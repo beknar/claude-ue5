@@ -2608,8 +2608,20 @@ public:
 		TArray<TWeakObjectPtr<ARDMonster>> Mons; TArray<TWeakObjectPtr<ARDTownsfolk>> Folk; TArray<FQuestThing> Things;
 		TWeakObjectPtr<ARDTownsfolk> Kept; TWeakObjectPtr<AActor> Horse; FVector2D Point = FVector2D::ZeroVector;
 		float Deadline = 0.f, NextWave = 0.f; int32 Waves = 0; bool bAmbushed = false, bStrandedAway = false; int32 GoldGiven = 0;
+		// (PR #58's review: the stage's spec parsed once and its point found once while it waits (MStage, PtStage: the stage they
+		// are for); the storm held by this run (let go when its actors are cleared); its last look's time (a pause counted whole))
+		int32 MStage = -1; TMap<FString, FString> M; int32 PtStage = -1; FVector2D PtWait = FVector2D::ZeroVector;
+		bool bHeldWeather = false; float LastLook = -1.f;
 	};
 	TMap<int32, FQuestRun> WildQuestRuns;
+	/** the stranded's shore, she put there at the next quest tick (PR #58's review: WildPutHer lays chunks, and a structure's
+	 *  chunk adds its run to WildQuestRuns: done while a run was held by reference it wrote into freed memory) */
+	bool bWildStrandPending = false; FVector2D WildStrandTo = FVector2D::ZeroVector;
+	/** the run's stage spec (parsed when its stage changes) */
+	const TMap<FString, FString>& QuestStageSpec(FQuestRun& Run);
+	/** a wild monster of a kind on open ground at a ground point (its capsule over it), set up and empowered on the wild
+	 *  section: the quests', the director's and the tests' (PR #58's review: one helper) */
+	ARDMonster* SpawnWildMonsterAt(const FRDMonsterDef& Def, const FVector& Ground, float Yaw, int32 Seed, int32 Tier, float Hp, const FString& Named);
 	float WildQuestLook = 0.f;
 	int32 WildQuestStage(int32 Site) const;
 	void SetWildQuestStage(FQuestRun& Run, int32 Stage);

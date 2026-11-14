@@ -280,16 +280,13 @@ void ARDDungeonGenerator::TickWildEncounters(float Dt, const FVector& Her)
 			{
 				const float A = Rs.FRandRange(0.f, 2.f * PI), D = Rs.FRandRange(200.f, 600.f);
 				FVector Q(At.X + FMath::Cos(A) * D, At.Y + FMath::Sin(A) * D, 0.f);
-				Q.Z = WildGroundZ(Q) + Def.CapsuleHalfHeight + 10.f;
-				FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-				ARDMonster* M = GetWorld()->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), FTransform(FRotator(0, Rs.FRandRange(0.f, 360.f), 0), Q), Sp);
+				Q.Z = WildGroundZ(Q);
+				const float Yaw = Rs.FRandRange(0.f, 360.f);
+				const int32 Seed = (int32)Rs.GetUnsignedInt();
+				ARDMonster* M = SpawnWildMonsterAt(Def, Q, Yaw, Seed, Tier, K.MonsterHealth > 0.f ? K.MonsterHealth : 1.f, K.Title);
 				if (!M) continue;
-				M->SpawnIndex = -1; M->bOpenGround = true; M->HomeAt = Q; M->WildKey = -1;
-				M->Setup(Ws_, Def, (int32)Rs.GetUnsignedInt());
-				M->Empower(Tier, K.MonsterHealth > 0.f ? K.MonsterHealth : 1.f, 1.f, 1.f, K.Title);
 				// (the list of 2026-11-10: "when the player is ambushed, the ambushers should make their way to her immediately")
 				if (K.bHunts) { M->bHunting = true; M->HuntUntil = Now + 60.f; }          // (PR #38's review: the kind's flag, not its name)
-				Ws_->SpawnedMonsters.Add(M);
 				WildRoamers.Add(M); ++Made;
 			}
 		}

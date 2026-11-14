@@ -196,6 +196,15 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
 - **A search's limit in whole cells is not its distance**: `FindNearestWildPlace` walks 4 km place cells, so "within 1.5 km" found a shelter 4.9 km off. It keeps only matches within its kilometres now; a caller that relied on the loose limit (the lost ruin's 12 km, its ruin 12.2 km off) gets its own.
 - **A timer's stage counts while its condition holds**: "weather the storm in the shelter" ended when she reached the shelter and failed when the time ran out (backwards); with the shelter the structure itself the whole quest was over in a tick, and the test saw no stage at all. Read a quest that passes with no stage recorded as one that did nothing.
 - **A thing someone must be brought from must not start at the end**: with the shelter where she stood, the family spawned beside her were already safe. They wait 320 m out when the end is within 60 m.
+- **PR #58's review (2026-11-14)**:
+  - Never call what lays chunks while holding a reference into a map that laying adds to. `WildPutHer` lays a structure's chunk, which adds its run to `WildQuestRuns`, so the strand writing into its run afterwards wrote into freed memory. She is put on her shore at the next tick, holding nothing.
+  - A stage is begun again whenever it is laid again (she went 4 km off and back, the chunk was laid again, the game was loaded). What it lays is cleared first and laid again: a choice had two pairs, and a tame left its first horse. Its one-time start happens once a stage, recorded in the counters (`wq12:<site>:s`): the delivery's medicine was given at every pass, and its time set again.
+  - Exempt from the leash what goes far by design. A delivery's town is 8 km off and more: it was cleared on the way and given again.
+  - A stage that needs her somewhere starts when she is there. A defence begun from 2 km off failed at once, "more than 60 m away".
+  - What a stage holds over the world (the storm) is let go when its actors are cleared, not only when it ends.
+  - A pause counts the time that passed since the last look, not the look's period: at 30 fps the 0.2 s look came every 0.233 s.
+  - What a waiting stage needs (its point, its parsed spec) is found once a stage. A water search five times a second was 2,400 samples.
+  - The difficulty reaches every spawner, through one helper (`SpawnWildMonsterAt`).
 
 ## The dungeons' keys (2026-11-08b, phase 3: `RD/RDKeys.cpp`, `905`)
 

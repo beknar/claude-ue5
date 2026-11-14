@@ -1569,7 +1569,7 @@ void FRDWildWorld::SitesInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 	if (Rand01(Cell.X, Cell.Y, Seed + 1201u) > SiteFill) return;
 	// (up to six tries in the cell: dry, off the roads, fields and yards, 1.2 km from a town and 200 m from the captain's places,
 	// and gentle: 4 m of rise over a 12 m ring at most)
-	FVector2D At; FRDWSample S; bool bOk = false;
+	FVector2D At = FVector2D::ZeroVector; FRDWSample S; bool bOk = false;
 	for (int32 Try = 0; Try < 6 && !bOk; ++Try)
 	{
 		At = FVector2D(X0 + (0.1 + 0.8 * Rand01(Cell.X, Cell.Y, Seed + 1202u + Try * 37u)) * SiteCellM, Y0 + (0.1 + 0.8 * Rand01(Cell.X, Cell.Y, Seed + 1203u + Try * 37u)) * SiteCellM);

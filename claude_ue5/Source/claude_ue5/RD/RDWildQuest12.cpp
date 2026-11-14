@@ -66,8 +66,39 @@ void ARDDungeonGenerator::ClearQuestStageActors(FQuestRun& Run)
 	Run.Mons.Reset();
 	for (FQuestThing& T : Run.Things) if (UStaticMeshComponent* C = T.Mesh.Get()) C->DestroyComponent();
 	Run.Things.Reset();
+	// (PR #58's review: a wild horse not tamed goes with the stage (laid again, a new one was made and the old one left), and a
+	// storm the stage held is let go (left held, it stood over the whole world))
+	if (ARDHorse* Hz = Cast<ARDHorse>(Run.Horse.Get()); Hz && !Hz->bHers) Hz->Destroy();
+	Run.Horse = nullptr;
+	if (Run.bHeldWeather) { Run.bHeldWeather = false; SetWeatherNamed(TEXT("auto"), false); }
 	// (the quest's people stay through its stages: the boy found is the boy walked home, the side chosen the one followed)
 	Run.Folk.RemoveAll([](const TWeakObjectPtr<ARDTownsfolk>& W) { return !W.IsValid(); });
+}
+
+const TMap<FString, FString>& ARDDungeonGenerator::QuestStageSpec(FQuestRun& Run)
+{
+	if (Run.MStage != Run.Stage)
+	{
+		const FRDWildQuestDef* Q = QuestOfRun(Run);
+		Run.M = Q && Q->Stages.IsValidIndex(Run.Stage - 1) ? RDQ12Parse(Q->Stages[Run.Stage - 1]) : TMap<FString, FString>();
+		Run.MStage = Run.Stage;
+	}
+	return Run.M;
+}
+
+ARDMonster* ARDDungeonGenerator::SpawnWildMonsterAt(const FRDMonsterDef& Def, const FVector& Ground, float Yaw, int32 Seed, int32 Tier, float Hp, const FString& Named)
+{
+	ARDSection* Ws = EnsureWildSection();
+	if (!Ws) return nullptr;
+	const FVector L(Ground.X, Ground.Y, Ground.Z + Def.CapsuleHalfHeight + 10.f);
+	FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	ARDMonster* M = GetWorld()->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), FTransform(FRotator(0, Yaw, 0), L), Sp);
+	if (!M) return nullptr;
+	M->SpawnIndex = -1; M->bOpenGround = true; M->HomeAt = L; M->WildKey = -1;
+	M->Setup(Ws, Def, Seed);
+	M->Empower(Tier, Hp, 1.f, 1.f, Named);
+	Ws->SpawnedMonsters.Add(M);
+	return M;
 }
 
 // ------------------------------------------------------------------------------------------------ points
@@ -211,19 +242,15 @@ void ARDDungeonGenerator::SpawnQuestMonsters(FQuestRun& Run, int32 N, const FStr
 	if (Kinds.Num() == 0) return;
 	FRandomStream R((int32)FRDWildWorld::Hash(Run.Site, 0x7100 + Run.Stage * 16 + Run.Mons.Num(), Wild ? Wild->Seed : 0u));
 	const FRDMonsterDef& Def = Monsters[Kinds[R.RandRange(0, Kinds.Num() - 1)]];
-	for (int32 I = 0; I < N; ++I)
+	// (by the difficulty, as the places' and the director's: hell's quarter more (PR #58's review))
+	for (int32 I = 0; I < DifficultyCount(N); ++I)
 	{
 		const float A = R.FRandRange(0.f, 2.f * PI), D = Ring > 0.f ? Ring * 100.f : R.FRandRange(150.f, 600.f);
 		FVector L(At.X * 100.0 + FMath::Cos(A) * D, At.Y * 100.0 + FMath::Sin(A) * D, 0.0);
-		L.Z = WildGroundZ(L) + Def.CapsuleHalfHeight + 10.f;
-		FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		ARDMonster* M = GetWorld()->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), FTransform(FRotator(0, R.FRandRange(0.f, 360.f), 0), L), Sp);
-		if (!M) continue;
-		M->SpawnIndex = -1; M->bOpenGround = true; M->HomeAt = L; M->WildKey = -1;
-		M->Setup(Ws, Def, (int32)R.GetUnsignedInt());
-		M->Empower(Run.P.Tier, Hp, 1.f, 1.f, Named);
-		Ws->SpawnedMonsters.Add(M);
-		Run.Mons.Add(M);
+		L.Z = WildGroundZ(L);
+		const float Yaw = R.FRandRange(0.f, 360.f);
+		const int32 Seed = (int32)R.GetUnsignedInt();
+		if (ARDMonster* M = SpawnWildMonsterAt(Def, L, Yaw, Seed, Run.P.Tier, Hp, Named)) Run.Mons.Add(M);
 	}
 }
 
@@ -237,6 +264,13 @@ void ARDDungeonGenerator::QuestSiteLaid(const FRDWildPlace& P)
 	const bool bNew = Run.Site == 0;
 	Run.Site = P.Id; Run.P = P; Run.Quest = Qi;
 	const URDGameInstance* GI = URDGameInstance::Of(this);
+	// (stranded: the quest goes on from the shore she woke on, not the structure (PR #58's review: laid again, the structure's
+	// place undid it); kept in the counters, so a load keeps it too)
+	if (GI && GI->Counters.Contains(FString::Printf(TEXT("wq12:%d:sx"), P.Id)))
+	{
+		Run.P.At = FVector2D(GI->GetCounter(FString::Printf(TEXT("wq12:%d:sx"), P.Id)), GI->GetCounter(FString::Printf(TEXT("wq12:%d:sy"), P.Id)));
+		Run.bStrandedAway = WildQuestStage(P.Id) < RDQ12Done;
+	}
 	Run.Stage = WildQuestStage(P.Id);
 	Run.Progress = GI ? GI->GetCounter(FString::Printf(TEXT("wq12:%d:p"), P.Id)) : 0;
 	Run.Choice = GI ? GI->GetCounter(FString::Printf(TEXT("wq12:%d:c"), P.Id)) : 0;
@@ -249,7 +283,9 @@ void ARDDungeonGenerator::QuestSiteLaid(const FRDWildPlace& P)
 		const float A = FMath::DegreesToRadians(P.Yaw);
 		SpawnQuestFolk(Run, TEXT("giver"), Q.GiverTitle, Q.Giver, { Q.Offer }, P.At + FVector2D(FMath::Cos(A), FMath::Sin(A)) * 9.f);
 	}
-	if (!bNew) Run.bBegun = false;          // (a stage under way: its actors laid again as she comes)
+	// (a stage under way: what it laid before is taken away (PR #58's review: laid again on top of it, a choice had two pairs,
+	// a tame two horses), then laid again as she comes; its one-time start (a deadline, the delivery's medicine) is not redone)
+	if (!bNew && Run.bBegun) { ClearQuestStageActors(Run); Run.bBegun = false; }
 }
 
 // ------------------------------------------------------------------------------------------------ F
@@ -268,11 +304,11 @@ FString ARDDungeonGenerator::WildQuestTalk(ARDTownsfolk* T)
 		// who set off at once could leave its 4 km before it began, and it never would))
 		if (Q->Stages.IsValidIndex(0)) BeginWildQuestStage(*Run, RDQ12Parse(Q->Stages[0]));
 		if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("%s:  \"%s\"  (quest: %s)"), *Who, *Q->Offer, *Q->Title));
-		UE_LOG(LogRDQuest12, Log, TEXT("RDQUEST12 %s taken at %s (%d)"), *Q->Name.ToString(), *Run->P.Name, Run->Site);
+		UE_LOG(LogRDQuest12, Log, TEXT("RDQUEST12 %s taken at %s (%d)"), *Q->Name.ToString(), *T->Title, T->WildQuestSite);
 		return TEXT("quest");
 	}
 	if (Run->Stage < 1 || Run->Stage >= RDQ12Done || !Q->Stages.IsValidIndex(Run->Stage - 1)) return FString();
-	const TMap<FString, FString> M = RDQ12Parse(Q->Stages[Run->Stage - 1]);
+	const TMap<FString, FString> M = QuestStageSpec(*Run);
 	const FString Do = M.FindRef(TEXT("do"));
 	// (a talk: the one it names; a choice: either side, which is the choice)
 	if ((Do == TEXT("talk") && T->WildQuestRole == FName(*M.FindRef(TEXT("who")))) || (Do == TEXT("choose") && (T->WildQuestRole == TEXT("a") || T->WildQuestRole == TEXT("b"))))
@@ -300,7 +336,7 @@ FString ARDDungeonGenerator::WildQuestInteract(const FVector& From)
 		FQuestRun& Run = Kv.Value;
 		const FRDWildQuestDef* Q = QuestOfRun(Run);
 		if (!Q || Run.Stage < 1 || Run.Stage >= RDQ12Done || !Q->Stages.IsValidIndex(Run.Stage - 1)) continue;
-		const TMap<FString, FString> M = RDQ12Parse(Q->Stages[Run.Stage - 1]);
+		const TMap<FString, FString>& M = QuestStageSpec(Run);
 		const FString Do = M.FindRef(TEXT("do"));
 		for (FQuestThing& Th : Run.Things)
 		{
@@ -370,6 +406,7 @@ void ARDDungeonGenerator::FinishWildQuest(FQuestRun& Run, bool bWon)
 {
 	const FRDWildQuestDef* Q = QuestOfRun(Run);
 	SetWildQuestStage(Run, bWon ? RDQ12Done : RDQ12Failed);
+	Run.bStrandedAway = false;          // (PR #58's review: the leash holds again once the quest is over)
 	if (!Q) return;
 	if (bWon)
 	{
@@ -396,6 +433,13 @@ void ARDDungeonGenerator::FinishWildQuest(FQuestRun& Run, bool bWon)
 void ARDDungeonGenerator::BeginWildQuestStage(FQuestRun& Run, const TMap<FString, FString>& M)
 {
 	Run.bBegun = true;
+	// (PR #58's review: a stage is begun again each time it is laid again (she went more than 4 km off and came back, its
+	// structure's chunk laid again, a load); what it lays is laid each time, its one-time start (a deadline, the delivery's
+	// medicine, a defence's waves) only the first time, recorded in the counters ("wq12:<site>:s", the stage started))
+	URDGameInstance* SGI = URDGameInstance::Of(this);
+	const FString SKey = FString::Printf(TEXT("wq12:%d:s"), Run.Site);
+	const bool bFirst = !SGI || SGI->GetCounter(SKey) != Run.Stage;
+	if (SGI) SGI->Counters.Add(SKey, Run.Stage);
 	const FString Do = M.FindRef(TEXT("do"));
 	const FString At = M.Contains(TEXT("at")) ? M.FindRef(TEXT("at")) : FString(TEXT("site"));
 	Run.Point = QuestPoint(Run, At, Run.Stage);
@@ -410,15 +454,19 @@ void ARDDungeonGenerator::BeginWildQuestStage(FQuestRun& Run, const TMap<FString
 	}
 	else if (Do == TEXT("choose"))
 	{
+		// (each side made only if not standing already)
 		const FVector2D Side = FVector2D(-(Run.Point - Run.P.At).Y, (Run.Point - Run.P.At).X).GetSafeNormal() * 4.f;
-		SpawnQuestFolk(Run, TEXT("a"), M.FindRef(TEXT("title_a")), M.FindRef(TEXT("def_a")), { M.FindRef(TEXT("line_a")) }, Run.Point + Side);
-		SpawnQuestFolk(Run, TEXT("b"), M.FindRef(TEXT("title_b")), M.FindRef(TEXT("def_b")), { M.FindRef(TEXT("line_b")) }, Run.Point - Side);
+		auto Has = [&](FName R) { return Run.Folk.ContainsByPredicate([&](const TWeakObjectPtr<ARDTownsfolk>& W) { return W.IsValid() && W->WildQuestRole == R; }); };
+		if (!Has(TEXT("a"))) SpawnQuestFolk(Run, TEXT("a"), M.FindRef(TEXT("title_a")), M.FindRef(TEXT("def_a")), { M.FindRef(TEXT("line_a")) }, Run.Point + Side);
+		if (!Has(TEXT("b"))) SpawnQuestFolk(Run, TEXT("b"), M.FindRef(TEXT("title_b")), M.FindRef(TEXT("def_b")), { M.FindRef(TEXT("line_b")) }, Run.Point - Side);
 	}
 	else if (Do == TEXT("kill") || Do == TEXT("capture"))
 		SpawnQuestMonsters(Run, N, M.FindRef(TEXT("kind")), M.FindRef(TEXT("named")), RDQ12Num(M, TEXT("hp"), 1.f), Run.Point, 0.f);
 	else if (Do == TEXT("collect") || Do == TEXT("rite") || Do == TEXT("cleanse"))
 	{
-		for (int32 I = 0; I < (Do == TEXT("collect") ? N : 1); ++I)
+		// (laid again: only what is left to take (a rite's or a cleansing's thing once taken stands as taken: its guardians come))
+		if (Do != TEXT("collect") && Run.Progress >= 1) { FQuestThing Th; Th.At = FVector(Run.Point.X * 100.0, Run.Point.Y * 100.0, 0.0); Th.bTaken = true; Run.Things.Add(Th); }
+		for (int32 I = Do == TEXT("collect") ? Run.Progress : (Run.Progress >= 1 ? 1 : 0); I < (Do == TEXT("collect") ? N : 1); ++I)
 		{
 			const float A = I * 2.f * PI / FMath::Max(N, 1) + 0.7f;
 			SpawnQuestThing(Run, M.FindRef(TEXT("thing")), Run.Point + (Do == TEXT("collect") && N > 1 ? FVector2D(FMath::Cos(A), FMath::Sin(A)) * 6.f : FVector2D::ZeroVector), RDQ12Num(M, TEXT("h"), 0.6f), FName(*M.FindRef(TEXT("item"))));
@@ -443,21 +491,23 @@ void ARDDungeonGenerator::BeginWildQuestStage(FQuestRun& Run, const TMap<FString
 		if (T) T->bRoadWalker = true;
 		Run.bAmbushed = false;
 	}
-	else if (Do == TEXT("defend")) { Run.Deadline = GetWorld()->GetTimeSeconds() + RDQ12Num(M, TEXT("secs"), 60.f); Run.Waves = 0; Run.NextWave = GetWorld()->GetTimeSeconds() + 2.f; }
+	// (a defence's time starts when she is at its point (the tick): begun from afar (a load, her way back) it failed at once
+	// for her being more than 60 m off (PR #58's review))
+	else if (Do == TEXT("defend")) { if (bFirst) { Run.Deadline = 0.f; Run.Waves = 0; } }
 	else if (Do == TEXT("deliver"))
 	{
-		Run.Deadline = GetWorld()->GetTimeSeconds() + RDQ12Num(M, TEXT("secs"), 720.f);
-		if (PlayerCombat && M.Contains(TEXT("item")) && FindItem(FName(*M.FindRef(TEXT("item")))) >= 0) PlayerCombat->AddItem(FName(*M.FindRef(TEXT("item"))), 1);
-		Run.Progress = 0;
+		// (the medicine given once; the time set once (a load sets it again: the clock is the session's))
+		if (bFirst || Run.Deadline <= 0.f) Run.Deadline = GetWorld()->GetTimeSeconds() + RDQ12Num(M, TEXT("secs"), 720.f);
+		if (bFirst && PlayerCombat && M.Contains(TEXT("item")) && FindItem(FName(*M.FindRef(TEXT("item")))) >= 0) PlayerCombat->AddItem(FName(*M.FindRef(TEXT("item"))), 1);
 	}
 	else if (Do == TEXT("survive"))
 	{
-		Run.Deadline = GetWorld()->GetTimeSeconds() + RDQ12Num(M, TEXT("secs"), 120.f);
-		if (M.Contains(TEXT("weather"))) SetWeatherNamed(M.FindRef(TEXT("weather")), true);
+		if (bFirst || Run.Deadline <= 0.f) Run.Deadline = GetWorld()->GetTimeSeconds() + RDQ12Num(M, TEXT("secs"), 120.f);
+		if (M.Contains(TEXT("weather"))) { SetWeatherNamed(M.FindRef(TEXT("weather")), true); Run.bHeldWeather = true; }
 	}
 	else if (Do == TEXT("tame"))
 	{
-		Run.Progress = 0;
+		if (bFirst) Run.Progress = 0;
 		// (a wild horse, not hers (the stable's grey's coat), standing where the stage puts it)
 		Run.Horse = SpawnHorseAt(FVector(Run.Point.X * 100.0, Run.Point.Y * 100.0, WildGroundZ(FVector(Run.Point.X * 100.0, Run.Point.Y * 100.0, 0.0))), Run.P.Yaw, false);
 	}
@@ -473,9 +523,12 @@ void ARDDungeonGenerator::BeginWildQuestStage(FQuestRun& Run, const TMap<FString
 			if (Sq.WaterKind == 0 && WildLairRelief(To) < 3.f) break;
 			To = S + FVector2D(Way.X * FMath::Cos(K * 0.5f) - Way.Y * FMath::Sin(K * 0.5f), Way.X * FMath::Sin(K * 0.5f) + Way.Y * FMath::Cos(K * 0.5f)) * 1500.f;
 		}
-		WildPutHer(To.X, To.Y);
-		// (the quest goes on from where she woke: its next points are found round her there)
+		// (she is put there at the next quest tick, not here: WildPutHer lays chunks, and a structure's chunk adds its run to
+		// WildQuestRuns, which may move the run this holds (PR #58's review))
+		bWildStrandPending = true; WildStrandTo = To;
+		// (the quest goes on from where she woke: its next points are found round her there; kept for a load)
 		Run.P.At = To; Run.bStrandedAway = true;
+		if (SGI) { SGI->Counters.Add(FString::Printf(TEXT("wq12:%d:sx"), Run.Site), FMath::RoundToInt(To.X)); SGI->Counters.Add(FString::Printf(TEXT("wq12:%d:sy"), Run.Site), FMath::RoundToInt(To.Y)); }
 		AdvanceWildQuest(Run);
 		return;
 	}
@@ -485,6 +538,8 @@ void ARDDungeonGenerator::BeginWildQuestStage(FQuestRun& Run, const TMap<FString
 void ARDDungeonGenerator::TickWildQuests12(float Dt, const FVector& Her)
 {
 	WildQuestLook -= Dt;
+	// (the stranded put on her shore here, no run held)
+	if (bWildStrandPending && IsWildReady()) { bWildStrandPending = false; WildPutHer(WildStrandTo.X, WildStrandTo.Y); return; }
 	if (WildQuestLook > 0.f || !PlayerCombat || PlayerCombat->IsDead() || !IsWildReady()) return;
 	WildQuestLook = 0.2f;
 	const FVector2D H(Her.X / 100.0, Her.Y / 100.0);
@@ -495,14 +550,22 @@ void ARDDungeonGenerator::TickWildQuests12(float Dt, const FVector& Her)
 		const FRDWildQuestDef* Q = QuestOfRun(Run);
 		// (far from her and not under way: its people go with their chunks; the run is kept for its state)
 		if (!Q || Run.Stage < 1 || Run.Stage >= RDQ12Done || !Q->Stages.IsValidIndex(Run.Stage - 1)) continue;
-		const TMap<FString, FString> M = RDQ12Parse(Q->Stages[Run.Stage - 1]);
+		const TMap<FString, FString> M = QuestStageSpec(Run);
+		const FString Do = M.FindRef(TEXT("do"));
 		// (near: within 4 km of the structure or of the stage's own point (a ruin 9 km off is gone to from the structure, and
-		// reached far from it))
-		const FVector2D Pt = Run.bBegun ? Run.Point : QuestPoint(Run, M.Contains(TEXT("at")) ? M.FindRef(TEXT("at")) : FString(TEXT("site")), Run.Stage);
-		if (FVector2D::Distance(Run.P.At, H) > 4000.f && FVector2D::Distance(Pt, H) > 4000.f && !Run.bStrandedAway) { if (Run.bBegun) { ClearQuestStageActors(Run); Run.bBegun = false; } continue; }
+		// reached far from it); the point found once while the stage waits (PR #58's review: found five times a second, a water
+		// search was 2,400 samples); a delivery runs wherever she is (its town is 8 km off and more: cleared half way, it was
+		// given again and its time set again)
+		if (!Run.bBegun && Run.PtStage != Run.Stage) { Run.PtWait = QuestPoint(Run, M.Contains(TEXT("at")) ? M.FindRef(TEXT("at")) : FString(TEXT("site")), Run.Stage); Run.PtStage = Run.Stage; }
+		const FVector2D Pt = Run.bBegun ? Run.Point : Run.PtWait;
+		const bool bRoams = Run.bStrandedAway || Do == TEXT("deliver");
+		if (FVector2D::Distance(Run.P.At, H) > 4000.f && FVector2D::Distance(Pt, H) > 4000.f && !bRoams) { if (Run.bBegun) { ClearQuestStageActors(Run); Run.bBegun = false; } continue; }
 		if (!Run.bBegun) BeginWildQuestStage(Run, M);
 		if (Run.Stage >= RDQ12Done || !Run.bBegun) continue;
-		const FString Do = M.FindRef(TEXT("do"));
+		// (the time since this run's last look: a storm's pause is the whole of it (PR #58's review: 0.2 s a look let the
+		// storm's time run on outside at lower frame rates))
+		const float Since = Run.LastLook >= 0.f ? Now - Run.LastLook : 0.2f;
+		Run.LastLook = Now;
 		const int32 N = RDQ12Int(M, TEXT("n"), 1);
 		const float Reach = RDQ12Num(M, TEXT("r"), 10.f);
 		if (Do == TEXT("goto"))
@@ -556,9 +619,14 @@ void ARDDungeonGenerator::TickWildQuests12(float Dt, const FVector& Her)
 		}
 		else if (Do == TEXT("defend"))
 		{
-			// (waves round the point until the time is up; she must stay within 40 m of it)
+			// (waves round the point until the time is up, from when she comes within 40 m of it; then she must stay within 60 m)
 			const int32 Waves = RDQ12Int(M, TEXT("waves"), 3);
 			const float Secs = RDQ12Num(M, TEXT("secs"), 60.f);
+			if (Run.Deadline <= 0.f)
+			{
+				if (FVector2D::Distance(Run.Point, H) > 40.f) continue;
+				Run.Deadline = Now + Secs; Run.NextWave = Now + 2.f; Run.Waves = 0;
+			}
 			if (Run.Waves < Waves && Now >= Run.NextWave)
 			{
 				SpawnQuestMonsters(Run, N, M.FindRef(TEXT("kind")), FString(), 1.f, Run.Point, 22.f);
@@ -580,7 +648,7 @@ void ARDDungeonGenerator::TickWildQuests12(float Dt, const FVector& Her)
 		{
 			// (the storm's time runs only while she is in the shelter (out of it the end moves on with the clock: this tick's 0.2 s);
 			// it is over once the time has run in there)
-			if (FVector2D::Distance(Run.Point, H) >= Reach) Run.Deadline += 0.2f;
+			if (FVector2D::Distance(Run.Point, H) >= Reach) Run.Deadline += Since;
 			else if (Now > Run.Deadline) { SetWeatherNamed(TEXT("auto"), false); if (PlayerCombat && M.Contains(TEXT("done"))) PlayerCombat->ShowMessage(M.FindRef(TEXT("done"))); AdvanceWildQuest(Run); }
 		}
 		else if (Do == TEXT("capture"))

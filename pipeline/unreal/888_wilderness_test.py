@@ -1660,6 +1660,15 @@ def step_quests12():
                     yield from go(px + 10.0, py, msgs); yield from watching(rwait(1.2), msgs)
                     r["stages"][-1]["killed"] = r["stages"][-1].get("killed", 0) + kill_near(px, py); yield from watching(rwait(1.0), msgs)
                 elif do in ("collect", "rite", "cleanse"):
+                    # (PR #58's review: a stage laid again lays only what is left: one moonbloom taken, she goes 5 km off (the
+                    # stage cleared) and back (laid again): none while away, the two left when back, none doubled)
+                    if qn == "ingredient" and "relaid" not in r and int(L[5]) == 1:
+                        yield from go(cx + 5000.0, cy, msgs); yield from watching(rwait(2.0), msgs)
+                        away = len([t_ for t_ in stage_things(sid) if t_[0] == "thing"])
+                        yield from go(cx + 12.0, cy, msgs); yield from watching(rwait(2.0), msgs)
+                        r["relaid"] = {"away_things": away, "back_left": len([t_ for t_ in stage_things(sid) if t_[0] == "thing" and t_[4] == "0"]),
+                                       "back_all": len([t_ for t_ in stage_things(sid) if t_[0] == "thing"])}
+                        continue
                     th = [t_ for t_ in stage_things(sid) if t_[0] == "thing" and t_[4] == "0"]
                     if not th:
                         # (the rite's or the cleansing's guardians come once its thing is taken)
@@ -1723,7 +1732,10 @@ def step_quests12():
         T = v.get("tamed")
         if T is None: return True
         return T["horses_tamed"] >= 1 and T["ride_tamed"] and T["owned"] and (T["tamed_only"] or T.get("swap") == [True, False, True, True])
-    res["failed"] = [k for k, v in res["quests"].items() if not (v.get("found") and v.get("end_stage") == 90 and v.get("gold", 0) > 0 and tamed_ok(v))]
+    def relaid_ok(v):
+        R_ = v.get("relaid")
+        return R_ is None or (R_["away_things"] == 0 and R_["back_left"] == 2 and R_["back_all"] == 2)
+    res["failed"] = [k for k, v in res["quests"].items() if not (v.get("found") and v.get("end_stage") == 90 and v.get("gold", 0) > 0 and tamed_ok(v) and relaid_ok(v))]
     ok = res["table"] >= 25 and not res["failed"] and len(res["quests"]) == len(want)
     step_result("quests12", ok, **res)
 
