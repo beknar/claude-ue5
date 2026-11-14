@@ -183,6 +183,7 @@ void URDCombatComponent::TickStealth(float Dt, float Now)
 void URDCombatComponent::ResetStealth(bool bFill)
 {
 	StealthUntil = -100.f; bAmbushArmed = false; StealthTraps.Reset();
+	ResetRogueArts();          // (the list of 2026-11-12: her arts' running state too (PR #60's review))
 	SetAura(RD6StealthAura, nullptr, false);
 	const FRDHeroDef* H = Generator && Generator->bStealth ? Generator->FindHero(Generator->CurrentHero) : nullptr;
 	MaxDexEnergy = H ? H->DexEnergy : 0.f;

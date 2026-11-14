@@ -770,6 +770,14 @@ public:
 	float AmbushArtMul() const;
 	/** her clip for an art: "dagger" her blade's first strike, "crossbow" her shot */
 	void PlayArtClip(FName Which);
+	/** an art learned (its manual read or picked up): hers at its one rank, on the quick bar; false: not hers to learn, known */
+	bool LearnArt(FName Art, bool bSay);
+	/** an active ability onto the quick bar's first free slot (an art learned, a token's first rank) */
+	void AddAbilityToQuickBar(FName Ability);
+	/** every art's running state put back (the hook's pull, the lotus, the cuts and the time they slowed, the vanishing act): a
+	 *  restart, a revive, a change of hero, the end of play (PR #60's review) */
+	void ResetRogueArts();
+	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 	/** the arts made, their damage, the death lotus's and the thousand cuts' strikes (tests) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Rogue12") int32 ArtUses = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Rogue12") float ArtDamage = 0.f;

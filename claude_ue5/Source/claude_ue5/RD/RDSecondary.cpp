@@ -115,19 +115,20 @@ bool URDCombatComponent::RankUpSecondary(FName Ability, FName Spell)
 	SecondaryRanks.Add(Ability, R + 1);
 	Generator->RefreshSummonsSecondary();
 	// (an active one learned goes on the quick bar's first free slot)
-	if (R == 0 && D->Kind != ERDSecondaryKind::Passive && Generator->bQuickSlots)
-	{
-		const FName Entry(*(TEXT("@") + Ability.ToString()));
-		if (!QuickSlots.Contains(Entry))
-		{
-			int32 Free = QuickSlots.IndexOfByPredicate([](const FName& N) { return N.IsNone(); });
-			AssignQuickEntry(Free >= 0 ? Free : QuickSlots.Num(), Entry);
-		}
-	}
+	if (R == 0 && D->Kind != ERDSecondaryKind::Passive) AddAbilityToQuickBar(Ability);
 	SetMessage(FString::Printf(TEXT("%s rank %d:  %s"), *D->Title, R + 1, *RDSecText(*D, R + 1)));
 	PlayUiSound(TEXT("Player.Inventory"), TEXT("Player.Inventory"));
 	UE_LOG(LogRDSecondary, Log, TEXT("RDSECONDARY %s rank %d%s"), *Ability.ToString(), R + 1, D->bChoosesSpell ? *FString::Printf(TEXT(" (%s)"), *GetBoostSpell(Ability).ToString()) : TEXT(""));
 	return true;
+}
+
+void URDCombatComponent::AddAbilityToQuickBar(FName Ability)
+{
+	if (!Generator || !Generator->bQuickSlots) return;
+	const FName Entry(*(TEXT("@") + Ability.ToString()));
+	if (QuickSlots.Contains(Entry)) return;
+	const int32 Free = QuickSlots.IndexOfByPredicate([](const FName& N) { return N.IsNone(); });
+	AssignQuickEntry(Free >= 0 ? Free : QuickSlots.Num(), Entry);
 }
 
 TArray<FString> URDCombatComponent::GetSecondaryLines() const
@@ -138,8 +139,9 @@ TArray<FString> URDCombatComponent::GetSecondaryLines() const
 	{
 		if (D.Hero != Generator->CurrentHero) continue;
 		const int32 R = GetSecondaryRank(D.Name);
+		const int32 Max = D.Slot > 0 ? 1 : RDSecMaxRank;          // (the Rogue's arts: one rank, from their manuals (PR #60's review))
 		Out.Add(FString::Printf(TEXT("%s|%s|%s|%d|%d|%s|%s|%s"), *D.Name.ToString(), *D.Title, D.Kind == ERDSecondaryKind::Active ? TEXT("active") : D.Kind == ERDSecondaryKind::Toggle ? TEXT("toggle") : TEXT("passive"),
-			R, RDSecMaxRank, R > 0 ? *RDSecText(D, R) : TEXT(""), R < RDSecMaxRank ? *RDSecText(D, R + 1) : TEXT(""), *GetBoostSpell(D.Name).ToString()));
+			R, Max, R > 0 ? *RDSecText(D, R) : TEXT(""), R < Max ? *RDSecText(D, R + 1) : TEXT(""), *GetBoostSpell(D.Name).ToString()));
 	}
 	return Out;
 }

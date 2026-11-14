@@ -5639,7 +5639,7 @@ def step_rogue12fx():
 def step_rogue12(only=None):
     """the list of 2026-11-12's seventh phase (925, RD/RDRogue12.cpp, SourceArt/balance/rogue12.json): the Rogue's sixteen arts.
     Their manuals: in the start set (tier 1, place 1) her tome draws over 40 seeds give the Manual of Caltrops and no other, the
-    Warrior's none; read, Caltrops is hers (rank 1, "@Caltrops" on the quick bar, the manual used up), and the place then gives
+    Warrior's none; picked up, Caltrops is hers at once (rank 1, "@Caltrops" on the quick bar, the manual not carried), and the place then gives
     its Mage's tome again; a token cannot raise an art. Then each art made in the start room on harmless monsters (or on her) and
     measured: what it reached, the dexterity energy it took (its cost; the smoke none), its cooldown (a second use refused), and
     each one's own effect: the caltrops' slow and bleed, the smoke's monsters losing her, the hamstring's cut and slow (gone after
@@ -5708,7 +5708,7 @@ def step_rogue12(only=None):
         g.set_session_seed(seed0)
         return got
     mres = {"rogue": manuals()}
-    c.add_item("Manual of Caltrops", 1); mres["read"] = c.use_item("Manual of Caltrops")
+    c.add_item("Manual of Caltrops", 1); mres["read"] = c.get_secondary_rank("Caltrops") == 1          # (picked up, a manual teaches its art at once, as a tome its spell (PR #60's review))
     mres["rank"] = c.get_secondary_rank("Caltrops"); mres["on_bar"] = "@Caltrops" in [str(x) for x in c.get_quick_slots()]
     mres["left"] = c.get_item_count("Manual of Caltrops"); mres["says"] = str(c.message)
     mres["rogue_after"] = manuals()

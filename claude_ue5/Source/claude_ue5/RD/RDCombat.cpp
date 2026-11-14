@@ -456,7 +456,7 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 	if (W->Cooldown > 0.f) ReadyAt.Add(W->Name, GetWorld()->GetTimeSeconds() + W->Cooldown);
 	VeilUntil = FMath::Min(VeilUntil, GetWorld()->GetTimeSeconds());      // (an attack ends her veil: they see her again)
 	// (mistward6: an attack out of stealth ends it, and is an ambush)
-	if (IsStealthed()) { bAmbushArmed = true; if (VanishBlowsLeft > 0) --VanishBlowsLeft; else EndStealth(TEXT("attack")); }          // (the vanishing act spares her first blows)
+	ArtStrikeFromHiding();          // (out of stealth: an ambush; the vanishing act spares her first blows)
 	SetSlowed(true);
 	return true;
 }
@@ -747,6 +747,7 @@ void URDCombatComponent::Revive(bool bToStart)
 	// (level 5: what was on her is gone: her spells, poison, weakness, slowness, the areas she left, the channel)
 	WardUntil = SkinUntil = VeilUntil = MirrorUntil = PactUntil = DispelUntil = RuneUntil = SanctumUntil = DrainUntil = -100.f;
 	WardHits = 0; WardPool = 0.f; DrainTarget = nullptr;
+	ResetRogueArts();
 	ClearAfflictions();
 	for (FArea& Ar : Areas) if (UFXSystemComponent* F = Ar.Fx.Get()) F->Deactivate();
 	Areas.Reset();
@@ -904,8 +905,17 @@ void URDCombatComponent::AddItem(FName Name, int32 Count)
 	if (Ix >= 0 && Generator->Items[Ix].Kind == ERDItemKind::Tome)
 	{
 		const FName Sp = Generator->Items[Ix].Spell;
-		if (KnowsSpell(Sp)) { SetMessage(FString::Printf(TEXT("You know %s already"), *Sp.ToString())); return; }
-		if (LearnSpell(Sp)) return;
+		// (the list of 2026-11-12: a Rogue's manual teaches its art at once to her, as a tome its spell (PR #60's review))
+		if (const FRDSecondaryDef* Ad = Generator->FindSecondary(Sp); Ad && Ad->Slot > 0)
+		{
+			if (Ad->Hero == Generator->CurrentHero && GetSecondaryRank(Sp) > 0) { SetMessage(FString::Printf(TEXT("You know %s already"), *Ad->Title)); return; }
+			if (LearnArt(Sp, true)) return;
+		}
+		else
+		{
+			if (KnowsSpell(Sp)) { SetMessage(FString::Printf(TEXT("You know %s already"), *Sp.ToString())); return; }
+			if (LearnSpell(Sp)) return;
+		}
 	}
 	// (mistward: armour (bArmourStacks) and shields are kept copy by copy, each with its own durability)
 	const bool bStacks = Ix >= 0 && (Generator->Items[Ix].Kind == ERDItemKind::Shield || (Generator->bArmourStacks && Generator->Items[Ix].Kind == ERDItemKind::Armour));
@@ -1028,17 +1038,8 @@ bool URDCombatComponent::UseItem(FName Name)
 		// (the list of 2026-11-12's seventh phase: a manual of the Rogue's teaches its art (on the quick bar's first free slot))
 		if (const FRDSecondaryDef* Ad = Generator->FindSecondary(It.Spell); Ad && Ad->Slot > 0)
 		{
-			if (Ad->Hero != Generator->CurrentHero) { SetMessage(FString::Printf(TEXT("The %s cannot learn %s"), *Generator->PlayerTitle.ToLower(), *Ad->Title)); return false; }
-			if (GetSecondaryRank(Ad->Name) > 0) { SetMessage(FString::Printf(TEXT("You know %s already"), *Ad->Title)); return false; }
-			SecondaryRanks.Add(Ad->Name, 1);
-			if (Ad->Kind != ERDSecondaryKind::Passive && Generator->bQuickSlots)
-			{
-				const FName Entry(*(TEXT("@") + Ad->Name.ToString()));
-				if (!QuickSlots.Contains(Entry)) { const int32 Free = QuickSlots.IndexOfByPredicate([](const FName& N) { return N.IsNone(); }); AssignQuickEntry(Free >= 0 ? Free : QuickSlots.Num(), Entry); }
-			}
+			if (!LearnArt(Ad->Name, true)) return false;
 			RemoveCarried(Name, 1);
-			SetMessage(FString::Printf(TEXT("You learn %s: %s"), *Ad->Title, *Ad->Text));
-			PlayUiSound(TEXT("Player.Inventory"), TEXT("Player.Inventory"));
 			return true;
 		}
 		if (KnowsSpell(It.Spell)) { SetMessage(FString::Printf(TEXT("You know %s already"), *It.Spell.ToString())); return false; }

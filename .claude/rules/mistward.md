@@ -298,6 +298,13 @@ Every rule a switch on the generator ("Mistward2" category), on in Mistward and 
 - **A force over its time falls short by the frame rate, and a line at the chest misses what stops the capsule**: the hook's root-motion pull came 1.5 to 2.2 m short; it moves her itself, swept, each tick. The test's wall was found with a line over the throne's steps, which stopped her capsule: find a way with the capsule.
 - **A flat plane is seen edge on**: the crosshair (and the smoke's puffs) face the camera each tick.
 - **One helper converts a picture into a hidden-body one**: a text replace turned her own art's pictures (the Vanishing Act, the lotus) into ones with her body hidden. Picture an art on her body with her shown.
+- **PR #60's review (2026-11-14)**:
+  - A flag one path sets and only another path's end clears is left set by a third path. The arts armed the ambush and never went through `EndAttack`, so her next ordinary blow took the bonus. An art spends it there and then.
+  - An effect renewed every look is added for one look's time. A 0.5 s burn added every 0.2 s stacked two or three deep.
+  - Every move that puts her elsewhere checks its sight line to where she goes. The cuts' blink had no check, as the misty step had none before PR #35.
+  - Everything an art runs over time is put back on a restart, a revive and the end of play (`ResetRogueArts`). The time the cuts slowed would have stayed slowed for the next hero.
+  - Another art is refused while one still moves her (the hook's pull).
+  - A new kind of thing in an old item kind (a manual as a tome) reaches every reader of that kind: the pickup (learned at once), the inventory's text, the abilities' list (one rank).
 
 ## The packaged game (`869`, `pipeline/package_mistward.ps1`, 2026-10-27)
 

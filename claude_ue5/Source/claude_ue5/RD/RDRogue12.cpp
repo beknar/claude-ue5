@@ -290,7 +290,7 @@ void ARDArtProp::Tick(float Dt)
 			if (bNew) Mo->AddBurn(B, C, 0.f);
 		}
 		else if (Kind == ERDArtProp::Smoke) Mo->LoseHerFor(A);
-		else { Mo->ExposeFor(A, 1.f); Mo->AddBurn(B, 0.5f, 0.f); }
+		else { Mo->ExposeFor(A, 1.f); Mo->AddBurn(B, 0.2f, 0.f); }          // (one look's worth: renewed, never stacked (PR #60's review))
 		if (bNew) { Done.Add(Mo); ++Reached; }
 	}
 }
@@ -449,7 +449,7 @@ bool URDCombatComponent::UseRogueArt(const FRDSecondaryDef& D)
 		Generator->PlaySoundAt(TEXT("Player.NoMana"), C->GetActorLocation());
 		return false;
 	}
-	if (IsAttacking() || ArtCutsLeft.Num() > 0 || ArtLotusLeft > 0) { SetMessage(FString::Printf(TEXT("%s: not in the middle of a move"), *D.Title)); return false; }
+	if (IsAttacking() || ArtCutsLeft.Num() > 0 || ArtLotusLeft > 0 || bArtHooking) { SetMessage(FString::Printf(TEXT("%s: not in the middle of a move"), *D.Title)); return false; }
 	const float V = RDArtNum(D.Values), V2 = RDArtNum(D.Values2, 1.f), S = RDArtNum(D.Seconds), Cd = RDArtNum(D.Cooldowns, 10.f);
 	const FVector L = C->GetActorLocation();
 	FVector Fw = C->GetActorForwardVector() * FVector(1, 1, 0); Fw = Fw.GetSafeNormal();
@@ -743,6 +743,7 @@ bool URDCombatComponent::UseRogueArt(const FRDSecondaryDef& D)
 		}
 	}
 	else { SetMessage(FString::Printf(TEXT("%s: not made yet"), *D.Title)); return false; }
+	bAmbushArmed = false;          // (an art's strike from hiding used its ambush there and then (PR #60's review: left armed, her next ordinary blow took it))
 	if (!Refused.IsEmpty()) { SetMessage(Refused); return false; }
 	PlayArtClip(D.Clip);
 	DexEnergy = FMath::Max(0.f, DexEnergy - D.Dex);
@@ -752,6 +753,39 @@ bool URDCombatComponent::UseRogueArt(const FRDSecondaryDef& D)
 	SetMessage(D.Title);
 	UE_LOG(LogRDRogue12, Log, TEXT("RDROGUEART %s: %d reached, %.2f, %.0f dexterity left"), *D.Name.ToString(), Reached, Number, DexEnergy);
 	return true;
+}
+
+bool URDCombatComponent::LearnArt(FName Art, bool bSay)
+{
+	const FRDSecondaryDef* Ad = Generator ? Generator->FindSecondary(Art) : nullptr;
+	if (!Ad || Ad->Slot <= 0) return false;
+	if (Ad->Hero != Generator->CurrentHero) { if (bSay) SetMessage(FString::Printf(TEXT("The %s cannot learn %s"), *Generator->PlayerTitle.ToLower(), *Ad->Title)); return false; }
+	if (GetSecondaryRank(Ad->Name) > 0) { if (bSay) SetMessage(FString::Printf(TEXT("You know %s already"), *Ad->Title)); return false; }
+	SecondaryRanks.Add(Ad->Name, 1);
+	if (Ad->Kind != ERDSecondaryKind::Passive) AddAbilityToQuickBar(Ad->Name);
+	SetMessage(FString::Printf(TEXT("You learn %s: %s"), *Ad->Title, *Ad->Text));
+	PlayUiSound(TEXT("Player.Inventory"), TEXT("Player.Inventory"));
+	UE_LOG(LogRDRogue12, Log, TEXT("RDROGUEART learned %s"), *Ad->Name.ToString());
+	return true;
+}
+
+void URDCombatComponent::ResetRogueArts()
+{
+	UWorld* W = GetWorld();
+	if (bArtHooking)
+		if (ACharacter* C = Cast<ACharacter>(GetOwner()); C && C->GetCharacterMovement()->MovementMode == MOVE_Flying) C->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+	bArtHooking = false;
+	ArtLotusLeft = 0; ArtCutsLeft.Reset();
+	if (ArtCutsDilationWas > 0.f && W) UGameplayStatics::SetGlobalTimeDilation(W, ArtCutsDilationWas);
+	ArtCutsDilationWas = -1.f;
+	if (bVanishLook) if (USkeletalMeshComponent* Bd = Body()) Bd->SetOverlayMaterial(nullptr);
+	bVanishLook = false; VanishBlowsLeft = 0;
+}
+
+void URDCombatComponent::EndPlay(const EEndPlayReason::Type Reason)
+{
+	ResetRogueArts();          // (the time the cuts slowed never left slowed for the next hero or level)
+	Super::EndPlay(Reason);
 }
 
 float URDCombatComponent::AmbushArtMul() const
@@ -786,7 +820,7 @@ void URDCombatComponent::TickRogueArts(float Dt)
 		if (bEnd) { bArtHooking = false; if (CM->MovementMode == MOVE_Flying) CM->SetMovementMode(MOVE_Falling); CM->Velocity = FVector::ZeroVector; }
 	}
 	// (the vanishing act's shimmer off with the stealth)
-	if (bVanishLook && !IsStealthed()) { if (USkeletalMeshComponent* Bd = Body()) Bd->SetOverlayMaterial(nullptr); bVanishLook = false; VanishBlowsLeft = 0; }
+	if (!IsStealthed() && (bVanishLook || VanishBlowsLeft > 0)) { if (bVanishLook) if (USkeletalMeshComponent* Bd = Body()) Bd->SetOverlayMaterial(nullptr); bVanishLook = false; VanishBlowsLeft = 0; }
 	// (the death lotus: its strikes a third of a second apart, each with its crescent and an afterimage of her)
 	if (ArtLotusLeft > 0 && Now >= ArtLotusNext)
 	{
@@ -822,11 +856,17 @@ void URDCombatComponent::TickRogueArts(float Dt)
 				const float Hh = C->GetCapsuleComponent()->GetScaledCapsuleHalfHeight(), Rad = C->GetCapsuleComponent()->GetScaledCapsuleRadius();
 				const FVector Ml = Mo->GetActorLocation();
 				const FVector Bk = -(Mo->GetActorForwardVector() * FVector(1, 1, 0)).GetSafeNormal();
-				FVector Got;
-				if (SecFloorAt(Ml + Bk * (Rad + Mo->GetCapsuleComponent()->GetScaledCapsuleRadius() + 40.f), Hh, Rad, Got))
+				const float Off = Rad + Mo->GetCapsuleComponent()->GetScaledCapsuleRadius() + 40.f;
+				for (const FVector Way : { Bk, FVector(Bk.Y, -Bk.X, 0.f), FVector(-Bk.Y, Bk.X, 0.f) })
 				{
+					// (in sight of its monster: never through a wall (PR #60's review))
+					FVector Got;
+					if (!SecFloorAt(Ml + Way * Off, Hh, Rad, Got)) continue;
+					FHitResult Sh; FCollisionQueryParams Sq(SCENE_QUERY_STAT(RDArtCutsSpot), false, C); Sq.AddIgnoredActor(Mo);
+					if (W->LineTraceSingleByChannel(Sh, Ml, Got, ECC_Visibility, Sq)) continue;
 					C->SetActorLocation(Got, false, nullptr, ETeleportType::TeleportPhysics);
 					C->SetActorRotation(FRotator(0.f, (Ml - Got).Rotation().Yaw, 0.f));
+					break;
 				}
 				ArtHit(Mo, ArtCutsDmg); ++ArtCutsHits;
 				if (D->Fx) SpawnFx(D->Fx, Ml, FRotator(0.f, (Ml - C->GetActorLocation()).Rotation().Yaw, 35.f * (ArtCutsHits % 2 ? 1.f : -1.f)), D->FxScale);

@@ -53,7 +53,7 @@
        "3",
        "1",
        "0",
-       "0.37",
+       "0.41",
        "NS_ShockWave_03:1@0,0,43"
       ]
      ],
@@ -103,7 +103,7 @@
      "dex_want": 20,
      "exposed": 0.25,
      "burning": true,
-     "lost": 38.7,
+     "lost": 16.9,
      "pool": [
       [
        "Acid",
@@ -113,7 +113,7 @@
        "1",
        "1",
        "0",
-       "3.47",
+       "3.48",
        ""
       ]
      ],
@@ -139,7 +139,7 @@
      "dex": 25.0,
      "dex_want": 25,
      "foe": "RDArtProp",
-     "to_double_cm": 577,
+     "to_double_cm": 575,
      "burst_lost": 19.5,
      "props_after": 0,
      "again_refused": true
@@ -201,7 +201,7 @@
      "dex_want": 25,
      "lost": 22.8,
      "to_it_cm": 116,
-     "moved_cm": 862,
+     "moved_cm": 687,
      "again_refused": true
     },
     "GildedLure": {
@@ -220,11 +220,11 @@
        "0",
        "1",
        "2.39",
-       "NS_Hit_ShootingStar01:0@799,6,-6"
+       "NS_Hit_ShootingStar01:0@799,5,-6"
       ]
      ],
      "foe": "RDArtProp",
-     "moved_cm": 196,
+     "moved_cm": 195,
      "again_refused": true
     },
     "VanishingAct": {
@@ -278,7 +278,7 @@
    },
    "manuals": {
     "rogue": {
-     "Manual of Caltrops": 228
+     "Manual of Caltrops": 215
     },
     "read": true,
     "rank": 1,
@@ -286,11 +286,11 @@
     "left": 0,
     "says": "You learn Caltrops: Scatters spikes over 3 m: monsters crossing them are slowed 40% and bleed",
     "rogue_after": {
-     "Tome of Frost Shard": 228
+     "Tome of Frost Shard": 215
     },
     "token_began": false,
     "warrior": {
-     "Tome of Frost Shard": 228
+     "Tome of Frost Shard": 215
     }
    },
    "growth": {
