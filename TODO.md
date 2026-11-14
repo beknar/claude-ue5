@@ -20,7 +20,13 @@ Built and compiled, but no test has run it yet:
 
 ## The list of 2026-11-12 ([docs/improvements12.txt](docs/improvements12.txt))
 
-Done in phases (1 to 6 so far): 1 gold, the map in its scroll, the mouse on the big map, rd.MapTeleport, the saves as cards; 2 the horses' gaits; 3 the twenty ruins; 4 the hidden lairs; 5 the 34 structures and 25 quests; 6 the game to tier 30; to come: 7 the Rogue's abilities.
+Done in phases (all seven): 1 gold, the map in its scroll, the mouse on the big map, rd.MapTeleport, the saves as cards; 2 the horses' gaits; 3 the twenty ruins; 4 the hidden lairs; 5 the 34 structures and 25 quests; 6 the game to tier 30; 7 the Rogue's sixteen arts.
+
+- [ ] **Phase 7, the Rogue's arts, what is not done or measured:** ([docs/secondary.md](docs/secondary.md#the-rogues-arts-the-list-of-2026-11-12)):
+  - No clips of their own: each art plays her blade's first strike or her crossbow's shot (or none); the Death Lotus turns her body a third at each strike, the Thousand Cuts puts her behind each monster in turn. A throw, a spin and a hook's shot were not made.
+  - Their pictures are the test's from her side in the castle's start room: the net (round a monster 8 m off) and the coin (8 m off) are not made out in theirs; the rope is thin; the arts have no icons on the quick bar (letters, as the other heroes' abilities).
+  - The manuals were measured at the castle's place 1 (the start set); the places past the castle are the same rule (the chain's index x 5 + the tier) and were not visited. Nobody has played the arts by hand or against monsters that fight back.
+  - The numbers marked ours (costs, cooldowns, shares) are set, not balanced by trials: `868 balance` does not use the arts.
 
 - [ ] **Phase 6, the game to tier 30, what is not done or measured:** ([docs/tiers.md](docs/tiers.md)):
   - Heaven's dungeon is tiers 26-30 by the tables (its monsters 1.12 a tier stronger, her growth with them), as the other dungeons past the castle are: no hero has fought there under autoplay, and the balance past tier 5 is by construction, not by trials.

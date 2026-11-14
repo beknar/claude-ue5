@@ -112,6 +112,15 @@ public:
 	/** the third list's slashes: blinded (Share of its blows miss) for Seconds; held (stunned) for Seconds */
 	void BlindFor(float Share, float Seconds);
 	void StunFor(float Seconds);
+	/** the list of 2026-11-12's seventh phase (the Rogue's arts, RDRogue12.cpp): it has lost her (the smoke: no foe of hers for
+	 *  Seconds); marked (it takes Share more from her); exposed (its armour eaten: it takes Share more from everyone) */
+	void LoseHerFor(float Seconds);
+	void MarkFor(float Share, float Seconds);
+	void ExposeFor(float Share, float Seconds);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool HasLostHer() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetMarkShare() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetExposedShare() const;
+	float LostHerUntil = -100.f, MarkUntil = -100.f, MarkShare = 0.f, ExposedUntil = -100.f, ExposedShare = 0.f;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetBlindShare() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsStunned() const { return Stun > 0.f && bStunHeld; }
 	/** blows it swung that missed for its blindness (tests) */

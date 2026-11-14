@@ -1716,6 +1716,9 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 	}
 	case ERDItemKind::Tome:
 	{
+		// (the list of 2026-11-12: a Rogue's manual says its art)
+		if (const FRDSecondaryDef* Ad = Gen ? Gen->FindSecondary(It.Spell) : nullptr; Ad && Ad->Slot > 0)
+			return FString::Printf(TEXT("A rogue's manual: teaches %s: %s.  %.0f dexterity, every %.0f s."), *Ad->Title, *Ad->Text, Ad->Dex, Ad->Cooldowns.Num() > 0 ? Ad->Cooldowns[0] : 0.f);
 		const int32 Si = Gen ? Gen->FindSpell(It.Spell) : -1;
 		if (Si < 0) return TEXT("A spell tome");
 		const FRDSpellDef& Sp = Gen->Spells[Si];

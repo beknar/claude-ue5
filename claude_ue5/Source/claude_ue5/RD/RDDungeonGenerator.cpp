@@ -596,7 +596,7 @@ TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) co
 		if (Ix >= 0 && Items[Ix].Kind == ERDItemKind::Tome && Items[Ix].Spell.IsNone())
 		{
 			const FName Sp = TomeSpellOf(Section, Index, K);
-			if (!Sp.IsNone() && FindItem(TomeItemName(Sp)) >= 0) Out.Add(TomeItemName(Sp));
+			if (const FName Ti = TomeItemOf(Sp); !Ti.IsNone()) Out.Add(Ti);
 			continue;
 		}
 		Out.Add(Picked[K]);
@@ -626,6 +626,9 @@ FName ARDDungeonGenerator::TomeSpellOf(FIntPoint Section, int32 Index, int32 Pic
 	if (Spells.ContainsByPredicate([](const FRDSpellDef& S) { return S.Slot > 0; }))
 	{
 		const int32 Want = FMath::Max(ChainIndexHere(), 0) * 5 + Tier;
+		// (the list of 2026-11-12's seventh phase: for the Rogue, the art of the place until she knows it: its manual)
+		for (const FRDSecondaryDef& D : Secondaries)
+			if (D.Slot == Want && D.Hero == CurrentHero && !(PlayerCombat && PlayerCombat->GetSecondaryRank(D.Name) > 0)) return D.Name;
 		// (the list of 2026-11-11: a tier's place can hold a spell of one hero's own too (the Warlock's curses): for her that one
 		// first until she knows it, then the place's other; for the other heroes the place's other)
 		const FRDSpellDef* First = nullptr; const FRDSpellDef* Own = nullptr;
@@ -1451,6 +1454,7 @@ void ARDDungeonGenerator::AddHitText(const FVector& At, float Amount, bool bOnPl
 void ARDDungeonGenerator::RestartPlay(int32 Seed)
 {
 	if (Seed != 0) SessionSeed = Seed;
+	ClearArtProps();          // (the list of 2026-11-12: the Rogue's caltrops, pools, decoys go with the run)
 	for (auto It = Sections.CreateIterator(); It; ++It)
 	{
 		if (IsStartSection(It->Key) && It->Value) continue;

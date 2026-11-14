@@ -17,6 +17,7 @@ class USoundBase;
 class UFXSystemAsset;
 class APawn;
 class UTexture2D;
+class UMaterialInterface;
 
 /** A placeable mesh normalised by Adjust to the dungeon frame: origin at the footprint centre on the floor, front toward
  *  +X (furniture faces +X; wall pieces run along Y with their room face toward +X; floor tiles centred, top at z = 0;
@@ -1008,6 +1009,23 @@ struct FRDSecondaryDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName LookSpell;
 	/** it raises a spell she chooses at its first rank (the Mage's spell boosts) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bChoosesSpell = false;
+	// ---- the list of 2026-11-12's seventh phase: the Rogue's arts (SourceArt/balance/rogue12.json, 925; RD/RDRogue12.cpp)
+	/** an art: learned from its manual (an item of kind Tome whose Spell is this Name), found at its place among the dungeons'
+	 *  tiers (the chain's index x 5 + the tier, as the tome spells' Slot), never raised by an Angel Token (0: a token's ability) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Slot = 0;
+	/** what it costs of her dexterity energy */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Dex = 0.f;
+	/** its look: the thing it throws or lays (caltrops, a vial, a coin, a knife, the net, the hook), its effects (the main one and a
+	 *  second: a trail, a hit, a burst), a material of its own (the crosshair, the pool, the rope, her double), their tint and
+	 *  scale; the clip of hers it plays ("dagger": her blade's first strike, "crossbow": her shot; none: no clip) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> Mesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float MeshScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UNiagaraSystem> Fx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UNiagaraSystem> Fx2 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float FxScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UMaterialInterface> Material = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FLinearColor Tint = FLinearColor::White;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Clip;
 };
 
 /** random_dungeonmagic_level5: how heavy a set of armour is; each hero wears only some weights (FRDHeroDef::Wears) */

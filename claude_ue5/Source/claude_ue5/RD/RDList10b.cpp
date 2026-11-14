@@ -163,7 +163,7 @@ TArray<FName> ARDDungeonGenerator::ShelfLootOf(FIntPoint Section, int32 Index) c
 		if (Got->Kind == ERDItemKind::Tome && Got->Spell.IsNone())
 		{
 			const FName Sp = TomeSpellOf(Section, 50000 + Index, K);
-			if (!Sp.IsNone() && FindItem(TomeItemName(Sp)) >= 0) Out.Add(TomeItemName(Sp));
+			if (const FName Ti = TomeItemOf(Sp); !Ti.IsNone()) Out.Add(Ti);
 			continue;
 		}
 		Out.Add(Got->Name);

@@ -1,0 +1,338 @@
+{
+ "tag": "r12f",
+ "plan": [
+  "rogue12"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "rogue12",
+   "ok": true,
+   "manuals_ok": true,
+   "arts_ok": true,
+   "failed": [],
+   "arts": {
+    "Caltrops": {
+     "ok": true,
+     "last": "Caltrops|1|3.00",
+     "says": "Caltrops",
+     "dex": 15.0,
+     "dex_want": 15,
+     "slow": 0.4,
+     "burning": true,
+     "lost": 4.1,
+     "prop": [
+      [
+       "Caltrops",
+       "Caltrops",
+       "150",
+       "0",
+       "3",
+       "1",
+       "0",
+       "7.89",
+       ""
+      ]
+     ],
+     "again_refused": true
+    },
+    "SmokeBomb": {
+     "ok": true,
+     "last": "SmokeBomb|1|4.00",
+     "says": "Smoke Bomb",
+     "dex": 0.0,
+     "dex_want": 0,
+     "lost_her": true,
+     "foe_is_her": false,
+     "props": [
+      [
+       "Smoke",
+       "SmokeBomb",
+       "0",
+       "0",
+       "3",
+       "1",
+       "0",
+       "0.41",
+       "NS_ShockWave_03:1@0,0,43"
+      ]
+     ],
+     "again_refused": true
+    },
+    "Hamstring": {
+     "ok": true,
+     "last": "Hamstring|1|0.60",
+     "says": "Hamstring",
+     "dex": 10.0,
+     "dex_want": 10,
+     "lost": 13.0,
+     "slow": 0.6,
+     "slow_4_6s": 0.6,
+     "slow_5_6s": 0.0,
+     "again_refused": true
+    },
+    "MarkedForDeath": {
+     "ok": true,
+     "last": "MarkedForDeath|1|0.30",
+     "says": "Marked for Death",
+     "dex": 15.0,
+     "dex_want": 15,
+     "share": 0.3,
+     "marked_lost": 130.0,
+     "unmarked_lost": 100.0,
+     "crosshair": 1,
+     "again_refused": true
+    },
+    "GrapplingHook": {
+     "wall_cm": 1516.89794921875,
+     "ok": true,
+     "last": "GrapplingHook|0|14.41",
+     "says": "Grappling Hook",
+     "dex": 10.0,
+     "dex_want": 10,
+     "rope": 1,
+     "moved_cm": 1441,
+     "left_cm": 76,
+     "again_refused": true
+    },
+    "AcidFlask": {
+     "ok": true,
+     "last": "AcidFlask|1|3.00",
+     "says": "Acid Flask",
+     "dex": 20.0,
+     "dex_want": 20,
+     "exposed": 0.25,
+     "burning": true,
+     "lost": 16.9,
+     "pool": [
+      [
+       "Acid",
+       "AcidFlask",
+       "500",
+       "-0",
+       "1",
+       "1",
+       "0",
+       "3.48",
+       ""
+      ]
+     ],
+     "again_refused": true
+    },
+    "RicochetBolt": {
+     "ok": true,
+     "last": "RicochetBolt|3|33.80",
+     "says": "Ricochet Bolt",
+     "dex": 20.0,
+     "dex_want": 20,
+     "lost": [
+      33.8,
+      33.8,
+      33.8
+     ],
+     "again_refused": true
+    },
+    "ShadowDouble": {
+     "ok": true,
+     "last": "ShadowDouble|1|6.00",
+     "says": "Shadow Double",
+     "dex": 25.0,
+     "dex_want": 25,
+     "foe": "RDArtProp",
+     "to_double_cm": 575,
+     "burst_lost": 19.5,
+     "props_after": 0,
+     "again_refused": true
+    },
+    "NetShot": {
+     "ok": true,
+     "last": "NetShot|1|4.00",
+     "says": "Net Shot",
+     "dex": 15.0,
+     "dex_want": 15,
+     "slow": 1.0,
+     "slow_3_4s": 1.0,
+     "slow_5_0s": 0.0,
+     "again_refused": true
+    },
+    "FanOfKnives": {
+     "ok": true,
+     "last": "FanOfKnives|4|10.40",
+     "says": "Fan of Knives",
+     "dex": 25.0,
+     "dex_want": 25,
+     "lost": [
+      10.4,
+      10.4,
+      10.4,
+      10.4,
+      0.0
+     ],
+     "again_refused": true
+    },
+    "Flashbang": {
+     "ok": true,
+     "last": "Flashbang|2|3.00",
+     "says": "Flashbang",
+     "dex": 20.0,
+     "dex_want": 20,
+     "blind": [
+      1.0,
+      1.0,
+      0.0
+     ],
+     "stunned": [
+      true,
+      true,
+      false
+     ],
+     "stunned_3_5s": [
+      false,
+      false,
+      false
+     ],
+     "again_refused": true
+    },
+    "Shadowstep": {
+     "ok": true,
+     "last": "Shadowstep|1|22.75",
+     "says": "Shadowstep",
+     "dex": 25.0,
+     "dex_want": 25,
+     "lost": 22.8,
+     "to_it_cm": 116,
+     "moved_cm": 687,
+     "again_refused": true
+    },
+    "GildedLure": {
+     "ok": true,
+     "last": "GildedLure|1|15.00",
+     "says": "Gilded Lure",
+     "dex": 10.0,
+     "dex_want": 10,
+     "coin": [
+      [
+       "Coin",
+       "GildedLure",
+       "800",
+       "0",
+       "4",
+       "0",
+       "1",
+       "2.39",
+       "NS_Hit_ShootingStar01:0@799,5,-6"
+      ]
+     ],
+     "foe": "RDArtProp",
+     "moved_cm": 195,
+     "again_refused": true
+    },
+    "VanishingAct": {
+     "ok": true,
+     "last": "VanishingAct|3|12.00",
+     "says": "Vanishing Act",
+     "dex": 40.0,
+     "dex_want": 40,
+     "stealthed": true,
+     "look": true,
+     "spared": 3,
+     "stealthed_after_blows": [
+      true,
+      true,
+      true,
+      false
+     ],
+     "look_after": false,
+     "again_refused": true
+    },
+    "DeathLotus": {
+     "ok": true,
+     "last": "DeathLotus|3|10.40",
+     "says": "Death Lotus",
+     "dex": 30.0,
+     "dex_want": 30,
+     "lost": [
+      31.2,
+      31.2,
+      31.2
+     ],
+     "strikes": 9,
+     "again_refused": true
+    },
+    "ThousandCuts": {
+     "ok": true,
+     "last": "ThousandCuts|3|26.00",
+     "says": "Thousand Cuts",
+     "dex": 50.0,
+     "dex_want": 50,
+     "dilation": 0.3,
+     "lost": [
+      26.0,
+      26.0,
+      26.0
+     ],
+     "cuts": 3,
+     "dilation_after": 1.0,
+     "again_refused": true
+    }
+   },
+   "manuals": {
+    "rogue": {
+     "Manual of Caltrops": 215
+    },
+    "read": true,
+    "rank": 1,
+    "on_bar": true,
+    "left": 0,
+    "says": "You learn Caltrops: Scatters spikes over 3 m: monsters crossing them are slowed 40% and bleed",
+    "rogue_after": {
+     "Tome of Frost Shard": 215
+    },
+    "token_began": false,
+    "warrior": {
+     "Tome of Frost Shard": 215
+    }
+   },
+   "growth": {
+    "t1": [
+     13.0,
+     0.6
+    ],
+    "t10": [
+     30.2,
+     0.6
+    ],
+    "blade": [
+     13.0,
+     30.2
+    ],
+    "cut_ratio": 2.323,
+    "blade_ratio": 2.326,
+    "ok": true
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_r12f_rogue12_caltrops.png",
+  "mw_r12f_rogue12_smoke.png",
+  "mw_r12f_rogue12_smoke2.png",
+  "mw_r12f_rogue12_hamstring.png",
+  "mw_r12f_rogue12_marked.png",
+  "mw_r12f_rogue12_hook.png",
+  "mw_r12f_rogue12_acid.png",
+  "mw_r12f_rogue12_ricochet.png",
+  "mw_r12f_rogue12_double.png",
+  "mw_r12f_rogue12_net.png",
+  "mw_r12f_rogue12_fan.png",
+  "mw_r12f_rogue12_flash.png",
+  "mw_r12f_rogue12_shadowstep.png",
+  "mw_r12f_rogue12_lure.png",
+  "mw_r12f_rogue12_vanish.png",
+  "mw_r12f_rogue12_lotus.png",
+  "mw_r12f_rogue12_cuts_marks.png",
+  "mw_r12f_rogue12_cuts.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}
