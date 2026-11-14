@@ -1,0 +1,134 @@
+{
+ "tag": "t13m3",
+ "plan": [
+  "curses13",
+  "finalback13"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "curses13",
+   "ok": true,
+   "lethargy": {
+    "plain_gaps": 8,
+    "cursed_gaps": 7,
+    "plain_s": 2.8,
+    "cursed_s": 3.08,
+    "amount": 0.15,
+    "interval": 1.84,
+    "want_longer_s": 0.276,
+    "longer_s": 0.285,
+    "ratio": 1.1
+   },
+   "brittle": {
+    "crits": 1,
+    "knocked_down": 1,
+    "stunned_then": true
+   },
+   "fear_stun": {
+    "under": {
+     "stunned": true,
+     "afraid": true,
+     "branch": "stun"
+    },
+    "after": {
+     "stunned": false,
+     "afraid": true,
+     "branch": "fear"
+    }
+   },
+   "silence": {
+    "clear_line": true,
+    "caught_shooting": true,
+    "refused": 3,
+    "still_shooting": false,
+    "silenced": true,
+    "shots_after": 0
+   },
+   "hunted_wall": {
+    "yaw": 45,
+    "dist_cm": 1600.0,
+    "wall_at_cm": 1221,
+    "cast": true,
+    "drawn_front": [
+     1391,
+     633,
+     1
+    ],
+    "drawn_behind": [
+     1375,
+     1915,
+     2
+    ]
+   }
+  },
+  {
+   "step": "finalback13",
+   "ok": true,
+   "placed_ok": true,
+   "before": {
+    "placed": 1,
+    "slain": 0,
+    "door_open": 0,
+    "section": [
+     4,
+     0
+    ],
+    "room": 1,
+    "band": 7,
+    "boss_alive": 1,
+    "boss_hp": 1836.0,
+    "reward": "",
+    "share": "40/1332|12/401|86/2826|1"
+   },
+   "placed_counter": 1,
+   "slain_counter": 0,
+   "tiers_after": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "at_arrival": {
+    "placed": 0,
+    "slain": 0,
+    "door_open": 0,
+    "section": [
+     0,
+     0
+    ],
+    "room": -1,
+    "band": 0,
+    "boss_alive": 0,
+    "boss_hp": 0.0,
+    "reward": "",
+    "share": "0/0|0/0|0/0|0"
+   },
+   "boss_at_arrival": false,
+   "after_explored": {
+    "placed": 1,
+    "slain": 0,
+    "door_open": 0,
+    "section": [
+     4,
+     0
+    ],
+    "room": 2,
+    "band": 10,
+    "boss_alive": 1,
+    "boss_hp": 1836.0,
+    "reward": "",
+    "share": "40/1315|12/390|59/2707|1"
+   },
+   "boss_after": true
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_t13m3_curses13_hunted_wall.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 0
+}

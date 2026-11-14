@@ -5925,9 +5925,13 @@ def step_curses13():
     cast("Lethargy", m); yield from wait(0.3)
     cursed = yield from blow_gaps(m, 25.0, True)
     mp = sum(plain) / len(plain) if plain else None; mc = sum(cursed) / len(cursed) if cursed else None
+    # (the curse lengthens its wait between blows (the attack interval, RDMonster.cpp), not its swing: the gap grows by the
+    # amount times the interval (0.15 x 1.84 = 0.28 s), the whole gap by less than 15 % (PR #62's review: a ratio within 0.06 of
+    # 1.15 would have passed a curse a third short))
     res["lethargy"] = {"plain_gaps": len(plain), "cursed_gaps": len(cursed), "plain_s": round(mp, 2) if mp else None, "cursed_s": round(mc, 2) if mc else None,
                        "amount": CU["Lethargy"]["amount"], "interval": round(m.get_attack_interval(), 2),
-                       "want_ratio": round(1.0 + CU["Lethargy"]["amount"], 2), "ratio": round(mc / mp, 2) if mp and mc else None}
+                       "want_longer_s": round(CU["Lethargy"]["amount"] * m.get_attack_interval(), 3), "longer_s": round(mc - mp, 3) if mp and mc else None,
+                       "ratio": round(mc / mp, 2) if mp and mc else None}
     drop([m]); quiet(True); yield from wait(0.3)
     # ---- Brittle: her weapon's blows until one is doubled: it is knocked down (stunned) and counted
     m = spawn_dummy(ahead(500)); yield from wait(0.5)
@@ -5997,7 +6001,7 @@ def step_curses13():
     res["hunted_wall"] = hm
     quiet(False)
     le = res["lethargy"]; br = res["brittle"]; fs = res.get("fear_stun", {}); si = res["silence"]
-    ok = (le["plain_gaps"] >= 6 and le["cursed_gaps"] >= 6 and le["ratio"] is not None and abs(le["ratio"] - le["want_ratio"]) < 0.06
+    ok = (le["plain_gaps"] >= 6 and le["cursed_gaps"] >= 6 and le["longer_s"] is not None and abs(le["longer_s"] - le["want_longer_s"]) < 0.08
           and br["knocked_down"] == 1 and br["stunned_then"] and fs.get("under", {}).get("stunned") and fs["under"].get("afraid") and fs["under"].get("branch") == "stun"
           and fs.get("after", {}).get("branch") == "fear"
           and si.get("caught_shooting") and si.get("refused", 0) >= 1 and not si.get("still_shooting") and si.get("shots_after", 1) == 0
@@ -6102,7 +6106,9 @@ def step_dungeon13():
         her = G["pawn"].get_actor_location(); her = V(her.x, her.y, her.z - 90)
         end, _ = clear_line(her, 0.0, 900.0)
         if not end: fights.append({"kind": kname, "error": "no clear line"}); continue
-        m = g.spawn_monster_named(kname, end, t, 1.0, 1.0, 1.0); yield from wait(0.3); quiet(False)
+        m = g.spawn_monster_named(kname, end, t, 1.0, 1.0, 1.0); yield from wait(0.3)
+        if not m: fights.append({"kind": kname, "error": "not spawned"}); continue
+        quiet(False)
         shoots = bool(d.get_editor_property("shoots")); mh0 = m.hits_landed; sf0 = m.shots_fired; ma0 = m.attacks_made
         # (its own blows first: up to 10 s with her standing, her hit points kept up, its attacks and blows landing counted; then
         # the fight (test_t13w: the Warrior with her tier's kit staggered each kind at every blow, none ever struck her))
@@ -6113,10 +6119,16 @@ def step_dungeon13():
         first = {"secs": round(now() - t1, 1), "attacks": m.attacks_made - ma0, "landed": m.hits_landed - mh0, "shots": m.shots_fired - sf0,
                  "m_from_her": round(dist2(m.get_actor_location(), me_) / 100.0, 2) if alive(m) else None, "branches": branches,
                  "reach": round(d.get_editor_property("reach"), 1), "scale": round(m.get_actor_scale3d().x, 2) if alive(m) else None}
-        r = yield from bal_fight(c, "Warrior", t, [m], 60.0)
+        last = {"hits": m.hits_landed, "shots": m.shots_fired}
+        def keep_counts():
+            if unreal.SystemLibrary.is_valid(m): last["hits"] = m.hits_landed; last["shots"] = m.shots_fired
+            return None
+        r = yield from bal_fight(c, "Warrior", t, [m], 60.0, after_start=keep_counts)
+        keep_counts()
         r = {k_: v for k_, v in r.items() if k_ not in ("trace",)}
-        r.update({"kind": kname, "tier": t, "its_first": first, "its_blows_landed": (m.hits_landed - mh0) if unreal.SystemLibrary.is_valid(m) else None,
-                  "its_shots": ((m.shots_fired - sf0) if shoots else None) if unreal.SystemLibrary.is_valid(m) else None, "dead": (not alive(m))})
+        # (counted as last read while it was there: one destroyed at its death keeps what it struck (PR #62's review))
+        r.update({"kind": kname, "tier": t, "its_first": first, "its_blows_landed": max(last["hits"] - mh0, first["landed"]),
+                  "its_shots": max(last["shots"] - sf0, first["shots"]) if shoots else None, "dead": (not alive(m))})
         fights.append(r); quiet(True)
         if alive(m): drop([m])
         yield from wait(0.3)
@@ -6129,10 +6141,13 @@ def step_dungeon13():
     bosses = {}; slain = {}
     for t in range(2, 6):
         g.debug_open_tiers(t, True); yield from wait(0.5)
-        # (up to three sets of the tier visited, 20 s after each: test_t13w2's tier-4 boss was not placed within 20 s of two)
+        # (a tier's boss is set in an explored room of the tier before (PlaceBoss): a set of tier t-1 visited and cleared (its rooms
+        # explored), up to three, 20 s after each (test_t13s5: visiting the tier's own sets left tiers 3 and 5 with no boss, "no
+        # explored room of tier 2 to set it in"))
         e_ = None
-        for S_ in (I2(t - 1, 0), I2(t - 1, 1), I2(t - 1, -1)):
-            yield from visit(S_)
+        for S_ in ((I2(0, 0),) if t == 2 else (I2(t - 2, 0), I2(t - 2, 1), I2(t - 2, -1))):
+            sec_ = yield from visit(S_)
+            if sec_ and t > 2: g.debug_clear_section(S_, 0, sec_.get_room_center(0)); yield from wait(0.5)
             for _ in range(80):
                 for e in (str(l).split("|") for l in g.get_encounter_lines()):
                     # (boss|x|y|z|kind|alive|tier|label|max: as step_tier25 reads them)
@@ -6172,7 +6187,8 @@ def step_dungeon13():
     quiet(False)
     has_kinds = bool(kinds)
     # (not every place has an art: 16 arts over the chain's 30 places; a place with one shows its manual only, one without none)
-    man_ok = all((v.get("slots") == [v["want_slot"]]) if v.get("has_art") else not v.get("manuals") for v in man.values())
+    # (PR #62's review: a tier whose set was never built fails, it is not a place without an art)
+    man_ok = len(man) == 5 and all(v.get("set", True) and "want_slot" in v and ((v.get("slots") == [v["want_slot"]]) if v.get("has_art") else not v.get("manuals")) for v in man.values())
     sets_ok = all(s.get("set", True) and s.get("tier") == t and s.get("monsters", 0) > 0 and s.get("containers", 0) > 0 for t, s in sets.items()) and len(sets) == 4
     fights_ok = (not has_kinds) or all(f.get("dead") and (f.get("its_blows_landed") or 0) + (f.get("its_shots") or 0) >= 1 and f.get("dealt", 0) > 0 for f in fights)
     nxt = chain[ci + 1][0] if 0 <= ci < len(chain) - 1 else None
@@ -6202,7 +6218,7 @@ def step_finalback13():
     sec = yield from over(S)
     if not sec: quiet(False); step_result("finalback13", False, error="no tier-5 set"); return
     g.debug_clear_section(S, 0, sec.get_room_center(0)); yield from wait(0.5)
-    rooms = [(r_, len(list(sec.get_room_free_tiles(r_)))) for r_ in range(200)]
+    rooms = [(r_, len(list(sec.get_room_free_tiles(r_)))) for r_ in range(sec.get_num_rooms())]
     room = max(rooms, key=lambda x: x[1])[0]
     res["placed_ok"] = g.debug_place_final_boss(S, room); yield from wait(1.0)
     res["before"] = fb_state(); res["placed_counter"] = gi.get_counter("finalboss:placed"); res["slain_counter"] = gi.get_counter("finalboss")
@@ -6269,8 +6285,9 @@ def step_stuck13():
             sw = unreal.SystemLibrary.capsule_trace_single(G["w"], L0, L0 + V(dv.x / nn * 50, dv.y / nn * 50, 0), cap.get_scaled_capsule_radius(), cap.get_scaled_capsule_half_height(),
                                                            unreal.TraceTypeQuery.TRACE_TYPE_QUERY2, False, [m], unreal.DrawDebugTrace.NONE, True)
             sw = sw.to_tuple() if sw else None
-            r["sweep"] = {"hit": bool(sw and sw[0]), "start_penetrating": bool(sw[2]) if sw else None, "what": (sw[9].get_name() + "." + sw[10].get_name()) if sw and sw[0] and sw[9] and sw[10] else None,
-                          "time": round(sw[3], 3) if sw else None, "at_z": round(sw[4].z - L0.z) if sw and sw[0] else None}
+            # (the tuple: blocking, initial overlap, time, distance, location, ... (PR #62's review: read as [2], [3] before))
+            r["sweep"] = {"hit": bool(sw and sw[0]), "start_penetrating": bool(sw[1]) if sw else None, "what": (sw[9].get_name() + "." + sw[10].get_name()) if sw and sw[0] and sw[9] and sw[10] else None,
+                          "time": round(sw[2], 3) if sw else None, "at_z": round(sw[4].z - L0.z) if sw and sw[0] else None}
             r["mesh_collision"] = str(m.get_component_by_class(unreal.SkeletalMeshComponent).get_collision_enabled())
             if sw and sw[0] and isinstance(sw[10], unreal.InstancedStaticMeshComponent):
                 ism = sw[10]; sm = ism.get_editor_property("static_mesh"); fl = L0.z - cap.get_scaled_capsule_half_height()

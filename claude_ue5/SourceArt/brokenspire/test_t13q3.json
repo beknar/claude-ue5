@@ -1,5 +1,5 @@
 {
- "tag": "t13q2",
+ "tag": "t13q3",
  "plan": [
   "quests13"
  ],
@@ -31,7 +31,7 @@
      "Scholar: Done: What the Monks Wrote",
      "Board: Done: Bounty: Clear the Ossuary"
     ],
-    "gold": 934,
+    "gold": 120,
     "offered_next": [
      "Quest: Deeper Than the Bells",
      "Quest: The Warden Below"
@@ -60,7 +60,7 @@
      "Scholar: Done: The Guild's Ledger",
      "Board: Done: Bounty: Iron Hounds"
     ],
-    "gold": 2096,
+    "gold": 120,
     "offered_next": [
      "Quest: Bank the Second Furnace",
      "Quest: Break a Governor"
@@ -89,7 +89,7 @@
      "Scholar: Done: Name the Dead",
      "Board: Done: Bounty: The Outfall Rats"
     ],
-    "gold": 3896,
+    "gold": 120,
     "offered_next": [
      "Quest: Open the Second Sluice",
      "Quest: The Sluice Warden"
@@ -110,7 +110,7 @@
      "enter": 1,
      "tier": 2,
      "kills": 33,
-     "boss": 2
+     "boss": 1
     },
     "turned_in": [
      "Elder: Done: The Gate of a Hundred Years",
@@ -118,7 +118,7 @@
      "Scholar: Done: The Scribes' Account",
      "Board: Done: Notice: Wardbreakers Wanted"
     ],
-    "gold": 11942,
+    "gold": 145,
     "offered_next": [
      "Quest: Halls of the Tower",
      "Quest: The Tower's Master"
@@ -139,7 +139,7 @@
      "enter": 1,
      "tier": 2,
      "kills": 33,
-     "boss": 1
+     "boss": 3
     },
     "turned_in": [
      "Elder: Done: Past the Lobby",
@@ -147,7 +147,7 @@
      "Scholar: Done: Former Staff",
      "Board: Done: Contract: Rogue Defenders"
     ],
-    "gold": 20821,
+    "gold": 200,
     "offered_next": [
      "Quest: Deeper Clearance",
      "Quest: The Fortress Commander"

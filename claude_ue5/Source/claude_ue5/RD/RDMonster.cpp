@@ -1030,9 +1030,13 @@ void ARDMonster::KeepFeetOnFloor()
 	const float HH = Cap->GetScaledCapsuleHalfHeight();
 	const FVector L = GetActorLocation();
 	FHitResult H; FCollisionQueryParams Q(SCENE_QUERY_STAT(RDMonsterFeet), false, this);
-	// (down its middle from its top: the first thing under its middle is the floor it stands in)
-	if (GetWorld()->LineTraceSingleByChannel(H, L + FVector(0, 0, HH), L - FVector(0, 0, HH + 150.f), ECC_WorldStatic, Q)
-		&& H.ImpactPoint.Z < L.Z && H.ImpactPoint.Z > L.Z - HH + 2.f)
+	// (down its middle from its top: the first static thing under its middle is the floor it stands in. Static geometry only, its
+	// section's or the wilds' ground (PR #62's review: by the WorldStatic channel another pawn's capsule answered, and a monster
+	// could have been set on her or on another monster); lifted at most 60 cm (the sewers' were 29 and 40), never onto furniture
+	// it stands beside more than that)
+	FCollisionObjectQueryParams Obj; Obj.AddObjectTypesToQuery(ECC_WorldStatic);
+	if (GetWorld()->LineTraceSingleByObjectType(H, L + FVector(0, 0, HH), L - FVector(0, 0, HH + 150.f), Obj, Q)
+		&& H.ImpactPoint.Z < L.Z && H.ImpactPoint.Z > L.Z - HH + 2.f && H.ImpactPoint.Z < L.Z - HH + 60.f)
 		SetActorLocation(FVector(L.X, L.Y, H.ImpactPoint.Z + HH + 2.f), false, nullptr, ETeleportType::TeleportPhysics);
 }
 

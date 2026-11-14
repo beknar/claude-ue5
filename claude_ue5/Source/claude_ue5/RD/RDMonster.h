@@ -337,7 +337,8 @@ private:
 	void TickHover(float Dt);
 	/** its first second: a capsule bottom found under the floor below it is lifted onto it (the TODO sweep, 868 stuck13: the sewers'
 	 *  Tide Captain and Abyssal Shellclaw, their capsules the table's tallest, came to rest 40 and 29 cm into the floor as if the
-	 *  default capsule had landed, and chased her without moving a step) */
+	 *  default capsule had landed, and chased her without moving a step). Why they landed so was not found: this guard puts them on
+	 *  the floor, it is not the cause's fix (PR #62's review) */
 	float FeetCheckLeft = 1.f;
 	void KeepFeetOnFloor();
 	/** a beam begun at its foe (P), in its range: true when it stands to call it down */

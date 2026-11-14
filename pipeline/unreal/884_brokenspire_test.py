@@ -5195,7 +5195,15 @@ def step_quests13():
         r["killed"] = kills
         g.debug_open_tiers(2, True); yield from wait(0.5)
         boss = None
+        span = g.get_editor_property("section_tiles") * g.get_editor_property("tile_size")
         for S in (I2(1, 0), I2(1, 1), I2(0, 1)):
+            # (each set of tier 2 visited: a boss is set in a room she has explored (PR #62's review: the loop never went there))
+            cmv = G["pawn"].get_editor_property("character_movement"); cmv.set_movement_mode(unreal.MovementMode.MOVE_FLYING)
+            G["pawn"].set_actor_location(V(S.x * span, S.y * span, g.section_floor_z(S) + 400.0), False, True); yield from wait(0.3)
+            g.generate_section_now(S); t1 = time.time()
+            while time.time() - t1 < 30 and not (g.is_section_generated(S) and g.get_section(S) and not g.get_section(S).is_building()): yield
+            if g.get_section(S): put(g.get_section(S).get_room_center(0)); g.debug_clear_section(S, 0, g.get_section(S).get_room_center(0))
+            G["pawn"].get_editor_property("character_movement").set_movement_mode(unreal.MovementMode.MOVE_WALKING); yield from wait(0.5)
             for _ in range(60):
                 e_ = [e for e in (str(l).split("|") for l in g.get_encounter_lines()) if e[0] == "boss" and len(e) > 7 and e[6] == "2"]
                 if e_: boss = e_[0]; break
@@ -5216,6 +5224,9 @@ def step_quests13():
             st = wild_town_state()
             if st.get("name") == town and st.get("loading") == "0" and st.get("section") == "1": break
         yield from wait(2.0); g = G["gen"]; quiet(True)
+        # (the quests' own gold: the purse read once she is back, before the turn-ins (PR #62's review: read before she went down,
+        # the kills' gold counted too))
+        gold0 = G["gen"].get_gold()
         r["turned_in"] = yield from givers("turnin")
         r["gold"] = G["gen"].get_gold() - gold0
         r["offered_next"] = []
