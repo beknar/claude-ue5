@@ -1,0 +1,162 @@
+{
+ "tag": "t13q2",
+ "plan": [
+  "quests13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "quests13",
+   "ok": true,
+   "Vel Morrath": {
+    "taken": [
+     "Elder: Quest: The Stair Beneath the Altar",
+     "Captain: Quest: Ash and Bone",
+     "Scholar: Quest: What the Monks Wrote",
+     "Board: Quest: Bounty: Clear the Ossuary"
+    ],
+    "talked_to": "Monk",
+    "down": "vel_morrath",
+    "killed": 32,
+    "boss": "Orc_03",
+    "counters": {
+     "enter": 1,
+     "tier": 2,
+     "kills": 33,
+     "boss": 1
+    },
+    "turned_in": [
+     "Elder: Done: The Stair Beneath the Altar",
+     "Captain: Done: Ash and Bone",
+     "Scholar: Done: What the Monks Wrote",
+     "Board: Done: Bounty: Clear the Ossuary"
+    ],
+    "gold": 934,
+    "offered_next": [
+     "Quest: Deeper Than the Bells",
+     "Quest: The Warden Below"
+    ]
+   },
+   "Ashenreach": {
+    "taken": [
+     "Elder: Quest: Through the Iron Gate",
+     "Captain: Quest: Scrap Them",
+     "Scholar: Quest: The Guild's Ledger",
+     "Board: Quest: Bounty: Iron Hounds"
+    ],
+    "talked_to": "Worker",
+    "down": "war_engine",
+    "killed": 32,
+    "boss": "Orc_03",
+    "counters": {
+     "enter": 1,
+     "tier": 2,
+     "kills": 33,
+     "boss": 1
+    },
+    "turned_in": [
+     "Elder: Done: Through the Iron Gate",
+     "Captain: Done: Scrap Them",
+     "Scholar: Done: The Guild's Ledger",
+     "Board: Done: Bounty: Iron Hounds"
+    ],
+    "gold": 2096,
+    "offered_next": [
+     "Quest: Bank the Second Furnace",
+     "Quest: Break a Governor"
+    ]
+   },
+   "Graymourne": {
+    "taken": [
+     "Elder: Quest: Down the Old Grate",
+     "Captain: Quest: Drowned Men Walking",
+     "Scholar: Quest: Name the Dead",
+     "Board: Quest: Bounty: The Outfall Rats"
+    ],
+    "talked_to": "Mourner",
+    "down": "sewers",
+    "killed": 32,
+    "boss": "Orc_03",
+    "counters": {
+     "enter": 1,
+     "tier": 2,
+     "kills": 33,
+     "boss": 1
+    },
+    "turned_in": [
+     "Elder: Done: Down the Old Grate",
+     "Captain: Done: Drowned Men Walking",
+     "Scholar: Done: Name the Dead",
+     "Board: Done: Bounty: The Outfall Rats"
+    ],
+    "gold": 3896,
+    "offered_next": [
+     "Quest: Open the Second Sluice",
+     "Quest: The Sluice Warden"
+    ]
+   },
+   "Kethrys Spire": {
+    "taken": [
+     "Elder: Quest: The Gate of a Hundred Years",
+     "Captain: Quest: Thin the Wards",
+     "Scholar: Quest: The Scribes' Account",
+     "Board: Quest: Notice: Wardbreakers Wanted"
+    ],
+    "talked_to": "Monk",
+    "down": "kethrys_spire",
+    "killed": 32,
+    "boss": "Orc_03",
+    "counters": {
+     "enter": 1,
+     "tier": 2,
+     "kills": 33,
+     "boss": 2
+    },
+    "turned_in": [
+     "Elder: Done: The Gate of a Hundred Years",
+     "Captain: Done: Thin the Wards",
+     "Scholar: Done: The Scribes' Account",
+     "Board: Done: Notice: Wardbreakers Wanted"
+    ],
+    "gold": 11942,
+    "offered_next": [
+     "Quest: Halls of the Tower",
+     "Quest: The Tower's Master"
+    ]
+   },
+   "Heaven": {
+    "taken": [
+     "Elder: Quest: Past the Lobby",
+     "Captain: Quest: Security Sweep",
+     "Scholar: Quest: Former Staff",
+     "Board: Quest: Contract: Rogue Defenders"
+    ],
+    "talked_to": "Worker",
+    "down": "heaven_fortress",
+    "killed": 32,
+    "boss": "Orc_03",
+    "counters": {
+     "enter": 1,
+     "tier": 2,
+     "kills": 33,
+     "boss": 1
+    },
+    "turned_in": [
+     "Elder: Done: Past the Lobby",
+     "Captain: Done: Security Sweep",
+     "Scholar: Done: Former Staff",
+     "Board: Done: Contract: Rogue Defenders"
+    ],
+    "gold": 20821,
+    "offered_next": [
+     "Quest: Deeper Clearance",
+     "Quest: The Fortress Commander"
+    ]
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 0
+}

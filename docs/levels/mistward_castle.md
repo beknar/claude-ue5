@@ -436,7 +436,8 @@ What the trials say (`test_b.json`: the run of 2026-11-04, whose tier trials agr
   - **his death:** Ursag's Horn Blade in his loot (a tier-5 weapon), 2705 gold (2500 and the kill's), the victory notice; the door open (the grating down and no longer blocking, its light 129 particles);
   - **the way back:** she walked into the door and Brokenspire opened, the counter kept (1).
   - In earlier runs the same step found what it was there to find: he was not placed while one of the three shares (the chests, 1.7 %) was under the rule's; and a starting Warrior dies in three of his blows (the test keeps her alive and adds up what he takes).
-- **Not yet tested** ([TODO.md](../../TODO.md#the-final-boss-aurorim-2026-11-03)): coming back to him unslain after leaving the castle; the real share (the test's is 1 %: a game reaches 50 % over about 16 of tier 5's 32 sets, and nobody has played that far); a room with no wall free for his door (it then has none, and the log says so). The door has no mark of its own on the map (his mark is the boss's). The package cooks him, but no run of it has reached tier 5.
+- **Coming back to him** (`868 finalback13`, `test_t13f2`, 2026-11-14): placed in a cleared tier-5 set and not slain, she left as a travel does (`SaveCarry`) and the castle opened again: he was not there until a tier-5 set was explored, then he was set again (another room, his band of 9).
+- **Not yet tested** ([TODO.md](../../TODO.md#the-final-boss-aurorim-2026-11-03)): the real share (the test's is 1 %: a game reaches 50 % over about 16 of tier 5's 32 sets, and nobody has played that far); a room with no wall free for his door (it then has none, and the log says so). The door has no mark of its own on the map (his mark is the boss's). The package cooks him, but no run of it has reached tier 5.
 
 **Brokenspire's third list (2026-11-02, `886`, on the castle too).** Falls hurt (`bFallDamage`): from the highest point of a fall to where she lands, nothing up to 4.5 m, then a share of her hit points growing to all of them at 15 m; no dodge, stealth, ward, shield or armour takes it (`URDCombatComponent::TickFallDamage`; measured in the town: 3 m nothing, 9 m 37.5 of 85, 20 m she falls). The Warrior's Dagger was put where her sword is (its grip point 4.5 cm behind the guard on the sword's spot in her hand): on its 11 cm handle that left the handle over the middle of her palm, 6.4 cm from the wrist, its middle 4 cm toward the blade. `886` moves it 3 cm toward her fingers and 3.5 cm toward the pommel in her hand's frame (once: it moves only the grip as measured): the handle's middle now at the base of her fingers, 9.4 cm out, 0.2 cm from the palm's middle across the hand (`884 dagger`, in her own pose in play).
 
@@ -527,12 +528,25 @@ The spells and slashes, on every map of the game (`918 cantrip,spells3,slashes3,
   - The tome's text and the refusal say "only the warlock learns it".
   - The HUD's curse mark no longer builds strings every frame.
   - Not changed: a trail slash on a bow gets only the arrow's trail (bows are spell weapons here, so the swing's trail on the weapon skips them).
-  - Not measured: Silence on a wind-up and the fear under a stun (no shooter or stun was put in the test).
-- **Not measured:** Lethargy's slower blows (the monsters' wait between blows), Brittle's knock-down beyond the doubled blow's stun, Silence stopping a shot (the shooters check it, not measured here), Hunted's mark seen through a wall on the map. No monster in the game heals itself, so Withering Brand acts only on heals the game gives a monster (measured with a test heal), and a monster's regeneration does not exist to stop.
+  - Measured since (`868 curses13`, `test_t13m2`, 2026-11-14): Silence on a Soldier caught in its shot's wind-up (refused 3 times, no shot after) and the fear under a stun (a Brittle knock-down: stunned and afraid, its fight "stun"; once the stun ended, "fear").
+- **Measured in the TODO sweep** (`868 curses13`, `test_t13m2`): Lethargy's slower blows (a monster's blows on her 2.80 s apart, cursed 3.09: x 1.10 against the table's 1.15; a count over 12 s, 4 blows either way, could not tell them apart), Brittle's knock-down (a doubled blow knocked it down and stunned it, counted), the hunted mark drawn by the HUD while its monster stood 16 m off behind a wall (on it in front of her, at the screen's edge with her turned away; `GetHuntedMarkDrawn`). It is the HUD's mark: the maps draw none. No monster in the game heals itself, so Withering Brand acts only on heals the game gives a monster (measured with a test heal), and a monster's regeneration does not exist to stop.
 
 ![Singularity cast at a plague rat](../images/mistward_singularity.jpg)
 
 ![The Warlock's curses on four monsters bound by Chains of Kinship](../images/mistward_curses.jpg)
+
+## The TODO sweep (2026-11-14)
+
+The open items of `TODO.md` that a test could settle, on the castle and the five dungeons past it:
+
+| Step | What it measures |
+|---|---|
+| `dungeon13` (`-lv vel_morrath`, `war_engine`, `sewers`, `kethrys_spire`, `heaven_fortress`) | Tiers 2 and 3 opened by the game's own rule: the start set and its ring cleared, the `"<key>:tier"` counter written. Tiers 4 and 5 opened with their encounters. A set of each tier 2-5 visited: its floor (the catacombs' and sewers' -4.5 m a tier), its theme's props by the walls, its monsters of its tier, a picture. Each of the dungeon's own kinds (`SourceArt/<level>/monsters.json`) fought one at a time by the Warrior under autoplay with her tier's kit: up to 20 s of its own blows first (counted landing), then the fight to its death. Each tier's boss slain; the last one's drop (the next dungeon's key). The quest counters (`:kills`, `:boss`, `:tier`) read. The Rogue's manual at each place: every place with an art holds its manual over 30 seeds, the places without one none. A save made in the dungeon and loaded: the dungeon opened again, its tiers still open. Records `test_t13v3`, `test_t13w3`, `test_t13s4`, `test_t13k2`, `test_t13h2` |
+| `curses13` | The curses' unmeasured parts (above) (`test_t13m2`) |
+| `finalback13` | Coming back to Aurorim unslain (above) (`test_t13f2`) |
+| `stuck13` (`-lv sewers`, `-opt "kinds=A+B"`) | Kinds spawned 9 m off: each must reach her within 6 s. It found the sewers' Tide Captain and Abyssal Shellclaw stuck: their capsules, the table's tallest, came to rest 40 and 29 cm into the floor (their middles 90.4 cm over it, as the default capsule's landing would put them), and they chased her without moving a step. A monster now checks its feet for its first second and is lifted onto the floor under it (`ARDMonster::KeepFeetOnFloor`). Since then both walk to her (`test_t13x7`) |
+
+What the fights showed: with her tier's kit the Warrior staggers a single monster at every blow until it dies, so a monster's own blows were measured before the fight, with her standing (`its_first`). The casters' bolts and the defenders' rounds land (counted, not pictured in flight). Heaven's defenders were fought at its tiers 26-30 with the castle's tier kits: each killed, 108 to 246 of her hit points taken. Every dungeon's tier bosses are still the castle's strongest kinds of each tier (an Orc Raider, a Zombie Tank, a War Raptor, a Broodmother): the dungeons' own bosses wait for the user.
 
 ## The game's own console
 

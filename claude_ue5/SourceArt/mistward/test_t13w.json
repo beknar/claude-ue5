@@ -1,0 +1,503 @@
+{
+ "tag": "t13w",
+ "plan": [
+  "dungeon13"
+ ],
+ "level": "war_engine",
+ "steps": [
+  {
+   "step": "dungeon13",
+   "ok": false,
+   "key": "war_engine",
+   "chain_index": 2,
+   "manuals": {
+    "1": {
+     "tier": 1,
+     "want_slot": 11,
+     "has_art": true,
+     "manuals": [
+      "Manual of Acid Flask"
+     ],
+     "slots": [
+      11
+     ]
+    },
+    "2": {
+     "tier": 2,
+     "want_slot": 12,
+     "has_art": false,
+     "manuals": [],
+     "slots": []
+    },
+    "3": {
+     "tier": 3,
+     "want_slot": 13,
+     "has_art": true,
+     "manuals": [
+      "Manual of Ricochet Bolt"
+     ],
+     "slots": [
+      13
+     ]
+    },
+    "4": {
+     "tier": 4,
+     "want_slot": 14,
+     "has_art": true,
+     "manuals": [
+      "Manual of Shadow Double"
+     ],
+     "slots": [
+      14
+     ]
+    },
+    "5": {
+     "tier": 5,
+     "want_slot": 15,
+     "has_art": false,
+     "manuals": [],
+     "slots": []
+    }
+   },
+   "open_by_rule": [
+    true,
+    true
+   ],
+   "tier_counter_after_rule": 3,
+   "theme_prop_meshes": [
+    "SM_Forge",
+    "SM_Ind_Aba_Storage_Barrel_Metal_Rust_01",
+    "SM_Ind_Fac_Chain_Pile_Metal_Rusty_01",
+    "SM_Ind_Jun_Gear_Metal_Rusty_02",
+    "SM_Ind_Min_Cart_Metal_Old_02",
+    "sm_Anvil_01a"
+   ],
+   "sets": {
+    "2": {
+     "tier": 2,
+     "theme": "The War Engine",
+     "floor_z": 0,
+     "props": 5,
+     "monsters": 0,
+     "monster_tiers": [],
+     "kinds": [],
+     "containers": 311
+    },
+    "3": {
+     "tier": 3,
+     "theme": "The War Engine",
+     "floor_z": 0,
+     "props": 6,
+     "monsters": 23,
+     "monster_tiers": [
+      3
+     ],
+     "kinds": [
+      "Azrak",
+      "Costalmed",
+      "Cyber_Soldier",
+      "Devourer",
+      "Gnur",
+      "Iron_Golem",
+      "Magur",
+      "Mutant_Trooper"
+     ],
+     "containers": 283
+    },
+    "4": {
+     "tier": 4,
+     "theme": "The War Engine",
+     "floor_z": 0,
+     "props": 6,
+     "monsters": 15,
+     "monster_tiers": [
+      4
+     ],
+     "kinds": [
+      "Alien_Warrior_05",
+      "Bull_Warrior",
+      "Orc_01",
+      "Orc_02",
+      "Shell",
+      "Ursag",
+      "War_Mech"
+     ],
+     "containers": 241
+    },
+    "5": {
+     "tier": 5,
+     "theme": "The War Engine",
+     "floor_z": 0,
+     "props": 6,
+     "monsters": 17,
+     "monster_tiers": [
+      5
+     ],
+     "kinds": [
+      "Alfa",
+      "Engine_Mech",
+      "Iron_Colossus",
+      "Nasty",
+      "Titan"
+     ],
+     "containers": 288
+    }
+   },
+   "fights": [
+    {
+     "won": true,
+     "down": false,
+     "secs": 14.5,
+     "hp_left": 1.0,
+     "low": 1.0,
+     "max_hp": 404,
+     "dealt": 677,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Scrap_Hound",
+     "tier": 1,
+     "its_blows_landed": 0,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 14.6,
+     "hp_left": 1.0,
+     "low": 1.0,
+     "max_hp": 404,
+     "dealt": 677,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Flayed_Mechanic",
+     "tier": 1,
+     "its_blows_landed": 0,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 14.7,
+     "hp_left": 1.0,
+     "low": 1.0,
+     "max_hp": 528,
+     "dealt": 759,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Scrap_Mutant",
+     "tier": 2,
+     "its_blows_landed": 0,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 14.7,
+     "hp_left": 1.0,
+     "low": 1.0,
+     "max_hp": 528,
+     "dealt": 759,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Rusted_Robot",
+     "tier": 2,
+     "its_blows_landed": 0,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 15.0,
+     "hp_left": 1.0,
+     "low": 1.0,
+     "max_hp": 528,
+     "dealt": 759,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Cyber_Convict",
+     "tier": 2,
+     "its_blows_landed": 0,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 14.8,
+     "hp_left": 1.0,
+     "low": 1.0,
+     "max_hp": 672,
+     "dealt": 850,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Iron_Golem",
+     "tier": 3,
+     "its_blows_landed": 0,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 15.0,
+     "hp_left": 1.0,
+     "low": 1.0,
+     "max_hp": 672,
+     "dealt": 850,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Cyber_Soldier",
+     "tier": 3,
+     "its_blows_landed": 0,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 14.7,
+     "hp_left": 1.0,
+     "low": 1.0,
+     "max_hp": 672,
+     "dealt": 850,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Mutant_Trooper",
+     "tier": 3,
+     "its_blows_landed": 0,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 16.4,
+     "hp_left": 1.0,
+     "low": 1.0,
+     "max_hp": 837,
+     "dealt": 1031,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "War_Mech",
+     "tier": 4,
+     "its_blows_landed": 0,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 16.0,
+     "hp_left": 1.0,
+     "low": 1.0,
+     "max_hp": 1026,
+     "dealt": 1155,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Iron_Colossus",
+     "tier": 5,
+     "its_blows_landed": 0,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 16.3,
+     "hp_left": 1.0,
+     "low": 1.0,
+     "max_hp": 1026,
+     "dealt": 1155,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Engine_Mech",
+     "tier": 5,
+     "its_blows_landed": 0,
+     "its_shots": null,
+     "dead": true
+    }
+   ],
+   "bosses": {
+    "lines": {
+     "2": [
+      "boss",
+      "-4047",
+      "244",
+      "112",
+      "Orc_03",
+      "1",
+      "2",
+      "TIER 2 BOSS: ORC RAIDER",
+      "2706"
+     ],
+     "3": [
+      "boss",
+      "24757",
+      "181",
+      "112",
+      "Tank",
+      "1",
+      "3",
+      "TIER 3 BOSS: ZOMBIE TANK",
+      "3031"
+     ],
+     "4": [
+      "boss",
+      "49893",
+      "25375",
+      "112",
+      "Fantasy_Animal_raptor_mount",
+      "1",
+      "4",
+      "TIER 4 BOSS: WAR RAPTOR",
+      "2995"
+     ],
+     "5": [
+      "boss",
+      "75799",
+      "25347",
+      "112",
+      "Nasty",
+      "1",
+      "5",
+      "TIER 5 BOSS: BROODMOTHER",
+      "3354"
+     ]
+    },
+    "slain": {
+     "2": "Orc_03",
+     "3": "Tank",
+     "4": "Fantasy_Animal_raptor_mount",
+     "5": "Nasty"
+    },
+    "key_dropped": "sewers",
+    "bossdone": {
+     "1": 0,
+     "2": 1,
+     "3": 1,
+     "4": 1,
+     "5": 1
+    }
+   },
+   "counters": {
+    "tier": [
+     0,
+     3
+    ],
+    "kills": [
+     0,
+     224
+    ],
+    "boss": [
+     0,
+     4
+    ]
+   },
+   "save": {
+    "saved": true,
+    "info": "2026-11-14 08:55|war_engine|The War Engine|Warrior|test|Sweep Dungeon",
+    "world_s_before": 269.8,
+    "load": true,
+    "world_s_after": 2.1,
+    "level_after": "war_engine",
+    "reopened": true,
+    "tiers_open_after": [
+     true,
+     true,
+     true,
+     true,
+     true
+    ]
+   },
+   "next_key": "sewers",
+   "parts_ok": {
+    "manuals": true,
+    "sets": false,
+    "fights": false,
+    "bosses": true,
+    "counters": true,
+    "save": true
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_t13w_dungeon13_war_engine_tier2.png",
+  "mw_t13w_dungeon13_war_engine_tier3.png",
+  "mw_t13w_dungeon13_war_engine_tier4.png",
+  "mw_t13w_dungeon13_war_engine_tier5.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 0
+}

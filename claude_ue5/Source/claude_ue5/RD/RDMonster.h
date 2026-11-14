@@ -335,6 +335,11 @@ private:
 	void SetupBoss(const FRDMonsterDef& Def);
 	/** the mesh raised over its capsule and bobbing (down on the floor once dead) */
 	void TickHover(float Dt);
+	/** its first second: a capsule bottom found under the floor below it is lifted onto it (the TODO sweep, 868 stuck13: the sewers'
+	 *  Tide Captain and Abyssal Shellclaw, their capsules the table's tallest, came to rest 40 and 29 cm into the floor as if the
+	 *  default capsule had landed, and chased her without moving a step) */
+	float FeetCheckLeft = 1.f;
+	void KeepFeetOnFloor();
 	/** a beam begun at its foe (P), in its range: true when it stands to call it down */
 	bool TrySkyBeam(AActor* P, const FVector& D, float Dist, float Dz, float Gap, float Dt);
 	void ReleaseBeam(AActor* P);

@@ -1,0 +1,50 @@
+{
+ "tag": "t13m1",
+ "plan": [
+  "curses13"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "curses13",
+   "ok": false,
+   "lethargy": {
+    "plain_12s": 4,
+    "cursed_12s": 4,
+    "amount": 0.15,
+    "interval": 1.84,
+    "want_ratio": 0.87,
+    "ratio": 1.0
+   },
+   "brittle": {
+    "crits": 1,
+    "knocked_down": 1,
+    "stunned_then": true
+   },
+   "fear_stun": {
+    "under": {
+     "stunned": true,
+     "afraid": true,
+     "branch": "stun"
+    },
+    "after": {
+     "stunned": false,
+     "afraid": true,
+     "branch": "fear"
+    }
+   },
+   "silence": {
+    "clear_line": true,
+    "caught_shooting": true,
+    "refused": 3,
+    "still_shooting": false,
+    "silenced": true,
+    "shots_after": 0
+   },
+   "hunted_wall": {}
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "windows_shown_again": 0
+}

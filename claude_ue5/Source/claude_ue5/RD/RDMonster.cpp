@@ -1023,10 +1023,24 @@ bool ARDMonster::TickCombat(float Dt)
 	return true;
 }
 
+void ARDMonster::KeepFeetOnFloor()
+{
+	const UCapsuleComponent* Cap = GetCapsuleComponent();
+	if (!Cap || bFinalBoss || IsDead()) return;
+	const float HH = Cap->GetScaledCapsuleHalfHeight();
+	const FVector L = GetActorLocation();
+	FHitResult H; FCollisionQueryParams Q(SCENE_QUERY_STAT(RDMonsterFeet), false, this);
+	// (down its middle from its top: the first thing under its middle is the floor it stands in)
+	if (GetWorld()->LineTraceSingleByChannel(H, L + FVector(0, 0, HH), L - FVector(0, 0, HH + 150.f), ECC_WorldStatic, Q)
+		&& H.ImpactPoint.Z < L.Z && H.ImpactPoint.Z > L.Z - HH + 2.f)
+		SetActorLocation(FVector(L.X, L.Y, H.ImpactPoint.Z + HH + 2.f), false, nullptr, ETeleportType::TeleportPhysics);
+}
+
 void ARDMonster::Tick(float Dt)
 {
 	Super::Tick(Dt);
 	if (!Section) return;
+	if (FeetCheckLeft > 0.f) { FeetCheckLeft -= Dt; KeepFeetOnFloor(); }
 	if (bAlly)
 	{
 		// (an ally the player's camera is in, or nearly: hidden while it is, so it never fills the view)

@@ -5137,6 +5137,102 @@ def step_cityfps13():
     # (a measure, not a rule: ok when every city was reached and 15 s of frames counted in it)
     step_result("cityfps13", len(res) == 6 and all(v["fps"] * 15 >= 30 for v in res.values()), **res)
 STEPS.update({"cityfps13": step_cityfps13})
+
+def I2(x, y): return unreal.IntPoint(x, y)
+def step_quests13():
+    """the cities' quests taken, done below and turned in (the TODO: "its quests taken and turned in"): in each city (Vel
+    Morrath, Ashenreach, Graymourne, Kethrys Spire, Heaven) every quest its givers offer is taken (the elder's, the captain's,
+    the board's, the scholar's); the scholar's errand done in the city (F at the one it names); down into its dungeon by its
+    way (the counters' "enter"), the start set cleared (tier 2 opened by the game's rule: "tier"), monsters killed by her (25 or
+    more: "kills"), tier 2's boss slain ("boss"); back up by the Escape menu's Return to <city>; every quest that is ready
+    turned in for its gold (32 killed: Heaven's sweep asks 30, the others 25). The quests that follow those (deeper tiers) are offered, not played"""
+    res = {}
+    TALK = {"Vel Morrath": "Monk", "Ashenreach": "Worker", "Graymourne": "Mourner", "Kethrys Spire": "Monk", "Heaven": "Worker"}
+    for town, lv in (("Vel Morrath", "vel_morrath"), ("Ashenreach", "war_engine"), ("Graymourne", "sewers"), ("Kethrys Spire", "kethrys_spire"), ("Heaven", "heaven_fortress")):
+        r = {}
+        if "brokenspire" not in G["w"].get_path_name(): yield from travel("brokenspire", via_menu)
+        yield from as_hero("Warrior")
+        yield from find_town(town); g = G["gen"]; quiet(True)
+        def givers(act):
+            """each giver's panel opened and every line of that act taken (accept or turnin), until none is left"""
+            done_ = []
+            for role in ("Elder", "Captain", "Scholar", "Board"):
+                if role == "Board":
+                    bd = place("board")
+                    if not bd: continue
+                    put(bd); yield from wait(0.3); G["gen"].open_town_panel("board", -1)
+                else:
+                    f = talk_to(role)
+                    if not f: continue
+                    yield from wait(0.3); G["gen"].open_town_panel("talk", f["i"])
+                yield from rwait(0.3)
+                for _ in range(6):
+                    i = line_of(act)
+                    if i < 0: break
+                    done_.append(role + ": " + panel()[i][1]); G["gen"].activate_town_entry(i); yield from rwait(0.3)
+                G["gen"].close_town_panel(); yield from rwait(0.2)
+            return done_
+        r["taken"] = yield from givers("accept")
+        # (the scholar's errand: F at the one it names)
+        f = talk_to(TALK[town])
+        if f: yield from wait(0.3); yield from press("F"); yield from rwait(0.6); G["gen"].close_town_panel(); yield from rwait(0.2)
+        r["talked_to"] = TALK[town] if f else None
+        gold0 = G["gen"].get_gold()
+        # ---- down
+        mg = place("mistgate")
+        yield from travel(lv, lambda: put(V(mg.x, mg.y, 0)))
+        g = G["gen"]; quiet(True); r["down"] = G["w"].get_path_name().split(".")[-1]
+        g.debug_clear_section(I2(0, 0), 0, g.get_start_room_center()); yield from wait(0.5)
+        kills = 0
+        for S in [I2(x, y) for x in range(-1, 2) for y in range(-1, 2) if not (x == 0 and y == 0)]:
+            if kills >= 32: break
+            g.generate_section_now(S); t0 = time.time()
+            while time.time() - t0 < 30 and not (g.is_section_generated(S) and g.get_section(S) and not g.get_section(S).is_building()): yield
+            for m in list(g.get_monsters()):
+                if kills >= 32: break
+                if m and not m.is_dead() and not m.is_ally() and g.world_to_section(m.get_actor_location()) == S: m.apply_damage(1e7, G["pawn"]); kills += 1
+            yield from wait(0.3)
+        r["killed"] = kills
+        g.debug_open_tiers(2, True); yield from wait(0.5)
+        boss = None
+        for S in (I2(1, 0), I2(1, 1), I2(0, 1)):
+            for _ in range(60):
+                e_ = [e for e in (str(l).split("|") for l in g.get_encounter_lines()) if e[0] == "boss" and len(e) > 7 and e[6] == "2"]
+                if e_: boss = e_[0]; break
+                yield from rwait(0.25)
+            if boss: break
+        if boss:
+            at = V(float(boss[1]), float(boss[2]), float(boss[3]))
+            for m in g.get_monsters():
+                if m and not m.is_dead() and m.boss and dist2(m.get_actor_location(), at) < 800: m.apply_damage(1e7, G["pawn"]); r["boss"] = str(m.monster_name); break
+        yield from wait(1.0)
+        r["counters"] = {k: G["gi"].get_counter(f"{str(g.get_editor_property('dungeon_key'))}:{k}") for k in ("enter", "tier", "kills", "boss")}
+        quiet(False)
+        # ---- back up, turned in
+        yield from travel("brokenspire", via_menu)
+        t0 = time.time()
+        while time.time() - t0 < 150:
+            yield
+            st = wild_town_state()
+            if st.get("name") == town and st.get("loading") == "0" and st.get("section") == "1": break
+        yield from wait(2.0); g = G["gen"]; quiet(True)
+        r["turned_in"] = yield from givers("turnin")
+        r["gold"] = G["gen"].get_gold() - gold0
+        r["offered_next"] = []
+        for role in ("Elder", "Captain"):
+            f = talk_to(role)
+            if f:
+                yield from wait(0.3); G["gen"].open_town_panel("talk", f["i"]); yield from rwait(0.3)
+                r["offered_next"] += [p[1] for p in panel() if p[0] == "accept"]; G["gen"].close_town_panel(); yield from rwait(0.2)
+        quiet(False)
+        res[town] = r
+    # (each city: its four first quests (enter, the kills, the board's kills, the errand) and its captain's boss after its kills are
+    # not taken together (the boss quest follows the kills): the turned in must hold the elder's, the captain's, the scholar's and
+    # the board's)
+    ok = all(len(v.get("taken", [])) >= 4 and len(v.get("turned_in", [])) >= 4 and v.get("gold", 0) > 0 and v.get("counters", {}).get("enter", 0) >= 1
+             and v["counters"].get("kills", 0) >= 25 and v["counters"].get("boss", 0) >= 1 for v in res.values()) and len(res) == 5
+    step_result("quests13", ok, **res)
+STEPS.update({"quests13": step_quests13})
 STEPS.update({"load13": step_load13, "autosave13": step_autosave13, "continue13": step_continue13, "respawn13": step_respawn13, "circle13": step_circle13,
               "walls13": step_walls13, "others13": step_others13, "later13": step_later13})
 

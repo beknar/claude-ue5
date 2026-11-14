@@ -1,0 +1,579 @@
+{
+ "tag": "t13x6",
+ "plan": [
+  "stuck13"
+ ],
+ "level": "sewers",
+ "steps": [
+  {
+   "step": "stuck13",
+   "ok": true,
+   "Drowned_Captain": {
+    "capsule": [
+     28.0,
+     96.8
+    ],
+    "scale": [
+     1.0,
+     1.0
+    ],
+    "frames": [
+     [
+      0.5,
+      8.26,
+      0.0,
+      289,
+      "MOVE_WALKING: 1>",
+      302,
+      "chase"
+     ],
+     [
+      1.0,
+      6.7,
+      0.0,
+      302,
+      "MOVE_WALKING: 1>",
+      302,
+      "chase"
+     ],
+     [
+      1.5,
+      5.18,
+      0.0,
+      302,
+      "MOVE_WALKING: 1>",
+      302,
+      "chase"
+     ],
+     [
+      2.0,
+      3.64,
+      0.0,
+      302,
+      "MOVE_WALKING: 1>",
+      302,
+      "chase"
+     ],
+     [
+      2.6,
+      2.13,
+      0.0,
+      302,
+      "MOVE_WALKING: 1>",
+      302,
+      "chase"
+     ],
+     [
+      3.1,
+      1.21,
+      0.0,
+      0,
+      "MOVE_WALKING: 1>",
+      302,
+      "swing"
+     ],
+     [
+      3.6,
+      1.21,
+      0.0,
+      0,
+      "MOVE_WALKING: 1>",
+      302,
+      "swing"
+     ],
+     [
+      4.1,
+      1.21,
+      0.0,
+      0,
+      "MOVE_WALKING: 1>",
+      302,
+      "swing"
+     ],
+     [
+      4.6,
+      1.21,
+      0.0,
+      0,
+      "MOVE_WALKING: 1>",
+      302,
+      "reach"
+     ],
+     [
+      5.1,
+      1.21,
+      0.0,
+      0,
+      "MOVE_WALKING: 1>",
+      302,
+      "reach"
+     ],
+     [
+      5.6,
+      1.21,
+      0.0,
+      0,
+      "MOVE_WALKING: 1>",
+      302,
+      "swing"
+     ],
+     [
+      6.1,
+      1.21,
+      0.0,
+      0,
+      "MOVE_WALKING: 1>",
+      302,
+      "swing"
+     ]
+    ],
+    "bottom_over_floor_cm": 2.4,
+    "floor_under": "RDSection_1.InstancedStaticMeshComponent_22",
+    "mesh_z": -96.5,
+    "ceiling_cm_over_middle": null,
+    "sweep": {
+     "hit": false,
+     "start_penetrating": null,
+     "what": null,
+     "time": null,
+     "at_z": null
+    },
+    "mesh_collision": "<CollisionEnabled.NO_COLLISION: 0>",
+    "attached": [
+     "CollisionCylinder",
+     "Arrow",
+     "CharacterMesh0"
+    ]
+   },
+   "Tide_Captain": {
+    "capsule": [
+     28.0,
+     130.7
+    ],
+    "scale": [
+     1.0,
+     1.35
+    ],
+    "frames": [
+     [
+      0.5,
+      9.0,
+      0.0,
+      282,
+      "MOVE_WALKING: 1>",
+      348,
+      "chase"
+     ],
+     [
+      1.0,
+      9.0,
+      0.0,
+      305,
+      "MOVE_WALKING: 1>",
+      348,
+      "chase"
+     ],
+     [
+      1.5,
+      9.0,
+      0.0,
+      348,
+      "MOVE_WALKING: 1>",
+      348,
+      "chase"
+     ],
+     [
+      2.0,
+      9.0,
+      0.0,
+      348,
+      "MOVE_WALKING: 1>",
+      348,
+      "chase"
+     ],
+     [
+      2.5,
+      9.0,
+      0.0,
+      270,
+      "MOVE_WALKING: 1>",
+      348,
+      "chase"
+     ],
+     [
+      3.0,
+      9.0,
+      0.0,
+      348,
+      "MOVE_WALKING: 1>",
+      348,
+      "chase"
+     ],
+     [
+      3.6,
+      9.0,
+      0.0,
+      348,
+      "MOVE_WALKING: 1>",
+      348,
+      "chase"
+     ],
+     [
+      4.1,
+      9.0,
+      0.0,
+      320,
+      "MOVE_WALKING: 1>",
+      348,
+      "chase"
+     ],
+     [
+      4.6,
+      9.0,
+      0.0,
+      348,
+      "MOVE_WALKING: 1>",
+      348,
+      "chase"
+     ],
+     [
+      5.1,
+      9.0,
+      0.0,
+      348,
+      "MOVE_WALKING: 1>",
+      348,
+      "chase"
+     ],
+     [
+      5.6,
+      9.0,
+      0.0,
+      288,
+      "MOVE_WALKING: 1>",
+      348,
+      "chase"
+     ],
+     [
+      6.1,
+      9.0,
+      0.0,
+      348,
+      "MOVE_WALKING: 1>",
+      348,
+      "chase"
+     ]
+    ],
+    "bottom_over_floor_cm": -40.3,
+    "floor_under": "RDSection_1.InstancedStaticMeshComponent_22",
+    "mesh_z": -130.3,
+    "ceiling_cm_over_middle": null,
+    "sweep": {
+     "hit": true,
+     "start_penetrating": false,
+     "what": "RDSection_1.InstancedStaticMeshComponent_22",
+     "time": 0.0,
+     "at_z": 0
+    },
+    "mesh_collision": "<CollisionEnabled.NO_COLLISION: 0>",
+    "blocker": {
+     "mesh": "SM_Sewer_Floor_01a",
+     "low_cm_over_floor": 38,
+     "high_cm_over_floor": 40,
+     "hit_cm_over_floor": 131,
+     "m_off": 3.0
+    },
+    "attached": [
+     "CollisionCylinder",
+     "Arrow",
+     "CharacterMesh0"
+    ]
+   },
+   "Abyssal_Shellclaw": {
+    "capsule": [
+     28.0,
+     119.5
+    ],
+    "scale": [
+     1.0,
+     1.3
+    ],
+    "frames": [
+     [
+      0.5,
+      9.0,
+      0.0,
+      279,
+      "MOVE_WALKING: 1>",
+      328,
+      "chase"
+     ],
+     [
+      1.0,
+      9.0,
+      0.0,
+      293,
+      "MOVE_WALKING: 1>",
+      328,
+      "chase"
+     ],
+     [
+      1.5,
+      9.0,
+      0.0,
+      328,
+      "MOVE_WALKING: 1>",
+      328,
+      "chase"
+     ],
+     [
+      2.0,
+      9.0,
+      0.0,
+      328,
+      "MOVE_WALKING: 1>",
+      328,
+      "chase"
+     ],
+     [
+      2.6,
+      9.0,
+      0.0,
+      264,
+      "MOVE_WALKING: 1>",
+      328,
+      "chase"
+     ],
+     [
+      3.1,
+      9.0,
+      0.0,
+      327,
+      "MOVE_WALKING: 1>",
+      328,
+      "chase"
+     ],
+     [
+      3.6,
+      9.0,
+      0.0,
+      327,
+      "MOVE_WALKING: 1>",
+      328,
+      "chase"
+     ],
+     [
+      4.1,
+      9.0,
+      0.0,
+      325,
+      "MOVE_WALKING: 1>",
+      328,
+      "chase"
+     ],
+     [
+      4.6,
+      9.0,
+      0.0,
+      328,
+      "MOVE_WALKING: 1>",
+      328,
+      "chase"
+     ],
+     [
+      5.1,
+      9.0,
+      0.0,
+      328,
+      "MOVE_WALKING: 1>",
+      328,
+      "chase"
+     ],
+     [
+      5.6,
+      9.0,
+      0.0,
+      289,
+      "MOVE_WALKING: 1>",
+      328,
+      "chase"
+     ],
+     [
+      6.1,
+      9.0,
+      0.0,
+      328,
+      "MOVE_WALKING: 1>",
+      328,
+      "chase"
+     ]
+    ],
+    "bottom_over_floor_cm": -29.0,
+    "floor_under": "RDSection_1.InstancedStaticMeshComponent_22",
+    "mesh_z": -119.7,
+    "ceiling_cm_over_middle": null,
+    "sweep": {
+     "hit": true,
+     "start_penetrating": false,
+     "what": "RDSection_1.InstancedStaticMeshComponent_22",
+     "time": 0.0,
+     "at_z": 0
+    },
+    "mesh_collision": "<CollisionEnabled.NO_COLLISION: 0>",
+    "blocker": {
+     "mesh": "SM_Sewer_Floor_01a",
+     "low_cm_over_floor": 27,
+     "high_cm_over_floor": 29,
+     "hit_cm_over_floor": 119,
+     "m_off": 3.0
+    },
+    "attached": [
+     "CollisionCylinder",
+     "Arrow",
+     "CharacterMesh0"
+    ]
+   },
+   "Shellclaw": {
+    "capsule": [
+     28.0,
+     91.9
+    ],
+    "scale": [
+     1.0,
+     1.0
+    ],
+    "frames": [
+     [
+      0.5,
+      8.26,
+      0.0,
+      252,
+      "MOVE_WALKING: 1>",
+      252,
+      "chase"
+     ],
+     [
+      1.0,
+      6.98,
+      0.0,
+      252,
+      "MOVE_WALKING: 1>",
+      252,
+      "chase"
+     ],
+     [
+      1.5,
+      5.68,
+      0.0,
+      252,
+      "MOVE_WALKING: 1>",
+      252,
+      "chase"
+     ],
+     [
+      2.1,
+      4.4,
+      0.0,
+      252,
+      "MOVE_WALKING: 1>",
+      252,
+      "chase"
+     ],
+     [
+      2.6,
+      3.09,
+      0.0,
+      252,
+      "MOVE_WALKING: 1>",
+      252,
+      "chase"
+     ],
+     [
+      3.1,
+      1.81,
+      0.0,
+      252,
+      "MOVE_WALKING: 1>",
+      252,
+      "chase"
+     ],
+     [
+      3.6,
+      1.18,
+      0.0,
+      0,
+      "MOVE_WALKING: 1>",
+      252,
+      "swing"
+     ],
+     [
+      4.1,
+      1.18,
+      0.0,
+      0,
+      "MOVE_WALKING: 1>",
+      252,
+      "swing"
+     ],
+     [
+      4.6,
+      1.18,
+      0.0,
+      0,
+      "MOVE_WALKING: 1>",
+      252,
+      "swing"
+     ],
+     [
+      5.1,
+      1.18,
+      0.0,
+      0,
+      "MOVE_WALKING: 1>",
+      252,
+      "swing"
+     ],
+     [
+      5.7,
+      1.18,
+      0.0,
+      0,
+      "MOVE_WALKING: 1>",
+      252,
+      "swing"
+     ],
+     [
+      6.2,
+      1.18,
+      0.0,
+      0,
+      "MOVE_WALKING: 1>",
+      252,
+      "reach"
+     ]
+    ],
+    "bottom_over_floor_cm": 2.4,
+    "floor_under": "RDSection_1.InstancedStaticMeshComponent_22",
+    "mesh_z": -92.1,
+    "ceiling_cm_over_middle": null,
+    "sweep": {
+     "hit": false,
+     "start_penetrating": null,
+     "what": null,
+     "time": null,
+     "at_z": null
+    },
+    "mesh_collision": "<CollisionEnabled.NO_COLLISION: 0>",
+    "attached": [
+     "CollisionCylinder",
+     "Arrow",
+     "CharacterMesh0"
+    ]
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 0
+}

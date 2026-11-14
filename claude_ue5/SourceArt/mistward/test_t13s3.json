@@ -1,0 +1,671 @@
+{
+ "tag": "t13s3",
+ "plan": [
+  "dungeon13"
+ ],
+ "level": "sewers",
+ "steps": [
+  {
+   "step": "dungeon13",
+   "ok": false,
+   "key": "sewers",
+   "chain_index": 3,
+   "manuals": {
+    "1": {
+     "tier": 1,
+     "want_slot": 16,
+     "has_art": false,
+     "manuals": [],
+     "slots": []
+    },
+    "2": {
+     "tier": 2,
+     "want_slot": 17,
+     "has_art": true,
+     "manuals": [
+      "Manual of Net Shot"
+     ],
+     "slots": [
+      17
+     ]
+    },
+    "3": {
+     "tier": 3,
+     "want_slot": 18,
+     "has_art": false,
+     "manuals": [],
+     "slots": []
+    },
+    "4": {
+     "tier": 4,
+     "want_slot": 19,
+     "has_art": true,
+     "manuals": [
+      "Manual of Fan of Knives"
+     ],
+     "slots": [
+      19
+     ]
+    },
+    "5": {
+     "tier": 5,
+     "want_slot": 20,
+     "has_art": false,
+     "manuals": [],
+     "slots": []
+    }
+   },
+   "theme_prop_meshes": [
+    "SM_Barrel",
+    "SM_Box",
+    "SM_Dead_Pirate_01c",
+    "SM_Dead_Pirate_01d",
+    "SM_Rag_01a",
+    "SM_Ropes",
+    "SM_Sewer_Mud_01a",
+    "SM_Sewer_Mud_01b",
+    "SM_Trash_Bag_01a"
+   ],
+   "open_by_rule": [
+    true,
+    true
+   ],
+   "tier_counter_after_rule": 3,
+   "sets": {
+    "2": {
+     "tier": 2,
+     "floor_z": -450,
+     "props": 9,
+     "monsters": 16,
+     "monster_tiers": [
+      2
+     ],
+     "kinds": [
+      "Drowned_Diver",
+      "Finned_Lurker",
+      "Gunner",
+      "Monster",
+      "Orc_03",
+      "Parasit",
+      "Sufferer"
+     ],
+     "containers": 340
+    },
+    "3": {
+     "tier": 3,
+     "floor_z": -900,
+     "props": 9,
+     "monsters": 18,
+     "monster_tiers": [
+      3
+     ],
+     "kinds": [
+      "Alien",
+      "Azrak",
+      "Costalmed",
+      "Drowned_Captain",
+      "Gaping_Deepman",
+      "Gnur",
+      "Hammerhead_Brute",
+      "Magur"
+     ],
+     "containers": 334
+    },
+    "4": {
+     "tier": 4,
+     "floor_z": -1350,
+     "props": 9,
+     "monsters": 18,
+     "monster_tiers": [
+      4
+     ],
+     "kinds": [
+      "Alien_Warrior_05",
+      "Bug",
+      "Daemon",
+      "Exterminator",
+      "Fantasy_Animal_raptor_mount",
+      "Orc_01",
+      "Orc_02",
+      "Parasite_Spider"
+     ],
+     "containers": 196
+    },
+    "5": {
+     "tier": 5,
+     "floor_z": -1800,
+     "props": 9,
+     "monsters": 15,
+     "monster_tiers": [
+      5
+     ],
+     "kinds": [
+      "Abyssal_Shellclaw",
+      "Alfa",
+      "Hunter",
+      "Nasty",
+      "Rock",
+      "Tide_Captain"
+     ],
+     "containers": 310
+    }
+   },
+   "fights": [
+    {
+     "won": true,
+     "down": false,
+     "secs": 13.3,
+     "hp_left": 0.77,
+     "low": 0.77,
+     "max_hp": 621,
+     "dealt": 1194,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Drowned_Sailor",
+     "tier": 1,
+     "its_first": {
+      "secs": 6.1,
+      "attacks": 2,
+      "landed": 2,
+      "shots": 0,
+      "m_from_her": 1.2,
+      "branches": {
+       "unseen": 1,
+       "chase": 106,
+       "reach": 46,
+       "swing": 61
+      },
+      "reach": 95.0,
+      "scale": 1.0
+     },
+     "its_blows_landed": 2,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 13.2,
+     "hp_left": 0.57,
+     "low": 0.57,
+     "max_hp": 621,
+     "dealt": 1194,
+     "taken": 122,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Drowned_Deckhand",
+     "tier": 1,
+     "its_first": {
+      "secs": 5.9,
+      "attacks": 2,
+      "landed": 2,
+      "shots": 0,
+      "m_from_her": 1.23,
+      "branches": {
+       "unseen": 1,
+       "chase": 104,
+       "reach": 47,
+       "swing": 60
+      },
+      "reach": 95.0,
+      "scale": 1.0
+     },
+     "its_blows_landed": 2,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 13.2,
+     "hp_left": 0.86,
+     "low": 0.86,
+     "max_hp": 813,
+     "dealt": 1337,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Drowned_Diver",
+     "tier": 2,
+     "its_first": {
+      "secs": 7.2,
+      "attacks": 2,
+      "landed": 2,
+      "shots": 0,
+      "m_from_her": 1.22,
+      "branches": {
+       "unseen": 1,
+       "chase": 101,
+       "reach": 46,
+       "swing": 106
+      },
+      "reach": 95.0,
+      "scale": 1.0
+     },
+     "its_blows_landed": 2,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 13.3,
+     "hp_left": 0.86,
+     "low": 0.86,
+     "max_hp": 813,
+     "dealt": 1337,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Finned_Lurker",
+     "tier": 2,
+     "its_first": {
+      "secs": 7.6,
+      "attacks": 2,
+      "landed": 2,
+      "shots": 0,
+      "m_from_her": 1.22,
+      "branches": {
+       "unseen": 1,
+       "chase": 114,
+       "reach": 46,
+       "swing": 106
+      },
+      "reach": 95.0,
+      "scale": 1.0
+     },
+     "its_blows_landed": 2,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 14.9,
+     "hp_left": 0.9,
+     "low": 0.9,
+     "max_hp": 1034,
+     "dealt": 1516,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Drowned_Captain",
+     "tier": 3,
+     "its_first": {
+      "secs": 5.9,
+      "attacks": 2,
+      "landed": 2,
+      "shots": 0,
+      "m_from_her": 1.22,
+      "branches": {
+       "unseen": 1,
+       "chase": 98,
+       "reach": 46,
+       "swing": 62
+      },
+      "reach": 95.0,
+      "scale": 1.0
+     },
+     "its_blows_landed": 2,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 13.2,
+     "hp_left": 0.9,
+     "low": 0.9,
+     "max_hp": 1034,
+     "dealt": 1498,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Gaping_Deepman",
+     "tier": 3,
+     "its_first": {
+      "secs": 7.6,
+      "attacks": 2,
+      "landed": 2,
+      "shots": 0,
+      "m_from_her": 1.25,
+      "branches": {
+       "unseen": 1,
+       "chase": 114,
+       "reach": 46,
+       "swing": 109
+      },
+      "reach": 95.0,
+      "scale": 1.0
+     },
+     "its_blows_landed": 2,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 13.2,
+     "hp_left": 0.9,
+     "low": 0.9,
+     "max_hp": 1034,
+     "dealt": 1498,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Hammerhead_Brute",
+     "tier": 3,
+     "its_first": {
+      "secs": 8.1,
+      "attacks": 2,
+      "landed": 2,
+      "shots": 0,
+      "m_from_her": 1.26,
+      "branches": {
+       "unseen": 1,
+       "chase": 114,
+       "reach": 46,
+       "swing": 126
+      },
+      "reach": 96.0,
+      "scale": 1.0
+     },
+     "its_blows_landed": 2,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 14.5,
+     "hp_left": 0.79,
+     "low": 0.79,
+     "max_hp": 1288,
+     "dealt": 1817,
+     "taken": 168,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Spearsnout",
+     "tier": 4,
+     "its_first": {
+      "secs": 7.5,
+      "attacks": 2,
+      "landed": 2,
+      "shots": 0,
+      "m_from_her": 1.46,
+      "branches": {
+       "unseen": 1,
+       "chase": 111,
+       "reach": 46,
+       "swing": 105
+      },
+      "reach": 107.0,
+      "scale": 1.0
+     },
+     "its_blows_landed": 2,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 15.6,
+     "hp_left": 0.92,
+     "low": 0.92,
+     "max_hp": 1288,
+     "dealt": 1768,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Shellclaw",
+     "tier": 4,
+     "its_first": {
+      "secs": 7.7,
+      "attacks": 2,
+      "landed": 2,
+      "shots": 0,
+      "m_from_her": 1.19,
+      "branches": {
+       "unseen": 1,
+       "chase": 114,
+       "reach": 46,
+       "swing": 108
+      },
+      "reach": 95.0,
+      "scale": 1.0
+     },
+     "its_blows_landed": 2,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 17.6,
+     "hp_left": 1.0,
+     "low": 1.0,
+     "max_hp": 1579,
+     "dealt": 2035,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Tide_Captain",
+     "tier": 5,
+     "its_first": {
+      "secs": 20.0,
+      "attacks": 0,
+      "landed": 0,
+      "shots": 0,
+      "m_from_her": 9.0,
+      "branches": {
+       "unseen": 1,
+       "chase": 710
+      },
+      "reach": 95.0,
+      "scale": 1.0
+     },
+     "its_blows_landed": 0,
+     "its_shots": null,
+     "dead": true
+    },
+    {
+     "won": true,
+     "down": false,
+     "secs": 17.7,
+     "hp_left": 1.0,
+     "low": 1.0,
+     "max_hp": 1579,
+     "dealt": 2035,
+     "taken": 0,
+     "kills": 1,
+     "left": [],
+     "autoplay_only": null,
+     "used": 0,
+     "stealth": 0,
+     "kites": 0,
+     "summons": 0,
+     "kind": "Abyssal_Shellclaw",
+     "tier": 5,
+     "its_first": {
+      "secs": 20.0,
+      "attacks": 0,
+      "landed": 0,
+      "shots": 0,
+      "m_from_her": 9.0,
+      "branches": {
+       "unseen": 1,
+       "chase": 711
+      },
+      "reach": 95.0,
+      "scale": 1.0
+     },
+     "its_blows_landed": 0,
+     "its_shots": null,
+     "dead": true
+    }
+   ],
+   "bosses": {
+    "lines": {
+     "2": [
+      "boss",
+      "-7266",
+      "3750",
+      "124",
+      "Orc_03",
+      "1",
+      "2",
+      "TIER 2 BOSS: ORC RAIDER",
+      "4769"
+     ],
+     "3": [
+      "boss",
+      "25950",
+      "150",
+      "-326",
+      "Tank",
+      "1",
+      "3",
+      "TIER 3 BOSS: ZOMBIE TANK",
+      "5341"
+     ],
+     "4": [
+      "boss",
+      "50250",
+      "-150",
+      "-778",
+      "Fantasy_Animal_raptor_mount",
+      "1",
+      "4",
+      "TIER 4 BOSS: WAR RAPTOR",
+      "5278"
+     ],
+     "5": [
+      "boss",
+      "75150",
+      "750",
+      "-1226",
+      "Nasty",
+      "1",
+      "5",
+      "TIER 5 BOSS: BROODMOTHER",
+      "5911"
+     ]
+    },
+    "slain": {
+     "2": "Orc_03",
+     "3": "Tank",
+     "4": "Fantasy_Animal_raptor_mount",
+     "5": "Nasty"
+    },
+    "key_dropped": "kethrys",
+    "bossdone": {
+     "1": 0,
+     "2": 1,
+     "3": 1,
+     "4": 1,
+     "5": 1
+    }
+   },
+   "counters": {
+    "tier": [
+     0,
+     3
+    ],
+    "kills": [
+     0,
+     224
+    ],
+    "boss": [
+     0,
+     4
+    ]
+   },
+   "save": {
+    "saved": true,
+    "info": "2026-11-14 09:51|sewers|The Sewers of Graymourne|Warrior|test|Sweep Dungeon",
+    "world_s_before": 357.1,
+    "load": true,
+    "world_s_after": 2.1,
+    "level_after": "sewers",
+    "reopened": true,
+    "tiers_open_after": [
+     true,
+     true,
+     true,
+     true,
+     true
+    ]
+   },
+   "next_key": "kethrys",
+   "parts_ok": {
+    "manuals": true,
+    "sets": true,
+    "fights": false,
+    "bosses": true,
+    "counters": true,
+    "save": true
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_t13s3_dungeon13_sewers_tier2.png",
+  "mw_t13s3_dungeon13_sewers_tier3.png",
+  "mw_t13s3_dungeon13_sewers_tier4.png",
+  "mw_t13s3_dungeon13_sewers_tier5.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 0
+}
