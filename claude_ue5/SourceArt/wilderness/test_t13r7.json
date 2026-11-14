@@ -1,0 +1,84 @@
+{
+ "tag": "t13r7",
+ "plan": [
+  "animals13",
+  "swim13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "animals13",
+   "ok": true,
+   "wait_s": 120.0,
+   "deer_before": 2,
+   "blows": 3,
+   "killed": true,
+   "deer_after_kill": 1,
+   "another_came_after_s": 119.6,
+   "counts_every_10s": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ]
+  },
+  {
+   "step": "swim13",
+   "ok": true,
+   "lake": {
+    "at_m": [
+     15152,
+     1203
+    ],
+    "depth_m": 5.8,
+    "swimming": true,
+    "line": "swim|1|Anim_Idle_Swim_Warrior3|19.7|0|194|0|1|5|-31.5"
+   },
+   "river": {
+    "at_m": [
+     19183,
+     801
+    ],
+    "depth_m": 5.6,
+    "swimming": true,
+    "line": "swim|1|Anim_Idle_Swim_Warrior3|17.0|0|194|0|1|10|-33.0"
+   },
+   "fall": {
+    "hp_lost": 0.0,
+    "swimming": true,
+    "dead": false
+   },
+   "save_swimming": true,
+   "saved": true,
+   "load": true,
+   "after_load": {
+    "from_save_m": 0.0,
+    "swimming": true,
+    "line": "swim|1|Anim_Idle_Swim_Warrior3|18.0|0|194|0|1|7|-32.7"
+   },
+   "death": {
+    "dead": true,
+    "alive_after": true,
+    "swimming_after": false,
+    "town": "Brokenspire",
+    "in_walls": true
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_t13r7_swim13_lake.png",
+  "wd_t13r7_swim13_river.png"
+ ],
+ "error": null,
+ "saves_put_back": 2,
+ "windows_shown_again": 1
+}

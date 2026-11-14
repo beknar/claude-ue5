@@ -373,6 +373,25 @@ The list of 2026-11-12's fifth phase (`docs/improvements12.txt`: the wilderness'
 
 ![The 34 structures, each from 40 m before its front](../images/sites12_kinds.jpg)
 
+## The TODO sweep (2026-11-14)
+
+The open items of `TODO.md` that a test could settle in the wilds (`888 ... -Light`):
+
+| Step | What it measures |
+|---|---|
+| `questsave13` | The captain's two quests taken, two of the den's four wolves killed, saved and loaded: the quest still taken, the two kills kept (two wolves at the den), the rest killed, both quests turned in (320 gold) (`test_t13r6`). The captain's panel sometimes opened only at a second word: the step tries up to three times |
+| `tamesave13` | The tamed horse kept by a save: tamed (`quests12`'s tame), saved mounted, loaded: still hers, she on it (`test_t13r1`) |
+| `quests12b` | The quests whose choices the first run left untried, taken the other way (`test_t13r5`) |
+| `animals13` | A wild deer killed at the game's own 120 s wait: no deer comes in its place before it, one 119.6 s after (`test_t13r7`) |
+| `hunt13` | Hunting by the game's own rules, nothing held: eight bolts at a running deer hit once and left it at 38 % of its hit points; a hare was never caught in 12 s (`test_t13r2`). Measured, not changed: struck, the animals outrun her |
+| `swim13` | Swimming in a lake (5.8 m deep) and a river (5.6 m): her swim clip on, her body at the face; a fall into deep water; saved swimming and loaded (still swimming, 0 m from where she saved); killed in the water, she comes back in Brokenspire's walls on foot (`test_t13r7`). It found two faults, fixed: a fall into deep water hurt her as a fall on land (82.7 of her hit points, `test_t13r3`): a fall that ends in water more than 1 m deep over her feet does no harm now (`TickFallDamage`); and `WildPutHer` (a load, a teleport) put her on the lake's bed, 4.3 m under the face, where she walked: she is put no deeper than the swimming floor (145 cm under the face) |
+| `weather13` | An hour of the game's time at `rd.GameSpeed 10`: the weather changed 9 times, 4.7 to 9.1 minutes apart; the wilds' tracks every 5.4 to 8.7 minutes, and at dusk and dawn the scene's set changed with its track at once (those two left out of the gaps) (`test_t13r8`) |
+| `farms1x13` | The farms at her own speed: 3,565 frames over the fields, none over 100 ms (median 16.2 ms, 95th 22.1), against 2,634 on the grasslands (median 23.0) (`test_t13r4`) |
+| `caldera13` | The volcanoes' lava from her view, by day and night, she 60 m off unhurt (`test_t13r9`); the nearest hot spring (116 km out) and its steam effect, active. The steam was spawned with the pre-cull check (a chunk is made out of view) and is spawned without it now; it still shows in no picture (72 m and 35 m, noon: `test_t13r10`, `t13r11`): not settled |
+| `horse9 -Hero <hero>` | The horse ridden by the other five heroes: each bought, mounted, her rider clip playing, 14.0 cm over the saddle bone, as the Warrior (`test_t13hm`, `t13hw`, `t13hr`, `t13ha`, `t13hs`) |
+
+The older steps the TODO asked to run again (the ground changed by the sheer walls' fix, the thirteen crops, PR #27's review) all pass: `ground7,ground8` (`test_t13o1`), `quests,places` (`test_t13o2`), `rain8,speed8` (`test_t13o3`), `fields8,perf8` (`test_t13o4`), `animals8` (`test_t13o5`: its wild deer now held within a sword's reach; at 300 cm the Warrior's swings had struck nothing).
+
 ## Limits
 
 What is not there yet, and what has not been tested, is listed in [TODO.md](../../TODO.md). In short:

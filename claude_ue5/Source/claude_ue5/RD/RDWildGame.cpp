@@ -358,7 +358,10 @@ bool ARDDungeonGenerator::StepWildBuild(FWildBuild& B)
 				const double X0 = D->Coord.X * WildChunkM, Y0 = D->Coord.Y * WildChunkM;
 				if (Pd.C.X < X0 || Pd.C.X >= X0 + WildChunkM || Pd.C.Y < Y0 || Pd.C.Y >= Y0 + WildChunkM) continue;
 				UNiagaraFunctionLibrary::SpawnSystemAttached(WildSteamFx, C->Ground, NAME_None, FVector(Pd.C.X * 100.0, Pd.C.Y * 100.0, Wild->ToZ(Pd.Level) + 20.f) - C->GetActorLocation(),
-					FRotator::ZeroRotator, FVector(2.5f), EAttachLocation::KeepRelativeOffset, true, ENCPoolMethod::None);
+					FRotator::ZeroRotator, FVector(2.5f), EAttachLocation::KeepRelativeOffset, false, ENCPoolMethod::None,
+					// (no pre-cull check: a chunk is made ahead of her, out of view, and a system culled there never drew (the TODO
+					// sweep's caldera13: the steam counted at the spring, none in its picture))
+					true, false);
 			}
 		C->bMaking = false;
 		++WildBuilt;
@@ -664,7 +667,14 @@ bool ARDDungeonGenerator::WildPutHer(float Xm, float Ym)
 			RDWildComputeChunk(*Wild, *D);
 			BuildWildChunk(D);
 		}
-	const float Z = WildGroundZ(FVector(Xm * 100.0, Ym * 100.0, 0.0));
+	float Z = WildGroundZ(FVector(Xm * 100.0, Ym * 100.0, 0.0));
+	// (where the water is deep she is put on its swimming floor, 145 cm under the face (RDWildChunk.cpp), not on the bed under it:
+	// put on the bed (a load of a save made swimming, a test's put) she stood with her head 4.3 m under the water and never swam
+	// (the TODO sweep, 888 swim13))
+	{
+		float Fz = 0.f;
+		if (WaterFaceAt(FVector(Xm * 100.0, Ym * 100.0, Z), Fz) && Fz - 145.f > Z) Z = Fz - 145.f;
+	}
 	P->SetActorLocation(FVector(Xm * 100.0, Ym * 100.0, Z + 120.f), false, nullptr, ETeleportType::TeleportPhysics);
 	if (ACharacter* Ch = Cast<ACharacter>(P)) Ch->GetCharacterMovement()->StopMovementImmediately();
 	LastSafeSpot = P->GetActorLocation(); bHasSafeSpot = true;

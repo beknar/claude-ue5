@@ -1,0 +1,63 @@
+{
+ "tag": "t13r6",
+ "plan": [
+  "questsave13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "questsave13",
+   "ok": true,
+   "captain": true,
+   "pack": 4,
+   "before_save": {
+    "killed": 2,
+    "quest": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "saved": true,
+   "load": true,
+   "after_load": {
+    "killed": 2,
+    "alive_at_den": 2,
+    "quest": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "after_all": {
+    "state": "ready",
+    "progress": 1,
+    "count": 1,
+    "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+   },
+   "patrol_before_save": {
+    "state": "ready",
+    "progress": 1,
+    "count": 1,
+    "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+   },
+   "patrol_after_load": {
+    "state": "ready",
+    "progress": 1,
+    "count": 1,
+    "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+   },
+   "gold": 320,
+   "done": {
+    "captain_wolves": "done",
+    "captain_patrol": "done"
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "error": null,
+ "saves_put_back": 2,
+ "windows_shown_again": 1
+}

@@ -1,0 +1,111 @@
+{
+ "tag": "t13o5",
+ "plan": [
+  "animals8"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "animals8",
+   "ok": true,
+   "kills": {
+    "Deer": {
+     "hp0": 40.0,
+     "hp_after_first_blow": 25.700000762939453,
+     "blows": 3,
+     "dead": true,
+     "drops": [
+      "Coarse Hide",
+      "Light Leather"
+     ],
+     "lying_roll": 0.0,
+     "length_z": 0.0,
+     "up_z": 0.0,
+     "f_names": "harvest the parts (2)",
+     "taken": {
+      "Coarse Hide": 1,
+      "Light Leather": 1
+     }
+    },
+    "Wolf": {
+     "hp0": 55.0,
+     "hp_after_first_blow": 40.70000076293945,
+     "blows": 4,
+     "dead": true,
+     "drops": [
+      "Coarse Hide",
+      "Hound Fang"
+     ],
+     "lying_roll": 0.0,
+     "length_z": 0.0,
+     "up_z": 0.0,
+     "f_names": "harvest the parts (2)",
+     "taken": {
+      "Hound Fang": 1,
+      "Coarse Hide": 1
+     }
+    },
+    "Hare": {
+     "hp0": 10.0,
+     "hp_after_first_blow": 0.0,
+     "blows": 1,
+     "dead": true,
+     "drops": [
+      "Light Leather"
+     ],
+     "lying_roll": 90.0,
+     "length_z": 0.0,
+     "up_z": 0.0,
+     "f_names": "harvest the parts (1)",
+     "taken": {
+      "Light Leather": 1
+     }
+    }
+   },
+   "alive_at_kill": {
+    "Deer": 2,
+    "Wolf": 0,
+    "Hare": 3
+   },
+   "killed": 3,
+   "respawn_wait_s": 45.0,
+   "pending_after_kills": [
+    [
+     "Deer",
+     25
+    ],
+    [
+     "Wolf",
+     34
+    ],
+    [
+     "Hare",
+     40
+    ]
+   ],
+   "places_freed_after_s": 40.5,
+   "wild_deer": {
+    "killed": true,
+    "casts": 3,
+    "deer_after_kill": 1,
+    "waiting": [
+     [
+      "Deer",
+      45
+     ]
+    ],
+    "deer_at_20s": 1,
+    "another_came_after_s": 46.4
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_t13o5_animals8_deer_dead.png",
+  "wd_t13o5_animals8_wolf_dead.png",
+  "wd_t13o5_animals8_hare_dead.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

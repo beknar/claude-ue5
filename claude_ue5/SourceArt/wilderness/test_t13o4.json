@@ -1,0 +1,89 @@
+{
+ "tag": "t13o4",
+ "plan": [
+  "fields8",
+  "perf8"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "fields8",
+   "ok": true,
+   "at": [
+    1500,
+    -1200
+   ],
+   "crops": {
+    "SM_Wild_Corn_A": 14009,
+    "SM_Wild_Corn_B": 14182,
+    "SM_Pumpkin03": 1901,
+    "SM_Pumpkin01": 1812,
+    "SM_Pumpkin02": 1822,
+    "SM_Cabbage_1": 318,
+    "SM_Cabbage_3": 327,
+    "SM_Cabbage_2": 293
+   },
+   "fps_fields": 42.9,
+   "fps_grasslands": 36.3,
+   "fields_on_line": 10
+  },
+  {
+   "step": "perf8",
+   "ok": true,
+   "fps_grasslands": 36.1,
+   "fps_farms_crops": 52.0,
+   "crop_instances": 0,
+   "fps_farms_no_crops": 51.6,
+   "fps_only_wheat": [
+    0,
+    51.7
+   ],
+   "fps_only_corn": [
+    28191,
+    51.9
+   ],
+   "fps_only_cabbage": [
+    938,
+    51.9
+   ],
+   "fps_only_potato": [
+    0,
+    51.9
+   ],
+   "fps_only_pumpkin": [
+    5535,
+    52.2
+   ],
+   "fps_only_sunflower": [
+    0,
+    52.0
+   ],
+   "run_farms_5x": {
+    "frames": 687,
+    "mean_ms": 21.8,
+    "over_50ms": 18,
+    "over_100ms": 2,
+    "max_ms": 417.0
+   },
+   "run_grasslands_5x": {
+    "frames": 535,
+    "mean_ms": 28.0,
+    "over_50ms": 25,
+    "over_100ms": 3,
+    "max_ms": 250.0
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_t13o4_fields8_near_20.png",
+  "wd_t13o4_fields8_near_200.png",
+  "wd_t13o4_fields8_low_20.png",
+  "wd_t13o4_fields8_low_200.png",
+  "wd_t13o4_fields8_far_20.png",
+  "wd_t13o4_fields8_far_200.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

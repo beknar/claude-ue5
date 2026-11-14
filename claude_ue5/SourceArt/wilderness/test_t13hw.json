@@ -1,0 +1,133 @@
+{
+ "tag": "t13hw",
+ "plan": [
+  "horse9"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "horse9",
+   "ok": true,
+   "stable_spots": 1,
+   "stable_at": [
+    -20550,
+    550
+   ],
+   "before": {
+    "owned": 0.0,
+    "spawned": 0.0,
+    "mounted": 0.0,
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0,
+    "clip": "none",
+    "rate": 0.0,
+    "speed": 0.0,
+    "saddle_z": 0.0,
+    "pelvis_z": 101.9,
+    "rider": "None",
+    "stable_horse": 1.0,
+    "pelvis_off_xy": -1.0
+   },
+   "prompt": "the stable: a horse for 60 gold",
+   "bought": true,
+   "gold_taken": 60,
+   "price": 60,
+   "after_buy": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": -20300.0,
+    "y": 763.0,
+    "z": 0.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": 175.3,
+    "pelvis_z": 101.9,
+    "rider": "None",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 222.9
+   },
+   "gi_owned": true,
+   "blocking_before_mount": true,
+   "walk_into_horse": {
+    "start_cm": 220,
+    "nearest_cm": 70
+   },
+   "horse_at_cm": 220,
+   "mount_prompt": "ride your horse",
+   "mounted": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 1.0,
+    "x": 140680.0,
+    "y": -1591956.0,
+    "z": -1913.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -1738.8,
+    "pelvis_z": -1724.8,
+    "rider": "idle",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 0.1
+   },
+   "attack_refused": true,
+   "blocking_mounted": false,
+   "riding": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 1.0,
+    "x": 143924.0,
+    "y": -1590983.0,
+    "z": -2028.0,
+    "clip": "run",
+    "rate": 1.23,
+    "speed": 2087.0,
+    "saddle_z": -1882.5,
+    "pelvis_z": -1863.0,
+    "rider": "run",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 3.8
+   },
+   "speed_m_s": {
+    "foot": 3.79,
+    "mounted": 20.36,
+    "ratio": 5.37,
+    "want": 5.5,
+    "after": 3.62
+   },
+   "after_dismount": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": 156881.0,
+    "y": -1587056.0,
+    "z": -2248.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -2073.1,
+    "pelvis_z": -2137.7,
+    "rider": "None",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 232.2
+   },
+   "death": {
+    "dead": true,
+    "mounted": 0.0,
+    "montage": true
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_t13hw_horse_idle.png",
+  "wd_t13hw_horse_side.png",
+  "wd_t13hw_horse_back.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

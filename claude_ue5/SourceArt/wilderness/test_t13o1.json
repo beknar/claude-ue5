@@ -1,0 +1,232 @@
+{
+ "tag": "t13o1",
+ "plan": [
+  "ground7",
+  "ground8"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "ground7",
+   "ok": true,
+   "relief": {
+    "grasslands": {
+     "range_m": 12.24,
+     "short_m": 1.09,
+     "max_step_5m": 0.86
+    },
+    "plains": {
+     "range_m": 3.07,
+     "short_m": 0.88,
+     "max_step_5m": 0.78
+    },
+    "farms": {
+     "range_m": 4.03,
+     "short_m": 0.91,
+     "max_step_5m": 0.77
+    },
+    "meadows": {
+     "range_m": 6.91,
+     "short_m": 1.59,
+     "max_step_5m": 0.75
+    },
+    "temperate aspen": {
+     "range_m": 11.0,
+     "short_m": 1.08,
+     "max_step_5m": 1.05
+    },
+    "tundras": {
+     "range_m": 5.4,
+     "short_m": 1.06,
+     "max_step_5m": 0.94
+    }
+   },
+   "lines": {
+    "grasslands": [
+     8946,
+     -772
+    ],
+    "plains": [
+     1392,
+     -15924
+    ],
+    "farms": [
+     1500,
+     -1200
+    ],
+    "meadows": [
+     12786,
+     11844
+    ],
+    "temperate aspen": [
+     62442,
+     -20562
+    ],
+    "tundras": [
+     118681,
+     -20325
+    ]
+   },
+   "blend": [
+    [
+     0.95,
+     "farms"
+    ],
+    [
+     0.95,
+     "farms"
+    ],
+    [
+     0.91,
+     "farms"
+    ],
+    [
+     0.9,
+     "farms"
+    ],
+    [
+     0.84,
+     "farms"
+    ],
+    [
+     0.73,
+     "farms"
+    ],
+    [
+     0.5,
+     "grasslands"
+    ],
+    [
+     0.69,
+     "grasslands"
+    ],
+    [
+     0.84,
+     "grasslands"
+    ],
+    [
+     0.88,
+     "grasslands"
+    ],
+    [
+     0.9,
+     "grasslands"
+    ],
+    [
+     0.94,
+     "grasslands"
+    ],
+    [
+     0.95,
+     "grasslands"
+    ],
+    [
+     0.96,
+     "grasslands"
+    ],
+    [
+     0.97,
+     "grasslands"
+    ],
+    [
+     0.97,
+     "grasslands"
+    ],
+    [
+     0.97,
+     "grasslands"
+    ]
+   ],
+   "blend_mixed_km": 2.25,
+   "fields": {
+    "n": 31,
+    "mean_m": 36.0,
+    "cv": 0.8
+   },
+   "road_m": 6.5,
+   "road_crossings": [
+    [
+     400.0,
+     -10,
+     607,
+     6.5
+    ],
+    [
+     650.0,
+     122,
+     845,
+     6.25
+    ],
+    [
+     650.0,
+     -145,
+     842,
+     6.5
+    ]
+   ],
+   "minimap_label": "MEADOWS  ·  fair"
+  },
+  {
+   "step": "ground8",
+   "ok": true,
+   "runs": {
+    "grasslands": {
+     "samples": 120,
+     "over_20cm": 0,
+     "max_over": 3.900000000000091,
+     "falling": 0,
+     "floors_over": {},
+     "worst": []
+    },
+    "hills": {
+     "samples": 120,
+     "over_20cm": 0,
+     "max_over": 3.900000000001455,
+     "falling": 0,
+     "floors_over": {},
+     "worst": []
+    },
+    "farms": {
+     "samples": 120,
+     "over_20cm": 0,
+     "max_over": 3.1000000000000014,
+     "falling": 0,
+     "floors_over": {},
+     "worst": []
+    },
+    "temperate autumn forests": {
+     "samples": 120,
+     "over_20cm": 0,
+     "max_over": 4.600000000000364,
+     "falling": 0,
+     "floors_over": {},
+     "worst": []
+    },
+    "marshes": {
+     "samples": 120,
+     "over_20cm": 0,
+     "max_over": 3.100000000000364,
+     "falling": 0,
+     "floors_over": {},
+     "worst": []
+    },
+    "mountains": {
+     "samples": 120,
+     "over_20cm": 0,
+     "max_over": 8.10000000000582,
+     "falling": 0,
+     "floors_over": {},
+     "worst": []
+    }
+   },
+   "share_over_20cm": 0.0
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_t13o1_ground7_minimap.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

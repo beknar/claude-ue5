@@ -1,0 +1,236 @@
+{
+ "tag": "t13o2",
+ "plan": [
+  "quests",
+  "places"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "quests",
+   "ok": true,
+   "places": {
+    "wild:wolves": {
+     "id": 536870912,
+     "name": "The Mill Road Den",
+     "x": 1839.4,
+     "y": 139.8,
+     "kind": "lair",
+     "n": 4,
+     "killed": 0,
+     "progress": 0,
+     "rx": 1839.4,
+     "ry": 139.8,
+     "yaw": -150.1,
+     "shown": 0
+    },
+    "wild:patrol": {
+     "id": 536870913,
+     "name": "The Old Watchtower",
+     "x": -2394.8,
+     "y": 1734.0,
+     "kind": "ruins",
+     "n": 3,
+     "killed": 0,
+     "progress": 0,
+     "rx": -2399.8,
+     "ry": 1729.1,
+     "yaw": -135.3,
+     "shown": 0
+    }
+   },
+   "den": {
+    "from_brokenspire_km": 1.84,
+    "water": 0.0,
+    "h": 74.6,
+    "biome": "farms",
+    "road_m": 45
+   },
+   "tower": {
+    "from_brokenspire_km": 2.96,
+    "water": 0.0,
+    "h": 76.3,
+    "biome": "farms",
+    "road_m": null
+   },
+   "captain_panel": true,
+   "offered": [
+    "Quest: Thin the Horde",
+    "Quest: Cells Under the Keep",
+    "Quest: Wolves on the Mill Road",
+    "Quest: The Lost Patrol"
+   ],
+   "accept_wolves": true,
+   "accept_patrol": true,
+   "taken": {
+    "captain_wolves": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    },
+    "captain_patrol": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+    }
+   },
+   "on_map": {
+    "wild:wolves": 1,
+    "wild:patrol": 1
+   },
+   "travel_refused": true,
+   "refusal": "You have not found The Mill Road Den yet",
+   "den_pack": {
+    "alive": 4,
+    "kinds": [
+     "Ripper_dog"
+    ]
+   },
+   "after_three": {
+    "progress": 0,
+    "killed": 3,
+    "quest": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "again_alive": 1,
+   "after_all": {
+    "progress": 1,
+    "killed": 4,
+    "quest": {
+     "state": "ready",
+     "progress": 1,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "tower_guards": 3,
+   "tower_props": 95,
+   "patrol_at_10m": 0,
+   "patrol_at_2_5m": 1,
+   "patrol_quest": {
+    "state": "ready",
+    "progress": 1,
+    "count": 1,
+    "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+   },
+   "captain_again": true,
+   "turnin_lines": [
+    "Done: Wolves on the Mill Road",
+    "Done: The Lost Patrol"
+   ],
+   "gold": 320,
+   "done": {
+    "captain_wolves": "done",
+    "captain_patrol": "done"
+   },
+   "on_map_after": {
+    "wild:wolves": 0,
+    "wild:patrol": 0
+   }
+  },
+  {
+   "step": "places",
+   "ok": true,
+   "visits": [
+    {
+     "kind": "camp",
+     "name": "Wolf Camp",
+     "found": true,
+     "props": 17,
+     "monsters": 2
+    },
+    {
+     "kind": "ruins",
+     "name": "The Old Watchtower",
+     "found": true,
+     "props": 95,
+     "monsters": 1
+    },
+    {
+     "kind": "ritual",
+     "name": "Oak Circle",
+     "found": true,
+     "props": 24,
+     "monsters": 5
+    },
+    {
+     "kind": "house",
+     "name": "Wynne's Farmstead",
+     "found": true,
+     "props": 50,
+     "monsters": 3
+    },
+    {
+     "kind": "village",
+     "name": "Briarmere",
+     "found": true,
+     "props": 149,
+     "monsters": 1
+    },
+    {
+     "kind": "cave",
+     "name": "Elm Cave",
+     "found": true,
+     "props": 25,
+     "monsters": 5
+    },
+    {
+     "kind": "lair",
+     "name": "The Mill Road Den",
+     "found": true,
+     "props": 19,
+     "monsters": 0
+    },
+    {
+     "kind": "spawn",
+     "name": "Oak Hollow",
+     "found": true,
+     "props": 30,
+     "monsters": 6,
+     "monster_m": [
+      14.5,
+      5.4
+     ],
+     "aggro": true
+    }
+   ],
+   "census": {
+    "camp": 9,
+    "cave": 10,
+    "house": 11,
+    "lair": 14,
+    "ritual": 8,
+    "ruins": 14,
+    "spawn": 6,
+    "village": 10
+   },
+   "killed_stays": {
+    "place": "Oak Hollow",
+    "before": 3,
+    "after": 2
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_t13o2_quest_den.png",
+  "wd_t13o2_quest_tower.png",
+  "wd_t13o2_place_camp.png",
+  "wd_t13o2_place_ruins.png",
+  "wd_t13o2_place_ritual.png",
+  "wd_t13o2_place_house.png",
+  "wd_t13o2_place_village.png",
+  "wd_t13o2_place_cave.png",
+  "wd_t13o2_place_lair.png",
+  "wd_t13o2_place_spawn.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

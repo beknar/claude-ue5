@@ -1,0 +1,137 @@
+{
+ "tag": "t13r1",
+ "plan": [
+  "quests12=tame",
+  "tamesave13",
+  "questsave13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "quests12",
+   "ok": true,
+   "quests": {
+    "tame": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "tame",
+       "hint": "Win the wild horse's trust (walk to it, F, three times)",
+       "point_m_from_site": 32.0,
+       "f": [
+        "quest_tame",
+        "quest_tame",
+        "quest_tame"
+       ]
+      }
+     ],
+     "found": true,
+     "site": 134352959,
+     "at_km": [
+      3.33,
+      9.49
+     ],
+     "structure": "A living beast's back",
+     "take_f": "quest",
+     "end_stage": 90,
+     "gold": 30,
+     "tamed": {
+      "horses_tamed": 1,
+      "ride_tamed": true,
+      "tamed_only": false,
+      "owned": true,
+      "swap": [
+       true,
+       false,
+       true,
+       true
+      ]
+     },
+     "told": [
+      "Discovered: A living beast's back. a beast the size of a hill, a whole camp built on its back, walking its slow round",
+      "A horse breaker:  \"There's a wild horse running here. Earn its trust: come to it slowly, three times.\"  (quest: Tame a mount)",
+      "The horse lets you near and eats from your hand (1 of 3)",
+      "The horse lets you near and eats from your hand (2 of 3)",
+      "Quest done: Tame a mount (30 gold)"
+     ]
+    }
+   },
+   "table": 25,
+   "failed": []
+  },
+  {
+   "step": "tamesave13",
+   "ok": true,
+   "before": {
+    "tamed": 1,
+    "ride_tamed": true,
+    "tamed_only": false
+   },
+   "mounted_before": "0",
+   "saved": true,
+   "load": true,
+   "after": {
+    "tamed": 1,
+    "ride_tamed": true,
+    "tamed_only": false,
+    "owned": true
+   },
+   "mounted_after": "1",
+   "horse_after": "1|1|1|139200|-1592400|-1928|idle|1.00|0|-1753.4|-1739.4|idle|0|0.0"
+  },
+  {
+   "step": "questsave13",
+   "ok": false,
+   "captain": false,
+   "pack": 4,
+   "before_save": {
+    "killed": 2,
+    "quest": {
+     "state": "offered",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "saved": true,
+   "load": true,
+   "after_load": {
+    "killed": 2,
+    "alive_at_den": 2,
+    "quest": {
+     "state": "offered",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "after_all": {
+    "state": "offered",
+    "progress": 1,
+    "count": 1,
+    "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+   },
+   "patrol_before_save": {
+    "state": "offered",
+    "progress": 1,
+    "count": 1,
+    "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+   },
+   "patrol_after_load": {
+    "state": "offered",
+    "progress": 1,
+    "count": 1,
+    "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+   },
+   "gold": 0,
+   "done": {
+    "captain_wolves": "offered",
+    "captain_patrol": "offered"
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "error": null,
+ "saves_put_back": 3,
+ "windows_shown_again": 1
+}

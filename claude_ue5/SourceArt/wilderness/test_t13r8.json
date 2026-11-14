@@ -1,0 +1,135 @@
+{
+ "tag": "t13r8",
+ "plan": [
+  "weather13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "weather13",
+   "ok": true,
+   "game_minutes": 63.4,
+   "weather_changes": [
+    [
+     6.0,
+     1,
+     2
+    ],
+    [
+     13.4,
+     2,
+     3
+    ],
+    [
+     18.1,
+     3,
+     1
+    ],
+    [
+     25.2,
+     1,
+     3
+    ],
+    [
+     31.2,
+     3,
+     4
+    ],
+    [
+     36.2,
+     4,
+     0
+    ],
+    [
+     40.6,
+     0,
+     2
+    ],
+    [
+     49.0,
+     2,
+     1
+    ],
+    [
+     56.3,
+     1,
+     2
+    ],
+    [
+     61.4,
+     2,
+     4
+    ]
+   ],
+   "music_changes": [
+    [
+     8.4,
+     "SW_Music_Wild_06",
+     "SW_Music_Wild_01"
+    ],
+    [
+     16.4,
+     "SW_Music_Wild_01",
+     "SW_Music_Wild_02"
+    ],
+    [
+     25.2,
+     "SW_Music_Wild_02",
+     "SW_Music_WildNight_01"
+    ],
+    [
+     30.2,
+     "SW_Music_WildNight_01",
+     "SW_Music_WildNight_02"
+    ],
+    [
+     36.6,
+     "SW_Music_WildNight_02",
+     "SW_Music_WildNight_03"
+    ],
+    [
+     45.3,
+     "SW_Music_WildNight_03",
+     "SW_Music_WildNight_04"
+    ],
+    [
+     53.7,
+     "SW_Music_WildNight_04",
+     "SW_Music_WildNight_01"
+    ],
+    [
+     55.3,
+     "SW_Music_WildNight_01",
+     "SW_Music_Wild_02"
+    ],
+    [
+     61.4,
+     "SW_Music_Wild_02",
+     "SW_Music_Wild_03"
+    ]
+   ],
+   "music_scene_changes": 2,
+   "weather_gaps_min": [
+    7.4,
+    4.7,
+    7.1,
+    6.0,
+    5.0,
+    4.4,
+    8.4,
+    7.3,
+    5.1
+   ],
+   "music_gaps_min": [
+    8.0,
+    6.4,
+    8.7,
+    8.4
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

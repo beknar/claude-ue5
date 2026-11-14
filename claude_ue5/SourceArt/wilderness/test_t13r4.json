@@ -1,0 +1,157 @@
+{
+ "tag": "t13r4",
+ "plan": [
+  "weather13",
+  "farms1x13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "weather13",
+   "ok": false,
+   "game_minutes": 63.4,
+   "weather_changes": [
+    [
+     8.4,
+     1,
+     0
+    ],
+    [
+     17.1,
+     0,
+     1
+    ],
+    [
+     21.8,
+     1,
+     2
+    ],
+    [
+     30.9,
+     2,
+     0
+    ],
+    [
+     36.6,
+     0,
+     3
+    ],
+    [
+     43.3,
+     3,
+     4
+    ],
+    [
+     48.0,
+     4,
+     3
+    ],
+    [
+     56.3,
+     3,
+     4
+    ],
+    [
+     61.0,
+     4,
+     3
+    ]
+   ],
+   "music_changes": [
+    [
+     6.7,
+     "SW_Music_Wild_06",
+     "SW_Music_Wild_01"
+    ],
+    [
+     15.4,
+     "SW_Music_Wild_01",
+     "SW_Music_Wild_02"
+    ],
+    [
+     23.1,
+     "SW_Music_Wild_02",
+     "SW_Music_Wild_03"
+    ],
+    [
+     24.8,
+     "SW_Music_Wild_03",
+     "SW_Music_WildNight_02"
+    ],
+    [
+     30.2,
+     "SW_Music_WildNight_02",
+     "SW_Music_WildNight_03"
+    ],
+    [
+     36.2,
+     "SW_Music_WildNight_03",
+     "SW_Music_WildNight_04"
+    ],
+    [
+     43.9,
+     "SW_Music_WildNight_04",
+     "SW_Music_WildNight_01"
+    ],
+    [
+     49.6,
+     "SW_Music_WildNight_01",
+     "SW_Music_WildNight_02"
+    ],
+    [
+     55.0,
+     "SW_Music_WildNight_02",
+     "SW_Music_Wild_03"
+    ],
+    [
+     61.4,
+     "SW_Music_Wild_03",
+     "SW_Music_Wild_04"
+    ]
+   ],
+   "weather_gaps_min": [
+    8.7,
+    4.7,
+    9.1,
+    5.7,
+    6.7,
+    4.7,
+    8.3,
+    4.7
+   ],
+   "music_gaps_min": [
+    8.7,
+    7.7,
+    1.7,
+    5.4,
+    6.0,
+    7.7,
+    5.7,
+    5.4,
+    6.4
+   ]
+  },
+  {
+   "step": "farms1x13",
+   "ok": true,
+   "farms": {
+    "frames": 3565,
+    "over_100ms": 0,
+    "median_ms": 16.2,
+    "p95_ms": 22.1,
+    "field_at_start": 1.0
+   },
+   "grassland": {
+    "frames": 2634,
+    "over_100ms": 0,
+    "median_ms": 23.0,
+    "p95_ms": 28.1,
+    "field_at_start": 0.0
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}
