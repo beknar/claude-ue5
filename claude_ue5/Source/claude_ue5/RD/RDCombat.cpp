@@ -456,7 +456,7 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 	if (W->Cooldown > 0.f) ReadyAt.Add(W->Name, GetWorld()->GetTimeSeconds() + W->Cooldown);
 	VeilUntil = FMath::Min(VeilUntil, GetWorld()->GetTimeSeconds());      // (an attack ends her veil: they see her again)
 	// (mistward6: an attack out of stealth ends it, and is an ambush)
-	if (IsStealthed()) { bAmbushArmed = true; EndStealth(TEXT("attack")); }
+	if (IsStealthed()) { bAmbushArmed = true; if (VanishBlowsLeft > 0) --VanishBlowsLeft; else EndStealth(TEXT("attack")); }          // (the vanishing act spares her first blows)
 	SetSlowed(true);
 	return true;
 }
@@ -1025,6 +1025,22 @@ bool URDCombatComponent::UseItem(FName Name)
 	if (It.Kind == ERDItemKind::Ring) return WearRing(Name);              // (level 5: worn, one of each kind)
 	if (It.Kind == ERDItemKind::Tome)
 	{
+		// (the list of 2026-11-12's seventh phase: a manual of the Rogue's teaches its art (on the quick bar's first free slot))
+		if (const FRDSecondaryDef* Ad = Generator->FindSecondary(It.Spell); Ad && Ad->Slot > 0)
+		{
+			if (Ad->Hero != Generator->CurrentHero) { SetMessage(FString::Printf(TEXT("The %s cannot learn %s"), *Generator->PlayerTitle.ToLower(), *Ad->Title)); return false; }
+			if (GetSecondaryRank(Ad->Name) > 0) { SetMessage(FString::Printf(TEXT("You know %s already"), *Ad->Title)); return false; }
+			SecondaryRanks.Add(Ad->Name, 1);
+			if (Ad->Kind != ERDSecondaryKind::Passive && Generator->bQuickSlots)
+			{
+				const FName Entry(*(TEXT("@") + Ad->Name.ToString()));
+				if (!QuickSlots.Contains(Entry)) { const int32 Free = QuickSlots.IndexOfByPredicate([](const FName& N) { return N.IsNone(); }); AssignQuickEntry(Free >= 0 ? Free : QuickSlots.Num(), Entry); }
+			}
+			RemoveCarried(Name, 1);
+			SetMessage(FString::Printf(TEXT("You learn %s: %s"), *Ad->Title, *Ad->Text));
+			PlayUiSound(TEXT("Player.Inventory"), TEXT("Player.Inventory"));
+			return true;
+		}
 		if (KnowsSpell(It.Spell)) { SetMessage(FString::Printf(TEXT("You know %s already"), *It.Spell.ToString())); return false; }
 		if (!LearnSpell(It.Spell)) return false;
 		RemoveCarried(Name, 1);

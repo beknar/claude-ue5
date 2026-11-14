@@ -289,6 +289,16 @@ Every rule a switch on the generator ("Mistward2" category), on in Mistward and 
 - **A whole stack on a held button**: a tap acts when the button is let go (a press that might become a hold must wait), held 0.6 s the whole stack; a recipe still acts on the press.
 - **The castle's prep table is the kit's mesh with its food modelled on it**: food to take needs the bare table (890's) and the town's food pieces, and the saved start section built again (its furniture is saved).
 
+## The Rogue's arts (the list of 2026-11-12's seventh phase: `925`, `RD/RDRogue12.cpp`, `868 rogue12,rogue12fx`)
+
+- **An effect spawned with the pre-cull check can be culled for good**: a system spawned where the camera is not looking at that moment (at her feet, under the camera) never drew. Spawn with it off, as `SpawnFx` does (`ENCPoolMethod::None, false`), and effects that lie on the ground in the world, not attached to a prop.
+- **Screen an effect over its life, not at one moment**: ShockWaves' 03 was a thick grey cloud in the screening's picture at 0.5 s; in play it is a ring of smoke rushing outward, gone from the middle in a second. The smoke bomb's cloud is our own (soft camera-facing puffs in a material of ours, `puff`); the ring is its burst. CharacterBodyFX's coins, glass and bubbles and the bullet pack's glass show nothing on their own.
+- **A pause in a test's real time moves its game-time readings**: a picture that holds the real clock 0.9 s made a "4.9 s" reading of a 5 s slow come at 5.8 s. Read each at its time after the cause (`until(t0, s)`).
+- **What one trial leaves touches the next**: an acid pool still there burned the next trial's monster (twice its loss); destroyed monsters still in the generator's list drew the ricochet's chain to nothing. Clear the props between trials (`ClearArtProps`, also in `RestartPlay`), take monsters out with `destroy_actor` (a kill drops its things into the next picture), and skip any monster that is not `IsValid` in every loop.
+- **A force over its time falls short by the frame rate, and a line at the chest misses what stops the capsule**: the hook's root-motion pull came 1.5 to 2.2 m short; it moves her itself, swept, each tick. The test's wall was found with a line over the throne's steps, which stopped her capsule: find a way with the capsule.
+- **A flat plane is seen edge on**: the crosshair (and the smoke's puffs) face the camera each tick.
+- **One helper converts a picture into a hidden-body one**: a text replace turned her own art's pictures (the Vanishing Act, the lotus) into ones with her body hidden. Picture an art on her body with her shown.
+
 ## The packaged game (`869`, `pipeline/package_mistward.ps1`, 2026-10-27)
 
 - **Play in the editor hides missing material usages**: the editor sets a usage a material lacks while it draws (in memory only, and the package did not even show as dirty), so the castle looked right in play while the packaged game drew 7 base materials' pieces (the furniture kit's iron, food, embers and flames; DarkHalls, Gothic Props, HallowedDepths, Medieval Weapons) in the default material, and the menu's two Fig4 studio materials lacked the Nanite usage. `869` sets and saves them; the menu's are saved every run. Look for "missing usage flag" in a Development package's log, never only in the editor's.

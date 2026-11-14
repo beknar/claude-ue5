@@ -1,0 +1,415 @@
+{
+  "_doc": "The Rogue's sixteen arts (the user's list of 2026-11-12, docs/improvements12.txt, its seventh phase), written by 925 onto every map of the game as secondary abilities of the Rogue (FRDSecondaryDef with a Slot) and their manuals (items of kind Tome: 'Manual of <title>', Spell the art's name, Tiers its place's game tier, Weight 0: only its place's tome draw gives it, for her). place: the chain's index x 5 + the tier (Mistward 1-5, Vel Morrath 6-10, the War Engine 11-15, the Sewers 16-20, Kethrys Spire 21-25, Heaven 26-30), as the list sets them. dex: its cost in dexterity energy (her pool 100, back 1.5 a second; stealth 40), ours. cooldown: ours. values / values2 / seconds: its numbers (RD/RDRogue12.cpp reads each by its art: a share, a count, a multiple of her blade's or her crossbow's blow as her growth makes it); reach: how far it finds its monster or throws (cm); share: its round (metres). damage: whether it does damage (from her own weapons, growing as they grow: 'blade' or 'bolt') or holds its strength (a control: the list's 'the control effects would keep their strength, as her stealth does'). Looks by asset path, screened in 868 rogue12's pictures.",
+  "screen": [
+    "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Projectiles/NS_Projectile_MagicArrow01",
+    "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Hits/NS_Hit_MagicArrow01",
+    "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Projectiles/NS_Projectile_ShootingStar01",
+    "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Hits/NS_Hit_ShootingStar01",
+    "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Projectiles/NS_Projectile_Lightning01",
+    "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Hits/NS_Hit_Lightning01",
+    "/Game/Bullet_ImpactFX/FX/NS_Impact_Glass"
+  ],
+  "hero": "Rogue",
+  "manual_icon_from": "Tome of Fireball",
+  "materials": {
+    "smoky": {
+      "kind": "translucent",
+      "color": [
+        0.16,
+        0.13,
+        0.22
+      ],
+      "opacity": 0.78,
+      "fresnel": 2.0,
+      "emissive": 0.35
+    },
+    "silver": {
+      "kind": "translucent",
+      "color": [
+        0.85,
+        0.88,
+        0.95
+      ],
+      "opacity": 0.45,
+      "fresnel": 2.0,
+      "emissive": 0.6
+    },
+    "crosshair": {
+      "kind": "crosshair",
+      "texture": "/Game/Medieval_Weapons/Textures/UI/T_BowCrosshair",
+      "color": [
+        1.0,
+        0.04,
+        0.02
+      ],
+      "emissive": 6.0
+    },
+    "acid": {
+      "kind": "acid",
+      "color": [
+        1.0,
+        0.62,
+        0.05
+      ],
+      "emissive": 1.6
+    },
+    "rope": {
+      "kind": "opaque",
+      "color": [
+        0.28,
+        0.19,
+        0.11
+      ],
+      "roughness": 0.9
+    },
+    "haze": {
+      "kind": "haze",
+      "opacity": 0.18,
+      "refraction": 1.06
+    },
+    "ring": {
+      "kind": "ring",
+      "color": [
+        1.0,
+        1.0,
+        0.97
+      ],
+      "emissive": 8.0,
+      "thickness": 0.12
+    },
+    "puff": {
+      "kind": "puff",
+      "color": [
+        0.42,
+        0.42,
+        0.44
+      ],
+      "opacity": 0.85
+    }
+  },
+  "shared": {
+    "disc": "/Engine/BasicShapes/Cylinder",
+    "plane": "/Engine/BasicShapes/Plane",
+    "cylinder": "/Engine/BasicShapes/Cylinder",
+    "rope_material": "rope"
+  },
+  "caltrop_fbx": "rogue12/SM_RD_Caltrop.fbx",
+  "caltrop_material": "/Game/Medieval_Weapons/Materials/VOL2/M_Dagger_01",
+  "arts": [
+    {
+      "name": "Caltrops",
+      "title": "Caltrops",
+      "place": 1,
+      "dex": 15,
+      "cooldown": 14,
+      "damage": "blade",
+      "clip": "dagger",
+      "text": "Scatters spikes over {share} m: monsters crossing them are slowed {v}% and bleed",
+      "values": [
+        0.4
+      ],
+      "values2": [
+        0.15
+      ],
+      "seconds": [
+        10
+      ],
+      "reach": 150,
+      "share": 3,
+      "mesh": "caltrop",
+      "mesh_scale": 2.5
+    },
+    {
+      "name": "SmokeBomb",
+      "title": "Smoke Bomb",
+      "place": 3,
+      "dex": 0,
+      "cooldown": 18,
+      "damage": "",
+      "clip": "dagger",
+      "text": "A {share} m cloud: monsters inside lose her for {v} s, with no dexterity energy spent",
+      "values": [
+        4
+      ],
+      "seconds": [
+        5
+      ],
+      "share": 4,
+      "fx": "/Game/ShockWaves/FX/NS_ShockWave_03",
+      "fx_scale": 1.0,
+      "material": "puff"
+    },
+    {
+      "name": "Hamstring",
+      "title": "Hamstring",
+      "place": 5,
+      "dex": 10,
+      "cooldown": 10,
+      "damage": "blade",
+      "clip": "dagger",
+      "text": "A dagger cut that slows its target {v}% for {s} s",
+      "values": [
+        0.6
+      ],
+      "values2": [
+        1.0
+      ],
+      "seconds": [
+        5
+      ],
+      "reach": 250,
+      "fx": "/Game/StylizedSlashesV2/Particles/NiagaraSystems/NS_Slash_Blood",
+      "fx2": "/Game/StylizedSlashesV2/Particles/NiagaraSystems/NS_SlashImpact_Blood",
+      "fx_scale": 0.5
+    },
+    {
+      "name": "MarkedForDeath",
+      "title": "Marked for Death",
+      "place": 7,
+      "dex": 15,
+      "cooldown": 20,
+      "damage": "",
+      "clip": "",
+      "text": "Her target takes +{v}% from her for {s} s",
+      "values": [
+        0.3
+      ],
+      "seconds": [
+        10
+      ],
+      "reach": 2000,
+      "material": "crosshair"
+    },
+    {
+      "name": "GrapplingHook",
+      "title": "Grappling Hook",
+      "place": 9,
+      "dex": 10,
+      "cooldown": 12,
+      "damage": "",
+      "clip": "crossbow",
+      "text": "Hooks a wall or monster up to 20 m away and pulls her to it",
+      "reach": 2000,
+      "seconds": [
+        1
+      ],
+      "mesh": "/Game/Gothic_Props/Assets/Meshes/SM_Hook_A",
+      "mesh_scale": 0.6
+    },
+    {
+      "name": "AcidFlask",
+      "title": "Acid Flask",
+      "place": 11,
+      "dex": 20,
+      "cooldown": 16,
+      "damage": "blade",
+      "clip": "dagger",
+      "text": "A thrown vial: a {share} m puddle that eats armour (+{v}% damage taken) and burns",
+      "values": [
+        0.25
+      ],
+      "values2": [
+        0.2
+      ],
+      "seconds": [
+        6
+      ],
+      "reach": 1200,
+      "share": 3,
+      "mesh": "/Game/Crownfall/Assets/SmallAssets/SM_S_Potion",
+      "mesh_scale": 1.0,
+      "fx": "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Hits/NS_Hit_Icicle01",
+      "fx_scale": 1.0,
+      "material": "acid"
+    },
+    {
+      "name": "RicochetBolt",
+      "title": "Ricochet Bolt",
+      "place": 13,
+      "dex": 20,
+      "cooldown": 12,
+      "damage": "bolt",
+      "clip": "crossbow",
+      "text": "A crossbow bolt that bounces between up to {v} monsters",
+      "values": [
+        4
+      ],
+      "values2": [
+        1.0
+      ],
+      "reach": 2500,
+      "share": 8,
+      "fx": "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Projectiles/NS_Projectile_Lightning01",
+      "fx2": "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Hits/NS_Hit_Lightning01",
+      "fx_scale": 1.0
+    },
+    {
+      "name": "ShadowDouble",
+      "title": "Shadow Double",
+      "place": 14,
+      "dex": 25,
+      "cooldown": 25,
+      "damage": "blade",
+      "clip": "",
+      "text": "Leaves a copy of herself that draws monsters within {share} m for {s} s, then bursts",
+      "values": [
+        3
+      ],
+      "values2": [
+        1.5
+      ],
+      "seconds": [
+        6
+      ],
+      "share": 12,
+      "fx2": "/Game/ShockWaves/FX/NS_ShockWave_03",
+      "fx_scale": 0.6,
+      "material": "smoky"
+    },
+    {
+      "name": "NetShot",
+      "title": "Net Shot",
+      "place": 17,
+      "dex": 15,
+      "cooldown": 14,
+      "damage": "",
+      "clip": "crossbow",
+      "text": "Roots one monster for {s} s",
+      "seconds": [
+        4
+      ],
+      "reach": 2000,
+      "mesh": "/Game/Harbour_Collection/Props/SM_BigFishNet/Meshes/FBX/SM_BigFishNet",
+      "mesh_scale": 0.3
+    },
+    {
+      "name": "FanOfKnives",
+      "title": "Fan of Knives",
+      "place": 19,
+      "dex": 25,
+      "cooldown": 12,
+      "damage": "blade",
+      "clip": "dagger",
+      "text": "{v} knives thrown in a ring, hitting everything within {share} m round her",
+      "values": [
+        8
+      ],
+      "values2": [
+        0.8
+      ],
+      "share": 6,
+      "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Dagger",
+      "mesh_scale": 0.8
+    },
+    {
+      "name": "Flashbang",
+      "title": "Flashbang",
+      "place": 21,
+      "dex": 20,
+      "cooldown": 20,
+      "damage": "",
+      "clip": "dagger",
+      "text": "Blinds and stuns monsters within {share} m for {s} s",
+      "seconds": [
+        3
+      ],
+      "share": 6,
+      "fx_scale": 1.0,
+      "material": "ring"
+    },
+    {
+      "name": "Shadowstep",
+      "title": "Shadowstep",
+      "place": 23,
+      "dex": 25,
+      "cooldown": 14,
+      "damage": "blade",
+      "clip": "dagger",
+      "text": "Teleports behind her target and backstabs it with her ambush bonus",
+      "values2": [
+        1.0
+      ],
+      "reach": 1500,
+      "fx": "/Game/Desert_Outpost/VFX/NS_Smoke01",
+      "fx2": "/Game/StylizedSlashesV2/Particles/NiagaraSystems/NS_SlashImpact_Blood",
+      "fx_scale": 1.0
+    },
+    {
+      "name": "GildedLure",
+      "title": "Gilded Lure",
+      "place": 26,
+      "dex": 10,
+      "cooldown": 18,
+      "damage": "",
+      "clip": "dagger",
+      "text": "A tossed coin: monsters within {share} m go after it for {s} s",
+      "seconds": [
+        5
+      ],
+      "reach": 800,
+      "share": 15,
+      "mesh": "/Game/Castle_Collection/Props/SM_Coin/Meshes/FBX/SM_Coin_var1",
+      "mesh_scale": 6.0,
+      "fx2": "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Hits/NS_Hit_ShootingStar01",
+      "fx_scale": 0.5
+    },
+    {
+      "name": "VanishingAct",
+      "title": "Vanishing Act",
+      "place": 27,
+      "dex": 40,
+      "cooldown": 40,
+      "damage": "",
+      "clip": "",
+      "text": "{s} s stealth that survives her first {v} blows",
+      "values": [
+        3
+      ],
+      "seconds": [
+        12
+      ],
+      "material": "haze"
+    },
+    {
+      "name": "DeathLotus",
+      "title": "Death Lotus",
+      "place": 28,
+      "dex": 30,
+      "cooldown": 16,
+      "damage": "blade",
+      "clip": "dagger",
+      "text": "Spins, hitting everything within {share} m {v} times",
+      "values": [
+        3
+      ],
+      "values2": [
+        0.8
+      ],
+      "share": 3,
+      "fx": "/Game/StylizedSlashesV2/Particles/NiagaraSystems/NS_Slash_Wind",
+      "fx_scale": 0.8,
+      "material": "silver"
+    },
+    {
+      "name": "ThousandCuts",
+      "title": "Thousand Cuts",
+      "place": 29,
+      "dex": 50,
+      "cooldown": 60,
+      "damage": "blade",
+      "clip": "dagger",
+      "text": "Her last: marks every monster she can see within {share} m, then blinks between them, slashing each",
+      "values": [
+        8
+      ],
+      "values2": [
+        2.0
+      ],
+      "share": 20,
+      "fx": "/Game/StylizedSlashesV2/Particles/NiagaraSystems/NS_Slash_Blood",
+      "fx_scale": 0.8,
+      "material": "crosshair"
+    }
+  ],
+  "screened": "868 rogue12fx (2026-11-14): the smoke is ShockWaves' 03 (a grey cloud billowing out; the smoke packs' own showed nothing on the castle's floor in 1.4 s or a thin plume); Shadowstep's black ash Desert Outpost's Smoke01 (a dark plume); the ricochet's streak and sparks Magic Projectiles' lightning (white-violet); the coin's glint the shooting star's hit; the flash a ring of our own (no ring system is white: ShockWaves' 01 blue, 05 yellow, 07 pink, 09 orange); CharacterBodyFX's coins, glass and bubbles and the bullet pack's glass showed nothing on their own; StylizedShields' shadow is a purple dome; ShockWaves' 03 is a ring of smoke rushing out (gone from the middle in a second): the smoke bomb's burst, its cloud our own puffs"
+}

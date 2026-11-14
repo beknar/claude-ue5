@@ -1,4 +1,5 @@
 #include "RD/RDMonster.h"
+#include "RD/RDRogue12.h"
 #include "RD/RDSection.h"
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDCombat.h"
@@ -269,6 +270,11 @@ bool ARDMonster::ApplyDamageEx(float Amount, AActor* From, const FVector* At, bo
 {
 	if (!bCombat || bDead || Amount <= 0.f) return false;
 	Amount *= 1.f + GetCurseShare();            // (cursed: it takes more)
+	// (the list of 2026-11-12's seventh phase: its armour eaten by the Rogue's acid, more from everyone; marked for death, more
+	// from her)
+	Amount *= 1.f + GetExposedShare();
+	if (MarkUntil > 0.f && From && Section && Section->Generator && Section->Generator->GetPlayerCombat() && From == Section->Generator->GetPlayerCombat()->GetOwner())
+		Amount *= 1.f + GetMarkShare();
 	Amount = CurseDamageIn(Amount, From);       // (the list of 2026-11-11: the Warlock's curses, the Sunder slash)
 	Health = FMath::Max(0.f, Health - Amount);
 	CurseAfterHit(Amount);
@@ -650,7 +656,16 @@ AActor* ARDMonster::PickFoe(URDCombatComponent* Pc, bool& bFoePlayer) const
 		return Best;
 	}
 	// (a monster: her, unless she is veiled; or one of her allies nearer)
-	if (Pc && Pc->GetOwner() && !Pc->IsDead() && !Pc->IsHidden())          // (mistward6: or in stealth)
+	// (the list of 2026-11-12's seventh phase: the Rogue's decoys first (her double, the coin): a monster within one's draw goes for
+	// it; and one in her smoke has lost her)
+	const float NowF = GetWorld()->GetTimeSeconds();
+	for (const TWeakObjectPtr<ARDArtProp>& Wp : G->ArtProps)
+	{
+		ARDArtProp* Ap = Wp.Get();
+		if (!Ap || !Ap->bDecoy || NowF > Ap->Until) continue;
+		if (FVector::Dist2D(Ap->GetActorLocation(), L) <= Ap->Radius && FMath::Abs(Ap->GetActorLocation().Z - L.Z) < 400.f) return Ap;
+	}
+	if (Pc && Pc->GetOwner() && !Pc->IsDead() && !Pc->IsHidden() && NowF >= LostHerUntil)          // (mistward6: or in stealth)
 	{
 		Best = Pc->GetOwner(); bFoePlayer = true;
 		BestD = FVector::Dist2D(Best->GetActorLocation(), L);

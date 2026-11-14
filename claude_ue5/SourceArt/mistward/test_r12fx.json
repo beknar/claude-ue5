@@ -1,0 +1,62 @@
+{
+ "tag": "r12fx",
+ "plan": [
+  "rogue12fx"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "rogue12fx",
+   "ok": true,
+   "shots": [
+    {
+     "n": 0,
+     "path": "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Projectiles/NS_Projectile_MagicArrow01"
+    },
+    {
+     "n": 1,
+     "path": "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Hits/NS_Hit_MagicArrow01"
+    },
+    {
+     "n": 2,
+     "path": "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Projectiles/NS_Projectile_ShootingStar01"
+    },
+    {
+     "n": 3,
+     "path": "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Hits/NS_Hit_ShootingStar01"
+    },
+    {
+     "n": 4,
+     "path": "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Projectiles/NS_Projectile_Lightning01"
+    },
+    {
+     "n": 5,
+     "path": "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Hits/NS_Hit_Lightning01"
+    },
+    {
+     "n": 6,
+     "path": "/Game/Bullet_ImpactFX/FX/NS_Impact_Glass"
+    }
+   ]
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_r12fx_rogue12fx_0_a.png",
+  "mw_r12fx_rogue12fx_0_b.png",
+  "mw_r12fx_rogue12fx_1_a.png",
+  "mw_r12fx_rogue12fx_1_b.png",
+  "mw_r12fx_rogue12fx_2_a.png",
+  "mw_r12fx_rogue12fx_2_b.png",
+  "mw_r12fx_rogue12fx_3_a.png",
+  "mw_r12fx_rogue12fx_3_b.png",
+  "mw_r12fx_rogue12fx_4_a.png",
+  "mw_r12fx_rogue12fx_4_b.png",
+  "mw_r12fx_rogue12fx_5_a.png",
+  "mw_r12fx_rogue12fx_5_b.png",
+  "mw_r12fx_rogue12fx_6_a.png",
+  "mw_r12fx_rogue12fx_6_b.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

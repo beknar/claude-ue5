@@ -5611,7 +5611,281 @@ def step_spells11(parts=("cantrip", "spells", "curses", "slashes")):
     res["oks"] = oks
     step_result("spells11" if len(parts) == 4 else "spells11_" + "_".join(parts), bool(oks) and all(oks.values()), **res)
 
-STEPS = {"list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
+def step_rogue12fx():
+    """screening the Rogue's arts' looks (the list of 2026-11-12's seventh phase; rogue12.json's "screen"): each candidate effect
+    spawned on the start room's floor 3.5 m before her (her body hidden, the camera looking down at it), pictured at 0.5 and 1.4 s
+    (rogue12fx_<n>_a / _b), then taken away; always ok (a picture sheet to choose from)"""
+    g = G["gen"]; res = {"shots": []}
+    RJ = json.load(open(os.path.join(SA, "balance", "rogue12.json"), encoding="utf-8"))
+    c = yield from restart("Rogue"); quiet(True)
+    ctr = g.get_start_room_center(); put(V(ctr.x, ctr.y, ctr.z), 0.0); yield from wait(0.5)
+    kill_all_near(G["pawn"].get_actor_location(), 4000); yield from wait(0.4)
+    G["pawn"].set_actor_hidden_in_game(True)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-22, yaw=0.0)); yield from wait(0.3)
+    try:
+        for k, path in enumerate(RJ.get("screen", [])):
+            sys_ = unreal.load_asset(path)
+            if not sys_: res["shots"].append({"n": k, "path": path, "missing": True}); continue
+            L = G["pawn"].get_actor_location()
+            comp = unreal.NiagaraFunctionLibrary.spawn_system_at_location(G["w"], sys_, V(L.x + 350, L.y, L.z - 88), unreal.Rotator(0, 0, 0), V(1, 1, 1), True, True)
+            yield from wait(0.5); shot(f"rogue12fx_{k}_a"); yield from rwait(0.9); yield from wait(0.9); shot(f"rogue12fx_{k}_b"); yield from rwait(0.9)
+            if comp: comp.deactivate(); comp.destroy_component(comp)
+            res["shots"].append({"n": k, "path": path}); yield from wait(0.6)
+    finally:
+        G["pawn"].set_actor_hidden_in_game(False)
+    step_result("rogue12fx", True, **res)
+
+
+def step_rogue12(only=None):
+    """the list of 2026-11-12's seventh phase (925, RD/RDRogue12.cpp, SourceArt/balance/rogue12.json): the Rogue's sixteen arts.
+    Their manuals: in the start set (tier 1, place 1) her tome draws over 40 seeds give the Manual of Caltrops and no other, the
+    Warrior's none; read, Caltrops is hers (rank 1, "@Caltrops" on the quick bar, the manual used up), and the place then gives
+    its Mage's tome again; a token cannot raise an art. Then each art made in the start room on harmless monsters (or on her) and
+    measured: what it reached, the dexterity energy it took (its cost; the smoke none), its cooldown (a second use refused), and
+    each one's own effect: the caltrops' slow and bleed, the smoke's monsters losing her, the hamstring's cut and slow (gone after
+    its time), the mark's 30 % more from her (a blow of hers against an unmarked one's), the hook's pull to a wall, the acid's
+    exposure and burn, the ricochet's monsters struck, the double drawing a monster and bursting, the net's root, the knives on all
+    round her, the flashbang's blind and stun, the shadowstep behind its monster with its backstab, the coin drawing a monster, the
+    vanishing act's stealth through three blows (the fourth ends it), the lotus's three strikes on each, the thousand cuts on every
+    one in sight (time back at 1 after). A picture of each. Their growth: the hamstring's cut at the game's tier 1 and 10 grows as her
+    blade does, its slow stays"""
+    g = G["gen"]; res = {"arts": {}}
+    RJ = json.load(open(os.path.join(SA, "balance", "rogue12.json"), encoding="utf-8"))
+    ARTS = {a["name"]: a for a in RJ["arts"]}
+    want = [a["name"] for a in RJ["arts"] if not only or a["name"] in only]
+    def setup(hero="Rogue"):
+        c = yield from restart(hero); quiet(True)
+        ctr = g.get_start_room_center(); put(V(ctr.x, ctr.y, ctr.z), 0.0); yield from wait(0.5)
+        kill_all_near(G["pawn"].get_actor_location(), 4000); yield from wait(0.4)
+        return c
+    def here(): return G["pawn"].get_actor_location()
+    def props(): return [str(l).split("|") for l in g.get_art_prop_lines()]
+    def use(c, name):
+        # (the last trial's props gone first: a pool or caltrops left there touched the next one's monsters)
+        g.clear_art_props()
+        c.set_dex_energy(c.get_max_dex_energy()); e0 = c.get_dex_energy(); u0 = c.art_uses
+        ok = c.use_secondary(name)
+        return {"ok": bool(ok and c.art_uses > u0), "last": str(c.last_secondary), "says": str(c.message), "dex": round(e0 - c.get_dex_energy(), 1),
+                "dex_want": ARTS[name]["dex"]}
+    def again(c, name):
+        c.set_dex_energy(c.get_max_dex_energy()); u0 = c.art_uses; c.use_secondary(name); return c.art_uses > u0
+    def look_shot(name, at=None, wait_s=0.0):
+        # (her body hidden for the picture, the camera turned down toward where the art works (at: a point, else ahead))
+        p_ = G["pawn"]; L = p_.get_actor_location()
+        if at is not None:
+            yaw_ = math.degrees(math.atan2(at.y - L.y, at.x - L.x)); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-24, yaw=yaw_))
+        p_.set_actor_hidden_in_game(True); yield from wait(0.05 + wait_s); shot(name); yield from rwait(0.9); p_.set_actor_hidden_in_game(False)
+    def free_way(maxcm=1800, mincm=600):
+        """a yaw from her along which a wall stands between mincm and maxcm, and the distance"""
+        L = here()
+        for k in range(24):
+            yaw = k * 15.0; f = V(math.cos(math.radians(yaw)), math.sin(math.radians(yaw)), 0)
+            # (her whole capsule swept along it (a line at her chest passed over the throne's steps, which stopped her 2.2 m short),
+            # and a line at her eye to the same wall: the hook's)
+            r = unreal.SystemLibrary.capsule_trace_single(G["w"], L, V(L.x + f.x * maxcm, L.y + f.y * maxcm, L.z), 36.0, 85.0,
+                                                          unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+            r2 = unreal.SystemLibrary.line_trace_single(G["w"], V(L.x, L.y, L.z + 50), V(L.x + f.x * maxcm, L.y + f.y * maxcm, L.z + 50),
+                                                        unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+            if r is None or r2 is None: continue
+            t1, t2 = r.to_tuple(), r2.to_tuple()
+            if t1[0] and t2[0] and mincm < t2[3] < maxcm and t1[3] > t2[3] - 120: return yaw, t2[3]
+        return None, None
+    def face(yaw):
+        G["pawn"].set_actor_rotation(unreal.Rotator(roll=0, pitch=0, yaw=yaw), False)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=yaw))
+    c = yield from setup("Rogue")
+    # ---- the manuals
+    S0 = I2(0, 0); seed0 = g.get_editor_property("session_seed"); start_room = set(g.get_start_room_containers())
+    def manuals():
+        got = {}
+        for sd in range(1, 41):
+            g.set_session_seed(seed0 + sd * 7919)
+            for i in range(g.get_section(S0).get_num_containers()):
+                if i in start_room: continue
+                for n in g.loot_list_of(S0, i):
+                    n = str(n)
+                    if n.startswith("Manual of ") or n.startswith("Tome of "): got[n] = got.get(n, 0) + 1
+        g.set_session_seed(seed0)
+        return got
+    mres = {"rogue": manuals()}
+    c.add_item("Manual of Caltrops", 1); mres["read"] = c.use_item("Manual of Caltrops")
+    mres["rank"] = c.get_secondary_rank("Caltrops"); mres["on_bar"] = "@Caltrops" in [str(x) for x in c.get_quick_slots()]
+    mres["left"] = c.get_item_count("Manual of Caltrops"); mres["says"] = str(c.message)
+    mres["rogue_after"] = manuals()
+    tok = str(g.get_editor_property("angel_token_item")); c.add_item(tok, 1); mres["token_began"] = c.use_item(tok); c.cancel_rank_up(); c.set_inventory_open(False)
+    c = yield from setup("Warrior"); mres["warrior"] = manuals()
+    res["manuals"] = mres
+    manuals_ok = (mres["rogue"].get("Manual of Caltrops", 0) > 0 and not [k for k in mres["rogue"] if k.startswith("Manual of ") and k != "Manual of Caltrops"]
+                  and mres["read"] and mres["rank"] == 1 and mres["on_bar"] and mres["left"] == 0 and not any(k.startswith("Manual of ") for k in mres["rogue_after"])
+                  and mres["rogue_after"].get("Tome of Frost Shard", 0) > 0 and not any(k.startswith("Manual of ") for k in mres["warrior"]) and not mres["token_began"])
+    # ---- every art
+    c = yield from setup("Rogue")
+    for a in RJ["arts"]: c.set_secondary_rank(a["name"], 1, "None")
+    A = res["arts"]
+    def clean():
+        # (the trial's monsters taken out, not killed (a kill drops its harvest and things), and every pile there taken away: the
+        # pictures were crowded with them)
+        for m_ in list(g.get_monsters()):
+            try:
+                if m_ and unreal.SystemLibrary.is_valid(m_) and not m_.is_ally() and dist2(m_.get_actor_location(), here()) < 3500: m_.destroy_actor()
+            except Exception: pass
+        for p_ in list(g.get_editor_property("loot_piles")):
+            try:
+                if p_ and unreal.SystemLibrary.is_valid(p_): p_.destroy_actor()
+            except Exception: pass
+    def until(t0, s):
+        # (a reading at its time after the use (the pictures hold the real clock a while))
+        while now() - t0 < s: yield
+    def done(name, r, ok):
+        r["again_refused"] = not again(c, name)
+        g.clear_art_props()          # (gone before the next trial's monsters are put there)
+        clean()
+        r["ok"] = bool(ok and r["ok"] and abs(r["dex"] - r["dex_want"]) < 0.6 and r["again_refused"])
+        A[name] = r
+    if "Caltrops" in want:
+        m = spawn_dummy(ahead(150)); yield from wait(0.5); h0 = hp(m)
+        r = use(c, "Caltrops"); yield from wait(0.5); (yield from look_shot("rogue12_caltrops", ahead(150))); yield from wait(1.5)
+        pr = [p for p in props() if p[1] == "Caltrops"]
+        r.update({"slow": round(m.get_slow_share(), 2), "burning": m.is_burning(), "lost": round(h0 - hp(m), 1), "prop": pr[:1]})
+        done("Caltrops", r, abs(r["slow"] - 0.4) < 0.01 and r["lost"] > 0 and pr and int(pr[0][5]) >= 1)
+        drop([m]); yield from wait(0.3)
+    if "SmokeBomb" in want:
+        m = spawn_dummy(ahead(250)); yield from wait(0.5)
+        L0 = here(); r = use(c, "SmokeBomb"); yield from wait(0.3)
+        put(V(L0.x - 450, L0.y, L0.z), 0.0); yield from wait(0.5); (yield from look_shot("rogue12_smoke", L0)); yield from wait(1.0); (yield from look_shot("rogue12_smoke2", L0))
+        put(L0, 0.0); yield from wait(0.2)
+        quiet(False); yield from wait(0.8)
+        foe = m.get_foe(); r.update({"lost_her": m.has_lost_her(), "foe_is_her": bool(foe and foe == G["pawn"])}); quiet(True)
+        r["props"] = [p_ for p_ in props() if p_[1] == "SmokeBomb"]
+        done("SmokeBomb", r, r["lost_her"] and not r["foe_is_her"] and r["dex"] == 0)
+        drop([m]); yield from wait(0.3)
+    if "Hamstring" in want:
+        m = spawn_dummy(ahead(140)); yield from wait(0.5); h0 = hp(m)
+        r = use(c, "Hamstring"); t0 = now(); yield from wait(0.2); r.update({"lost": round(h0 - hp(m), 1), "slow": round(m.get_slow_share(), 2)})
+        (yield from look_shot("rogue12_hamstring", m.get_actor_location()))
+        yield from until(t0, 4.6); r["slow_4_6s"] = round(m.get_slow_share(), 2); yield from until(t0, 5.6); r["slow_5_6s"] = round(m.get_slow_share(), 2)
+        done("Hamstring", r, r["lost"] > 0 and abs(r["slow"] - 0.6) < 0.01 and r["slow_4_6s"] > 0.5 and r["slow_5_6s"] == 0)
+        drop([m]); yield from wait(0.3)
+    if "MarkedForDeath" in want:
+        m = spawn_dummy(ahead(600)); m2 = spawn_dummy(ahead(600, 300)); yield from wait(0.5)
+        r = use(c, "MarkedForDeath"); yield from wait(0.4); (yield from look_shot("rogue12_marked", m.get_actor_location()))
+        h0, h2 = hp(m), hp(m2); m.apply_damage(100.0, G["pawn"]); m2.apply_damage(100.0, G["pawn"]); yield from wait(0.1)
+        r.update({"share": round(m.get_mark_share(), 2), "marked_lost": round(h0 - hp(m), 1), "unmarked_lost": round(h2 - hp(m2), 1),
+                  "crosshair": len([p for p in props() if p[1] == "MarkedForDeath"])})
+        done("MarkedForDeath", r, abs(r["marked_lost"] - 1.3 * r["unmarked_lost"]) < 1.0 and r["crosshair"] == 1)
+        drop([m, m2]); yield from wait(0.3)
+    if "GrapplingHook" in want:
+        yaw, d = free_way(); r = {"wall_cm": d}
+        if yaw is None: r.update({"ok": False, "dex": 0, "dex_want": ARTS["GrapplingHook"]["dex"]}); A["GrapplingHook"] = r
+        else:
+            face(yaw); yield from wait(0.3); L0 = here()
+            r.update(use(c, "GrapplingHook")); yield from wait(0.15); shot("rogue12_hook"); r["rope"] = len([p for p in props() if p[1] == "GrapplingHook"])
+            yield from wait(1.2); r["moved_cm"] = round(dist2(here(), L0)); r["left_cm"] = round(d - r["moved_cm"])
+            done("GrapplingHook", r, r["rope"] >= 1 and r["moved_cm"] > d - 200 and r["left_cm"] > 0)
+        ctr = g.get_start_room_center(); put(V(ctr.x, ctr.y, ctr.z), 0.0); yield from wait(0.4)
+    if "AcidFlask" in want:
+        m = spawn_dummy(ahead(500)); yield from wait(0.5); h0 = hp(m)
+        r = use(c, "AcidFlask"); yield from wait(1.0); (yield from look_shot("rogue12_acid", m.get_actor_location())); yield from wait(1.0)
+        pool = [p for p in props() if p[0] == "Acid"]
+        r.update({"exposed": round(m.get_exposed_share(), 2), "burning": m.is_burning(), "lost": round(h0 - hp(m), 1), "pool": pool[:1]})
+        done("AcidFlask", r, abs(r["exposed"] - 0.25) < 0.01 and r["lost"] > 0 and pool)
+        drop([m]); yield from wait(0.3)
+    if "RicochetBolt" in want:
+        ms = [spawn_dummy(ahead(600)), spawn_dummy(ahead(800, 300)), spawn_dummy(ahead(800, -300))]; yield from wait(0.5); h0 = [hp(m) for m in ms]
+        r = use(c, "RicochetBolt"); yield from wait(0.15); shot("rogue12_ricochet"); yield from wait(1.2)
+        r["lost"] = [round(a - hp(m), 1) for a, m in zip(h0, ms)]
+        done("RicochetBolt", r, all(x > 0 for x in r["lost"]))
+        drop(ms); yield from wait(0.3)
+    if "ShadowDouble" in want:
+        L0 = here(); m = spawn_dummy(ahead(900)); yield from wait(0.5)
+        r = use(c, "ShadowDouble"); yield from wait(0.2)
+        put(V(L0.x - 450, L0.y + 250, L0.z), 0.0); quiet(False); yield from wait(1.5); (yield from look_shot("rogue12_double", L0))
+        foe = m.get_foe(); r["foe"] = str(foe.get_class().get_name()) if foe else None; r["to_double_cm"] = round(dist2(m.get_actor_location(), L0))
+        h0 = hp(m); yield from wait(5.0); r["burst_lost"] = round(h0 - hp(m), 1); r["props_after"] = len([p for p in props() if p[1] == "ShadowDouble"]); quiet(True)
+        done("ShadowDouble", r, r["foe"] == "RDArtProp" and r["props_after"] == 0)
+        drop([m]); ctr = g.get_start_room_center(); put(V(ctr.x, ctr.y, ctr.z), 0.0); yield from wait(0.4)
+    if "NetShot" in want:
+        m = spawn_dummy(ahead(800)); yield from wait(0.5)
+        r = use(c, "NetShot"); t0 = now(); yield from wait(0.6); r["slow"] = round(m.get_slow_share(), 2); land = now() - t0
+        (yield from look_shot("rogue12_net", m.get_actor_location()))
+        yield from until(t0, 3.4); r["slow_3_4s"] = round(m.get_slow_share(), 2); yield from until(t0, 5.0); r["slow_5_0s"] = round(m.get_slow_share(), 2)
+        done("NetShot", r, r["slow"] == 1.0 and r["slow_3_4s"] == 1.0 and r["slow_5_0s"] == 0)
+        drop([m]); yield from wait(0.3)
+    if "FanOfKnives" in want:
+        ms = [spawn_dummy(ahead(300)), spawn_dummy(ahead(-300)), spawn_dummy(ahead(0, 300)), spawn_dummy(ahead(0, -300)), spawn_dummy(ahead(900))]; yield from wait(0.5); h0 = [hp(m) for m in ms]
+        r = use(c, "FanOfKnives"); yield from wait(0.12); shot("rogue12_fan"); yield from wait(0.4)
+        r["lost"] = [round(a - hp(m), 1) for a, m in zip(h0, ms)]
+        done("FanOfKnives", r, all(x > 0 for x in r["lost"][:4]) and r["lost"][4] == 0)
+        drop(ms); yield from wait(0.3)
+    if "Flashbang" in want:
+        ms = [spawn_dummy(ahead(300)), spawn_dummy(ahead(0, 450)), spawn_dummy(ahead(1000))]; yield from wait(0.5)
+        r = use(c, "Flashbang"); t0 = now(); yield from wait(0.15); r.update({"blind": [round(m.get_blind_share(), 2) for m in ms], "stunned": [m.is_stunned() for m in ms]})
+        (yield from look_shot("rogue12_flash", ahead(200)))
+        yield from until(t0, 3.5); r["stunned_3_5s"] = [m.is_stunned() for m in ms]
+        done("Flashbang", r, r["blind"][:2] == [1.0, 1.0] and r["stunned"][:2] == [True, True] and not r["stunned"][2] and not any(r["stunned_3_5s"]))
+        drop(ms); yield from wait(0.3)
+    if "Shadowstep" in want:
+        m = spawn_dummy(ahead(800)); yield from wait(0.5); h0 = hp(m); L0 = here()
+        r = use(c, "Shadowstep"); yield from wait(0.2); (yield from look_shot("rogue12_shadowstep", m.get_actor_location()))
+        r.update({"lost": round(h0 - hp(m), 1), "to_it_cm": round(dist2(here(), m.get_actor_location())), "moved_cm": round(dist2(here(), L0))})
+        done("Shadowstep", r, r["lost"] > 0 and r["to_it_cm"] < 250 and r["moved_cm"] > 500)
+        drop([m]); ctr = g.get_start_room_center(); put(V(ctr.x, ctr.y, ctr.z), 0.0); yield from wait(0.4)
+    if "GildedLure" in want:
+        m = spawn_dummy(ahead(400, 900)); yield from wait(0.5); p0 = m.get_actor_location()
+        r = use(c, "GildedLure"); yield from wait(0.8); (yield from look_shot("rogue12_lure", ahead(800)))
+        quiet(False); yield from wait(1.5)
+        coin = [p for p in props() if p[0] == "Coin"]; foe = m.get_foe()
+        r.update({"coin": coin[:1], "foe": str(foe.get_class().get_name()) if foe else None, "moved_cm": round(dist2(m.get_actor_location(), p0))}); quiet(True)
+        done("GildedLure", r, coin and r["foe"] == "RDArtProp" and r["moved_cm"] > 50)
+        drop([m]); yield from wait(0.3)
+    if "VanishingAct" in want:
+        m = spawn_dummy(ahead(130)); yield from wait(0.5)
+        G["pawn"].set_actor_hidden_in_game(False); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=G["pawn"].get_actor_rotation().yaw))
+        r = use(c, "VanishingAct"); yield from wait(0.5); shot("rogue12_vanish")
+        r.update({"stealthed": c.is_stealthed(), "look": c.is_vanish_look_on(), "spared": c.vanish_blows_left}); kept = []
+        for k in range(4):
+            c.start_attack(); yield from wait(1.1); kept.append(c.is_stealthed())
+        r["stealthed_after_blows"] = kept; r["look_after"] = c.is_vanish_look_on()
+        done("VanishingAct", r, r["stealthed"] and r["look"] and r["spared"] == 3 and kept == [True, True, True, False])
+        drop([m]); yield from wait(0.3)
+    if "DeathLotus" in want:
+        ms = [spawn_dummy(ahead(200)), spawn_dummy(ahead(-180, 100)), spawn_dummy(ahead(0, -220))]; yield from wait(0.5); h0 = [hp(m) for m in ms]; k0 = c.art_lotus_hits
+        r = use(c, "DeathLotus"); yield from wait(0.35); shot("rogue12_lotus"); yield from wait(0.9)
+        r.update({"lost": [round(a - hp(m), 1) for a, m in zip(h0, ms)], "strikes": c.art_lotus_hits - k0})
+        done("DeathLotus", r, r["strikes"] == 9 and all(x > 0 for x in r["lost"]))
+        drop(ms); yield from wait(0.3)
+    if "ThousandCuts" in want:
+        ms = [spawn_dummy(ahead(700)), spawn_dummy(ahead(1100, 400)), spawn_dummy(ahead(900, -500))]; yield from wait(0.5); h0 = [hp(m) for m in ms]; k0 = c.art_cuts_hits
+        r = use(c, "ThousandCuts"); yield from rwait(0.15); shot("rogue12_cuts_marks"); r["dilation"] = round(unreal.GameplayStatics.get_global_time_dilation(G["w"]), 2)
+        yield from rwait(0.7); yield from wait(0.25); shot("rogue12_cuts")
+        yield from wait(1.2)
+        r.update({"lost": [round(a - hp(m), 1) for a, m in zip(h0, ms)], "cuts": c.art_cuts_hits - k0, "dilation_after": round(unreal.GameplayStatics.get_global_time_dilation(G["w"]), 2)})
+        done("ThousandCuts", r, r["cuts"] == 3 and all(x > 0 for x in r["lost"]) and r["dilation"] < 0.5 and r["dilation_after"] == 1.0)
+        drop(ms); ctr = g.get_start_room_center(); put(V(ctr.x, ctr.y, ctr.z), 0.0); yield from wait(0.4)
+    # ---- growth: the hamstring's cut at the game's tier 1 and 10 (rd.Tier), against her blade's own
+    gr = {}
+    if not only or "growth" in only:
+        def cut():
+            m = spawn_dummy(ahead(140)); yield from wait(0.5); h0 = hp(m)
+            c.set_dex_energy(c.get_max_dex_energy()); c.use_secondary("Hamstring"); yield from wait(0.3)
+            out = (round(h0 - hp(m), 1), round(m.get_slow_share(), 2)); drop([m]); yield from wait(0.3); return out
+        wi = next((i for i, w in enumerate(g.get_editor_property("weapons")) if not w.spell), 0)
+        d1 = c.get_damage_of(wi); gr["t1"] = yield from cut()
+        unreal.SystemLibrary.execute_console_command(G["w"], "rd.Tier 10"); yield from wait(0.6); c = cb()
+        c.set_secondary_rank("Hamstring", 1, "None"); c.reset_cooldowns() if hasattr(c, "reset_cooldowns") else None
+        yield from wait(10.5)
+        d10 = c.get_damage_of(wi); gr["t10"] = yield from cut()
+        unreal.SystemLibrary.execute_console_command(G["w"], "rd.Tier 0"); yield from wait(0.6)
+        gr.update({"blade": [round(d1, 1), round(d10, 1)], "cut_ratio": round(gr["t10"][0] / max(gr["t1"][0], 0.1), 3), "blade_ratio": round(d10 / max(d1, 0.1), 3)})
+        gr["ok"] = gr["t1"][0] > 0 and abs(gr["cut_ratio"] - gr["blade_ratio"]) < 0.05 * gr["blade_ratio"] and gr["t1"][1] == gr["t10"][1] and gr["blade_ratio"] > 1.5
+    res["growth"] = gr
+    quiet(False)
+    arts_ok = all(A.get(n, {}).get("ok") for n in want)
+    ok = (manuals_ok or bool(only)) and arts_ok and (gr.get("ok", True))
+    step_result("rogue12", ok, manuals_ok=manuals_ok, arts_ok=arts_ok, failed=[n for n in want if not A.get(n, {}).get("ok")], **res)
+
+
+STEPS = {"rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
          "spells11_spells": lambda: step_spells11(("spells",)), "spells11_curses": lambda: step_spells11(("curses",)), "spells11_slashes": lambda: step_spells11(("slashes",)), "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
          "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "menulook": step_menulook, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,

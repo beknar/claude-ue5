@@ -752,6 +752,46 @@ public:
 	float ManaBladeBonus(bool bSpend);
 	void TickSecondary(float Dt);
 
+	// ---- the list of 2026-11-12's seventh phase: the Rogue's arts (RD/RDRogue12.cpp; secondary abilities of hers with a Slot)
+	/** an art made (UseSecondary sends hers here): refused with the reason said (not ready, too little dexterity energy, no
+	 *  enemy, no room) */
+	bool UseRogueArt(const FRDSecondaryDef& D);
+	void TickRogueArts(float Dt);
+	/** what an art leaves in the world (caltrops, a cloud, a pool, her double, a crosshair, the rope, a flash), set up by its kind */
+	class ARDArtProp* SpawnArtProp(const FRDSecondaryDef& D, uint8 Kind, const FVector& At);          // (Kind: an ERDArtProp)
+	/** her blade's blow and her crossbow's, as her growth makes them (the arts' damage) */
+	float ArtBlade() const;
+	float ArtBolt() const;
+	/** an art's blow on a monster (counted as hers: kills, damage) */
+	void ArtHit(ARDMonster* Mo, float Dmg);
+	/** an art that strikes out of stealth: ends it as an attack does, unless the vanishing act still spares blows */
+	void ArtStrikeFromHiding();
+	/** her ambush bonus on an art struck out of hiding */
+	float AmbushArtMul() const;
+	/** her clip for an art: "dagger" her blade's first strike, "crossbow" her shot */
+	void PlayArtClip(FName Which);
+	/** the arts made, their damage, the death lotus's and the thousand cuts' strikes (tests) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Rogue12") int32 ArtUses = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Rogue12") float ArtDamage = 0.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Rogue12") int32 ArtLotusHits = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Rogue12") int32 ArtCutsHits = 0;
+	/** the vanishing act's blows still spared (0: the next blow ends her stealth as before) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Rogue12") int32 VanishBlowsLeft = 0;
+	/** the thousand cuts still to come (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Rogue12") int32 GetArtCutsLeft() const { return ArtCutsLeft.Num(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Rogue12") bool IsVanishLookOn() const { return bVanishLook; }
+	friend class ARDArtProp;
+private:
+	int32 ArtLotusLeft = 0;
+	float ArtLotusNext = 0.f, ArtLotusDmg = 0.f;
+	FName ArtLotusArt, ArtCutsArt;
+	TArray<TWeakObjectPtr<ARDMonster>> ArtCutsLeft;
+	float ArtCutsDmg = 0.f, ArtCutsNext = -1.f, ArtCutsDilationWas = -1.f;
+	double ArtCutsRealStart = 0.0;
+	bool bVanishLook = false, bArtHooking = false;
+	FVector ArtHookTo = FVector::ZeroVector;
+	float ArtHookUntil = -100.f;
+
 private:
 	TMap<FName, int32> SecondaryRanks;
 	TMap<FName, FName> BoostSpells;

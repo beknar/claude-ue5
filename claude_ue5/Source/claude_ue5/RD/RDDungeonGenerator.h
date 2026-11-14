@@ -449,6 +449,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Secondary") FName HallowedStoneItem;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Secondary") TArray<FString> HallowedKinds;
 	const FRDSecondaryDef* FindSecondary(FName Name) const { return Secondaries.FindByPredicate([Name](const FRDSecondaryDef& D) { return D.Name == Name; }); }
+	/** the list of 2026-11-12's seventh phase: the Rogue's arts' props in the world (the monsters' decoys among them) and the shared
+	 *  meshes they lay (a disc for the acid's pool, a plane for a crosshair, a cylinder for the hook's rope, its material), 925 */
+	TArray<TWeakObjectPtr<class ARDArtProp>> ArtProps;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Rogue12") TObjectPtr<UStaticMesh> ArtDisc = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Rogue12") TObjectPtr<UStaticMesh> ArtPlane = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Rogue12") TObjectPtr<UStaticMesh> ArtCylinder = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Rogue12") TObjectPtr<UMaterialInterface> ArtRopeMaterial = nullptr;
+	/** the item that teaches a spell or an art (a tome, or the Rogue's manual: an item of kind Tome whose Spell it is) */
+	FName TomeItemOf(FName Spell) const;
+	/** tests: the arts' props in the world: "<kind>|<art>|<x>|<y>|<z>|<reached>|<decoy>|<seconds left>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Rogue12") TArray<FString> GetArtPropLines() const;
+	/** every art's prop taken away (a restart; tests between trials) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Rogue12") void ClearArtProps();
 	/** her rank's number of a secondary ability (1 when not learned: the Summoner's multipliers) */
 	float SecondaryMul(FName Ability, int32 Which = 0) const;
 	/** her summons' strength again (a rank of her minions' health, damage or frenzy raised) */

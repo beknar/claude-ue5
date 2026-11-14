@@ -3,7 +3,7 @@
 [README](../README.md) · [The tiers](tiers.md) · [Mistward Castle](levels/mistward_castle.md) · [The wilderness](levels/wilderness.md) · [TODO](../TODO.md)
 
 This is the sixth phase of the user's list of 2026-11-08b ([docs/improvements9.txt](improvements9.txt)): "earned in the wilderness by gathering materials and making Angel Tokens".
-- **Who has them:** the Warrior and the Mage have six each, as do the Warlock; the Summoner and the Martial Artist have five each. The Rogue has none, because the list names none for her.
+- **Who has them:** the Warrior and the Mage have six each, as do the Warlock; the Summoner and the Martial Artist have five each. The Rogue has none of these: the list names none for her. Her sixteen arts (the list of 2026-11-12) are learned from manuals, not tokens ([The Rogue's arts](#the-rogues-arts-the-list-of-2026-11-12)).
 - **Ranks:** each ability has six ranks. An Angel Token raises one ability one rank, and the first rank learns it.
 - **Data and code:** the data is `claude_ue5/SourceArt/balance/secondary.json`, which stage `911` writes onto every map of the game. The game's side is `RD/RDSecondary.cpp`.
 
@@ -99,6 +99,39 @@ How each one works in the game:
   - Frenzy divides their wait between blows.
   - Soul harvest works for a death within 25 m of her.
 
+## The Rogue's arts (the list of 2026-11-12)
+
+The seventh phase of the user's list of 2026-11-12 ([docs/improvements12.txt](improvements12.txt)): sixteen abilities for the Rogue, each at a place the list sets among the dungeons' thirty tiers. The data is `claude_ue5/SourceArt/balance/rogue12.json`, which stage `925` writes onto every map she plays; the game's side is `RD/RDRogue12.cpp`.
+- **What an art is:** a secondary ability of hers with a place (`FRDSecondaryDef::Slot`), at one rank. Tokens cannot raise one ("learned from its manual").
+- **Earning:** its manual ("Manual of <art>", an item of kind Tome) is found in its place's containers as the Mage finds a tome: for her, a tome drawn at an art's place is that art's manual until she knows it, then the place's spell tome as before (the Warlock's curses share places the same way). Read from the inventory, the art is hers and goes on the quick bar's first free slot. The manuals are never drawn by themselves (`Weight` 0). What she has learned is carried and saved with her other abilities.
+- **Use:** from the quick bar (`@<Name>`: a number key, or made ready on the D-pad and then the attack button), with a cooldown, paid in dexterity energy (her stealth's pool: 100, back 1.5 a second; the smoke bomb costs none, as the list says). Refused with the reason said: not ready, too little energy, no enemy, no room, in the middle of a move.
+- **Growth:** the arts that do damage take it from her own weapons as her growth makes them (her blade's blow, her crossbow's), so they grow as her daggers and crossbow do; the control effects (slow, root, stun, blind, the mark, the exposure) keep their numbers, as her stealth does. Measured: the hamstring's cut was 13.0 at the game's tier 1 and 30.2 at tier 10 (x 2.323), her blade 13.0 and 30.2 (x 2.326); its slow 60 % at both.
+- **From hiding:** an art that strikes out of stealth ends it as an attack does (and takes her ambush bonus), unless the Vanishing Act still spares blows. Shadowstep always strikes with the ambush bonus.
+- **The monsters' side:** the smoke makes a monster lose her (it takes no foe of hers for its time); her double and the coin are decoys (a monster within one's round goes for it); the mark (30 % more from her) and the acid's exposure (25 % more from everyone) are on the monster.
+
+| Place | Art | Dexterity | Cooldown (s) | Damage | What it does | How it looks |
+|---|---|---|---|---|---|---|
+| 1 (Mistward 1) | Caltrops | 15 | 14 | a bleed of 15 % of her blade's blow a second | Scatters spikes over 3 m: monsters crossing them are slowed 40% and bleed | iron spikes of our own (`blender_numpy/caltrop.py`) scattered on the floor, no glow |
+| 3 (Mistward 3) | Smoke Bomb | 0 | 18 | none (a control) | A 4 m cloud: monsters inside lose her for 4 s, with no dexterity energy spent | a ring of grey smoke bursting out (ShockWaves' 03), then a cloud of our own: soft grey puffs over its round, rising |
+| 5 (Mistward 5) | Hamstring | 10 | 10 | her blade's blow | A dagger cut that slows its target 60% for 5 s | a crimson slash on her cut (StylizedSlashes' blood) and blood at the monster |
+| 7 (Vel Morrath 2) | Marked for Death | 15 | 20 | none (a control) | Her target takes +30% from her for 10 s | a red crosshair (Medieval Weapons' bow sight, tinted) over its head, facing her and turning |
+| 9 (Vel Morrath 4) | Grappling Hook | 10 | 12 | none (a control) | Hooks a wall or monster up to 20 m away and pulls her to it | a hook (Gothic Props') on a rope from her hand while she is pulled |
+| 11 (the War Engine 1) | Acid Flask | 20 | 16 | a burn of 20 % of her best blow a second | A thrown vial: a 3 m puddle that eats armour (+25% damage taken) and burns | a vial (Crownfall's) thrown in an arc, an icy shard burst as it breaks, then a bubbling amber pool of our own |
+| 13 (the War Engine 3) | Ricochet Bolt | 20 | 12 | her crossbow's blow | A crossbow bolt that bounces between up to 4 monsters | her own bolt flying from monster to monster, a white-violet streak with it (Magic Projectiles' lightning), white sparks at each |
+| 14 (the War Engine 4) | Shadow Double | 25 | 25 | its burst: her blade's blow x 1.5 within 3 m | Leaves a copy of herself that draws monsters within 12 m for 6 s, then bursts | a copy of her body in her pose, in a smoky see-through material of our own; a burst of smoke as it goes |
+| 17 (the Sewers 2) | Net Shot | 15 | 14 | none (a control) | Roots one monster for 4 s | Harbour's fishing net flying to it and wrapped round it while it holds |
+| 19 (the Sewers 4) | Fan of Knives | 25 | 12 | her blade's blow x 0.8 | 8 knives thrown in a ring, hitting everything within 6 m round her | eight knives (Medieval Weapons' dagger) spinning outward |
+| 21 (Kethrys Spire 1) | Flashbang | 20 | 20 | none (a control) | Blinds and stuns monsters within 6 m for 3 s | a white flash of light and a white ring of our own spreading over the floor |
+| 23 (Kethrys Spire 3) | Shadowstep | 25 | 14 | her blade's blow with her ambush bonus (x 1.75) | Teleports behind her target and backstabs it with her ambush bonus | a dark plume where she leaves and where she comes (Desert Outpost's smoke), a crimson slash on the backstab |
+| 26 (Heaven 1) | Gilded Lure | 10 | 18 | none (a control) | A tossed coin: monsters within 15 m go after it for 5 s | a gold coin (Castle Collection's) tossed in an arc, spinning where it lands, a glint (the shooting star's sparkle) |
+| 27 (Heaven 2) | Vanishing Act | 40 | 40 | none (a control) | 12 s stealth that survives her first 3 blows | a shimmer of light bands drifting up through her body (an overlay of our own) |
+| 28 (Heaven 3) | Death Lotus | 30 | 16 | her blade's blow x 0.8 each strike | Spins, hitting everything within 3 m 3 times | her spin, a pale crescent at each strike (StylizedSlashes' wind) and silver afterimages of her |
+| 29 (Heaven 4) | Thousand Cuts | 50 | 60 | her blade's blow x 2 on each | Her last: marks every monster she can see within 20 m, then blinks between them, slashing each | time slowed a moment, a red crosshair on each, then a red slash on each as she reaches it |
+
+Numbers that are ours (the list gives none): the costs, the cooldowns, the damage shares, the hook's pull (24 m a second), the ricochet's hop (8 m), the double's draw (12 m) and burst, the coin's toss (8 m), the knives' round (6 m).
+
+![The Rogue's arts in play (868 rogue12)](images/rogue12_arts.jpg)
+
 ## The tests
 
 `868 secondary` runs on Mistward Castle (`test_sc4.json` after PR #35's review):
@@ -135,7 +168,22 @@ How each one works in the game:
 
 The castle's steps the abilities touch still pass (`test_r26a.json`: `inventory`, `tabs`, `slots`, `death`, `martial`, `summoner`, `growth`, `shields`, `scrolls`, `recipes`), and so does `quickbar` on `martial_arts` (`test_r26b.json`).
 
+`868 rogue12` runs on Mistward Castle (`test_r12f.json`), as the Rogue in the start room on harmless monsters:
+- **The manuals:** over 40 seeds her tome draws in the start set (tier 1, place 1) gave the Manual of Caltrops (228 times) and no other manual; read, Caltrops was hers at rank 1 on the quick bar and the manual was used up; then the place gave Frost Shard's tome again; the Warrior's draws gave no manual; an Angel Token offered her nothing to raise.
+- **Each art** took its cost in dexterity energy (the smoke none) and was refused a second time on its cooldown, and:
+  - Caltrops: the monster on them slowed 40 % and bleeding. Smoke Bomb: the monster in it had lost her (not her foe with the monsters let loose).
+  - Hamstring: its cut, slowed 60 %, still at 4.6 s, gone at 5.6 s. Marked for Death: a blow of 100 from her did 130 on it and 100 on another; its crosshair over it.
+  - Grappling Hook: pulled 14.4 m to 0.8 m from a wall 15.2 m off, its rope there. Acid Flask: the pool, the monster in it exposed 25 % and burning.
+  - Ricochet Bolt: three monsters struck, 33.8 each. Shadow Double: a monster set free went for the double (its foe), the double gone after its time.
+  - Net Shot: rooted at once and at 3.4 s, free at 5.0 s. Fan of Knives: the four round her struck, one 9 m off not.
+  - Flashbang: the two within 6 m blinded and stunned, the one 10 m off not; none stunned at 3.5 s.
+  - Shadowstep: behind its monster 8 m off (1.2 m from it), its backstab 22.8. Gilded Lure: a monster 9 m off went for the coin (its foe) and moved toward it.
+  - Vanishing Act: in stealth with its shimmer, three blows spared, the fourth ended it (the shimmer gone with it).
+  - Death Lotus: three monsters within 3 m struck three times each (9 strikes). Thousand Cuts: three monsters in sight cut, time at 0.3 while they were marked and back at 1 after.
+- **Growth:** the hamstring's cut at the game's tier 1 and 10 (`rd.Tier`) as her blade's, its slow the same.
+- `868 rogue12fx` pictures candidate effects on the castle's floor to choose the looks from (`rogue12.json`'s `screen`; what was chosen and why in its `screened`).
+
 ## Rebuild
 
 1. Build the C++ (`pipeline\build_cpp.ps1`).
-2. Run `911_secondary.py` (all seven maps). Run it again after anything that writes the levels' items or recipes anew (`857`, `875`, `910`).
+2. Run `911_secondary.py` (all seven maps). Then `925_rogue12.py` (its `caltrop` step needs `blender -b -P pipeline/blender_numpy/caltrop.py -- claude_ue5/SourceArt/rogue12` first): `911` writes the whole list of abilities anew, the Rogue's arts with it. Run it again after anything that writes the levels' items or recipes anew (`857`, `875`, `910`).

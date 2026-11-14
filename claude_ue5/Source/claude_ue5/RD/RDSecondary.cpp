@@ -100,6 +100,7 @@ bool URDCombatComponent::RankUpSecondary(FName Ability, FName Spell)
 	const FRDSecondaryDef* D = SecDef(Ability);
 	if (!D || !Generator || bDead) return false;
 	if (D->Hero != Generator->CurrentHero) { SetMessage(FString::Printf(TEXT("%s is not your hero's"), *D->Title)); return false; }
+	if (D->Slot > 0) { SetMessage(FString::Printf(TEXT("%s is learned from its manual"), *D->Title)); return false; }
 	const int32 R = GetSecondaryRank(Ability);
 	if (R >= RDSecMaxRank) { SetMessage(FString::Printf(TEXT("%s is at its last rank"), *D->Title)); return false; }
 	if (Generator->AngelTokenItem.IsNone() || GetItemCount(Generator->AngelTokenItem) <= 0) { SetMessage(TEXT("You have no Angel Token")); return false; }
@@ -148,7 +149,8 @@ bool URDCombatComponent::BeginRankUp(FName Item)
 {
 	const int32 Ix = Generator ? Generator->FindItem(Item) : -1;
 	if (Ix < 0 || Generator->Items[Ix].Kind != ERDItemKind::Token || GetItemCount(Item) <= 0 || bDead) return false;
-	if (GetSecondaryLines().Num() == 0) { SetMessage(FString::Printf(TEXT("The %s has no ability to raise for your hero"), *Item.ToString())); return false; }
+	if (!Generator->Secondaries.ContainsByPredicate([this](const FRDSecondaryDef& D) { return D.Hero == Generator->CurrentHero && D.Slot == 0; }))
+	{ SetMessage(FString::Printf(TEXT("The %s has no ability to raise for your hero"), *Item.ToString())); return false; }
 	RankWith = Item; RankSpellFor = NAME_None; RankCursor = 0;
 	ResetListView();
 	SetMessage(TEXT("Choose the ability the Angel Token raises"));
@@ -186,7 +188,7 @@ TArray<FString> URDCombatComponent::GetRankLines() const
 	}
 	for (const FRDSecondaryDef& D : Generator->Secondaries)
 	{
-		if (D.Hero != Generator->CurrentHero) continue;
+		if (D.Hero != Generator->CurrentHero || D.Slot > 0) continue;          // (the Rogue's arts: from their manuals, never a token)
 		const int32 R = GetSecondaryRank(D.Name);
 		Out.Add(FString::Printf(TEXT("rank|%s|%s|%d|%d|%s"), *D.Name.ToString(), *D.Title, R, RDSecMaxRank, R < RDSecMaxRank ? *RDSecText(D, R + 1) : TEXT("at its last rank")));
 	}
@@ -322,6 +324,7 @@ bool URDCombatComponent::UseSecondary(FName Ability)
 	if (Generator->IsSwimming()) { SetMessage(FString::Printf(TEXT("%s: not while swimming"), *D->Title)); return false; }
 	UWorld* W = GetWorld();
 	const float Now = W->GetTimeSeconds();
+	if (D->Slot > 0) return UseRogueArt(*D);          // (the list of 2026-11-12: the Rogue's arts, RDRogue12.cpp)
 	const float V = SecondaryValue(Ability, 0), V2 = SecondaryValue(Ability, 1), S = SecondaryValue(Ability, 2), Cd = SecondaryValue(Ability, 3);
 	if (D->Kind == ERDSecondaryKind::Passive) { SetMessage(FString::Printf(TEXT("%s always holds"), *D->Title)); return false; }
 	if (D->Kind == ERDSecondaryKind::Toggle)
@@ -594,6 +597,7 @@ void URDCombatComponent::TickSecondary(float Dt)
 	ACharacter* C = Cast<ACharacter>(GetOwner());
 	if (!W || !C || !Generator) return;
 	const float Now = W->GetTimeSeconds();
+	TickRogueArts(Dt);
 	// (pulled and pushed: swept tick by tick, walls stop them)
 	for (int32 I = ForcedMoves.Num() - 1; I >= 0; --I)
 	{
