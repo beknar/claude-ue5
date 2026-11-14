@@ -1,0 +1,148 @@
+{
+ "tag": "q12h",
+ "plan": [
+  "quests12=disaster+lostruin+stranded"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "quests12",
+   "ok": true,
+   "quests": {
+    "disaster": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "escort",
+       "hint": "Get the shepherd's family to shelter",
+       "point_m_from_site": 0.0,
+       "ambush_killed": 2
+      },
+      {
+       "stage": 2,
+       "do": "survive",
+       "hint": "Weather the storm in the shelter",
+       "point_m_from_site": 0.0,
+       "weather": 5
+      }
+     ],
+     "found": true,
+     "site": 134332474,
+     "at_km": [
+      -9.14,
+      -3.87
+     ],
+     "structure": "A watchtower",
+     "take_f": "quest",
+     "end_stage": 90,
+     "gold": 74,
+     "told": [
+      "Discovered: A watchtower. a lookout over the land, its ladder still sound",
+      "A shepherd:  \"A storm is coming down the valley! Help me get my family to shelter!\"  (quest: Weather the disaster)",
+      "Game speed: 3x",
+      "+3 gold",
+      "They reach the shelter.",
+      "Game speed: 4x",
+      "Quest done: Weather the disaster (70 gold)"
+     ]
+    },
+    "lostruin": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "collect",
+       "hint": "Find the burned map",
+       "point_m_from_site": 32.0,
+       "f": [
+        "quest_thing"
+       ]
+      },
+      {
+       "stage": 2,
+       "do": "goto",
+       "hint": "Find the ruin on the map",
+       "point_m_from_site": 0.0
+      },
+      {
+       "stage": 3,
+       "do": "kill",
+       "hint": "Defeat the ruin's guardians",
+       "point_m_from_site": 0.0,
+       "killed": 5
+      },
+      {
+       "stage": 4,
+       "do": "talk",
+       "hint": "Tell the scholar",
+       "point_m_from_site": 0.0,
+       "f": "quest"
+      }
+     ],
+     "found": true,
+     "site": 134361145,
+     "at_km": [
+      9.65,
+      -5.53
+     ],
+     "structure": "A titan's carcass",
+     "take_f": "quest",
+     "end_stage": 90,
+     "gold": 92,
+     "told": [
+      "Discovered: A titan's carcass. the ribs of something vast, a fallen giant's head turned to stone beside them",
+      "A scholar:  \"I have half a burned map of a ruin near here. Find it, and survive what's inside.\"  (quest: The lost ruin)",
+      "The half-burned map: it shows ruins and a road (1 of 1)",
+      "The ruin from the map.",
+      "+4 gold",
+      "The ruin's wardens are dead.",
+      "Quest done: The lost ruin (80 gold)"
+     ]
+    },
+    "stranded": {
+     "stages": [
+      {
+       "stage": 4,
+       "do": "collect",
+       "hint": "Forage food",
+       "point_m_from_site": 32.0,
+       "f": [
+        "quest_thing",
+        "quest_thing"
+       ]
+      },
+      {
+       "stage": 5,
+       "do": "goto",
+       "hint": "Make your way back to a town",
+       "point_m_from_site": 24346.5
+      }
+     ],
+     "found": true,
+     "site": 134311990,
+     "at_km": [
+      -20.27,
+      -13.48
+     ],
+     "structure": "A cave system",
+     "take_f": "quest",
+     "end_stage": 90,
+     "gold": 70,
+     "told": [
+      "Discovered: A cave system. a cave's mouth in the rock, its passages running back into the dark",
+      "A ferryman:  \"Cross with me to the far bank? ... The ferry! It's breaking up!\"  (quest: Stranded)",
+      "Fresh water: you drink.",
+      "Shelter for the night.",
+      "You forage food (1 of 2)",
+      "You forage food (2 of 2)",
+      "Quest done: Stranded (70 gold)"
+     ]
+    }
+   },
+   "table": 25,
+   "failed": []
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "error": null,
+ "windows_shown_again": 1
+}

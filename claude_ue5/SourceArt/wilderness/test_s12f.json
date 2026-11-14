@@ -1,0 +1,445 @@
+{
+ "tag": "s12f",
+ "plan": [
+  "sites12=den+fairyring+lakeisland+fortress+watchtower+mine+tomb+shrine+cabin+bridge+waystation"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "sites12",
+   "ok": true,
+   "kinds": {
+    "den": {
+     "found": true,
+     "id": 134344763,
+     "at_km": [
+      -0.74,
+      -1.65
+     ],
+     "name": "A beast's den",
+     "laid": {
+      "kind": "den",
+      "pieces": 18,
+      "boxes": 1,
+      "guards_standing": 2,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "table": {
+      "guards": 2,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "an old hunter",
+     "told": "Leaving Brokenspire"
+    },
+    "fairyring": {
+     "found": true,
+     "id": 134365246,
+     "at_km": [
+      11.41,
+      5.8
+     ],
+     "name": "A fairy ring",
+     "laid": {
+      "kind": "fairyring",
+      "pieces": 41,
+      "boxes": 1,
+      "guards_standing": 0,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "table": {
+      "guards": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a priestess",
+     "told": "Discovered: A fairy ring. a ring of toadstools in a clearing, the grass inside untrodden"
+    },
+    "lakeisland": {
+     "found": true,
+     "id": 134508619,
+     "at_km": [
+      98.44,
+      39.01
+     ],
+     "name": "A lake island",
+     "laid": {
+      "kind": "lakeisland",
+      "pieces": 11,
+      "boxes": 1,
+      "guards_standing": 1,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "table": {
+      "guards": 1,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a wailing spirit",
+     "told": "Discovered: A lake island. a rocky islet off the shore, a boat drawn up before it"
+    },
+    "fortress": {
+     "found": true,
+     "id": 134332476,
+     "at_km": [
+      -8.88,
+      1.38
+     ],
+     "name": "A ruined fortress",
+     "laid": {
+      "kind": "fortress",
+      "pieces": 23,
+      "boxes": 1,
+      "guards_standing": 3,
+      "guards_in_a_piece": 0,
+      "prisoners": 1,
+      "traps": 2
+     },
+     "table": {
+      "guards": 3,
+      "prisoners": 1,
+      "traps": 2
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "an outpost founder",
+     "free_f": "freed",
+     "freed": 1,
+     "gold_from_prisoner": 15,
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: A ruined fortress. broken walls on a rise, a tower still standing among them | You free the prisoner: \"Thank you! Take this, it's all I kept hidden from them.\" (15 gold) | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "watchtower": {
+     "found": true,
+     "id": 134348860,
+     "at_km": [
+      1.99,
+      0.37
+     ],
+     "name": "A watchtower",
+     "laid": {
+      "kind": "watchtower",
+      "pieces": 10,
+      "boxes": 1,
+      "guards_standing": 2,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 1
+     },
+     "table": {
+      "guards": 2,
+      "prisoners": 0,
+      "traps": 1
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a wounded soldier",
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: A watchtower. a lookout over the land, its ladder still sound | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "mine": {
+     "found": true,
+     "id": 134336568,
+     "at_km": [
+      -7.05,
+      -8.95
+     ],
+     "name": "An abandoned mine",
+     "laid": {
+      "kind": "mine",
+      "pieces": 14,
+      "boxes": 1,
+      "guards_standing": 2,
+      "guards_in_a_piece": 0,
+      "prisoners": 1,
+      "traps": 2
+     },
+     "table": {
+      "guards": 2,
+      "prisoners": 1,
+      "traps": 2
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a dying smuggler",
+     "free_f": "freed",
+     "freed": 1,
+     "gold_from_prisoner": 15,
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: An abandoned mine. a timbered shaft into the hill, carts left on their rails | You free the prisoner: \"Thank you! Take this, it's all I kept hidden from them.\" (15 gold) | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "tomb": {
+     "found": true,
+     "id": 134332473,
+     "at_km": [
+      -8.82,
+      -6.85
+     ],
+     "name": "A barrow tomb",
+     "laid": {
+      "kind": "tomb",
+      "pieces": 9,
+      "boxes": 1,
+      "guards_standing": 2,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 2
+     },
+     "table": {
+      "guards": 2,
+      "prisoners": 0,
+      "traps": 2
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a scholar",
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: A barrow tomb. a carved front set into a mound, the door sealed long ago | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "shrine": {
+     "found": true,
+     "id": 134340668,
+     "at_km": [
+      -3.59,
+      0.27
+     ],
+     "name": "A standing-stone shrine",
+     "laid": {
+      "kind": "shrine",
+      "pieces": 14,
+      "boxes": 1,
+      "guards_standing": 0,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "table": {
+      "guards": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a priestess",
+     "told": "Discovered: A standing-stone shrine. stones round a praying figure, offerings at her feet"
+    },
+    "cabin": {
+     "found": true,
+     "id": 134398026,
+     "at_km": [
+      31.89,
+      36.95
+     ],
+     "name": "A trapper's cabin",
+     "laid": {
+      "kind": "cabin",
+      "pieces": 7,
+      "boxes": 1,
+      "guards_standing": 1,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 2
+     },
+     "table": {
+      "guards": 1,
+      "prisoners": 0,
+      "traps": 2
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a bounty hunter",
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: A trapper's cabin. a cabin at the edge of the deep woods, pelts drying by its door | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "bridge": {
+     "found": true,
+     "id": 134471738,
+     "at_km": [
+      75.97,
+      -5.5
+     ],
+     "name": "A river crossing",
+     "laid": {
+      "kind": "bridge",
+      "pieces": 5,
+      "boxes": 1,
+      "guards_standing": 2,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 1
+     },
+     "table": {
+      "guards": 2,
+      "prisoners": 0,
+      "traps": 1
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a wounded soldier",
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: A river crossing. an old bridge over the river, a toll post at its end | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "waystation": {
+     "found": true,
+     "id": 134344766,
+     "at_km": [
+      -1.74,
+      5.62
+     ],
+     "name": "A roadside waystation",
+     "laid": {
+      "kind": "waystation",
+      "pieces": 5,
+      "boxes": 1,
+      "guards_standing": 0,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "table": {
+      "guards": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a farmer",
+     "told": "Discovered: A roadside waystation. an inn at the crossroads, its sign creaking in the wind"
+    }
+   },
+   "table": 34,
+   "counts": {
+    "cave": 72,
+    "canyon": 6,
+    "aerie": 87,
+    "pass": 107,
+    "waterfall": 1,
+    "sinkhole": 132,
+    "greattree": 82,
+    "swamp": 6,
+    "glacier": 44,
+    "caldera": 67,
+    "seacave": 6,
+    "spire": 110,
+    "den": 523,
+    "fairyring": 55,
+    "lakeisland": 3,
+    "fortress": 149,
+    "watchtower": 228,
+    "mine": 104,
+    "tomb": 178,
+    "shrine": 423,
+    "cabin": 137,
+    "bridge": 4,
+    "waystation": 180,
+    "logging": 100,
+    "palisade": 182,
+    "shipwreck": 4,
+    "witchhut": 61,
+    "village": 161,
+    "dam": 3,
+    "smugglers": 206,
+    "titan": 67,
+    "beastback": 41,
+    "floating": 63,
+    "rift": 48
+   },
+   "quests": {
+    "legendary": 196,
+    "delivery": 149,
+    "spirit": 135,
+    "outpost": 107,
+    "expedition": 118,
+    "blight": 221,
+    "holdpass": 113,
+    "capture": 138,
+    "investigation": 333,
+    "manhunt": 169,
+    "sacred": 280,
+    "survey": 125,
+    "cache": 176,
+    "bounty": 186,
+    "escort": 67,
+    "stranded": 24,
+    "disaster": 149,
+    "lostruin": 176,
+    "dispute": 77,
+    "infestation": 250,
+    "rescue": 102,
+    "ingredient": 124,
+    "tame": 76,
+    "clearing": 124,
+    "trailblaze": 25
+   },
+   "failed": []
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s12f_sites12_den.png",
+  "wd_s12f_sites12_fairyring.png",
+  "wd_s12f_sites12_lakeisland.png",
+  "wd_s12f_sites12_fortress.png",
+  "wd_s12f_sites12_watchtower.png",
+  "wd_s12f_sites12_mine.png",
+  "wd_s12f_sites12_tomb.png",
+  "wd_s12f_sites12_shrine.png",
+  "wd_s12f_sites12_cabin.png",
+  "wd_s12f_sites12_bridge.png",
+  "wd_s12f_sites12_waystation.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

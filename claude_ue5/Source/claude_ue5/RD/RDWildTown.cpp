@@ -222,6 +222,16 @@ void ARDDungeonGenerator::TickWildPlaces(const FVector2D& AtM)
 		}
 		Ps.Append(WildFarmNear);
 	}
+	// (the list of 2026-11-12: the structures, searched again only when her site cell changes: the 3 x 3 round her)
+	{
+		const FIntPoint Sc = Wild->SiteCellOf(AtM.X, AtM.Y);
+		if (Sc != WildSiteCell)
+		{
+			WildSiteCell = Sc; WildSiteNear.Reset();
+			for (int32 I = -1; I <= 1; ++I) for (int32 J = -1; J <= 1; ++J) Wild->SitesIn(Sc + FIntPoint(I, J), WildSiteNear);
+		}
+		Ps.Append(WildSiteNear);
+	}
 	for (const FRDWildPlace& P : Ps)
 	{
 		if (WildFound.Contains(P.Id)) continue;
@@ -241,6 +251,8 @@ void ARDDungeonGenerator::TickWildPlaces(const FVector2D& AtM)
 			WildRuinsTold.Add(P.Id);
 			PlayerCombat->ShowMessage(FString::Printf(TEXT("Discovered: %s. %s: %s"), *P.Name, *WildRuinKinds[RuinK].Title, *WildRuinKinds[RuinK].Text));
 		}
+		else if (PlayerCombat && P.Site >= 0 && WildSiteKinds.IsValidIndex(P.Site))
+			PlayerCombat->ShowMessage(FString::Printf(TEXT("Discovered: %s. %s"), *WildSiteKinds[P.Site].Title, *WildSiteKinds[P.Site].Text));
 		else if (const int32 LairK = WildLairCoverOf(P); PlayerCombat && LairK >= 0)
 			PlayerCombat->ShowMessage(FString::Printf(TEXT("Discovered: %s. %s: %s"), *P.Name, *WildLairCovers[LairK].Title, *WildLairCovers[LairK].Text));
 		else if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("Discovered: %s"), *P.Name));

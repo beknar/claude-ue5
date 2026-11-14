@@ -125,14 +125,14 @@ bool ARDDungeonGenerator::HasHorse() const
 	return GI && GI->bHorseOwned;
 }
 
-ARDHorse* ARDDungeonGenerator::SpawnHorseAt(const FVector& At, float Yaw, bool bHers)
+ARDHorse* ARDDungeonGenerator::SpawnHorseAt(const FVector& At, float Yaw, bool bHers, int32 Coat)
 {
 	if (!HorseDef.Mesh) return nullptr;
 	FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	ARDHorse* H = GetWorld()->SpawnActor<ARDHorse>(ARDHorse::StaticClass(), FTransform(FRotator(0.f, Yaw, 0.f), At), Sp);
 	if (!H) return nullptr;
 	H->bHers = bHers;
-	H->Init(HorseDef, !bHers);          // (the stable's grey, her bay)
+	H->Init(HorseDef, Coat < 0 ? !bHers : Coat != 0);          // (the stable's grey, her bay; a tamed one keeps its grey)
 	return H;
 }
 
@@ -158,24 +158,42 @@ bool ARDDungeonGenerator::CallHorse()
 	APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
 	if (!Her || !HasHorse() || bMounted) return false;
 	const FVector At = HorseSpotBeside(Her);
-	if (!Horse) Horse = SpawnHorseAt(At, Her->GetActorRotation().Yaw, true);
+	const URDGameInstance* GI = URDGameInstance::Of(this);
+	if (!Horse) Horse = SpawnHorseAt(At, Her->GetActorRotation().Yaw, true, GI && GI->bRideTamed && GI->HorsesTamed > 0 ? 1 : 0);
 	else { Horse->SetActorLocationAndRotation(At, FRotator(0.f, Her->GetActorRotation().Yaw, 0.f)); Horse->PlayFor(0.f); }
 	// (its box stops her only once she is clear of it: set down where she stands (no spot found beside her) it would hold her inside)
 	if (Horse) Horse->SetBlocking(false);
 	return Horse != nullptr;
 }
 
+bool ARDDungeonGenerator::SwapHorse()
+{
+	URDGameInstance* GI = URDGameInstance::Of(this);
+	if (!GI || !GI->bHorseOwned || GI->HorsesTamed <= 0 || GI->bTamedOnly) { SetTownNote(TEXT("You have one horse")); return false; }
+	if (bMounted) { SetTownNote(TEXT("Get off your horse first")); return false; }
+	GI->bRideTamed = !GI->bRideTamed;
+	if (Horse) { Horse->Destroy(); Horse = nullptr; }
+	if (!CallHorse()) { GI->bRideTamed = !GI->bRideTamed; CallHorse(); return false; }
+	SetTownNote(GI->bRideTamed ? TEXT("The stable boy brings out your tamed grey; the bay goes in to rest") : TEXT("The stable boy brings out your bay; the grey goes in to rest"));
+	UE_LOG(LogRDHorse, Log, TEXT("RDHORSE swapped: the %s out"), GI->bRideTamed ? TEXT("tamed grey") : TEXT("bay"));
+	return true;
+}
+
 bool ARDDungeonGenerator::BuyHorse()
 {
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	if (!GI || !PlayerCombat) return false;
-	if (GI->bHorseOwned) { SetTownNote(TEXT("You have a horse already: the stable calls it for you")); return CallHorse(); }
+	if (GI->bHorseOwned && !GI->bTamedOnly) { SetTownNote(TEXT("You have a horse already: the stable calls it for you")); return CallHorse(); }
+	if (GI->bTamedOnly && bMounted) { SetTownNote(TEXT("Get off your horse first")); return false; }
 	const int32 Cost = HorsePriceNow();
 	if (GetGold() < Cost) { SetTownNote(TEXT("You have too little gold")); return false; }
 	// (PR #37's review: the horse made before her gold is taken: no horse, no sale)
 	if (!HorseDef.Mesh) { SetTownNote(TEXT("The stable has no horse today")); return false; }
+	// (her tamed grey, if she has one, goes to the stable: the bay is the one she has out)
+	const bool bWasTamedOnly = GI->bTamedOnly;
+	if (bWasTamedOnly) { GI->bTamedOnly = false; GI->bRideTamed = false; if (Horse) { Horse->Destroy(); Horse = nullptr; } }
 	GI->bHorseOwned = true;
-	if (!CallHorse()) { GI->bHorseOwned = false; SetTownNote(TEXT("The stable has no horse today")); return false; }
+	if (!CallHorse()) { GI->bHorseOwned = bWasTamedOnly; GI->bTamedOnly = bWasTamedOnly; GI->bRideTamed = bWasTamedOnly; SetTownNote(TEXT("The stable has no horse today")); return false; }
 	AddGold(-Cost, TEXT("the stable"));
 	if (StableHorse) { StableHorse->Destroy(); StableHorse = nullptr; }
 	TownCount(TEXT("horse"));

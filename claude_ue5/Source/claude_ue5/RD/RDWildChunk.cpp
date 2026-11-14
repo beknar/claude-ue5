@@ -339,6 +339,12 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 		const FIntPoint Q0 = W.PoiCellOf(X0, Y0), Q1 = W.PoiCellOf(X0 + Cm, Y0 + Cm);
 		for (int32 Ci = Q0.X; Ci <= Q1.X; ++Ci) for (int32 Cj = Q0.Y; Cj <= Q1.Y; ++Cj) W.PoisIn(FIntPoint(Ci, Cj), Pois);
 		for (const FRDWildPlace& P : Pois) if (P.At.X >= X0 && P.At.X < X0 + Cm && P.At.Y >= Y0 && P.At.Y < Y0 + Cm) D.Places.Add(P);
+		// (the list of 2026-11-12: the structures whose point is in it)
+		TArray<FRDWildPlace> Sites;
+		// (and the cells round them: a water kind is moved to its shore, out of its own cell by up to 1.3 km)
+		const FIntPoint S0 = W.SiteCellOf(X0, Y0) - FIntPoint(1, 1), S1 = W.SiteCellOf(X0 + Cm, Y0 + Cm) + FIntPoint(1, 1);
+		for (int32 Ci = S0.X; Ci <= S1.X; ++Ci) for (int32 Cj = S0.Y; Cj <= S1.Y; ++Cj) W.SitesIn(FIntPoint(Ci, Cj), Sites);
+		for (const FRDWildPlace& P : Sites) if (P.At.X >= X0 && P.At.X < X0 + Cm && P.At.Y >= Y0 && P.At.Y < Y0 + Cm) D.Places.Add(P);
 	}
 	D.Ms = (FPlatformTime::Seconds() - T0) * 1000.0;
 }

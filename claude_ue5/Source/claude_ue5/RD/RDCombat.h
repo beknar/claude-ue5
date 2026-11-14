@@ -850,6 +850,10 @@ public:
 	/** the list of 2026-11-11: a trail slash's Fx on a component (her weapon, a bolt) for Seconds */
 	void StartSlashTrail(const FRDSlashDef& S, USceneComponent* On, float Seconds);
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 SlashTrails = 0;
+	/** the list of 2026-11-12: a trap stepped on: Share of her hit points (no blow: no dodge, shield or armour takes it, as a
+	 *  fall), and her speed slowed by SlowShare for SlowSecs */
+	void HurtByTrap(float Share, float SlowShare, float SlowSecs, const FString& Msg);
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild12") int32 TrapsHurt = 0;
 private:
 	/** a hit with a slash on a monster: its bonus (with Dmg, the hit's own damage, for the shares) and effect */
 	void SlashHit(const FRDSlashDef& S, ARDMonster* Mo, float Dmg, const FVector& At, bool bPrimary = true);

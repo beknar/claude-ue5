@@ -1270,6 +1270,7 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 {
 	const double T0 = FPlatformTime::Seconds();
 	Seed = InSeed; Biomes = InBiomes;
+	{ FScopeLock Lk(&SiteCache->Lock); SiteCache->Cells.Reset(); }
 	BiomeIndex.Reset();
 	for (int32 I = 0; I < Biomes.Num(); ++I) BiomeIndex.Add(Biomes[I].Name, I);
 	if (Biomes.Num() == 0) { FRDWildBiome B; B.Name = TEXT("grasslands"); Biomes.Add(B); BiomeIndex.Add(B.Name, 0); }
@@ -1540,9 +1541,164 @@ bool FRDWildWorld::FindPlace(int32 Id, FRDWildPlace& Out) const
 		if (Gj >= 512) Gj -= 1024;
 		FarmsteadsIn(Gi * GreatFieldM, Gj * GreatFieldM, (Gi + 1) * GreatFieldM, (Gj + 1) * GreatFieldM, Ps);
 	}
+	else if (Id >= SiteIdBase) SitesIn(FIntPoint(((Id - SiteIdBase) >> 12) & 0xFFF, (Id - SiteIdBase) & 0xFFF), Ps);          // (a structure)
 	else PlacesIn(FIntPoint((Id >> 14) & 0x3FF, (Id >> 4) & 0x3FF), Ps);
 	for (const FRDWildPlace& P : Ps) if (P.Id == Id) { Out = P; return true; }
 	return false;
+}
+
+// ================================================================================================ the list of 2026-11-12's structures
+void FRDWildWorld::SitesIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
+{
+	{
+		FScopeLock Lk(&SiteCache->Lock);
+		if (const TArray<FRDWildPlace>* Got = SiteCache->Cells.Find(Cell)) { Out.Append(*Got); return; }
+	}
+	TArray<FRDWildPlace> Mine;
+	SitesInCell(Cell, Mine);
+	Out.Append(Mine);
+	FScopeLock Lk(&SiteCache->Lock);
+	SiteCache->Cells.Add(Cell, MoveTemp(Mine));
+}
+
+void FRDWildWorld::SitesInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
+{
+	if (SiteKinds.Num() == 0 || Cell.X < 0 || Cell.Y < 0 || Cell.X > 0xFFF || Cell.Y > 0xFFF) return;
+	const double X0 = Xs + Cell.X * SiteCellM, Y0 = Yw + Cell.Y * SiteCellM;
+	if (X0 < Xs || X0 + SiteCellM > Xn || Y0 < Yw || Y0 + SiteCellM > Ye) return;
+	if (Rand01(Cell.X, Cell.Y, Seed + 1201u) > SiteFill) return;
+	// (up to six tries in the cell: dry, off the roads, fields and yards, 1.2 km from a town and 200 m from the captain's places,
+	// and gentle: 4 m of rise over a 12 m ring at most)
+	FVector2D At; FRDWSample S; bool bOk = false;
+	for (int32 Try = 0; Try < 6 && !bOk; ++Try)
+	{
+		At = FVector2D(X0 + (0.1 + 0.8 * Rand01(Cell.X, Cell.Y, Seed + 1202u + Try * 37u)) * SiteCellM, Y0 + (0.1 + 0.8 * Rand01(Cell.X, Cell.Y, Seed + 1203u + Try * 37u)) * SiteCellM);
+		double Dt; NearestTown(At.X, At.Y, Dt);
+		if (Dt < 1200.0) continue;
+		bool bNear = false;
+		for (const FRDWildPlace& Q : QuestPlaces) if (FVector2D::Distance(Q.At, At) < 200.0) bNear = true;
+		if (bNear) continue;
+		Sample(At.X, At.Y, S, false);
+		if (S.WaterKind != 0 || S.H < 2.f || S.Lava > 0.3f || S.Field > 0.3f || S.FarmKind == 4 || S.Road > 0.05f) continue;
+		float Lo = S.H, Hi = S.H;
+		for (int32 K = 0; K < 8; ++K) { const double A = K * PI / 4.0; const float Hk = Height(At.X + FMath::Cos(A) * 12.0, At.Y + FMath::Sin(A) * 12.0); Lo = FMath::Min(Lo, Hk); Hi = FMath::Max(Hi, Hk); }
+		if (Hi - Lo > 4.f) continue;
+		bOk = true;
+	}
+	if (!bOk) return;
+	// (none within 150 m of a place: its 4 km cell's and the next's near an edge)
+	{
+		const FIntPoint Pc = PlaceCellOf(At.X, At.Y);
+		TArray<FRDWildPlace> Ps;
+		for (int32 I = -1; I <= 1; ++I) for (int32 J = -1; J <= 1; ++J) PlacesIn(Pc + FIntPoint(I, J), Ps);
+		for (const FRDWildPlace& P : Ps) if (FVector2D::Distance(P.At, At) < 150.0) return;
+	}
+	const FString Bn = Biomes.IsValidIndex(S.Biome) ? Biomes[S.Biome].Name : FString();
+	auto Fits = [&](const FRDWildSiteKind& K) { return K.Biomes.Contains(TEXT("*")) || K.Biomes.Contains(Bn); };
+	// (a kind of the region by weight; a water kind then looks for its water within 600 m (sixteen ways every 12 m: a river is a
+	// few metres wide), its middle moved to that water's shore; with none it is a kind that wants no water (a second draw). Only
+	// a water kind pays for the search: of the first version's 150 m round every spot none of the six water kinds was ever found)
+	auto WaterOf = [](const FString& W) { return W == TEXT("sea") ? 1 : W == TEXT("lake") ? 2 : W == TEXT("river") ? 3 : W == TEXT("any") ? 0 : -1; };
+	auto Pick = [&](bool bDryOnly, uint32 Salt)
+	{
+		TArray<float> Wt; float Sum = 0.f;
+		for (const FRDWildSiteKind& K : SiteKinds) { const float W = Fits(K) && !(bDryOnly && WaterOf(K.NeedWater) >= 0) ? FMath::Max(K.Weight, 0.f) : 0.f; Wt.Add(W); Sum += W; }
+		if (Sum <= 0.f) return -1;
+		float U = Rand01(Cell.X, Cell.Y, Seed + Salt) * Sum;
+		int32 Ki = 0;
+		for (; Ki < Wt.Num() - 1; ++Ki) { if (Wt[Ki] > 0.f && U < Wt[Ki]) break; U -= Wt[Ki]; }
+		while (Ki > 0 && Wt[Ki] <= 0.f) --Ki;
+		return Wt[Ki] > 0.f ? Ki : -1;
+	};
+	int32 Ki = Pick(false, 1204u);
+	if (Ki < 0) return;
+	const FVector2D At0 = At; const FRDWSample S0 = S;
+	if (const int32 Wk = WaterOf(SiteKinds[Ki].NeedWater); Wk >= 0)
+	{
+		double Best = 1e9; FVector2D Hit = At, Way(1, 0);
+		for (int32 K = 0; K < 16; ++K)
+		{
+			const FVector2D D(FMath::Cos(K * PI / 8.0), FMath::Sin(K * PI / 8.0));
+			for (double Rr = 12.0; Rr <= 600.0 && Rr < Best; Rr += 12.0)
+			{
+				const FVector2D Q = At + D * Rr;
+				FRDWSample Sq; Sample(Q.X, Q.Y, Sq, false);
+				if (Sq.WaterKind < 1 || Sq.WaterKind > 3 || Sq.Water < Sq.H + 0.5f || (Wk > 0 && Sq.WaterKind != Wk)) continue;
+				Best = Rr; Hit = Q; Way = -D; break;
+			}
+		}
+		// (a river or a lake the rays passed between: the nearest river line or lake within the cell's reach, from the world's own
+		// hashes (sixteen rays 600 m long found a river for one site in 150 km, the dam for none))
+		if (Best > 1e8 && (Wk == 0 || Wk >= 2))
+		{
+			const double Reach = SiteCellM * 0.5;
+			const int32 I0 = FMath::FloorToInt((At.X - Reach) / HashM), I1 = FMath::FloorToInt((At.X + Reach) / HashM);
+			const int32 J0 = FMath::FloorToInt((At.Y - Reach) / HashM), J1 = FMath::FloorToInt((At.Y + Reach) / HashM);
+			double Nd = Reach; FVector2D Np = At; bool bFound = false;
+			for (int32 I = I0; I <= I1; ++I)
+				for (int32 J = J0; J <= J1; ++J)
+				{
+					if (Wk == 0 || Wk == 3)
+						for (auto It = SegHash.CreateConstKeyIterator(FIntPoint(I, J)); It; ++It)
+						{
+							const uint32 V = It.Value();
+							if ((V >> 31) != 0) continue;
+							const int32 Ri = (V >> 16) & 0x7FFF, Sg = V & 0xFFFF;
+							double T; const double D = RDWSegDist(At, Rivers[Ri].P[Sg], Rivers[Ri].P[Sg + 1], T);
+							if (D < Nd) { Nd = D; Np = FMath::Lerp(Rivers[Ri].P[Sg], Rivers[Ri].P[Sg + 1], T); bFound = true; }
+						}
+					if (Wk == 0 || Wk == 2)
+						for (auto It = LakeHash.CreateConstKeyIterator(FIntPoint(I, J)); It; ++It)
+						{
+							const FLake& L = Lakes[It.Value()];
+							const double D = FMath::Max(0.0, FVector2D::Distance(At, L.C) - L.R * 0.6);
+							// (inside its rim by 0.4 of its radius: a lake's edge wavers by its shape's noise)
+							if (D < Nd) { Nd = D; Np = L.C + (At - L.C).GetSafeNormal() * L.R * 0.6; bFound = true; }
+						}
+				}
+			if (bFound)
+			{
+				FRDWSample Sq; Sample(Np.X, Np.Y, Sq, false);
+				if (Sq.WaterKind >= 1 && Sq.WaterKind <= 3 && Sq.Water >= Sq.H + 0.5f && (Wk == 0 || Sq.WaterKind == Wk))
+				{
+					Best = Nd; Hit = Np;
+					Way = (At - Np).GetSafeNormal();
+					if (Way.IsNearlyZero()) Way = FVector2D(FMath::Cos(Rand01(Cell.X, Cell.Y, Seed + 1207u) * 2.0 * PI), FMath::Sin(Rand01(Cell.X, Cell.Y, Seed + 1207u) * 2.0 * PI));
+				}
+			}
+		}
+		if (Best > 1e8) { Ki = Pick(true, 1206u); if (Ki < 0) return; }
+		else
+		{
+			// (its middle on the shore: from the wet sample back toward the spot to the first ground with no water, 4 m on)
+			FVector2D Q = Hit;
+			for (int32 St = 0; St < 600; ++St)
+			{
+				Q += Way;
+				FRDWSample Sq; Sample(Q.X, Q.Y, Sq, false);
+				if (Sq.WaterKind == 0 || Sq.Water <= Sq.H) { At = Q + Way * 4.0; break; }
+			}
+			Sample(At.X, At.Y, S, false);
+			// (the shore checked as the spot was: dry, off the roads and fields, clear of the towns and the places; else the spot
+			// keeps a kind that wants no water)
+			bool bShore = S.WaterKind == 0 && S.Lava <= 0.3f && S.Field <= 0.3f && S.FarmKind != 4 && S.Road <= 0.05f;
+			if (bShore) { double Dt; NearestTown(At.X, At.Y, Dt); bShore = Dt >= 1200.0; }
+			if (bShore) for (const FRDWildPlace& Qp : QuestPlaces) if (FVector2D::Distance(Qp.At, At) < 200.0) bShore = false;
+			if (bShore)
+			{
+				const FIntPoint Pc = PlaceCellOf(At.X, At.Y);
+				TArray<FRDWildPlace> Ps;
+				for (int32 I = -1; I <= 1; ++I) for (int32 J = -1; J <= 1; ++J) PlacesIn(Pc + FIntPoint(I, J), Ps);
+				for (const FRDWildPlace& Pq : Ps) if (FVector2D::Distance(Pq.At, At) < 150.0) bShore = false;
+			}
+			if (!bShore) { At = At0; S = S0; Ki = Pick(true, 1206u); if (Ki < 0) return; }
+		}
+	}
+	FRDWildPlace P;
+	P.Id = SiteIdBase + ((Cell.X & 0xFFF) << 12) + (Cell.Y & 0xFFF);
+	P.Kind = TEXT("site"); P.Site = Ki; P.Name = SiteKinds[Ki].Title; P.At = At; P.H = S.H; P.Biome = S.Biome;
+	P.Tier = TierAt(At.X, At.Y); P.Yaw = Rand01(Cell.X, Cell.Y, Seed + 1205u) * 360.f;
+	Out.Add(P);
 }
 
 // ================================================================================================ the seventh phase's points of interest

@@ -170,6 +170,12 @@ public:
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bPortcullisUp = false;
 	/** the eighth phase: she has bought a horse at a stable */
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bHorseOwned = false;
+	/** the list of 2026-11-12: the wild horses she has tamed (a quest's): each a mount of hers beside the one bought */
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") int32 HorsesTamed = 0;
+	/** which of her two she has out: the tamed grey (true) or the bay she bought; the other waits at the stables */
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bRideTamed = false;
+	/** her only horse is one she tamed (none bought): the stable still sells her the bay */
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bTamedOnly = false;
 	/** the showcase's command line read (once a game) */
 	bool bShow7Read = false;
 	// ---- the wilderness (RDWild*.cpp): the world's seed, the map she revealed (50 m cells in blocks of 32 x 32: a block's

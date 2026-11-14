@@ -882,7 +882,7 @@ void ARDDungeonGenerator::RebuildTown(int32 Seed)
 // ================================================================================================ every frame
 void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 {
-	if (bTown) { TickDayNight(Dt); TickTownLights(Dt); TickTownLife(Dt); TickTownSatellite(Dt); TickSky7(Dt, PC); if (PC && PC->GetPawn()) { TickWildLife(Dt, PC->GetPawn()->GetActorLocation()); if (bWild) TickWildEncounters(Dt, PC->GetPawn()->GetActorLocation()); TickHorse(Dt); TickWild10(Dt, PC->GetPawn()->GetActorLocation()); TickWild11(Dt, PC->GetPawn()->GetActorLocation()); if (bWild) TickWildRuins12(Dt, PC->GetPawn()->GetActorLocation()); } }
+	if (bTown) { TickDayNight(Dt); TickTownLights(Dt); TickTownLife(Dt); TickTownSatellite(Dt); TickSky7(Dt, PC); if (PC && PC->GetPawn()) { TickWildLife(Dt, PC->GetPawn()->GetActorLocation()); if (bWild) TickWildEncounters(Dt, PC->GetPawn()->GetActorLocation()); TickHorse(Dt); TickWild10(Dt, PC->GetPawn()->GetActorLocation()); TickWild11(Dt, PC->GetPawn()->GetActorLocation()); if (bWild) { TickWildSites12(Dt, PC->GetPawn()->GetActorLocation()); TickWildQuests12(Dt, PC->GetPawn()->GetActorLocation()); TickWildRuins12(Dt, PC->GetPawn()->GetActorLocation()); } } }
 	APawn* P = PC ? PC->GetPawn() : nullptr;
 	if (!P) return;
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
@@ -1397,6 +1397,8 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 		return TableFoodTake(From);          // (the list of 2026-11-10: a prep table's food in the castle)
 	}
 	if (TownPanelClosedFrame == GFrameCounter) return TEXT("closed");
+	// (the list of 2026-11-12: a wild quest's thing within reach (a clue, a flower, a beast beaten down, a horse))
+	if (bWild) if (const FString Qd = WildQuestInteract(From); !Qd.IsEmpty()) return Qd;
 	// (a farmstead's family: they turn to her and say a line of their own)
 	{
 		int32 Di = -1; const ARDWildChunk* Dc = bWild && bWildHouseInsides ? WildDoorNear(From, 190.f, Di) : nullptr;
@@ -1406,6 +1408,8 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 	if (ARDTownsfolk* Wf = WildFolkForF(From))
 	{
 		Wf->FaceToward(From, 8.f);
+		// (the list of 2026-11-12: a structure's prisoner freed, a quest's person spoken to)
+		if (const FString Did = WildSiteTalk(Wf); !Did.IsEmpty()) return Did;
 		// (a farm's people only: the director's travellers are not farm folk (PR #50's review))
 		if (!WildRoamFolk.Contains(TWeakObjectPtr<ARDTownsfolk>(Wf))) TownCount(TEXT("talk:farm"));
 		const FString Line = Wf->NextLine();
@@ -1602,6 +1606,16 @@ TArray<FString> ARDDungeonGenerator::GetQuestLines() const
 	{
 		const int32 P = QuestProgress(Q);
 		Out.Add(FString::Printf(TEXT("%s|%s|%s|%s|%d|%d|%s"), *Q.Id.ToString(), *Q.Giver.ToString(), *Q.Title, *RDQuestStateOf(GI, Q, P, bWild && IsWildReady()), FMath::Min(P, Q.Count), Q.Count, *Q.Hint));
+	}
+	// (the list of 2026-11-12: the wilds' quests under way, their stage's line)
+	for (const FString& L : GetWildQuestRunLines())
+	{
+		TArray<FString> F; L.ParseIntoArray(F, TEXT("|"), false);
+		if (F.Num() < 15) continue;
+		const int32 St = FCString::Atoi(*F[3]);
+		if (St < 1 || St >= 90) continue;
+		const FRDWildQuestDef* Wq = WildQuests.FindByPredicate([&](const FRDWildQuestDef& D) { return D.Name.ToString() == F[2]; });
+		Out.Add(FString::Printf(TEXT("wq12:%s|Wild|%s|taken|%s|%s|%s"), *F[1], Wq ? *Wq->Title : *F[2], *F[5], *F[6], *F[14]));
 	}
 	return Out;
 }
@@ -1894,8 +1908,13 @@ void ARDDungeonGenerator::BuildTownLines()
 		TownTitle = TEXT("The stable"); TownSub = FString::Printf(TEXT("you have %d gold"), Gold);
 		if (TownBody.IsEmpty()) TownBody = TEXT("A grey stands in the straw, saddled and patient. The stable boy pats its neck: \"Fast as the wind on the open road.\"");
 		const int32 Cost = HorsePriceNow();
-		if (!HasHorse()) Add(TEXT("buyhorse"), TEXT("Buy the horse"), FString::Printf(TEXT("%d g"), Cost), FString::Printf(TEXT("Yours for good: ridden, you go %.1f times as fast across the wilds (F beside it to ride, F again to get off; no blows from the saddle)"), HorseDef.SpeedMul), Gold >= Cost);
-		else Add(TEXT("callhorse"), TEXT("Call your horse"), FString(), TEXT("It comes to your side"));
+		const URDGameInstance* HGI = URDGameInstance::Of(this);
+		const bool bTamedOnly = HGI && HGI->bTamedOnly;
+		if (!HasHorse() || bTamedOnly) Add(TEXT("buyhorse"), TEXT("Buy the horse"), FString::Printf(TEXT("%d g"), Cost), FString::Printf(TEXT("Yours for good: ridden, you go %.1f times as fast across the wilds (F beside it to ride, F again to get off; no blows from the saddle)"), HorseDef.SpeedMul), Gold >= Cost);
+		if (HasHorse()) Add(TEXT("callhorse"), TEXT("Call your horse"), FString(), TEXT("It comes to your side"));
+		// (the list of 2026-11-12: a bought bay and a tamed grey, one out at a time)
+		if (HasHorse() && HGI && HGI->HorsesTamed > 0 && !bTamedOnly)
+			Add(TEXT("swaphorse"), HGI->bRideTamed ? TEXT("Saddle your bay") : TEXT("Saddle your tamed grey"), FString(), TEXT("The other waits here in the stable"));
 		Add(TEXT("bye"), TEXT("Leave"), FString(), FString());
 	}
 	else if (TownPanel == TEXT("stash"))
@@ -1977,6 +1996,7 @@ bool ARDDungeonGenerator::ActivateTownEntry(int32 Line)
 	}
 	else if (E.Act == TEXT("bless")) bOk = TownBless();
 	else if (E.Act == TEXT("buyhorse")) { bOk = BuyHorse(); if (bOk) CloseTownPanel(); }
+	else if (E.Act == TEXT("swaphorse")) { bOk = SwapHorse(); if (bOk) CloseTownPanel(); }
 	else if (E.Act == TEXT("callhorse")) { bOk = CallHorse(); if (bOk) { SetTownNote(TEXT("Your horse comes")); CloseTownPanel(); } }
 	else if (E.Act == TEXT("donate")) { AddGold(-5, TEXT("an offering")); TownCount(TEXT("offerings")); SetTownNote(TEXT("The priest bows his head: \"They will eat tonight.\"")); bOk = true; }
 	else if (E.Act == TEXT("deposit")) bOk = TownDeposit(E.Arg);

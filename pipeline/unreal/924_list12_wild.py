@@ -7,7 +7,11 @@ Steps (name them; several in one run):
   lairs    its fourth phase, the lairs hidden behind something: SourceArt/wilderness/lairs12.json's pieces (l12_<name>#<n>) and
            its covers into WildLairCovers (RD/RDWildLair12.cpp: a lair's cover, laid by the ruins' layout language, its monsters
            inside it); after ruins (its covers use the ruins' walls, rubble, cliffs and cave)
-C++ first (RD/RDWildRuin12.cpp, RD/RDWildLair12.cpp). Args: steps"""
+  sites    its fifth phase, the structures of the wilds: SourceArt/wilderness/sites12.json's pieces (s12_<name>#<n>) and its 34
+           kinds into WildSiteKinds (FRDWildSiteKind: the world places them (SitesIn), RD/RDWildSite12.cpp lays them with their
+           chests, guards, prisoners and traps), the living beast's creature; after ruins and lairs (it lays their pieces too)
+  quests   its 25 quests into WildQuests (RD/RDWildQuest12.cpp runs them); after sites (their things are its pieces)
+C++ first (RD/RDWildRuin12.cpp, RD/RDWildLair12.cpp, RD/RDWildSite12.cpp, RD/RDWildQuest12.cpp). Args: steps"""
 import os, sys, json, unreal
 les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); eal = unreal.EditorAssetLibrary
@@ -28,7 +32,7 @@ def foliage_paths():
     import re
     out = set()
     for f in os.listdir(SA):
-        if not f.endswith(".json") or f.startswith("test_") or f in ("ruins12.json", "lairs12.json"): continue
+        if not f.endswith(".json") or f.startswith("test_") or f in ("ruins12.json", "lairs12.json", "sites12.json", "quests12.json"): continue
         try: J = json.load(open(os.path.join(SA, f), encoding="utf-8"))
         except Exception: continue
         if f == "biomes.json": J = {k: v for k, v in J.items() if k != "pieces"}
@@ -42,7 +46,7 @@ def generator():
     return next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
 
 
-def lay_table(file, pre, prop, rows):
+def lay_table(file, pre, prop, rows, cls=None, more=None):
     """a table's pieces into WildPieces as <pre><name>#<n> (its old entries out first), its kinds or covers into the generator's
     <prop>. A solid piece's mesh with no simple collision, its trace flag the default, is walked through (916's barn): its mesh
     as its collision (the plants (soft) are laid without collision or seen through, and keep theirs); so too the places' table's
@@ -107,20 +111,66 @@ def lay_table(file, pre, prop, rows):
         for line in K["parts"]:
             kv = dict(x.split("=", 1) for x in line.split(";") if "=" in x)
             if "p" in kv: assert any(t.startswith(kv["p"]) for t in table), f"924 {rows}: {K['name']}'s piece {kv['p']} is in no table"
-        k = unreal.RDWildRuinKind()
+        k = (cls or unreal.RDWildRuinKind)()
         k.set_editor_property("name", K["name"]); k.set_editor_property("title", K["title"]); k.set_editor_property("text", K["text"])
         k.set_editor_property("biomes", K["biomes"]); k.set_editor_property("weight", float(K.get("weight", 1.0)))
         k.set_editor_property("water", bool(K.get("water", False))); k.set_editor_property("parts", K["parts"])
         k.set_editor_property("loot", K.get("loot", "")); k.set_editor_property("guards", int(K.get("guards", 0)))
         k.set_editor_property("hide_r", float(K.get("hide_r", 0.0))); k.set_editor_property("gap_yaw", float(K.get("gap_yaw", 0.0)))
+        if more: more(k, K)
         kinds.append(k)
     g.set_editor_property(prop, kinds)
     g.modify(); les.save_current_level()
     REPORT.append(f"{rows}: {len(kinds)}, {n} meshes in {len(J['pieces'])} pieces")
+    return J, g
 
 
 def step_ruins():
     lay_table("ruins12.json", "r12_", "wild_ruin_kinds", "kinds")
+
+
+def step_sites():
+    def more(k, K):
+        k.set_editor_property("need_water", K.get("need_water", ""))
+        k.set_editor_property("prisoners", int(K.get("prisoners", 0))); k.set_editor_property("traps", int(K.get("traps", 0)))
+        k.set_editor_property("quests", [unreal.Name(x) for x in K.get("quests", [])])
+    J, g = lay_table("sites12.json", "s12_", "wild_site_kinds", "kinds", unreal.RDWildSiteKind, more)
+    # (every quest a structure names must be in quests12.json)
+    Q = {x["name"] for x in json.load(open(os.path.join(SA, "quests12.json"), encoding="utf-8"))["quests"]}
+    missing = sorted({x for K in J["kinds"] for x in K.get("quests", []) if x not in Q})
+    assert not missing, f"924 sites: quests in no table: {missing}"
+    B = J.get("beast", {})
+    if B:
+        m = unreal.load_asset(B["mesh"]); a = unreal.load_asset(B["walk"])
+        assert m and a, f"924 sites: the beast's mesh or walk is missing ({B})"
+        g.set_editor_property("wild_beast_mesh", m); g.set_editor_property("wild_beast_walk", a)
+        g.set_editor_property("wild_beast_scale", float(B.get("scale", 2.6))); g.set_editor_property("wild_beast_speed", float(B.get("speed", 110.0)))
+        g.set_editor_property("wild_beast_radius", float(B.get("radius", 45.0)))
+        bd = unreal.load_asset(B["build"]) if B.get("build") else None
+        assert bd or not B.get("build"), f"924 sites: the beast's build is missing ({B['build']})"
+        g.set_editor_property("wild_beast_build", bd)
+        g.modify(); les.save_current_level()
+    REPORT.append(f"sites: {len(J['kinds'])} kinds, the beast {'set' if B else 'none'}")
+
+
+def step_quests():
+    J = json.load(open(os.path.join(SA, "quests12.json"), encoding="utf-8"))
+    g = generator()
+    table = {str(k) for k in g.get_editor_property("wild_pieces").keys()}
+    out = []
+    for Q in J["quests"]:
+        for line in Q["stages"]:
+            kv = dict(x.split("=", 1) for x in line.split(";") if "=" in x)
+            if kv.get("thing"): assert any(t.startswith(kv["thing"]) for t in table), f"924 quests: {Q['name']}'s thing {kv['thing']} is in no table"
+        q = unreal.RDWildQuestDef()
+        q.set_editor_property("name", Q["name"]); q.set_editor_property("title", Q["title"])
+        q.set_editor_property("giver", Q.get("giver", "")); q.set_editor_property("giver_title", Q.get("giver_title", ""))
+        q.set_editor_property("offer", Q.get("offer", "")); q.set_editor_property("stages", Q["stages"])
+        q.set_editor_property("gold", int(Q.get("gold", 0))); q.set_editor_property("things", Q.get("things", ""))
+        out.append(q)
+    g.set_editor_property("wild_quests", out)
+    g.modify(); les.save_current_level()
+    REPORT.append(f"quests: {len(out)}")
 
 
 def step_lairs():
@@ -128,7 +178,7 @@ def step_lairs():
 
 
 for s in STEPS:
-    {"ruins": step_ruins, "lairs": step_lairs}[s]()
+    {"ruins": step_ruins, "lairs": step_lairs, "sites": step_sites, "quests": step_quests}[s]()
 print("924 " + " | ".join(REPORT))
 import gc
 gc.collect()

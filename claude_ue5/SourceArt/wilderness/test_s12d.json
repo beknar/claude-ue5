@@ -1,0 +1,513 @@
+{
+ "tag": "s12d",
+ "plan": [
+  "sites12=logging+palisade+shipwreck+witchhut+village+dam+smugglers+titan+beastback+floating+rift+sinkhole+bridge"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "sites12",
+   "ok": true,
+   "kinds": {
+    "logging": {
+     "found": true,
+     "id": 134443073,
+     "at_km": [
+      58.77,
+      14.2
+     ],
+     "name": "A logging camp",
+     "laid": {
+      "kind": "logging",
+      "pieces": 19,
+      "boxes": 1,
+      "guards_standing": 1,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "table": {
+      "guards": 1,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a farmer",
+     "told": "Discovered: A logging camp. stumps and stacked logs, a saw left in a cut trunk"
+    },
+    "palisade": {
+     "found": true,
+     "id": 134336569,
+     "at_km": [
+      -5.4,
+      -7.04
+     ],
+     "name": "A bandit palisade",
+     "laid": {
+      "kind": "palisade",
+      "pieces": 26,
+      "boxes": 1,
+      "guards_standing": 3,
+      "guards_in_a_piece": 0,
+      "prisoners": 2,
+      "traps": 2
+     },
+     "table": {
+      "guards": 3,
+      "prisoners": 2,
+      "traps": 2
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a worried mother",
+     "free_f": "freed",
+     "freed": 1,
+     "gold_from_prisoner": 15,
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: A bandit palisade. a stockade of sharpened logs, a camp behind it | You free the prisoner: \"Thank you! Take this, it's all I kept hidden from them.\" (15 gold) | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "shipwreck": {
+     "found": true,
+     "id": 134266908,
+     "at_km": [
+      -48.07,
+      -79.48
+     ],
+     "name": "A shipwreck",
+     "laid": {
+      "kind": "shipwreck",
+      "pieces": 15,
+      "boxes": 1,
+      "guards_standing": 2,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "table": {
+      "guards": 2,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a ferryman",
+     "told": "Discovered: A shipwreck. a broken hull on the shore, its cargo spilled in the sand"
+    },
+    "witchhut": {
+     "found": true,
+     "id": 134418503,
+     "at_km": [
+      43.38,
+      29.23
+     ],
+     "name": "A witch's hut",
+     "laid": {
+      "kind": "witchhut",
+      "pieces": 16,
+      "boxes": 1,
+      "guards_standing": 1,
+      "guards_in_a_piece": 0,
+      "prisoners": 1,
+      "traps": 1
+     },
+     "table": {
+      "guards": 1,
+      "prisoners": 1,
+      "traps": 1
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a herbalist",
+     "free_f": "freed",
+     "freed": 1,
+     "gold_from_prisoner": 45,
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: A witch's hut. a hut in the mire, charms hanging from its eaves, a pot steaming | You free the prisoner: \"Thank you! Take this, it's all I kept hidden from them.\" (45 gold) | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "village": {
+     "found": true,
+     "id": 134348861,
+     "at_km": [
+      0.64,
+      2.92
+     ],
+     "name": "An abandoned village",
+     "laid": {
+      "kind": "village",
+      "pieces": 10,
+      "boxes": 1,
+      "guards_standing": 2,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 1
+     },
+     "table": {
+      "guards": 2,
+      "prisoners": 0,
+      "traps": 1
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a wailing spirit",
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: An abandoned village. houses with their doors open and nobody home | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "dam": {
+     "found": true,
+     "id": 134283341,
+     "at_km": [
+      -38.52,
+      43.86
+     ],
+     "name": "A mill weir",
+     "laid": {
+      "kind": "dam",
+      "pieces": 10,
+      "boxes": 1,
+      "guards_standing": 1,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "table": {
+      "guards": 1,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a woodsman",
+     "told": "Discovered: A mill weir. a stone weir across the river, a wheel turning beside it"
+    },
+    "smugglers": {
+     "found": true,
+     "id": 134328385,
+     "at_km": [
+      -10.96,
+      13.23
+     ],
+     "name": "A smugglers' tunnel",
+     "laid": {
+      "kind": "smugglers",
+      "pieces": 16,
+      "boxes": 1,
+      "guards_standing": 2,
+      "guards_in_a_piece": 0,
+      "prisoners": 1,
+      "traps": 2
+     },
+     "table": {
+      "guards": 2,
+      "prisoners": 1,
+      "traps": 2
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a courier",
+     "free_f": "freed",
+     "freed": 1,
+     "gold_from_prisoner": 15,
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: A smugglers' tunnel. a timbered tunnel mouth hidden in the hill, crates stacked inside | You free the prisoner: \"Thank you! Take this, it's all I kept hidden from them.\" (15 gold) | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "titan": {
+     "found": true,
+     "id": 134361145,
+     "at_km": [
+      9.65,
+      -5.53
+     ],
+     "name": "A titan's carcass",
+     "laid": {
+      "kind": "titan",
+      "pieces": 12,
+      "boxes": 1,
+      "guards_standing": 3,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "table": {
+      "guards": 3,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a scholar",
+     "told": "Discovered: A titan's carcass. the ribs of something vast, a fallen giant's head turned to stone beside them"
+    },
+    "beastback": {
+     "found": true,
+     "id": 134352959,
+     "at_km": [
+      3.33,
+      9.49
+     ],
+     "name": "A living beast's back",
+     "laid": {
+      "kind": "beastback",
+      "pieces": 3,
+      "boxes": 1,
+      "guards_standing": 0,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "table": {
+      "guards": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a horse breaker",
+     "beast_moved_m": 3.32,
+     "told": "Discovered: A living beast's back. a beast the size of a hill, a whole camp built on its back, walking its slow round"
+    },
+    "floating": {
+     "found": true,
+     "id": 134307903,
+     "at_km": [
+      -23.59,
+      9.18
+     ],
+     "name": "A floating island",
+     "laid": {
+      "kind": "floating",
+      "pieces": 13,
+      "boxes": 1,
+      "guards_standing": 1,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "table": {
+      "guards": 1,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a herbalist",
+     "told": "Discovered: A floating island. a crag of crystal hanging in the air, shards of it scattered below"
+    },
+    "rift": {
+     "found": true,
+     "id": 134328375,
+     "at_km": [
+      -11.7,
+      -11.25
+     ],
+     "name": "A rift",
+     "laid": {
+      "kind": "rift",
+      "pieces": 13,
+      "boxes": 1,
+      "guards_standing": 3,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 1
+     },
+     "table": {
+      "guards": 3,
+      "prisoners": 0,
+      "traps": 1
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a frightened settler",
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: A rift. a scar torn in the world, a ring of light standing over it | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "sinkhole": {
+     "found": true,
+     "id": 134344759,
+     "at_km": [
+      -2.15,
+      -10.86
+     ],
+     "name": "A sinkhole",
+     "laid": {
+      "kind": "sinkhole",
+      "pieces": 15,
+      "boxes": 1,
+      "guards_standing": 1,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 2
+     },
+     "table": {
+      "guards": 1,
+      "prisoners": 0,
+      "traps": 2
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a dying smuggler",
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: A sinkhole. the ground fallen in, a ring of rock round a dark drop | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "bridge": {
+     "found": true,
+     "id": 134471738,
+     "at_km": [
+      75.97,
+      -5.5
+     ],
+     "name": "A river crossing",
+     "laid": {
+      "kind": "bridge",
+      "pieces": 5,
+      "boxes": 1,
+      "guards_standing": 2,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 1
+     },
+     "table": {
+      "guards": 2,
+      "prisoners": 0,
+      "traps": 1
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a wounded soldier",
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: A river crossing. an old bridge over the river, a toll post at its end | Spikes! You step on a hidden trap: 21 damage"
+    }
+   },
+   "table": 34,
+   "counts": {
+    "cave": 72,
+    "canyon": 6,
+    "aerie": 87,
+    "pass": 107,
+    "waterfall": 1,
+    "sinkhole": 132,
+    "greattree": 82,
+    "swamp": 6,
+    "glacier": 44,
+    "caldera": 67,
+    "seacave": 6,
+    "spire": 110,
+    "den": 523,
+    "fairyring": 55,
+    "lakeisland": 3,
+    "fortress": 149,
+    "watchtower": 228,
+    "mine": 104,
+    "tomb": 178,
+    "shrine": 423,
+    "cabin": 137,
+    "bridge": 4,
+    "waystation": 180,
+    "logging": 100,
+    "palisade": 182,
+    "shipwreck": 4,
+    "witchhut": 61,
+    "village": 161,
+    "dam": 3,
+    "smugglers": 206,
+    "titan": 67,
+    "beastback": 41,
+    "floating": 63,
+    "rift": 48
+   },
+   "quests": {
+    "legendary": 196,
+    "delivery": 149,
+    "spirit": 135,
+    "outpost": 107,
+    "expedition": 118,
+    "blight": 221,
+    "holdpass": 113,
+    "capture": 138,
+    "investigation": 333,
+    "manhunt": 169,
+    "sacred": 280,
+    "survey": 125,
+    "cache": 176,
+    "bounty": 186,
+    "escort": 67,
+    "stranded": 24,
+    "disaster": 149,
+    "lostruin": 176,
+    "dispute": 77,
+    "infestation": 250,
+    "rescue": 102,
+    "ingredient": 124,
+    "tame": 76,
+    "clearing": 124,
+    "trailblaze": 25
+   },
+   "failed": []
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s12d_sites12_logging.png",
+  "wd_s12d_sites12_palisade.png",
+  "wd_s12d_sites12_shipwreck.png",
+  "wd_s12d_sites12_witchhut.png",
+  "wd_s12d_sites12_village.png",
+  "wd_s12d_sites12_dam.png",
+  "wd_s12d_sites12_smugglers.png",
+  "wd_s12d_sites12_titan.png",
+  "wd_s12d_sites12_beastback.png",
+  "wd_s12d_sites12_floating.png",
+  "wd_s12d_sites12_rift.png",
+  "wd_s12d_sites12_sinkhole.png",
+  "wd_s12d_sites12_bridge.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

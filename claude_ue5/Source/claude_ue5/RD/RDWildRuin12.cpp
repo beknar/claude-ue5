@@ -133,7 +133,9 @@ bool ARDDungeonGenerator::FindNearestWildPlace(float X, float Y, float MaxKm, TF
 				{
 					FVector2D A;
 					if (!Match(P, A)) continue;
+					// (within MaxKm itself: the rings are whole 4 km cells, and a shelter "within 1.5 km" came back 4.9 km off)
 					const double D = FVector2D::DistSquared(A, FVector2D(X, Y));
+					if (D > FMath::Square(MaxKm * 1000.0)) continue;
 					if (D < Best) { Best = D; Out = P; OutAt = A; bGot = true; }
 				}
 			}
@@ -413,7 +415,12 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 			// (its sink: with a height in metres, centimetres of the piece as laid (only stretched by sz); with a scale, centimetres
 			// of the mesh scaled. Scaled by each mesh's own size, one part's pillars sank 75 to 300 cm (PR #56's review))
 			const float SinkCm = (Hm > 0.f ? Sink : Sink * Sc) * Sz;
-			if (UStaticMeshComponent* Pc = LayRuinPiece(C, Mesh, FVector(Wxy.X * 100.0, Wxy.Y * 100.0, A.Z * 100.f), Rot, FVector(Sc * Sx, Sc * Sy, Sc * Sz), SinkCm, bCol)) { ++Rec.Pieces; Rec.Comps.Add(Pc); Rec.Lifts.Add(A.Z * 100.f); SeeOnly(Pc); }
+			if (UStaticMeshComponent* Pc = LayRuinPiece(C, Mesh, FVector(Wxy.X * 100.0, Wxy.Y * 100.0, A.Z * 100.f), Rot, FVector(Sc * Sx, Sc * Sy, Sc * Sz), SinkCm, bCol))
+			{
+				++Rec.Pieces; Rec.Comps.Add(Pc); Rec.Lifts.Add(A.Z * 100.f); SeeOnly(Pc);
+				// (hide=1: a collider only (the great tree's trunk: the tree's own mesh is millions of triangles, laid without collision))
+				if (RDR12Num(M, TEXT("hide"), 0.f, R) > 0.5f) { Pc->SetVisibility(false); Pc->SetHiddenInGame(true); Pc->SetCastShadow(false); }
+			}
 		}
 	}
 }

@@ -20,7 +20,7 @@ Built and compiled, but no test has run it yet:
 
 ## The list of 2026-11-12 ([docs/improvements12.txt](docs/improvements12.txt))
 
-Done in phases (1 to 4 so far): 1 gold, the map in its scroll, the mouse on the big map, rd.MapTeleport, the saves as cards; 2 the horses' gaits; 3 the twenty ruins; 4 the hidden lairs; to come: 5 the structures and quests; 6 tiers 26-30; 7 the Rogue's abilities.
+Done in phases (1 to 5 so far): 1 gold, the map in its scroll, the mouse on the big map, rd.MapTeleport, the saves as cards; 2 the horses' gaits; 3 the twenty ruins; 4 the hidden lairs; 5 the 34 structures and 25 quests; to come: 6 tiers 26-30; 7 the Rogue's abilities.
 
 - [ ] **Phase 1, what is not measured:** ([Brokenspire](docs/levels/brokenspire.md)):
   - The mouse on a town's big map beyond the teleport's click (its drag and wheel were there before).
@@ -41,6 +41,17 @@ Done in phases (1 to 4 so far): 1 gold, the map in its scroll, the mouse on the 
   - The monsters notice her by distance as before, not by sight: a cover hides them from her, not her from them.
   - The cave mouth is a mouth among rocks, as the wilds' caves are: no inside.
   - Lairs on rough ground: a den where the land rises or falls more than 2.5 m within 8 m moves to the gentlest ground within 40 m, but on a mountain's face or a canyon's terraces there may be none: its cover's pieces stand a storey apart, its monsters may slide out of it, and from below or above it hides little. The test measures the nearest lair of each cover on gentle ground (2 m within 8 m) and sets her down on gentle ground near the den's height (set down on a terrace she fell to her death).
+
+- [ ] **Phase 5, the structures and their quests, what is not done or measured:** ([the wilderness](docs/levels/wilderness.md#the-list-of-2026-11-12-fifth-part-the-structures-and-their-quests)):
+  - The list names 34 structures (the plan said 42): all 34 are built.
+  - The structures are set pieces over the land: the caves, the mine, the tomb, the smugglers' tunnel and the ice cave have no inside beyond their mouth; the waterfall's hollow and the rift are pieces.
+  - The quests were played by the test, which goes to each point, takes, kills and speaks as a player would but puts her at points over 1.5 km off (as a journey would) and runs the escorts, defences and the storm at three or four times the game's speed. Nobody has played one through by hand; the fights were the test's killing blows, not hers.
+  - Each quest was played once, at the nearest structure offering it; its branches (the clearing's and the manhunt's two ends, the dispute's two sides) were played one way each (the clearing's raiders, the manhunt's letting go, the dispute's druids).
+  - The buried cache's water clue: where no water lies within 2 km of the structure (a sinkhole on the plains) the clue is at the structure itself.
+  - A storm's shelter is a cave, house, village or camp 100 m to 1.5 km off; with none, the structure itself, the family then waiting out with their flock 320 m away. The stranded's shelter is looked for within 5 km of the shore, else the shore itself is her shelter for the night.
+  - The tamed horse keeps the wild grey's coat; with her bay the stable swaps them (measured), but nobody has ridden the tamed one through a save and load.
+  - Two water kinds are rare round Brokenspire (the mill weir 3 within 150 km, the lake island 3): their rivers and lakes are rare there.
+  - Some pictures show little of their structure: the test pictures each from 40 m before its front behind her, and the den, the fairy ring, the bog island, the shrine, the barrow and the mine are low or small there; the pieces' readouts say they stand.
 
 ## The list of 2026-11-11 ([docs/improvements11.txt](docs/improvements11.txt))
 

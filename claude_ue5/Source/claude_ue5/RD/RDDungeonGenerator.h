@@ -2557,6 +2557,84 @@ public:
 	/** an earth bank laid as the ground is drawn (the ground's material and vertex data from the world): a ring of middle radius
 	 *  Rm and width Wm (metres), Hm high, open over GapDeg about the way GapYaw (world degrees), its ends sloping down */
 	class UProceduralMeshComponent* LayWildBerm(ARDWildChunk* C, const FVector2D& O, float Rm, float Wm, float Hm, float GapYaw, float GapDeg);
+	// ---- the list of 2026-11-12's fifth phase: the structures of the wilds (RDWildSite12.cpp, 924 sites) and their quests
+	/** the structures' kinds (924 sites, from SourceArt/wilderness/sites12.json): the world's SitesIn places them, a chunk lays
+	 *  them (LayWildSite) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild12") TArray<FRDWildSiteKind> WildSiteKinds;
+	/** the share of the 2.5 km grid's cells that hold one */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild12") float WildSiteFill = 0.5f;
+	FIntPoint WildSiteCell = FIntPoint(MIN_int32, MIN_int32);
+	TArray<FRDWildPlace> WildSiteNear;
+	void LayWildSite(ARDWildChunk* C, const FRDWildPlace& P);
+	/** what a laid structure holds beyond its pieces: its prisoners (townsfolk in cages), its traps (where, their keys) */
+	struct FSiteTrap { FVector At = FVector::ZeroVector; int64 Key = 0; float ReadyAt = 0.f; int32 SiteId = 0; };
+	TArray<FSiteTrap> WildSiteTraps;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild12") int32 WildTrapsSprung = 0;
+	/** the living beast's back's creature (924 sites: the Animals pack's fantasy elephant with its howdah): its mesh, walk, scale, its
+	 *  speed (cm/s) and the radius of its slow round (m) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild12") TObjectPtr<class USkeletalMesh> WildBeastMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild12") TObjectPtr<class UAnimSequence> WildBeastWalk = nullptr;
+	/** what it carries on its back (the pack's war platform, a mesh of its own on the beast's bones: it follows the body's pose) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild12") TObjectPtr<class USkeletalMesh> WildBeastBuild = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild12") float WildBeastScale = 2.6f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild12") float WildBeastSpeed = 110.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild12") float WildBeastRadius = 45.f;
+	struct FWildBeast { TWeakObjectPtr<class USkeletalMeshComponent> Comp; FVector2D Centre = FVector2D::ZeroVector; float Angle = 0.f; int32 SiteId = 0; };
+	TArray<FWildBeast> WildBeasts;
+	/** tests: the beasts walking: "beast|<site>|<x>|<y>|<z>|<yaw>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild12") TArray<FString> GetWildBeastLines() const;
+	TArray<TWeakObjectPtr<ARDTownsfolk>> WildSiteFolk;
+	TArray<FRuinLaid> WildSitesLaid;
+	void TickWildSites12(float Dt, const FVector& Her);
+	/** F on a structure's person (a prisoner freed, a quest's giver): what it did ("" when nothing) */
+	FString WildSiteTalk(ARDTownsfolk* T);
+	/** tests: "site|<id>|<kind>|<title>|<x>|<y>|<pieces>|<boxes>|<guards standing>|<inside a piece>|<prisoners>|<freed>|<traps>|<name>|<yaw>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild12") TArray<FString> GetWildSiteLines() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild12") TArray<FString> GetWildSitePieceLines(int32 Id) const;
+	/** tests: the nearest structure of a kind (or, Quest set, one that holds that quest) within MaxKm: "id|x|y|yaw|name" or "" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild12") FString FindWildSite(FName Kind, FName Quest, float X, float Y, float MaxKm) const;
+	/** tests: every kind's count among the structures within MaxKm: "<kind>|<count>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild12") TArray<FString> CountWildSites(float X, float Y, float MaxKm) const;
+	/** tests: a structure's prisoners and traps: "prisoner|<x>|<y>|<freed>" and "trap|<x>|<y>|<ready>" lines */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild12") TArray<FString> GetWildSiteThingLines(int32 Id) const;
+	/** the quest a structure holds (one of its kind's Quests, from its id), none when it has none */
+	FName WildSiteQuestOf(const FRDWildPlace& P) const;
+	// (the quests, RDWildQuest12.cpp: 924 quests from SourceArt/wilderness/quests12.json)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild12") TArray<FRDWildQuestDef> WildQuests;
+	struct FQuestThing { FVector At = FVector::ZeroVector; TWeakObjectPtr<UStaticMeshComponent> Mesh; FName Item; bool bTaken = false; };
+	struct FQuestRun
+	{
+		int32 Site = 0; FRDWildPlace P; int32 Quest = -1; int32 Stage = 0, Progress = 0, Choice = 0; float StageAt = 0.f; bool bBegun = false;
+		TArray<TWeakObjectPtr<ARDMonster>> Mons; TArray<TWeakObjectPtr<ARDTownsfolk>> Folk; TArray<FQuestThing> Things;
+		TWeakObjectPtr<ARDTownsfolk> Kept; TWeakObjectPtr<AActor> Horse; FVector2D Point = FVector2D::ZeroVector;
+		float Deadline = 0.f, NextWave = 0.f; int32 Waves = 0; bool bAmbushed = false, bStrandedAway = false; int32 GoldGiven = 0;
+	};
+	TMap<int32, FQuestRun> WildQuestRuns;
+	float WildQuestLook = 0.f;
+	int32 WildQuestStage(int32 Site) const;
+	void SetWildQuestStage(FQuestRun& Run, int32 Stage);
+	const FRDWildQuestDef* QuestOfRun(const FQuestRun& Run) const;
+	void ClearQuestStageActors(FQuestRun& Run);
+	FVector2D QuestPoint(const FQuestRun& Run, const FString& Spec, int32 Salt) const;
+	ARDTownsfolk* SpawnQuestFolk(FQuestRun& Run, FName QRole, const FString& Title, const FString& Def, const TArray<FString>& Lines, const FVector2D& At);
+	void SpawnQuestThing(FQuestRun& Run, const FString& Prefix, const FVector2D& At, float HeightM, FName Item);
+	void SpawnQuestMonsters(FQuestRun& Run, int32 N, const FString& KindSpec, const FString& Named, float Hp, const FVector2D& At, float Ring);
+	void QuestSiteLaid(const FRDWildPlace& P);
+	FString WildQuestTalk(ARDTownsfolk* T);
+	/** F on a quest's thing within reach (a clue, a flower, the stones), a beaten-down beast bound, a wild horse calmed */
+	FString WildQuestInteract(const FVector& From);
+	void AdvanceWildQuest(FQuestRun& Run);
+	void FinishWildQuest(FQuestRun& Run, bool bWon);
+	void BeginWildQuestStage(FQuestRun& Run, const TMap<FString, FString>& M);
+	void TickWildQuests12(float Dt, const FVector& Her);
+	void TameWildHorse(FQuestRun& Run);
+	void SetWeatherNamed(const FString& Name, bool bHold);
+	/** tests: "wq|<site>|<quest>|<stage>|<do>|<progress>|<n>|<choice>|<point x>|<point y>|<monsters>|<alive>|<things left>|<gold given>|<hint>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild12") TArray<FString> GetWildQuestRunLines() const;
+	/** tests: a quest's people: "<role>|<title>|<x>|<y>|<z>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild12") TArray<FString> GetWildQuestFolkLines(int32 Site) const;
+	/** tests: a quest's things and monsters: "thing|x|y|z|taken", "monster|x|y|z|dead|hp|max", "horse|x|y|z|0" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild12") TArray<FString> GetWildQuestThingLines(int32 Site) const;
 	// ---- the list of 2026-11-12's fourth phase: the lairs hidden behind something (RDWildLair12.cpp, 924 lairs)
 	/** "monster lairs do not have any special structure around them. they should be hiding behind something, a stand of trees, a
 	 *  ruin, a cave, an abandoned house, an earth berm": a lair's cover (a ruin kind's fields: its parts laid round the lair, its
@@ -2764,11 +2842,14 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Horse") int32 HorsePriceNow() const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Horse") bool BuyHorse();
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Horse") bool CallHorse();
+	/** the list of 2026-11-12: with a bought horse and a tamed one, the other one saddled (at the stable; not while riding) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Horse") bool SwapHorse();
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Horse") bool MountHorse();
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Horse") bool DismountHorse();
 	/** tests: "<owned>|<spawned>|<mounted>|<x>|<y>|<z>|<its clip>|<its rate>|<her speed>|<saddle z>|<her pelvis z>|<her rider clip>|<the stable's horse>|<her pelvis from the saddle, flat (cm)>" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Horse") FString GetHorseState() const;
-	class ARDHorse* SpawnHorseAt(const FVector& At, float Yaw, bool bHers);
+	/** Coat: -1 by whose it is (the stable's grey, her bay), 0 the bay, 1 the grey (a tamed horse) */
+	class ARDHorse* SpawnHorseAt(const FVector& At, float Yaw, bool bHers, int32 Coat = -1);
 	void TickHorse(float Dt);
 	// ---- the captain's two wilderness quests (2026-11-07, RDWildQuest.cpp): "wild:wolves" (the Mill Road Den's pack killed,
 	// every one: read from the kills kept, WildKilled), "wild:patrol" (the lost patrol's remains found at the old watchtower)

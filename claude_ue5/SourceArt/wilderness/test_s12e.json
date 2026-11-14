@@ -1,0 +1,486 @@
+{
+ "tag": "s12e",
+ "plan": [
+  "sites12=cave+canyon+aerie+pass+waterfall+sinkhole+greattree+swamp+glacier+caldera+seacave+spire"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "sites12",
+   "ok": true,
+   "kinds": {
+    "cave": {
+     "found": true,
+     "id": 134324278,
+     "at_km": [
+      -12.76,
+      -13.62
+     ],
+     "name": "A cave system",
+     "laid": {
+      "kind": "cave",
+      "pieces": 13,
+      "boxes": 1,
+      "guards_standing": 2,
+      "guards_in_a_piece": 0,
+      "prisoners": 1,
+      "traps": 2
+     },
+     "table": {
+      "guards": 2,
+      "prisoners": 1,
+      "traps": 2
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a wailing spirit",
+     "free_f": "freed",
+     "freed": 1,
+     "gold_from_prisoner": 15,
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: A cave system. a cave's mouth in the rock, its passages running back into the dark | You free the prisoner: \"Thank you! Take this, it's all I kept hidden from them.\" (15 gold) | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "canyon": {
+     "found": true,
+     "id": 134299705,
+     "at_km": [
+      -29.01,
+      -6.3
+     ],
+     "name": "A gorge",
+     "laid": {
+      "kind": "canyon",
+      "pieces": 14,
+      "boxes": 1,
+      "guards_standing": 2,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 2
+     },
+     "table": {
+      "guards": 2,
+      "prisoners": 0,
+      "traps": 2
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a caravan master",
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: A gorge. a narrow cut between sheer walls, a place for an ambush | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "aerie": {
+     "found": true,
+     "id": 134389819,
+     "at_km": [
+      26.01,
+      -1.64
+     ],
+     "name": "A cliff aerie",
+     "laid": {
+      "kind": "aerie",
+      "pieces": 20,
+      "boxes": 1,
+      "guards_standing": 2,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "table": {
+      "guards": 2,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "an old hunter",
+     "told": "Discovered: A cliff aerie. a nest of branches on a ledge, bones below it"
+    },
+    "pass": {
+     "found": true,
+     "id": 134332480,
+     "at_km": [
+      -9.38,
+      11.88
+     ],
+     "name": "A mountain pass",
+     "laid": {
+      "kind": "pass",
+      "pieces": 11,
+      "boxes": 1,
+      "guards_standing": 3,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 1
+     },
+     "table": {
+      "guards": 3,
+      "prisoners": 0,
+      "traps": 1
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a pilgrim",
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: A mountain pass. the one way through the mountains, a gate across it | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "waterfall": {
+     "found": true,
+     "id": 134570062,
+     "at_km": [
+      136.7,
+      45.68
+     ],
+     "name": "A waterfall grotto",
+     "laid": {
+      "kind": "waterfall",
+      "pieces": 14,
+      "boxes": 1,
+      "guards_standing": 1,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "table": {
+      "guards": 1,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a dying smuggler",
+     "told": "Discovered: A waterfall grotto. water falling over a rock face, a hollow behind it"
+    },
+    "sinkhole": {
+     "found": true,
+     "id": 134344759,
+     "at_km": [
+      -2.15,
+      -10.86
+     ],
+     "name": "A sinkhole",
+     "laid": {
+      "kind": "sinkhole",
+      "pieces": 15,
+      "boxes": 1,
+      "guards_standing": 1,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 2
+     },
+     "table": {
+      "guards": 1,
+      "prisoners": 0,
+      "traps": 2
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a dying smuggler",
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: A sinkhole. the ground fallen in, a ring of rock round a dark drop | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "greattree": {
+     "found": true,
+     "id": 134357050,
+     "at_km": [
+      6.13,
+      -3.73
+     ],
+     "name": "An ancient great tree",
+     "laid": {
+      "kind": "greattree",
+      "pieces": 13,
+      "boxes": 1,
+      "guards_standing": 2,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "table": {
+      "guards": 2,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a priestess",
+     "told": "Discovered: An ancient great tree. a tree older than any town, its roots wide as a house"
+    },
+    "swamp": {
+     "found": true,
+     "id": 134422596,
+     "at_km": [
+      46.48,
+      21.53
+     ],
+     "name": "A bog island",
+     "laid": {
+      "kind": "swamp",
+      "pieces": 28,
+      "boxes": 1,
+      "guards_standing": 2,
+      "guards_in_a_piece": 0,
+      "prisoners": 1,
+      "traps": 1
+     },
+     "table": {
+      "guards": 2,
+      "prisoners": 1,
+      "traps": 1
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a druid",
+     "free_f": "freed",
+     "freed": 1,
+     "gold_from_prisoner": 120,
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: A bog island. a hump of firm ground in the bog, half sunk in peat and reeds | You free the prisoner: \"Thank you! Take this, it's all I kept hidden from them.\" (120 gold) | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "glacier": {
+     "found": true,
+     "id": 134537266,
+     "at_km": [
+      117.09,
+      -24.7
+     ],
+     "name": "An ice cave",
+     "laid": {
+      "kind": "glacier",
+      "pieces": 16,
+      "boxes": 1,
+      "guards_standing": 2,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 1
+     },
+     "table": {
+      "guards": 2,
+      "prisoners": 0,
+      "traps": 1
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "an expedition's patron",
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: An ice cave. a cave in the ice, old things frozen in its walls | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "caldera": {
+     "found": true,
+     "id": 134389824,
+     "at_km": [
+      25.31,
+      10.43
+     ],
+     "name": "Lava tubes",
+     "laid": {
+      "kind": "caldera",
+      "pieces": 12,
+      "boxes": 1,
+      "guards_standing": 2,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 2
+     },
+     "table": {
+      "guards": 2,
+      "prisoners": 0,
+      "traps": 2
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a herbalist",
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: Lava tubes. black rock round a vent, the ground hot underfoot | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "seacave": {
+     "found": true,
+     "id": 134254643,
+     "at_km": [
+      -55.98,
+      -22.29
+     ],
+     "name": "A sea cave",
+     "laid": {
+      "kind": "seacave",
+      "pieces": 16,
+      "boxes": 1,
+      "guards_standing": 2,
+      "guards_in_a_piece": 0,
+      "prisoners": 1,
+      "traps": 1
+     },
+     "table": {
+      "guards": 2,
+      "prisoners": 1,
+      "traps": 1
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a ferryman",
+     "free_f": "freed",
+     "freed": 1,
+     "gold_from_prisoner": 15,
+     "trap": {
+      "hurt": 1,
+      "hp_lost": 21.0
+     },
+     "told": "Discovered: A sea cave. a cave in the sea cliff, its floor wet with the tide | You free the prisoner: \"Thank you! Take this, it's all I kept hidden from them.\" (15 gold) | Spikes! You step on a hidden trap: 21 damage"
+    },
+    "spire": {
+     "found": true,
+     "id": 134332470,
+     "at_km": [
+      -8.2,
+      -13.72
+     ],
+     "name": "A rock spire",
+     "laid": {
+      "kind": "spire",
+      "pieces": 8,
+      "boxes": 1,
+      "guards_standing": 1,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "table": {
+      "guards": 1,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a priestess",
+     "told": "Discovered: A rock spire. a needle of rock standing alone over the plain"
+    }
+   },
+   "table": 34,
+   "counts": {
+    "cave": 72,
+    "canyon": 6,
+    "aerie": 87,
+    "pass": 107,
+    "waterfall": 1,
+    "sinkhole": 132,
+    "greattree": 82,
+    "swamp": 6,
+    "glacier": 44,
+    "caldera": 67,
+    "seacave": 6,
+    "spire": 110,
+    "den": 523,
+    "fairyring": 55,
+    "lakeisland": 3,
+    "fortress": 149,
+    "watchtower": 228,
+    "mine": 104,
+    "tomb": 178,
+    "shrine": 423,
+    "cabin": 137,
+    "bridge": 4,
+    "waystation": 180,
+    "logging": 100,
+    "palisade": 182,
+    "shipwreck": 4,
+    "witchhut": 61,
+    "village": 161,
+    "dam": 3,
+    "smugglers": 206,
+    "titan": 67,
+    "beastback": 41,
+    "floating": 63,
+    "rift": 48
+   },
+   "quests": {
+    "legendary": 196,
+    "delivery": 149,
+    "spirit": 135,
+    "outpost": 107,
+    "expedition": 118,
+    "blight": 221,
+    "holdpass": 113,
+    "capture": 138,
+    "investigation": 333,
+    "manhunt": 169,
+    "sacred": 280,
+    "survey": 125,
+    "cache": 176,
+    "bounty": 186,
+    "escort": 67,
+    "stranded": 24,
+    "disaster": 149,
+    "lostruin": 176,
+    "dispute": 77,
+    "infestation": 250,
+    "rescue": 102,
+    "ingredient": 124,
+    "tame": 76,
+    "clearing": 124,
+    "trailblaze": 25
+   },
+   "failed": []
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s12e_sites12_cave.png",
+  "wd_s12e_sites12_canyon.png",
+  "wd_s12e_sites12_aerie.png",
+  "wd_s12e_sites12_pass.png",
+  "wd_s12e_sites12_waterfall.png",
+  "wd_s12e_sites12_sinkhole.png",
+  "wd_s12e_sites12_greattree.png",
+  "wd_s12e_sites12_swamp.png",
+  "wd_s12e_sites12_glacier.png",
+  "wd_s12e_sites12_caldera.png",
+  "wd_s12e_sites12_seacave.png",
+  "wd_s12e_sites12_spire.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}
