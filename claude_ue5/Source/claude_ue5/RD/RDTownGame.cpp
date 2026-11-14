@@ -2199,12 +2199,19 @@ FString ARDDungeonGenerator::StashKey(int32 I) const
 void ARDDungeonGenerator::TickTownPanel(APlayerController* PC)
 {
 	if (!PC || !IsTownPanelOpen()) return;
-	// (the wilds came ready while the panel was open: its LATER lines are made again, the cursor kept on its line)
+	// (the wilds came ready while the panel was open: its LATER lines are made again, the cursor kept on its line: the same
+	// quest (a LATER line becomes its accept line) or the same act, found again by its argument (PR #61's review: by its index
+	// it could land on another quest))
 	if (!bTownLinesWildReady && bWild && IsWildReady())
 	{
 		const int32 Cur = TownCursor;
+		const FString Arg = TownLines.IsValidIndex(Cur) ? TownLines[Cur].Arg : FString();
+		const FName Act = TownLines.IsValidIndex(Cur) ? TownLines[Cur].Act : NAME_None;
 		BuildTownLines();
-		TownCursor = TownLines.Num() > 0 ? FMath::Clamp(Cur, 0, TownLines.Num() - 1) : 0;
+		int32 Found = -1;
+		for (int32 I = 0; I < TownLines.Num() && Found < 0; ++I) if (!Arg.IsEmpty() && TownLines[I].Arg == Arg) Found = I;
+		for (int32 I = 0; I < TownLines.Num() && Found < 0; ++I) if (Arg.IsEmpty() && TownLines[I].Act == Act) Found = I;
+		TownCursor = Found >= 0 ? Found : (TownLines.Num() > 0 ? FMath::Clamp(Cur, 0, TownLines.Num() - 1) : 0);
 	}
 	auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };
 	if (Pressed({ EKeys::Escape, EKeys::BackSpace, EKeys::F, EKeys::Tab, EKeys::Gamepad_FaceButton_Right })) { CloseTownPanel(); return; }

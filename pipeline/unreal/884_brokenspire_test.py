@@ -3372,6 +3372,19 @@ def dummies():
     for l in G["gen"].get_town_dummy_lines():
         p = str(l).split("|"); out.append({"kind": p[0], "at": V(float(p[1]), float(p[2]), float(p[3])), "hits": int(p[4]), "lean": float(p[5]), "r": float(p[6]), "h": float(p[7])})
     return out
+def dummy_spot(d, offs):
+    """a spot before a dummy with a clear line to its own mesh: (angle, distance, clear), tried at each distance round it every
+    30 degrees; none clear: angle 0 at the first distance"""
+    for off in offs:
+        for a_ in range(0, 360, 30):
+            pp = d["at"] + V(math.cos(math.radians(a_)), math.sin(math.radians(a_)), 0) * off
+            h = unreal.SystemLibrary.line_trace_single(G["w"], pp + V(0, 0, 100), d["at"] + V(0, 0, d["h"] * 0.6), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+            h = h.to_tuple() if h else None
+            hc = h[10] if h else None; hm = hc.get_editor_property("static_mesh") if hc and isinstance(hc, unreal.StaticMeshComponent) else None
+            if h and h[0] and hm and ("Dummy" in hm.get_name() or "Target" in hm.get_name()): return float(a_), off, True
+            # (since the sweep a dummy's body is a capsule round it (bolts trace simple collision): its capsule met is the dummy)
+            if h and h[0] and isinstance(hc, unreal.CapsuleComponent) and dist2(h[4], d["at"]) < d["r"] + 30: return float(a_), off, True
+    return 0.0, offs[0], False
 def step_dummies():
     """the barracks' training dummies (the list of 2026-11-07: "the training dummies near the barracks should react when hit by a
     melee or ranged weapon"): the Warrior's sword and the Mage's bolt each at a dummy and a target: it counts the hit and
@@ -3391,22 +3404,20 @@ def step_dummies():
             # (before it, 1.3 m off (a bolt: 6 m), facing it, on the barracks' side away from the door's lane)
             # (a bolt from 6 m, else 4.5 or 3 m: test_t13a's dummy had no clear line at 6 m on any side, and the bolt fired
             # from the fallback met what stood between; the sight line's first hit is recorded)
-            ang = 0.0; clear = False
-            for off in ((130.0 + d["r"],) if kind == "melee" else (600.0, 450.0, 300.0)):
-                for a_ in range(0, 360, 30):
-                    pp = d["at"] + V(math.cos(math.radians(a_)), math.sin(math.radians(a_)), 0) * off
-                    h = unreal.SystemLibrary.line_trace_single(G["w"], pp + V(0, 0, 100), d["at"] + V(0, 0, d["h"] * 0.6), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
-                    h = h.to_tuple() if h else None
-                    hc = h[10] if h else None; hm = hc.get_editor_property("static_mesh") if hc and isinstance(hc, unreal.StaticMeshComponent) else None
-                    if h and h[0] and hm and ("Dummy" in hm.get_name() or "Target" in hm.get_name()): ang = a_; clear = True; break
-                if clear: break
+            ang, off, clear = dummy_spot(d, (130.0 + d["r"],) if kind == "melee" else (600.0, 450.0, 300.0))
             pp = d["at"] + V(math.cos(math.radians(ang)), math.sin(math.radians(ang)), 0) * off
             yaw = math.degrees(math.atan2(d["at"].y - pp.y, d["at"].x - pp.x))
             put(V(pp.x, pp.y, d["at"].z), yaw=yaw); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4.0 if kind == "melee" else -1.0, yaw=yaw)); yield from wait(1.2)
+            # (a bolt flies where the camera looks, as a player aims: the view's pitch set so its line meets the dummy's middle (a fixed
+            # pitch of -1 sent the bolt over or under the narrow dummy from some spots: test_t13j, its line clear and no hit))
+            if kind == "ranged":
+                cm_ = G["pc"].player_camera_manager.get_camera_location(); tgt = d["at"] + V(0, 0, d["h"] * 0.6)
+                pit = math.degrees(math.atan2(tgt.z - cm_.z, math.hypot(tgt.x - cm_.x, tgt.y - cm_.y)))
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=pit, yaw=yaw)); yield from wait(0.4)
             h0 = dummies()[i]["hits"]; a0 = cb().get_editor_property("attacks_made"); t0 = g.get_editor_property("town_dummy_hits")
             # (what a straight line from her hand's height meets first on the way: the dummy, or something before it)
             me = G["pawn"].get_actor_location()
-            hl = unreal.SystemLibrary.line_trace_single(G["w"], me + V(0, 0, 50), d["at"] + V(0, 0, 150 - (me.z - d["at"].z) + me.z - d["at"].z), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+            hl = unreal.SystemLibrary.line_trace_single(G["w"], me + V(0, 0, 50), d["at"] + V(0, 0, d["h"] * 0.6), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
             hl = hl.to_tuple() if hl else None
             first = (hl[10].get_owner().get_name() + "." + hl[10].get_name() + ":" + (hl[10].get_editor_property("static_mesh").get_name() if isinstance(hl[10], unreal.StaticMeshComponent) and hl[10].get_editor_property("static_mesh") else "")) if hl and hl[0] and hl[10] else None
             yield from press("LeftMouseButton", 0.12)
@@ -4781,21 +4792,27 @@ def menu_save(name):
     """the Escape menu's Save page: a name, Enter (the player's way, as 888 save)"""
     g = G["gen"]; g.set_menu_open(True); yield from rwait(0.3)
     lines = [str(l) for l in g.get_menu_lines()]
-    g.activate_menu_line(next(i for i, l in enumerate(lines) if "Save the game" in l)); yield from rwait(0.3)
+    i = next((i for i, l in enumerate(lines) if "Save the game" in l), -1)
+    if i < 0: g.set_menu_open(False); raise RuntimeError(f"no 'Save the game' line in the menu: {lines}")
+    g.activate_menu_line(i); yield from rwait(0.3)
     g.set_save_name_text(name); yield from press("Enter"); yield from rwait(0.6)
     g.set_menu_open(False); yield from rwait(0.2)
 def menu_load_line(name_has):
     """the Load page opened and the line of that save chosen (its index on the page)"""
     g = G["gen"]; g.set_menu_open(True); yield from rwait(0.3)
     lines = [str(l) for l in g.get_menu_lines()]
-    g.activate_menu_line(next(i for i, l in enumerate(lines) if "Load a game" in l)); yield from rwait(0.4)
+    i = next((i for i, l in enumerate(lines) if "Load a game" in l), -1)
+    if i < 0: g.set_menu_open(False); return -1, lines
+    g.activate_menu_line(i); yield from rwait(0.4)
     page = [str(l) for l in g.get_menu_lines()]
     k = next((i for i, l in enumerate(page) if name_has in l), -1)
+    if k < 0: g.set_menu_open(False)
     return k, page
 def find_town(name):
     """put near a town's middle until it is built round her (it is found then: the circles and the come-back list it)"""
     yield from to_town(name)
     yield from rwait(1.5)
+    G.setdefault("found13", set()).add(name)
     return wild_town_state()
 
 def step_load13():
@@ -4846,7 +4863,7 @@ def step_autosave13():
     g = G["gen"]; res = {}; quiet(True)
     sq = place("square"); put(V(sq.x + 300, sq.y, 0)); yield from wait(8.5)     # (past the autosaves' 8 s pause)
     n0 = save_state()["written"]
-    g.set_editor_property("menu_dry_run", True)
+    g.set_editor_property("menu_dry_run", True); g.set_editor_property("menu_dry_run_autosave", True)
     try:
         g.set_menu_open(True); yield from rwait(0.3)
         lines = [str(l) for l in g.get_menu_lines()]
@@ -4855,7 +4872,7 @@ def step_autosave13():
         res["quit_ok"] = g.activate_menu_line(q) if q >= 0 else False
         res["after_quit"] = save_state(); res["quit_info"] = str(g.get_save_info("autosave"))
     finally:
-        g.set_editor_property("menu_dry_run", False); g.set_menu_open(False)
+        g.set_editor_property("menu_dry_run", False); g.set_editor_property("menu_dry_run_autosave", False); g.set_menu_open(False)
     yield from rwait(0.5)
     mg = place("mistgate")
     put(V(mg.x, mg.y, 0))
@@ -4897,7 +4914,9 @@ def step_continue13():
         p = G["pawn"].get_actor_location()
         res["arrived"] = save_state()["arrived"]; res["from_save_m"] = round(dist2(p, at) / 100.0, 1)
         res["town"] = wild_town_state().get("name")
-    ok = bool(sel) and res["menu_slot"] == slot and res.get("arrived", 0) >= 1 and res.get("from_save_m", 99) < 10 and res.get("town") == "Brokenspire"
+    # (PR #61's review: CONTINUE takes the newest of all saves; an autosave written after the named one (made where she stood)
+    # is as good: the slot must be one of the two)
+    ok = bool(sel) and res["menu_slot"] in (slot, "autosave") and res.get("arrived", 0) >= 1 and res.get("from_save_m", 99) < 10 and res.get("town") == "Brokenspire"
     step_result("continue13", ok, **res)
 
 def step_respawn13():
@@ -4911,7 +4930,9 @@ def step_respawn13():
     yield from find_town("Vel Morrath")
     vm = next(t for t in towns if t["name"] == "Vel Morrath"); bs = next(t for t in towns if t["name"] == "Brokenspire")
     # (the point: on the line from Vel Morrath to the nearest other town not found, past half way (the lines' metres))
-    others = [t for t in towns if t["name"] not in ("Vel Morrath", "Brokenspire")]
+    # (PR #61's review: a town found earlier in the run (walls13, others13...) is no "other": only those not found here)
+    found = G.get("found13", set()) | {"Vel Morrath", "Brokenspire"}
+    others = [t for t in towns if t["name"] not in found]
     ot = min(others, key=lambda t: math.hypot(t["x"] - vm["x"], t["y"] - vm["y"]))
     best = None
     for f in (0.62, 0.55, 0.7, 0.5, 0.75):
@@ -4936,7 +4957,10 @@ def step_respawn13():
     st = wild_town_state(); p = G["pawn"].get_actor_location()
     res["back"] = {"town": st.get("name"), "in_walls": bool(g.is_in_town_walls(p)), "alive": not cb().is_dead(), "hp": round(cb().get_health(), 1)}
     quiet(False)
-    ok = res["dead"] and res["back"]["town"] == "Vel Morrath" and res["back"]["in_walls"] and res["back"]["alive"]
+    # (the town the rule gives: the nearest of Brokenspire and the towns found)
+    fd = [t for t in towns if t["name"] in found]
+    res["want"] = min(fd, key=lambda t: math.hypot(t["x"] - best[0], t["y"] - best[1]))["name"]
+    ok = res["dead"] and res["back"]["town"] == res["want"] and res["back"]["in_walls"] and res["back"]["alive"]
     step_result("respawn13", ok, **res)
 
 def step_circle13():
@@ -5039,19 +5063,13 @@ def step_others13():
             put(bd); yield from wait(0.3); g.open_town_panel("board", -1); yield from rwait(0.3)
             r["bounties"] = [p[1] for p in panel() if p[0] == "accept"]; g.close_town_panel(); yield from rwait(0.2)
         # (the board posts three at a time of those the town's own table has: each city's city.json has one bounty (test_t13e))
-        cj = os.path.join(r"E:\code\claude-ue5\claude_ue5\SourceArt", {"Vel Morrath": "vel_morrath"}.get(name, name.lower()), "city.json")
+        cj = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "SourceArt", {"Vel Morrath": "vel_morrath"}.get(name, name.lower()), "city.json")
         try: r["board_table"] = sum(1 for q in json.load(open(cj, encoding="utf-8")).get("quests", []) if q.get("giver") == "Board")
         except Exception as e: r["board_table"] = None; r["board_table_error"] = str(e)
         ds = dummies(); r["dummies"] = len(ds)
         if ds:
-            d = ds[0]; ang = 0.0
-            for a_ in range(0, 360, 30):
-                pp = d["at"] + V(math.cos(math.radians(a_)), math.sin(math.radians(a_)), 0) * (130.0 + d["r"])
-                h = unreal.SystemLibrary.line_trace_single(G["w"], pp + V(0, 0, 100), d["at"] + V(0, 0, d["h"] * 0.6), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
-                h = h.to_tuple() if h else None
-                hc = h[10] if h else None; hm = hc.get_editor_property("static_mesh") if hc and isinstance(hc, unreal.StaticMeshComponent) else None
-                if h and h[0] and hm and ("Dummy" in hm.get_name() or "Target" in hm.get_name()): ang = a_; break
-            pp = d["at"] + V(math.cos(math.radians(ang)), math.sin(math.radians(ang)), 0) * (130.0 + d["r"])
+            d = ds[0]; ang, off_, _clear = dummy_spot(d, (130.0 + d["r"],))
+            pp = d["at"] + V(math.cos(math.radians(ang)), math.sin(math.radians(ang)), 0) * off_
             yaw = math.degrees(math.atan2(d["at"].y - pp.y, d["at"].x - pp.x))
             put(V(pp.x, pp.y, d["at"].z), yaw=yaw); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4.0, yaw=yaw)); yield from wait(1.2)
             h0 = dummies()[0]["hits"]; yield from press("LeftMouseButton", 0.12)
@@ -5095,9 +5113,10 @@ def step_later13():
     yield from rwait(0.5)
     res["after"] = [p[0] + ":" + p[1] for p in panel() if p[0] in ("later", "accept")]
     res["panel_open"] = bool(g.is_town_panel_open()); g.close_town_panel()
-    ok = res["panel_open"] and not any(x.startswith("later:") for x in res["after"]) and any(x.startswith("accept:") for x in res["after"])
-    # (opened after the wilds were ready the test proves nothing about the change: said so)
+    # (PR #61's review: opened after the wilds were ready it proves nothing about the change: then it fails, saying why)
     res["proved_change"] = (not res["ready_at_open"]) and any(x.startswith("later:") for x in res["first"])
+    ok = res["proved_change"] and res["panel_open"] and not any(x.startswith("later:") for x in res["after"]) and any(x.startswith("accept:") for x in res["after"])
+    if not res["proved_change"]: res["why"] = "the wilds were ready before the panel could be opened: the window was not met"
     step_result("later13", ok, **res)
 def step_cityfps13():
     """the cities' frame rates settled (the TODO: 2 to 31 a second read just after each city was built round her): in each city's
@@ -5115,12 +5134,34 @@ def step_cityfps13():
         res[name] = {"fps": round(n / (time.time() - t0), 1), "worst_ms": round(worst * 1000)}
         shot("cityfps13_" + name.replace(" ", "_"), "1280x720"); yield from rwait(1.2)
     quiet(False)
-    step_result("cityfps13", all(v["fps"] > 0 for v in res.values()), **res)
+    # (a measure, not a rule: ok when every city was reached and 15 s of frames counted in it)
+    step_result("cityfps13", len(res) == 6 and all(v["fps"] * 15 >= 30 for v in res.values()), **res)
 STEPS.update({"cityfps13": step_cityfps13})
 STEPS.update({"load13": step_load13, "autosave13": step_autosave13, "continue13": step_continue13, "respawn13": step_respawn13, "circle13": step_circle13,
               "walls13": step_walls13, "others13": step_others13, "later13": step_later13})
 
+SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
+def saves_snapshot():
+    """the save folder's files and their bytes (PR #61's review: the tests' saves were left on disk and the player's autosave
+    overwritten): put back at the end, the tests' own new files deleted"""
+    snap = {}
+    if os.path.isdir(SAVES):
+        for f in os.listdir(SAVES):
+            fp = os.path.join(SAVES, f)
+            if os.path.isfile(fp): snap[f] = open(fp, "rb").read()
+    return snap
+def saves_restore(snap):
+    if snap is None or not os.path.isdir(SAVES): return 0
+    n = 0
+    for f in os.listdir(SAVES):
+        fp = os.path.join(SAVES, f)
+        if os.path.isfile(fp) and f not in snap: os.remove(fp); n += 1
+    for f, b in snap.items():
+        fp = os.path.join(SAVES, f)
+        if not os.path.exists(fp) or open(fp, "rb").read() != b: open(fp, "wb").write(b); n += 1
+    return n
 def run():
+    G["saves"] = saves_snapshot()
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     # (every dungeon's way open for the steps that go down (the list of 2026-11-08b's keys); keys9 shuts them for itself)
     if o: o.debug_all_dungeon_keys(True)
@@ -5137,6 +5178,8 @@ def run():
 def finish(err=None):
     unreal.unregister_slate_post_tick_callback(G["h"])
     R["error"] = err
+    try: R["saves_put_back"] = saves_restore(G.get("saves"))
+    except Exception as e: R["saves_put_back"] = str(e)
     try:
         if G.get("gen"): quiet(False); G["gen"].close_town_panel(); R["windows_shown_again"] = G["gen"].slate_restore_view()
     except Exception as e: R["error"] = (err or "") + " / " + str(e)

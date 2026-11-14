@@ -1,0 +1,163 @@
+{
+ "tag": "t13j",
+ "plan": [
+  "walls13",
+  "load13",
+  "respawn13",
+  "dummies"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "walls13",
+   "ok": true,
+   "Ashenreach": {
+    "outside_walls": false,
+    "map_outside": "1",
+    "walked_in": true,
+    "walk_s": 9.6,
+    "town": "Ashenreach",
+    "in_walls_state": "1",
+    "map_inside": "2"
+   },
+   "Graymourne": {
+    "outside_walls": false,
+    "map_outside": "1",
+    "walked_in": true,
+    "walk_s": 11.9,
+    "town": "Graymourne",
+    "in_walls_state": "1",
+    "map_inside": "2"
+   }
+  },
+  {
+   "step": "load13",
+   "ok": true,
+   "dup_slots": [
+    "save_sweep_dup_77b513|Sweep Dup|2026-11-14 08:01|Graymourne|Summoner"
+   ],
+   "load_line": "button|Sweep Dup: Graymourne, 2026-11-14 08:01 (Summoner)",
+   "page_lines": [
+    "button|Sweep Dup: Graymourne, 2026-11-14 08:01 (Summoner)"
+   ],
+   "chosen": true,
+   "back_m": 0.0,
+   "gold_back": true,
+   "after_load": {
+    "written": 1,
+    "slot": "autosave",
+    "why": "map",
+    "arrived": 1
+   },
+   "vel_info": "2026-11-14 08:02|brokenspire|Vel Morrath|Summoner|menu|Sweep Vel",
+   "before_load_town": "Brokenspire",
+   "chosen_vel": true,
+   "vel_after": {
+    "town": "Vel Morrath",
+    "loading": "0",
+    "in_walls": "1",
+    "from_save_m": 0.0,
+    "in_town_walls": true
+   }
+  },
+  {
+   "step": "respawn13",
+   "ok": true,
+   "other": "Kethrys Spire",
+   "point_km": [
+    115.4,
+    -14.9
+   ],
+   "dist_km": {
+    "vel": 108.3,
+    "brokenspire": 116.3,
+    "other": 66.4
+   },
+   "found_count": 4,
+   "dead": true,
+   "back": {
+    "town": "Ashenreach",
+    "in_walls": true,
+    "alive": true,
+    "hp": 85.0
+   },
+   "want": "Ashenreach"
+  },
+  {
+   "step": "dummies",
+   "ok": false,
+   "melee": [
+    {
+     "kind": "Town.Dummy",
+     "hits": 1,
+     "lean_max": 9.1,
+     "lean_after_4s": 0.0
+    },
+    {
+     "kind": "Town.Target",
+     "hits": 1,
+     "lean_max": 9.0,
+     "lean_after_4s": 0.0
+    }
+   ],
+   "ranged": [
+    {
+     "kind": "Town.Dummy",
+     "hits": 0,
+     "lean_max": 0.0,
+     "lean_after_4s": 0.0
+    },
+    {
+     "kind": "Town.Target",
+     "hits": 1,
+     "lean_max": 5.8,
+     "lean_after_4s": 0.0
+    }
+   ],
+   "dummies": [
+    [
+     "Town.Dummy",
+     6994710,
+     -17400,
+     54,
+     176
+    ],
+    [
+     "Town.Target",
+     6993590,
+     -17400,
+     70,
+     189
+    ]
+   ],
+   "diag": [
+    {
+     "attacks": 1,
+     "town_hits": 0,
+     "first_on_line": "RDSection_4.StaticMeshComponent_138:SM_Garrison_Dummy",
+     "ang": 0.0,
+     "off_cm": 600.0,
+     "clear": true
+    },
+    {
+     "attacks": 1,
+     "town_hits": 1,
+     "first_on_line": "RDSection_4.StaticMeshComponent_139:SM_Garrison_Target",
+     "ang": 0.0,
+     "off_cm": 600.0,
+     "clear": true
+    }
+   ]
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "bs_t13j_walls13_Ashenreach_map.png",
+  "bs_t13j_walls13_Graymourne_map.png",
+  "bs_t13j_dummy_struck.png",
+  "bs_t13j_dummy_missed_0.png"
+ ],
+ "error": null,
+ "saves_put_back": 3,
+ "windows_shown_again": 0
+}

@@ -1,0 +1,138 @@
+{
+ "tag": "t13n",
+ "plan": [
+  "dummies",
+  "others13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "dummies",
+   "ok": true,
+   "melee": [
+    {
+     "kind": "Town.Dummy",
+     "hits": 1,
+     "lean_max": 5.6,
+     "lean_after_4s": 0.0
+    },
+    {
+     "kind": "Town.Target",
+     "hits": 1,
+     "lean_max": 3.9,
+     "lean_after_4s": 0.0
+    }
+   ],
+   "ranged": [
+    {
+     "kind": "Town.Dummy",
+     "hits": 1,
+     "lean_max": 6.0,
+     "lean_after_4s": 0.0
+    },
+    {
+     "kind": "Town.Target",
+     "hits": 1,
+     "lean_max": 6.4,
+     "lean_after_4s": 0.0
+    }
+   ],
+   "dummies": [
+    [
+     "Town.Dummy",
+     6900,
+     13690,
+     54,
+     176
+    ],
+    [
+     "Town.Target",
+     6900,
+     14810,
+     70,
+     189
+    ]
+   ],
+   "diag": [
+    {
+     "attacks": 1,
+     "town_hits": 1,
+     "first_on_line": "RDSection_0.StaticMeshComponent_193:SM_Garrison_Dummy",
+     "ang": 90.0,
+     "off_cm": 600.0,
+     "clear": true
+    },
+    {
+     "attacks": 1,
+     "town_hits": 1,
+     "first_on_line": "RDSection_0.StaticMeshComponent_194:SM_Garrison_Target",
+     "ang": 60.0,
+     "off_cm": 600.0,
+     "clear": true
+    }
+   ]
+  },
+  {
+   "step": "others13",
+   "ok": true,
+   "Vel Morrath": {
+    "board_spot": true,
+    "bounties": [
+     "Quest: Bounty: Clear the Ossuary"
+    ],
+    "board_table": 1,
+    "dummies": 2,
+    "dummy": {
+     "hits": 1,
+     "lean_max": 9.1
+    },
+    "lift_cm": {
+     "max": 140.0,
+     "min": -140.0,
+     "under_buildings_max": 0.0
+    }
+   },
+   "Ashenreach": {
+    "board_spot": true,
+    "bounties": [
+     "Quest: Bounty: Iron Hounds"
+    ],
+    "board_table": 1,
+    "dummies": 2,
+    "dummy": {
+     "hits": 1,
+     "lean_max": 7.6
+    },
+    "lift_cm": {
+     "max": 140.0,
+     "min": -131.4,
+     "under_buildings_max": 0.0
+    }
+   },
+   "Graymourne": {
+    "board_spot": true,
+    "bounties": [
+     "Quest: Bounty: The Outfall Rats"
+    ],
+    "board_table": 1,
+    "dummies": 2,
+    "dummy": {
+     "hits": 1,
+     "lean_max": 4.2
+    },
+    "lift_cm": {
+     "max": 139.3,
+     "min": -140.0,
+     "under_buildings_max": 0.0
+    }
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "bs_t13n_dummy_struck.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 0
+}

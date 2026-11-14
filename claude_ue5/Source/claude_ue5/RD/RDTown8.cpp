@@ -4,6 +4,7 @@
 #include "RD/RDSection.h"
 #include "RD/RDDungeonGenerator.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 
@@ -20,6 +21,20 @@ void ARDSection::AddTownDummy(FName Kind, const FRDPiece* P, const FTransform& T
 	const FVector Sz = FVector(P->Size) * T.GetScale3D();
 	D.Radius = FMath::Clamp(0.5f * FMath::Max(Sz.X, Sz.Y), 25.f, 70.f);
 	D.Height = FMath::Max(Sz.Z, 100.f);
+	// (its body for bolts: a capsule two thirds of its radius, over its height, blocking Visibility only (bolts and sight lines);
+	// she walks through it as before, the camera passes it)
+	if (UCapsuleComponent* Cap = NewObject<UCapsuleComponent>(this))
+	{
+		Cap->SetupAttachment(Pv);
+		Cap->SetCapsuleSize(D.Radius * 0.66f, D.Height * 0.5f);
+		Cap->SetRelativeLocation(FVector(0, 0, D.Height * 0.5f));
+		Cap->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		Cap->SetCollisionResponseToAllChannels(ECR_Ignore);
+		Cap->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+		Cap->SetHiddenInGame(true);
+		Cap->RegisterComponent();
+		D.Body = Cap;
+	}
 	TownDummies.Add(D);
 }
 
@@ -55,7 +70,7 @@ void ARDSection::TickTownDummies(float Now)
 
 int32 ARDSection::TownDummyOf(const UPrimitiveComponent* C) const
 {
-	if (C) for (int32 I = 0; I < TownDummies.Num(); ++I) if (TownDummies[I].Mesh.Get() == C) return I;
+	if (C) for (int32 I = 0; I < TownDummies.Num(); ++I) if (TownDummies[I].Mesh.Get() == C || TownDummies[I].Body.Get() == C) return I;
 	return -1;
 }
 

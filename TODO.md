@@ -115,7 +115,7 @@ Done in phases, a PR each ([Brokenspire](docs/levels/brokenspire.md#the-list-of-
 
 Built and tested (`884 planks`, `storage`, `block8` (`test_b8b`; `test_b8`'s block8 failed on the turn, 56 degrees of 60); `888 rain8`, `sky8`, `fields8`, `ground8`, `animals8`, `speed8`; `868 block`); still to test or do:
 
-- [x] **`884 dummies` passes** (`test_t13b`, 2026-11-14). In `test_t13a` the bolt at one town's dummy missed again: no spot 6 m out had a clear line to it, and the test fired from its fallback angle through what stood between. It now also tries 4.5 and 3 m and records the line's first hit.
+- [x] **`884 dummies` passes** (`test_t13b`, 2026-11-14). In `test_t13a` the bolt at one town's dummy missed again: no spot 6 m out had a clear line to it, and the test fired from its fallback angle through what stood between. It now also tries 4.5 and 3 m and records the line's first hit. The real cause (`test_t13j`, `test_t13l`): the bolt flew through the dummy's straw body, whose simple collision is its post alone, and struck the target behind it; each dummy has a capsule body for bolts now (`test_t13n` passes).
 - [ ] **`888 perf8` to run again:** its record was not kept, so the farms' frame rates quoted for it (37 to 39 a second, 39 to 42 with the crops hidden) have no record behind them.
 
 - [ ] **The packaged game with this list:** packaged on 2026-11-08 (Shipping, `builds\mistward_castle`; every run of its `-Test` ok, the console reading `rd.WildRunSpeed` back), but no run went out to the farms, and whether `869` ran before it is not recorded: the crops' materials (the corn and potato plants', Bone Temple's and PureNature's) need the instanced-mesh usage. A Development package's log ("missing usage flag") would show it.
@@ -136,7 +136,7 @@ Built and tested (`884 list7`, `signs`, `gate`; `888 sky7`, `life7`, `ground7`, 
 
 - [ ] **The weather over a long session:** the tests set each weather; the game's own changes every 4 to 9 minutes (the next one's time is checked) have not been watched for an hour.
 - [ ] **The music's change after 5 to 10 minutes:** tested by asking for the next track at once and reading when the one after is due; no test has waited the minutes.
-- [ ] **A named save loaded from the Load page,** and two saves of the same name (the second overwrites the first).
+- [x] **A named save loaded from the Load page,** and two saves of the same name (the second overwrites the first): `884 load13` (`test_t13d`, 2026-11-14).
 - [x] **The town's rise and fall in the other towns** (Vel Morrath, Ashenreach, Graymourne): `884 others13` (`test_t13i`): +1.4 to -1.3 / -1.4 m in each, 0 under every building.
 
 ## Vel Morrath and its catacombs (2026-11-06, [docs/levels/vel_morrath.md](docs/levels/vel_morrath.md))
@@ -218,7 +218,7 @@ The review's finds, each checked (in play where it could be measured, else in th
 
 PR #26's second review, fixed in the TODO sweep (2026-11-14):
 
-- [x] **A quest panel opened before the wilds are ready kept its LATER line**: its lines are made again once the wilds are ready (`TickTownPanel`, `bTownLinesWildReady`). Read in the code only: `884 later13 -NoWildWait` (`test_t13c`) found the wilds ready before the town's people were there to open a panel, so the window could not be met in play.
+- [ ] **A quest panel opened before the wilds are ready kept its LATER line**: fixed in the code (its lines are made again once the wilds are ready, the cursor kept on its quest: `TickTownPanel`, `bTownLinesWildReady`), not shown in play: `884 later13 -NoWildWait` (`test_t13c`) found the wilds ready before the town's people were there to open a panel, so the window could not be met in play (the step fails when it is not met).
 - [x] **The den's pack by a word in the name**: the word must end the name's last word ("Dire Wolf", "HellDog"; not "Dogman" or "WolfRider"), and the weakest such kind is taken. The castle's table has its ripper dogs, so play is unchanged.
 
 ## The captain's wilderness quests (2026-11-07)

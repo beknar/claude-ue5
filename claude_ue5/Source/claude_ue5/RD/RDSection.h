@@ -326,6 +326,9 @@ public:
 	struct FTownDummy
 	{
 		TWeakObjectPtr<USceneComponent> Pivot; TWeakObjectPtr<UStaticMeshComponent> Mesh;
+		/** its body for bolts: a capsule round it on its pivot (query only, Visibility): a bolt's trace is simple, and the dummy's
+		 *  simple collision is its post alone, so bolts flew through its straw body (the TODO sweep, 884 dummies) */
+		TWeakObjectPtr<UPrimitiveComponent> Body;
 		FVector At = FVector::ZeroVector; FQuat Rest = FQuat::Identity; FName Kind;
 		float Radius = 40.f, Height = 180.f;
 		FVector Axis = FVector(0, 1, 0); float HitAt = -100.f, Amp = 0.f; int32 Hits = 0;
