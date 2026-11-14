@@ -3389,21 +3389,31 @@ def step_dummies():
         if str(g.get_editor_property("current_hero")) != hero: g.switch_hero(hero); yield from wait(1.0); refresh()
         for i, d in enumerate(ds[:2]):
             # (before it, 1.3 m off (a bolt: 6 m), facing it, on the barracks' side away from the door's lane)
-            off = 130.0 + d["r"] if kind == "melee" else 600.0
-            to_door = V(1.0, 0.0, 0.0)
-            ang = 0.0
-            for a_ in range(0, 360, 30):
-                pp = d["at"] + V(math.cos(math.radians(a_)), math.sin(math.radians(a_)), 0) * off
-                h = unreal.SystemLibrary.line_trace_single(G["w"], pp + V(0, 0, 100), d["at"] + V(0, 0, d["h"] * 0.6), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
-                h = h.to_tuple() if h else None
-                hc = h[10] if h else None; hm = hc.get_editor_property("static_mesh") if hc and isinstance(hc, unreal.StaticMeshComponent) else None
-                if h and h[0] and hm and ("Dummy" in hm.get_name() or "Target" in hm.get_name()): ang = a_; break
+            # (a bolt from 6 m, else 4.5 or 3 m: test_t13a's dummy had no clear line at 6 m on any side, and the bolt fired
+            # from the fallback met what stood between; the sight line's first hit is recorded)
+            ang = 0.0; clear = False
+            for off in ((130.0 + d["r"],) if kind == "melee" else (600.0, 450.0, 300.0)):
+                for a_ in range(0, 360, 30):
+                    pp = d["at"] + V(math.cos(math.radians(a_)), math.sin(math.radians(a_)), 0) * off
+                    h = unreal.SystemLibrary.line_trace_single(G["w"], pp + V(0, 0, 100), d["at"] + V(0, 0, d["h"] * 0.6), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+                    h = h.to_tuple() if h else None
+                    hc = h[10] if h else None; hm = hc.get_editor_property("static_mesh") if hc and isinstance(hc, unreal.StaticMeshComponent) else None
+                    if h and h[0] and hm and ("Dummy" in hm.get_name() or "Target" in hm.get_name()): ang = a_; clear = True; break
+                if clear: break
             pp = d["at"] + V(math.cos(math.radians(ang)), math.sin(math.radians(ang)), 0) * off
             yaw = math.degrees(math.atan2(d["at"].y - pp.y, d["at"].x - pp.x))
             put(V(pp.x, pp.y, d["at"].z), yaw=yaw); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4.0 if kind == "melee" else -1.0, yaw=yaw)); yield from wait(1.2)
-            h0 = dummies()[i]["hits"]
+            h0 = dummies()[i]["hits"]; a0 = cb().get_editor_property("attacks_made"); t0 = g.get_editor_property("town_dummy_hits")
+            # (what a straight line from her hand's height meets first on the way: the dummy, or something before it)
+            me = G["pawn"].get_actor_location()
+            hl = unreal.SystemLibrary.line_trace_single(G["w"], me + V(0, 0, 50), d["at"] + V(0, 0, 150 - (me.z - d["at"].z) + me.z - d["at"].z), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+            hl = hl.to_tuple() if hl else None
+            first = (hl[10].get_owner().get_name() + "." + hl[10].get_name() + ":" + (hl[10].get_editor_property("static_mesh").get_name() if isinstance(hl[10], unreal.StaticMeshComponent) and hl[10].get_editor_property("static_mesh") else "")) if hl and hl[0] and hl[10] else None
             yield from press("LeftMouseButton", 0.12)
             lean = yield from watch(i, 1.6)
+            if kind == "ranged":
+                res.setdefault("diag", []).append({"attacks": cb().get_editor_property("attacks_made") - a0, "town_hits": g.get_editor_property("town_dummy_hits") - t0, "first_on_line": first, "ang": ang, "off_cm": off, "clear": clear})
+                if dummies()[i]["hits"] == h0: shot(f"dummy_missed_{i}")
             if kind == "melee" and i == 0:
                 shot("dummy_struck"); yield from rwait(1.5)
             yield from rwait(2.5)
@@ -4737,6 +4747,379 @@ STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "
               "planks": step_planks, "dummies": step_dummies, "storage": step_storage, "block8": step_block8, "console": step_console,
               "storage9": step_storage9, "start9": step_start9, "backspace9": step_backspace9, "time9": step_time9, "noshield9": step_noshield9, "fight11": step_fight11, "console11": step_console11,
               "sky9": step_sky9, "sky10": step_sky10, "skyspin": step_skyspin, "cloudless": step_cloudless, "horizon": step_horizon, "sun10": step_sun10, "stair10": step_stair10, "see10": step_see10, "forge10": step_forge10, "lines10": step_lines10, "town10": step_town10, "animals10": step_animals10, "sleep10": step_sleep10, "people10": step_people10, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9, "spire": step_spire, "descendspire": step_descendspire, "heaven": step_heaven, "descendheaven": step_descendheaven})
+# ------------------------------------------------------------------------------------------------ the TODO sweep (2026-11-14)
+def wild_town_state():
+    p = str(G["gen"].get_wild_town_state()).split("|")
+    k = ["idx", "name", "loading", "section", "dist", "build_s", "loaded", "dropped", "in_walls", "ox", "oy", "home"]
+    return dict(zip(k, p))
+def save_state():
+    p = str(G["gen"].get_save_state()).split("|")
+    return {"written": int(p[0]), "slot": p[1], "why": p[2], "arrived": int(p[3])}
+def until_world(pred, sec=90):
+    """after a travel or a load: until a world whose path the predicate takes, with its generator (and her pawn) found"""
+    G["travel_until"] = time.time() + sec + 10
+    t0 = time.time()
+    while time.time() - t0 < sec:
+        yield
+        w = UES.get_game_world()
+        if w is None or not pred(w.get_path_name()): continue
+        refresh()
+        if G.get("gen") and G.get("pawn") and cb(): break
+    G["travel_until"] = 0
+def until_loaded(sec=120):
+    """a load: the level opened again and the save's place reached (the generator's LoadsArrived)"""
+    yield from until_world(lambda p: "brokenspire" in p, sec)
+    t0 = time.time()
+    while time.time() - t0 < sec:
+        yield
+        refresh()
+        try:
+            if G["gen"].is_wild_ready() and save_state()["arrived"] >= 1: break
+        except Exception: pass
+    yield from rwait(3.0); refresh()
+def menu_save(name):
+    """the Escape menu's Save page: a name, Enter (the player's way, as 888 save)"""
+    g = G["gen"]; g.set_menu_open(True); yield from rwait(0.3)
+    lines = [str(l) for l in g.get_menu_lines()]
+    g.activate_menu_line(next(i for i, l in enumerate(lines) if "Save the game" in l)); yield from rwait(0.3)
+    g.set_save_name_text(name); yield from press("Enter"); yield from rwait(0.6)
+    g.set_menu_open(False); yield from rwait(0.2)
+def menu_load_line(name_has):
+    """the Load page opened and the line of that save chosen (its index on the page)"""
+    g = G["gen"]; g.set_menu_open(True); yield from rwait(0.3)
+    lines = [str(l) for l in g.get_menu_lines()]
+    g.activate_menu_line(next(i for i, l in enumerate(lines) if "Load a game" in l)); yield from rwait(0.4)
+    page = [str(l) for l in g.get_menu_lines()]
+    k = next((i for i, l in enumerate(page) if name_has in l), -1)
+    return k, page
+def find_town(name):
+    """put near a town's middle until it is built round her (it is found then: the circles and the come-back list it)"""
+    yield from to_town(name)
+    yield from rwait(1.5)
+    return wild_town_state()
+
+def step_load13():
+    """the TODO's saves (2026-11-14): two saves of one name (the second overwrites the first: one line, her second place);
+    a save loaded from the Escape menu's Load page by its line (the player's way, not LoadGameFrom); a save made in Vel
+    Morrath loaded from Brokenspire builds Vel Morrath first and puts her where she saved"""
+    g = G["gen"]; res = {}; quiet(True)
+    sq = place("square")
+    # ---- two saves named alike, from two places
+    A = V(sq.x + 600, sq.y, 0); B = V(sq.x - 900, sq.y + 300, 0)
+    put(A); yield from wait(1.0); yield from menu_save("Sweep Dup")
+    put(B); yield from wait(1.0); yield from menu_save("Sweep Dup")
+    at_b = G["pawn"].get_actor_location()
+    slots = [str(s) for s in g.get_save_slots()]
+    res["dup_slots"] = [s for s in slots if "|Sweep Dup|" in s]
+    # ---- loaded from the Load page's line, after she has moved
+    put(A); g.add_gold(77, "test"); g0 = g.get_gold() - 77; yield from wait(1.0)
+    k, page = yield from menu_load_line("Sweep Dup")
+    res["load_line"] = page[k] if k >= 0 else None; res["page_lines"] = [l for l in page if "Sweep Dup" in l]
+    res["chosen"] = g.activate_menu_line(k) if k >= 0 else False
+    yield from until_loaded()
+    g = G["gen"]; p = G["pawn"].get_actor_location()
+    res["back_m"] = round(dist2(p, at_b) / 100.0, 1); res["gold_back"] = g.get_gold() == g0; res["after_load"] = save_state()
+    # ---- a save in Vel Morrath, loaded from Brokenspire
+    st = yield from find_town("Vel Morrath")
+    vp = place("square") or G["pawn"].get_actor_location()
+    put(V(vp.x + 400, vp.y, 0)); yield from wait(1.0); at_v = G["pawn"].get_actor_location()
+    yield from menu_save("Sweep Vel")
+    res["vel_info"] = str(g.get_save_info([s.split("|")[0] for s in (str(x) for x in g.get_save_slots()) if "|Sweep Vel|" in s][0]))
+    yield from find_town("Brokenspire")
+    res["before_load_town"] = wild_town_state()["name"]
+    k, page = yield from menu_load_line("Sweep Vel")
+    res["chosen_vel"] = g.activate_menu_line(k) if k >= 0 else False
+    yield from until_loaded(150)
+    st = wild_town_state(); p = G["pawn"].get_actor_location()
+    res["vel_after"] = {"town": st.get("name"), "loading": st.get("loading"), "in_walls": st.get("in_walls"), "from_save_m": round(dist2(p, at_v) / 100.0, 1),
+                        "in_town_walls": bool(G["gen"].is_in_town_walls(p))}
+    quiet(False)
+    ok = (len(res["dup_slots"]) == 1 and len(res["page_lines"]) == 1 and res["chosen"] and res["back_m"] < 10 and res["gold_back"]
+          and "Vel Morrath" in res["vel_info"] and res["before_load_town"] == "Brokenspire" and res["chosen_vel"]
+          and res["vel_after"]["town"] == "Vel Morrath" and res["vel_after"]["from_save_m"] < 10 and res["vel_after"]["in_town_walls"])
+    step_result("load13", ok, **res)
+
+def step_autosave13():
+    """the autosaves on Quit (the Escape menu's QUIT GAME, in a dry run: the autosave is written before the dry run returns)
+    and before the Mistgate (walked into: the castle's level opens; the autosave on disk says why "castle", made in
+    Brokenspire). Ends play in the castle: put it last"""
+    g = G["gen"]; res = {}; quiet(True)
+    sq = place("square"); put(V(sq.x + 300, sq.y, 0)); yield from wait(8.5)     # (past the autosaves' 8 s pause)
+    n0 = save_state()["written"]
+    g.set_editor_property("menu_dry_run", True)
+    try:
+        g.set_menu_open(True); yield from rwait(0.3)
+        lines = [str(l) for l in g.get_menu_lines()]
+        q = next((i for i, l in enumerate(lines) if "Quit" in l or "QUIT" in l), -1)
+        res["quit_line"] = lines[q] if q >= 0 else None
+        res["quit_ok"] = g.activate_menu_line(q) if q >= 0 else False
+        res["after_quit"] = save_state(); res["quit_info"] = str(g.get_save_info("autosave"))
+    finally:
+        g.set_editor_property("menu_dry_run", False); g.set_menu_open(False)
+    yield from rwait(0.5)
+    mg = place("mistgate")
+    put(V(mg.x, mg.y, 0))
+    yield from until_world(lambda p: "mistward_castle" in p, 60)
+    res["level"] = G["w"].get_path_name().split(".")[-1]
+    res["castle_info"] = str(G["gen"].get_save_info("autosave"))
+    quiet(False)
+    qi = res["quit_info"].split("|"); ci = res["castle_info"].split("|")
+    ok = (res["quit_ok"] and res["after_quit"]["why"] == "quit" and res["after_quit"]["written"] > n0 and len(qi) > 4 and qi[4] == "quit"
+          and "mistward_castle" in res["level"] and len(ci) > 4 and ci[4] == "castle" and "brokenspire" in ci[1])
+    step_result("autosave13", ok, **res)
+
+def step_continue13():
+    """the hero menu's CONTINUE (C, the pad's X): a save made (the newest), the menu level opened from play, C pressed there:
+    the save's level opens and she arrives where the save says (in Brokenspire, near the spot)"""
+    g = G["gen"]; res = {}; quiet(True)
+    sq = place("square"); put(V(sq.x - 500, sq.y - 400, 0)); yield from wait(1.0); at = G["pawn"].get_actor_location()
+    yield from menu_save("Sweep Continue")
+    slot = next((s.split("|")[0] for s in (str(x) for x in g.get_save_slots()) if "|Sweep Continue|" in s), None)
+    res["slot"] = slot
+    quiet(False)
+    GS.open_level(G["w"], "mistward_castle_select", True, "")
+    G["travel_until"] = time.time() + 70; sel = None; t0 = time.time()
+    while time.time() - t0 < 60:
+        yield
+        w = UES.get_game_world()
+        if w is None or "mistward_castle_select" not in w.get_path_name(): continue
+        ss = GS.get_all_actors_of_class(w, unreal.RDHeroSelect)
+        if ss and str(ss[0].get_editor_property("continue_slot")): sel = ss[0]; break
+    G["travel_until"] = 0
+    res["menu_slot"] = str(sel.get_editor_property("continue_slot")) if sel else None
+    res["menu_info"] = str(sel.get_editor_property("continue_info")) if sel else None
+    if sel:
+        yield from rwait(1.0)
+        sel.simulate_key(key("C"), True); yield from rwait(0.15)
+        try: sel.simulate_key(key("C"), False)
+        except Exception: pass
+        yield from until_loaded(150)
+        p = G["pawn"].get_actor_location()
+        res["arrived"] = save_state()["arrived"]; res["from_save_m"] = round(dist2(p, at) / 100.0, 1)
+        res["town"] = wild_town_state().get("name")
+    ok = bool(sel) and res["menu_slot"] == slot and res.get("arrived", 0) >= 1 and res.get("from_save_m", 99) < 10 and res.get("town") == "Brokenspire"
+    step_result("continue13", ok, **res)
+
+def step_respawn13():
+    """coming back to life in the nearest found town (WildRespawnAt): Vel Morrath found; then out in the wilds at a point
+    whose nearest town is one not found, nearer to Vel Morrath than to Brokenspire: killed, she comes back in Vel Morrath's
+    square (loaded at once), not in the nearer unfound town nor in Brokenspire"""
+    g = G["gen"]; res = {}; quiet(True)
+    towns = []
+    for i, l in enumerate(g.get_wild_town_lines()):
+        p = str(l).split("|"); towns.append({"i": i, "name": p[0], "x": float(p[2]), "y": float(p[3])})
+    yield from find_town("Vel Morrath")
+    vm = next(t for t in towns if t["name"] == "Vel Morrath"); bs = next(t for t in towns if t["name"] == "Brokenspire")
+    # (the point: on the line from Vel Morrath to the nearest other town not found, past half way (the lines' metres))
+    others = [t for t in towns if t["name"] not in ("Vel Morrath", "Brokenspire")]
+    ot = min(others, key=lambda t: math.hypot(t["x"] - vm["x"], t["y"] - vm["y"]))
+    best = None
+    for f in (0.62, 0.55, 0.7, 0.5, 0.75):
+        px, py = vm["x"] + (ot["x"] - vm["x"]) * f, vm["y"] + (ot["y"] - vm["y"]) * f
+        dv = math.hypot(px - vm["x"], py - vm["y"]); db = math.hypot(px - bs["x"], py - bs["y"]); do = math.hypot(px - ot["x"], py - ot["y"])
+        if do < dv and dv < db: best = (px, py, dv, db, do); break
+    res["other"] = ot["name"]; res["point_km"] = [round(best[0] / 1000.0, 1), round(best[1] / 1000.0, 1)] if best else None
+    if best: res["dist_km"] = {"vel": round(best[2] / 1000.0, 1), "brokenspire": round(best[3] / 1000.0, 1), "other": round(best[4] / 1000.0, 1)}
+    if not best: step_result("respawn13", False, **res); quiet(False); return
+    g.wild_put_her(best[0], best[1]); yield from rwait(4.0); refresh()
+    res["found_count"] = g.get_wild_found_count()
+    c = cb(); c.apply_damage(c.get_max_health() * 10 + 500, None); yield from wait(0.5)
+    res["dead"] = c.is_dead()
+    t0 = time.time()
+    while time.time() - t0 < 30 and cb().is_dead(): yield
+    t0 = time.time()
+    while time.time() - t0 < 120:
+        yield
+        st = wild_town_state()
+        if st.get("loading") == "0" and st.get("section") == "1": break
+    yield from rwait(2.0); refresh()
+    st = wild_town_state(); p = G["pawn"].get_actor_location()
+    res["back"] = {"town": st.get("name"), "in_walls": bool(g.is_in_town_walls(p)), "alive": not cb().is_dead(), "hp": round(cb().get_health(), 1)}
+    quiet(False)
+    ok = res["dead"] and res["back"]["town"] == "Vel Morrath" and res["back"]["in_walls"] and res["back"]["alive"]
+    step_result("respawn13", ok, **res)
+
+def step_circle13():
+    """the teleport circle's journey to another town: Vel Morrath found (its circle known), Brokenspire's circle takes her
+    there, Vel Morrath's back; refused while a monster is near her"""
+    g = G["gen"]; res = {}
+    yield from find_town("Vel Morrath")
+    yield from find_town("Brokenspire")
+    def circle_lines():
+        return [str(l).split("|") for l in g.get_town_panel_lines()]
+    def go(to):
+        g.open_town_panel("circle", -1); yield from rwait(0.3)
+        L = circle_lines(); i = next((k for k, p in enumerate(L) if p[0] == "travel" and to in p[1]), -1)
+        res.setdefault("lines", []).append([p[1] for p in L])
+        ok = g.activate_town_entry(i) if i >= 0 else False
+        g.close_town_panel()
+        return ok
+    # (refused in a fight: a monster set by her)
+    me = G["pawn"].get_actor_location()
+    mo = None
+    try:
+        mo = g.spawn_monster_named(str(g.get_editor_property("monsters")[0].name), V(me.x + 400, me.y, me.z), 1)
+    except Exception as e: res["spawn_error"] = str(e)
+    yield from wait(1.0)
+    res["combat"] = bool(g.is_wild_combat())
+    res["refused_ok"] = (yield from go("Vel Morrath"))
+    yield from rwait(1.0); res["after_refusal_town"] = wild_town_state().get("name")
+    res["refusal"] = str(g.get_wild_map_state()).split("|")[10] if len(str(g.get_wild_map_state()).split("|")) > 10 else None
+    if mo:
+        try: mo.apply_damage(1e7, None)
+        except Exception: pass
+    yield from wait(2.0)
+    res["went"] = (yield from go("Vel Morrath"))
+    t0 = time.time()
+    while time.time() - t0 < 120:
+        yield
+        st = wild_town_state()
+        if st.get("name") == "Vel Morrath" and st.get("loading") == "0" and st.get("section") == "1": break
+    yield from rwait(2.0); refresh(); g = G["gen"]
+    res["at_vel"] = {"town": wild_town_state().get("name"), "in_walls": bool(g.is_in_town_walls(G["pawn"].get_actor_location()))}
+    res["back_went"] = (yield from go("Brokenspire"))
+    t0 = time.time()
+    while time.time() - t0 < 120:
+        yield
+        st = wild_town_state()
+        if st.get("name") == "Brokenspire" and st.get("loading") == "0" and st.get("section") == "1": break
+    yield from rwait(2.0); refresh(); g = G["gen"]
+    res["at_home"] = {"town": wild_town_state().get("name"), "in_walls": bool(g.is_in_town_walls(G["pawn"].get_actor_location()))}
+    ok = (res["combat"] and not res["refused_ok"] and res["after_refusal_town"] == "Brokenspire" and res["went"] and res["at_vel"]["town"] == "Vel Morrath"
+          and res["at_vel"]["in_walls"] and res["back_went"] and res["at_home"]["town"] == "Brokenspire" and res["at_home"]["in_walls"])
+    step_result("circle13", ok, **res)
+
+def step_walls13():
+    """walking in through Ashenreach's and Graymourne's gates from the wilds: outside the map is the wilds' (its frame's kind
+    1), through the gate she is in the walls and M opens the town's own map (kind 2) with the town's name"""
+    g = G["gen"]; res = {}; quiet(True)
+    for name in ("Ashenreach", "Graymourne"):
+        r = {}
+        yield from find_town(name)
+        gate = place("gate"); sq = place("square")
+        if not gate or not sq: res[name] = {"gate": None}; continue
+        d = V(gate.x - sq.x, gate.y - sq.y, 0); n = math.hypot(d.x, d.y) or 1.0; d = V(d.x / n, d.y / n, 0)
+        out = V(gate.x + d.x * 3000, gate.y + d.y * 3000, 0)
+        yaw = math.degrees(math.atan2(-d.y, -d.x))
+        put(out, yaw=yaw)
+        yield from wait(2.0)
+        r["outside_walls"] = bool(g.is_in_town_walls(G["pawn"].get_actor_location()))
+        g.set_map_open(True); yield from rwait(0.4); r["map_outside"] = str(g.get_map_frame()).split("|")[0]; g.set_map_open(False); yield from rwait(0.2)
+        # (walked in: her move input toward the square, through the gate, up to 40 s)
+        t0 = time.time(); inside = False
+        while time.time() - t0 < 40:
+            pw = G["pawn"]; p = pw.get_actor_location()
+            to = V(sq.x - p.x, sq.y - p.y, 0); m = math.hypot(to.x, to.y) or 1.0
+            pw.add_movement_input(V(to.x / m, to.y / m, 0), 1.0, False)
+            if g.is_in_town_walls(p) and dist2(p, gate) > 600: inside = True; break
+            yield
+        r["walked_in"] = inside; r["walk_s"] = round(time.time() - t0, 1)
+        yield from rwait(1.0)
+        st = wild_town_state(); r["town"] = st.get("name"); r["in_walls_state"] = st.get("in_walls")
+        g.set_map_open(True); yield from rwait(0.5); r["map_inside"] = str(g.get_map_frame()).split("|")[0]
+        shot(f"walls13_{name}_map", "1280x720"); yield from rwait(1.2); g.set_map_open(False); yield from rwait(0.2)
+        res[name] = r
+    quiet(False)
+    ok = all(isinstance(res.get(n), dict) and not res[n].get("outside_walls", True) and res[n].get("map_outside") == "1" and res[n].get("walked_in")
+             and res[n].get("town") == n and res[n].get("map_inside") == "2" for n in ("Ashenreach", "Graymourne"))
+    step_result("walls13", ok, **res)
+
+def step_others13():
+    """the other towns' boards, dummies and the ground's rise and fall (Vel Morrath, Ashenreach, Graymourne): the board's
+    three bounties, a training dummy struck by the Warrior's sword (it counts and leans), the open ground rising and falling
+    (flat under every building)"""
+    g = G["gen"]; res = {}; quiet(True)
+    if str(g.get_editor_property("current_hero")) != "Warrior": g.switch_hero("Warrior"); yield from wait(1.0); refresh(); g = G["gen"]
+    for name in ("Vel Morrath", "Ashenreach", "Graymourne"):
+        r = {}
+        yield from find_town(name); g = G["gen"]; S = section()
+        bd = place("board")
+        r["board_spot"] = bd is not None
+        if bd:
+            put(bd); yield from wait(0.3); g.open_town_panel("board", -1); yield from rwait(0.3)
+            r["bounties"] = [p[1] for p in panel() if p[0] == "accept"]; g.close_town_panel(); yield from rwait(0.2)
+        # (the board posts three at a time of those the town's own table has: each city's city.json has one bounty (test_t13e))
+        cj = os.path.join(r"E:\code\claude-ue5\claude_ue5\SourceArt", {"Vel Morrath": "vel_morrath"}.get(name, name.lower()), "city.json")
+        try: r["board_table"] = sum(1 for q in json.load(open(cj, encoding="utf-8")).get("quests", []) if q.get("giver") == "Board")
+        except Exception as e: r["board_table"] = None; r["board_table_error"] = str(e)
+        ds = dummies(); r["dummies"] = len(ds)
+        if ds:
+            d = ds[0]; ang = 0.0
+            for a_ in range(0, 360, 30):
+                pp = d["at"] + V(math.cos(math.radians(a_)), math.sin(math.radians(a_)), 0) * (130.0 + d["r"])
+                h = unreal.SystemLibrary.line_trace_single(G["w"], pp + V(0, 0, 100), d["at"] + V(0, 0, d["h"] * 0.6), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+                h = h.to_tuple() if h else None
+                hc = h[10] if h else None; hm = hc.get_editor_property("static_mesh") if hc and isinstance(hc, unreal.StaticMeshComponent) else None
+                if h and h[0] and hm and ("Dummy" in hm.get_name() or "Target" in hm.get_name()): ang = a_; break
+            pp = d["at"] + V(math.cos(math.radians(ang)), math.sin(math.radians(ang)), 0) * (130.0 + d["r"])
+            yaw = math.degrees(math.atan2(d["at"].y - pp.y, d["at"].x - pp.x))
+            put(V(pp.x, pp.y, d["at"].z), yaw=yaw); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4.0, yaw=yaw)); yield from wait(1.2)
+            h0 = dummies()[0]["hits"]; yield from press("LeftMouseButton", 0.12)
+            # (the swing's peak comes 0.15 s after the blow: at a city's 8 to 15 frames a second the samples missed it (2.3 and 2.7
+            # degrees in test_t13g, 7.9 and 8.8 in test_t13e): the game slowed four times while it is watched)
+            GS.set_global_time_dilation(G["w"], 0.25)
+            try:
+                best = 0.0; t0 = time.time()
+                while time.time() - t0 < 3.0: best = max(best, dummies()[0]["lean"]); yield
+            finally: GS.set_global_time_dilation(G["w"], 1.0)
+            r["dummy"] = {"hits": dummies()[0]["hits"] - h0, "lean_max": round(best, 1)}
+        # (the rise and fall: the section's lift over a 9 m grid, and under the buildings' middles)
+        L0 = S.get_actor_location(); mx = -1e9; mn = 1e9
+        for i in range(4, 164, 3):
+            for j in range(4, 164, 3):
+                hh = S.get_town_lift_at(V(L0.x + (i + 0.5) * 300, L0.y + (j + 0.5) * 300, 0)); mx = max(mx, hh); mn = min(mn, hh)
+            if i % 30 == 4: yield
+        under = [abs(S.get_town_lift_at(b["c"])) for b in blds()]
+        r["lift_cm"] = {"max": round(mx, 1), "min": round(mn, 1), "under_buildings_max": round(max(under, default=0.0), 1)}
+        res[name] = r
+    quiet(False)
+    ok = all(res[n].get("board_table") and len(res[n].get("bounties", [])) == min(3, res[n]["board_table"]) and res[n]["dummies"] >= 1 and res[n].get("dummy", {}).get("hits", 0) >= 1 and res[n]["dummy"]["lean_max"] > 3.0
+             and res[n]["lift_cm"]["max"] - res[n]["lift_cm"]["min"] > 50 and res[n]["lift_cm"]["under_buildings_max"] < 1.0 for n in ("Vel Morrath", "Ashenreach", "Graymourne"))
+    step_result("others13", ok, **res)
+
+def step_later13():
+    """PR #26's second review: a quest panel opened before the wilds are ready shows a captain's wilderness quest LATER; its
+    lines are made again once they are ready, without opening it again (TickTownPanel). Run first, at play's start"""
+    g = G["gen"]; res = {}
+    cap = None; t0 = time.time()
+    while time.time() - t0 < 30 and not cap:
+        try: cap = next((f for f in folk() if f["role"] == "Captain"), None)
+        except Exception: cap = None
+        yield
+    res["ready_at_open"] = bool(g.is_wild_ready())
+    if not cap: step_result("later13", False, error="no captain"); return
+    g.open_town_panel("talk", cap["i"]); yield from rwait(0.2)
+    res["first"] = [p[0] + ":" + p[1] for p in panel() if p[0] in ("later", "accept")]
+    t0 = time.time()
+    while time.time() - t0 < 60 and not g.is_wild_ready(): yield
+    yield from rwait(0.5)
+    res["after"] = [p[0] + ":" + p[1] for p in panel() if p[0] in ("later", "accept")]
+    res["panel_open"] = bool(g.is_town_panel_open()); g.close_town_panel()
+    ok = res["panel_open"] and not any(x.startswith("later:") for x in res["after"]) and any(x.startswith("accept:") for x in res["after"])
+    # (opened after the wilds were ready the test proves nothing about the change: said so)
+    res["proved_change"] = (not res["ready_at_open"]) and any(x.startswith("later:") for x in res["first"])
+    step_result("later13", ok, **res)
+def step_cityfps13():
+    """the cities' frame rates settled (the TODO: 2 to 31 a second read just after each city was built round her): in each city's
+    square, a minute after it is built, the frames of 15 s (the play window of 1280 x 720), and a noon picture"""
+    g = G["gen"]; res = {}; quiet(True)
+    g.set_town_hour(12.0)
+    for name in ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne", "Kethrys Spire", "Heaven"):
+        yield from find_town(name); g = G["gen"]
+        sq = place("square")
+        if sq: put(sq, yaw=0.0)
+        yield from rwait(60.0)
+        n = 0; t0 = time.time(); worst = 0.0; last = t0
+        while time.time() - t0 < 15.0:
+            yield; t = time.time(); worst = max(worst, t - last); last = t; n += 1
+        res[name] = {"fps": round(n / (time.time() - t0), 1), "worst_ms": round(worst * 1000)}
+        shot("cityfps13_" + name.replace(" ", "_"), "1280x720"); yield from rwait(1.2)
+    quiet(False)
+    step_result("cityfps13", all(v["fps"] > 0 for v in res.values()), **res)
+STEPS.update({"cityfps13": step_cityfps13})
+STEPS.update({"load13": step_load13, "autosave13": step_autosave13, "continue13": step_continue13, "respawn13": step_respawn13, "circle13": step_circle13,
+              "walls13": step_walls13, "others13": step_others13, "later13": step_later13})
+
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     # (every dungeon's way open for the steps that go down (the list of 2026-11-08b's keys); keys9 shuts them for itself)

@@ -1,0 +1,31 @@
+{
+ "tag": "t13c",
+ "plan": [
+  "later13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "later13",
+   "ok": true,
+   "ready_at_open": true,
+   "first": [
+    "accept:Quest: Thin the Horde",
+    "accept:Quest: Cells Under the Keep",
+    "accept:Quest: Wolves on the Mill Road",
+    "accept:Quest: The Lost Patrol"
+   ],
+   "after": [
+    "accept:Quest: Thin the Horde",
+    "accept:Quest: Cells Under the Keep",
+    "accept:Quest: Wolves on the Mill Road",
+    "accept:Quest: The Lost Patrol"
+   ],
+   "panel_open": true,
+   "proved_change": false
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "windows_shown_again": 0
+}

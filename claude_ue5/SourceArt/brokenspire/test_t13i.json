@@ -1,0 +1,67 @@
+{
+ "tag": "t13i",
+ "plan": [
+  "others13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "others13",
+   "ok": true,
+   "Vel Morrath": {
+    "board_spot": true,
+    "bounties": [
+     "Quest: Bounty: Clear the Ossuary"
+    ],
+    "board_table": 1,
+    "dummies": 2,
+    "dummy": {
+     "hits": 1,
+     "lean_max": 3.7
+    },
+    "lift_cm": {
+     "max": 140.0,
+     "min": -140.0,
+     "under_buildings_max": 0.0
+    }
+   },
+   "Ashenreach": {
+    "board_spot": true,
+    "bounties": [
+     "Quest: Bounty: Iron Hounds"
+    ],
+    "board_table": 1,
+    "dummies": 2,
+    "dummy": {
+     "hits": 1,
+     "lean_max": 8.9
+    },
+    "lift_cm": {
+     "max": 140.0,
+     "min": -131.4,
+     "under_buildings_max": 0.0
+    }
+   },
+   "Graymourne": {
+    "board_spot": true,
+    "bounties": [
+     "Quest: Bounty: The Outfall Rats"
+    ],
+    "board_table": 1,
+    "dummies": 2,
+    "dummy": {
+     "hits": 1,
+     "lean_max": 4.7
+    },
+    "lift_cm": {
+     "max": 139.3,
+     "min": -140.0,
+     "under_buildings_max": 0.0
+    }
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "windows_shown_again": 0
+}
