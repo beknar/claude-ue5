@@ -77,7 +77,8 @@ void ARDDungeonGenerator::StartWild()
 	const TArray<FRDWildBiome> Biomes = WildBiomes;
 	const TArray<FRDWildPoiKind> Pois = WildPoiKinds; const float Fill = WildPoiFill;
 	const bool bPortSea = bPortWaterOpen;          // (the list of 2026-11-11: Graymourne's harbour open to the sea)
-	WildStream->Init = Async(EAsyncExecution::Thread, [W, Biomes, Seed, Pois, Fill, bPortSea]() { W->PoiKinds = Pois; W->PoiFill = Fill; W->bPortSea = bPortSea; W->Init(Seed, Biomes); });
+	const TArray<FRDWildSiteKind> Sites = WildSiteKinds; const float SFill = WildSiteFill;          // (the list of 2026-11-12: the structures)
+	WildStream->Init = Async(EAsyncExecution::Thread, [W, Biomes, Seed, Pois, Fill, bPortSea, Sites, SFill]() { W->PoiKinds = Pois; W->PoiFill = Fill; W->SiteKinds = Sites; W->SiteFill = SFill; W->bPortSea = bPortSea; W->Init(Seed, Biomes); });
 	UE_LOG(LogRDWild, Log, TEXT("RDWILD the world asked for (seed %u, %d biomes)"), Seed, Biomes.Num());
 }
 

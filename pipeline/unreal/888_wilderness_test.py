@@ -18,6 +18,11 @@ Steps:
   lairs12 (2026-11-12, 924 lairs) the lairs hidden behind something: each cover among the world's lairs, the nearest of each
           visited: its monsters inside it, how many sight lines to them its pieces block from 30 m and 15 m, woken they come
           out to her by its opening; a picture of each (lairs12=<cover>+<cover> for some)
+  sites12 (2026-11-12, 924 sites) the 34 structures: each among the world's structures, every quest among them; the nearest of
+          each visited (pieces, chest, guards, prisoners freed with F, a trap stepped on, the giver, the beast's walk), a picture
+          (sites12=<kind>+<kind> for some; run in three batches)
+  quests12 (2026-11-12, 924 quests) the 25 quests, each at its nearest structure, played through as a player does; its gold
+          paid (quests12=<quest>+<quest> for some; run in batches)
   gait12  (2026-11-12, 915) the horse's walk, canter and gallop ridden on the plains: each gait's clip, rate and strides a
           second, its hooves measured in the world (no slide while down), her rider clip by the gait; pictures from the side
   poi7    (2026-11-09, 912) the points of interest: the seconds between them along 14 lines of the world's model, a 150 s
@@ -1430,6 +1435,309 @@ def step_lairs12():
                 and v.get("woken_side_m") and v["woken_side_out_m"] > v["laid"]["reach_m"]
                 for k, v in res["covers"].items())
     step_result("lairs12", ok, **res)
+
+
+def step_sites12():
+    """the list of 2026-11-12's fifth phase (924 sites, RD/RDWildSite12.cpp): the structures that hold its quests ("cave system,
+    canyon or gorge, cliff face or aerie ... a titan's carcass ... a rift or portal scar"; "those structures can have containers,
+    traps, hold prisoners"). Every kind among the world's structures within 150 km of Brokenspire (CountWildSites, and every
+    quest among them); then the nearest of each kind (sites12=<kind>+<kind> for some) visited: she is put 45 m before its front on
+    gentle ground, the chunks made, and what was laid read: its pieces (none walked through, none over the ground by more than
+    its part raised it, none gone), its chest, its guards standing (none inside a piece), its prisoners and traps, its quest's
+    giver; a picture from where she stands; a prisoner freed with F (the cage gone, gold given), a trap stepped on (a wound and
+    a slow); the living beast walks its round"""
+    g = G["gen"]; res = {"kinds": {}}; quiet(True)
+    yield from wait_ready(90)
+    kinds = [str(k.get_editor_property("name")) for k in g.get_editor_property("wild_site_kinds")]
+    res["table"] = len(kinds)
+    cnt = {}
+    for l in g.count_wild_sites(0.0, 0.0, 150.0):
+        a_, b_ = str(l).rsplit("|", 1); cnt[a_] = int(b_)
+    res["counts"] = {k: v for k, v in cnt.items() if not k.startswith("quest:")}
+    res["quests"] = {k[6:]: v for k, v in cnt.items() if k.startswith("quest:")}
+    want = G.get("look_only") or kinds
+    def gentle(x, y):
+        s0 = sample(x, y)
+        if s0["water"]: return False
+        return all(abs(sample(x + dx, y + dy)["h"] - s0["h"]) < 1.2 for dx, dy in ((3, 0), (-3, 0), (0, 3), (0, -3)))
+    try:
+        for kd in want:
+            r = {}
+            f = str(g.find_wild_site(kd, "None", 0.0, 0.0, 150.0))
+            if not f: res["kinds"][kd] = {"found": False}; continue
+            sid, cx, cy, yw, nm = f.split("|", 4); sid = int(sid); cx = float(cx); cy = float(cy); yw = float(yw)
+            r.update({"found": True, "id": sid, "at_km": [round(cx / 1000.0, 2), round(cy / 1000.0, 2)], "name": nm})
+            spot = None
+            for rr in (45.0, 55.0, 38.0):
+                for a in [yw + d_ for d_ in (0, 40, -40, 80, -80, 120, -120, 180)]:
+                    sx, sy = cx + rr * math.cos(math.radians(a)), cy + rr * math.sin(math.radians(a))
+                    if gentle(sx, sy): spot = (sx, sy); break
+                if spot: break
+            spot = spot or (cx + 45.0, cy)
+            msgs = []
+            try: cb().set_editor_property("message", "")
+            except Exception: pass
+            g.wild_put_her(*spot); yield from watching(wait_chunks(30, 50), msgs); yield from watching(rwait(2.0), msgs)
+            lines = [str(l).split("|") for l in g.get_wild_site_lines()]
+            mine = next((p for p in lines if int(p[1]) == sid), None)
+            if mine:
+                r["laid"] = {"kind": mine[2], "pieces": int(mine[6]), "boxes": int(mine[7]), "guards_standing": int(mine[8]), "guards_in_a_piece": int(mine[9]),
+                             "prisoners": int(mine[10]), "traps": int(mine[12])}
+            K = next((k for k in g.get_editor_property("wild_site_kinds") if str(k.get_editor_property("name")) == kd), None)
+            r["table"] = {"guards": K.get_editor_property("guards"), "prisoners": K.get_editor_property("prisoners"), "traps": K.get_editor_property("traps")} if K else {}
+            pcs = [str(l).split("|") for l in g.get_wild_site_piece_lines(sid)]
+            r["pieces_gone"] = sum(1 for q in pcs if q[0] == "gone")
+            r["walked_through"] = sorted(set(q[0] for q in pcs if len(q) > 6 and q[6] == "0"))
+            r["floating"] = sorted(set(q[0] for q in pcs if q[0] != "gone" and len(q) > 7 and float(q[7]) >= 0 and float(q[3]) - float(q[5]) > float(q[7]) + 2.0))
+            boxes, _f, _b = box_lines()
+            r["chests"] = sum(1 for b in boxes if (5 << 40) <= b["key"] < (6 << 40) and math.hypot(b["x"] / 100.0 - cx, b["y"] / 100.0 - cy) < 70.0)
+            folk = [str(l).split("|") for l in g.get_wild_quest_folk_lines(sid)]
+            r["giver"] = next((q[1] for q in folk if q[0] == "giver"), "")
+            # (the picture: the camera at its middle 3 m up, a clear line found as for the lairs)
+            ax, ay, up = cx, cy, 300.0
+            if kd == "beastback":
+                # (the beast walks its round 45 m about the middle: she stands 40 m off the beast itself, the camera on it)
+                bl = [str(l).split("|") for l in g.get_wild_beast_lines() if str(l).split("|")[1] == str(sid)]
+                if bl:
+                    ax, ay, up = float(bl[0][2]) / 100.0, float(bl[0][3]) / 100.0, 450.0
+                    p = G["pawn"].get_actor_location(); dx, dy = p.x / 100.0 - ax, p.y / 100.0 - ay; dl = math.hypot(dx, dy) or 1.0
+                    sx, sy = ax + dx / dl * 40.0, ay + dy / dl * 40.0
+                    G["pawn"].set_actor_location(V(sx * 100.0, sy * 100.0, sample(sx, sy)["z"] + 100.0), False, True); yield from watching(rwait(0.8), msgs)
+            gz0 = sample(ax, ay)["z"]
+            p = G["pawn"].get_actor_location()
+            pitch = max(-25.0, min(12.0, math.degrees(math.atan2(gz0 + up - (p.z + 200.0), math.hypot(ax * 100.0 - p.x, ay * 100.0 - p.y))) - 4.0))
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=pitch, yaw=math.degrees(math.atan2(ay * 100.0 - p.y, ax * 100.0 - p.x))))
+            yield from watching(rwait(1.5), msgs); shot(f"sites12_{kd}", "1280x720"); yield from watching(rwait(1.0), msgs)
+            # (a prisoner freed: she is put by it and presses F)
+            things = [str(l).split("|") for l in g.get_wild_site_thing_lines(sid)]
+            pr = [t_ for t_ in things if t_[0] == "prisoner" and t_[3] == "0"]
+            if pr:
+                px_, py_ = float(pr[0][1]), float(pr[0][2])
+                gold0 = g.get_gold() if hasattr(g, "get_gold") else 0
+                # (on the cage's outer side, away from the structure's middle and its chest)
+                ox, oy = px_ / 100.0 - cx, py_ / 100.0 - cy; ol = math.hypot(ox, oy) or 1.0
+                qx, qy = px_ / 100.0 + ox / ol * 1.5, py_ / 100.0 + oy / ol * 1.5
+                G["pawn"].set_actor_location(V(qx * 100.0, qy * 100.0, sample(qx, qy)["z"] + 100.0), False, True); yield from rwait(0.6)
+                r["free_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from watching(rwait(0.8), msgs)
+                after = [str(l).split("|") for l in g.get_wild_site_thing_lines(sid)]
+                r["freed"] = sum(1 for t_ in after if t_[0] == "prisoner" and t_[3] == "1")
+                r["gold_from_prisoner"] = (g.get_gold() - gold0) if hasattr(g, "get_gold") else None
+            # (a trap stepped on: her hit points and the trap's count)
+            tr = [t_ for t_ in things if t_[0] == "trap"]
+            if tr:
+                tx_, ty_ = float(tr[0][1]), float(tr[0][2])
+                cb().set_health(cb().get_max_health()); hp0 = cb().get_health(); n0 = cb().get_editor_property("traps_hurt")
+                G["pawn"].set_actor_location(V(tx_, ty_, sample(tx_ / 100.0, ty_ / 100.0)["z"] + 100.0), False, True); yield from watching(rwait(1.2), msgs)
+                r["trap"] = {"hurt": cb().get_editor_property("traps_hurt") - n0, "hp_lost": round(hp0 - cb().get_health(), 1)}
+                cb().set_health(cb().get_max_health())
+            if kd == "beastback":
+                b0 = [str(l).split("|") for l in g.get_wild_beast_lines() if str(l).split("|")[1] == str(sid)]
+                yield from rwait(3.0)
+                b1 = [str(l).split("|") for l in g.get_wild_beast_lines() if str(l).split("|")[1] == str(sid)]
+                r["beast_moved_m"] = round(math.hypot(float(b1[0][2]) - float(b0[0][2]), float(b1[0][3]) - float(b0[0][3])) / 100.0, 2) if b0 and b1 else None
+                # (which way it faces: its body to its head bone, against the way it moved; within 30 degrees)
+                if b0 and b1 and len(b1[0]) > 7:
+                    mvx, mvy = float(b1[0][2]) - float(b0[0][2]), float(b1[0][3]) - float(b0[0][3])
+                    hx, hy = float(b1[0][6]) - float(b1[0][2]), float(b1[0][7]) - float(b1[0][3])
+                    r["beast_head_off_deg"] = round(abs((math.degrees(math.atan2(hy, hx) - math.atan2(mvy, mvx)) + 180.0) % 360.0 - 180.0), 1)
+            r["told"] = " | ".join(msgs)
+            res["kinds"][kd] = r
+            g.wild_drop_all(); yield from rwait(0.5)
+    finally:
+        quiet(False)
+    g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    seen = [k for k, v in res["kinds"].items() if v.get("found")]
+    def good(k, v):
+        L = v.get("laid") or {}; T = v.get("table") or {}
+        return (L.get("kind") == k and L.get("pieces", 0) >= 3 and v["chests"] >= 1 and not v["walked_through"] and not v["floating"] and v["pieces_gone"] == 0
+                and L.get("guards_standing", -1) >= T.get("guards", 0) and L.get("guards_in_a_piece", 1) == 0 and L.get("prisoners", -1) >= T.get("prisoners", 0)
+                and L.get("traps", -1) >= T.get("traps", 0) and v["giver"] != "" and (T.get("prisoners", 0) == 0 or v.get("freed", 0) >= 1)
+                and (T.get("traps", 0) == 0 or (v.get("trap") or {}).get("hurt", 0) >= 1) and (k != "beastback" or ((v.get("beast_moved_m") or 0) > 1.0 and v.get("beast_head_off_deg") is not None and v["beast_head_off_deg"] <= 30.0)))
+    res["failed"] = [k for k, v in res["kinds"].items() if v.get("found") and not good(k, v)]
+    ok = res["table"] >= 34 and all(res["counts"].get(k, 0) > 0 for k in kinds) and len(seen) == len(want) and not res["failed"] and len(res["quests"]) >= 25
+    step_result("sites12", ok, **res)
+
+
+def step_quests12():
+    """the list of 2026-11-12's fifth phase (924 quests, RD/RDWildQuest12.cpp): its 25 quests, each at the nearest structure that
+    holds it (quests12=<quest>+<quest> for some), played through as a player does: F on its giver (the quest taken), then each
+    stage by its own means: F on the one to talk to (or one side of a choice), coming to its point, its monsters killed (blows of
+    the game's own damage), its things taken with F (at night for the moonbloom: the clock moved), a beast beaten down and bound,
+    a wild horse walked up to three times, someone walked home while they follow her (the game sped up), a place held against
+    its waves, medicine brought to a town in time, a storm weathered in a shelter; each stage's line and its twist read as it
+    comes; done when the quest says so, its gold paid"""
+    g = G["gen"]; res = {"quests": {}}; quiet(True)
+    yield from wait_ready(90)
+    quests = [str(q.get_editor_property("name")) for q in g.get_editor_property("wild_quests")]
+    res["table"] = len(quests)
+    want = G.get("look_only") or quests
+    W = G["w"]
+    def con(c): unreal.SystemLibrary.execute_console_command(W, c)
+    def run_line(sid):
+        for l in g.get_wild_quest_run_lines():
+            p_ = str(l).split("|")
+            if int(p_[1]) == sid: return p_
+        return None
+    def put(x, y): G["pawn"].set_actor_location(V(x * 100.0, y * 100.0, sample(x, y)["z"] + 110.0), False, True)
+    def go(x, y, msgs):
+        # (a point more than 1.5 km off: put there by the game, its chunks made, as a journey would; else stepped to)
+        p_ = G["pawn"].get_actor_location()
+        if math.hypot(p_.x / 100.0 - x, p_.y / 100.0 - y) > 1500.0:
+            g.wild_put_her(x, y); yield from watching(wait_chunks(30, 50), msgs); yield from watching(rwait(1.5), msgs)
+        else: put(x, y)
+    def folk(sid): return [str(l).split("|") for l in g.get_wild_quest_folk_lines(sid)]
+    def stage_things(sid): return [str(l).split("|") for l in g.get_wild_quest_thing_lines(sid)]
+    def kill_near(x, y, rr=60.0):
+        n_ = 0
+        for m in g.get_monsters():
+            if m and not m.is_dead() and math.hypot(m.get_actor_location().x / 100.0 - x, m.get_actor_location().y / 100.0 - y) < rr:
+                m.apply_damage(1e7, G["pawn"]); n_ += 1
+        return n_
+    try:
+        for qn in want:
+            r = {"stages": []}
+            f = str(g.find_wild_site("None", qn, 0.0, 0.0, 150.0))
+            if not f: res["quests"][qn] = {"found": False}; continue
+            sid, cx, cy, yw, nm = f.split("|", 4); sid = int(sid); cx = float(cx); cy = float(cy)
+            r.update({"found": True, "site": sid, "at_km": [round(cx / 1000.0, 2), round(cy / 1000.0, 2)], "structure": nm})
+            msgs = []
+            try: cb().set_editor_property("message", "")
+            except Exception: pass
+            gold0 = g.get_gold()
+            if qn == "tame":
+                # (a bay bought before (the stable's own state: bHorseOwned), so the tamed grey is her second mount)
+                gi_ = unreal.GameplayStatics.get_game_instance(W)
+                gi_.set_editor_property("horse_owned", True); gi_.set_editor_property("tamed_only", False); gi_.set_editor_property("ride_tamed", False)
+            g.wild_put_her(cx + 12.0, cy); yield from watching(wait_chunks(30, 50), msgs); yield from watching(rwait(1.5), msgs)
+            # (the giver: F beside them)
+            gv = next((q for q in folk(sid) if q[0] == "giver"), None)
+            if not gv: r["error"] = "no giver"; res["quests"][qn] = r; continue
+            G["pawn"].set_actor_location(V(float(gv[2]) + 140.0, float(gv[3]), float(gv[4]) + 20.0), False, True); yield from rwait(0.5)
+            r["take_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from watching(rwait(0.8), msgs)
+            t0 = time.time(); last = None; tries = 0
+            while time.time() - t0 < 240.0:
+                L = run_line(sid)
+                if not L: break
+                st = int(L[3])
+                if st >= 90: break
+                do, px, py = L[4], float(L[8]), float(L[9])
+                # (a stage not begun yet has no point: wait for the game's tick (a begun stage's (0, 0) is Brokenspire's, a town goal))
+                if len(L) > 15 and L[15] == "0":
+                    # (a stage is begun within 4 km of the structure or its point: far off (at a ruin 12 km away, the giver's
+                    # stage next) she goes back to the structure, as a player would)
+                    p_ = G["pawn"].get_actor_location()
+                    if math.hypot(p_.x / 100.0 - cx, p_.y / 100.0 - cy) > 3500.0: yield from go(cx + 12.0, cy, msgs)
+                    yield from rwait(0.4); continue
+                if (st, do) != last:
+                    last = (st, do); tries = 0
+                    r["stages"].append({"stage": st, "do": do, "hint": L[14], "point_m_from_site": round(math.hypot(px - cx, py - cy), 1)})
+                tries += 1
+                if tries > 40: r["stuck"] = {"stage": st, "do": do, "line": L}; break
+                cb().set_health(cb().get_max_health())
+                if do == "goto" or do == "survive":
+                    yield from go(px, py, msgs)
+                    # (the storm's two minutes in the shelter, the game four times as fast)
+                    if do == "survive": con("rd.GameSpeed 4"); tries -= 0.9; r["stages"][-1]["weather"] = g.get_weather()
+                    yield from watching(rwait(1.0), msgs)
+                elif do in ("talk", "choose", "deliver"):
+                    if do == "deliver":
+                        g.wild_put_her(px + 30.0, py); yield from watching(wait_chunks(30, 40), msgs); yield from watching(rwait(2.0), msgs)
+                        continue
+                    role = "b" if (do == "choose" and qn in ("clearing",)) else "a" if do == "choose" else None
+                    fl = folk(sid)
+                    who = next((q for q in fl if (role and q[0] == role)), None) if role else None
+                    if not who:
+                        # (the one this stage names: the newest that is not the giver, else the giver)
+                        who = next((q for q in reversed(fl) if q[0] != "giver" and q[0] not in ("a", "b")), None) if do == "talk" else None
+                        if do == "talk" and (not who or "giver" in L[14].lower() or any(w_ in L[14].lower() for w_ in ("tell", "report", "bring the", "speak with the spirit"))):
+                            who = next((q for q in fl if q[0] == "giver"), who)
+                    if not who: yield from rwait(0.5); continue
+                    G["pawn"].set_actor_location(V(float(who[2]) + 140.0, float(who[3]), float(who[4]) + 20.0), False, True); yield from rwait(0.5)
+                    r["stages"][-1]["f"] = str(g.interact_nearest(G["pawn"].get_actor_location()))
+                    if do == "choose": r["choice"] = role
+                    yield from watching(rwait(0.8), msgs)
+                elif do == "kill":
+                    yield from go(px + 10.0, py, msgs); yield from watching(rwait(1.2), msgs)
+                    r["stages"][-1]["killed"] = r["stages"][-1].get("killed", 0) + kill_near(px, py); yield from watching(rwait(1.0), msgs)
+                elif do in ("collect", "rite", "cleanse"):
+                    # (PR #58's review: a stage laid again lays only what is left: one moonbloom taken, she goes 5 km off (the
+                    # stage cleared) and back (laid again): none while away, the two left when back, none doubled)
+                    if qn == "ingredient" and "relaid" not in r and int(L[5]) == 1:
+                        yield from go(cx + 5000.0, cy, msgs); yield from watching(rwait(2.0), msgs)
+                        away = len([t_ for t_ in stage_things(sid) if t_[0] == "thing"])
+                        yield from go(cx + 12.0, cy, msgs); yield from watching(rwait(2.0), msgs)
+                        r["relaid"] = {"away_things": away, "back_left": len([t_ for t_ in stage_things(sid) if t_[0] == "thing" and t_[4] == "0"]),
+                                       "back_all": len([t_ for t_ in stage_things(sid) if t_[0] == "thing"])}
+                        continue
+                    th = [t_ for t_ in stage_things(sid) if t_[0] == "thing" and t_[4] == "0"]
+                    if not th:
+                        # (the rite's or the cleansing's guardians come once its thing is taken)
+                        kill_near(px, py, 40.0); yield from watching(rwait(1.0), msgs); continue
+                    if "night" in L[14].lower(): con("rd.Time 23"); yield from rwait(0.6)
+                    if "dawn" in L[14].lower(): con("rd.Time 6"); yield from rwait(0.6)
+                    tx_, ty_, tz_ = float(th[0][1]), float(th[0][2]), float(th[0][3])
+                    G["pawn"].set_actor_location(V(tx_ + 120.0, ty_, tz_ + 110.0), False, True); yield from rwait(0.5)
+                    r["stages"][-1].setdefault("f", []).append(str(g.interact_nearest(G["pawn"].get_actor_location())))
+                    yield from watching(rwait(0.8), msgs)
+                elif do == "capture":
+                    mo = [t_ for t_ in stage_things(sid) if t_[0] == "monster" and t_[4] == "0"]
+                    if not mo: yield from rwait(0.6); continue
+                    m = min((m_ for m_ in g.get_monsters() if m_ and not m_.is_dead()), key=lambda m_: math.hypot(m_.get_actor_location().x - float(mo[0][1]), m_.get_actor_location().y - float(mo[0][2])), default=None)
+                    if m is None: yield from rwait(0.6); continue
+                    if m.get_health() > m.get_max_health() * 0.3: m.apply_damage(m.get_health() - m.get_max_health() * 0.2, G["pawn"]); yield from rwait(0.4)
+                    l_ = m.get_actor_location()
+                    G["pawn"].set_actor_location(V(l_.x + 150.0, l_.y, l_.z + 30.0), False, True); yield from rwait(0.3)
+                    r["stages"][-1]["f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from watching(rwait(0.8), msgs)
+                elif do == "tame":
+                    hz = next((t_ for t_ in stage_things(sid) if t_[0] == "horse"), None)
+                    if not hz: yield from rwait(0.6); continue
+                    G["pawn"].set_actor_location(V(float(hz[1]) + 200.0, float(hz[2]), float(hz[3]) + 120.0), False, True); yield from rwait(1.2)
+                    r["stages"][-1].setdefault("f", []).append(str(g.interact_nearest(G["pawn"].get_actor_location()))); yield from watching(rwait(1.2), msgs)
+                elif do == "escort":
+                    # (she walks toward the end in short steps, the game three times as fast, the one escorted following; an ambush
+                    # killed as it comes)
+                    con("rd.GameSpeed 3"); fl = folk(sid)
+                    p_ = G["pawn"].get_actor_location()
+                    dx, dy = px * 100.0 - p_.x, py * 100.0 - p_.y; dd = math.hypot(dx, dy)
+                    step = min(500.0, dd)
+                    if dd > 50.0: G["pawn"].set_actor_location(V(p_.x + dx / dd * step, p_.y + dy / dd * step, sample((p_.x + dx / dd * step) / 100.0, (p_.y + dy / dd * step) / 100.0)["z"] + 110.0), False, True)
+                    yield from watching(rwait(1.2), msgs)
+                    r["stages"][-1]["ambush_killed"] = r["stages"][-1].get("ambush_killed", 0) + kill_near(p_.x / 100.0, p_.y / 100.0, 40.0)
+                    tries -= 0.8
+                elif do == "defend":
+                    con("rd.GameSpeed 4"); put(px + 5.0, py)
+                    yield from watching(rwait(1.5), msgs)
+                    r["stages"][-1]["killed"] = r["stages"][-1].get("killed", 0) + kill_near(px, py, 50.0)
+                    tries -= 0.9
+                else:
+                    yield from rwait(0.6)
+            con("rd.GameSpeed 1"); con("rd.Weather auto")
+            L = run_line(sid)
+            r["end_stage"] = int(L[3]) if L else None
+            r["gold"] = g.get_gold() - gold0
+            if qn == "tame":
+                # (the tamed horse a second mount: hers and out, and with a bought one the stable swaps them and back)
+                gi = unreal.GameplayStatics.get_game_instance(W)
+                r["tamed"] = {"horses_tamed": gi.get_editor_property("horses_tamed"), "ride_tamed": gi.get_editor_property("ride_tamed"),
+                              "tamed_only": gi.get_editor_property("tamed_only"), "owned": gi.get_editor_property("horse_owned")}
+                if not r["tamed"]["tamed_only"]:
+                    r["tamed"]["swap"] = [bool(g.swap_horse()), gi.get_editor_property("ride_tamed"), bool(g.swap_horse()), gi.get_editor_property("ride_tamed")]
+            r["told"] = msgs[-12:]
+            res["quests"][qn] = r
+            g.wild_drop_all(); yield from rwait(0.5)
+    finally:
+        quiet(False); con("rd.GameSpeed 1"); con("rd.Weather auto")
+    g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    def tamed_ok(v):
+        T = v.get("tamed")
+        if T is None: return True
+        return T["horses_tamed"] >= 1 and T["ride_tamed"] and T["owned"] and (T["tamed_only"] or T.get("swap") == [True, False, True, True])
+    def relaid_ok(v):
+        R_ = v.get("relaid")
+        return R_ is None or (R_["away_things"] == 0 and R_["back_left"] == 2 and R_["back_all"] == 2)
+    res["failed"] = [k for k, v in res["quests"].items() if not (v.get("found") and v.get("end_stage") == 90 and v.get("gold", 0) > 0 and tamed_ok(v) and relaid_ok(v))]
+    ok = res["table"] >= 25 and not res["failed"] and len(res["quests"]) == len(want)
+    step_result("quests12", ok, **res)
 
 
 def step_list10w():
@@ -3115,7 +3423,7 @@ def step_speed8():
     step_result("speed8", ok, **res)
 
 
-STEPS = {"list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 def run():

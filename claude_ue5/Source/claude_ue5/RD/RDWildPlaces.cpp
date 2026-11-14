@@ -86,6 +86,13 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 		// (one a frame, after the chunk's own steps: a farmstead is some 30 pieces, 10 animals and 4 people (PR #30's review))
 		if (P.Kind == TEXT("farmstead")) { WildFarmQueue.Add({ C, P }); continue; }
 		if (P.Poi >= 0) { SpawnWildPoi(C, P); continue; }          // (the seventh phase's small points of interest: RDWildPoi.cpp)
+		// (the list of 2026-11-12's fifth phase: a structure, RDWildSite12.cpp; its guards, as a ruin's)
+		if (P.Site >= 0)
+		{
+			LayWildSite(C, P);
+			if (WildSiteKinds.IsValidIndex(P.Site) && WildSiteKinds[P.Site].Guards > 0) SpawnWildMonsters(C, P);
+			continue;
+		}
 		FRandomStream R((int32)FRDWildWorld::Hash(P.Id, 77, Wild->Seed));
 		const FVector O = C->GetActorLocation();
 		int32 Laid = 0;
@@ -267,6 +274,7 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 	int32 N = bLair ? R.RandRange(3, 5) : R.RandRange(2, 3);
 	// (the list of 2026-11-12: a ruin's guardians, its kind's number, after the draws)
 	if (const int32 Rk = P.Kind == TEXT("ruins") && P.Quest.IsEmpty() ? WildRuinKindOf(P) : -1; Rk >= 0) N = WildRuinKinds[Rk].Guards;
+	if (WildSiteKinds.IsValidIndex(P.Site)) N = WildSiteKinds[P.Site].Guards;          // (a structure's)
 	// (the list of 2026-11-11: hell's quarter more, after the draw: the place's other draws keep their order; the kills are kept
 	// by number, so the extra ones come last)
 	N = DifficultyCount(N);
@@ -312,7 +320,8 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 		At.Z = WildGroundZ(At) + Def.CapsuleHalfHeight + 10.f;
 		// (a ruin's guards off its pieces: drawn where the castle's keep or the rock-cut temple's cliff stands they were spawned
 		// inside it (PR #56's review). Rings round its middle after the draws, so the place's stream is unchanged)
-		if (const FRuinLaid* Rl = P.Kind == TEXT("ruins") ? WildRuinsLaid.FindByPredicate([&](const FRuinLaid& X) { return X.Id == P.Id; }) : nullptr)
+		if (const FRuinLaid* Rl = P.Kind == TEXT("ruins") ? WildRuinsLaid.FindByPredicate([&](const FRuinLaid& X) { return X.Id == P.Id; })
+			: P.Site >= 0 ? WildSitesLaid.FindByPredicate([&](const FRuinLaid& X) { return X.Id == P.Id; }) : nullptr)
 			for (int32 K = 0; K < 36 && WildRuinInPiece(*Rl, At, Def.CapsuleRadius + 40.f, Def.CapsuleHalfHeight); ++K)
 			{
 				const float A2 = A + K * (2.f * PI / 12.f), D2 = (4.f + 4.f * (K / 12)) * 100.f;

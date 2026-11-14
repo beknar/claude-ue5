@@ -293,12 +293,93 @@ The list of 2026-11-12's fourth phase ("monster lairs do not have any special st
 
 ![The nine covers, each from 30 m on its closed side](../images/lairs12_covers.jpg)
 
+## The list of 2026-11-12, fifth part: the structures and their quests
+
+The list of 2026-11-12's fifth phase (`docs/improvements12.txt`: the wilderness's structures and the quests found at them; the user's choices: every structure a set piece of the packs' meshes, all 25 quests with their twists, the stranded keep their gear, a tamed horse a second mount). The list names 34 structures (it was called 42 in the plan). C++ `RD/RDWildSite12.cpp` (the structures) and `RD/RDWildQuest12.cpp` (the quests), the world's sites in `FRDWildWorld::SitesIn` (`RDWildWorld.cpp`); stage `924_list12_wild.py sites,quests` from `SourceArt/wilderness/sites12.json` and `quests12.json`. Measured in `888 sites12,quests12 -Light` (`test_s12e.json`, `test_s12f.json`, `test_s12d.json`; `test_q12a.json` to `test_q12l.json`).
+
+- **Where they stand**: the world's sites are a layer of their own over the places (a 2.5 km cell, up to six tries in each, a kind drawn by weight among those the biome allows, `SitesInCell`), kept per cell (`FSiteCache`); a chunk lays every site of the cells round its own, so one moved out of its cell (a weir to its river) is still laid. A water kind (the river crossing, the mill weir, the lake island, the sea cave, the shipwreck) looks for its water along 16 rays to 600 m, then by the rivers' and lakes' own lines within 1.25 km, and stands on the shore it walks back to (its crossing over the water).
+- **What each is**: laid by the ruins' layout language (`LayWildParts`) from 81 pack meshes (`s12_<group>#<n>` in the places' table), with its chest, its guards (inside it, none in a piece), its prisoners (tied, F to free: a few gold or a thing in thanks), its traps (a spring plate that hurts) and the giver of its quests:
+
+| Structure | Where | Guards, prisoners, traps | Its quests | What stands there |
+|---|---|---|---|---|
+| A cave system | 7 biomes | 2, 1, 2 | Lair clearing, Infestation, The lost ruin, The buried cache, The lost expedition, Stranded, The restless spirit | a cave's mouth in the rock, its passages running back into the dark |
+| A gorge | canyons, canyon networks, mesas | 2, 0, 2 | Hold the pass, Trailblazing, The manhunt, Stranded, Weather the disaster | a narrow cut between sheer walls, a place for an ambush |
+| A cliff aerie | 5 biomes | 2, 0, 0 | The legendary hunt, The rare ingredient, Tame a mount, Search and rescue | a nest of branches on a ledge, bones below it |
+| A mountain pass | 6 biomes | 3, 0, 1 | Hold the pass, Trailblazing, Wilderness escort, Urgent delivery, Weather the disaster | the one way through the mountains, a gate across it |
+| A waterfall grotto | 8 biomes | 1, 0, 0 | The buried cache, The rare ingredient, The sacred site | water falling over a rock face, a hollow behind it |
+| A sinkhole | 7 biomes | 1, 0, 2 | The lost ruin, The buried cache, The rare ingredient, The sacred site | the ground fallen in, a ring of rock round a dark drop |
+| An ancient great tree | 6 biomes | 2, 0, 0 | Infestation, Blight cleansing, The sacred site, Territory dispute | a tree older than any town, its roots wide as a house |
+| A bog island | marshes, wetlands | 2, 1, 1 | The rare ingredient, Investigation, The restless spirit, Blight cleansing | a hump of firm ground in the bog, half sunk in peat and reeds |
+| An ice cave | glacial, arctic regions, tundras, mountains and peaks | 2, 0, 1 | The lost expedition, Search and rescue, Stranded, Weather the disaster | a cave in the ice, old things frozen in its walls |
+| Lava tubes | volcanoes, geothermal caldera, volcanic tundra, burned plain | 2, 0, 2 | The legendary hunt, The lost ruin, The rare ingredient, Weather the disaster, Blight cleansing | black rock round a vent, the ground hot underfoot |
+| A sea cave | the coast | 2, 1, 1 | The buried cache, The manhunt, Stranded, Weather the disaster | a cave in the sea cliff, its floor wet with the tide |
+| A rock spire | 7 biomes | 1, 0, 0 | Survey and cartography, Tame a mount, The sacred site | a needle of rock standing alone over the plain |
+| A beast's den | anywhere | 2, 0, 0 | Monster bounty, The legendary hunt, Infestation, Live capture | a hollow among roots and rocks, bones round its mouth |
+| A fairy ring | 5 biomes | 0, 0, 0 | Investigation, The sacred site, Territory dispute | a ring of toadstools in a clearing, the grass inside untrodden |
+| A lake island | a lake | 1, 0, 0 | The buried cache, The restless spirit, The sacred site | a rocky islet off the shore, a boat drawn up before it |
+| A ruined fortress | 7 biomes | 3, 1, 2 | Lair clearing, Hold the pass, The lost ruin, Frontier outpost | broken walls on a rise, a tower still standing among them |
+| A watchtower | 9 biomes | 2, 0, 1 | Hold the pass, Survey and cartography, Weather the disaster, Frontier outpost | a lookout over the land, its ladder still sound |
+| An abandoned mine | 6 biomes | 2, 1, 2 | Infestation, The buried cache, The lost expedition, Search and rescue, The restless spirit | a timbered shaft into the hill, carts left on their rails |
+| A barrow tomb | 7 biomes | 2, 0, 2 | The lost ruin, The buried cache, The restless spirit | a carved front set into a mound, the door sealed long ago |
+| A standing-stone shrine | anywhere | 0, 0, 0 | Investigation, Blight cleansing, The sacred site | stones round a praying figure, offerings at her feet |
+| A trapper's cabin | 8 biomes | 1, 0, 2 | Monster bounty, The legendary hunt, The lost expedition, Investigation | a cabin at the edge of the deep woods, pelts drying by its door |
+| A river crossing | a river | 2, 0, 1 | Hold the pass, Wilderness escort, The manhunt, Urgent delivery | an old bridge over the river, a toll post at its end |
+| A roadside waystation | 8 biomes | 0, 0, 0 | Wilderness escort, The manhunt, Urgent delivery, Investigation | an inn at the crossroads, its sign creaking in the wind |
+| A logging camp | 5 biomes | 1, 0, 0 | Infestation, Investigation, Territory dispute | stumps and stacked logs, a saw left in a cut trunk |
+| A bandit palisade | 8 biomes | 3, 2, 2 | Lair clearing, Search and rescue, The manhunt | a stockade of sharpened logs, a camp behind it |
+| A shipwreck | the coast | 2, 0, 0 | The buried cache, The lost expedition, Stranded | a broken hull on the shore, its cargo spilled in the sand |
+| A witch's hut | 5 biomes | 1, 1, 1 | The rare ingredient, Investigation, Blight cleansing | a hut in the mire, charms hanging from its eaves, a pot steaming |
+| An abandoned village | 7 biomes | 2, 0, 1 | The lost expedition, Weather the disaster, Investigation, The restless spirit | houses with their doors open and nobody home |
+| A mill weir | a river | 1, 0, 0 | The lost ruin, Weather the disaster, Territory dispute | a stone weir across the river, a wheel turning beside it |
+| A smugglers' tunnel | 6 biomes | 2, 1, 2 | The buried cache, The manhunt, Urgent delivery | a timbered tunnel mouth hidden in the hill, crates stacked inside |
+| A titan's carcass | 7 biomes | 3, 0, 0 | The legendary hunt, Infestation, The lost ruin, Blight cleansing | the ribs of something vast, a fallen giant's head turned to stone beside them |
+| A living beast's back | savannahs, plains, grasslands, cold steppes | 0, 0, 0 | Survey and cartography, Tame a mount, Frontier outpost | a beast the size of a hill, a whole camp built on its back, walking its slow round |
+| A floating island | 6 biomes | 1, 0, 0 | Survey and cartography, The rare ingredient, The sacred site | a crag of crystal hanging in the air, shards of it scattered below |
+| A rift | 7 biomes | 3, 0, 1 | Infestation, Investigation, Blight cleansing | a scar torn in the world, a ring of light standing over it |
+
+- **The living beast's back**: the Animals pack's fantasy elephant (`SK_Fantasy_Elephant_Full`, its walk) with the war platform on its back (`SK_Fantasy_Elephant_Build_Full` following the body's pose), 2.6 times its size, walking a circle 45 m round its middle at 1.1 m/s, its head the way it walks; the camp's chest and giver at the round's middle.
+- **Its quests**: each structure offers some of the 25 (`sites12.json`'s `quests`, one at a time, drawn from the site's id); F at the giver takes it, and its stages are run by the game wherever they lead (`TickWildQuests12`): a stage is begun as she comes within 4 km of the structure or of the stage's point, and its people, things and monsters are made then and taken away when she leaves.
+
+| Quest | Giver | What happens (its twist) | Offered at |
+|---|---|---|---|
+| Monster bounty | a bounty hunter | two trail marks, the beast killed; its den is wrecked: a worse thing drove it out and comes for her | 2 kinds |
+| Lair clearing | a carter | the "bandits" are ragged villagers: she lets them go (the carter is told the road is open) or clears the camp | 3 kinds |
+| The legendary hunt | an old hunter | bait gathered, the trap set on its trail; a rival hunting party wants the beast and fights her for it, then the apex beast | 5 kinds |
+| Infestation | a frightened settler | a swarm, then a second from further out, then the nest and its queen to destroy | 7 kinds |
+| Hold the pass | a wounded soldier | three waves come while the refugees cross: the pass held for a minute | 5 kinds |
+| Survey and cartography | a guild surveyor | three landmarks along a trail marked, the map handed in | 4 kinds |
+| The lost ruin | a scholar | a map found, the ruin (one of the twenty kinds, up to 12 km off) reached, its wardens killed | 7 kinds |
+| The buried cache | a dying smuggler | leaning stones, then where water meets rock, then the cache dug up | 9 kinds |
+| The lost expedition | an expedition's patron | two abandoned camps searched; at the last a survivor and the thing that hunted them; the survivor walked home | 6 kinds |
+| Trailblazing | a caravan master | firm ground, a safe ford, the far side; then the caravan led through | 2 kinds |
+| The rare ingredient | a herbalist | three moonblooms, which open only at night, picked and brought back fresh | 7 kinds |
+| Live capture | a menagerie's buyer | a beast beaten down and bound alive (killed, another comes: a dead one is no use) | 1 kinds |
+| Tame a mount | a horse breaker | a wild horse won over at three slow approaches (running near it, it bolts): hers, a second mount | 3 kinds |
+| Search and rescue | a worried mother | the boy's trail, the boy found cold and lost, brought home | 4 kinds |
+| Wilderness escort | a pilgrim | the pilgrim led to the far shrine; an ambush on the way | 3 kinds |
+| The manhunt | a warden | the fugitive tracked and found: he is innocent and running; she lets him go or brings him back | 6 kinds |
+| Urgent delivery | a courier | the medicine taken to the nearest town in game time (15 minutes) | 4 kinds |
+| Stranded | a ferryman | the ferry breaks up: washed up 1.5 km off with what she carried, she finds water, shelter, food and a town | 5 kinds |
+| Weather the disaster | a shepherd | a storm comes down: the family brought to shelter, the storm weathered inside it | 8 kinds |
+| Investigation | a farmer | clues gathered (strange charms in the branches), a ritual place, the cultists behind the lights | 9 kinds |
+| The restless spirit | a wailing spirit | the spirit's keepsake found far off and laid on its grave, the spirit at rest | 6 kinds |
+| Blight cleansing | a druid | the poisoned spring found, its guardians killed, the water cleansed | 7 kinds |
+| The sacred site | a priestess | a rite at the stones, only at dawn; the guardians it wakes laid low | 8 kinds |
+| Territory dispute | a woodsman | loggers against druids: she sides with one, and drives off the other's | 4 kinds |
+| Frontier outpost | an outpost founder | timber gathered, then two raids on the new post held off | 3 kinds |
+
+- **The stranded keep their gear** (the user's choice): the ferry breaks up and she washes up 1.5 km off on a dry shore with what she carried; water, shelter, food and the way to a town are hers to find. **A tamed horse is a second mount**: hers and out at once (in the wild grey's coat); with a bay bought too, the stable saddles either (`SwapHorse`), the other waiting there; tamed with none bought, the stable still sells her the bay. Both are saved.
+- **Measured** (`test_s12e.json`, `test_s12f.json`, `test_s12d.json`, the beast in `test_q12c.json`): all 34 kinds among the world's sites within 150 km of Brokenspire (the den 523 to the mill weir 3); the nearest of each visited: laid of its kind (3 to 41 pieces), none walked through, none floating, its chest, its guards standing and none in a piece, its prisoners freed with F (gold in thanks), a trap stepped on hurting her, its giver there; the beast walked 3.7 m in the test's seconds and faced 3 degrees off its way. Every quest (the latest of `test_q12a.json` to `test_q12l.json` for each quest) was taken at a structure of its own and played to its end by the test: its every stage begun, its point reached, its things taken, its monsters killed, its people spoken to, led or chosen for, and its gold paid.
+
+![The 34 structures, each from 40 m before its front](../images/sites12_kinds.jpg)
+
 ## Limits
 
 What is not there yet, and what has not been tested, is listed in [TODO.md](../../TODO.md). In short:
 
 - Caves are a mouth among rocks: there is no inside. Villages, camps and lone houses have their buildings and props but nobody in them (the farmsteads have their families). Since the list of 2026-11-11 every farm building can be entered; the farm folk stand at their work: they do not walk, sleep or go in at night. The farm buildings have one storey, and the gardens are harvested once a game (the town's grow again by the next day).
-- Monsters live only at spawn points, lairs (hidden in their covers since the list of 2026-11-12), ruins with guards and the captain's two quests' places; between places there are only the animals that flee from her (deer, wolves, squirrels, hares), which never fight (since the list of 2026-11-07 she can hunt them).
+- The 34 structures (the list of 2026-11-12) are set pieces of the packs' meshes over the land, as the ruins: the caves, the mine, the tomb, the tunnel and the ice cave are mouths with no inside, the waterfall's hollow and the rift's scar are pieces, not places to go in. Their quests run in the wilds round them; the delivery is reached in game time (time spent in a menu does not count), and a quest left far away keeps its stage but drops its people and things until she comes back within 4 km.
+- Monsters live only at spawn points, lairs (hidden in their covers since the list of 2026-11-12), ruins and structures with guards, the structures' quests and the captain's two quests' places; between places there are only the animals that flee from her (deer, wolves, squirrels, hares), which never fight (since the list of 2026-11-07 she can hunt them).
 - Birds and insects are effects round her (flocks and swarms), not creatures: nothing hunts them and they do not land.
 - The weather has no lightning, puddles or wet ground: the rain and snow are falling drops round the camera, the storm a darker sky, more rain and stronger wind.
 - She wades shallow water and swims deep water at its face (since 2026-11-12); she does not dive, and nothing stops her swimming far out to sea. The lava does no harm.
@@ -343,6 +424,8 @@ What is not there yet, and what has not been tested, is listed in [TODO.md](../.
 | `swim12` (884's) | (`SourceArt/brokenspire/test_sw12u.json`, `-Light`) the six heroes swimming in Graymourne's harbour and the sea beyond it; the splash's and strokes' sounds recorded; a swing begun on the quay broken off in the water, her horse not mounted from it, her jump hers again out of it (PR #53's review) ([Swimming](#swimming-2026-11-12)) |
 | `ruins12` | the list of 2026-11-12's third part (`test_r12f.json`, `test_r12g.json`; `ruins12=<kind>+<kind>` for some, run in two batches of ten): the table's 20 kinds, each among the ruins within 150 km; the nearest of each laid of its kind (3 pieces or more, where each stands against the ground), its chest within 40 m, its guards; the message naming it at 20 m; a picture from 45 m before its front ([its section](#the-list-of-2026-11-12-third-part-twenty-kinds-of-ruins)) |
 | `lairs12` | the list of 2026-11-12's fourth part (`test_l12c.json`; `lairs12=<cover>+<cover>` for some): the table's nine covers, each among the lairs within 150 km; the nearest of each laid (3 pieces or more, none walked through, none over the ground by more than its part raised it), its monsters inside its circle, the share of sight lines to them its pieces block from 30 m (0.6 or more) and 15 m; woken from before its opening and from its side, one comes out past its walls to her within 8 s; how many are home again 20 s after she leaves; a picture from 30 m on its closed side ([its section](#the-list-of-2026-11-12-fourth-part-the-lairs-hidden)) |
+| `sites12` | the list of 2026-11-12's fifth part (`test_s12e.json`, `test_s12f.json`, `test_s12d.json`; `sites12=<kind>+<kind>` for some, run in batches of about twelve): the table's 34 kinds and 25 quests, each kind among the sites within 150 km; the nearest of each laid of its kind (3 pieces or more, none walked through, none floating), its chest, its guards standing and none in a piece, its prisoners freed with F, a trap stepped on hurting her, its quests' giver; the beast moving and facing its way (30 degrees or less); a picture from 40 m before its front ([its section](#the-list-of-2026-11-12-fifth-part-the-structures-and-their-quests)) |
+| `quests12` | (the latest of `test_q12a.json` to `test_q12l.json` for each quest; `quests12=<quest>+<quest>` for some, run in batches of about eight) each quest taken at the nearest structure offering it and played by the test to its end, stage by stage as the game runs it (go to its point, take its things, kill, capture, tame, lead, defend, choose, deliver, weather the storm), its gold paid; the tamed horse hers and out, and with a bay the stable swaps them and back; a stage laid again (one moonbloom taken, she 5 km off and back) lays only what is left (none away, two back) |
 | `events11` | (`test_w11e.json`) each of the director's 13 new kinds forced ahead of her: met; a place laid of its kind, a herd made, a person who gives once (her things or gold more, the second F nothing) |
 | `quests` | (2026-11-07; 2026-11-08 `test_s12.json`) the captain's two quests: the Mill Road Den 1.8 km out, 45 m from the Ashenreach road, the Old Watchtower 3.0 km out off the Vel Morrath road, both dry; taken at the captain, on the map and named, no travel there before they are found; the den's four ripper dogs (three killed, the chunks made again: one left; the fourth: done); the tower's three guards, its 18 props; the patrol found 2.5 m from their remains, not 10 m; both turned in for 320 gold, off the map |
 
@@ -371,4 +454,5 @@ The tool's exit code is 1 for the 15 known unreadable pack files the asset regis
 2j. Swimming (2026-11-12): C++ first (`RD/RDSwim.cpp`), `887_wilderness.py materials` (the water's ripples and `MPC_RD_Water`), `python pipeline/blender_numpy/rdc_sound_prep.py claude_ue5/SourceArt/brokenspire/water.json claude_ue5/SourceArt/brokenspire/audio_water` (the water's sounds), then `921_swim.py clips,sounds,level` on `brokenspire` (after `913 rider`'s rigs exist; `sounds` adds its three sets to the level's table and keeps the rest). Check with `884_brokenspire_test.ps1 swim12,port11 <tag> 2400 -Light` (restart the editor first: a long session left too little memory for its play).
 2k. The list of 2026-11-12's third part, the ruins: C++ first (`RD/RDWildRuin12.cpp`), then `924_list12_wild.py ruins` (on `brokenspire`: the ruins' pieces into the places' table and the twenty kinds; it checks every part's piece is there). Check with `888_wilderness_test.ps1 "ruins12=<ten kinds>" <tag> 1500 -Light` twice, the editor restarted between.
 2l. Its fourth part, the lairs hidden: C++ first (`RD/RDWildLair12.cpp`, `RDWildRuin12.cpp`, `RDMonster.cpp`), then `924_list12_wild.py lairs` (after `ruins`: the covers use its walls, rubble, cliffs and cave). Check with `888_wilderness_test.ps1 lairs12 <tag> 1500 -Light`.
+2m. Its fifth part, the structures and their quests: C++ first (`RD/RDWildSite12.cpp`, `RD/RDWildQuest12.cpp`, `RDWildWorld.cpp`'s sites, `RDHorse.cpp`'s second mount), then `924_list12_wild.py sites,quests` (after `ruins` and `lairs`: on `brokenspire`, the structures' pieces, kinds and beast, then the quests). Check with `888_wilderness_test.ps1 "sites12=<twelve kinds>" <tag> 1500 -Light` three times and `"quests12=<eight quests>" <tag> 2400 -Light` (the editor restarted between batches).
 3. `888_wilderness_test.ps1 all <tag>`; Brokenspire's own test (`884_brokenspire_test.ps1 all`) after anything shared: its `gate` step expects the gate open when the wilderness is on.

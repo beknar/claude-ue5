@@ -1,0 +1,193 @@
+{
+ "tag": "q12l",
+ "plan": [
+  "quests12=ingredient+clearing+manhunt+dispute"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "quests12",
+   "ok": true,
+   "quests": {
+    "ingredient": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "collect",
+       "hint": "Pick three moonblooms at night",
+       "point_m_from_site": 32.0,
+       "f": [
+        "quest_thing",
+        "quest_thing",
+        "quest_thing"
+       ]
+      },
+      {
+       "stage": 2,
+       "do": "talk",
+       "hint": "Bring the moonbloom to the herbalist",
+       "point_m_from_site": 0.0,
+       "f": "quest"
+      }
+     ],
+     "found": true,
+     "site": 134361152,
+     "at_km": [
+      8.42,
+      11.41
+     ],
+     "structure": "A sinkhole",
+     "take_f": "quest",
+     "relaid": {
+      "away_things": 0,
+      "back_left": 2,
+      "back_all": 2
+     },
+     "end_stage": 90,
+     "gold": 140,
+     "told": [
+      "Discovered: A sinkhole. the ground fallen in, a ring of rock round a dark drop",
+      "A herbalist:  \"Moonbloom grows near here, but it only opens at night. Bring me three.\"  (quest: The rare ingredient)",
+      "You pick a moonbloom (1 of 3)",
+      "You pick a moonbloom (2 of 3)",
+      "You pick a moonbloom (3 of 3)",
+      "Quest done: The rare ingredient (140 gold)"
+     ]
+    },
+    "clearing": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "goto",
+       "hint": "Find the bandits' camp",
+       "point_m_from_site": 320.0
+      },
+      {
+       "stage": 2,
+       "do": "choose",
+       "hint": "Speak with the leader, or with the raider who would fight",
+       "point_m_from_site": 320.0,
+       "f": "quest"
+      },
+      {
+       "stage": 3,
+       "do": "kill",
+       "hint": "Clear the camp",
+       "point_m_from_site": 320.0,
+       "killed": 3
+      }
+     ],
+     "found": true,
+     "site": 134328382,
+     "at_km": [
+      -11.37,
+      6.05
+     ],
+     "structure": "A bandit palisade",
+     "take_f": "quest",
+     "choice": "b",
+     "end_stage": 90,
+     "gold": 79,
+     "told": [
+      "Discovered: A bandit palisade. a stockade of sharpened logs, a camp behind it",
+      "A carter:  \"Bandits hold the camp up the way and nothing gets through. Clear them out.\"  (quest: Lair clearing)",
+      "The camp: but these 'bandits' are ragged villagers, children among them.",
+      "An armed raider:  \"You draw on them.\"",
+      "+4 gold",
+      "Quest done: Lair clearing (70 gold)"
+     ]
+    },
+    "manhunt": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "goto",
+       "hint": "Track the fugitive",
+       "point_m_from_site": 108.2
+      },
+      {
+       "stage": 2,
+       "do": "goto",
+       "hint": "Track the fugitive",
+       "point_m_from_site": 214.1
+      },
+      {
+       "stage": 3,
+       "do": "choose",
+       "hint": "Decide the fugitive's fate",
+       "point_m_from_site": 320.0,
+       "f": "quest"
+      },
+      {
+       "stage": 5,
+       "do": "talk",
+       "hint": "Report to the warden",
+       "point_m_from_site": 0.0,
+       "f": "quest"
+      }
+     ],
+     "found": true,
+     "site": 134324285,
+     "at_km": [
+      -13.5,
+      3.58
+     ],
+     "structure": "A bandit palisade",
+     "take_f": "quest",
+     "choice": "a",
+     "end_stage": 90,
+     "gold": 80,
+     "told": [
+      "Discovered: A bandit palisade. a stockade of sharpened logs, a camp behind it",
+      "A warden:  \"A prisoner escaped. Track him and bring him back.\"  (quest: The manhunt)",
+      "Footprints, running.",
+      "A torn sleeve on a thorn.",
+      "The fugitive:  \"You let him run.\"",
+      "Quest done: The manhunt (80 gold)"
+     ]
+    },
+    "dispute": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "choose",
+       "hint": "Choose a side",
+       "point_m_from_site": 0.0,
+       "f": "quest"
+      },
+      {
+       "stage": 2,
+       "do": "kill",
+       "hint": "Drive off the loggers' hirelings",
+       "point_m_from_site": 32.0,
+       "killed": 4
+      }
+     ],
+     "found": true,
+     "site": 134328379,
+     "at_km": [
+      -11.14,
+      -2.11
+     ],
+     "structure": "An ancient great tree",
+     "take_f": "quest",
+     "choice": "a",
+     "end_stage": 90,
+     "gold": 88,
+     "told": [
+      "Discovered: An ancient great tree. a tree older than any town, its roots wide as a house",
+      "A woodsman:  \"The druids and the loggers will come to blows over this grove. Decide it.\"  (quest: Territory dispute)",
+      "A druid:  \"You side with the druids.\"",
+      "+1 gold",
+      "Quest done: Territory dispute (80 gold)"
+     ]
+    }
+   },
+   "table": 25,
+   "failed": []
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "error": null,
+ "windows_shown_again": 1
+}

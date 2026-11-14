@@ -1,0 +1,500 @@
+{
+ "tag": "q12a",
+ "plan": [
+  "sites12=beastback",
+  "quests12=bounty+clearing+legendary+infestation+holdpass+survey+lostruin+cache"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "sites12",
+   "ok": true,
+   "kinds": {
+    "beastback": {
+     "found": true,
+     "id": 134352959,
+     "at_km": [
+      3.33,
+      9.49
+     ],
+     "name": "A living beast's back",
+     "laid": {
+      "kind": "beastback",
+      "pieces": 3,
+      "boxes": 1,
+      "guards_standing": 0,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "table": {
+      "guards": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a horse breaker",
+     "beast_moved_m": 3.71,
+     "told": "Discovered: A living beast's back. a beast the size of a hill, a whole camp built on its back, walking its slow round"
+    }
+   },
+   "table": 34,
+   "counts": {
+    "cave": 72,
+    "canyon": 6,
+    "aerie": 87,
+    "pass": 107,
+    "waterfall": 1,
+    "sinkhole": 132,
+    "greattree": 82,
+    "swamp": 6,
+    "glacier": 44,
+    "caldera": 67,
+    "seacave": 6,
+    "spire": 110,
+    "den": 523,
+    "fairyring": 55,
+    "lakeisland": 3,
+    "fortress": 149,
+    "watchtower": 228,
+    "mine": 104,
+    "tomb": 178,
+    "shrine": 423,
+    "cabin": 137,
+    "bridge": 4,
+    "waystation": 180,
+    "logging": 100,
+    "palisade": 182,
+    "shipwreck": 4,
+    "witchhut": 61,
+    "village": 161,
+    "dam": 3,
+    "smugglers": 206,
+    "titan": 67,
+    "beastback": 41,
+    "floating": 63,
+    "rift": 48
+   },
+   "quests": {
+    "legendary": 196,
+    "delivery": 149,
+    "spirit": 135,
+    "outpost": 107,
+    "expedition": 118,
+    "blight": 221,
+    "holdpass": 113,
+    "capture": 138,
+    "investigation": 333,
+    "manhunt": 169,
+    "sacred": 280,
+    "survey": 125,
+    "cache": 176,
+    "bounty": 186,
+    "escort": 67,
+    "stranded": 24,
+    "disaster": 149,
+    "lostruin": 176,
+    "dispute": 77,
+    "infestation": 250,
+    "rescue": 102,
+    "ingredient": 124,
+    "tame": 76,
+    "clearing": 124,
+    "trailblaze": 25
+   },
+   "failed": []
+  },
+  {
+   "step": "quests12",
+   "ok": false,
+   "quests": {
+    "bounty": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "goto",
+       "hint": "Follow the beast's kills",
+       "point_m_from_site": 6154.7
+      }
+     ],
+     "found": true,
+     "site": 134336573,
+     "at_km": [
+      -5.38,
+      2.99
+     ],
+     "structure": "A beast's den",
+     "take_f": "quest",
+     "stuck": {
+      "stage": 1,
+      "do": "goto",
+      "line": [
+       "wq",
+       "134336573",
+       "bounty",
+       "1",
+       "goto",
+       "0",
+       "1",
+       "0",
+       "0.0",
+       "0.0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "Follow the beast's kills"
+      ]
+     },
+     "end_stage": 1,
+     "gold": 0,
+     "told": [
+      "Discovered: A beast's den. a hollow among roots and rocks, bones round its mouth",
+      "A bounty hunter:  \"Something has been killing travellers on this road. Follow its kills and bring me its head.\"  (quest: Monster bounty)",
+      "Brokenspire"
+     ]
+    },
+    "clearing": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "goto",
+       "hint": "Find the bandits' camp",
+       "point_m_from_site": 320.0
+      },
+      {
+       "stage": 2,
+       "do": "choose",
+       "hint": "Speak with the leader, or with the raider who would fight",
+       "point_m_from_site": 320.0,
+       "f": "quest"
+      },
+      {
+       "stage": 3,
+       "do": "kill",
+       "hint": "Clear the camp",
+       "point_m_from_site": 320.0,
+       "killed": 3
+      }
+     ],
+     "found": true,
+     "site": 134328382,
+     "at_km": [
+      -11.37,
+      6.05
+     ],
+     "structure": "A bandit palisade",
+     "take_f": "quest",
+     "choice": "b",
+     "end_stage": 90,
+     "gold": 77,
+     "told": [
+      "Discovered: A bandit palisade. a stockade of sharpened logs, a camp behind it",
+      "A carter:  \"Bandits hold the camp up the way and nothing gets through. Clear them out.\"  (quest: Lair clearing)",
+      "The camp: but these 'bandits' are ragged villagers, children among them.",
+      "An armed raider:  \"You draw on them.\"",
+      "+1 gold",
+      "Quest done: Lair clearing (70 gold)"
+     ]
+    },
+    "legendary": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "collect",
+       "hint": "Gather bait for the beast",
+       "point_m_from_site": 32.0,
+       "f": [
+        "quest_thing",
+        "quest_thing"
+       ]
+      },
+      {
+       "stage": 2,
+       "do": "rite",
+       "hint": "Set the trap at its trail",
+       "point_m_from_site": 32.0,
+       "f": [
+        "quest_thing"
+       ]
+      },
+      {
+       "stage": 3,
+       "do": "kill",
+       "hint": "Drive off the rival hunters",
+       "point_m_from_site": 320.0,
+       "killed": 2
+      },
+      {
+       "stage": 4,
+       "do": "kill",
+       "hint": "Bring down the legendary beast",
+       "point_m_from_site": 320.0,
+       "killed": 1
+      }
+     ],
+     "found": true,
+     "site": 134344763,
+     "at_km": [
+      -0.74,
+      -1.65
+     ],
+     "structure": "A beast's den",
+     "take_f": "quest",
+     "end_stage": 90,
+     "gold": 131,
+     "told": [
+      "Discovered: A beast's den. a hollow among roots and rocks, bones round its mouth",
+      "An old hunter:  \"There is a great beast in these parts no one has ever brought down. Bait it, trap it, take its trophy.\"  (quest: The legendary hunt)",
+      "You gather bait (1 of 2)",
+      "You gather bait (2 of 2)",
+      "+2 gold",
+      "You set the trap and the bait (1 of 1)",
+      "Another hunting party: they want the beast and won't share it!",
+      "+3 gold",
+      "The rivals are driven off.",
+      "+2 gold",
+      "Quest done: The legendary hunt (120 gold)"
+     ]
+    },
+    "infestation": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "kill",
+       "hint": "Kill the crawlers",
+       "point_m_from_site": 32.0,
+       "killed": 5
+      },
+      {
+       "stage": 2,
+       "do": "kill",
+       "hint": "Kill the second swarm",
+       "point_m_from_site": 32.0,
+       "killed": 3
+      },
+      {
+       "stage": 3,
+       "do": "cleanse",
+       "hint": "Destroy the nest",
+       "point_m_from_site": 320.0,
+       "f": [
+        "quest_thing"
+       ]
+      }
+     ],
+     "found": true,
+     "site": 134340667,
+     "at_km": [
+      -3.85,
+      -1.77
+     ],
+     "structure": "A beast's den",
+     "take_f": "quest",
+     "end_stage": 90,
+     "gold": 96,
+     "told": [
+      "Discovered: A beast's den. a hollow among roots and rocks, bones round its mouth",
+      "A frightened settler:  \"They keep coming out of the ground! Kill them and find where they breed.\"  (quest: Infestation)",
+      "+4 gold",
+      "More will come unless the nest is found.",
+      "Another swarm!",
+      "+1 gold",
+      "They came from further out.",
+      "You smash the nest (1 of 1)",
+      "+2 gold",
+      "Quest done: Infestation (70 gold)"
+     ]
+    },
+    "holdpass": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "defend",
+       "hint": "Hold the pass until the refugees are through",
+       "point_m_from_site": 0.0,
+       "killed": 8
+      }
+     ],
+     "found": true,
+     "site": 134348860,
+     "at_km": [
+      1.99,
+      0.37
+     ],
+     "structure": "A watchtower",
+     "take_f": "quest",
+     "end_stage": 90,
+     "gold": 113,
+     "told": [
+      "Discovered: A watchtower. a lookout over the land, its ladder still sound",
+      "A wounded soldier:  \"Refugees are coming through behind us. Hold this place until they're past!\"  (quest: Hold the pass)",
+      "Game speed: 4x",
+      "They are coming (wave 1 of 3)",
+      "+2 gold",
+      "They are coming (wave 2 of 3)",
+      "+2 gold",
+      "They are coming (wave 3 of 3)",
+      "+4 gold",
+      "Quest done: Hold the pass (90 gold)"
+     ]
+    },
+    "survey": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "goto",
+       "hint": "Reach the first vantage point",
+       "point_m_from_site": 82.1
+      },
+      {
+       "stage": 2,
+       "do": "goto",
+       "hint": "Reach the second vantage point",
+       "point_m_from_site": 161.1
+      },
+      {
+       "stage": 3,
+       "do": "goto",
+       "hint": "Reach the last vantage point",
+       "point_m_from_site": 320.1
+      },
+      {
+       "stage": 4,
+       "do": "talk",
+       "hint": "Bring the survey to the surveyor",
+       "point_m_from_site": 320.1,
+       "f": "quest"
+      }
+     ],
+     "found": true,
+     "site": 134352956,
+     "at_km": [
+      3.66,
+      0.49
+     ],
+     "structure": "A watchtower",
+     "take_f": "quest",
+     "end_stage": 90,
+     "gold": 60,
+     "told": [
+      "Discovered: A watchtower. a lookout over the land, its ladder still sound",
+      "A guild surveyor:  \"The guild wants this land mapped. Climb to the high points and mark the landmarks for me.\"  (quest: Survey and cartography)",
+      "A vantage point: you mark the hills to the east.",
+      "A spring here: you mark it as water.",
+      "The last landmark is named. The map is done.",
+      "Quest done: Survey and cartography (60 gold)"
+     ]
+    },
+    "lostruin": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "collect",
+       "hint": "Find the burned map",
+       "point_m_from_site": 32.0,
+       "f": [
+        "quest_thing"
+       ]
+      },
+      {
+       "stage": 2,
+       "do": "goto",
+       "hint": "Find the ruin on the map",
+       "point_m_from_site": 0.0
+      },
+      {
+       "stage": 3,
+       "do": "kill",
+       "hint": "Defeat the ruin's guardians",
+       "point_m_from_site": 0.0,
+       "killed": 5
+      },
+      {
+       "stage": 4,
+       "do": "talk",
+       "hint": "Tell the scholar",
+       "point_m_from_site": 0.0,
+       "f": "quest"
+      }
+     ],
+     "found": true,
+     "site": 134361145,
+     "at_km": [
+      9.65,
+      -5.53
+     ],
+     "structure": "A titan's carcass",
+     "take_f": "quest",
+     "end_stage": 90,
+     "gold": 91,
+     "told": [
+      "Discovered: A titan's carcass. the ribs of something vast, a fallen giant's head turned to stone beside them",
+      "A scholar:  \"I have half a burned map of a ruin near here. Find it, and survive what's inside.\"  (quest: The lost ruin)",
+      "The half-burned map: it shows ruins and a road (1 of 1)",
+      "The ruin from the map.",
+      "+3 gold",
+      "The ruin's wardens are dead.",
+      "Quest done: The lost ruin (80 gold)"
+     ]
+    },
+    "cache": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "goto",
+       "hint": "Find where the stones lean",
+       "point_m_from_site": 108.2
+      },
+      {
+       "stage": 2,
+       "do": "goto",
+       "hint": "Find where water meets rock",
+       "point_m_from_site": 0.0
+      },
+      {
+       "stage": 3,
+       "do": "collect",
+       "hint": "Dig up the cache",
+       "point_m_from_site": 320.1,
+       "f": [
+        "quest_thing"
+       ]
+      }
+     ],
+     "found": true,
+     "site": 134344759,
+     "at_km": [
+      -2.15,
+      -10.86
+     ],
+     "structure": "A sinkhole",
+     "take_f": "quest",
+     "end_stage": 90,
+     "gold": 110,
+     "told": [
+      "Discovered: A sinkhole. the ground fallen in, a ring of rock round a dark drop",
+      "A dying smuggler:  \"My stash... a riddle marks it. 'Where the stones lean, then where water meets rock, dig.'\"  (quest: The buried cache)",
+      "Leaning stones: the first clue.",
+      "Where water meets rock: the second clue.",
+      "You dig up the cache (1 of 1)",
+      "Quest done: The buried cache (110 gold)"
+     ]
+    }
+   },
+   "table": 25,
+   "failed": [
+    "bounty"
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_q12a_sites12_beastback.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

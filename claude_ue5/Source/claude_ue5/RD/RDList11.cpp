@@ -459,15 +459,9 @@ ARDMonster* ARDDungeonGenerator::SpawnTestAmbusher(FVector At, int32 Tier)
 	FCollisionQueryParams Q(TEXT("RDTestAmbusher"), false);
 	if (APawn* P = GetWorld()->GetFirstPlayerController() ? GetWorld()->GetFirstPlayerController()->GetPawn() : nullptr) Q.AddIgnoredActor(P);
 	const float Gz = GetWorld()->LineTraceSingleByChannel(H, At + FVector(0, 0, 3000.f), At - FVector(0, 0, 6000.f), ECC_Visibility, Q) ? H.ImpactPoint.Z : WildGroundZ(At);
-	const FVector Sp(At.X, At.Y, Gz + Def.CapsuleHalfHeight + 10.f);
-	FActorSpawnParameters Ps; Ps.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	ARDMonster* M = GetWorld()->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), FTransform(FRotator::ZeroRotator, Sp), Ps);
+	ARDMonster* M = SpawnWildMonsterAt(Def, FVector(At.X, At.Y, Gz), 0.f, 4242 + WildRoamers.Num(), FMath::Max(Tier, 1), 1.f, TEXT("Ambusher"));
 	if (!M) return nullptr;
-	M->SpawnIndex = -1; M->bOpenGround = true; M->HomeAt = Sp; M->WildKey = -1;
-	M->Setup(Ws_, Def, 4242 + WildRoamers.Num());
-	M->Empower(FMath::Max(Tier, 1), 1.f, 1.f, 1.f, TEXT("Ambusher"));
 	M->bHunting = true; M->HuntUntil = GetWorld()->GetTimeSeconds() + 60.f;
-	Ws_->SpawnedMonsters.Add(M);
 	WildRoamers.Add(M);
 	return M;
 }

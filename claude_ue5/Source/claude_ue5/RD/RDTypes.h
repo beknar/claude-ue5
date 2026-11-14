@@ -867,6 +867,43 @@ struct FRDWildRuinKind
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float GapYaw = 0.f;
 };
 
+/** the list of 2026-11-12's fifth phase ("add these quest types that can be found in the wilderness ... they should have some
+ *  kind of physical structure that holds them ... those structures can have containers, traps, hold prisoners"): a structure of
+ *  the wilds (a cave system, a ruined fortress, a titan's carcass ...): a ruin kind's fields (its parts laid by the ruins'
+ *  layout language, its biomes, weight, loot, guards) and the water it needs ("sea", "lake", "river", "any": its middle on that
+ *  water's shore within 150 m; "" none), its prisoners (in cages: F frees them), its traps (spikes underfoot) and the quests it
+ *  can hold (SourceArt/wilderness/sites12.json; RD/RDWildSite12.cpp, RD/RDWildQuest12.cpp) */
+USTRUCT(BlueprintType)
+struct FRDWildSiteKind : public FRDWildRuinKind
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString NeedWater;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Prisoners = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Traps = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FName> Quests;
+};
+
+/** the list of 2026-11-12's fifth phase: a quest of the wilds, found at a structure (RD/RDWildQuest12.cpp; 924 quests from
+ *  SourceArt/wilderness/quests12.json). Its stages are lines of key=value pairs ("do=kill;at=far;n=1;named=The Grey Widow;..."):
+ *  do one of talk, choose, goto, kill, collect, escort, defend, capture, tame, deliver, rite, survive, strand, reward; at a point
+ *  (site, near, far, trail, town, water, shelter, place:<kind>); "if=a" / "if=b" a branch of the choice; say what she is told
+ *  as it begins, hint the tracker's line */
+USTRUCT(BlueprintType)
+struct FRDWildQuestDef
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Title;
+	/** the giver (a townsfolk def's name begins with it) and what they are called; their offer */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Giver;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString GiverTitle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Offer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Stages;
+	/** its reward: gold (by the tier, as the wilds' gold) and things ("Item|n;...") */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Gold = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Things;
+};
+
 /** a hero's rider clips (the Animals pack's camel rider's, retargeted to her by 913) */
 USTRUCT(BlueprintType)
 struct FRDRiderClips

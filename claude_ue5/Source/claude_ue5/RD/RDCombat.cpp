@@ -655,6 +655,24 @@ void URDCombatComponent::TickFallDamage()
 	if (Health <= 0.f) Fall();
 }
 
+void URDCombatComponent::HurtByTrap(float Share, float SlowShare, float SlowSecs, const FString& Msg)
+{
+	if (bDead || !Generator) return;
+	const float Now = GetWorld()->GetTimeSeconds();
+	const float Amount = MaxHealth * FMath::Clamp(Share, 0.f, 1.f);
+	Health = FMath::Max(0.f, Health - Amount);
+	if (Health <= 0.f && Now < PactUntil) { Health = FMath::Max(1.f, MaxHealth * PactShare); PactUntil = Now; ++PactSaves; SetAura(ERDSpellKind::Pact, nullptr, false); }
+	DamageTaken += Amount; LastHurtTime = Now; ++TrapsHurt;
+	if (SlowShare > 0.f) { SlowMeShare = FMath::Max(SlowMeShare, SlowShare); SlowMeUntil = FMath::Max(SlowMeUntil, Now + SlowSecs); }
+	if (AActor* O = GetOwner())
+	{
+		Generator->AddHitText(O->GetActorLocation() + FVector(0, 0, 90.f), Amount, true);
+		Generator->PlaySoundAt(Health <= 0.f ? TEXT("Player.Death") : TEXT("Player.Hurt"), O->GetActorLocation());
+	}
+	SetMessage(FString::Printf(TEXT("%s: %.0f damage"), *Msg, Amount));
+	if (Health <= 0.f) Fall();
+}
+
 void URDCombatComponent::Fall()
 {
 	const float Now = GetWorld()->GetTimeSeconds();

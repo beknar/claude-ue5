@@ -1,0 +1,361 @@
+{
+ "tag": "q12c",
+ "plan": [
+  "sites12=beastback",
+  "quests12=tame+rescue+escort+manhunt+delivery+stranded+disaster"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "sites12",
+   "ok": true,
+   "kinds": {
+    "beastback": {
+     "found": true,
+     "id": 134352959,
+     "at_km": [
+      3.33,
+      9.49
+     ],
+     "name": "A living beast's back",
+     "laid": {
+      "kind": "beastback",
+      "pieces": 3,
+      "boxes": 1,
+      "guards_standing": 0,
+      "guards_in_a_piece": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "table": {
+      "guards": 0,
+      "prisoners": 0,
+      "traps": 0
+     },
+     "pieces_gone": 0,
+     "walked_through": [],
+     "floating": [],
+     "chests": 1,
+     "giver": "a horse breaker",
+     "beast_moved_m": 3.74,
+     "beast_head_off_deg": 3.1,
+     "told": "Discovered: A living beast's back. a beast the size of a hill, a whole camp built on its back, walking its slow round"
+    }
+   },
+   "table": 34,
+   "counts": {
+    "cave": 72,
+    "canyon": 6,
+    "aerie": 87,
+    "pass": 107,
+    "waterfall": 1,
+    "sinkhole": 132,
+    "greattree": 82,
+    "swamp": 6,
+    "glacier": 44,
+    "caldera": 67,
+    "seacave": 6,
+    "spire": 110,
+    "den": 523,
+    "fairyring": 55,
+    "lakeisland": 3,
+    "fortress": 149,
+    "watchtower": 228,
+    "mine": 104,
+    "tomb": 178,
+    "shrine": 423,
+    "cabin": 137,
+    "bridge": 4,
+    "waystation": 180,
+    "logging": 100,
+    "palisade": 182,
+    "shipwreck": 4,
+    "witchhut": 61,
+    "village": 161,
+    "dam": 3,
+    "smugglers": 206,
+    "titan": 67,
+    "beastback": 41,
+    "floating": 63,
+    "rift": 48
+   },
+   "quests": {
+    "legendary": 196,
+    "delivery": 149,
+    "spirit": 135,
+    "outpost": 107,
+    "expedition": 118,
+    "blight": 221,
+    "holdpass": 113,
+    "capture": 138,
+    "investigation": 333,
+    "manhunt": 169,
+    "sacred": 280,
+    "survey": 125,
+    "cache": 176,
+    "bounty": 186,
+    "escort": 67,
+    "stranded": 24,
+    "disaster": 149,
+    "lostruin": 176,
+    "dispute": 77,
+    "infestation": 250,
+    "rescue": 102,
+    "ingredient": 124,
+    "tame": 76,
+    "clearing": 124,
+    "trailblaze": 25
+   },
+   "failed": []
+  },
+  {
+   "step": "quests12",
+   "ok": false,
+   "quests": {
+    "tame": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "tame",
+       "hint": "Win the wild horse's trust (walk to it, F, three times)",
+       "point_m_from_site": 32.0,
+       "f": [
+        "quest_tame",
+        "quest_tame",
+        "quest_tame"
+       ]
+      }
+     ],
+     "found": true,
+     "site": 134352959,
+     "at_km": [
+      3.33,
+      9.49
+     ],
+     "structure": "A living beast's back",
+     "take_f": "quest",
+     "end_stage": 90,
+     "gold": 30,
+     "told": [
+      "A horse breaker:  \"There's a wild horse running here. Earn its trust: come to it slowly, three times.\"  (quest: Tame a mount)",
+      "The horse lets you near and eats from your hand (1 of 3)",
+      "The horse lets you near and eats from your hand (2 of 3)",
+      "Quest done: Tame a mount (30 gold)"
+     ]
+    },
+    "rescue": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "goto",
+       "hint": "Find the boy's trail",
+       "point_m_from_site": 161.0
+      },
+      {
+       "stage": 2,
+       "do": "talk",
+       "hint": "Find the lost boy",
+       "point_m_from_site": 320.0,
+       "f": "quest"
+      },
+      {
+       "stage": 3,
+       "do": "escort",
+       "hint": "Bring the boy home",
+       "point_m_from_site": 0.0,
+       "ambush_killed": 3
+      }
+     ],
+     "found": true,
+     "site": 134336569,
+     "at_km": [
+      -5.4,
+      -7.04
+     ],
+     "structure": "A bandit palisade",
+     "take_f": "quest",
+     "end_stage": 90,
+     "gold": 78,
+     "told": [
+      "A lost boy:  \"I got lost... I'm so cold.\"",
+      "Game speed: 3x",
+      "On the way: a lost hunter",
+      "On the way: a travelling pedlar",
+      "Ruins show through the land ahead",
+      "Deer graze ahead",
+      "On the way: a travelling pedlar",
+      "There is something worth gathering ahead",
+      "On the way: a courier",
+      "+3 gold",
+      "+2 gold",
+      "Quest done: Search and rescue (70 gold)"
+     ]
+    },
+    "escort": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "escort",
+       "hint": "Escort the pilgrim to the far shrine",
+       "point_m_from_site": 319.9,
+       "ambush_killed": 5
+      }
+     ],
+     "found": true,
+     "site": 134324283,
+     "at_km": [
+      -13.36,
+      -1.64
+     ],
+     "structure": "A roadside waystation",
+     "take_f": "quest",
+     "end_stage": 90,
+     "gold": 98,
+     "told": [
+      "Discovered: A roadside waystation. an inn at the crossroads, its sign creaking in the wind",
+      "A pilgrim:  \"We must cross to the far shrine, but we can't fight. Will you walk with us?\"  (quest: Wilderness escort)",
+      "Game speed: 3x",
+      "+3 gold",
+      "Ambush! Protect the pilgrim!",
+      "+4 gold",
+      "Quest done: Wilderness escort (80 gold)"
+     ]
+    },
+    "manhunt": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "goto",
+       "hint": "Track the fugitive",
+       "point_m_from_site": 108.2
+      },
+      {
+       "stage": 2,
+       "do": "goto",
+       "hint": "Track the fugitive",
+       "point_m_from_site": 214.1
+      },
+      {
+       "stage": 3,
+       "do": "choose",
+       "hint": "Decide the fugitive's fate",
+       "point_m_from_site": 320.0,
+       "f": "quest"
+      },
+      {
+       "stage": 5,
+       "do": "talk",
+       "hint": "Report to the warden",
+       "point_m_from_site": 0.0,
+       "f": "quest"
+      }
+     ],
+     "found": true,
+     "site": 134324285,
+     "at_km": [
+      -13.5,
+      3.58
+     ],
+     "structure": "A bandit palisade",
+     "take_f": "quest",
+     "choice": "a",
+     "end_stage": 90,
+     "gold": 80,
+     "told": [
+      "Discovered: A bandit palisade. a stockade of sharpened logs, a camp behind it",
+      "A warden:  \"A prisoner escaped. Track him and bring him back.\"  (quest: The manhunt)",
+      "Footprints, running.",
+      "A torn sleeve on a thorn.",
+      "The the fugitive:  \"You let him run.\"",
+      "Quest done: The manhunt (80 gold)"
+     ]
+    },
+    "delivery": {
+     "stages": [],
+     "found": true,
+     "site": 134340665,
+     "at_km": [
+      -3.78,
+      -7.1
+     ],
+     "structure": "A roadside waystation",
+     "take_f": "quest",
+     "end_stage": 1,
+     "gold": 0,
+     "told": [
+      "Discovered: A roadside waystation. an inn at the crossroads, its sign creaking in the wind",
+      "A courier:  \"This medicine must reach the nearest town before nightfall. My leg is broken. Run it for me!\"  (quest: Urgent delivery)"
+     ]
+    },
+    "stranded": {
+     "stages": [
+      {
+       "stage": 3,
+       "do": "goto",
+       "hint": "Find shelter",
+       "point_m_from_site": 10727.3
+      },
+      {
+       "stage": 4,
+       "do": "collect",
+       "hint": "Forage food",
+       "point_m_from_site": 32.0,
+       "f": [
+        "quest_thing",
+        "quest_thing"
+       ]
+      }
+     ],
+     "found": true,
+     "site": 134311990,
+     "at_km": [
+      -20.27,
+      -13.48
+     ],
+     "structure": "A cave system",
+     "take_f": "quest",
+     "end_stage": 5,
+     "gold": 0,
+     "told": [
+      "Discovered: A cave system. a cave's mouth in the rock, its passages running back into the dark",
+      "A ferryman:  \"Cross with me to the far bank? ... The ferry! It's breaking up!\"  (quest: Stranded)",
+      "Fresh water: you drink.",
+      "Discovered: Gray Cave",
+      "You forage food (1 of 2)",
+      "You forage food (2 of 2)"
+     ]
+    },
+    "disaster": {
+     "stages": [],
+     "found": true,
+     "site": 134332474,
+     "at_km": [
+      -9.14,
+      -3.87
+     ],
+     "structure": "A watchtower",
+     "take_f": "quest",
+     "end_stage": 90,
+     "gold": 70,
+     "told": [
+      "Discovered: A watchtower. a lookout over the land, its ladder still sound",
+      "A shepherd:  \"A storm is coming down the valley! Help me get my family to shelter!\"  (quest: Weather the disaster)",
+      "They reach the shelter.",
+      "Quest done: Weather the disaster (70 gold)"
+     ]
+    }
+   },
+   "table": 25,
+   "failed": [
+    "delivery",
+    "stranded"
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_q12c_sites12_beastback.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

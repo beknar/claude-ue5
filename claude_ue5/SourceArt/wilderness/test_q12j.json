@@ -1,0 +1,140 @@
+{
+ "tag": "q12j",
+ "plan": [
+  "quests12=lostruin+cache+delivery"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "quests12",
+   "ok": true,
+   "quests": {
+    "lostruin": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "collect",
+       "hint": "Find the burned map",
+       "point_m_from_site": 32.0,
+       "f": [
+        "quest_thing"
+       ]
+      },
+      {
+       "stage": 2,
+       "do": "goto",
+       "hint": "Find the ruin on the map",
+       "point_m_from_site": 12220.3
+      },
+      {
+       "stage": 3,
+       "do": "kill",
+       "hint": "Defeat the ruin's guardians",
+       "point_m_from_site": 12220.3,
+       "killed": 2
+      },
+      {
+       "stage": 4,
+       "do": "talk",
+       "hint": "Tell the scholar",
+       "point_m_from_site": 0.0,
+       "f": "quest"
+      }
+     ],
+     "found": true,
+     "site": 134361145,
+     "at_km": [
+      9.65,
+      -5.53
+     ],
+     "structure": "A titan's carcass",
+     "take_f": "quest",
+     "end_stage": 90,
+     "gold": 86,
+     "told": [
+      "Discovered: A titan's carcass. the ribs of something vast, a fallen giant's head turned to stone beside them",
+      "A scholar:  \"I have half a burned map of a ruin near here. Find it, and survive what's inside.\"  (quest: The lost ruin)",
+      "The half-burned map: it shows ruins and a road (1 of 1)",
+      "Discovered: Ruins of Windstead. Aqueduct: the arches of an aqueduct that outlasted the city it fed",
+      "+3 gold",
+      "The ruin's wardens are dead.",
+      "Quest done: The lost ruin (80 gold)"
+     ]
+    },
+    "cache": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "goto",
+       "hint": "Find where the stones lean",
+       "point_m_from_site": 108.2
+      },
+      {
+       "stage": 2,
+       "do": "goto",
+       "hint": "Find where water meets rock",
+       "point_m_from_site": 0.0
+      },
+      {
+       "stage": 3,
+       "do": "collect",
+       "hint": "Dig up the cache",
+       "point_m_from_site": 320.1,
+       "f": [
+        "quest_thing"
+       ]
+      }
+     ],
+     "found": true,
+     "site": 134344759,
+     "at_km": [
+      -2.15,
+      -10.86
+     ],
+     "structure": "A sinkhole",
+     "take_f": "quest",
+     "end_stage": 90,
+     "gold": 110,
+     "told": [
+      "Discovered: A sinkhole. the ground fallen in, a ring of rock round a dark drop",
+      "A dying smuggler:  \"My stash... a riddle marks it. 'Where the stones lean, then where water meets rock, dig.'\"  (quest: The buried cache)",
+      "Leaning stones: the first clue.",
+      "Where water meets rock: the second clue.",
+      "You dig up the cache (1 of 1)",
+      "Quest done: The buried cache (110 gold)"
+     ]
+    },
+    "delivery": {
+     "stages": [
+      {
+       "stage": 1,
+       "do": "deliver",
+       "hint": "Bring the medicine to the nearest town in time",
+       "point_m_from_site": 8041.7
+      }
+     ],
+     "found": true,
+     "site": 134340665,
+     "at_km": [
+      -3.78,
+      -7.1
+     ],
+     "structure": "A roadside waystation",
+     "take_f": "quest",
+     "end_stage": 90,
+     "gold": 90,
+     "told": [
+      "Discovered: A roadside waystation. an inn at the crossroads, its sign creaking in the wind",
+      "A courier:  \"This medicine must reach the nearest town before nightfall. My leg is broken. Run it for me!\"  (quest: Urgent delivery)",
+      "Quest done: Urgent delivery (90 gold)"
+     ]
+    }
+   },
+   "table": 25,
+   "failed": []
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "error": null,
+ "windows_shown_again": 1
+}

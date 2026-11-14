@@ -117,6 +117,12 @@ public:
 	int32 WildGiftGold = 0;
 	/** tests: whether it was given */
 	bool bWildGiven = false;
+	/** the list of 2026-11-12's fifth phase: a structure's prisoner (its key in WildKilled once freed, 0 for none) and its cage */
+	int64 WildSiteKey = 0;
+	TWeakObjectPtr<class UStaticMeshComponent> WildSiteCage;
+	/** a quest's person (RDWildQuest12.cpp): the structure's id and its part in the quest ("giver", "leader", ...; none: not one) */
+	int32 WildQuestSite = 0;
+	FName WildQuestRole;
 	/** the list of 2026-11-10's sixth phase: a traveller on the wilds' roads: no section; it walks the points it is given (world, on
 	 *  the wild ground) and stands, or sits at its camp's fire (its StandWork) */
 	bool bRoadWalker = false;

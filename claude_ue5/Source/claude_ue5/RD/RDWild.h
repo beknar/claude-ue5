@@ -153,6 +153,8 @@ struct FRDWildPlace
 	UPROPERTY(BlueprintReadOnly) FString Quest;
 	/** the seventh phase: a small point of interest's kind (its index into PoiKinds; -1: a place) */
 	UPROPERTY(BlueprintReadOnly) int32 Poi = -1;
+	/** the list of 2026-11-12's fifth phase: a structure's kind (its index into SiteKinds; -1: none) */
+	UPROPERTY(BlueprintReadOnly) int32 Site = -1;
 };
 
 /** the shapes of ground a biome can have */
@@ -330,6 +332,21 @@ public:
 	float PoiFill = 0.8f;
 	FIntPoint PoiCellOf(double X, double Y) const { return FIntPoint(FMath::FloorToInt((X - Xs) / PoiCellM), FMath::FloorToInt((Y - Yw) / PoiCellM)); }
 	void PoisIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const;
+	/** the list of 2026-11-12's fifth phase: the structures of the wilds (SitesIn): a 2.5 km grid, one in half its cells, of the
+	 *  kinds of the region (SiteKinds, set before Init from the generator's WildSiteKinds), a water kind on its water's shore;
+	 *  places of kind "site", ids SiteIdBase + (cell x << 12 | cell y), in the free range between the points of interest's and
+	 *  the farms' */
+	static constexpr int32 SiteIdBase = 1 << 27;
+	static constexpr double SiteCellM = 2500.0;
+	TArray<FRDWildSiteKind> SiteKinds;
+	float SiteFill = 0.5f;
+	FIntPoint SiteCellOf(double X, double Y) const { return FIntPoint(FMath::FloorToInt((X - Xs) / SiteCellM), FMath::FloorToInt((Y - Yw) / SiteCellM)); }
+	void SitesIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const;
+	/** each cell's structures, worked out once (a water kind's search is 800 samples, and a chunk asks the 3 x 3 cells round it):
+	 *  shared by the worker threads behind a lock, emptied at Init */
+	struct FSiteCache { FCriticalSection Lock; TMap<FIntPoint, TArray<FRDWildPlace>> Cells; };
+	TSharedPtr<FSiteCache> SiteCache = MakeShared<FSiteCache>();
+	void SitesInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) const;
 	TArray<FRDWildPlace> QuestPlaces;
 	/** a quest goal's place ("wild:wolves" -> the den), or null */
 	const FRDWildPlace* QuestPlaceFor(const FString& Goal) const;
