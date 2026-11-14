@@ -2,7 +2,7 @@
 
 [README](../README.md) · [Mistward Castle](levels/mistward_castle.md) · [The wilderness](levels/wilderness.md) · [Vel Morrath](levels/vel_morrath.md) · [Ashenreach](levels/ashenreach.md) · [Graymourne](levels/graymourne.md) · [Kethrys Spire](levels/kethrys_spire.md) · [Heaven](levels/heaven.md) · [TODO](../TODO.md)
 
-The rebalance to tier 25: the fifth phase of the user's list of 2026-11-08b ([docs/improvements9.txt](improvements9.txt)). It covers four things:
+The rebalance to tier 25: the fifth phase of the user's list of 2026-11-08b ([docs/improvements9.txt](improvements9.txt)), carried to tier 30 by the sixth phase of the list of 2026-11-12 ([docs/improvements12.txt](improvements12.txt)): Heaven's dungeon is the game's tiers 26-30, its gear a fifth quality (Divine), and the wilds rise past Heaven to tier 30. It covers four things:
 - The Mage gains one spell a tier, and two new spells fill the last places.
 - The Summoner, the Rogue and the Martial Artist earn new abilities in the dungeons after Mistward.
 - The gear is spread over the other five dungeons, in quality copies.
@@ -14,7 +14,7 @@ The data is `claude_ue5/SourceArt/balance/tier25.json`. Stage `910` writes it on
 
 ## The game's tiers
 
-Each dungeon keeps its own five tiers of sets of rooms. A level's base (`DungeonTierBase`) and cap (`DungeonTierCap`) map them into the game's 25:
+Each dungeon keeps its own five tiers of sets of rooms. A level's base (`DungeonTierBase`) and cap (`DungeonTierCap`) map them into the game's 30 (`ARDDungeonGenerator::GameTierMax`):
 
 | Dungeon | Town | Its tiers in the game's | Base | Cap |
 |---|---|---|---|---|
@@ -23,9 +23,9 @@ Each dungeon keeps its own five tiers of sets of rooms. A level's base (`Dungeon
 | the War Engine | Ashenreach | 11-15 | 10 | |
 | the Sewers of Graymourne | Graymourne | 16-20 | 15 | |
 | the Black Tower of Kethrys Spire | Kethrys Spire | 21-25 | 20 | |
-| Kratos Aurorim Research | Heaven | 25 (its first tier 24 + 1, the rest held at 25) | 24 | 25 |
+| Kratos Aurorim Research | Heaven | 26-30 (until the list of 2026-11-12: 25, base 24 held at 25) | 25 | |
 
-The game's tier (`GameGlobalTier`) is the deepest one opened in any dungeon of the chain. It sets the town's prices: 1 to 8 over the first five tiers as before, then about 17 % a tier, so 17.5 at tier 10 and 185 at tier 25.
+The game's tier (`GameGlobalTier`) is the deepest one opened in any dungeon of the chain. It sets the town's prices: 1 to 8 over the first five tiers as before, then about 17 % a tier, so 17.5 at tier 10, 185 at tier 25 and 405 at tier 30.
 - **Gold:** a kill and a container pay by the game's tier of where she earned them: x the tier over the first five, then growing as the prices do (5 x the price factor over 8: about 11 at tier 10, 115 at tier 25).
 - **Store:** an item is priced by its kind and its own lowest tier (the same table).
   - **What is used up** (potions, food, scrolls, repair items, torches) also grows past tier 5 as a kill's gold does (`RDUsedUpScale`: x 2.19 at tier 10, x 23.1 at tier 25), so it costs as many kills as at tier 5. A tier-1 healing potion costs 12 gold at tier 1 and 277 at tier 25.
@@ -46,6 +46,7 @@ Past tier 5 the monsters' hit points grow by 1.12 a tier and their blows by 1.09
 | 15 | 10.56 | 5.21 | 3.11 | 2.37 | 38.5 |
 | 20 | 18.61 | 8.01 | 5.47 | 3.64 | 84.3 |
 | 25 | 32.80 | 12.33 | 9.65 | 5.60 | 185 |
+| 30 | 57.80 | 18.97 | 17.00 | 8.62 | 405 |
 
 The Summoner's summons grow to tier 10 of her summonings (`SummonTierStrength`: 0.8 to 1.0 over the first five, then up to 1.2).
 
@@ -58,7 +59,7 @@ Each tome spell has one place among the dungeons' 30 tiers (`FRDSpellDef::Slot`)
   - Starfall: Meteor Storm's, at 1.2 times its mana and 1.5 times its damage.
   - Singularity: Void Rift's, at 1.2 times its mana and 1.6 times its damage.
 
-The tome items carry their place's game tier.
+The tome items carry their place's game tier: Heaven's five 26 to 30 since the list of 2026-11-12 (they were all 25). The Warlock's thirteen curses have places of their own among the 30 (`list11_spells.json`, `918 spells3`), shared with a Mage's spell; a tome at a curse's place is the curse for her until she knows it. `910` leaves every spell kept to one hero out of the Mage's order: run after `918` it had counted the curses in, and every later spell moved along (Meteor Storm's place was 39).
 
 | Dungeon | Tier 1 | Tier 2 | Tier 3 | Tier 4 | Tier 5 |
 |---|---|---|---|---|---|
@@ -92,7 +93,8 @@ The castle's tiered weapons, armour, shields and rings come again in each later 
 | Fine | Vel Morrath | by the tiers' power | +0.04 | x 1.3 | x 1.25 |
 | Masterwork | the War Engine | (a found weapon of tier t: tier 5's x 1.12 per tier past 5) | +0.08 | x 1.6 | x 1.5 |
 | Exalted | the Sewers | | +0.12 | x 1.9 | x 1.75 |
-| Celestial | Kethrys Spire and Heaven | | +0.16 (at most 0.85) | x 2.2 | x 2.0 |
+| Celestial | Kethrys Spire | | +0.16 (at most 0.85) | x 2.2 | x 2.0 |
+| Divine | Heaven (since the list of 2026-11-12) | | +0.20 (at most 0.85) | x 2.5 | x 2.25 |
 
 Each quality has 108 copies. A copy's damage follows `880`'s rule for found weapons: 8 + 3 × its damage rating, times the power of its first tier (`balance6.json` for tiers 1 to 5, then × 1.12 a tier). The Viking Shortsword, for example, does 20 at tier 1; its Fine copy does 56 (tier 6), Masterwork 99, Exalted 174 and Celestial 307. The potions, food and scrolls are found in every dungeon at their rank.
 
@@ -115,7 +117,7 @@ Every map now carries every dungeon's kinds: 88 kinds, weight 0 except on their 
 | the War Engine's machines, tier k | 10 + k (11-15) |
 | the drowned of the Sewers, tier k | 15 + k (16-20) |
 | the casters of the Black Tower, tier k | 20 + k (21-25) |
-| Heaven's defenders | 23-25 |
+| Heaven's defenders | 26-30 (past Heaven: the wilds' tiers rise from 25 at its gate to 30 some 40 km on, along the way from Kethrys Spire) |
 | Aurorim | never |
 
 ## The tests
@@ -126,6 +128,7 @@ The list of 2026-11-10's seventh phase ran the rebalance in every dungeon and ci
 - **`888 cities25`** (`-Light`, `test_c25f.json`) checks the six cities' store, horse, blessing and healer at game tiers 1, 5, 7, 8, 10 and 25 ([Brokenspire's seventh part](levels/brokenspire.md#the-list-of-2026-11-10-seventh-part-the-rebalance-in-each-city)).
 - **`868 tier25` on the War Engine again** (`test_p7w3.json`) after PR #44's review renamed its summon's record (`later.Summoner.summon`).
 - **`888 wild25`** (`test_w25p7.json`) again.
+- **Tier 30** (the list of 2026-11-12's sixth phase): `868 tier25 -lv heaven_fortress` (`test_t30h.json`): its tiers 26-30, its 19 start-set monsters 73.5 times tier 1's hit points and 29.9 times its blows as the tables say, its loot Divine only (none of another quality, no plain tiered piece) and its tomes Meteor Storm (26) and Null Sanctum (27), its boss's gold (11,143 against at least 10,132 at tier 30), Heaven's Gale, Death's Kiss and Summon Tier 10 (a Kratos Commander at tier 26). Kethrys Spire again (`test_t30k.json`: 21-25, Celestial) and the castle's curses (`868 spells11`, `test_t30s.json`). `888 wild25,cities25 -Light` (`test_w30a.json`): the wilds' places to tier 30 past Heaven (a Kratos Guard at 27, a Kratos Tank at 30, each in its band) and the six cities' prices at tier 30 by the table (x 405).
 
 `868 tier25` runs on Vel Morrath (`-lv vel_morrath`, `test_t25e.json`).
 - **Tiers:** the level's tiers are the game's 6-10.
@@ -150,3 +153,4 @@ The castle's own steps the rebalance touches still pass on Mistward Castle (`tes
 1. Build the C++ (`pipeline\build_cpp.ps1`).
 2. Run `910_tier25.py` (all seven maps; or name some). Run it after anything that writes the levels' heroes, spells, items or monsters anew (`855`, `857`, `858`, `859`, `871`, `872`, `876`, `880`, `895`, `897`, `907`, `909`): those stages write the castle's tables, and `910` builds the rest from them.
 3. Run `905_dungeon_keys.py`, which writes the chain's tier bases from `tier25.json`.
+4. Run `918_improvements11.py cantrip spells3 slashes3` (`910` makes Starfall and Singularity again from their sources: `spells3` gives them their looks and pictures back and keeps the curses' places and pictures; `casts3` and `icons3` need not run again).

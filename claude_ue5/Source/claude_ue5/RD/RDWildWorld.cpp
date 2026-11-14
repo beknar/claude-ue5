@@ -1455,6 +1455,13 @@ void FRDWildWorld::MakeTierChain()
 	TierSites.Reset(); TierValues.Reset();
 	for (int32 K = 0; K < UE_ARRAY_COUNT(RDWTierNames); ++K)
 		for (const FRDWildTown& T : Towns) if (T.Name == RDWTierNames[K]) { TierSites.Add(T.Site); TierValues.Add(RDWTierOf[K]); break; }
+	// (the list of 2026-11-12's sixth phase, the game to tier 30: past Heaven the land goes on rising, 25 at its gate to 30 some
+	// 40 km on, along the way from Kethrys Spire to Heaven; Heaven's defenders meet her there (their wild band 26-30))
+	if (TierSites.Num() >= 2 && TierValues.Last() >= 25.f)
+	{
+		const FVector2D Way = (TierSites.Last() - TierSites[TierSites.Num() - 2]).GetSafeNormal();
+		TierSites.Add(TierSites.Last() + Way * 40000.0); TierValues.Add(30.f);
+	}
 }
 
 FString FRDWildWorld::NameFor(const FString& Kind, uint32 H) const

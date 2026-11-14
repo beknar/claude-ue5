@@ -1,6 +1,7 @@
-// The rebalance to tier 25 (the user's list of 2026-11-08b, docs/improvements9.txt, its fifth phase): the game's tiers 1-25 over
-// the chain of dungeons (Mistward Castle 1-5, Vel Morrath 6-10, The War Engine 11-15, the Sewers 16-20, Kethrys Spire 21-25,
-// Heaven at 25), each level's own five tiers mapped into them (DungeonTierBase, DungeonTierCap; the chain's "|base|cap", 905):
+// The rebalance to tier 25 (the user's list of 2026-11-08b, docs/improvements9.txt, its fifth phase), carried to tier 30 by the
+// list of 2026-11-12's sixth phase: the game's tiers 1-30 over the chain of dungeons (Mistward Castle 1-5, Vel Morrath 6-10,
+// The War Engine 11-15, the Sewers 16-20, Kethrys Spire 21-25, Heaven 26-30), each level's own five tiers mapped into them
+// (DungeonTierBase, DungeonTierCap; the chain's "|base|cap", 905):
 //   GlobalTier       a level's tier in the game's tiers (the monsters' strength, the loot's tiers)
 //   GameGlobalTier   the deepest game's tier opened in any dungeon (the town's prices, the hero's growth in the town and the wilds)
 //   GrowthTier       the tier the hero grows by (at least the deepest she has opened anywhere: no fall back to tier 1 in a new

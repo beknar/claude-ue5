@@ -1,7 +1,7 @@
 {
- "_doc": "The rebalance to tier 25 (the user's list of 2026-11-08b, docs/improvements9.txt, its fifth phase), read by 910 and written onto every map of the game (brokenspire and the six dungeons). The game's tiers 1-25: each dungeon's five tiers mapped by its base and cap (also in dungeons/chain.json for the game's own tier, 905). Past tier 5 the monsters' hit points grow by health_growth a tier and their blows by damage_growth (the hero's power by power_growth and her hit points and mana by health_growth: 910 writes them as the generators' TierGrowthPower / TierGrowthHealth), their speed, pace and ability as tier 5's. Mage spells: one to each of the dungeons' 30 tiers (its tome's Slot), the 28 found before (in their old order: tier, then mana) and two made up. Gear: each tiered item again in each later dungeon at its tier there, in a quality (Fine, Masterwork, Exalted, Celestial), its damage by the tiers' power (880's rule: mistward/balance6.json's weapon_tier_power, past tier 5 x power_growth a tier), its armour, block and ring bonus a little more, its durability more; potions and food in each dungeon at their rank. Monsters: every dungeon's kinds on every map (weight 0 but on their own), the wilderness meeting each in its band of the game's tiers. Later abilities: one for the Summoner, the Rogue and the Martial Artist in each later dungeon (its last tier's boss), copies of their own abilities made stronger.",
- "maps": {"brokenspire": [0, 0], "mistward_castle": [0, 0], "vel_morrath": [5, 0], "war_engine": [10, 0], "sewers": [15, 0], "kethrys_spire": [20, 0], "heaven_fortress": [24, 25]},
- "tiers": {"health_growth": 1.12, "damage_growth": 1.09, "count": 25},
+ "_doc": "The rebalance to tier 25 (the user's list of 2026-11-08b, docs/improvements9.txt, its fifth phase), carried to tier 30 by the list of 2026-11-12's sixth phase (docs/improvements12.txt: Heaven's dungeon the game's tiers 26-30, its gear Divine). Read by 910 and written onto every map of the game (brokenspire and the six dungeons). The game's tiers 1-30: each dungeon's five tiers mapped by its base and cap (also in dungeons/chain.json for the game's own tier, 905). Past tier 5 the monsters' hit points grow by health_growth a tier and their blows by damage_growth (the hero's power by power_growth and her hit points and mana by health_growth: 910 writes them as the generators' TierGrowthPower / TierGrowthHealth), their speed, pace and ability as tier 5's. Mage spells: one to each of the dungeons' 30 tiers (its tome's Slot), the 28 found before (in their old order: tier, then mana) and two made up. Gear: each tiered item again in each later dungeon at its tier there, in a quality (Fine, Masterwork, Exalted, Celestial, Divine), its damage by the tiers' power (880's rule: mistward/balance6.json's weapon_tier_power, past tier 5 x power_growth a tier), its armour, block and ring bonus a little more, its durability more; potions and food in each dungeon at their rank. Monsters: every dungeon's kinds on every map (weight 0 but on their own), the wilderness meeting each in its band of the game's tiers. Later abilities: one for the Summoner, the Rogue and the Martial Artist in each later dungeon (its last tier's boss), copies of their own abilities made stronger.",
+ "maps": {"brokenspire": [0, 0], "mistward_castle": [0, 0], "vel_morrath": [5, 0], "war_engine": [10, 0], "sewers": [15, 0], "kethrys_spire": [20, 0], "heaven_fortress": [25, 0]},
+ "tiers": {"health_growth": 1.12, "damage_growth": 1.09, "count": 30},
  "power_growth": 1.12, "health_growth": 1.09,
  "starting_spells": ["Fire Bolt", "Dark Fire"],
  "tome_spells_exclude": ["Straight Punch", "Side Kick", "Smashing Strike", "Roundhouse Kick", "Chain Punch", "Rear Kick", "Piercing Palm", "Axe Kick", "Meteor Fist", "Spinning Kick", "Summon Tier 1", "Summon Tier 2", "Summon Tier 3", "Summon Tier 4", "Summon Tier 5"],
@@ -9,13 +9,13 @@
   {"name": "Starfall", "from": "Meteor Storm", "mana": 1.2, "damage": 1.5, "effect": "calls down a storm of falling stars over the area", "icon_from": "Meteor Storm"},
   {"name": "Singularity", "from": "Void Rift", "mana": 1.2, "damage": 1.6, "effect": "opens a collapsing void that crushes everything in it", "icon_from": "Void Rift"}
  ],
- "qualities": ["Fine", "Masterwork", "Exalted", "Celestial"],
+ "qualities": ["Fine", "Masterwork", "Exalted", "Celestial", "Divine"],
  "quality_kinds": ["Weapon", "Armour", "Shield", "Ring"],
  "quality_armour_step": 0.04, "quality_armour_max": 0.85, "quality_durability_step": 0.25, "quality_ring_step": 0.3,
  "consumable_kinds": ["Healing", "Mana", "Speed", "Food", "Scroll"],
  "monsters": {
   "home": {"war_engine": "war_engine", "sewers": "sewers", "kethrys_spire": "kethrys_spire", "heaven_fortress": "heaven_fortress"},
-  "wild_bands": {"castle": [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10]], "war_engine": 10, "sewers": 15, "kethrys_spire": 20, "heaven_fortress": [23, 25]},
+  "wild_bands": {"castle": [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10]], "war_engine": 10, "sewers": 15, "kethrys_spire": 20, "heaven_fortress": 25},
   "never_wild": ["Aurorim"]
  },
  "summon_tier_strength": [0.8, 0.85, 0.9, 0.95, 1.0, 1.04, 1.08, 1.12, 1.16, 1.2],

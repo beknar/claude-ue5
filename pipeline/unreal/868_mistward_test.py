@@ -4216,11 +4216,11 @@ def step_catacombs():
 def step_tier25():
     """the rebalance to tier 25 (910, SourceArt/balance/tier25.json; the list of 2026-11-08b's fifth phase), on any dungeon past
     the castle (-lv vel_morrath, war_engine, sewers, kethrys_spire, heaven_fortress; what it expects of each read from
-    tier25.json: the list of 2026-11-10's seventh phase): its tiers are the game's (GlobalTier: Vel Morrath's 6-10, Heaven's 24-25);
+    tier25.json: the list of 2026-11-10's seventh phase): its tiers are the game's (GlobalTier: Vel Morrath's 6-10, Heaven's 26-30 since the list of 2026-11-12's sixth phase);
     the start set's monsters, the same seed spawned with the level's base taken away and put back, are as much stronger as the
     tier tables say (hit points and blows, monster by monster) and so is she (her hit points by her growth); every container's loot
     in the start set and in a tier-2 set over 40 session seeds holds only things of the game's tier (the castle's tiered gear in
-    the quality of the dungeon's band: Fine 6-10, Masterwork 11-15, Exalted 16-20, Celestial 21-25; none of the others), and each
+    the quality of the dungeon's band: Fine 6-10, Masterwork 11-15, Exalted 16-20, Celestial 21-25, Divine 26-30; none of the others), and each
     tome is the one spell of its tier's place (Slot = the chain's index x 5 + the tier); the tier-5 boss slain: the Martial Artist,
     the Rogue and the Summoner earn the dungeon's abilities (tier25.json's "later" for this dungeon), none of the next dungeon's;
     the Summoner's new summoning called: its kind at her side (the record's later.Summoner.summon)"""
@@ -4231,7 +4231,7 @@ def step_tier25():
     chain = [str(l).split("|") for l in g.get_editor_property("dungeon_chain")]
     ci = next((i for i, p in enumerate(chain) if p[0] == res["key"]), -1); res["chain_index"] = ci
     TJ25 = json.load(open(os.path.join(SA, "balance", "tier25.json"), encoding="utf-8"))
-    # (the quality by the game's tier band (6-10 Fine, 11-15 Masterwork, 16-20 Exalted, 21-25 Celestial): Heaven's 24-25 are Celestial as Kethrys Spire's)
+    # (the quality by the game's tier band (6-10 Fine, 11-15 Masterwork, 16-20 Exalted, 21-25 Celestial, 26-30 Divine: Heaven's)
     QS = TJ25["qualities"]; gt1 = g.global_tier(1); QW = QS[min(max((gt1 - 6) // 5, 0), len(QS) - 1)] if gt1 > 5 else ""
     LT = TJ25["later"]
     mine = {h: (LT[h][ci - 1]["name"] if 1 <= ci <= len(LT.get(h, [])) else None) for h in ("MartialArtist", "Rogue", "Summoner")}

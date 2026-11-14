@@ -624,7 +624,7 @@ if "spells3" in STEPS:
                            ("mana", float(12 + 6 * slot)), ("cooldown", float(c["cooldown"])), ("duration", float(c["duration"])), ("drop_chance", 0.0),
                            ("tier", tier), ("slot", slot), ("damage", 0.0), ("reach", 1400.0), ("radius", float(c.get("radius", 0))), ("amount", float(c["amount"])),
                            ("count", int(c.get("count", 0))), ("curse_effect", getattr(unreal.RDCurseEffect, c["effect"].upper())), ("only_heroes", ["Warlock"]),
-                           ("element", "shadow"), ("icon", "None"), ("use_colors", False)):
+                           ("element", "shadow"), ("icon", s.get_editor_property("icon") if c["name"] in by else "None"), ("use_colors", False)):
                 s.set_editor_property(fld, v)
             s.set_editor_property("cast_fx", fx(c["cast"])); s.set_editor_property("impact_fx", fx(c["impact"])); s.set_editor_property("area_fx", fx(c["mark"]))
             for fld, v in (("cast_fx_scale", 1.0), ("impact_fx_scale", 1.0), ("area_fx_scale", 0.8), ("area_every", 0.0)): s.set_editor_property(fld, v)
@@ -636,13 +636,20 @@ if "spells3" in STEPS:
         for i, s in enumerate(spells):
             if str(s.name) in made: s.set_editor_property("element", "None"); spells[i] = s; continue
             e = element_of(s.name); s.set_editor_property("element", e or "None"); spells[i] = s; ne += 1 if e else 0
+        # (the pictures icons3 made, kept: a curse keeps its own (above); Starfall and Singularity, made again by 910 from Meteor Storm
+        # and Void Rift, take theirs again from the level's art when it has them)
+        ua = g.get_editor_property("ui_art")
+        for i, s in enumerate(spells):
+            if str(s.name) in ("Starfall", "Singularity"):
+                pn = "spell_" + str(s.name).lower()
+                if unreal.Name(pn) in ua: s.set_editor_property("icon", pn); spells[i] = s
         g.set_editor_property("spells", spells)
         # (their tomes: Curse of Frailty's tome copied, in the game's tier of its place)
         items = list(g.get_editor_property("items")); names = {str(it.name): i for i, it in enumerate(items)}
         src = items[names["Tome of Curse of Frailty"]]; nt = 0
         for c in L11["curses"]:
             t = copy_struct(unreal.RDItemDef, items[names["Tome of " + c["name"]]] if ("Tome of " + c["name"]) in names else src)
-            t.set_editor_property("name", "Tome of " + c["name"]); t.set_editor_property("spell", c["name"]); t.set_editor_property("tiers", [min(int(c["slot"]), 25)])
+            t.set_editor_property("name", "Tome of " + c["name"]); t.set_editor_property("spell", c["name"]); t.set_editor_property("tiers", [min(int(c["slot"]), 30)])
             if ("Tome of " + c["name"]) in names: items[names["Tome of " + c["name"]]] = t
             else: names[t.get_editor_property("name")] = len(items); items.append(t)
             nt += 1
