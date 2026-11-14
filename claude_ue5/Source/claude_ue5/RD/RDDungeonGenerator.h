@@ -1877,6 +1877,8 @@ public:
 	UPROPERTY(Transient) TObjectPtr<AActor> CircleFx;
 	FName TownPanel;
 	int32 TownTab = 0, TownCursor = 0, TownGuardsPlanned = 0;
+	/** the panel's lines were made with the wilds ready (BuildTownLines); TickTownPanel makes them again once they are */
+	bool bTownLinesWildReady = true;
 	bool bTownTraveling = false, bTownPlaced = false;
 	uint64 TownPanelClosedFrame = 0;
 	// (the showcase tour)

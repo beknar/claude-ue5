@@ -1,0 +1,91 @@
+{
+ "tag": "t13e",
+ "plan": [
+  "walls13",
+  "others13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "walls13",
+   "ok": true,
+   "Ashenreach": {
+    "outside_walls": false,
+    "map_outside": "1",
+    "walked_in": true,
+    "walk_s": 9.4,
+    "town": "Ashenreach",
+    "in_walls_state": "1",
+    "map_inside": "2"
+   },
+   "Graymourne": {
+    "outside_walls": false,
+    "map_outside": "1",
+    "walked_in": true,
+    "walk_s": 12.0,
+    "town": "Graymourne",
+    "in_walls_state": "1",
+    "map_inside": "2"
+   }
+  },
+  {
+   "step": "others13",
+   "ok": false,
+   "Vel Morrath": {
+    "board_spot": true,
+    "bounties": [
+     "Quest: Bounty: Clear the Ossuary"
+    ],
+    "dummies": 2,
+    "dummy": {
+     "hits": 1,
+     "lean_max": 8.8
+    },
+    "lift_cm": {
+     "max": 140.0,
+     "min": -140.0,
+     "under_buildings_max": 0.0
+    }
+   },
+   "Ashenreach": {
+    "board_spot": true,
+    "bounties": [
+     "Quest: Bounty: Iron Hounds"
+    ],
+    "dummies": 2,
+    "dummy": {
+     "hits": 1,
+     "lean_max": 8.9
+    },
+    "lift_cm": {
+     "max": 140.0,
+     "min": -131.4,
+     "under_buildings_max": 0.0
+    }
+   },
+   "Graymourne": {
+    "board_spot": true,
+    "bounties": [
+     "Quest: Bounty: The Outfall Rats"
+    ],
+    "dummies": 2,
+    "dummy": {
+     "hits": 1,
+     "lean_max": 7.9
+    },
+    "lift_cm": {
+     "max": 139.3,
+     "min": -140.0,
+     "under_buildings_max": 0.0
+    }
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "bs_t13e_walls13_Ashenreach_map.png",
+  "bs_t13e_walls13_Graymourne_map.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

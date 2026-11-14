@@ -1,0 +1,104 @@
+{
+ "tag": "t13d",
+ "plan": [
+  "load13",
+  "respawn13",
+  "circle13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "load13",
+   "ok": true,
+   "dup_slots": [
+    "save_sweep_dup_77b513|Sweep Dup|2026-11-14 06:51|Brokenspire|Summoner"
+   ],
+   "load_line": "button|Sweep Dup: Brokenspire, 2026-11-14 06:51 (Summoner)",
+   "page_lines": [
+    "button|Sweep Dup: Brokenspire, 2026-11-14 06:51 (Summoner)"
+   ],
+   "chosen": true,
+   "back_m": 0.0,
+   "gold_back": true,
+   "after_load": {
+    "written": 1,
+    "slot": "autosave",
+    "why": "map",
+    "arrived": 1
+   },
+   "vel_info": "2026-11-14 06:51|brokenspire|Vel Morrath|Summoner|menu|Sweep Vel",
+   "before_load_town": "Brokenspire",
+   "chosen_vel": true,
+   "vel_after": {
+    "town": "Vel Morrath",
+    "loading": "0",
+    "in_walls": "1",
+    "from_save_m": 0.0,
+    "in_town_walls": true
+   }
+  },
+  {
+   "step": "respawn13",
+   "ok": true,
+   "other": "Ashenreach",
+   "point_km": [
+    64.3,
+    28.5
+   ],
+   "dist_km": {
+    "vel": 47.4,
+    "brokenspire": 70.3,
+    "other": 29.1
+   },
+   "found_count": 2,
+   "dead": true,
+   "back": {
+    "town": "Vel Morrath",
+    "in_walls": true,
+    "alive": true,
+    "hp": 85.0
+   }
+  },
+  {
+   "step": "circle13",
+   "ok": true,
+   "combat": true,
+   "lines": [
+    [
+     "Brokenspire",
+     "Vel Morrath",
+     "Mistward Castle",
+     "Step away"
+    ],
+    [
+     "Brokenspire",
+     "Vel Morrath",
+     "Mistward Castle",
+     "Step away"
+    ],
+    [
+     "Brokenspire",
+     "Vel Morrath",
+     "Mistward Castle",
+     "Step away"
+    ]
+   ],
+   "refused_ok": false,
+   "after_refusal_town": "Brokenspire",
+   "refusal": "You cannot travel while enemies are near",
+   "went": true,
+   "at_vel": {
+    "town": "Vel Morrath",
+    "in_walls": true
+   },
+   "back_went": true,
+   "at_home": {
+    "town": "Brokenspire",
+    "in_walls": true
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "windows_shown_again": 0
+}

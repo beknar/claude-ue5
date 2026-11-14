@@ -1777,6 +1777,9 @@ static void RDTownThingLines(const ARDDungeonGenerator* G, const URDCombatCompon
 void ARDDungeonGenerator::BuildTownLines()
 {
 	TownLines.Reset();
+	// (whether the wilds were ready when the lines were made: a panel opened before they are keeps a quest LATER until
+	// TickTownPanel makes its lines again once they are, PR #26's second review)
+	bTownLinesWildReady = !bWild || IsWildReady();
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	const int32 Gold = GetGold();
 	auto Add = [&](FName Act, const FString& Label, const FString& Tag, const FString& Detail, bool bOn = true, const FString& Arg = FString())
@@ -2196,6 +2199,13 @@ FString ARDDungeonGenerator::StashKey(int32 I) const
 void ARDDungeonGenerator::TickTownPanel(APlayerController* PC)
 {
 	if (!PC || !IsTownPanelOpen()) return;
+	// (the wilds came ready while the panel was open: its LATER lines are made again, the cursor kept on its line)
+	if (!bTownLinesWildReady && bWild && IsWildReady())
+	{
+		const int32 Cur = TownCursor;
+		BuildTownLines();
+		TownCursor = TownLines.Num() > 0 ? FMath::Clamp(Cur, 0, TownLines.Num() - 1) : 0;
+	}
 	auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };
 	if (Pressed({ EKeys::Escape, EKeys::BackSpace, EKeys::F, EKeys::Tab, EKeys::Gamepad_FaceButton_Right })) { CloseTownPanel(); return; }
 	if (Pressed({ EKeys::W, EKeys::Up, EKeys::Gamepad_DPad_Up })) MoveTownCursor(-1);
