@@ -1,0 +1,235 @@
+{
+ "tag": "t30h",
+ "plan": [
+  "tier25"
+ ],
+ "level": "heaven_fortress",
+ "steps": [
+  {
+   "step": "tier25",
+   "ok": true,
+   "mons_ok": true,
+   "loot_ok": true,
+   "later_ok": true,
+   "key": "heaven",
+   "base": 25,
+   "cap": 0,
+   "global": [
+    26,
+    27,
+    28,
+    29,
+    30
+   ],
+   "growth_tier": 26,
+   "chain_index": 5,
+   "expect": {
+    "quality": "Divine",
+    "mine": {
+     "MartialArtist": "Heaven's Gale",
+     "Rogue": "Death's Kiss",
+     "Summoner": "Summon Tier 10"
+    },
+    "next": {
+     "MartialArtist": null,
+     "Rogue": null,
+     "Summoner": null
+    },
+    "summon_kind": "Kratos_Commander"
+   },
+   "tables": 30,
+   "monsters": {
+    "count": 19,
+    "count_t1": 19,
+    "same_again": true,
+    "want_h": 73.466,
+    "want_d": 29.865,
+    "off": [],
+    "ratios": [
+     {
+      "kind": "Kratos_Trooper",
+      "tier": 1,
+      "h": [
+       3673.0,
+       50.0
+      ],
+      "d": [
+       336.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Kratos_Trooper",
+      "tier": 1,
+      "h": [
+       3673.0,
+       50.0
+      ],
+      "d": [
+       336.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Kratos_Trooper",
+      "tier": 1,
+      "h": [
+       3673.0,
+       50.0
+      ],
+      "d": [
+       336.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Kratos_Trooper",
+      "tier": 1,
+      "h": [
+       3673.0,
+       50.0
+      ],
+      "d": [
+       336.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Kratos_Trooper",
+      "tier": 1,
+      "h": [
+       3673.0,
+       50.0
+      ],
+      "d": [
+       336.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Kratos_Trooper",
+      "tier": 1,
+      "h": [
+       3673.0,
+       50.0
+      ],
+      "d": [
+       336.0,
+       11.0
+      ],
+      "ok": true
+     }
+    ]
+   },
+   "hero_hp": {
+    "here": 1471.0,
+    "as_tier1": 140.0
+   },
+   "loot": {
+    "0,0": {
+     "tier": 1,
+     "game_tier": 26,
+     "things": 16247,
+     "off_tier": [],
+     "forced": [
+      "Bread",
+      "Bronze Ingot",
+      "Cheese",
+      "Coarse Hide",
+      "Copper Ingot",
+      "Cured Leather Strip",
+      "Divine Arming Sword",
+      "Divine Bone Blade",
+      "Divine Dagger",
+      "Divine Desert Hero’s Armour",
+      "Divine Dexterity Ring 1",
+      "Divine Dexterity Ring 2"
+     ],
+     "forced_off": [],
+     "fine": 5549,
+     "quality": "Divine",
+     "plain_tiered": 0,
+     "other_quality": 0,
+     "tomes": {
+      "Tome of Meteor Storm": 26
+     },
+     "slot_want": 26
+    },
+    "1,0": {
+     "tier": 2,
+     "game_tier": 27,
+     "things": 11958,
+     "off_tier": [],
+     "forced": [],
+     "forced_off": [],
+     "fine": 4549,
+     "quality": "Divine",
+     "plain_tiered": 0,
+     "other_quality": 0,
+     "tomes": {
+      "Tome of Null Sanctum": 27
+     },
+     "slot_want": 27
+    }
+   },
+   "tomes_seen": 2,
+   "later": {
+    "gold": {
+     "gained": 10673,
+     "game_tier": 30,
+     "want_min": 10132
+    },
+    "MartialArtist": {
+     "set4": true,
+     "boss": "Nasty",
+     "killed": 1,
+     "new": [
+      "Heaven's Gale",
+      "Smashing Strike",
+      "Roundhouse Kick"
+     ],
+     "message": "A new ability: Heaven's Gale"
+    },
+    "Rogue": {
+     "weapons": [
+      "Daggers",
+      "Crossbow",
+      "Death's Kiss"
+     ]
+    },
+    "Summoner": {
+     "weapons": [
+      "Fire",
+      "Dark Fire",
+      "Summon Tier 1",
+      "Summon Tier 10"
+     ],
+     "summon": {
+      "started": true,
+      "mana": 257.0,
+      "growth_tier": 26,
+      "allies": [
+       {
+        "kind": "Kratos_Commander",
+        "hp": 4408,
+        "damage": 403.0,
+        "tier": 26
+       }
+      ]
+     }
+    }
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_t30h_tier25_golem.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

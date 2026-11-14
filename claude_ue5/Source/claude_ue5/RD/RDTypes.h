@@ -4,6 +4,10 @@
 #include "CoreMinimal.h"
 #include "RDTypes.generated.h"
 
+/** the game's last tier (Heaven's dungeon's last: the list of 2026-11-12's sixth phase; 25 before): the town's prices and gold, the
+ *  console's rd.Tier and the wilds' tiers run to it (SourceArt/balance/tier25.json's tiers.count says the same for the stages) */
+constexpr int32 RDGameTierMax = 30;
+
 class UStaticMesh;
 class USkeletalMesh;
 class UAnimationAsset;

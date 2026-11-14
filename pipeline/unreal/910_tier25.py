@@ -6,17 +6,17 @@ other dungeons; the armor and weapons need to be redistributed across the rest o
 armor and weapons need to be made up ...; rebalance and redistribute all monsters so that they're spread out from brokenspire
 to Heaven"), from SourceArt/balance/tier25.json, onto every map of the game (brokenspire and the six dungeons):
 - the level's tiers in the game's (DungeonTierBase, DungeonTierCap: Mistward Castle 1-5, Vel Morrath 6-10, The War Engine 11-15,
-  the Sewers 16-20, Kethrys Spire 21-25, Heaven 25)
-- the monsters' tier tables to 25 (hit points x1.12 a tier past 5, blows x1.09; speed, pace and ability as tier 5's), the
+  the Sewers 16-20, Kethrys Spire 21-25, Heaven 26-30 since the list of 2026-11-12's sixth phase (25 before))
+- the monsters' tier tables to the json's count, 30 (hit points x1.12 a tier past 5, blows x1.09; speed, pace and ability as tier 5's), the
   summonings' strengths to 10
 - the Mage's spells: each tome spell one place among the dungeons' 30 tiers (Slot), in their old order; two made up (Starfall,
   Singularity) with their tomes
 - the gear: each tiered weapon, armour, shield and ring again in each later dungeon at its tier there in a quality (Fine,
-  Masterwork, Exalted, Celestial: damage by the tiers' power, armour, block and bonus a little more, durability more); potions and
+  Masterwork, Exalted, Celestial, Divine: damage by the tiers' power, armour, block and bonus a little more, durability more); potions and
   food in each dungeon at their rank
 - the monsters: every dungeon's kinds on every map (weight 0 but on their own map: summonable, met in the wilds), each with its
   band of the wilderness's tiers (the castle's 1-10, the War Engine's 11-15, the drowned 16-20, the casters 21-25, the defenders
-  23-25); Aurorim never in the wilds
+  26-30); Aurorim never in the wilds
 - the later abilities: the Summoner's summonings of the later dungeons' kinds, the Martial Artist's stronger chi attacks, the
   Rogue's bolts and blades, one of each in each later dungeon (FRDHeroDef::LaterWeapons: its last tier's boss)
 Run after 880 (its found weapons' rule, balance6.json's weapon_tier_power, is carried past tier 5 here) and after every stage that
@@ -30,6 +30,7 @@ D = json.load(open(os.path.join(SA, "balance", "tier25.json"), encoding="utf-8")
 MAPS = [a for a in sys.argv[1:] if a in D["maps"]] or list(D["maps"].keys())
 Q = D["qualities"]
 QSET = tuple(q + " " for q in Q)
+NT = D["tiers"]["count"]          # (the game's last tier: 30 since the list of 2026-11-12's sixth phase)
 
 
 def open_map(m):
@@ -93,10 +94,14 @@ for m in MAPS:
         s.set_editor_property("mana", s.get_editor_property("mana") * e["mana"]); s.set_editor_property("damage", s.get_editor_property("damage") * e["damage"])
         s.set_editor_property("effect", e["effect"]); spells.append(s)
     excl = set(D["starting_spells"]) | set(D["tome_spells_exclude"])
-    tome = [s for s in spells if str(s.get_editor_property("name")) not in excl and str(s.get_editor_property("name")) not in {e["name"] for e in D["new_spells"]}]
+    # (a spell kept to one hero (918's curses, the Warlock's: their places are their own, list11_spells.json's) is not in the Mage's
+    # order: run after 918, they pushed every later spell along (Meteor Storm's place was 39) and lost their own)
+    hero_own = lambda s: len(list(s.get_editor_property("only_heroes"))) > 0
+    tome = [s for s in spells if str(s.get_editor_property("name")) not in excl and str(s.get_editor_property("name")) not in {e["name"] for e in D["new_spells"]} and not hero_own(s)]
     tome.sort(key=lambda s: (int(s.get_editor_property("tier")), float(s.get_editor_property("mana")), int(s.get_editor_property("number"))))
     tome += [s for s in spells if str(s.get_editor_property("name")) in {e["name"] for e in D["new_spells"]}]
-    for s in spells: s.set_editor_property("slot", 0)
+    for s in spells:
+        if not hero_own(s): s.set_editor_property("slot", 0)
     for k, s in enumerate(tome): s.set_editor_property("slot", k + 1)
     r["slots"] = [str(s.get_editor_property("name")) for s in tome]
     # (the later abilities' spells: summonings of the later dungeons' kinds, stronger chi attacks)
@@ -122,12 +127,12 @@ for m in MAPS:
     for it in items:
         kd = it.get_editor_property("kind"); tiers = list(it.get_editor_property("tiers"))
         if kd in [kinds[k] for k in D["consumable_kinds"]] and tiers:
-            it.set_editor_property("tiers", sorted({t + 5 * q for t in tiers for q in range(5) if t + 5 * q <= 25}))
+            it.set_editor_property("tiers", sorted({t + 5 * q for t in tiers for q in range(NT // 5) if t + 5 * q <= NT}))
         out.append(it)
         if kd not in [kinds[k] for k in D["quality_kinds"]] or not tiers or max(tiers) > 5: continue
         name = str(it.get_editor_property("name"))
         for q, qn in enumerate(Q, start=1):
-            nt = [t + 5 * q for t in tiers if t + 5 * q <= 25]
+            nt = [t + 5 * q for t in tiers if t + 5 * q <= NT]
             if not nt: continue
             c = copy_struct(unreal.RDItemDef, it); nn = f"{qn} {name}"
             c.set_editor_property("name", nn); c.set_editor_property("tiers", nt)
@@ -158,12 +163,12 @@ for m in MAPS:
         if not src: continue
         c = copy_struct(unreal.RDItemDef, src); c.set_editor_property("name", "Tome of " + e["name"]); c.set_editor_property("spell", e["name"])
         out.append(c)
-    # (each spell's tome in the game's tier of its place: slot k is dungeon k // 5's tier k % 5, Heaven's all 25)
+    # (each spell's tome in the game's tier of its place: slot k is dungeon k // 5's tier k % 5, Heaven's 26-30)
     slot = {str(s.get_editor_property("name")): int(s.get_editor_property("slot")) for s in spells}
     for it in out:
         nm = str(it.get_editor_property("name"))
         if it.get_editor_property("kind") == unreal.RDItemKind.TOME and nm.startswith("Tome of ") and slot.get(nm[8:], 0) > 0:
-            it.set_editor_property("tiers", [min(slot[nm[8:]], 25)])
+            it.set_editor_property("tiers", [min(slot[nm[8:]], NT)])
     g.set_editor_property("items", out)
     r["items"] = {"all": len(out), **added}
     # ------------------------------------------------------------ the monsters: every dungeon's on every map, their wild bands

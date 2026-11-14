@@ -714,10 +714,10 @@ def step_places():
     step_result("places", ok, **res)
 def dist2(a, b): return math.hypot(a.x - b.x, a.y - b.y)
 def step_wild25():
-    """the rebalance to tier 25 (910): the monsters met in the wilds by the tiers of the roads, Brokenspire to Heaven: lairs and
-    spawn points of six tiers (round 2, 7, 12, 17, 22, 25) visited; every monster there is of its place's tier and of a kind
-    whose wild band holds it (the castle's kinds in 1-10, the War Engine's 11-15, the drowned 16-20, the casters 21-25, the
-    defenders 23-25), and the kinds change along the way"""
+    """the rebalance to tier 25 (910), carried to tier 30 (the list of 2026-11-12's sixth phase): the monsters met in the wilds by
+    the tiers of the roads, Brokenspire to Heaven and past it: lairs and spawn points of seven tiers (round 2, 7, 12, 17, 22, 27,
+    30) visited; every monster there is of its place's tier and of a kind whose wild band holds it (the castle's kinds in 1-10,
+    the War Engine's 11-15, the drowned 16-20, the casters 21-25, Heaven's defenders 26-30), and the kinds change along the way"""
     g = G["gen"]; res = {"visits": []}; quiet(True)
     yield from wait_ready(90)
     band = {str(d.name): (d.wild_tier_min, d.wild_tier_max) for d in g.get_editor_property("monsters")}
@@ -726,11 +726,12 @@ def step_wild25():
     for tn in ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne", "Kethrys Spire", "Heaven"):
         t = T.get(tn)
         if not t: continue
-        for p in places_near(t["x"], t["y"], 25000):
+        # (past Heaven the land rises to tier 30 over 40 km: its lairs looked for further out)
+        for p in places_near(t["x"], t["y"], 45000 if tn == "Heaven" else 25000):
             if p["kind"] in ("lair", "spawn") and all(q["id"] != p["id"] for q in cand): cand.append(p)
     res["tiers_found"] = sorted({p["tier"] for p in cand})
     picks = []
-    for want in (2, 7, 12, 17, 22, 25):
+    for want in (2, 7, 12, 17, 22, 27, 30):
         c = sorted(cand, key=lambda p: (abs(p["tier"] - want), p["id"]))
         if c and c[0] not in picks: picks.append(c[0])
     for p in picks:
@@ -746,7 +747,7 @@ def step_wild25():
     quiet(False)
     vs = [v for v in res["visits"] if v["monsters"] > 0]
     ok = (len(res["visits"]) >= 5 and len(vs) >= 5 and all(not v["out_of_band"] and v["tiers"] == [v["tier"]] for v in vs)
-          and max(v["tier"] for v in vs) >= 20 and len({tuple(v["kinds"]) for v in vs}) >= 4)
+          and max(v["tier"] for v in vs) >= 28 and len({tuple(v["kinds"]) for v in vs}) >= 5)
     step_result("wild25", ok, **res)
 
 
@@ -2880,13 +2881,15 @@ def step_travellers10():
 
 def step_cities25():
     """the list of 2026-11-10's seventh phase ("test the re-balanced changes in each city and dungeon"): in each of the six cities, the
-    town loaded round her (checked, not only waited for), the game's tier set to 1, 5, 7, 8, 10 and 25 (the dungeons' tiers opened, as
-    saved: the castle's, Vel Morrath's, Heaven's; put back in a finally):
+    town loaded round her (checked, not only waited for), the game's tier set to 1, 5, 7, 8, 10, 25 and 30 (the list of 2026-11-12's
+    sixth phase: Heaven's dungeon 26-30) (the dungeons' tiers opened, as saved: the castle's, then the chain's dungeon whose five
+    tiers hold it; put back in a finally):
       - the store sells nothing of a tier past the game's (by each item's own tiers), and the Mage the scrolls of the game's last two
         tiers (by each scroll's own tiers: 910 lays them again in every band);
       - a stronger healing or mana potion is never cheaper than a weaker one, at every tier;
       - past tier 5 what is used up (potions, food, scrolls, repair, torches) grows as the gold a kill pays (tier 5's x the price
-        table over 8: x 2.19 at 10, x 23.1 at 25), within a gold; the horse and the temple's blessing by the price table (x 17.5, x 185);
+        table over 8: x 2.19 at 10, x 23.1 at 25, x 50.6 at 30), within a gold; the horse and the temple's blessing by the price table
+        (x 17.5, x 185, x 405);
       - in Brokenspire a potion bought at tier 7 (the gold taken as shown) and sold once tier 8 opens pays back less than it cost;
       - the healer's price for half her hit points (her maxima as the tier makes them, her mana full) grows past tier 5 as the
         kills' gold (her hit points grow too: a point is priced down by her growth)"""
@@ -2914,20 +2917,22 @@ def step_cities25():
             v.set_editor_property("tiers", ts); ds[k] = v
         gi.set_editor_property("dungeons", ds)
     def set_tier(t):
-        """the game's tier t by what is opened: the castle's 1-5, else the chain's dungeon whose band holds it (Vel Morrath 6-10, Heaven's
-        first two 24-25)"""
+        """the game's tier t by what is opened: the castle's 1-5, else the chain's dungeon whose band holds it (Vel Morrath 6-10, ...
+        Kethrys Spire 21-25, Heaven 26-30), its tiers up to t's"""
         if t <= 5: gi.set_editor_property("castle_tiers", list(range(1, t + 1))); set_tiers({})
         else:
             gi.set_editor_property("castle_tiers", [1, 2, 3, 4, 5])
-            set_tiers({"vel_morrath": list(range(1, t - 4))} if t <= 10 else {chain[-1]: [1, 2]})
-    def table(t): return [1, 2, 3.5, 5.5, 8][t - 1] if t <= 5 else 8.0 * 1.17 ** (min(t, 25) - 5)
+            k_ = (t - 1) // 5
+            set_tiers({chain[k_]: list(range(1, t - 5 * k_ + 1))})
+    NT_ = json.load(open(os.path.join(SA, "balance", "tier25.json"), encoding="utf-8"))["tiers"]["count"]
+    def table(t): return [1, 2, 3.5, 5.5, 8][t - 1] if t <= 5 else 8.0 * 1.17 ** (min(t, NT_) - 5)
     def lines_of(kind_, tab=0):
         if not g.open_town_panel(kind_, -1): return None
         g.set_town_tab(tab)
         L = [str(l).split("|") for l in g.get_town_panel_lines()]
         g.close_town_panel(); return L
     def buys_of(st): return {b[1]: int(b[2].split()[0]) for b in st if b[0] == "buy" and b[2].split()[0].isdigit()}
-    TIERS = (1, 5, 7, 8, 10, 25)
+    TIERS = (1, 5, 7, 8, 10, 25, 30)
     try:
         T = towns()
         for name in ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne", "Kethrys Spire", "Heaven"):
@@ -2960,7 +2965,7 @@ def step_cities25():
                 if row["inversions"]: bad.append(f"a stronger potion cheaper at {tier}: {row['inversions'][:3]}")
             set_tier(1); yield from rwait(0.3); cb().refresh_maxima(); cb().set_health(cb().get_max_health())
             t1, t5 = r["tiers"]["1"], r["tiers"]["5"]
-            for tier in (10, 25):
+            for tier in (10, 25, 30):
                 tr = r["tiers"][str(tier)]; w_ = table(tier)
                 if t1["horse"] and abs(tr["horse"] / t1["horse"] - w_) / w_ > 0.03: bad.append(f"horse {t1['horse']}->{tr['horse']} at {tier}")
                 if t1["bless"] and tr["bless"] and abs(tr["bless"] / t1["bless"] - w_) / w_ > 0.03: bad.append(f"blessing {t1['bless']}->{tr['bless']} at {tier}")
@@ -3000,7 +3005,7 @@ def step_cities25():
                 # (the scrolls, for a hero who reads them: the Mage's, of the game's last two tiers by their own tiers)
                 h0 = str(g.get_editor_property("current_hero")); g.switch_hero("Mage"); yield from rwait(1.5); refresh(); g = G["gen"]
                 r["mage_scrolls"] = {}
-                for tier in (5, 10, 25):
+                for tier in (5, 10, 25, 30):
                     set_tier(tier); yield from rwait(0.4)
                     sc = [n for n in buys_of(lines_of("store") or []) if kind(n) == "SCROLL"]
                     r["mage_scrolls"][str(tier)] = sc

@@ -20,7 +20,14 @@ Built and compiled, but no test has run it yet:
 
 ## The list of 2026-11-12 ([docs/improvements12.txt](docs/improvements12.txt))
 
-Done in phases (1 to 5 so far): 1 gold, the map in its scroll, the mouse on the big map, rd.MapTeleport, the saves as cards; 2 the horses' gaits; 3 the twenty ruins; 4 the hidden lairs; 5 the 34 structures and 25 quests; to come: 6 tiers 26-30; 7 the Rogue's abilities.
+Done in phases (1 to 6 so far): 1 gold, the map in its scroll, the mouse on the big map, rd.MapTeleport, the saves as cards; 2 the horses' gaits; 3 the twenty ruins; 4 the hidden lairs; 5 the 34 structures and 25 quests; 6 the game to tier 30; to come: 7 the Rogue's abilities.
+
+- [ ] **Phase 6, the game to tier 30, what is not done or measured:** ([docs/tiers.md](docs/tiers.md)):
+  - Heaven's dungeon is tiers 26-30 by the tables (its monsters 1.12 a tier stronger, her growth with them), as the other dungeons past the castle are: no hero has fought there under autoplay, and the balance past tier 5 is by construction, not by trials.
+  - Divine, the fifth quality, is a step up the same rule (its armour +0.20, a ring's bonus x 2.5, durability x 2.25): its copies keep their base's mesh and picture.
+  - Past Heaven the wilds rise to tier 30 over 40 km along the way from Kethrys Spire; on the other sides of Heaven they stay 25.
+  - The Mage's thirty places are the tiers' thirty; the Warlock's curses keep their own thirteen among them. The castle's own tiers are unchanged.
+  - A game saved in Heaven's dungeon before the change loads with its tiers read as 26-30 (they were 25): the town's prices and her growth go up with them (x 1.17 a tier). No migration: those tiers are Heaven's now.
 
 - [ ] **Phase 1, what is not measured:** ([Brokenspire](docs/levels/brokenspire.md)):
   - The mouse on a town's big map beyond the teleport's click (its drag and wheel were there before).

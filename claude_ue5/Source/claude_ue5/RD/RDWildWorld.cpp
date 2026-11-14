@@ -1453,8 +1453,40 @@ void FRDWildWorld::MakeTierChain()
 	static const TCHAR* RDWTierNames[] = { TEXT("Brokenspire"), TEXT("Vel Morrath"), TEXT("Ashenreach"), TEXT("Graymourne"), TEXT("Kethrys Spire"), TEXT("Heaven") };
 	static const float RDWTierOf[] = { 1.f, 5.f, 10.f, 15.f, 20.f, 25.f };
 	TierSites.Reset(); TierValues.Reset();
+	bool bHeaven = false;
 	for (int32 K = 0; K < UE_ARRAY_COUNT(RDWTierNames); ++K)
-		for (const FRDWildTown& T : Towns) if (T.Name == RDWTierNames[K]) { TierSites.Add(T.Site); TierValues.Add(RDWTierOf[K]); break; }
+		for (const FRDWildTown& T : Towns) if (T.Name == RDWTierNames[K]) { TierSites.Add(T.Site); TierValues.Add(RDWTierOf[K]); bHeaven = K == UE_ARRAY_COUNT(RDWTierNames) - 1; break; }
+	// (the list of 2026-11-12's sixth phase, the game to tier 30: past Heaven the land goes on rising, from its tier at its gate to
+	// the game's last (RDGameTierMax) some 40 km on; Heaven's defenders meet her there (their wild band 26-30). The way on is the
+	// way from Kethrys Spire turned as little as it must for the whole leg to stay inside the continent and on its land (PR #59's
+	// review: straight on it could end in the sea or past the continent's edge, where no place is laid), shorter if none does)
+	if (bHeaven && TierSites.Num() >= 2)
+	{
+		const FVector2D H = TierSites.Last();
+		const FVector2D W0 = (H - TierSites[TierSites.Num() - 2]).GetSafeNormal();
+		auto LandAll = [&](const FVector2D& Way, double Len)
+		{
+			for (int32 I = 1; I <= 8; ++I)
+			{
+				const FVector2D Q = H + Way * (Len * I / 8.0);
+				if (Q.X < Xs + 4000.0 || Q.X > Xn - 4000.0 || Q.Y < Yw + 4000.0 || Q.Y > Ye - 4000.0 || Continent(Q.X, Q.Y) < 0.08f) return false;
+			}
+			return true;
+		};
+		FVector2D Best = FVector2D::ZeroVector; double BestLen = 0.0;
+		for (const double Len : { 40000.0, 30000.0, 20000.0 })
+		{
+			for (int32 K = 0; K <= 12 && BestLen == 0.0; ++K)
+			{
+				// (0, +15, -15, +30, -30 ... degrees off the way)
+				const float A = FMath::DegreesToRadians(15.f * ((K + 1) / 2) * (K % 2 ? 1.f : -1.f));
+				const FVector2D Way(W0.X * FMath::Cos(A) - W0.Y * FMath::Sin(A), W0.X * FMath::Sin(A) + W0.Y * FMath::Cos(A));
+				if (LandAll(Way, Len)) { Best = Way; BestLen = Len; }
+			}
+			if (BestLen > 0.0) break;
+		}
+		if (BestLen > 0.0) { TierSites.Add(H + Best * BestLen); TierValues.Add((float)RDGameTierMax); }
+	}
 }
 
 FString FRDWildWorld::NameFor(const FString& Kind, uint32 H) const

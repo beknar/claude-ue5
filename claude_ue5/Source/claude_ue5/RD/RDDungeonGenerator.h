@@ -420,9 +420,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") int32 MaxTier = 0;
 	/** (the rebalance to tier 25, the list of 2026-11-08b's fifth phase) this level's tiers in the game's: its tier T is the game's
 	 *  DungeonTierBase + T, at most DungeonTierCap (0: none): Mistward Castle 0 (1-5), Vel Morrath 5, The War Engine 10, the Sewers 15,
-	 *  Kethrys Spire 20 (21-25), Heaven 24 capped at 25. The monsters' strength, the loot's tiers and the hero's growth go by it */
+	 *  Kethrys Spire 20 (21-25), Heaven 25 (26-30: the list of 2026-11-12's sixth phase; 24 capped at 25 before). The monsters'
+	 *  strength, the loot's tiers and the hero's growth go by it */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") int32 DungeonTierBase = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") int32 DungeonTierCap = 0;
+	/** the game's last tier (Heaven's last: the list of 2026-11-12's sixth phase; 25 before), the town's prices and gold run to it */
+	static constexpr int32 GameTierMax = RDGameTierMax;
 	/** past the game's tier 5: the hero's hit points and mana grow by TierGrowthHealth a tier, her power (spells, her own weapons,
 	 *  chi, summons) by TierGrowthPower, as the monsters' (TierHealth / TierDamage past 5, 910) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") float TierGrowthHealth = 1.09f;

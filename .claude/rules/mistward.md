@@ -268,6 +268,9 @@ Every rule a switch on the generator ("Mistward2" category), on in Mistward and 
   - Test it by trading (buy, open the next tier, sell) and by rank, not against a copy of the formula.
   - A healer's price read after the test changed the tiers needs her maxima refreshed (`RefreshMaxima`). A hero switched while tier 25 was held came back with tier 25's hit points.
 - **The castle's stages write the tables `910` builds from**: rerun `910` after any of them (`855`, `857`-`859`, `871`, `872`, `876`, `880`, and the dungeons' `895`, `897`, `907`, `909`).
+- **Tier 30 (the list of 2026-11-12's sixth phase)**: the game's last tier is one constant (`GameTierMax`), and `910` reads the count from `tier25.json`: no 25 is written in its loops any more.
+  - A stage that adds to a table another stage orders must be left out of that order. `918`'s curses (kept to the Warlock, `OnlyHeroes`) were counted into `910`'s Mage order when `910` ran after `918`: every later spell moved (Meteor Storm's place was 39), and the curses lost their own places. `910` leaves any spell kept to one hero out, and leaves its place alone.
+  - A stage run again after another must keep what that one set. `918 spells3` set every curse's picture to none (only `icons3`, with its folder of PNGs, put them back): it keeps the picture now, and gives Starfall and Singularity theirs from the level's art.
 
 ## The secondary abilities (`911`, `RD/RDSecondary.cpp`, `SourceArt/balance/secondary.json`, `docs/secondary.md`; the list of 2026-11-08b's sixth phase)
 

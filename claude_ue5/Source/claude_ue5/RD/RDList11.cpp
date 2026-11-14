@@ -299,7 +299,7 @@ FString ARDDungeonGenerator::ConsoleSetTier(int32 N)
 	// 0: the game's own again (what was given stays))
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	if (!GI) return TEXT("no game instance");
-	N = FMath::Clamp(N, 0, 30);
+	N = FMath::Clamp(N, 0, RDGameTierMax);
 	GI->ConsoleTier = N;
 	const FRDHeroDef* H = FindHero(CurrentHero);
 	URDCombatComponent* Cb = PlayerCombat;
