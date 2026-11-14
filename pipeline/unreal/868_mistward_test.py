@@ -6140,21 +6140,22 @@ def step_dungeon13():
     g.debug_clear_section(I2(0, 0), 0, g.get_start_room_center()); yield from wait(0.3)
     bosses = {}; slain = {}
     for t in range(2, 6):
+        # (a tier's boss is set when the tier opens (OnTierOpened, once; DebugOpenTiers the same), in an explored room of the tier
+        # before (PlaceBoss): three sets of tier t-1 are visited and cleared (their rooms explored) first, then tier t opened, as in
+        # play, where a tier opens only once the tier before is explored (test_t13s5 and t13s6: opened before the visit, tiers 3 to
+        # 5 had "no explored room of tier t-1 to set it in" and no boss)
+        if t > 2:
+            for S_ in (I2(t - 2, 0), I2(t - 2, 1), I2(t - 2, -1)):
+                sec_ = yield from visit(S_)
+                if sec_: g.debug_clear_section(S_, 0, sec_.get_room_center(0)); yield from wait(0.5)
         g.debug_open_tiers(t, True); yield from wait(0.5)
-        # (a tier's boss is set in an explored room of the tier before (PlaceBoss): a set of tier t-1 visited and cleared (its rooms
-        # explored), up to three, 20 s after each (test_t13s5: visiting the tier's own sets left tiers 3 and 5 with no boss, "no
-        # explored room of tier 2 to set it in"))
         e_ = None
-        for S_ in ((I2(0, 0),) if t == 2 else (I2(t - 2, 0), I2(t - 2, 1), I2(t - 2, -1))):
-            sec_ = yield from visit(S_)
-            if sec_ and t > 2: g.debug_clear_section(S_, 0, sec_.get_room_center(0)); yield from wait(0.5)
-            for _ in range(80):
-                for e in (str(l).split("|") for l in g.get_encounter_lines()):
-                    # (boss|x|y|z|kind|alive|tier|label|max: as step_tier25 reads them)
-                    if e[0] == "boss" and len(e) > 7 and e[6] == str(t) and "USURPER" not in e[7]: e_ = e
-                if e_: break
-                yield from rwait(0.25)
+        for _ in range(80):
+            for e in (str(l).split("|") for l in g.get_encounter_lines()):
+                # (boss|x|y|z|kind|alive|tier|label|max: as step_tier25 reads them)
+                if e[0] == "boss" and len(e) > 7 and e[6] == str(t) and "USURPER" not in e[7]: e_ = e
             if e_: break
+            yield from rwait(0.25)
         if not e_: continue
         bosses[t] = e_
         at = V(float(e_[1]), float(e_[2]), float(e_[3]))
