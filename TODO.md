@@ -27,6 +27,7 @@ Done in phases (1 to 6 so far): 1 gold, the map in its scroll, the mouse on the 
   - Divine, the fifth quality, is a step up the same rule (its armour +0.20, a ring's bonus x 2.5, durability x 2.25): its copies keep their base's mesh and picture.
   - Past Heaven the wilds rise to tier 30 over 40 km along the way from Kethrys Spire; on the other sides of Heaven they stay 25.
   - The Mage's thirty places are the tiers' thirty; the Warlock's curses keep their own thirteen among them. The castle's own tiers are unchanged.
+  - A game saved in Heaven's dungeon before the change loads with its tiers read as 26-30 (they were 25): the town's prices and her growth go up with them (x 1.17 a tier). No migration: those tiers are Heaven's now.
 
 - [ ] **Phase 1, what is not measured:** ([Brokenspire](docs/levels/brokenspire.md)):
   - The mouse on a town's big map beyond the teleport's click (its drag and wheel were there before).

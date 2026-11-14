@@ -3530,8 +3530,10 @@ def step_growth():
     hers; mana back a second her pool's share (over 2 s); a restart back to tier 1"""
     res = {"heroes": {}, "found": {}}
     WP = list(BAL["weapon_tier_power"])
-    # (the rebalance to tier 25: the quality copies' tiers 6-25, the hero's power growth a tier past 5)
-    WP += [WP[-1] * G["gen"].get_editor_property("tier_growth_power") ** k for k in range(1, 21)]
+    # (the rebalance to tier 25, carried to 30: the quality copies' tiers 6-30 (tier25.json's count), the hero's power growth a
+    # tier past 5)
+    NT_ = json.load(open(os.path.join(SA, "balance", "tier25.json"), encoding="utf-8"))["tiers"]["count"]
+    WP += [WP[-1] * G["gen"].get_editor_property("tier_growth_power") ** k for k in range(1, NT_ - 4)]
     for it in items_of(unreal.RDItemKind.WEAPON):
         f = list(it.weapon_fits)
         if not f: continue
@@ -4353,7 +4355,8 @@ def step_tier25():
                 and later["gold"]["gained"] >= later["gold"]["want_min"])
     c = yield from restart("Warrior"); quiet(False)
     cap = res["cap"]
-    ok = (res["global"] == [min(base + t, cap) if cap > 0 else base + t for t in range(1, 6)] and res["tables"] >= 25 and ci >= 1 and mons_ok and loot_ok and later_ok)
+    # (the tables to the dungeon's last tier at least (PR #59's review: 25 entries would hold Heaven's 26-30 at tier 25's numbers))
+    ok = (res["global"] == [min(base + t, cap) if cap > 0 else base + t for t in range(1, 6)] and res["tables"] >= max(res["global"]) and ci >= 1 and mons_ok and loot_ok and later_ok)
     step_result("tier25", ok, mons_ok=mons_ok, loot_ok=loot_ok, later_ok=later_ok, **res)
 
 def step_secondary():

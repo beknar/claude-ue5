@@ -157,6 +157,10 @@ ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem); les = unreal.ge
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
 MAPS = "/Game/RandomDungeon/Maps/"
 GAME_MAPS = ("mistward_castle", "martial_arts", "brokenspire", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress")
+# (the game's last tier, tier25.json's count (PR #59's review: one number, not a 30 here); a spell's picture's name (icons3's and
+# spells3's one rule))
+TIER_COUNT = json.load(open(os.path.join(SA, "balance", "tier25.json"), encoding="utf-8"))["tiers"]["count"]
+def pic_name(n): return "spell_" + "_".join("".join(ch if ch.isalnum() else " " for ch in n.lower()).split())
 MENU = "mistward_castle_select"
 BODIES = {
     "Rogue": {"ch": "Rogue", "anims": "/Game/RandomDungeon/Magic3/Anims", "rigs": "/Game/RandomDungeon/Magic3/Rigs", "tag": "RDM3",
@@ -641,7 +645,7 @@ if "spells3" in STEPS:
         ua = g.get_editor_property("ui_art")
         for i, s in enumerate(spells):
             if str(s.name) in ("Starfall", "Singularity"):
-                pn = "spell_" + str(s.name).lower()
+                pn = pic_name(str(s.name))
                 if unreal.Name(pn) in ua: s.set_editor_property("icon", pn); spells[i] = s
         g.set_editor_property("spells", spells)
         # (their tomes: Curse of Frailty's tome copied, in the game's tier of its place)
@@ -649,7 +653,7 @@ if "spells3" in STEPS:
         src = items[names["Tome of Curse of Frailty"]]; nt = 0
         for c in L11["curses"]:
             t = copy_struct(unreal.RDItemDef, items[names["Tome of " + c["name"]]] if ("Tome of " + c["name"]) in names else src)
-            t.set_editor_property("name", "Tome of " + c["name"]); t.set_editor_property("spell", c["name"]); t.set_editor_property("tiers", [min(int(c["slot"]), 30)])
+            t.set_editor_property("name", "Tome of " + c["name"]); t.set_editor_property("spell", c["name"]); t.set_editor_property("tiers", [min(int(c["slot"]), TIER_COUNT)])
             if ("Tome of " + c["name"]) in names: items[names["Tome of " + c["name"]]] = t
             else: names[t.get_editor_property("name")] = len(items); items.append(t)
             nt += 1
@@ -752,7 +756,6 @@ if "icons3" in STEPS:
     k_ = STEPS.index("icons3")
     D3 = STEPS[k_ + 1] if len(STEPS) > k_ + 1 else ""
     assert os.path.isdir(D3), "918 icons3: give the folder of the cut pictures (spell_<name>.png)"
-    def pic_name(n): return "spell_" + "_".join("".join(ch if ch.isalnum() else " " for ch in n.lower()).split())
     WANT = {n: pic_name(n) for n in [c["name"] for c in L11["curses"]] + ["Starfall", "Singularity"]}
     lost = [p for p in WANT.values() if not os.path.exists(os.path.join(D3, p + ".png"))]
     assert not lost, f"918 icons3: no picture for {lost} in {D3}"

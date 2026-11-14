@@ -2924,7 +2924,8 @@ def step_cities25():
             gi.set_editor_property("castle_tiers", [1, 2, 3, 4, 5])
             k_ = (t - 1) // 5
             set_tiers({chain[k_]: list(range(1, t - 5 * k_ + 1))})
-    def table(t): return [1, 2, 3.5, 5.5, 8][t - 1] if t <= 5 else 8.0 * 1.17 ** (min(t, 30) - 5)
+    NT_ = json.load(open(os.path.join(SA, "balance", "tier25.json"), encoding="utf-8"))["tiers"]["count"]
+    def table(t): return [1, 2, 3.5, 5.5, 8][t - 1] if t <= 5 else 8.0 * 1.17 ** (min(t, NT_) - 5)
     def lines_of(kind_, tab=0):
         if not g.open_town_panel(kind_, -1): return None
         g.set_town_tab(tab)

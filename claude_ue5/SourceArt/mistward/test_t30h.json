@@ -134,7 +134,7 @@
     "0,0": {
      "tier": 1,
      "game_tier": 26,
-     "things": 16782,
+     "things": 16247,
      "off_tier": [],
      "forced": [
       "Bread",
@@ -151,7 +151,7 @@
       "Divine Dexterity Ring 2"
      ],
      "forced_off": [],
-     "fine": 5746,
+     "fine": 5549,
      "quality": "Divine",
      "plain_tiered": 0,
      "other_quality": 0,
@@ -163,24 +163,11 @@
     "1,0": {
      "tier": 2,
      "game_tier": 27,
-     "things": 6399,
+     "things": 11958,
      "off_tier": [],
-     "forced": [
-      "Bronze Ingot",
-      "Coarse Hide",
-      "Copper Ingot",
-      "Cured Leather Strip",
-      "Divine Bear Warrior’s Armour",
-      "Divine Beast Shield",
-      "Divine Bedvar’s Armour",
-      "Divine Bone Blade",
-      "Divine Combat Knife",
-      "Divine Crocodile Warrior’s Armour",
-      "Divine Crossbow",
-      "Divine Dark Knight's Sword"
-     ],
+     "forced": [],
      "forced_off": [],
-     "fine": 2490,
+     "fine": 4549,
      "quality": "Divine",
      "plain_tiered": 0,
      "other_quality": 0,
@@ -193,7 +180,7 @@
    "tomes_seen": 2,
    "later": {
     "gold": {
-     "gained": 11143,
+     "gained": 10673,
      "game_tier": 30,
      "want_min": 10132
     },
