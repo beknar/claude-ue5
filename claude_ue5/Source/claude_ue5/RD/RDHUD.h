@@ -56,6 +56,8 @@ public:
 	 *  the minimap / the big map wrote ("<room kind>|<tier>") */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FVector2D> GetAnvilsDrawn() const { return AnvilsDrawn; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FVector> GetMarksDrawn() const { return MarksDrawn; }
+	/** tests: where the hunted mark was drawn last frame (x, y on the canvas; z 1 in front of her, 2 behind; z 0 none) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") FVector GetHuntedMarkDrawn() const { return HuntedMarkDrawn; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetMiniTierLabels() const { return MiniTierLabels; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetMapTierLabels() const { return MapTierLabels; }
 	/** tests (mistward4): the upper left controls panel was drawn in the last frame; the summons panel's rows
@@ -118,6 +120,7 @@ private:
 	TArray<FVector2D> StarsDrawn, AnvilsDrawn;
 	/** mistward: the marks drawn this frame (world x, y; the kind in z: 7 boss, 8 guarded ring, 9 her things, 10 pad, 11 trap) */
 	TArray<FVector> MarksDrawn;
+	FVector HuntedMarkDrawn = FVector::ZeroVector;
 	TArray<FString> MiniTierLabels, MapTierLabels;
 	FVector2D MapView = FVector2D::ZeroVector, MapArrow = FVector2D::ZeroVector;
 	bool bMapArrow = false;

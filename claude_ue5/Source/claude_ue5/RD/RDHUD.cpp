@@ -261,6 +261,7 @@ void ARDHUD::DrawCombat(float Sc)
 		UI.Text(N, RDInk, S.X - Tw * 0.5f, A.Y - Th - 3.f * Sc, Small, Sc, ERDType::Label);
 	}
 	// ---- the list of 2026-11-11: Mark of the Hunted: its mark drawn over walls (at the screen's edge when it is behind her)
+	HuntedMarkDrawn = FVector::ZeroVector;
 	if (const ARDMonster* Hm = Gen->GetHuntedMark(); Hm && !Hm->IsDead())
 	{
 		FVector S = Project(Hm->GetActorLocation() + FVector(0, 0, Hm->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 10.f), false);
@@ -268,6 +269,7 @@ void ARDHUD::DrawCombat(float Sc)
 		FVector2D Hp(S.X, S.Y);
 		if (bBehind) Hp = FVector2D(Canvas->ClipX - Hp.X, Canvas->ClipY - 40.f * Sc);
 		Hp.X = FMath::Clamp(Hp.X, 30.f * Sc, Canvas->ClipX - 30.f * Sc); Hp.Y = FMath::Clamp(Hp.Y, 30.f * Sc, Canvas->ClipY - 30.f * Sc);
+		HuntedMarkDrawn = FVector(Hp.X, Hp.Y, bBehind ? 2.f : 1.f);
 		const float R = 16.f * Sc;
 		const FLinearColor Mc(1.f, 0.25f, 0.12f, 0.95f);
 		DrawLine(Hp.X - R, Hp.Y, Hp.X, Hp.Y - R, Mc, 2.5f * Sc); DrawLine(Hp.X, Hp.Y - R, Hp.X + R, Hp.Y, Mc, 2.5f * Sc);

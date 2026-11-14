@@ -5893,11 +5893,453 @@ STEPS = {"rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeB
          "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes, "tomemana": step_tomemana,
          "martial": step_martial, "martialroom": step_martialroom, "harvest": step_harvest, "recipes": step_recipes, "scrolls": step_scrolls,
          "gearbreak": step_gearbreak, "summoner": step_summoner}
+# ------------------------------------------------------------------------------------------------ the TODO sweep (2026-11-14)
+def step_curses13():
+    """the curses' parts the list of 2026-11-11's test left unmeasured: Lethargy's slower blows (a monster's blows landing on her
+    over 12 s, without and with it), Brittle's knock-down (a doubled blow stuns the monster, counted), Silence breaking a shot's
+    wind-up (a shooter caught mid-shot: its shot refused), the fear under a stun (Dread on a stunned monster: it stays stunned,
+    then flees), the hunted mark drawn while its monster is behind a wall (the HUD's mark, on the canvas)"""
+    c = yield from restart("Warlock"); g = G["gen"]; quiet(True); res = {}
+    kill_all_near(G["pawn"].get_actor_location(), 8000); yield from wait(0.5)
+    ctr = g.get_start_room_center(); put(ctr, 0.0); yield from wait(0.4)
+    L11 = json.load(open(os.path.join(SA, "balance", "list11_spells.json"), encoding="utf-8"))
+    tome = {str(i.spell): str(i.name) for i in items_of(unreal.RDItemKind.TOME)}
+    CU = {cu["effect"]: cu for cu in L11["curses"]}
+    for cu in L11["curses"]: c.add_item(tome.get(cu["name"], "Tome of " + cu["name"]), 1)
+    yield from wait(0.2)
+    def cast(e, m): return bool(c.cast_spell_now(s11_widx(CU[e]["name"]), m))
+    def blow_gaps(m, secs, curse=False):
+        """the game seconds between its blows landing on her (each increment of its count timed)"""
+        h = m.hits_landed; t0 = now(); times = []
+        while now() - t0 < secs:
+            c.set_health(c.get_max_health())
+            if curse and "lethargy" not in s11_lines(m): cast("Lethargy", m)
+            if m.hits_landed > h: h = m.hits_landed; times.append(now())
+            yield
+        return [b - a for a, b in zip(times, times[1:])]
+    # ---- Lethargy: a monster beside her (blows of 0): the time between its blows over 25 s, then cursed (cast again before it
+    # wears off): 15 % longer (a count over 12 s, 4 blows either way, could not tell 15 %: test_t13m1)
+    quiet(False)
+    m = s11_mob(ahead(140)); yield from wait(2.0)
+    plain = yield from blow_gaps(m, 25.0)
+    cast("Lethargy", m); yield from wait(0.3)
+    cursed = yield from blow_gaps(m, 25.0, True)
+    mp = sum(plain) / len(plain) if plain else None; mc = sum(cursed) / len(cursed) if cursed else None
+    # (the curse lengthens its wait between blows (the attack interval, RDMonster.cpp), not its swing: the gap grows by the
+    # amount times the interval (0.15 x 1.84 = 0.28 s), the whole gap by less than 15 % (PR #62's review: a ratio within 0.06 of
+    # 1.15 would have passed a curse a third short))
+    res["lethargy"] = {"plain_gaps": len(plain), "cursed_gaps": len(cursed), "plain_s": round(mp, 2) if mp else None, "cursed_s": round(mc, 2) if mc else None,
+                       "amount": CU["Lethargy"]["amount"], "interval": round(m.get_attack_interval(), 2),
+                       "want_longer_s": round(CU["Lethargy"]["amount"] * m.get_attack_interval(), 3), "longer_s": round(mc - mp, 3) if mp and mc else None,
+                       "ratio": round(mc / mp, 2) if mp and mc else None}
+    drop([m]); quiet(True); yield from wait(0.3)
+    # ---- Brittle: her weapon's blows until one is doubled: it is knocked down (stunned) and counted
+    m = spawn_dummy(ahead(500)); yield from wait(0.5)
+    cast("Brittle", m); yield from wait(0.2)
+    k0, cr0 = m.knocked_down, c.crits_dealt; stunned_after = None
+    for _ in range(80):
+        g.test_hit11(m, 5.0, "weapon")
+        if m.knocked_down > k0: stunned_after = bool(m.is_stunned()); break
+    res["brittle"] = {"crits": c.crits_dealt - cr0, "knocked_down": m.knocked_down - k0, "stunned_then": stunned_after}
+    # ---- the fear under the stun: Dread cast while it is down
+    if stunned_after:
+        cast("Dread", m); yield from wait(0.05)
+        under = {"stunned": bool(m.is_stunned()), "afraid": bool(m.is_afraid()), "branch": str(m.combat_branch)}
+        t0 = now()
+        while now() - t0 < 3.0 and m.is_stunned(): yield
+        yield from wait(0.4)
+        res["fear_stun"] = {"under": under, "after": {"stunned": bool(m.is_stunned()), "afraid": bool(m.is_afraid()), "branch": str(m.combat_branch)}}
+    drop([m]); yield from wait(0.3)
+    # ---- Silence breaking a shot's wind-up: a Soldier shooting at her from 10 m, cursed while it shoots
+    kill_all_near(ctr, 20000); put(ctr, 0.0); yield from wait(0.3)
+    her = G["pawn"].get_actor_location(); her = V(her.x, her.y, her.z - 90)
+    end, yaw = clear_line(her, 0.0, 1000.0)
+    sil = {"clear_line": bool(end)}
+    if end:
+        put(her, yaw); yield from wait(0.2); quiet(False)
+        m = g.spawn_monster_named("Soldier", end, 1, 1.0, 0.0, 1.0); yield from wait(0.3)
+        t0 = now(); caught = False
+        while now() - t0 < 15.0:
+            c.set_health(c.get_max_health())
+            if alive(m) and m.is_shooting(): caught = True; break
+            yield
+        sil["caught_shooting"] = caught
+        if caught:
+            r0, s0 = m.silenced_refusals, m.shots_fired
+            cast("Silence", m); yield from wait(0.05)
+            sil.update({"refused": m.silenced_refusals - r0, "still_shooting": bool(m.is_shooting()), "silenced": bool(m.is_silenced())})
+            yield from wait(1.5); sil["shots_after"] = m.shots_fired - s0
+        drop([m]); quiet(True)
+    res["silence"] = sil
+    # ---- the hunted mark behind a wall: a monster in the next room, a wall between (traced), its mark on the canvas
+    # (a floor point beyond a wall: her floor from a trace under her (not her capsule's height), the far point's floor within
+    # 60 cm of it, a wall between at waist height; every 15 degrees, 6 to 24 m (test_t13m1 found none at 9 to 16 m, 30 degrees))
+    hm = {}; put(ctr, 0.0); yield from wait(0.5)
+    her = G["pawn"].get_actor_location()
+    f0 = unreal.SystemLibrary.line_trace_single(G["w"], V(her.x, her.y, her.z), V(her.x, her.y, her.z - 400), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+    f0 = f0.to_tuple() if f0 else None; fl = f0[4].z if f0 and f0[0] else her.z - 95
+    for yaw_ in range(0, 360, 15):
+        for dist in (600.0, 900.0, 1200.0, 1600.0, 2000.0, 2400.0):
+            p = V(her.x + math.cos(math.radians(yaw_)) * dist, her.y + math.sin(math.radians(yaw_)) * dist, her.z)
+            fz = unreal.SystemLibrary.line_trace_single(G["w"], V(p.x, p.y, fl + 250), V(p.x, p.y, fl - 300), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+            fz = fz.to_tuple() if fz else None
+            if not (fz and fz[0] and abs(fz[4].z - fl) < 60): continue
+            wall = unreal.SystemLibrary.line_trace_single(G["w"], V(her.x, her.y, fl + 100), V(p.x, p.y, fl + 100), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+            wall = wall.to_tuple() if wall else None
+            if wall and wall[0] and dist2(wall[4], her) < dist - 150: hm = {"yaw": yaw_, "dist_cm": dist, "wall_at_cm": round(dist2(wall[4], her))}; break
+        if hm: break
+    if hm: put(ctr, float(hm["yaw"])); yield from wait(0.3)
+    if hm:
+        m = spawn_dummy(V(her.x + math.cos(math.radians(hm["yaw"])) * hm["dist_cm"], her.y + math.sin(math.radians(hm["yaw"])) * hm["dist_cm"], fl + 5)); yield from wait(0.5)
+        hm["cast"] = cast("Hunted", m); yield from wait(0.3)
+        hud = G["pc"].get_hud(); d = hud.get_hunted_mark_drawn()
+        hm["drawn_front"] = [round(d.x), round(d.y), int(d.z)]
+        shot("curses13_hunted_wall", "1280x720"); yield from rwait(1.0)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=hm["yaw"] + 180.0)); yield from wait(0.3)
+        d = hud.get_hunted_mark_drawn(); hm["drawn_behind"] = [round(d.x), round(d.y), int(d.z)]
+        drop([m])
+    res["hunted_wall"] = hm
+    quiet(False)
+    le = res["lethargy"]; br = res["brittle"]; fs = res.get("fear_stun", {}); si = res["silence"]
+    ok = (le["plain_gaps"] >= 6 and le["cursed_gaps"] >= 6 and le["longer_s"] is not None and abs(le["longer_s"] - le["want_longer_s"]) < 0.08
+          and br["knocked_down"] == 1 and br["stunned_then"] and fs.get("under", {}).get("stunned") and fs["under"].get("afraid") and fs["under"].get("branch") == "stun"
+          and fs.get("after", {}).get("branch") == "fear"
+          and si.get("caught_shooting") and si.get("refused", 0) >= 1 and not si.get("still_shooting") and si.get("shots_after", 1) == 0
+          and hm.get("cast") and hm.get("drawn_front", [0, 0, 0])[2] == 1 and hm.get("drawn_behind", [0, 0, 0])[2] == 2)
+    step_result("curses13", ok, **res)
+
+def dungeon_kinds():
+    lv = R["level"]; f = os.path.join(SA, lv, "monsters.json")
+    if not os.path.exists(f): return []
+    return [m["name"] for m in json.load(open(f, encoding="utf-8")).get("monsters", [])]
+def step_dungeon13():
+    """a dungeon past its first hall (the TODO sweep: -lv vel_morrath, war_engine, sewers, kethrys_spire, heaven_fortress):
+    tiers 2 and 3 opened by the game's own rule (the start set and its ring cleared: the "<key>:tier" counter), 4 and 5 with
+    their encounters; a set of each tier 2-5 visited (its floor, its theme's props by the walls, its monsters of its tier, a
+    picture); each of the dungeon's own kinds fought by the Warrior under autoplay with her tier's kit (its blows landing, her
+    blows, its death); the tiers' bosses slain and the last one's drop (the next dungeon's key); the quest counters read; the
+    Rogue's manual of each tier's place (the chain's index x 5 + the tier) in the sets' loot; a save made in the dungeon and
+    loaded (the dungeon opened again, its tiers still open). Ends with a load: put it last"""
+    res = {}
+    lv = R["level"]
+    # ---- the Rogue's manuals: a set of each tier, over 30 seeds
+    c = yield from restart("Rogue"); g = G["gen"]; quiet(True)
+    key = str(g.get_editor_property("dungeon_key")); res["key"] = key
+    chain = [str(l).split("|") for l in g.get_editor_property("dungeon_chain")]
+    ci = next((i for i, p in enumerate(chain) if p[0] == key), -1); res["chain_index"] = ci
+    g.debug_open_tiers(5, False); yield from wait(0.5)
+    # (a manual is named by its art's title: "Manual of Marked for Death" (test_t13v2: by its name, none was found))
+    SEC = {}
+    for s in g.get_editor_property("secondaries"):
+        if s.slot > 0: SEC[f"Manual of {str(s.title)}"] = s.slot; SEC[f"Manual of {str(s.name)}"] = s.slot
+    PLACES = sorted({s.slot for s in g.get_editor_property("secondaries") if s.slot > 0})
+    span = g.get_editor_property("section_tiles") * g.get_editor_property("tile_size")
+    def visit(S):
+        # (her movement and the generator read again each time: a restart makes her pawn anew (test_t13v: the one read before it
+        # was gone))
+        g_ = G["gen"]; cm_ = G["pawn"].get_editor_property("character_movement")
+        cm_.set_movement_mode(unreal.MovementMode.MOVE_FLYING)
+        G["pawn"].set_actor_location(V(S.x * span, S.y * span, g_.section_floor_z(S) + 400.0), False, True); yield from wait(0.3)
+        g_.generate_section_now(S); ok_ = yield from built(S)
+        sec = g_.get_section(S)
+        if sec: put(sec.get_room_center(0)); yield from wait(0.3)
+        G["pawn"].get_editor_property("character_movement").set_movement_mode(unreal.MovementMode.MOVE_WALKING); yield from wait(0.5)
+        return sec
+    man = {}; seed0 = g.get_editor_property("session_seed")
+    for t in range(1, 6):
+        S = I2(t - 1, 0); sec = g.get_section(S) if t == 1 else (yield from visit(S))
+        if not sec: man[t] = {"set": False}; continue
+        found = []
+        for sd in range(1, 31):
+            g.set_session_seed(seed0 + sd * 7919)
+            for i in range(sec.get_num_containers()):
+                found.extend(n for n in (str(x) for x in g.loot_list_of(S, i)) if n.startswith("Manual of "))
+        g.set_session_seed(seed0)
+        want = ci * 5 + g.tier_of(S)
+        man[t] = {"tier": g.tier_of(S), "want_slot": want, "has_art": want in PLACES, "manuals": sorted(set(found)), "slots": sorted({SEC.get(n) for n in set(found)}, key=lambda x: (x is None, x))}
+    res["manuals"] = man
+    # ---- the tiers opened by the game's rule, the sets visited
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    gi = GS.get_game_instance(G["w"])
+    cnt0 = {k: gi.get_counter(f"{key}:{k}") for k in ("tier", "kills", "boss")}
+    S0 = I2(0, 0); g.debug_clear_section(S0, 0, g.get_start_room_center()); yield from wait(0.5)
+    # (tier 2's set seen before the ring is cleared to open tier 3 (test_t13w counted a cleared set: 0 monsters))
+    def look(t, S):
+        sec = yield from visit(S)
+        if not sec: return {"set": False}
+        base = sec.get_actor_location().z
+        comps = sec.get_components_by_class(unreal.StaticMeshComponent)
+        n_props = sum(1 for cp in comps if cp.static_mesh and cp.static_mesh.get_name() in props)
+        mons = [m for m in G["gen"].get_monsters() if alive(m) and G["gen"].world_to_section(m.get_actor_location()) == S]
+        r_ = {"tier": G["gen"].tier_of(S), "floor_z": round(base), "props": n_props, "monsters": len(mons), "monster_tiers": sorted({m.tier for m in mons}),
+              "kinds": sorted({str(m.monster_name) for m in mons})[:8], "containers": sec.get_num_containers()}
+        shot(f"dungeon13_{lv}_tier{t}", "1280x720"); yield from rwait(1.0)
+        return r_
+    props = set()
+    PCS = md(g.get_editor_property("pieces"))
+    for nm in g.get_editor_property("theme_props"):
+        p_ = PCS.get(str(nm))
+        if p_ and p_.mesh: props.add(p_.mesh.get_name())
+    res["theme_prop_meshes"] = sorted(props)[:20]
+    sets = {2: (yield from look(2, I2(1, 0)))}
+    for S in [I2(x, y) for x in range(-1, 2) for y in range(-1, 2) if not (x == 0 and y == 0)]:
+        g.generate_section_now(S); yield from built(S)
+        g.debug_clear_section(S, 0, g.get_start_room_center()); yield from wait(0.2)
+    res["open_by_rule"] = [g.is_tier_open(t) for t in (2, 3)]
+    res["tier_counter_after_rule"] = gi.get_counter(f"{key}:tier")
+    g.debug_open_tiers(5, True); yield from wait(1.0)
+    for t in range(3, 6): sets[t] = yield from look(t, I2(t - 1, 0))
+    res["sets"] = sets
+    # ---- the dungeon's own kinds fought, one at a time, under autoplay (the Warrior with the kit of the kind's tier)
+    fights = []
+    kinds = dungeon_kinds()
+    defs = {str(d.name): d for d in g.get_editor_property("monsters")}
+    for kname in kinds:
+        d = defs.get(kname)
+        if not d: fights.append({"kind": kname, "error": "not in the level's monsters"}); continue
+        c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+        ctr = g.get_start_room_center(); kill_all_near(ctr, 30000); yield from wait(0.3)
+        t = max(1, min(5, int(d.tier) or 1))
+        if t > 1: g.debug_open_tiers(t, False)
+        put(ctr, 0.0); yield from wait(0.4)
+        got = yield from kit(c, "Warrior", t)
+        her = G["pawn"].get_actor_location(); her = V(her.x, her.y, her.z - 90)
+        end, _ = clear_line(her, 0.0, 900.0)
+        if not end: fights.append({"kind": kname, "error": "no clear line"}); continue
+        m = g.spawn_monster_named(kname, end, t, 1.0, 1.0, 1.0); yield from wait(0.3)
+        if not m: fights.append({"kind": kname, "error": "not spawned"}); continue
+        quiet(False)
+        shoots = bool(d.get_editor_property("shoots")); mh0 = m.hits_landed; sf0 = m.shots_fired; ma0 = m.attacks_made
+        # (its own blows first: up to 10 s with her standing, her hit points kept up, its attacks and blows landing counted; then
+        # the fight (test_t13w: the Warrior with her tier's kit staggered each kind at every blow, none ever struck her))
+        t1 = now(); branches = {}
+        while now() - t1 < 20.0 and alive(m) and m.hits_landed - mh0 < 2 and m.shots_fired - sf0 < 2:
+            c.set_health(c.get_max_health()); b_ = str(m.combat_branch); branches[b_] = branches.get(b_, 0) + 1; yield
+        me_ = G["pawn"].get_actor_location()
+        first = {"secs": round(now() - t1, 1), "attacks": m.attacks_made - ma0, "landed": m.hits_landed - mh0, "shots": m.shots_fired - sf0,
+                 "m_from_her": round(dist2(m.get_actor_location(), me_) / 100.0, 2) if alive(m) else None, "branches": branches,
+                 "reach": round(d.get_editor_property("reach"), 1), "scale": round(m.get_actor_scale3d().x, 2) if alive(m) else None}
+        last = {"hits": m.hits_landed, "shots": m.shots_fired}
+        def keep_counts():
+            if unreal.SystemLibrary.is_valid(m): last["hits"] = m.hits_landed; last["shots"] = m.shots_fired
+            return None
+        r = yield from bal_fight(c, "Warrior", t, [m], 60.0, after_start=keep_counts)
+        keep_counts()
+        r = {k_: v for k_, v in r.items() if k_ not in ("trace",)}
+        # (counted as last read while it was there: one destroyed at its death keeps what it struck (PR #62's review))
+        r.update({"kind": kname, "tier": t, "its_first": first, "its_blows_landed": max(last["hits"] - mh0, first["landed"]),
+                  "its_shots": max(last["shots"] - sf0, first["shots"]) if shoots else None, "dead": (not alive(m))})
+        fights.append(r); quiet(True)
+        if alive(m): drop([m])
+        yield from wait(0.3)
+    res["fights"] = fights
+    # ---- the bosses: tiers 2-5 opened with their encounters, each slain by her; the last one's drop
+    # (each tier opened in turn with its encounters and a set of it visited, its boss looked for and slain: opened all at once only
+    # tier 2's was placed in test_t13v2)
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    g.debug_clear_section(I2(0, 0), 0, g.get_start_room_center()); yield from wait(0.3)
+    bosses = {}; slain = {}
+    for t in range(2, 6):
+        # (a tier's boss is set when the tier opens (OnTierOpened, once; DebugOpenTiers the same), in an explored room of the tier
+        # before (PlaceBoss): three sets of tier t-1 are visited and cleared (their rooms explored) first, then tier t opened, as in
+        # play, where a tier opens only once the tier before is explored (test_t13s5 and t13s6: opened before the visit, tiers 3 to
+        # 5 had "no explored room of tier t-1 to set it in" and no boss)
+        if t > 2:
+            for S_ in (I2(t - 2, 0), I2(t - 2, 1), I2(t - 2, -1)):
+                sec_ = yield from visit(S_)
+                if sec_: g.debug_clear_section(S_, 0, sec_.get_room_center(0)); yield from wait(0.5)
+        g.debug_open_tiers(t, True); yield from wait(0.5)
+        e_ = None
+        for _ in range(80):
+            for e in (str(l).split("|") for l in g.get_encounter_lines()):
+                # (boss|x|y|z|kind|alive|tier|label|max: as step_tier25 reads them)
+                if e[0] == "boss" and len(e) > 7 and e[6] == str(t) and "USURPER" not in e[7]: e_ = e
+            if e_: break
+            yield from rwait(0.25)
+        if not e_: continue
+        bosses[t] = e_
+        at = V(float(e_[1]), float(e_[2]), float(e_[3]))
+        for mo in g.get_monsters():
+            if alive(mo) and mo.boss and dist2(mo.get_actor_location(), at) < 800:
+                mo.apply_damage(1e7, G["pawn"]); slain[t] = str(mo.monster_name); break
+        yield from wait(0.8)
+    res["bosses"] = {"lines": {k_: v for k_, v in bosses.items()}, "slain": slain, "key_dropped": str(g.get_editor_property("dungeon_key_dropped")),
+                     "bossdone": {t: gi.get_counter(f"{key}:bossdone:{t}") for t in range(1, 6)}}
+    res["counters"] = {k: [cnt0[k], gi.get_counter(f"{key}:{k}")] for k in ("tier", "kills", "boss")}
+    # ---- a save in the dungeon, loaded
+    sv = {"saved": g.save_game_now("save_sweep_dungeon13", "test", "Sweep Dungeon")}
+    sv["info"] = str(g.get_save_info("save_sweep_dungeon13"))
+    G["travel_until"] = time.time() + 120
+    tw0 = now(); sv["world_s_before"] = round(tw0, 1)
+    sv["load"] = g.load_game_from("save_sweep_dungeon13")
+    t0 = time.time(); seen_gone = False
+    while time.time() - t0 < 100:
+        yield
+        w = UES.get_game_world()
+        if w is None: seen_gone = True; continue
+        refresh()
+        # (opened again: a new world, its clock begun again (test_t13v2: the world never read as gone between two ticks))
+        if G.get("gen") and G.get("pawn") and cb() and GS.get_time_seconds(w) < tw0 - 5: break
+    G.pop("travel_until", None); yield from wait(2.0); refresh(); g = G["gen"]
+    sv["world_s_after"] = round(now(), 1)
+    sv["level_after"] = G["w"].get_path_name().split(".")[-1]; sv["reopened"] = seen_gone or sv["world_s_after"] < sv["world_s_before"] - 3
+    sv["tiers_open_after"] = [g.is_tier_open(t) for t in range(1, 6)]
+    res["save"] = sv
+    quiet(False)
+    has_kinds = bool(kinds)
+    # (not every place has an art: 16 arts over the chain's 30 places; a place with one shows its manual only, one without none)
+    # (PR #62's review: a tier whose set was never built fails, it is not a place without an art)
+    man_ok = len(man) == 5 and all(v.get("set", True) and "want_slot" in v and ((v.get("slots") == [v["want_slot"]]) if v.get("has_art") else not v.get("manuals")) for v in man.values())
+    sets_ok = all(s.get("set", True) and s.get("tier") == t and s.get("monsters", 0) > 0 and s.get("containers", 0) > 0 for t, s in sets.items()) and len(sets) == 4
+    fights_ok = (not has_kinds) or all(f.get("dead") and (f.get("its_blows_landed") or 0) + (f.get("its_shots") or 0) >= 1 and f.get("dealt", 0) > 0 for f in fights)
+    nxt = chain[ci + 1][0] if 0 <= ci < len(chain) - 1 else None
+    res["next_key"] = nxt
+    boss_ok = len(slain) == 4 and all(res["bosses"]["bossdone"][t] >= 1 for t in range(2, 6)) and ((not nxt) or bool(res["bosses"]["key_dropped"]))
+    cnt_ok = res["counters"]["kills"][1] > res["counters"]["kills"][0] and res["counters"]["boss"][1] > res["counters"]["boss"][0] and res["tier_counter_after_rule"] >= 3
+    save_ok = sv["saved"] and sv["load"] and sv["reopened"] and sv["level_after"] == lv and all(sv["tiers_open_after"])
+    res["parts_ok"] = {"manuals": man_ok, "sets": sets_ok, "fights": fights_ok, "bosses": boss_ok, "counters": cnt_ok, "save": save_ok}
+    step_result("dungeon13", all(res["parts_ok"].values()), **res)
+def step_finalback13():
+    """coming back to an unslain final boss (the TODO: "placed and not slain when she leaves the castle, he is set again once she
+    sees a room of tier 5 on her way back"): Aurorim placed in a cleared tier-5 set (DebugPlaceFinalBoss), not slain; she leaves
+    as a travel does (SaveCarry: the castle's tiers and its counters into the game instance) and the castle is opened again: he is
+    not there at first; once a tier-5 set is explored he is set again (bFinalRestorePending). Ends play in a castle opened again"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True); res = {}
+    gi = GS.get_game_instance(G["w"])
+    g.debug_open_tiers(5, False); yield from wait(0.5)
+    S = I2(4, 0); span = g.get_editor_property("section_tiles") * g.get_editor_property("tile_size")
+    def over(S_):
+        G["pawn"].get_editor_property("character_movement").set_movement_mode(unreal.MovementMode.MOVE_FLYING)
+        G["pawn"].set_actor_location(V(S_.x * span, S_.y * span, G["gen"].section_floor_z(S_) + 400.0), False, True); yield from wait(0.3)
+        G["gen"].generate_section_now(S_); yield from built(S_)
+        sec_ = G["gen"].get_section(S_)
+        if sec_: put(sec_.get_room_center(0))
+        G["pawn"].get_editor_property("character_movement").set_movement_mode(unreal.MovementMode.MOVE_WALKING); yield from wait(0.8)
+        return sec_
+    sec = yield from over(S)
+    if not sec: quiet(False); step_result("finalback13", False, error="no tier-5 set"); return
+    g.debug_clear_section(S, 0, sec.get_room_center(0)); yield from wait(0.5)
+    rooms = [(r_, len(list(sec.get_room_free_tiles(r_)))) for r_ in range(sec.get_num_rooms())]
+    room = max(rooms, key=lambda x: x[1])[0]
+    res["placed_ok"] = g.debug_place_final_boss(S, room); yield from wait(1.0)
+    res["before"] = fb_state(); res["placed_counter"] = gi.get_counter("finalboss:placed"); res["slain_counter"] = gi.get_counter("finalboss")
+    # (she leaves as a travel does, and the castle opens again)
+    g.save_carry()
+    G["travel_until"] = time.time() + 90; tw0 = now()
+    GS.open_level(G["w"], "mistward_castle", True, "Hero=Warrior")
+    t0 = time.time()
+    while time.time() - t0 < 80:
+        yield
+        w = UES.get_game_world()
+        if w is None: continue
+        refresh()
+        if G.get("gen") and G.get("pawn") and cb() and GS.get_time_seconds(w) < tw0 - 3: break
+    G.pop("travel_until", None); yield from wait(2.0); refresh(); g = G["gen"]; quiet(True)
+    res["tiers_after"] = [g.is_tier_open(t) for t in range(1, 6)]
+    res["at_arrival"] = fb_state(); res["boss_at_arrival"] = g.get_final_boss() is not None
+    # (her way back: a tier-5 set explored)
+    sec = yield from over(I2(4, 0))
+    if sec: g.debug_clear_section(I2(4, 0), 0, sec.get_room_center(0))
+    t0 = time.time()
+    while time.time() - t0 < 30 and not fb_state()["placed"]: yield from wait(0.5)
+    res["after_explored"] = fb_state(); res["boss_after"] = g.get_final_boss() is not None
+    quiet(False)
+    ok = (res["placed_ok"] and res["before"]["placed"] == 1 and res["placed_counter"] >= 1 and res["slain_counter"] == 0 and all(res["tiers_after"])
+          and res["at_arrival"]["placed"] == 0 and res["after_explored"]["placed"] == 1 and res["after_explored"]["slain"] == 0 and res["boss_after"])
+    step_result("finalback13", ok, **res)
+def step_stuck13():
+    """kinds that chase and do not move (test_t13s3: the sewers' Tide Captain and Abyssal Shellclaw, 9.0 m off for 20 s, their fight
+    "chase"): each spawned 9 m off on a clear line, its place, speed, movement mode, capsule and what is under and over it every
+    0.5 s for 6 s; the kinds named in the run's -opt "kinds=A+B" (default those two and their unscaled kin)"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True); res = {}
+    opt = dict(kv.split("=", 1) for kv in (sys.argv[3] if len(sys.argv) > 3 else "").split(";") if "=" in kv)
+    kinds = (opt.get("kinds") or "Tide_Captain+Abyssal_Shellclaw+Drowned_Captain+Shellclaw").split("+")
+    ctr = g.get_start_room_center(); kill_all_near(ctr, 30000)
+    for kname in kinds:
+        put(ctr, 0.0); yield from wait(0.4)
+        her = G["pawn"].get_actor_location(); her = V(her.x, her.y, her.z - 90)
+        end, _ = clear_line(her, 0.0, 900.0)
+        if not end: res[kname] = {"error": "no clear line"}; continue
+        m = g.spawn_monster_named(kname, end, 5, 1.0, 0.0, float(opt.get("smul", 1.0))); yield from wait(0.2)
+        if not m: res[kname] = {"error": "not spawned"}; continue
+        quiet(False)
+        cap = m.get_component_by_class(unreal.CapsuleComponent); cmv = m.get_component_by_class(unreal.CharacterMovementComponent)
+        # (-opt "cap=<cm>": its capsule's half height cut to that, its mesh lowered by as much (its feet where they were))
+        if opt.get("cap") and cap and cap.get_unscaled_capsule_half_height() > float(opt["cap"]):
+            h0_ = cap.get_unscaled_capsule_half_height(); h1_ = float(opt["cap"]); sk_ = m.get_component_by_class(unreal.SkeletalMeshComponent)
+            cap.set_capsule_size(cap.get_unscaled_capsule_radius(), h1_)
+            rl_ = sk_.get_editor_property("relative_location"); sk_.set_editor_property("relative_location", V(rl_.x, rl_.y, rl_.z + (h0_ - h1_)))
+            m.set_actor_location(m.get_actor_location() - V(0, 0, h0_ - h1_), False, True); yield from wait(0.2)
+        r = {"capsule": [round(cap.get_scaled_capsule_radius(), 1), round(cap.get_scaled_capsule_half_height(), 1)] if cap else None,
+             "scale": [round(m.get_actor_scale3d().x, 2), round(m.get_component_by_class(unreal.SkeletalMeshComponent).get_editor_property("relative_scale3d").x, 2)], "frames": []}
+        L0 = m.get_actor_location()
+        fd_ = unreal.SystemLibrary.line_trace_single(G["w"], L0, L0 - V(0, 0, 600), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [m], unreal.DrawDebugTrace.NONE, False)
+        fd_ = fd_.to_tuple() if fd_ else None
+        r["bottom_over_floor_cm"] = round((L0.z - cap.get_scaled_capsule_half_height()) - fd_[4].z, 1) if fd_ and fd_[0] and cap else None
+        r["floor_under"] = (fd_[9].get_name() + "." + fd_[10].get_name()) if fd_ and fd_[0] and fd_[10] else None
+        r["mesh_z"] = round(m.get_component_by_class(unreal.SkeletalMeshComponent).get_editor_property("relative_location").z, 1)
+        up = unreal.SystemLibrary.line_trace_single(G["w"], L0, L0 + V(0, 0, 600), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [m], unreal.DrawDebugTrace.NONE, False)
+        up = up.to_tuple() if up else None; r["ceiling_cm_over_middle"] = round(up[4].z - L0.z) if up and up[0] else None
+        # (its own capsule swept 50 cm toward her: what stops it)
+        if cap:
+            dv = V(her.x - L0.x, her.y - L0.y, 0); nn = math.hypot(dv.x, dv.y) or 1.0
+            sw = unreal.SystemLibrary.capsule_trace_single(G["w"], L0, L0 + V(dv.x / nn * 50, dv.y / nn * 50, 0), cap.get_scaled_capsule_radius(), cap.get_scaled_capsule_half_height(),
+                                                           unreal.TraceTypeQuery.TRACE_TYPE_QUERY2, False, [m], unreal.DrawDebugTrace.NONE, True)
+            sw = sw.to_tuple() if sw else None
+            # (the tuple: blocking, initial overlap, time, distance, location, ... (PR #62's review: read as [2], [3] before))
+            r["sweep"] = {"hit": bool(sw and sw[0]), "start_penetrating": bool(sw[1]) if sw else None, "what": (sw[9].get_name() + "." + sw[10].get_name()) if sw and sw[0] and sw[9] and sw[10] else None,
+                          "time": round(sw[2], 3) if sw else None, "at_z": round(sw[4].z - L0.z) if sw and sw[0] else None}
+            r["mesh_collision"] = str(m.get_component_by_class(unreal.SkeletalMeshComponent).get_collision_enabled())
+            if sw and sw[0] and isinstance(sw[10], unreal.InstancedStaticMeshComponent):
+                ism = sw[10]; sm = ism.get_editor_property("static_mesh"); fl = L0.z - cap.get_scaled_capsule_half_height()
+                # (the instance nearest the hit, its box over the floor)
+                bi = None
+                for ii in range(ism.get_instance_count()):
+                    tr = ism.get_instance_transform(ii, True)
+                    if bi is None or dist2(tr.translation, sw[4]) < dist2(bi[1].translation, sw[4]): bi = (ii, tr)
+                b0, b1 = sm.get_bounding_box().min, sm.get_bounding_box().max
+                zs = [bi[1].transform_location(V(x, y, z)).z for x in (b0.x, b1.x) for y in (b0.y, b1.y) for z in (b0.z, b1.z)]
+                r["blocker"] = {"mesh": sm.get_name(), "low_cm_over_floor": round(min(zs) - fl), "high_cm_over_floor": round(max(zs) - fl), "hit_cm_over_floor": round(sw[4].z - fl),
+                                "m_off": round(dist2(bi[1].translation, L0) / 100, 2)}
+            r["attached"] = [str(cc.get_name()) for cc in m.get_components_by_class(unreal.PrimitiveComponent)][:12]
+        t0 = now()
+        while now() - t0 < 6.0 and alive(m):
+            yield from wait(0.5)
+            L = m.get_actor_location(); v = m.get_velocity()
+            r["frames"].append([round(now() - t0, 1), round(dist2(L, her) / 100, 2), round(L.z - L0.z, 1), round(math.hypot(v.x, v.y)), str(cmv.movement_mode).split(".")[-1] if cmv else None,
+                                round(cmv.get_editor_property("max_walk_speed")) if cmv else None, str(m.combat_branch)])
+            c.set_health(c.get_max_health())
+        quiet(True); drop([m]); yield from wait(0.3)
+        res[kname] = r
+    # (each must come to her: within 3 m of her at the end of its 6 s, from 9 m)
+    step_result("stuck13", all(isinstance(v, dict) and v.get("frames") and v["frames"][-1][1] < 3.0 for v in res.values()), **res)
+STEPS.update({"curses13": step_curses13, "dungeon13": step_dungeon13, "finalback13": step_finalback13, "stuck13": step_stuck13})
+
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""
     if G.get("gen"): return G["gen"]
     return (GS.get_all_actors_of_class(G["w"], unreal.RDHeroSelect) or [None])[0] if G.get("w") else None
+SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
+def saves_snapshot():
+    """the save folder's files and their bytes: put back at the end, the tests' own new saves deleted (PR #61's review)"""
+    snap = {}
+    if os.path.isdir(SAVES):
+        for f in os.listdir(SAVES):
+            fp = os.path.join(SAVES, f)
+            if os.path.isfile(fp): snap[f] = open(fp, "rb").read()
+    return snap
+def saves_restore(snap):
+    if snap is None or not os.path.isdir(SAVES): return 0
+    n = 0
+    for f in os.listdir(SAVES):
+        fp = os.path.join(SAVES, f)
+        if os.path.isfile(fp) and f not in snap: os.remove(fp); n += 1
+    for f, b in snap.items():
+        fp = os.path.join(SAVES, f)
+        if not os.path.exists(fp) or open(fp, "rb").read() != b: open(fp, "wb").write(b); n += 1
+    return n
 def run():
+    G["saves"] = saves_snapshot()
     # (the editor's windows over the game's view (a floating Message Log covered it) hidden while input is sent to it; shown
     # again at the end)
     o = view_owner(); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
@@ -5913,6 +6355,8 @@ def run():
 def finish(err=None):
     unreal.unregister_slate_post_tick_callback(G["h"])
     R["error"] = err
+    try: R["saves_put_back"] = saves_restore(G.get("saves"))
+    except Exception as e: R["saves_put_back"] = str(e)
     try:
         c = cb() if G.get("gen") else None
         if c: c.set_scripted_only(False); c.set_inventory_open(False); c.set_crafting_open(False)
