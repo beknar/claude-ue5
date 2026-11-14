@@ -289,11 +289,24 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 			// review: a level without them would have sent another kind silently). Case kept: "Werewolf" or "Hellhound" is not
 			// a pack (PR #26's review); the warning once a play (the generator's, not a static: one outlives play sessions), not at
 			// every making of the den's chunk)
+			// (PR #26's second review: a word inside a longer name ("Dogman", "WolfRider") is not a pack; the word must end the
+			// name's own last word (a "Dire Wolf", a "HellDog"), and of those the weakest is taken, not the table's first)
+			auto LastWordIs = [](const FString& Name, const TCHAR* Want)
+			{
+				int32 E = Name.Len();
+				while (E > 0 && !FChar::IsAlpha(Name[E - 1])) --E;
+				const int32 L = FCString::Strlen(Want);
+				return E >= L && FCString::Strncmp(*Name + E - L, Want, L) == 0;
+			};
 			int32 Found = -1;
 			for (const TCHAR* Want : { TEXT("Ripper"), TEXT("Wolf"), TEXT("Hound"), TEXT("Dog") })
 			{
-				for (int32 K = 0; K < Monsters.Num() && Found < 0; ++K)
-					if (Monsters[K].Mesh && Monsters[K].Name.ToString().Contains(Want, ESearchCase::CaseSensitive)) Found = K;
+				for (int32 K = 0; K < Monsters.Num(); ++K)
+				{
+					const FString Nm = Monsters[K].Name.ToString();
+					const bool bMatch = FCString::Strcmp(Want, TEXT("Ripper")) == 0 ? Nm.Contains(Want, ESearchCase::CaseSensitive) : LastWordIs(Nm, Want);
+					if (Monsters[K].Mesh && bMatch && (Found < 0 || Monsters[K].HealthFactor < Monsters[Found].HealthFactor)) Found = K;
+				}
 				if (Found >= 0) break;
 			}
 			if (Found >= 0) Kind = Found;

@@ -1,0 +1,38 @@
+{
+ "tag": "t13f",
+ "plan": [
+  "continue13",
+  "autosave13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "continue13",
+   "ok": true,
+   "slot": "save_sweep_continue_1c7c04",
+   "menu_slot": "save_sweep_continue_1c7c04",
+   "menu_info": "2026-11-14 07:09|brokenspire|Brokenspire|Summoner|menu|Sweep Continue",
+   "arrived": 1,
+   "from_save_m": 0.0,
+   "town": "Brokenspire"
+  },
+  {
+   "step": "autosave13",
+   "ok": true,
+   "quit_line": "button|Quit",
+   "quit_ok": true,
+   "after_quit": {
+    "written": 2,
+    "slot": "autosave",
+    "why": "quit",
+    "arrived": 1
+   },
+   "quit_info": "2026-11-14 07:09|brokenspire|Brokenspire|Summoner|quit|",
+   "level": "mistward_castle",
+   "castle_info": "2026-11-14 07:09|brokenspire|Brokenspire|Summoner|castle|"
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "windows_shown_again": 0
+}

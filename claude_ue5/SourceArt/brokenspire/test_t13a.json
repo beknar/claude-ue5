@@ -1,0 +1,155 @@
+{
+ "tag": "t13a",
+ "plan": [
+  "dummies",
+  "console"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "dummies",
+   "ok": false,
+   "melee": [
+    {
+     "kind": "Town.Dummy",
+     "hits": 1,
+     "lean_max": 8.5,
+     "lean_after_4s": 0.07
+    },
+    {
+     "kind": "Town.Target",
+     "hits": 1,
+     "lean_max": 9.1,
+     "lean_after_4s": 0.0
+    }
+   ],
+   "ranged": [
+    {
+     "kind": "Town.Dummy",
+     "hits": 0,
+     "lean_max": 0.0,
+     "lean_after_4s": 0.0
+    },
+    {
+     "kind": "Town.Target",
+     "hits": 1,
+     "lean_max": 6.3,
+     "lean_after_4s": 0.0
+    }
+   ],
+   "dummies": [
+    [
+     "Town.Dummy",
+     -4990,
+     12900,
+     54,
+     176
+    ],
+    [
+     "Town.Target",
+     -6110,
+     12900,
+     70,
+     189
+    ]
+   ]
+  },
+  {
+   "step": "console",
+   "ok": true,
+   "key": "sent",
+   "checks": {
+    "enabled": {
+     "ok": true,
+     "what": "rd.GameConsole 1 in UEDPIE_0_brokenspire (editor)"
+    },
+    "opens": {
+     "ok": true,
+     "what": "open 1, the line has the keyboard 1, the line \"\" (the key's ` not typed)"
+    },
+    "runs": {
+     "ok": true,
+     "what": "typed \"rd.WildRunSpeed 10\", Enter: rd.WildRunSpeed 10.0, the line emptied 1, still open with the keyboard 1; printed: \"rd.WildRunSpeed = \"10\"\""
+    },
+    "reads": {
+     "ok": true,
+     "what": "rd.WildRunSpeed printed \"rd.WildRunSpeed = \"10\"      LastSetBy: Console\"; t.MaxFPS printed \"t.MaxFPS = \"0\"      LastSetBy: Scalability\""
+    },
+    "recalls": {
+     "ok": true,
+     "what": "Up \"t.MaxFPS\", Up \"rd.WildRunSpeed\", Down \"t.MaxFPS\""
+    },
+    "completes": {
+     "ok": true,
+     "what": "rd.Wild and Tab: \"rd.WildRunSpeed \""
+    },
+    "unknown": {
+     "ok": true,
+     "what": "printed \"Command not recognized: nosuchcommand\""
+    },
+    "help": {
+     "ok": true,
+     "what": "\"rd.WildRunSpeed = 10    Her running speed in the wilderness and its towns, for testing: 1, 5, 10, 15, 20, 30 or 40 (another number takes the nearest).\" / \"rd.GameConsole = 1    The game's own console, opened with the console key (`): 1 on, 0 off.\""
+    },
+    "picture": {
+     "ok": true,
+     "what": "E:\\code\\claude-ue5\\claude_ue5\\Saved\\Screenshots\\WindowsEditor\\bs_t13a_console.png"
+    },
+    "game_untouched": {
+     "ok": true,
+     "what": "W held 1.2 s under it: the game saw it down 0, she moved 0 cm"
+    },
+    "escape": {
+     "ok": true,
+     "what": "Escape: open 0, the game's view has the keyboard 1"
+    },
+    "toggles": {
+     "ok": true,
+     "what": "` opened it 1, ` again shut it 1"
+    },
+    "game_back": {
+     "ok": true,
+     "what": "W held 1 s with it shut: the game saw it down 1, she moved 493 cm"
+    }
+   },
+   "lines": [
+    "rd.WildRunSpeed = \"10\"",
+    "> rd.WildRunSpeed",
+    "HISTORY",
+    "Constructor: 1.000000",
+    "Console: 10.000000",
+    "rd.WildRunSpeed = \"10\"      LastSetBy: Console",
+    "> t.MaxFPS",
+    "HISTORY",
+    "Constructor: 0.000000",
+    "Scalability: 0.000000",
+    "t.MaxFPS = \"0\"      LastSetBy: Scalability",
+    "> nosuchcommand",
+    "Command not recognized: nosuchcommand",
+    "> help",
+    "The game's commands (a name alone shows its value, a name and a value sets it):",
+    "  rd.GameConsole = 1    The game's own console, opened with the console key (`): 1 on, 0 off.",
+    "  rd.GameSpeed = 1    How fast the whole game runs (the world's time dilation): 1 as made, 0.1 to 10.",
+    "  rd.GoTo    For testing: out to a major city by fast travel (found or not): rd.GoTo <brokenspire|velmorrath|ashenreach|graymourne|kethrys|heaven>",
+    "  rd.GoToPoi    To a place of rd.Pois' listing: rd.GoToPoi <number | name>",
+    "  rd.HeroMenu = 0    1: a dungeon level with heroes and a MenuLevel, played without ?Hero=, opens its menu first.",
+    "  rd.MapTeleport    A click on the big map teleports her to that point, once the map is revealed (rd.RevealMap); rd.MapTeleport off: no more",
+    "  rd.Pois    Every place of the map shown on it and the nearest 40 listed (the small points of interest near her too); rd.Pois all: all listed; rd.Pois hide: only those found again",
+    "  rd.RevealMap    The whole map shown (the wilds' and the dungeon's); rd.RevealMap off: as she has seen it",
+    "  rd.Tier    Her tier set by hand, with that tier's abilities, spells and slashes (a lower one takes them away): rd.Tier <1-30>; rd.Tier 0: the game's own",
+    "  rd.Time    The time of day: rd.Time <dawn|morning|noon|afternoon|evening|night|midnight|0-24>",
+    "  rd.TimeSpeed = 1    How much faster the day's clock runs (the hour, the sun and the moon): 1 as made (a day an hour), up to 240 (a day in 15 s).",
+    "  rd.Weather    The weather at once, held: rd.Weather <clear|fair|cloudy|overcast|rain|storm|snow|fog|cloudless|0-8>; cloudless: no clouds at all, not even on the horizon (never chosen by itself); rd.Weather auto lets it change again",
+    "  rd.WildRunSpeed = 10    Her running speed in the wilderness and its towns, for testing: 1, 5, 10, 15, 20, 30 or 40 (another number takes the nearest).",
+    "  help, clear    this list; empty the console",
+    "The engine's console variables are read and set the same way (t.MaxFPS 60)."
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "bs_t13a_dummy_struck.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

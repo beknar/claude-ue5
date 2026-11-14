@@ -1154,7 +1154,9 @@ bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
 	// (only Quit quits: an item without a branch here did, when anything not named fell through to it (the PR review's find))
 	if (Id != TEXT("quit")) return false;
 	LastMenuAction = TEXT("quit");
-	if (bMenuDryRun) return true;
+	// (a test's dry run writes Quit's autosave only when it asks (bMenuDryRunAutosave, the TODO sweep of 2026-11-14): PR #61's
+	// review, a dry run's Quit must not overwrite a player's autosave in every other test)
+	if (bMenuDryRun) { if (bMenuDryRunAutosave) WildAutosave(TEXT("quit")); return true; }
 	SetMenuOpen(false);
 	WildAutosave(TEXT("quit"));
 	// (in the editor this ends play and leaves the editor as it was; a game quits)

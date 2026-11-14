@@ -1,0 +1,48 @@
+{
+ "tag": "t13h",
+ "plan": [
+  "cityfps13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "cityfps13",
+   "ok": true,
+   "Brokenspire": {
+    "fps": 4.9,
+    "worst_ms": 493
+   },
+   "Vel Morrath": {
+    "fps": 10.5,
+    "worst_ms": 123
+   },
+   "Ashenreach": {
+    "fps": 9.3,
+    "worst_ms": 219
+   },
+   "Graymourne": {
+    "fps": 4.9,
+    "worst_ms": 362
+   },
+   "Kethrys Spire": {
+    "fps": 5.9,
+    "worst_ms": 194
+   },
+   "Heaven": {
+    "fps": 7.6,
+    "worst_ms": 159
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "bs_t13h_cityfps13_Brokenspire.png",
+  "bs_t13h_cityfps13_Vel_Morrath.png",
+  "bs_t13h_cityfps13_Ashenreach.png",
+  "bs_t13h_cityfps13_Graymourne.png",
+  "bs_t13h_cityfps13_Kethrys_Spire.png",
+  "bs_t13h_cityfps13_Heaven.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

@@ -1,0 +1,77 @@
+{
+ "tag": "t13b",
+ "plan": [
+  "dummies"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "dummies",
+   "ok": true,
+   "melee": [
+    {
+     "kind": "Town.Dummy",
+     "hits": 1,
+     "lean_max": 9.1,
+     "lean_after_4s": 0.0
+    },
+    {
+     "kind": "Town.Target",
+     "hits": 1,
+     "lean_max": 9.1,
+     "lean_after_4s": 0.0
+    }
+   ],
+   "ranged": [
+    {
+     "kind": "Town.Dummy",
+     "hits": 1,
+     "lean_max": 6.4,
+     "lean_after_4s": 0.0
+    },
+    {
+     "kind": "Town.Target",
+     "hits": 1,
+     "lean_max": 6.4,
+     "lean_after_4s": 0.0
+    }
+   ],
+   "dummies": [
+    [
+     "Town.Dummy",
+     10200,
+     -11890,
+     54,
+     176
+    ],
+    [
+     "Town.Target",
+     10200,
+     -13010,
+     70,
+     189
+    ]
+   ],
+   "diag": [
+    {
+     "attacks": 1,
+     "town_hits": 1,
+     "first_on_line": "RDSection_0.StaticMeshComponent_192:SM_Garrison_Dummy",
+     "ang": 0
+    },
+    {
+     "attacks": 1,
+     "town_hits": 1,
+     "first_on_line": "RDSection_0.StaticMeshComponent_193:SM_Garrison_Target",
+     "ang": 0
+    }
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "bs_t13b_dummy_struck.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

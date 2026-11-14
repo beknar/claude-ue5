@@ -1,0 +1,83 @@
+{
+ "tag": "t13l",
+ "plan": [
+  "dummies"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "dummies",
+   "ok": false,
+   "melee": [
+    {
+     "kind": "Town.Dummy",
+     "hits": 1,
+     "lean_max": 1.2,
+     "lean_after_4s": 0.0
+    },
+    {
+     "kind": "Town.Target",
+     "hits": 1,
+     "lean_max": 9.1,
+     "lean_after_4s": 0.0
+    }
+   ],
+   "ranged": [
+    {
+     "kind": "Town.Dummy",
+     "hits": 0,
+     "lean_max": 0.0,
+     "lean_after_4s": 0.0
+    },
+    {
+     "kind": "Town.Target",
+     "hits": 1,
+     "lean_max": 2.4,
+     "lean_after_4s": 0.0
+    }
+   ],
+   "dummies": [
+    [
+     "Town.Dummy",
+     15110,
+     600,
+     54,
+     176
+    ],
+    [
+     "Town.Target",
+     13990,
+     600,
+     70,
+     189
+    ]
+   ],
+   "diag": [
+    {
+     "attacks": 1,
+     "town_hits": 1,
+     "first_on_line": "RDSection_0.StaticMeshComponent_197:SM_Garrison_Dummy",
+     "ang": 0.0,
+     "off_cm": 600.0,
+     "clear": true
+    },
+    {
+     "attacks": 1,
+     "town_hits": 1,
+     "first_on_line": "RDSection_0.StaticMeshComponent_198:SM_Garrison_Target",
+     "ang": 0.0,
+     "off_cm": 600.0,
+     "clear": true
+    }
+   ]
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "bs_t13l_dummy_struck.png",
+  "bs_t13l_dummy_missed_0.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 0
+}
