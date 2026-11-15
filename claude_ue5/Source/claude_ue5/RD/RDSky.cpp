@@ -169,6 +169,22 @@ void ARDDungeonGenerator::SetWeather(int32 Kind, bool bAtOnce)
 	UE_LOG(LogRDSky, Log, TEXT("RDSKY the weather: %s%s"), *WeatherName(Weather), bAtOnce ? TEXT(" (at once)") : TEXT(""));
 }
 
+void ARDDungeonGenerator::WeatherWeights(bool bDry, bool bWhiteLand, bool bDustLand, bool bMoorLand, float* Wt) const
+{
+	// (the weathers' turn: how often each comes where she is; the cold makes rain snow (TickSky7); the fourth phase's moors: fog
+	// three times as often)
+	const float W[NumRotationWeathers] = { 2.f, 3.f, 2.5f, 1.5f, bDry ? 0.3f : 1.5f, bDry ? 0.15f : 0.6f, 0.f, bMoorLand ? 1.8f : 0.6f,
+		bWhiteLand && bSkyCold ? 0.9f : 0.f, bDustLand && !bSkyCold ? 0.9f : 0.f };
+	for (int32 K = 0; K < NumRotationWeathers; ++K) Wt[K] = W[K];
+}
+
+FString ARDDungeonGenerator::GetWeatherWeightsHere() const
+{
+	float Wt[NumRotationWeathers]; WeatherWeights(SkyDryLand, SkyWhiteLand, SkyDustLand, SkyMoorLand, Wt);
+	FString S; for (int32 K = 0; K < NumRotationWeathers; ++K) S += FString::Printf(TEXT("%s%s:%.2f"), K ? TEXT("|") : TEXT(""), *WeatherName(K), Wt[K]);
+	return S;
+}
+
 void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 {
 	if (!bSky7 || !bTown || Dt <= 0.f) return;
@@ -180,7 +196,7 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 	// ---- where she is: cold (snow for rain), dry (less rain)
 	const APawn* Her = PC ? PC->GetPawn() : nullptr;
 	const FVector L = Her ? Her->GetActorLocation() : FVector::ZeroVector;
-	bool bDry = false, bWhiteLand = false, bDustLand = false;
+	bool bDry = false, bWhiteLand = false, bDustLand = false, bMoorLand = false;
 	bSkyCold = false;
 	if (bWild && IsWildReady() && Her)
 	{
@@ -192,13 +208,16 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 		const FString Bn = Wild->BiomeName(S.Biome);
 		bWhiteLand = Bn == TEXT("cold steppes") || Bn == TEXT("tundras") || Bn == TEXT("arctic regions") || Bn == TEXT("glacial") || Bn == TEXT("mountains and peaks");
 		bDustLand = Bn == TEXT("savannahs") || Bn == TEXT("cold steppes") || Bn == TEXT("burned plain") || Bn == TEXT("canyons") || Bn == TEXT("canyon networks") || Bn == TEXT("mesas");
+		// (the fourth phase: "rolling mist that wipes out landmarks and gets people lost": the moors' fog comes three times as often)
+		bMoorLand = Bn == TEXT("highland moorland");
 	}
+	SkyMoorLand = bMoorLand; SkyDryLand = bDry; SkyWhiteLand = bWhiteLand; SkyDustLand = bDustLand;
 	// ---- the next weather, when its time comes
 	if (Now >= WeatherUntil && !bWeatherHeld)          // (the list of 2026-11-10: rd.Weather holds it)
 	{
 		++WeatherChanges;
 		const uint32 H = HashCombine((uint32)SessionSeed ^ 0x5EA7u, (uint32)WeatherChanges * 2654435761u);
-		const float Wt[NumRotationWeathers] = { 2.f, 3.f, 2.5f, 1.5f, bDry ? 0.3f : 1.5f, bDry ? 0.15f : 0.6f, 0.f, 0.6f, bWhiteLand && bSkyCold ? 0.9f : 0.f, bDustLand && !bSkyCold ? 0.9f : 0.f };
+		float Wt[NumRotationWeathers]; WeatherWeights(bDry, bWhiteLand, bDustLand, bMoorLand, Wt);
 		float Sum = 0.f; for (const float X : Wt) Sum += X;
 		float Pick = ((H >> 4) % 10000u) / 10000.f * Sum;
 		int32 K = 0;

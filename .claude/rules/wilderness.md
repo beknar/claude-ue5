@@ -294,4 +294,10 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
     - A pass on hit points lost must tie them to the cause. The ambush's monsters must be seen striking (`CombatBranch`).
     - A world sample a frame for what changes over hundreds of metres is waste: the quiet floor looks twice a second.
     - A piece's parts are laid for its own shape. The tapped pine's scar floated off its leaning foot, and the flume's -Y wall faced out.
+- **Phase 4 (hills and moorland)**:
+  - **A skin of the land under 25 cm lies under the drawn ground**: the chalk horse at 8 cm was laid (one piece) and never seen from 15 or 40 m. The drawn mesh is straight between its vertices; the skin follows the true height. The salt pan needed 25 cm too.
+  - **Anything flat and wide is a skin, not a piece**: the dew pond's 0.4 m rim was buried on its hilltop as the hot spring's was. It is two tinted patches now (clay, and its water over it).
+  - **A profile sampled every metre misses a channel under 2 m wide**: the sheep track's bed span (0.2 of its width) held no sample, and the step crashed. The bed and bank spans are a metre at least.
+  - **A kind of effects alone lays no pieces**, and the visit wants one. Give it something to stand among.
+  - **FrozenNorse's fog draws a dark smoke** (its broken masters again): screen a pack's effect in the pictures before it stands for mist.
   - **The editor can stop at "Wait for ZenServer?"** with the server already up (its health answered 200): Yes brings it back every minute, No lets the editor go on. The session's launcher answers it.

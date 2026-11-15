@@ -15,7 +15,7 @@ Built and compiled, but no test has run it yet:
 
 ## The list of 2026-11-14 ([docs/improvements13.txt](docs/improvements13.txt))
 
-The biomes' scenery, in phases with a PR each (the user's choices: every item to full depth; [the wilderness](docs/levels/wilderness.md#the-list-of-2026-11-14-the-biomes-scenery)). Done: phase 1, the framework (placing, laying, uses, hazards, herds, ambushes, the dry channels, swales, tracks and crossroads, the far storms) and the grasslands', meadows' and plains' 22 kinds; phase 2, the farms', savannahs', cold steppes' and burned plain's 29 kinds, the fields' stages, their channels, the whiteout and dust weather and the grass fires' smoke; phase 3, the five forests' 37 kinds, the needles' quiet floor, clearings, bogs and pits, the holloways.
+The biomes' scenery, in phases with a PR each (the user's choices: every item to full depth; [the wilderness](docs/levels/wilderness.md#the-list-of-2026-11-14-the-biomes-scenery)). Done: phase 1, the framework (placing, laying, uses, hazards, herds, ambushes, the dry channels, swales, tracks and crossroads, the far storms) and the grasslands', meadows' and plains' 22 kinds; phase 2, the farms', savannahs', cold steppes' and burned plain's 29 kinds, the fields' stages, their channels, the whiteout and dust weather and the grass fires' smoke; phase 3, the five forests' 37 kinds, the needles' quiet floor, clearings, bogs and pits, the holloways; phase 4, the hills' and moorland's 18 kinds, the chalk figure, the moors' mist.
 
 - [ ] **Phase 2, what is not done or measured:**
   - The frozen lakes of the cold steppes (cracking ice, trapped things, ice fishing) wait for phase 8 (the ice of the tundra and the arctic).
@@ -28,7 +28,11 @@ The biomes' scenery, in phases with a PR each (the user's choices: every item to
   - The aspens' trembling leaves and the forests' sounds (creaking trunks, birdsong that stops, distant axes) are phase 10's.
   - A clearing takes out the trees of its own chunk only: one at a chunk's edge keeps the next chunk's.
   - The reindeer, moose and elk are the wilds' deer; the woodpeckers, the owl and the grouse are not there.
-- [ ] **Phases 4 to 10:** hills and moorland; the mountains, peaks and glaciers; the canyons and mesas; the volcanic lands; the tundra and the arctic; the marshes, wetlands and coasts (tides); the lists' "what helps" across all of them.
+- [ ] **Phase 4 (hills and moorland), what is not done or measured:**
+  - The heather and gorse do not catch fire (nothing in the game sets the land alight); the will-o'-the-wisps are a pack's ghostly projectile laid still.
+  - The moors' mist is the fog weather coming three times as often (its weights read in the test); nobody has walked lost in it. The "Mist on the moor" kind's own effect (FrozenNorse's `NS_Mist01`) shows nothing in its noon pictures, and the chalk horse, flat on its slope, is a white sliver from the ground 40 m off (it reads from a hill across, not checked).
+  - The sheep are the farms' goats; the grouse are the packs' birds.
+- [ ] **Phases 5 to 10:** the mountains, peaks and glaciers; the canyons and mesas; the volcanic lands; the tundra and the arctic; the marshes, wetlands and coasts (tides); the lists' "what helps" across all of them.
 - [ ] **Phase 1, what is not done or measured:**
   - The burrows' "collapsing tunnels" are a fall's harm and a slow where the ground gives way: the ground itself does not open (a chunk's ground is one mesh).
   - The herons stand still (a mesh of our own, no clips); the bees and the birds are the packs' effects (flies as bees, the flocks as crows); the frogs are not there (no frog in the project).

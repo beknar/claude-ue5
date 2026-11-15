@@ -521,6 +521,36 @@ The user's list of 2026-11-14 ([docs/improvements13.txt](../improvements13.txt))
 
 ![The forests' 37 kinds, from 15 m (four from 40 m)](../images/scenery13_forest.jpg)
 
+### Hills and highland moorland
+
+| Kind | Biomes | What stands there | What she does there |
+|---|---|---|---|
+| Hillfort | hills (a rise) | two rings of earth bank on the summit, open at a gate, a broken palisade | look over the ramparts; a chest |
+| Chalk horse | hills | a horse 54 m long cut into the hillside, white through the turf (a skin of the land in its outline) | |
+| Terraced fields | hills | three drystone walls along the slope, flowers in the terraces | gather herbs |
+| Dew pond | hills (a rise) | a round clay-lined pond on the hilltop, reeds | drink: rest |
+| Folly tower | hills (a rise) | a lord's tower on the crest | climb it: the map shows 2.5 km round |
+| Beacon hill | hills, moorland (a rise) | a beacon (it burns at night), a signpost, wood stacked for it | look at the beacon |
+| Old quarry | hills | a cut rock face, a cave behind it, cut blocks, a cart, tools | two of the quarry's lurkers; a chest |
+| Hillside vines | hills | rows of old vines on stakes, goats among them | pick grapes |
+| Hidden combe | hills (a hollow) | a hermit's stone hut, apple trees, a fire, the hermit | pick apples; talk to the hermit |
+| Peat hags | moorland | black peat, moss, lights over it at night | the bog slows her and drags at her |
+| Tor | moorland, hills (a rise) | a granite stack of two great stones, lesser ones round | climb it: the map shows 2 km round; its lurker |
+| Heather and gorse | moorland, hills | gorse and heather in bloom, butterflies by day | gather heather |
+| Stone row | moorland | a row of eight standing stones, two hut circles | walk along it |
+| Peat cutting | moorland | a peat bank cut into the moor, turves stacked to dry, a spade | take dried turves |
+| Mist on the moor | moorland | the mist lying on the moor | |
+| Shepherd's bothy | moorland | a bothy, a ruined shieling, bedding, a fire | rest in the bothy |
+| Grouse butts | moorland | a line of shooting butts, the hunting lodge, the gamekeeper | trade a hide for food; talk |
+| Peat-water ford | moorland, hills (by water) | stepping stones, reeds | fish |
+
+- **What is new**: a skin of the land in an outline (`L=patch;poly=`: points round its middle, -1 to 1 of its reach; only what lies inside is laid: the chalk horse); the moors' fog comes three times as often in the weather's turn (`WeatherWeights`, read by `GetWeatherWeightsHere`); the hills' sheep tracks and holloways (dry channels' rules).
+- **Its new things**: Grapes (food), Peat Turf (a component, as a log).
+- **Its own pieces** (`scenery13_kit.py`): two stacks of peat turves (a dew pond piece too, unused: laid flat on its hilltop it lay buried, and the pond is two skins of the land, clay and water).
+- **Measured** (`test_s13p4a.json`, `test_s13p4b.json`, `test_s13p4c.json`): every kind found within 150 km of Brokenspire and visited. She climbed the folly 10.5 m and the tor 5.3 m, and saw 7,613 and 4,903 more of the map. The peat hags' bog took her walk from 353 to 159 cm/s and dragged at her (8.4 hit points). The quarry laid its two lurkers and the tor its one. The weather's turn weighs fog 1.8 on the moor against 0.6 on the grassland. The sheep track's bed lies 0.2 m under its banks and the hills' holloway's 2.6 m.
+
+![Hills and moorland's 18 kinds, from 15 m](../images/scenery13_hills.jpg)
+
 ## The TODO sweep (2026-11-14)
 
 The open items of `TODO.md` that a test could settle in the wilds (`888 ... -Light`):

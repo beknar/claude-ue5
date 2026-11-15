@@ -317,7 +317,7 @@ float ARDDungeonGenerator::WildPartsGroundZ(const FVector& L) const
 	return WildGroundZ(L) + Lift;
 }
 
-UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater, FLinearColor Tint)
+UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater, FLinearColor Tint, const TArray<FVector2D>* Poly)
 {
 	if (!C || !Wild || Rm <= 0.f || Hm == 0.f) return nullptr;
 	// (a grid over the rise: rings round its middle (a mound, a cone) or rows across a ridge, each point on the ground there lifted by
@@ -360,9 +360,23 @@ UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, 
 		for (int32 J = 0; J < Nv; ++J)
 		{
 			const int32 A = I * (Nv + 1) + J, B = (I + 1) * (Nv + 1) + J, Cc = I * (Nv + 1) + J + 1, E = (I + 1) * (Nv + 1) + J + 1;
+			// (an outline's figure: only the quads whose middle lies inside it, in the landform's own frame, -1 to 1 of its reach)
+			if (Poly && Poly->Num() >= 3)
+			{
+				const FVector2D Mq = (Xy[A] + Xy[B] + Xy[Cc] + Xy[E]) * 0.25 - O;
+				const FVector2D Lq(FVector2D::DotProduct(Mq, Ax) / Rm, FVector2D::DotProduct(Mq, Ay) / Rm);
+				bool bInside = false;
+				for (int32 Pi = 0, Pj = Poly->Num() - 1; Pi < Poly->Num(); Pj = Pi++)
+				{
+					const FVector2D& Pa = (*Poly)[Pi]; const FVector2D& Pb = (*Poly)[Pj];
+					if ((Pa.Y > Lq.Y) != (Pb.Y > Lq.Y) && Lq.X < (Pb.X - Pa.X) * (Lq.Y - Pa.Y) / (Pb.Y - Pa.Y) + Pa.X) bInside = !bInside;
+				}
+				if (!bInside) continue;
+			}
 			Tr.Add(A); Tr.Add(B); Tr.Add(Cc);
 			Tr.Add(B); Tr.Add(E); Tr.Add(Cc);
 		}
+	if (Tr.Num() == 0) return nullptr;
 	// (wound to face up whichever way the grid runs: the first triangle's normal decides)
 	if (Tr.Num() >= 3)
 	{
@@ -456,7 +470,14 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 				TArray<FString> Tc; Ts.ParseIntoArray(Tc, TEXT(","));
 				if (Tc.Num() == 3) Tint = FLinearColor(FCString::Atof(*Tc[0]), FCString::Atof(*Tc[1]), FCString::Atof(*Tc[2]), 1.f);
 			}
-			if (UProceduralMeshComponent* Lm = LayWildLandform(C, At, L, Rr, R2, Hh, Yaw0 + Ga, Cr, Tint))
+			// (the fourth phase: "poly=x,y x,y ...", an outline in the landform's frame (-1 to 1 of r): only what lies inside it is laid)
+			TArray<FVector2D> Poly;
+			if (const FString Ps = M.FindRef(TEXT("poly")); !Ps.IsEmpty())
+			{
+				TArray<FString> Pts; Ps.ParseIntoArrayWS(Pts);
+				for (const FString& Pt : Pts) { FString Px, Py; if (Pt.Split(TEXT(","), &Px, &Py)) Poly.Add(FVector2D(FCString::Atof(*Px), FCString::Atof(*Py))); }
+			}
+			if (UProceduralMeshComponent* Lm = LayWildLandform(C, At, L, Rr, R2, Hh, Yaw0 + Ga, Cr, Tint, Poly.Num() >= 3 ? &Poly : nullptr))
 			{
 				if (const FString Mn = M.FindRef(TEXT("mat")); !Mn.IsEmpty())
 					if (const TObjectPtr<UMaterialInterface>* Mi = WildSceneryMats.Find(FName(*(TEXT("m13_") + Mn)))) Lm->SetMaterial(0, Mi->Get());
