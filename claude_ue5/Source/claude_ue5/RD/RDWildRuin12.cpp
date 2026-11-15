@@ -57,6 +57,9 @@ namespace
 	float RDR12LandProfile(const FString& Type, float T, float Cr)
 	{
 		T = FMath::Clamp(T, 0.f, 1.f);
+		// (phase 2: a patch lies on the ground as it is, its height throughout (a salt pan's crust))
+		// (eased down over its last 15 % to its foot under the ground (PR #66's review: whole to its rim, the rim stood as a 10 cm lip))
+		if (Type == TEXT("patch")) return 1.f - FMath::SmoothStep(0.85f, 1.f, T);
 		if (Type == TEXT("cone") && Cr > 0.f)
 		{
 			if (T < Cr) return 1.f - 0.5f * (1.f - FMath::Square(T / Cr));
@@ -314,7 +317,7 @@ float ARDDungeonGenerator::WildPartsGroundZ(const FVector& L) const
 	return WildGroundZ(L) + Lift;
 }
 
-UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater)
+UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater, FLinearColor Tint)
 {
 	if (!C || !Wild || Rm <= 0.f || Hm == 0.f) return nullptr;
 	// (a grid over the rise: rings round its middle (a mound, a cone) or rows across a ridge, each point on the ground there lifted by
@@ -383,6 +386,9 @@ UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, 
 		Tg[K] = FProcMeshTangent((FVector(1, 0, 0) - Nr * Nr.X).GetSafeNormal(), false);
 		FRDWSample Q; Wild->Sample(Xy[K].X, Xy[K].Y, Q, false);
 		Q.Road = 0.f; Q.FieldCrop = -1; Q.Field = 0.f; Q.WaterKind = 0;
+		// (a tinted landform: the ground's own material in the tint's colour, bare (the salt pan's crust: the kit's masked crust on this
+		// mesh drew black))
+		if (Tint.A > 0.f) { Q.Color = FLinearColor(Tint.R, Tint.G, Tint.B, 1.f); Q.Sand = Q.Mud = Q.Rock = Q.Snow = Q.Lava = 0.f; }
 		const FRDWGroundVertex Gv = RDWildGroundVertex(Q, Nr);
 		Col[K] = Gv.C; U0[K] = Gv.UV0; U1[K] = Gv.UV1; U2[K] = Gv.UV2; U3[K] = Gv.UV3;
 	}
@@ -411,14 +417,27 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 		const FString L = M.FindRef(TEXT("L"));
 		const FString Pre = M.FindRef(TEXT("p"));
 		const FString BoxPiece = M.FindRef(TEXT("box"));
-		if (L == TEXT("mound") || L == TEXT("cone") || L == TEXT("ridge"))
+		if (L == TEXT("mound") || L == TEXT("cone") || L == TEXT("ridge") || L == TEXT("patch"))
 		{
+			// (phase 2: L=patch, a skin over the ground in a colour of its own (tint=r,g,b, linear) or a material of the table's (mat=):
+			// a flat 30 m salt pan laid as a piece lay under the land wherever the ground rose over its lowest corner, unseen from 15
+			// and 40 m)
 			// (the list of 2026-11-14: a rise of the land, laid as the ground is drawn: a burrow's mound, a pingo, a kurgan, a cinder cone,
 			// an esker; its own draws, in the order written)
 			const float Rr = RDR12Num(M, TEXT("r"), 6.f, R), R2 = RDR12Num(M, TEXT("r2"), Rr, R), Hh = RDR12Num(M, TEXT("hb"), 1.5f, R);
 			const float Ox = RDR12Num(M, TEXT("x"), 0.f, R), Oy = RDR12Num(M, TEXT("y"), 0.f, R), Ga = RDR12Num(M, TEXT("a"), 0.f, R), Cr = RDR12Num(M, TEXT("crater"), 0.35f, R);
 			const FVector2D At = O + FVector2D(Frame.RotateVector(FVector(Ox, Oy, 0.0)));
-			if (UProceduralMeshComponent* Lm = LayWildLandform(C, At, L, Rr, R2, Hh, Yaw0 + Ga, Cr)) { ++Rec.Pieces; Rec.Comps.Add(Lm); Rec.Lifts.Add(-1.f); WildPartsLand.Add({ At, L, Rr, R2, Hh, Yaw0 + Ga, Cr }); }
+			FLinearColor Tint = FLinearColor::Transparent;
+			if (const FString Ts = M.FindRef(TEXT("tint")); !Ts.IsEmpty())
+			{
+				TArray<FString> Tc; Ts.ParseIntoArray(Tc, TEXT(","));
+				if (Tc.Num() == 3) Tint = FLinearColor(FCString::Atof(*Tc[0]), FCString::Atof(*Tc[1]), FCString::Atof(*Tc[2]), 1.f);
+			}
+			if (UProceduralMeshComponent* Lm = LayWildLandform(C, At, L, Rr, R2, Hh, Yaw0 + Ga, Cr, Tint))
+			{
+				if (const FString Mn = M.FindRef(TEXT("mat")); !Mn.IsEmpty())
+					if (const TObjectPtr<UMaterialInterface>* Mi = WildSceneryMats.Find(FName(*(TEXT("m13_") + Mn)))) Lm->SetMaterial(0, Mi->Get());
+				++Rec.Pieces; Rec.Comps.Add(Lm); Rec.Lifts.Add(-1.f); WildPartsLand.Add({ At, L, Rr, R2, Hh, Yaw0 + Ga, Cr }); }
 			continue;
 		}
 		if (L == TEXT("berm"))
@@ -441,6 +460,10 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 		// kept over the parts gave a later part the first one's))
 		TMap<UStaticMesh*, UHierarchicalInstancedStaticMeshComponent*> InstOf;
 		const FString Hours = M.FindRef(TEXT("hours"));
+		// (the list of 2026-11-14's second phase: its pieces in a material of the table's ("mat=<name>": WildSceneryMats' "m13_<name>"))
+		UMaterialInterface* PartMat = nullptr;
+		if (const FString Mn = M.FindRef(TEXT("mat")); !Mn.IsEmpty()) if (const TObjectPtr<UMaterialInterface>* Mi = WildSceneryMats.Find(FName(*(TEXT("m13_") + Mn)))) PartMat = Mi->Get();
+		auto Dress = [&](UMeshComponent* Mc) { if (Mc && PartMat) for (int32 Si = 0; Si < Mc->GetNumMaterials(); ++Si) Mc->SetMaterial(Si, PartMat); };
 		const int32 N = FMath::Max(1, FMath::RoundToInt(RDR12Num(M, TEXT("n"), 1.f, R)));
 		const int32 N2 = FMath::Max(1, FMath::RoundToInt(RDR12Num(M, TEXT("n2"), 1.f, R)));
 		const float Rad = RDR12Num(M, TEXT("r"), 8.f, R), Rad2 = RDR12Num(M, TEXT("r2"), Rad, R);
@@ -590,7 +613,7 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 					if (bFar) { Hc->SetCachedMaxDrawDistance(0.f); Hc->bNeverDistanceCull = true; }
 					else Hc->SetCullDistances(10000, 12000);          // (faded from 100 m: a start of 0 faded the whole patch away at any distance)
 					Hc->RegisterComponent();
-					SeeOnly(Hc);
+					SeeOnly(Hc); Dress(Hc);
 					Rec.Comps.Add(Hc); Rec.Lifts.Add(-2.f); ++Rec.Pieces;
 				}
 				const FVector Gp(Wxy.X * 100.0, Wxy.Y * 100.0, WildPartsGroundZ(FVector(Wxy.X * 100.0, Wxy.Y * 100.0, 0.0)) + A.Z * 100.f);
@@ -601,6 +624,7 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 			if (UStaticMeshComponent* Pc = LayRuinPiece(C, Mesh, FVector(Wxy.X * 100.0, Wxy.Y * 100.0, A.Z * 100.f), Rot, FVector(Sc * Sx, Sc * Sy, Sc * Sz), SinkCm, bCol))
 			{
 				if (bFar) { Pc->SetCachedMaxDrawDistance(0.f); Pc->bNeverDistanceCull = true; }
+				Dress(Pc);
 				// (its lift: its part's, and the rise it stands on (the floating test reads its bottom against the land))
 				const FVector Wc(Wxy.X * 100.0, Wxy.Y * 100.0, 0.0);
 				++Rec.Pieces; Rec.Comps.Add(Pc); Rec.Lifts.Add(A.Z * 100.f + (WildPartsLand.Num() > 0 ? WildPartsGroundZ(Wc) - WildGroundZ(Wc) : 0.f)); SeeOnly(Pc);

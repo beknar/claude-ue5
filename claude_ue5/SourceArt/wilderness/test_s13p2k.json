@@ -1,0 +1,126 @@
+{
+ "tag": "s13p2k",
+ "plan": [
+  "scenery13=salt_pan"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "scenery13",
+   "ok": true,
+   "kinds": {
+    "salt_pan": {
+     "found": true,
+     "id": 67217609,
+     "at_km": [
+      -16.02,
+      -29.29
+     ],
+     "name": "Salt pan",
+     "laid": {
+      "kind": "salt_pan",
+      "title": "Salt pan",
+      "x": -16019.9,
+      "y": -29287.5,
+      "pieces": 1,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 223.3
+     },
+     "bottom_over_ground_cm": null,
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the salt crust",
+       "f": "scenery",
+       "said": "The crust crunches underfoot. Something dragged itself across it, not long ago.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Salt pan: a dry salt pan, its white crust cracked into plates and glaring in the sun | The crust crunches underfoot. Something dragged itself across it, not long ago.",
+     "ok": true
+    }
+   },
+   "table": 51,
+   "counts_30km": {
+    "tall_grass": 76,
+    "burrow_town": 252,
+    "hanged_tree": 59,
+    "nest_tree": 69,
+    "shrine_tree": 73,
+    "erratic": 233,
+    "migration": 4,
+    "wallow": 64,
+    "hive_meadow": 31,
+    "brook_crossing": 0,
+    "fairy_ring": 53,
+    "shepherd_hut": 316,
+    "reed_pond": 1,
+    "old_orchard": 113,
+    "dusk_meadow": 17,
+    "butte": 209,
+    "battlefield": 229,
+    "milestone_road": 6,
+    "crossroads_gibbet": 3,
+    "crossroads_shrine": 2,
+    "crossroads_notice": 1,
+    "wagon_wreck": 1,
+    "hedged_fields": 341,
+    "scarecrows": 40,
+    "threshing_yard": 21,
+    "mill_pond": 2,
+    "pumpkin_patch": 32,
+    "abandoned_farm": 84,
+    "loose_livestock": 87,
+    "baobab": 2,
+    "acacia_shade": 5,
+    "termite_mounds": 7,
+    "kopje": 10,
+    "waterhole": 2,
+    "vulture_kill": 9,
+    "salt_pan": 5,
+    "yurt_camp": 0,
+    "kurgan": 73,
+    "prayer_cairn": 106,
+    "petroglyph_rocks": 364,
+    "hot_spring": 4,
+    "pingo": 0,
+    "charred_snags": 0,
+    "hot_spots": 0,
+    "ash_drift": 0,
+    "regrowth": 0,
+    "scorched_farmstead": 0,
+    "looters_camp": 0,
+    "fire_break": 0,
+    "fused_glass": 0,
+    "beast_carcasses": 0,
+    "cells": 10201
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s13p2k_scenery13_salt_pan.png",
+  "wd_s13p2k_scenery13_salt_pan_near.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

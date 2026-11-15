@@ -252,7 +252,7 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 	{
 		const int32 Bi = W.FarmsBiome;
 		const FRDWildBiome& B = W.Biomes[Bi];
-		struct FFieldIn { int32 Crop = -1; float Ang = 0.f; FBox2D Box = FBox2D(ForceInit); };
+		struct FFieldIn { int32 Crop = -1; float Ang = 0.f; uint8 Stage = 0; FBox2D Box = FBox2D(ForceInit); };
 		TMap<FIntPoint, FFieldIn> Fields;
 		for (int32 I = 0; I < Nv; ++I)
 			for (int32 J = 0; J < Nv; ++J)
@@ -260,7 +260,7 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 				const FRDWSample& Q = Sat(I, J);
 				if (Q.FieldCrop < 0 || Q.Field < 0.3f) continue;
 				FFieldIn& Fd = Fields.FindOrAdd(Q.FieldCell);
-				Fd.Crop = Q.FieldCrop; Fd.Ang = Q.FieldAng; Fd.Box += FVector2D(I * St, J * St);
+				Fd.Crop = Q.FieldCrop; Fd.Ang = Q.FieldAng; Fd.Stage = Q.FieldStage; Fd.Box += FVector2D(I * St, J * St);
 			}
 		TMap<int32, FRDWChunkData::FInst> ByKind;
 		for (const auto& Kv : Fields)
@@ -315,7 +315,7 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 					const int32 I0 = FMath::Clamp(FMath::FloorToInt(Lx / St), 0, Nv - 2), J0 = FMath::Clamp(FMath::FloorToInt(Ly / St), 0, Nv - 2);
 					const float Fx = (float)(Lx / St - I0), Fy = (float)(Ly / St - J0);
 					const float Zc = FMath::Lerp(FMath::Lerp(Zat(I0, J0), Zat(I0 + 1, J0), Fx), FMath::Lerp(Zat(I0, J0 + 1), Zat(I0 + 1, J0 + 1), Fx), Fy);
-					const float Sc = FMath::Lerp(F.ScaleMin, F.ScaleMax, FRDWildWorld::Rand01(Rn, Sn, Hs + 6u));
+					const float Sc = FMath::Lerp(F.ScaleMin, F.ScaleMax, FRDWildWorld::Rand01(Rn, Sn, Hs + 6u)) * (Fd.Stage == 1 ? 0.35f : 1.f);          // (a sprouting field's plants a third of a ripe one's, the list of 2026-11-14)
 					const float Yaw = FRDWildWorld::Rand01(Rn, Sn, Hs + 7u) * 360.f;
 					FRDWChunkData::FInst& Ins = ByKind.FindOrAdd(Fi);
 					Ins.Biome = Bi; Ins.Foliage = Fi; Ins.bNear = F.bNearOnly;

@@ -15,9 +15,14 @@ Built and compiled, but no test has run it yet:
 
 ## The list of 2026-11-14 ([docs/improvements13.txt](docs/improvements13.txt))
 
-The biomes' scenery, in phases with a PR each (the user's choices: every item to full depth; [the wilderness](docs/levels/wilderness.md#the-list-of-2026-11-14-the-biomes-scenery)). Done: phase 1, the framework (placing, laying, uses, hazards, herds, ambushes, the dry channels, swales, tracks and crossroads, the far storms) and the grasslands', meadows' and plains' 22 kinds.
+The biomes' scenery, in phases with a PR each (the user's choices: every item to full depth; [the wilderness](docs/levels/wilderness.md#the-list-of-2026-11-14-the-biomes-scenery)). Done: phase 1, the framework (placing, laying, uses, hazards, herds, ambushes, the dry channels, swales, tracks and crossroads, the far storms) and the grasslands', meadows' and plains' 22 kinds; phase 2, the farms', savannahs', cold steppes' and burned plain's 29 kinds, the fields' stages, their channels, the whiteout and dust weather and the grass fires' smoke.
 
-- [ ] **Phases 2 to 10:** farms, savannahs, cold steppes and the burned plain (and their weather: whiteouts, dust storms, grass fires' smoke); the five forests; hills and moorland; the mountains, peaks and glaciers; the canyons and mesas; the volcanic lands; the tundra and the arctic; the marshes, wetlands and coasts (tides); the lists' "what helps" across all of them.
+- [ ] **Phase 2, what is not done or measured:**
+  - The frozen lakes of the cold steppes (cracking ice, trapped things, ice fishing) wait for phase 8 (the ice of the tundra and the arctic).
+  - The abandoned farmstead's door "locked from the inside" is the house's own mesh, not a door: only its root cellar's hatch opens.
+  - The whiteout and the dust storm are a fog's colour and the weather's own density; neither is measured as a distance seen.
+  - The vultures are the packs' crows; the Ash Wyrm is the project's Daemon under that name.
+- [ ] **Phases 3 to 10:** the five forests; hills and moorland; the mountains, peaks and glaciers; the canyons and mesas; the volcanic lands; the tundra and the arctic; the marshes, wetlands and coasts (tides); the lists' "what helps" across all of them.
 - [ ] **Phase 1, what is not done or measured:**
   - The burrows' "collapsing tunnels" are a fall's harm and a slow where the ground gives way: the ground itself does not open (a chunk's ground is one mesh).
   - The herons stand still (a mesh of our own, no clips); the bees and the birds are the packs' effects (flies as bees, the flocks as crows); the frogs are not there (no frog in the project).

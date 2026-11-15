@@ -258,6 +258,16 @@ void ARDDungeonGenerator::TickWildPlaces(const FVector2D& AtM)
 		else if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("Discovered: %s"), *P.Name));
 		UE_LOG(LogRDWildTown, Log, TEXT("RDWILD found %s (%s) at (%.0f, %.0f)"), *P.Name, *P.Kind, P.At.X, P.At.Y);
 		WildAutosave(TEXT("found"));
+		// (phase 2: a scenery's line told within the last second is hidden by this one: told again once this has been read)
+		if (GetWorld())
+		{
+			const float Now = GetWorld()->GetTimeSeconds();
+			TArray<int32> Again;
+			for (const TPair<int32, float>& T : WildSceneryToldAt) if (Now - T.Value < 1.f) Again.Add(T.Key);
+			// (its told time kept, moved to now: a stampede still waits its 3 s after the last line (PR #66's review: removed, it could
+			// start at once and hide the discovery))
+			for (const int32 Id : Again) { WildSceneryTold.Remove(Id); WildSceneryToldAt.Add(Id, Now); }
+		}
 	}
 }
 

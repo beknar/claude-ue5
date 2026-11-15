@@ -212,10 +212,13 @@ void ARDDungeonGenerator::OnWildAnimalKilled(ARDWildAnimal* A)
 	if (!A || !WildFauna.IsValidIndex(A->Def) || !GetWorld()) return;
 	const FRDWildFauna& F = WildFauna[A->Def];
 	const float Now = GetWorld()->GetTimeSeconds();
+	// (a scenery's predator's kill (PR #66's review): not hers: not counted, not kept with the game (the herd is whole when laid
+	// again), nothing dropped; her kills alone thin a herd for good)
+	if (bWildPredatorKill) { UE_LOG(LogRDWildLife, Log, TEXT("RDWILDLIFE %s taken by a predator"), *F.Name.ToString()); return; }
 	++AnimalsKilled;
 	// (a scenery's herd's beast (the list of 2026-11-14): killed for good, kept with the game; its herd is not the loose animals', so
 	// it holds no place against their cap (PR #65's review))
-	if (A->HerdId >= 0 && A->HerdIndex >= 0) { if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->WildKilled.AddUnique((9LL << 40) + (int64)(uint32)A->HerdId * 32 + A->HerdIndex); }
+	if (A->HerdId >= 0) { if (URDGameInstance* GI = URDGameInstance::Of(this); GI && A->HerdIndex >= 0) GI->WildKilled.AddUnique((9LL << 40) + (int64)(uint32)A->HerdId * 32 + A->HerdIndex); }
 	else AnimalRespawns.Add(TPair<int32, float>(A->Def, Now + WildAnimalRespawnSeconds));
 	// (its things: each "Item|min|max|chance", drawn from a hash of the session and the kill (no stream of the play's))
 	TArray<FName> Got;

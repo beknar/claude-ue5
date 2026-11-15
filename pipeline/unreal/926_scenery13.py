@@ -130,12 +130,10 @@ def step_items():
 
 def step_icons(src):
     src = os.path.abspath(src)
-    names = sorted({x["icon"] for x in J["items"]} - {"fruit"})
-    tex = {}
-    for n in names:
-        png = os.path.join(src, f"{n}.png")
-        assert os.path.exists(png), f"926 icons: no {png} (rdm4_ui_cut.py --export)"
-        tex[n] = ui_texture(png, "/Game/RandomDungeon/UI", f"T_RDM4_{n}")
+    # (the pictures painted for these things (in <dir>); an item may take a picture the maps have already: fruit, a pumpkin)
+    names = sorted(n for n in {x["icon"] for x in J["items"]} if os.path.exists(os.path.join(src, f"{n}.png")))
+    assert names, f"926 icons: no item's picture in {src} (rdm4_ui_cut.py --export)"
+    tex = {n: ui_texture(os.path.join(src, f"{n}.png"), "/Game/RandomDungeon/UI", f"T_RDM4_{n}") for n in names}
     def fn(g):
         ua = g.get_editor_property("ui_art")
         for n, t in tex.items():
@@ -152,6 +150,17 @@ def step_fauna():
     fa = [f for f in g.get_editor_property("wild_fauna") if str(f.name) not in J["fauna"]]
     town = {str(t.name): t for t in g.get_editor_property("town_animals")}
     for name in J["fauna"]:
+        if name == "Horse":
+            # (phase 2: the steppe's horse herds ("nomad yurt camps with horse herds"): the ridable horse's body and gaits (913, 915),
+            # its mesh facing +X at scale 1 as ARDHorse lays it; the walk and the gallop at the speeds its clips were made for)
+            h = g.get_editor_property("horse_def"); assert h.mesh and h.walk and h.run, "926 fauna: no horse (913, 915)"
+            # (it runs off at its canter, played at the speed the canter was made for)
+            run, run_cs = (h.canter, h.canter_clip_speed) if h.canter else (h.run, h.run_clip_speed)
+            F = unreal.RDWildFauna(); F.name = name; F.mesh = h.mesh; F.idle = h.idle; F.eat = h.idle; F.walk = h.walk; F.run = run
+            F.scale = 1.0; F.mesh_yaw = 0.0; F.walk_speed = h.walk_clip_speed; F.walk_clip_speed = h.walk_clip_speed
+            F.run_speed = run_cs; F.run_clip_speed = run_cs; F.flee_min, F.flee_max = 120.0, 250.0
+            F.biomes = []; F.per_km2 = 0.0; F.half_length = 110.0
+            fa.append(F); continue
         t = town.get(name)
         assert t, f"926 fauna: no town animal {name}"
         F = unreal.RDWildFauna(); F.name = name; F.mesh = t.mesh; F.idle = t.idle; F.eat = t.graze; F.walk = t.walk; F.run = t.walk
@@ -170,6 +179,7 @@ def step_scenery():
         k.set_editor_property("place", K.get("place", "")); k.set_editor_property("uses", K.get("uses", []))
         k.set_editor_property("hazards", K.get("hazards", [])); k.set_editor_property("herd", K.get("herd", ""))
         k.set_editor_property("ambush_r", float(K.get("ambush_r", 0)))
+        k.set_editor_property("folk", K.get("folk", []))
     _, g = lay_table("scenery13.json", "n13_", "wild_scenery_kinds", "kinds", unreal.RDWildSceneryKind, more)
     # (every herd's beast must be a wild animal of the level, every use's things items of it)
     fauna = {str(f.name) for f in g.get_editor_property("wild_fauna")}
@@ -186,11 +196,25 @@ def step_scenery():
         fx[unreal.Name("f13_" + name)] = s
     g.set_editor_property("wild_scenery_fx", fx)
     g.set_editor_property("wild_channel_rules", J["channels"])
-    St = J["storm"]
-    sm = unreal.load_asset(St["mesh"]); assert sm, f"926 scenery: no storm mesh {St['mesh']} (926 kit first)"
-    g.set_editor_property("wild_storm_biomes", St["biomes"]); g.set_editor_property("wild_storm_mesh", sm)
-    g.set_editor_property("wild_storm_funnel", unreal.load_asset(St["funnel"]) if St.get("funnel") else None)
-    g.set_editor_property("wild_storm_chance", float(St["chance"])); g.set_editor_property("wild_storm_km_min", float(St["km"][0])); g.set_editor_property("wild_storm_km_max", float(St["km"][1]))
+    # (the far sights: storm cells, a grass fire's smoke)
+    fs = []
+    for F in J["farsights"]:
+        sm = unreal.load_asset(F["mesh"]); assert sm, f"926 scenery: no far sight mesh {F['mesh']} (926 kit first)"
+        f = unreal.RDWildFarSight(); f.name = F["name"]; f.biomes = F["biomes"]; f.mesh = sm; f.chance = float(F["chance"])
+        f.km = unreal.Vector2D(float(F["km"][0]), float(F["km"][1])); f.drift = float(F.get("drift", 9.0)); f.seconds = float(F.get("secs", 360))
+        fs.append(f)
+    g.set_editor_property("wild_far_sights", fs)
+    # (the materials a part may lay its pieces in)
+    mats = {}
+    for name, path in J.get("mats", {}).items():
+        m = unreal.load_asset(path); assert m, f"926 scenery: no material {path}"
+        mats[unreal.Name("m13_" + name)] = m
+    g.set_editor_property("wild_scenery_mats", mats)
+    # (every kind's people must be townsfolk of the level)
+    defs = [str(t.name) for t in g.get_editor_property("townsfolk")]
+    for K in J["kinds"]:
+        for f in K.get("folk", []):
+            assert any(d.startswith(f.split("|")[0]) for d in defs), f"926 scenery: {K['name']}'s folk {f.split('|')[0]} is no townsfolk"
     # (the swales from biomes.json, the biome table's own source (887 data writes them too))
     B = {b["name"]: b for b in json.load(open(os.path.join(SA, "biomes.json"), encoding="utf-8"))["biomes"]}
     bios = list(g.get_editor_property("wild_biomes")); sw = []
@@ -200,7 +224,7 @@ def step_scenery():
         if v > 0: sw.append(f"{b.name} {v} m")
     g.set_editor_property("wild_biomes", bios)
     g.modify(); les.save_current_level()
-    REPORT.append(f"scenery: {len(J['kinds'])} kinds, {len(fx)} effects, {len(J['channels'])} channel rules, swales {', '.join(sw)}")
+    REPORT.append(f"scenery: {len(J['kinds'])} kinds, {len(fx)} effects, {len(J['channels'])} channel rules, {len(fs)} far sights, {len(mats)} materials, swales {', '.join(sw)}")
 
 
 i = 0

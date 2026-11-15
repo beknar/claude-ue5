@@ -43,7 +43,7 @@ namespace
 {
 	float RDSkySmooth(float A, float B, float X) { const float T = FMath::Clamp((X - A) / (B - A), 0.f, 1.f); return T * T * (3.f - 2.f * T); }
 	// (per weather: the clouds' cover, rain, wind, fog)
-	struct FRDWeatherLook { float Cover, Rain, Wind, Fog; };
+	struct FRDWeatherLook { float Cover, Rain, Wind, Fog; FLinearColor Tint = FLinearColor::White; };
 	const FRDWeatherLook RDWeatherLooks[ARDDungeonGenerator::NumWeathers] = {
 		{ 0.04f, 0.f, 0.12f, 0.f },     // clear
 		{ 0.32f, 0.f, 0.25f, 0.f },     // fair
@@ -53,6 +53,9 @@ namespace
 		{ 1.00f, 1.f, 1.00f, 0.45f },   // storm
 		{ 0.94f, 0.8f, 0.45f, 0.45f },  // snow
 		{ 0.70f, 0.f, 0.04f, 1.00f },   // fog
+		// (the list of 2026-11-14: "whiteout blizzards or dust storms that wipe out visibility")
+		{ 1.00f, 1.f, 0.95f, 1.00f, FLinearColor(1.35f, 1.38f, 1.45f) },     // whiteout: thick snow, a white fog
+		{ 0.55f, 0.f, 1.00f, 0.85f, FLinearColor(1.55f, 1.10f, 0.62f) },     // dust: no rain, a gale, a brown fog
 		{ 0.f, 0.f, 0.08f, 0.f } };     // cloudless (rd.Weather only: the rotation never picks it)
 	/** (2026-11-10: "truly clear weather ... separate from the current clear": clear's clouds never go below the cover range's
 	 *  0.05 and pile up along the horizon as a white band (884 sky10's pictures); cloudless draws no cloud layer at all) */
@@ -62,7 +65,7 @@ namespace
 
 FString ARDDungeonGenerator::WeatherName(int32 K)
 {
-	static const TCHAR* N[NumWeathers] = { TEXT("clear"), TEXT("fair"), TEXT("cloudy"), TEXT("overcast"), TEXT("rain"), TEXT("storm"), TEXT("snow"), TEXT("fog"), TEXT("cloudless") };
+	static const TCHAR* N[NumWeathers] = { TEXT("clear"), TEXT("fair"), TEXT("cloudy"), TEXT("overcast"), TEXT("rain"), TEXT("storm"), TEXT("snow"), TEXT("fog"), TEXT("whiteout"), TEXT("dust"), TEXT("cloudless") };
 	return K >= 0 && K < NumWeathers ? FString(N[K]) : FString(TEXT("?"));
 }
 
@@ -148,6 +151,7 @@ void ARDDungeonGenerator::BeginSky7()
 		WeatherUntil = W->GetTimeSeconds() + FMath::Lerp(WeatherSeconds.X, WeatherSeconds.Y, (H % 1000u) / 999.f);
 		const FRDWeatherLook& Lk = RDWeatherLooks[Weather];
 		SkyCover = SkyCoverWant = Lk.Cover; SkyRain = SkyRainWant = Lk.Rain; SkyWind = SkyWindWant = Lk.Wind; SkyFog = SkyFogWant = Lk.Fog;
+		SkyFogTint = SkyFogTintWant = Lk.Tint;
 	}
 	ApplySky7();
 	UE_LOG(LogRDSky, Log, TEXT("RDSKY begun: clouds %d, stars %d, moon %d, fog off the sky beyond %.0f m, weather %s"), SkyClouds ? 1 : 0, SkyStars ? 1 : 0, SkyMoon ? 1 : 0, FogSkyCutoff / 100.f, *WeatherName(Weather));
@@ -157,8 +161,8 @@ void ARDDungeonGenerator::SetWeather(int32 Kind, bool bAtOnce)
 {
 	Weather = FMath::Clamp(Kind, 0, RDWeatherCloudless);
 	const FRDWeatherLook& Lk = RDWeatherLooks[Weather];
-	SkyCoverWant = Lk.Cover; SkyRainWant = Lk.Rain; SkyWindWant = Lk.Wind; SkyFogWant = Lk.Fog;
-	if (bAtOnce) { SkyCover = SkyCoverWant; SkyRain = SkyRainWant; SkyWind = SkyWindWant; SkyFog = SkyFogWant; }
+	SkyCoverWant = Lk.Cover; SkyRainWant = Lk.Rain; SkyWindWant = Lk.Wind; SkyFogWant = Lk.Fog; SkyFogTintWant = Lk.Tint;
+	if (bAtOnce) { SkyCover = SkyCoverWant; SkyRain = SkyRainWant; SkyWind = SkyWindWant; SkyFog = SkyFogWant; SkyFogTint = SkyFogTintWant; }
 	if (const UWorld* W = GetWorld()) WeatherUntil = W->GetTimeSeconds() + WeatherSeconds.Y;
 	++WeatherChanges;
 	ApplySky7();
@@ -176,7 +180,7 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 	// ---- where she is: cold (snow for rain), dry (less rain)
 	const APawn* Her = PC ? PC->GetPawn() : nullptr;
 	const FVector L = Her ? Her->GetActorLocation() : FVector::ZeroVector;
-	bool bDry = false;
+	bool bDry = false, bWhiteLand = false, bDustLand = false;
 	bSkyCold = false;
 	if (bWild && IsWildReady() && Her)
 	{
@@ -184,22 +188,28 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 		float T = 0.5f, M = 0.5f; Wild->Climate(L.X / 100.0, L.Y / 100.0, T, M);
 		bSkyCold = S.Snow > 0.3f || T < 0.18f;
 		bDry = M < 0.25f;
+		// (the list of 2026-11-14: the regions of whiteouts and of dust storms)
+		const FString Bn = Wild->BiomeName(S.Biome);
+		bWhiteLand = Bn == TEXT("cold steppes") || Bn == TEXT("tundras") || Bn == TEXT("arctic regions") || Bn == TEXT("glacial") || Bn == TEXT("mountains and peaks");
+		bDustLand = Bn == TEXT("savannahs") || Bn == TEXT("cold steppes") || Bn == TEXT("burned plain") || Bn == TEXT("canyons") || Bn == TEXT("canyon networks") || Bn == TEXT("mesas");
 	}
 	// ---- the next weather, when its time comes
 	if (Now >= WeatherUntil && !bWeatherHeld)          // (the list of 2026-11-10: rd.Weather holds it)
 	{
 		++WeatherChanges;
 		const uint32 H = HashCombine((uint32)SessionSeed ^ 0x5EA7u, (uint32)WeatherChanges * 2654435761u);
-		const float Wt[NumRotationWeathers] = { 2.f, 3.f, 2.5f, 1.5f, bDry ? 0.3f : 1.5f, bDry ? 0.15f : 0.6f, 0.f, 0.6f };
+		const float Wt[NumRotationWeathers] = { 2.f, 3.f, 2.5f, 1.5f, bDry ? 0.3f : 1.5f, bDry ? 0.15f : 0.6f, 0.f, 0.6f, bWhiteLand && bSkyCold ? 0.9f : 0.f, bDustLand && !bSkyCold ? 0.9f : 0.f };
 		float Sum = 0.f; for (const float X : Wt) Sum += X;
 		float Pick = ((H >> 4) % 10000u) / 10000.f * Sum;
 		int32 K = 0;
 		for (; K < NumRotationWeathers - 1; ++K) { if (Pick < Wt[K]) break; Pick -= Wt[K]; }
-		if (K == Weather) K = (K + 1) % NumRotationWeathers == 6 ? 7 : (K + 1) % NumRotationWeathers;
+		// (the same weather drawn again: the next of the turn that may come here (PR #66's review: from fog the step went to the
+		// whiteout, was sent back to fog where there is none, and fog held another period))
+		if (K == Weather) for (int32 Step = 1; Step < NumRotationWeathers; ++Step) { const int32 Kn = (Weather + Step) % NumRotationWeathers; if (Wt[Kn] > 0.f) { K = Kn; break; } }
 		if (bSkyCold && (K == 4 || K == 5)) K = 6;
 		Weather = K;
 		const FRDWeatherLook& Lk = RDWeatherLooks[Weather];
-		SkyCoverWant = Lk.Cover; SkyRainWant = Lk.Rain; SkyWindWant = Lk.Wind; SkyFogWant = Lk.Fog;
+		SkyCoverWant = Lk.Cover; SkyRainWant = Lk.Rain; SkyWindWant = Lk.Wind; SkyFogWant = Lk.Fog; SkyFogTintWant = Lk.Tint;
 		WeatherUntil = Now + FMath::Lerp(WeatherSeconds.X, WeatherSeconds.Y, (H % 1000u) / 999.f);
 		UE_LOG(LogRDSky, Log, TEXT("RDSKY the weather turns %s (for %.0f s)%s"), *WeatherName(Weather), WeatherUntil - Now, bSkyCold ? TEXT(", cold") : TEXT(""));
 	}
@@ -208,7 +218,9 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 	SkyRain = FMath::FInterpConstantTo(SkyRain, SkyRainWant, Dt, 1.f / 20.f);
 	SkyWind = FMath::FInterpConstantTo(SkyWind, SkyWindWant, Dt, 1.f / 30.f);
 	SkyFog = FMath::FInterpConstantTo(SkyFog, SkyFogWant, Dt, 1.f / 60.f);
-	bSkySnowing = bSkyCold || Weather == 6;
+	SkyFogTint = FMath::CInterpTo(SkyFogTint, SkyFogTintWant, Dt, 1.f / 40.f);
+	// (a whiteout is snow wherever it falls; a dust storm carries no rain)
+	bSkySnowing = bSkyCold || Weather == 6 || Weather == WeatherWhiteout;
 	// ---- what follows her camera every frame: the dome, the moon, the rain or snow
 	FVector Cam = L;
 	if (PC && PC->PlayerCameraManager) Cam = PC->PlayerCameraManager->GetCameraLocation();
@@ -394,14 +406,15 @@ FString ARDDungeonGenerator::GetHazeState() const
 FString ARDDungeonGenerator::GetSkyState() const
 {
 	// "<weather>|<cover>|<rain>|<wind>|<fog>|<snowing>|<changes>|<seconds to the next>|<clouds>|<stars bright>|<moon bright>|<fog cutoff m>
-	//  |<rain on>|<snow on>|<wind fx>|<high clouds' drift cm>|<high dome's yaw>|<their wind x>|<their wind y>"
+	//  |<rain on>|<snow on>|<wind fx>|<high clouds' drift cm>|<high dome's yaw>|<their wind x>|<their wind y>|<the fog's light r>|<g>|<b>"
 	float Sb = -1.f, Mb = -1.f;
 	if (SkyStarsMID) SkyStarsMID->GetScalarParameterValue(FName(TEXT("Bright")), Sb);
 	if (SkyMoonMID) SkyMoonMID->GetScalarParameterValue(FName(TEXT("Bright")), Mb);
 	const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
-	return FString::Printf(TEXT("%s|%.2f|%.2f|%.2f|%.2f|%d|%d|%.0f|%d|%.3f|%.3f|%.0f|%d|%d|%d|%.0f|%.3f|%.3f|%.3f"), *WeatherName(Weather), SkyCover, SkyRain, SkyWind, SkyFog, bSkySnowing ? 1 : 0, WeatherChanges,
+	const FLinearColor Fl = DayFog ? DayFog->FogInscatteringLuminance : FLinearColor::Black;
+	return FString::Printf(TEXT("%s|%.2f|%.2f|%.2f|%.2f|%d|%d|%.0f|%d|%.3f|%.3f|%.0f|%d|%d|%d|%.0f|%.3f|%.3f|%.3f|%.4f|%.4f|%.4f"), *WeatherName(Weather), SkyCover, SkyRain, SkyWind, SkyFog, bSkySnowing ? 1 : 0, WeatherChanges,
 		WeatherUntil - Now, SkyClouds ? 1 : 0, Sb, Mb, DayFog ? DayFog->FogCutoffDistance / 100.f : -1.f,
 		(IsValid(WeatherRain) && WeatherRain->IsActive()) || (IsValid(RainDrops) && RainDrops->IsVisible()) ? 1 : 0,
 		(IsValid(WeatherSnow) && WeatherSnow->IsActive()) || (IsValid(SnowDrops) && SnowDrops->IsVisible()) ? 1 : 0, IsValid(WeatherWind) && WeatherWind->IsActive() ? 1 : 0,
-		SkyHighDrift, SkyHigh ? SkyHigh->GetComponentRotation().Yaw : 0.f, SkyHighWindDir.X, SkyHighWindDir.Y);
+		SkyHighDrift, SkyHigh ? SkyHigh->GetComponentRotation().Yaw : 0.f, SkyHighWindDir.X, SkyHighWindDir.Y, Fl.R, Fl.G, Fl.B);
 }
