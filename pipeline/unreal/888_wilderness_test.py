@@ -1208,12 +1208,27 @@ def scen_line(g, sid):
     return None
 
 
-def ground_put(x, y, up=100.0):
-    """her feet on whatever stands there (traced down from 30 m up), as 888's other steps"""
-    s0 = sample(x, y); z = s0["z"] + (max(0.0, s0["water_m"] - s0["h"]) * 100.0 if s0["water"] else 0.0)
-    hit = unreal.SystemLibrary.line_trace_single(G["w"], V(x * 100.0, y * 100.0, z + 3000.0), V(x * 100.0, y * 100.0, z - 300.0),
-                                                 unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
-    ht = hit.to_tuple() if hit else None
+TREE_WORDS = ("Pine", "Tree", "Aspen", "Birch", "Spruce", "Beech", "Oak", "Willow", "Acacia", "Baobab")
+def ground_put(x, y, up=100.0, from_m=None):
+    """her feet on whatever stands there, traced down from 30 m up; a tree's crown it hit is passed by, traced again from G["put_from_m"]
+    (the scenery's step: 4 m) over the ground. (The third phase: from 30 m the trace met the forests' crowns: she stood on a tree 11 m
+    up and fell to her death, and a hunt 9 m under her was dropped; traced from 4 m everywhere, she was put inside a kurgan's mound)"""
+    s0 = sample(x, y); z0 = s0["z"] + (max(0.0, s0["water_m"] - s0["h"]) * 100.0 if s0["water"] else 0.0)
+    def trace(fm):
+        hit = unreal.SystemLibrary.line_trace_single(G["w"], V(x * 100.0, y * 100.0, z0 + fm * 100.0), V(x * 100.0, y * 100.0, z0 - 300.0),
+                                                     unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+        return hit.to_tuple() if hit else None
+    ht = trace(from_m if from_m is not None else 30.0)
+    if ht and ht[0] and from_m is None and "put_from_m" in G:
+        comp = ht[10]
+        name = ""
+        try:
+            sm = comp.static_mesh if isinstance(comp, unreal.StaticMeshComponent) else None
+            name = sm.get_name() if sm else ""
+        except Exception: pass
+        if isinstance(comp, unreal.InstancedStaticMeshComponent) or any(w in name for w in TREE_WORDS):
+            ht = trace(G["put_from_m"])
+    z = z0
     if ht and ht[0]: z = max(z, ht[4].z)
     G["pawn"].set_actor_location(V(x * 100.0, y * 100.0, z + up), False, True)
 
@@ -1235,6 +1250,7 @@ def step_scenery13():
     # (a step's argument comes with its "_" made " " (for the biomes' names): the kinds' names keep theirs)
     want = [w if w in K else w.replace(" ", "_") for w in (G.get("look_only") or list(K))]
     hour0 = g.get_town_hour()
+    G["put_from_m"] = 4.0          # (the forests' crowns: see ground_put)
     try:
         for kd in want:
             r = {}
@@ -1269,6 +1285,15 @@ def step_scenery13():
             boxes, _f, _b = box_lines()
             r["chests"] = sum(1 for b in boxes if (7 << 40) <= b["key"] < (8 << 40) and math.hypot(b["x"] / 100.0 - cx, b["y"] / 100.0 - cy) < 40.0)
             r["want_chests"] = sum(1 for x in k.get_editor_property("parts") if "box=" in str(x))
+            # (the third phase: a clearing (L=clear) holds none of the forest's trees within 0.8 of its reach; the trees of the biomes
+            # round it counted the same way 60 m out for the measure's sense)
+            clr = [dict(x.split("=", 1) for x in str(pt).split(";") if "=" in x) for pt in k.get_editor_property("parts") if str(pt).startswith("L=clear")]
+            if clr:
+                tree = lambda n: any(w in n for w in ("Pine", "Tree", "Aspen", "Birch", "Spruce"))
+                rc = float(clr[0].get("r", 15)) * 0.8
+                cz = sample(cx, cy)["z"]
+                r["clearing"] = {"r_m": rc, "trees_in": len(instances_near(V(cx * 100.0, cy * 100.0, cz), rc * 100.0, tree)),
+                                 "trees_within_60m": len(instances_near(V(cx * 100.0, cy * 100.0, cz), 6000.0, tree))}
             yield from watching(wait_chunks(20, 50), msgs)
             p = G["pawn"].get_actor_location(); gz = sample(cx, cy)["z"]
             dh = math.hypot(cx * 100.0 - p.x, cy * 100.0 - p.y)
@@ -1315,13 +1340,22 @@ def step_scenery13():
                 # from her as it begins and 2.5 s on: an ambush comes at her)
                 quiet(False)
                 ground_put(cx + (near[0] - cx) * 0.3, cy + (near[1] - cy) * 0.3); yield from watching(rwait(0.6), msgs)
-                hp = G["pawn"].get_actor_location()
+                hp = G["pawn"].get_actor_location(); hp0_amb = cb().get_health()
                 mm = mine_mons(); d0 = [m.get_actor_location().distance(hp) / 100.0 for m in mm]
                 r["ambush_sprung"] = {"monsters": len(mm), "hunting": sum(1 for m in mm if m.get_editor_property("hunting")), "lying_low": sum(1 for m in mm if 0 <= m.get_editor_property("notice_cap") <= 300)}
-                yield from watching(rwait(2.5), msgs)
+                # (what its monsters do, every quarter second: a watcher that shoots keeps its range (PR #67's review: hit points lost
+                # alone could be a hazard's or a fall's))
+                branches = set()
+                for _q in range(10):
+                    yield from watching(rwait(0.25), msgs)
+                    for m in mm:
+                        if unreal.SystemLibrary.is_valid(m): branches.add(str(m.get_editor_property("combat_branch")))
+                r["ambush_sprung"]["branches"] = sorted(branches)
                 hp = G["pawn"].get_actor_location()
                 d1 = [m.get_actor_location().distance(hp) / 100.0 for m in mm if unreal.SystemLibrary.is_valid(m)]
                 r["ambush_sprung"]["m_from_her"] = [round(sum(d0) / max(1, len(d0)), 1), round(sum(d1) / max(1, len(d1)), 1)]
+                # (the third phase: watchers that shoot keep their range: the grove's edge's two held at 7 m and struck from there)
+                r["ambush_sprung"]["hp_lost"] = round(hp0_amb - cb().get_health(), 1)
                 quiet(True); cb().set_health(cb().get_max_health())
             # (its uses: from beside each, the prompt, then F; what she has before and after)
             th = scen_things(g, sid); r["uses"] = []
@@ -1384,11 +1418,19 @@ def step_scenery13():
                     v["counted_hers"] = g.get_editor_property("animals_killed") - ak0
                 else:
                     ground_put(hz["x"] / 100.0, hz["y"] / 100.0)
-                    yield from watching(rwait(4.0 if hz["kind"] in ("sting", "heat") else 2.2), msgs)
+                    # (a bog drags at her only after 4 s in it: she stands 7 s, and her speed is read while she is in it)
+                    yield from watching(rwait(7.0 if hz["kind"] == "bog" else 4.0 if hz["kind"] in ("sting", "heat") else 2.2), msgs)
+                    if hz["kind"] == "bog":
+                        # (its slow measured (PR #67's review: recorded and never asserted): her walk speed in it against out of it)
+                        mv = G["pawn"].get_component_by_class(unreal.CharacterMovementComponent)
+                        v["walk_speed_in_bog"] = round(mv.get_editor_property("max_walk_speed"))
+                        ground_put(hz["x"] / 100.0 + hz["r"] / 100.0 + 6.0, hz["y"] / 100.0); yield from rwait(2.5)
+                        v["walk_speed_out"] = round(mv.get_editor_property("max_walk_speed"))
                 v["hp_lost"] = round(hp0 - cb().get_health(), 1)
                 v["sprung"] = next((x["sprung"] for x in scen_things(g, sid)["haz"] if abs(x["x"] - hz["x"]) < 1 and abs(x["y"] - hz["y"]) < 1), 0)
                 v["monsters_came"] = len(mine_mons()) - mons0
-                v["ok"] = v["sprung"] > 0 and (v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting", "heat", "fall") else v.get("counted_hers", 0) == 0 if hz["kind"] == "hunt" else v["monsters_came"] > 0)
+                if hz["kind"] == "bog" and v.get("walk_speed_in_bog", 0) >= v.get("walk_speed_out", 0) * 0.8: v["slow_failed"] = True
+                v["ok"] = v["sprung"] > 0 and not v.get("slow_failed") and (v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting", "heat", "fall", "bog", "pit") else v.get("counted_hers", 0) == 0 if hz["kind"] == "hunt" else v["monsters_came"] > 0)
                 r["hazards"].append(v)
                 cb().set_health(cb().get_max_health())
                 ground_put(*near); yield from rwait(1.0)
@@ -1432,7 +1474,7 @@ def step_scenery13():
             r["told"] = " | ".join(msgs)
             res["kinds"][kd] = r
     finally:
-        quiet(False); g.set_town_hour(hour0)
+        quiet(False); g.set_town_hour(hour0); G.pop("put_from_m", None)
     g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
     def kind_ok(kd, v):
         if not v.get("found") or not v.get("laid"): return False
@@ -1441,13 +1483,16 @@ def step_scenery13():
                and v["chests"] >= v["want_chests"] and L["title"] in v["told"]
                and all(u["ok"] for u in v["uses"]) and all(h["ok"] for h in v["hazards"]))
         if "ambush_low" in v: okk = okk and v["ambush_low"]["monsters"] > 0 and v["ambush_low"]["hunting"] == 0 and v["ambush_low"]["lying_low"] > 0 \
-            and v["ambush_sprung"]["hunting"] > 0 and v["ambush_sprung"]["m_from_her"][1] < v["ambush_sprung"]["m_from_her"][0] - 1.0
+            and v["ambush_sprung"]["hunting"] > 0 and (v["ambush_sprung"]["m_from_her"][1] < v["ambush_sprung"]["m_from_her"][0] - 1.0
+                                                       or (v["ambush_sprung"].get("hp_lost", 0) > 0 and set(v["ambush_sprung"].get("branches", [])) & {"swing", "shoot", "beam", "reach"}))
         if v.get("folk"): okk = okk and v["folk"]["found"] >= v["folk"]["want"] and all(t["f"] in ("bark", "gift") and t["prompt"].startswith("talk") for t in v["folk"]["talk"])
         if v.get("herd"):
             h = v["herd"]
             if h.get("migrate"): okk = okk and 2.0 <= h["walked_12s_m"] <= 30.0          # (a walk: deer walk 1.3 m/s)
             if "outside_pen" in h: okk = okk and h["outside_pen"] == 0
             if h.get("stampede"): okk = okk and h["started"] and h["ran_m"] >= 20.0
+        # (none inside, and the forest's trees there round it: a count that finds no trees anywhere proves nothing (PR #67's review))
+        if v.get("clearing"): okk = okk and v["clearing"]["trees_in"] == 0 and v["clearing"]["trees_within_60m"] > 0
         return okk
     for kd, v in res["kinds"].items(): v["ok"] = kind_ok(kd, v)
     ok = all(v["ok"] for v in res["kinds"].values()) and len(res["kinds"]) == len(want)
@@ -1558,6 +1603,28 @@ def step_land13():
                 if key in cells: continue
                 cells.add(key); st[int(q[13])] += 1
         res["field_stages"] = {"ripe": st[0], "sprouting": st[1], "fallow": st[2], "burned": st[3], "fields": len(cells)}
+        # (the third phase: "a soft floor of needles that muffles footsteps": a monster set at 0.8 of the noticing distance, not hunting,
+        # in a pine forest and on the grassland: does it come at her in 3 s?)
+        res["quiet"] = {}
+        # (out in the open a monster notices her from the greater of the two distances (ARDMonster's notice): the first run took the
+        # castle's 10 m, and in the pine forest one set 7.7 m off came, the wilds' distance times 0.65 being more than that)
+        quiet(False); aggro = max(g.get_editor_property("aggro_distance"), g.get_editor_property("wild_aggro_distance"))
+        try:
+            for bn in ("pine forests", "grasslands"):
+                pt = find_biome_point(bn)
+                if not pt: res["quiet"][bn] = {"found": False}; continue
+                g.wild_put_her(*pt); yield from wait_chunks(30, 50); ground_put(*pt); yield from rwait(1.5)
+                hp_ = G["pawn"].get_actor_location()
+                m = g.spawn_test_ambusher(V(hp_.x + aggro * 0.8, hp_.y, hp_.z), 1, False)
+                if not m: res["quiet"][bn] = {"spawned": False}; continue
+                yield from rwait(0.4)
+                d0 = m.get_actor_location().distance(G["pawn"].get_actor_location()); yield from rwait(3.0)
+                d1 = m.get_actor_location().distance(G["pawn"].get_actor_location()) if unreal.SystemLibrary.is_valid(m) else d0
+                res["quiet"][bn] = {"scale": round(g.get_editor_property("wild_quiet_scale"), 2), "notice_m": round(aggro / 100.0, 1), "start_m": round(d0 / 100.0, 1),
+                                    "after_3s_m": round(d1 / 100.0, 1), "came": d1 < d0 - 100.0}
+                m.destroy_actor(); cb().set_health(cb().get_max_health())
+        finally:
+            quiet(True)
     finally:
         quiet(False)
     g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
@@ -1567,6 +1634,8 @@ def step_land13():
           and ff.get("weather") == "dust" and ff["dust_fog"][0] / max(ff["dust_fog"][2], 1e-3) > ff["fair_fog"][0] / max(ff["fair_fog"][2], 1e-3) * 1.3
           and wf.get("weather") == "whiteout" and sum(wf["white_fog"]) > sum(wf["fair_fog"]) * 1.1
           and all(res.get("field_stages", {}).get(k, 0) > 0 for k in ("ripe", "sprouting", "fallow"))
+          and res.get("quiet", {}).get("pine forests", {}).get("came") is False and res.get("quiet", {}).get("grasslands", {}).get("came") is True
+          and res["quiet"]["pine forests"]["scale"] < 1.0
           and all(v.get("found") and v["crests_1600m"] >= 2 for v in res["swales"].values())
           and res["crossroads_50km"] > 0 and res.get("storm", {}).get("on") == 1)
     step_result("land13", ok, **res)

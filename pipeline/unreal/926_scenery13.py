@@ -118,8 +118,11 @@ def step_items():
             assert like, f"926 items: no {X['like']} on this map to copy"
             it = unreal.RDItemDef()
             for k in ("kind", "amount", "seconds", "weight", "icon", "looks", "tiers", "found_max"): it.set_editor_property(k, like.get_editor_property(k))
-            it.set_editor_property("name", X["name"]); it.set_editor_property("amount", float(X["amount"])); it.set_editor_property("seconds", float(X["seconds"]))
-            it.set_editor_property("weight", float(X["weight"])); it.set_editor_property("icon", unreal.Name(X["icon"])); it.set_editor_property("looks", X["looks"])
+            # (a number not given is the copied item's: a component (the third phase's resin, as Glue) has no food's)
+            it.set_editor_property("name", X["name"])
+            for k in ("amount", "seconds", "weight"):
+                if k in X: it.set_editor_property(k, float(X[k]))
+            it.set_editor_property("icon", unreal.Name(X["icon"])); it.set_editor_property("looks", X["looks"])
             # (found only at their scenery: no tier puts them in a container)
             it.set_editor_property("tiers", [])
             items.append(it); made.append(X["name"])
@@ -210,6 +213,9 @@ def step_scenery():
         m = unreal.load_asset(path); assert m, f"926 scenery: no material {path}"
         mats[unreal.Name("m13_" + name)] = m
     g.set_editor_property("wild_scenery_mats", mats)
+    # (the third phase: where the needles muffle her steps, and how far the monsters notice her there)
+    g.set_editor_property("wild_quiet_biomes", J.get("quiet_biomes", []))
+    g.set_editor_property("wild_quiet_notice", float(J.get("quiet_notice", 1.0)))
     # (every kind's people must be townsfolk of the level)
     defs = [str(t.name) for t in g.get_editor_property("townsfolk")]
     for K in J["kinds"]:

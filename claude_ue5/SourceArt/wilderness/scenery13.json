@@ -9,7 +9,8 @@
   "biomes=grasslands;n=3;len=600-1600;w=8-14;d=2.2-3.6;wall=0.55;turn=12;name=arroyo",
   "biomes=savannahs;n=2;len=900-2200;w=14-24;d=1.4-2.4;wall=0.3;turn=9;name=dry riverbed",
   "biomes=farms;n=4;len=300-900;w=1.6-2.2;d=0.8-1.1;wall=0.7;turn=1.5;name=irrigation ditch",
-  "biomes=burned plain;n=3;len=400-1200;w=6-9;d=0.4-0.7;wall=0.2;turn=2;name=fire break"
+  "biomes=burned plain;n=3;len=400-1200;w=6-9;d=0.4-0.7;wall=0.2;turn=2;name=fire break",
+  "biomes=temperate autumn forests;n=3;len=500-1400;w=4-6;d=2.8-4.2;wall=0.85;turn=4;name=holloway"
  ],
  "fx": {
   "bees": "/Game/Volstok_District/VFX/NS_Flies_01a",
@@ -18,7 +19,10 @@
   "crows": "/Game/Volstok_District/VFX/NS_Flying_Birds_01a",
   "embers": "/Game/DwarvenCitadel/VFX/NS_Embers",
   "smoke": "/Game/Desert_Outpost/VFX/NS_Smoke01",
-  "steam": "/Game/LiquidSurfaceFX/FX/NS_Water_Steam"
+  "steam": "/Game/LiquidSurfaceFX/FX/NS_Water_Steam",
+  "rays": "/Game/MysticDungeon/VFX/NS_LightRayFX_01",
+  "fog": "/Game/FrozenNorseEnvironment/VFX/NS_NS1_Fog_01",
+  "fallingleaves": "/Game/Wildlands/VFX/FX/NS_Fallin_Leaves"
  },
  "items": [
   {
@@ -83,6 +87,21 @@
    "weight": 120,
    "icon": "ingredient_pumpkin",
    "looks": "a pumpkin from a farm's patch"
+  },
+  {
+   "name": "Pine Resin",
+   "like": "Glue",
+   "icon": "comp_glue",
+   "looks": "amber resin scraped from a tapped pine's cups: a glue, a torch's pitch, the stills' turpentine"
+  },
+  {
+   "name": "Wild Berries",
+   "like": "Bread",
+   "amount": 0.015,
+   "seconds": 10,
+   "weight": 20,
+   "icon": "fruit",
+   "looks": "a handful of berries from the sunny undergrowth of an aspen grove"
   }
  ],
  "fauna": [
@@ -266,6 +285,89 @@
   "windrock": [
    "/Game/Hyper/ResourcePack/Environments/Rocks/Mountain_RockFace_002/SM_MountainRock_Closed",
    "/Game/CastleofEternalMist/Meshes/Cliff/SM_Rock_E"
+  ],
+  "flume": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_Flume"
+  ],
+  "seidstone": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_SeidStone"
+  ],
+  "lavvu": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_Lavvu_A",
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_Lavvu_B"
+  ],
+  "beaverlodge": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_BeaverLodge"
+  ],
+  "beaverdam": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_BeaverDam"
+  ],
+  "furstretcher": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_FurStretcher"
+  ],
+  "stiltcache": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_StiltCache"
+  ],
+  "charcoalmound": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_CharcoalMound"
+  ],
+  "funguslog": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_FungusLog"
+  ],
+  "carvedface": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_CarvedFace"
+  ],
+  "resinpine": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_ResinPine_A",
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_ResinPine_B"
+  ],
+  "pinebig": [
+   "/Game/Wildlands/MESH/SM_Pine_Big_1_",
+   "/Game/Wildlands/MESH/SM_Pine_Big_2_"
+  ],
+  "pinemed": [
+   "/Game/Wildlands/MESH/SM_Pine_Medium_1_",
+   "/Game/Wildlands/MESH/SM_Pine_Medium_2_"
+  ],
+  "sprucesnow": [
+   "/Game/Wildlands/MESH/Pine_Snow/SM_Pine_Big_2_Snow",
+   "/Game/Wildlands/MESH/Pine_Snow/SM_Pine_Medium_2_Snow"
+  ],
+  "aspen": [
+   "/Game/RandomDungeon/Wild/Trees/SM_Wild_Aspen_A",
+   "/Game/RandomDungeon/Wild/Trees/SM_Wild_Aspen_B"
+  ],
+  "birch": [
+   "/Game/RandomDungeon/Wild/Trees/SM_Wild_Birch_A",
+   "/Game/RandomDungeon/Wild/Trees/SM_Wild_Birch_B"
+  ],
+  "autumntree": [
+   "/Game/BoneTemple/Meshes/SM_AutumnTree01",
+   "/Game/BoneTemple/Meshes/SM_AutumnTree02"
+  ],
+  "pinefallen": [
+   "/Game/Wildlands/MESH/SM_Pine_Fallen",
+   "/Game/Wildlands/MESH/SM_Pine_Fallen_1"
+  ],
+  "beechlog": [
+   "/Game/CastleofEternalMist/Scanned_Foliage/Objects/Foliage/EuropeanBeech/SM_EuropeanBeech_Log_01"
+  ],
+  "beechstump": [
+   "/Game/CastleofEternalMist/Scanned_Foliage/Objects/Foliage/EuropeanBeech/SM_EuropeanBeech_Stump_01"
+  ],
+  "logpile": [
+   "/Game/Medieval_Lake_Village/Meshs/SM_FireWoodSet01",
+   "/Game/Medieval_Lake_Village/Meshs/SM_FireWoodSet02"
+  ],
+  "deadleaves": [
+   "/Game/Wildlands/MESH/SM_Dead_Leaves_1"
+  ],
+  "moss": [
+   "/Game/Hivemind/Medieval_Docks/Static_Meshes/Foliage/SM_MossClump_01",
+   "/Game/Hivemind/Medieval_Docks/Static_Meshes/Foliage/SM_MossClump_02"
+  ],
+  "fern": [
+   "/Game/CastleofEternalMist/Scanned_Foliage/Objects/Foliage/EagleFern/SM_EagleFern_01"
   ]
  },
  "kinds": [
@@ -1249,10 +1351,714 @@
    "hazards": [
     "kind=wakes;x=0;y=0;r=10;who=Daemon;named=The Ash Wyrm;msg=Smoke boils up from the ash: the thing that started the fire rises to meet you!"
    ]
+  },
+  {
+   "name": "resin_camp",
+   "title": "Resin camp",
+   "text": "pines tapped for their resin, a clay cup under every scar, a still for turpentine",
+   "biomes": [
+    "pine forests"
+   ],
+   "weight": 1.0,
+   "folk": [
+    "Townsman|Resin tapper|Every cut bleeds a cup a week. The still makes turpentine for the shipwrights at Graymourne./Don't stand by the still when it boils./The pines here are older than the roads.|4|3"
+   ],
+   "uses": [
+    "do=forage;x=-3;y=0;r=3;verb=collect;what=resin from the cups;things=Pine Resin|2|4|1;reuse=600"
+   ],
+   "parts": [
+    "L=clear;r=13",
+    "L=ring;p=n13_resinpine#;n=4;r=9;a=20;s=0.9-1.1;yaw=face;yawadd=180;col=1",
+    "L=at;p=s12_cauldron#;x=2;y=-3;h=1.0;yaw=rand;col=1",
+    "L=at;p=campfire;x=2;y=-1;s=1;yaw=rand;col=0",
+    "L=at;fx=smoke;x=2;y=-3;z=1.2;s=0.4",
+    "L=scatter;p=r12_pottery#;n=6;r=3;x=-3;y=2;h=0.35-0.5;yaw=rand;col=0",
+    "L=at;p=s12_firewood#;x=-3;y=-4;h=1.0;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "sunlit_clearing",
+   "title": "Sunlit clearing",
+   "text": "the canopy breaks and the sun comes down in shafts on grass and deer",
+   "biomes": [
+    "pine forests",
+    "boreal pine forest",
+    "temperate aspen"
+   ],
+   "weight": 1.0,
+   "herd": "Deer:5;r=10",
+   "uses": [
+    "do=heal;x=0;y=0;r=4;verb=rest in;what=sun of the clearing;reuse=300;text=You sit in the sun a while. The forest is quiet round you."
+   ],
+   "parts": [
+    "L=clear;r=22",
+    "L=scatter;p=n13_flowers#;n=120;r=14;h=0.3-0.6;yaw=rand;col=0;inst=1",
+    "L=scatter;fx=rays;n=3;r=6;z=12;s=1;hours=day"
+   ]
+  },
+  {
+   "name": "granite_outcrop",
+   "title": "Granite outcrop",
+   "text": "grey granite slabs and boulders among widely spaced trunks",
+   "biomes": [
+    "pine forests",
+    "boreal pine forest"
+   ],
+   "weight": 1.0,
+   "place": "rise",
+   "uses": [
+    "do=climb;edge=1;r=3.5;verb=climb;what=outcrop;tz=4;reveal=1500;reuse=5;text=You scramble up the granite. The pines run on below you."
+   ],
+   "parts": [
+    "L=at;p=l12_boulder#;h=5;yaw=rand;col=1;sink=40",
+    "L=scatter;p=l12_boulder#;n=5;r=9;r0=5;h=1.5-3;yaw=rand;col=1;sink=30",
+    "L=scatter;p=r12_slab#;n=4;r=8;r0=4;h=0.3;yaw=rand;col=1;sink=6",
+    "L=scatter;p=n13_moss#;n=20;r=8;h=0.3;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "lightning_pine",
+   "title": "Lightning-struck pine",
+   "text": "a great pine split by lightning, its wood charred and still smoking",
+   "biomes": [
+    "pine forests",
+    "boreal pine forest",
+    "taigas"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=forage;edge=1;r=3;verb=salvage;what=split wood;things=Wood Log|1|2|1;reuse=900;text=The heartwood is dry and sound under the char."
+   ],
+   "parts": [
+    "L=at;p=n13_deadtree#;h=14;yaw=rand;col=1;mat=burnt;sink=30",
+    "L=at;fx=smoke;z=6;s=0.5",
+    "L=at;fx=embers;z=1;s=1",
+    "L=scatter;p=l12_fallen#;n=2;r=6;r0=3;s=1;yaw=rand;col=1;mat=burnt"
+   ]
+  },
+  {
+   "name": "logging_camp",
+   "title": "Logging camp",
+   "text": "a loggers' camp: felled trunks, a timber chute running downhill, saws and stumps",
+   "biomes": [
+    "pine forests",
+    "boreal pine forest",
+    "taigas"
+   ],
+   "weight": 1.0,
+   "folk": [
+    "Townsman|Logger|The chute takes them down to the river by noon./Mind the slope when the trunks are running./We fell what the sawyers at Brokenspire ask for, and no more.|4|4"
+   ],
+   "uses": [
+    "do=trade;x=4;y=5;r=3;verb=trade with;what=loggers;give=Bread|1;get=Wood Log|3;reuse=120"
+   ],
+   "parts": [
+    "L=clear;r=18",
+    "L=at;p=n13_flume#;x=-6;y=6;s=1;yaw=fixed;col=1",
+    "L=at;p=s12_logcart#;x=6;y=-3;h=2;yaw=rand;col=1",
+    "L=scatter;p=n13_logpile#;n=3;r=5;x=-2;y=-6;h=1.2;yaw=rand;col=1",
+    "L=scatter;p=n13_beechstump#;n=8;r=14;r0=8;h=0.6-0.8;yaw=rand;col=1",
+    "L=at;p=s12_saw#;x=3;y=2;h=0.8;yaw=rand;col=0",
+    "L=at;p=s12_axe#;x=2;y=3;h=0.6;yaw=rand;lie=1;col=0",
+    "L=at;p=tent;x=8;y=6;s=1;yaw=face;col=1",
+    "L=at;p=campfire;x=5;y=5;s=1;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "owl_hollow",
+   "title": "Owl's hollow",
+   "text": "an old tree hollowed by woodpeckers, an owl watching from the dark of it; something is tucked inside",
+   "biomes": [
+    "pine forests",
+    "temperate autumn forests",
+    "boreal pine forest"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=loot;x=3;y=0;r=2.8;verb=reach into;what=hollow;things=Bread|1|2|1,Small Healing Potion|1|1|0.6,Straw Rope|1|1|0.5;text=Someone hid a satchel in the hollow."
+   ],
+   "parts": [
+    "L=at;p=s12_greattree#;h=20;yaw=rand;col=1;far=1",
+    "L=scatter;p=n13_fern#;n=14;r=6;h=0.8;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "pine_ridge",
+   "title": "Pine ridge",
+   "text": "a ridgeline strewn with pine cones, the valley spread out below it",
+   "biomes": [
+    "pine forests"
+   ],
+   "weight": 1.0,
+   "place": "rise",
+   "uses": [
+    "do=climb;edge=1;r=3.5;verb=climb;what=ridge's rock;tz=2.5;reveal=2500;reuse=5;text=From the ridge the forest falls away to the valley."
+   ],
+   "parts": [
+    "L=at;p=l12_boulder#;h=3;yaw=rand;col=1;sink=30",
+    "L=scatter;p=n13_pinemed#;n=5;r=14;r0=6;h=9-11;yaw=rand;col=1",
+    "L=scatter;p=n13_deadleaves#;n=60;r=8;h=0.05;yaw=rand;col=0;inst=1"
+   ]
+  },
+  {
+   "name": "lichen_heath",
+   "title": "Lichen heath",
+   "text": "pale lichen carpets the sand under the pines, crunching underfoot; reindeer graze on it",
+   "biomes": [
+    "boreal pine forest"
+   ],
+   "weight": 1.0,
+   "herd": "Deer:7;r=12",
+   "uses": [
+    "do=forage;x=0;y=4;r=3;verb=gather;what=reindeer lichen;things=Herbs|1|2|1;reuse=600;text=Lichen for a poultice, as the herders use it."
+   ],
+   "parts": [
+    "L=patch;r=16;hb=0.06;tint=0.72,0.74,0.60",
+    "L=scatter;p=n13_pinemed#;n=4;r=18;r0=12;h=9-11;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "esker",
+   "title": "Esker",
+   "text": "a long gravel ridge left by the ice, winding through the forest: a raised trail",
+   "biomes": [
+    "boreal pine forest",
+    "taigas"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=9;y=0;r=3;verb=walk;what=gravel ridge;text=Sand and rounded stones, laid down by a river under the ice. It runs on for miles, dry above the bogs."
+   ],
+   "parts": [
+    "L=ridge;r=7;r2=90;hb=5;a=90",
+    "L=line;p=n13_pinemed#;n=7;r=80;a=90;x=5;h=9-11;yaw=rand;col=1",
+    "L=line;p=n13_pinemed#;n=7;r=80;a=90;x=-5;h=9-11;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "pine_dunes",
+   "title": "Pine dunes",
+   "text": "old sand dunes held in place by pines",
+   "biomes": [
+    "boreal pine forest"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=-8;r=3;verb=look at;what=dunes;text=The wind once moved this sand. The pines' roots hold it now."
+   ],
+   "parts": [
+    "L=mound;r=14;hb=4;x=-6;tint=0.40,0.34,0.24",
+    "L=mound;r=11;hb=3;x=12;y=6;tint=0.40,0.34,0.24",
+    "L=scatter;p=n13_pinemed#;n=6;r=14;h=8-11;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "kettle_lake",
+   "title": "Kettle lake",
+   "text": "a round, clear, deep lake left by the ice, boulders on its shore",
+   "biomes": [
+    "boreal pine forest",
+    "taigas"
+   ],
+   "weight": 1.0,
+   "need_water": "pond",
+   "uses": [
+    "do=fish;x=1;y=0;r=3;verb=fish;what=clear water;things=Fish|1|2|0.85;reuse=240;text=The water is clear to a great depth. Fish turn in it."
+   ],
+   "parts": [
+    "L=scatter;p=l12_boulder#;n=5;r=8;h=1-2;yaw=rand;col=1;sink=20",
+    "L=scatter;p=s12_reeds#;n=10;r=6;x=6;h=1.2;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "fire_scar",
+   "title": "Old fire scar",
+   "text": "trunks scarred by an old fire, and young pines all of one age where it burned",
+   "biomes": [
+    "boreal pine forest",
+    "pine forests"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=0;r=3;verb=read;what=fire scars;text=The young pines all sprang up the year after the fire. Twenty years, perhaps."
+   ],
+   "parts": [
+    "L=scatter;p=n13_deadtree#;n=4;r=10;h=10-13;yaw=rand;col=1;mat=burnt;sink=30",
+    "L=scatter;p=n13_pinemed#;n=16;r=14;h=2.5-4;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "herder_camp",
+   "title": "Reindeer herders' camp",
+   "text": "cone tents of the reindeer herders, a corral, meat drying on racks",
+   "biomes": [
+    "boreal pine forest",
+    "taigas"
+   ],
+   "weight": 1.0,
+   "herd": "Deer:6;pen=6;x=-16;y=0",
+   "folk": [
+    "Townswoman|Reindeer herder|The herd goes where the lichen is. We go where the herd is./North of here the sun does not set in summer./Sit. Eat. Then we talk.|3|-3"
+   ],
+   "uses": [
+    "do=heal;x=2;y=1;r=3;verb=share;what=herders' fire;reuse=600;text=They give you dried meat and a place by the fire.",
+    "do=trade;x=-2;y=1;r=3;verb=trade with;what=herders;give=Coarse Hide|1;get=Bread|2;reuse=120"
+   ],
+   "parts": [
+    "L=clear;r=16",
+    "L=ring;p=n13_lavvu#;n=2;r=6;a=0;s=0.95-1.05;yaw=face;col=1",
+    "L=ring;p=fence;n=12;r=8;x=-16;s=1;yaw=face;col=1",
+    "L=scatter;p=s12_fishrack#;n=2;r=3;x=5;y=-6;h=1.8;yaw=rand;col=1",
+    "L=at;p=campfire;s=1;yaw=rand;col=0",
+    "L=at;fx=smoke;z=0.5;s=0.5"
+   ]
+  },
+  {
+   "name": "seid_stone",
+   "title": "Seid stone",
+   "text": "a great boulder set up on three small stones, offerings round its foot",
+   "biomes": [
+    "boreal pine forest",
+    "taigas"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=offer;x=3;y=0;r=2.8;verb=leave an offering at;what=seid;give=Bread|1;name=Blessing of the Seid;dmg=0.06;armour=0.12;secs=600;text=The stone is warm under your hand."
+   ],
+   "parts": [
+    "L=at;p=n13_seidstone#;s=1;yaw=rand;col=1",
+    "L=scatter;p=n13_candle#;n=4;r=2.5;r0=2;h=0.25;yaw=rand;col=0",
+    "L=scatter;p=bones;n=3;r=3;r0=2;s=0.6;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "muskeg_bog",
+   "title": "Muskeg",
+   "text": "sinking ground of moss and peat; something lies preserved in the peat",
+   "biomes": [
+    "taigas",
+    "boreal pine forest"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=bog;x=1;y=1;r=9"
+   ],
+   "uses": [
+    "do=loot;x=-9;y=-4;r=2.8;verb=search;what=body in the peat;things=Coarse Hide|1|1|1,Small Healing Potion|1|1|0.3;text=A man, brown as leather, his face peaceful. He has lain here a long time."
+   ],
+   "parts": [
+    "L=patch;r=13;hb=0.05;tint=0.20,0.19,0.11",
+    "L=scatter;p=s12_reeds#;n=14;r=10;h=1.0-1.4;yaw=rand;col=0",
+    "L=scatter;p=n13_moss#;n=26;r=11;h=0.3;yaw=rand;col=0",
+    "L=scatter;p=n13_deadtree#;n=3;r=12;r0=8;h=6-8;yaw=rand;col=1;sink=30"
+   ]
+  },
+  {
+   "name": "spruce_thicket",
+   "title": "Spruce thicket",
+   "text": "black spruce so dense it stands like a wall; there is a way in",
+   "biomes": [
+    "taigas"
+   ],
+   "weight": 1.0,
+   "loot": "Coarse Hide|1|2|0.8;Straw Rope|1|2|0.6",
+   "parts": [
+    "L=ring;p=n13_sprucesnow#;n=18;r=7;span=320;s=0.9-1.1;yaw=rand;col=1",
+    "L=ring;p=n13_sprucesnow#;n=24;r=11;span=320;s=0.9-1.1;yaw=rand;col=1",
+    "L=at;box=Chest;x=0;y=0"
+   ]
+  },
+  {
+   "name": "beaver_pond",
+   "title": "Beaver dam",
+   "text": "a beaver dam holding back a pond, drowned trees standing grey in it",
+   "biomes": [
+    "taigas",
+    "temperate aspen",
+    "boreal pine forest"
+   ],
+   "weight": 1.0,
+   "need_water": "any",
+   "uses": [
+    "do=lore;x=2;y=4;r=3;verb=look at;what=beaver dam;text=Gnawed stumps, a lodge of sticks and mud, and a drowned forest where the water rose."
+   ],
+   "parts": [
+    "L=at;p=n13_beaverdam#;x=10;s=1;yaw=fixed;yawadd=90;col=1",
+    "L=at;p=n13_beaverlodge#;x=14;y=8;s=1;yaw=rand;col=1",
+    "L=scatter;p=n13_deadtree#;n=5;r=8;x=14;h=7-10;yaw=rand;col=1;sink=40",
+    "L=scatter;p=n13_beechstump#;n=6;r=6;r0=3;h=0.5-0.7;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "moose_wallow",
+   "title": "Bear's ground",
+   "text": "a wallow churned by moose, and trunks scored high by a bear's claws: someone's territory",
+   "biomes": [
+    "taigas",
+    "boreal pine forest",
+    "pine forests"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=wakes;x=0;y=0;r=6;who=Ursag;named=;n=1;msg=A bear rises out of the brush: this is its ground"
+   ],
+   "uses": [
+    "do=tracks;x=-10;y=6;r=3;verb=read;what=tracks in the mud;text=Moose, and over them the broad pads of a bear."
+   ],
+   "parts": [
+    "L=scatter;p=s12_mud#;n=4;r=5;s=1.2-1.5;yaw=rand;col=0;sink=4",
+    "L=ring;p=n13_pinemed#;n=5;r=9;h=9-11;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "trapline_cabin",
+   "title": "Trapper's cabin",
+   "text": "a trapline cabin with snares, a fur stretcher and a cache up on stilts",
+   "biomes": [
+    "taigas",
+    "boreal pine forest"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=loot;x=-6;y=5;r=2.6;verb=climb up to;what=cache on stilts;things=Coarse Hide|2|3|1,Straw Rope|1|2|0.7,Bread|1|2|0.6;text=Furs and stores, out of the bears' reach."
+   ],
+   "parts": [
+    "L=clear;r=12",
+    "L=at;p=house;h=4.5;yaw=fixed;col=1",
+    "L=at;p=n13_stiltcache#;x=-8;y=5;s=1;yaw=fixed;col=1",
+    "L=scatter;p=n13_furstretcher#;n=2;r=2;x=5;y=-5;s=1;yaw=rand;col=1",
+    "L=scatter;p=s12_stakes#;n=4;r=8;r0=6;h=0.5;yaw=rand;col=0",
+    "L=at;p=n13_logpile#;x=5;y=4;h=1.2;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "drunken_forest",
+   "title": "Drunken forest",
+   "text": "the ground thaws and heaves, and the spruces lean every way at once",
+   "biomes": [
+    "taigas"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=0;r=3;verb=look at;what=leaning trees;text=The frozen ground under the moss is thawing. Nothing here stands straight."
+   ],
+   "parts": [
+    "L=scatter;p=n13_pinemed#;n=16;r=16;h=8-10;yaw=rand;tilt=26;col=1;sink=40",
+    "L=scatter;p=n13_moss#;n=20;r=12;h=0.3;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "gold_larches",
+   "title": "Golden larches",
+   "text": "larches turned gold among the dark spruce, dropping their needles",
+   "biomes": [
+    "taigas",
+    "boreal pine forest"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=0;r=3;verb=look at;what=larches;text=Larches: the only needles that turn and fall."
+   ],
+   "parts": [
+    "L=scatter;p=n13_pinemed#;n=8;r=12;h=9-11;yaw=rand;col=1;mat=goldneedles;slot=1",
+    "L=at;fx=fallingleaves;z=4;s=1"
+   ]
+  },
+  {
+   "name": "leaf_pits",
+   "title": "Deep leaf litter",
+   "text": "deep, noisy leaf litter over the forest floor, hiding roots and pits",
+   "biomes": [
+    "temperate autumn forests"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=pit;x=4;y=3;r=1.6",
+    "kind=pit;x=-5;y=-2;r=1.6"
+   ],
+   "uses": [
+    "do=tracks;x=0;y=-6;r=3;verb=read;what=trail through the leaves;text=Something heavy came through the leaves, not long ago."
+   ],
+   "parts": [
+    "L=scatter;p=n13_deadleaves#;n=160;r=12;h=0.05;yaw=rand;col=0;inst=1",
+    "L=scatter;p=s12_roots#;n=2;r=8;r0=4;h=1;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "fungus_glade",
+   "title": "Fungus glade",
+   "text": "shelf fungi stepping up fallen logs, a ring of mushrooms: a forager's spot",
+   "biomes": [
+    "temperate autumn forests",
+    "temperate aspen",
+    "pine forests"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=forage;x=6;y=0;r=3;verb=pick;what=mushrooms;things=Field Mushrooms|2|3|1,Herbs|1|1|0.5;reuse=600"
+   ],
+   "parts": [
+    "L=scatter;p=n13_funguslog#;n=2;r=5;r0=2;s=1;yaw=rand;col=1",
+    "L=ring;p=n13_mushroom#;n=16;r=3;x=6;h=0.15-0.25;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "hollow_giant",
+   "title": "Hollow giant",
+   "text": "an old-growth giant whose hollow trunk is big enough to shelter in",
+   "biomes": [
+    "temperate autumn forests",
+    "pine forests"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=heal;x=4;y=0;r=3;verb=shelter in;what=hollow trunk;reuse=300;text=Dry inside, and out of the wind. You sleep an hour."
+   ],
+   "parts": [
+    "L=at;p=s12_greattree#;h=28;yaw=rand;col=1;far=1",
+    "L=scatter;p=s12_roots#;n=3;r=6;r0=4;h=1.2;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "mossy_walls",
+   "title": "Mossy walls",
+   "text": "mossy stone walls running through the woods from forgotten fields",
+   "biomes": [
+    "temperate autumn forests",
+    "temperate aspen"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=4;r=3;verb=look along;what=walls;text=Field walls, deep in the forest. Nobody has ploughed here for a hundred years."
+   ],
+   "parts": [
+    "L=line;p=n13_drystone#;n=6;r=12;a=0;s=1;yaw=fixed;col=1",
+    "L=line;p=n13_drystone#;n=4;r=8;a=90;x=12;s=1;yaw=fixed;yawadd=90;col=1",
+    "L=scatter;p=n13_moss#;n=24;r=12;h=0.3;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "nut_cache",
+   "title": "Nut cache",
+   "text": "acorns and nuts heaped in the roots of an oak, squirrels and a forager arguing over them",
+   "biomes": [
+    "temperate autumn forests"
+   ],
+   "weight": 1.0,
+   "herd": "Squirrel:5;r=6",
+   "folk": [
+    "Townswoman|Forager|The squirrels were here first. The boars will come by dusk./Fill your pockets: the oaks gave twice this year.|4|2"
+   ],
+   "uses": [
+    "do=forage;x=2;y=0;r=3;verb=gather;what=nuts;things=Nuts and Seeds|2|4|1;reuse=600"
+   ],
+   "parts": [
+    "L=at;p=n13_autumntree#;h=16;yaw=rand;col=1",
+    "L=scatter;p=n13_deadleaves#;n=50;r=6;h=0.05;yaw=rand;col=0;inst=1"
+   ]
+  },
+  {
+   "name": "charcoal_hearth",
+   "title": "Charcoal hearth",
+   "text": "a charcoal burner's smoking clamp, coppiced stools round it and his hut",
+   "biomes": [
+    "temperate autumn forests",
+    "pine forests"
+   ],
+   "weight": 1.0,
+   "folk": [
+    "Townsman|Charcoal burner|Five days she burns, and I don't sleep for any of them./The smiths in Ashenreach buy all I make.|5|3"
+   ],
+   "uses": [
+    "do=trade;x=4;y=2;r=3;verb=trade with;what=charcoal burner;give=Bread|1;get=Wood Log|2;reuse=120"
+   ],
+   "parts": [
+    "L=clear;r=15",
+    "L=at;p=n13_charcoalmound#;s=1;yaw=rand;col=1",
+    "L=at;fx=smoke;z=1.8;s=0.6",
+    "L=scatter;p=n13_beechstump#;n=8;r=12;r0=7;h=0.5-0.7;yaw=rand;col=1",
+    "L=at;p=house;x=-9;y=5;h=4;yaw=face;col=1",
+    "L=at;p=n13_logpile#;x=5;y=-5;h=1.2;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "dawn_hollow",
+   "title": "Misty hollow",
+   "text": "a low hollow where the fog lies at dawn and dusk",
+   "biomes": [
+    "temperate autumn forests",
+    "temperate aspen",
+    "pine forests"
+   ],
+   "weight": 1.0,
+   "place": "low",
+   "uses": [
+    "do=lore;x=0;y=0;r=3;verb=stand in;what=hollow;text=The cold air pools here. At dawn the fog fills it to the brim."
+   ],
+   "parts": [
+    "L=scatter;fx=fog;n=3;r=6;z=0.5;s=1;hours=dawn",
+    "L=scatter;p=n13_fern#;n=20;r=10;h=0.8;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "harvest_shrine",
+   "title": "Harvest shrine",
+   "text": "a face carved in an old oak, gourds and candles at its foot: a festival ground",
+   "biomes": [
+    "temperate autumn forests"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=offer;x=2.6;y=0;r=2.8;verb=leave an offering at;what=carved face;give=Bread|1;name=Blessing of the Harvest;dmg=0.05;armour=0.08;secs=900;text=The carved eyes seem kinder for it."
+   ],
+   "parts": [
+    "L=at;p=n13_carvedface#;s=1;yaw=fixed;col=1",
+    "L=scatter;p=n13_pumpkin#;n=4;r=2;x=1.8;h=0.4;yaw=rand;col=0",
+    "L=scatter;p=n13_candle#;n=4;r=1.6;x=1.8;h=0.25;yaw=rand;col=0",
+    "L=ring;p=n13_beechlog#;n=5;r=7;x=8;s=1;yaw=face;yawadd=90;col=1"
+   ]
+  },
+  {
+   "name": "watching_aspens",
+   "title": "Watching aspens",
+   "text": "white trunks with black, eye-like scars that seem to follow you",
+   "biomes": [
+    "temperate aspen"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=0;r=3;verb=look at;what=scarred trunks;text=Every scar is an eye, and every eye is on you. It is only bark. It is only bark."
+   ],
+   "parts": [
+    "L=ring;p=n13_aspen#;n=9;r=8;h=16-19;yaw=rand;col=1",
+    "L=ring;p=n13_aspen#;n=12;r=14;h=16-19;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "clonal_grove",
+   "title": "One grove",
+   "text": "a whole hillside of aspens grown from one root: one living thing",
+   "biomes": [
+    "temperate aspen"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=buff;x=0;y=0;r=3;verb=rest a hand on;what=grove;name=The Grove's Calm;dmg=0.0;armour=0.1;speed=0.05;secs=600;text=Every trunk on the hill shares one root. It is very old, and very patient."
+   ],
+   "parts": [
+    "L=scatter;p=n13_aspen#;n=34;r=30;r0=4;h=15-19;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "carved_aspens",
+   "title": "Carved trunks",
+   "text": "aspens carved with names, symbols and dates by shepherds and travellers",
+   "biomes": [
+    "temperate aspen"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=rumour;x=0;y=2;r=3;verb=read;what=carvings;text=Names, dates, a heart, a crude map: one carving points the way to something."
+   ],
+   "parts": [
+    "L=line;p=n13_aspen#;n=6;r=12;a=0;h=16-18;yaw=rand;col=1",
+    "L=at;p=s12_axe#;x=2;y=-3;h=0.6;lie=1;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "gold_stand",
+   "title": "Golden stand",
+   "text": "aspens turned bright gold against dark conifers",
+   "biomes": [
+    "temperate aspen"
+   ],
+   "weight": 1.0,
+   "parts": [
+    "L=scatter;p=n13_aspen#;n=14;r=14;h=15-18;yaw=rand;col=1;mat=goldleaves;slot=1",
+    "L=ring;p=n13_pinebig#;n=8;r=24;h=20-24;yaw=rand;col=1",
+    "L=at;fx=fallingleaves;z=4;s=1"
+   ]
+  },
+  {
+   "name": "beaver_stumps",
+   "title": "Beaver-felled stumps",
+   "text": "pointed stumps by the stream where beavers felled the aspens; elk have browsed the rest",
+   "biomes": [
+    "temperate aspen",
+    "temperate autumn forests"
+   ],
+   "weight": 1.0,
+   "need_water": "any",
+   "herd": "Deer:3;r=8",
+   "uses": [
+    "do=lore;x=0;y=0;r=3;verb=look at;what=stumps;text=Gnawed to points, every one. And the low branches all bitten off at the height of an elk's mouth."
+   ],
+   "parts": [
+    "L=scatter;p=n13_beechstump#;n=8;r=8;h=0.5-0.7;yaw=rand;col=1",
+    "L=scatter;p=n13_aspen#;n=4;r=10;r0=6;h=14-17;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "aspen_meadow",
+   "title": "Aspen undergrowth",
+   "text": "sunny, airy undergrowth of wildflowers and berries under the aspens",
+   "biomes": [
+    "temperate aspen"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=forage;x=0;y=0;r=3;verb=pick;what=berries;things=Wild Berries|2|4|1;reuse=600"
+   ],
+   "parts": [
+    "L=scatter;p=n13_flowers#;n=140;r=12;h=0.3-0.6;yaw=rand;col=0;inst=1",
+    "L=scatter;p=n13_aspen#;n=6;r=16;r0=10;h=15-18;yaw=rand;col=1",
+    "L=scatter;fx=butterflies;n=2;r=6;z=1;s=1;hours=day"
+   ]
+  },
+  {
+   "name": "aspen_edge",
+   "title": "Grove's edge",
+   "text": "where the aspens meet the pines: a cold camp, and someone watching from the trees",
+   "biomes": [
+    "temperate aspen",
+    "pine forests"
+   ],
+   "weight": 1.0,
+   "guards": 2,
+   "ambush_r": 12,
+   "loot": "Bread|1|2|0.8;Small Healing Potion|1|1|0.5",
+   "parts": [
+    "L=line;p=n13_aspen#;n=5;r=14;a=90;x=-14;h=15-18;yaw=rand;col=1",
+    "L=line;p=n13_pinebig#;n=5;r=14;a=90;x=14;h=18-22;yaw=rand;col=1",
+    "L=at;p=campfire;s=1;yaw=rand;col=0",
+    "L=at;box=Chest;x=2;y=3"
+   ]
+  },
+  {
+   "name": "windthrow",
+   "title": "Windthrow",
+   "text": "a storm's swath of fallen trees, root plates torn up: a barrier, a bridge, a hiding place",
+   "biomes": [
+    "pine forests",
+    "boreal pine forest",
+    "taigas",
+    "temperate autumn forests",
+    "temperate aspen"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=-8;r=3;verb=look at;what=fallen trees;text=One storm laid them all the same way. You could cross the gully on that trunk."
+   ],
+   "parts": [
+    "L=scatter;p=n13_pinefallen#;n=6;r=10;s=1;yaw=rand;col=1",
+    "L=scatter;p=s12_roots#;n=3;r=9;r0=4;h=2.5;yaw=rand;col=1"
+   ]
   }
  ],
  "mats": {
-  "burnt": "/Game/HouseForge_01/Materials/Wood/MI_Wood_Burnt"
+  "burnt": "/Game/HouseForge_01/Materials/Wood/MI_Wood_Burnt",
+  "goldleaves": "/Game/RandomDungeon/Wild13/Kit/MI_N13_GoldLeaves",
+  "goldneedles": "/Game/RandomDungeon/Wild13/Kit/MI_N13_GoldNeedles"
  },
  "farsights": [
   {
@@ -1289,5 +2095,12 @@
    "drift": 3.0,
    "secs": 480
   }
- ]
+ ],
+ "_doc_phase3": "the third phase (2026-11-15): the forests (pine forests, boreal pine forest, taigas, temperate autumn forests, temperate aspen): 38 kinds; quiet_biomes: where the needles muffle her steps (the wilds' monsters notice her at quiet_notice of their distance); L=clear takes the forest's plants out round a point (a clearing); hazards bog and pit",
+ "quiet_biomes": [
+  "pine forests",
+  "boreal pine forest",
+  "taigas"
+ ],
+ "quiet_notice": 0.65
 }

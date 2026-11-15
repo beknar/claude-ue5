@@ -470,6 +470,57 @@ The user's list of 2026-11-14 ([docs/improvements13.txt](../improvements13.txt))
 
 ![The second part's 29 kinds, each from 15 m (the termite mounds from 40 m)](../images/scenery13_open2.jpg)
 
+### The forests: pine, boreal, taiga, autumn and aspen
+
+| Kind | Biomes | What stands there | What she does there |
+|---|---|---|---|
+| Resin camp | pine forests | tapped pines, each with a herringbone scar over a clay cup, a still, pots, a fire, a tapper | collect resin; talk to the tapper |
+| Sunlit clearing | pine, boreal, aspen | a clearing where the canopy breaks (the forest's trees taken out of it), flowers, shafts of light by day, deer | rest in the sun |
+| Granite outcrop | pine, boreal (a rise) | a great granite boulder, lesser ones, slabs, moss | climb it: the map shows 1.5 km round |
+| Lightning-struck pine | pine, boreal, taiga | a great pine split and charred, still smoking, embers | salvage dry heartwood |
+| Logging camp | pine, boreal, taiga | a clearing, a timber chute running downhill, a log cart, log piles, stumps, a saw and an axe, a tent, a logger | trade bread for logs; talk to the logger |
+| Owl's hollow | pine, autumn, boreal | an old tree hollowed by woodpeckers, ferns | reach into the hollow: someone's hidden satchel |
+| Pine ridge | pine forests (a rise) | a rock on the ridge, pines, needles | climb the rock: the map shows 2.5 km round |
+| Lichen heath | boreal | pale lichen over the ground (a skin of its own colour), pines, reindeer grazing | gather reindeer lichen (herbs) |
+| Esker | boreal, taiga | a long gravel ridge (180 m) winding through the forest, pines down both sides | walk it: what it is |
+| Pine dunes | boreal | two sand dunes (mounds in sand's colour), pines on them | |
+| Kettle lake | boreal, taiga (by a pond) | boulders and reeds on a round lake's shore | fish |
+| Old fire scar | boreal, pine | burnt trunks, young pines all of one age | read the scars |
+| Reindeer herders' camp | boreal, taiga | two cone tents (lavvus), a corral with reindeer in it, meat on drying racks, a fire, a herder | share their fire; trade a hide for food; talk |
+| Seid stone | boreal, taiga | a great boulder set up on three small stones, candles and bones | leave bread: the Blessing of the Seid |
+| Muskeg | taiga, boreal | dark peat (a skin of its colour), reeds, moss, dead trees | the bog slows her from her first step and drags at her after 4 s; search the body preserved in the peat |
+| Spruce thicket | taiga | two rings of spruce so dense they stand as a wall, a gap into them | a chest in the middle |
+| Beaver dam | taiga, aspen, boreal (by a river) | a dam of sticks, a lodge, drowned trees, gnawed stumps | |
+| Bear's ground | taiga, boreal, pine | a moose wallow's mud, a ring of pines | read the tracks; a bear rises out of the brush |
+| Trapper's cabin | taiga, boreal | a cabin, a cache up on stilts, fur stretchers, snares, a log pile | climb up to the cache: furs and stores |
+| Drunken forest | taiga | spruces leaning every way on thawing ground, moss | |
+| Golden larches | taiga, boreal | larches turned gold, needles falling | |
+| Deep leaf litter | autumn | deep fallen leaves, roots | two pits hidden under the leaves; read the trail through them |
+| Fungus glade | autumn, aspen, pine | logs stepped with shelf fungi, a ring of mushrooms | pick mushrooms and herbs |
+| Hollow giant | autumn, pine | an old-growth giant 28 m high, its roots | shelter in the hollow (rest) |
+| Mossy walls | autumn, aspen | drystone field walls through the woods, moss | |
+| Nut cache | autumn | an oak, leaves, squirrels at it, a forager | gather nuts; talk to the forager |
+| Charcoal hearth | autumn, pine | a clearing, a smoking charcoal clamp, coppiced stools, the burner's hut, a log pile | trade bread for wood; talk |
+| Misty hollow | autumn, aspen, pine (a hollow) | fog lying in the hollow at dawn and dusk, ferns | |
+| Harvest shrine | autumn | an oak's trunk carved with a face, gourds and candles, a ring of log seats | leave bread: the Blessing of the Harvest |
+| Watching aspens | aspen | two rings of white aspens | look at the scars that seem to watch you |
+| One grove | aspen | 34 aspens over a hillside, one root | rest a hand on it: the Grove's Calm |
+| Carved trunks | aspen | a line of aspens carved with names and dates, an axe | read the carvings: one points the way to a structure of the wilds |
+| Golden stand | aspen | aspens turned gold inside a ring of dark pines, leaves falling | |
+| Beaver-felled stumps | aspen, autumn (by a river) | gnawed stumps by a stream, aspens, elk browsing | |
+| Aspen undergrowth | aspen | wildflowers, aspens, butterflies by day | pick wild berries |
+| Grove's edge | aspen, pine | where aspens meet pines: a cold camp, its watchers lying low | two of them come at her within 12 m; a chest |
+| Windthrow | every forest | fallen pines all laid one way, torn-up root plates | |
+
+- **The quiet floor** ("a soft floor of needles that muffles footsteps, good for stealth"): in the pine forests, the boreal pine forest and the taigas the wilds' monsters notice her from 0.65 of their distance (`WildQuietBiomes`, `WildQuietNotice`; a hunting monster is not fooled).
+- **What is new to the scenery**: a clearing (`L=clear;r=`: the forest's plants taken out of a square round a point, as a house keeps its floor); hazards `bog` (slowed from her first step, dragged at after 4 s) and `pit` (a fall's harm under the leaves, once a minute); a part's material on one slot (`slot=`: the gold larches' needles, the gold aspens' leaves); effects at `dawn` (4:30 to 8:30, 17:30 to 19:30); a landform in a colour of its own (`tint=`: the lichen, the peat, the dunes' sand).
+- **The land**: the autumn forests' holloways (sunken lanes 4 to 6 m wide, 2.8 to 4.2 m deep: a dry channel's rule).
+- **Its new things**: Pine Resin (a component, as glue), Wild Berries (food).
+- **Its own pieces** (`scenery13_kit.py`): a timber chute, a seid stone, two lavvus, a beaver lodge and dam, a fur stretcher, a cache on stilts, a charcoal clamp, a log of shelf fungi, an oak carved with a face, two tapped pines, gold leaves and needles.
+- **Measured** (`test_s13r1.json` to `test_s13r3.json`, `test_s13r8.json`, after PR #67's review; the whole table of 88 kinds again in `test_s13r1.json` to `test_s13r7.json`, all passing but the kurgan's and the pingo's uses, on mounds over the test's 4 m trace: passing in `test_s13r8.json` once it passes only trees' crowns by): every kind found within 150 km of Brokenspire and visited as the others are. The clearings hold none of the forest's trees inside them, with 21 to 52 trees within 60 m. In the bog her walk falls from 353 to 159 cm/s, and it drags at her after 4 s (8.4 hit points). The pits hurt (9.8 each). The bear rises at its ground. The grove's edge's two watchers lie low at 30 m, then hunt her and strike her (54 hit points in 2.5 s, swinging). The holloway's bed lies 3.4 m under its banks. The quiet floor: a monster 20 m off (0.8 of the wilds' 25 m) did not notice her in the pine forest in 3 s; on the grassland one came 4.4 m nearer in the same time.
+
+![The forests' 37 kinds, from 15 m (four from 40 m)](../images/scenery13_forest.jpg)
+
 ## The TODO sweep (2026-11-14)
 
 The open items of `TODO.md` that a test could settle in the wilds (`888 ... -Light`):

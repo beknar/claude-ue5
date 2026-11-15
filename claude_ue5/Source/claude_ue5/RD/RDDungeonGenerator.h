@@ -213,7 +213,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") int32 CountFightingGuards() const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") TArray<FString> GetGuardLines() const;
 	/** tests: a monster of the wilds' kinds put at a place (in a town too), hunting her as an ambush's does; -> it */
-	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") class ARDMonster* SpawnTestAmbusher(FVector At, int32 Tier = 1);
+	/** (the third phase's test: bHunt false spawns it not hunting, to see whether it notices her by itself) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") class ARDMonster* SpawnTestAmbusher(FVector At, int32 Tier = 1, bool bHunt = true);
 	// ---- the list of 2026-11-11's third phase (RDList11c.cpp): the Warlock's curses
 	/** Mark of the Hunted's one monster (the HUD marks it through walls) */
 	TWeakObjectPtr<class ARDMonster> HuntedMark;
@@ -2636,6 +2637,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TArray<FRDWildFarSight> WildFarSights;
 	/** materials a part may lay its piece in ("mat=<name>": "m13_<name>", the burned plain's charred timber) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TMap<FName, TObjectPtr<class UMaterialInterface>> WildSceneryMats;
+	/** the third phase ("a soft floor of needles that muffles footsteps, good for stealth"): the biomes whose floor is quiet, and how far
+	 *  the wilds' monsters notice her there against elsewhere; WildQuietScale is that factor where she stands now (1 elsewhere) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TArray<FString> WildQuietBiomes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildQuietNotice = 0.65f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild13") float WildQuietScale = 1.f;
+	float WildQuietAt = -1.f;
 	void LayWildScenery(ARDWildChunk* C, const FRDWildPlace& P);
 	void TickWildScenery13(float Dt, const FVector& Her);
 	/** a laid scenery's things: what F does (its uses), what hurts (its hazards), the effects its hours show, its herd */

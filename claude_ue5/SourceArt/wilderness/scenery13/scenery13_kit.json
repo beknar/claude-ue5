@@ -506,5 +506,233 @@
   ],
   "masked": [],
   "translucent": []
+ },
+ "SM_N13_Flume": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Flume.fbx",
+  "size_m": [
+   12.14,
+   1.26,
+   4.53
+  ],
+  "triangles": 256,
+  "slots": [
+   "FlumePlanks",
+   "FlumeTrestle"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_SeidStone": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_SeidStone.fbx",
+  "size_m": [
+   3.24,
+   2.46,
+   2.68
+  ],
+  "triangles": 516,
+  "slots": [
+   "SeidStoneRock"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Lavvu_A": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Lavvu_A.fbx",
+  "size_m": [
+   4.66,
+   4.52,
+   4.34
+  ],
+  "triangles": 208,
+  "slots": [
+   "LavvuACanvas",
+   "LavvuAPole",
+   "LavvuADoor"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Lavvu_B": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Lavvu_B.fbx",
+  "size_m": [
+   4.52,
+   4.39,
+   4.34
+  ],
+  "triangles": 208,
+  "slots": [
+   "LavvuBCanvas",
+   "LavvuBPole",
+   "LavvuBDoor"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_BeaverLodge": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_BeaverLodge.fbx",
+  "size_m": [
+   5.91,
+   5.82,
+   1.85
+  ],
+  "triangles": 824,
+  "slots": [
+   "BeaverLodgeMud",
+   "BeaverLodgeSticks"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_BeaverDam": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_BeaverDam.fbx",
+  "size_m": [
+   10.6,
+   2.81,
+   1.55
+  ],
+  "triangles": 1728,
+  "slots": [
+   "BeaverLodgeMud",
+   "BeaverLodgeSticks"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_FurStretcher": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_FurStretcher.fbx",
+  "size_m": [
+   1.2,
+   1.46,
+   2.08
+  ],
+  "triangles": 242,
+  "slots": [
+   "FurStretcherWood",
+   "FurStretcherPelt"
+  ],
+  "masked": [
+   "FurStretcherPelt"
+  ],
+  "translucent": []
+ },
+ "SM_N13_StiltCache": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_StiltCache.fbx",
+  "size_m": [
+   3.17,
+   2.47,
+   4.76
+  ],
+  "triangles": 156,
+  "slots": [
+   "StiltCacheLogs",
+   "StiltCacheRoof"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_CharcoalMound": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_CharcoalMound.fbx",
+  "size_m": [
+   4.71,
+   4.51,
+   1.72
+  ],
+  "triangles": 460,
+  "slots": [
+   "CharcoalMoundTurf",
+   "CharcoalMoundVent"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_FungusLog": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_FungusLog.fbx",
+  "size_m": [
+   7.04,
+   0.98,
+   0.68
+  ],
+  "triangles": 1372,
+  "slots": [
+   "FungusLogBark",
+   "FungusLogShelf"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_CarvedFace": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_CarvedFace.fbx",
+  "size_m": [
+   1.5,
+   1.46,
+   3.25
+  ],
+  "triangles": 106,
+  "slots": [
+   "CarvedFaceBark",
+   "CarvedFaceFace"
+  ],
+  "masked": [
+   "CarvedFaceFace"
+  ],
+  "translucent": []
+ },
+ "SM_N13_ResinPine_A": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_ResinPine_A.fbx",
+  "size_m": [
+   3.34,
+   4.11,
+   14.12
+  ],
+  "triangles": 248,
+  "slots": [
+   "ResinPineABark",
+   "ResinPineANeedles",
+   "ResinPineAScar",
+   "ResinPineACup"
+  ],
+  "masked": [
+   "ResinPineANeedles",
+   "ResinPineAScar"
+  ],
+  "translucent": []
+ },
+ "SM_N13_ResinPine_B": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_ResinPine_B.fbx",
+  "size_m": [
+   4.24,
+   3.82,
+   17.33
+  ],
+  "triangles": 248,
+  "slots": [
+   "ResinPineBBark",
+   "ResinPineBNeedles",
+   "ResinPineBScar",
+   "ResinPineBCup"
+  ],
+  "masked": [
+   "ResinPineBNeedles",
+   "ResinPineBScar"
+  ],
+  "translucent": []
+ },
+ "SM_N13_GoldCard": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_GoldCard.fbx",
+  "size_m": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "triangles": 4,
+  "slots": [
+   "GoldLeaves",
+   "GoldNeedles"
+  ],
+  "masked": [
+   "GoldLeaves",
+   "GoldNeedles"
+  ],
+  "translucent": []
  }
 }

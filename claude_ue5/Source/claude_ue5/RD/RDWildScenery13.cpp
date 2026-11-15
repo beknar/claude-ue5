@@ -37,10 +37,12 @@ namespace
 		return Out;
 	}
 	float RDS13Num(const TMap<FString, FString>& M, const TCHAR* K, float Def) { const FString* V = M.Find(K); return V && !V->IsEmpty() ? FCString::Atof(**V) : Def; }
-	/** the hours a thing shows at: "" always, "day" 6:30-19:30, "night" 20:00-5:30, "dusk" 18:00-21:30 and 4:30-6:30 */
+	/** the hours a thing shows at: "" always, "day" 6:30-19:30, "night" 20:00-5:30, "dusk" 18:00-21:30 and 4:30-6:30, "dawn" (the third
+	 *  phase: "fog in low hollows at dawn and early dusk") 4:30-8:30 and 17:30-19:30 */
 	bool RDS13InHours(const FString& Hours, float H)
 	{
 		if (Hours.IsEmpty()) return true;
+		if (Hours == TEXT("dawn")) return (H >= 4.5f && H < 8.5f) || (H >= 17.5f && H < 19.5f);
 		if (Hours == TEXT("day")) return H >= 6.5f && H < 19.5f;
 		if (Hours == TEXT("night")) return H >= 20.f || H < 5.5f;
 		if (Hours == TEXT("dusk")) return (H >= 18.f && H < 21.5f) || (H >= 4.5f && H < 6.5f);
@@ -197,6 +199,14 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 	const float Now = W->GetTimeSeconds();
 	const FVector2D H2(Her.X / 100.0, Her.Y / 100.0);
 	TickWildStorm13(Dt, Her);
+	// ---- the third phase: a quiet floor under her (the pine forests' needles): the monsters notice her from less far
+	// (twice a second: her region changes over hundreds of metres (PR #67's review: a whole sample every frame))
+	if (Now >= WildQuietAt)
+	{
+		WildQuietAt = Now + 0.5f;
+		FRDWSample Qs; Wild->Sample(H2.X, H2.Y, Qs, false);
+		WildQuietScale = WildQuietBiomes.Contains(Wild->BiomeName(Qs.Biome)) ? FMath::Clamp(WildQuietNotice, 0.1f, 1.f) : 1.f;
+	}
 	// ---- the hazards, every frame (a handful near her)
 	const ACharacter* Ch = Cast<ACharacter>(UGameplayStatics::GetPlayerPawn(this, 0));
 	const float Feet = Her.Z - (Ch ? Ch->GetSimpleCollisionHalfHeight() : 90.f);
@@ -231,6 +241,29 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 				if (!bIn || Now < Hz.ReadyAt) continue;
 				Hz.ReadyAt = Now + 1.f; ++Hz.Sprung; ++WildHazardsSprung;
 				PlayerCombat->HurtByTrap(0.025f * Hz.P, 0.f, 0.f, TEXT("The ground smoulders under you"));
+			}
+			else if (Hz.Kind == TEXT("bog"))
+			{
+				// (the third phase: "muskeg and bogs: sinking ground": she wades slowed from her first step, and after 4 s in it the bog
+				// drags at her every 2 s)
+				// (stepping back in starts it again: slowed at once (PR #67's review: the last drag's wait held the slow off 2 s))
+				if (bIn && Hz.In <= 0.f) Hz.ReadyAt = 0.f;
+				Hz.In = bIn ? Hz.In + Dt : 0.f;
+				if (!bIn || Now < Hz.ReadyAt) continue;
+				Hz.ReadyAt = Now + (Hz.In < 4.f ? 0.9f : 2.f);
+				if (Hz.In < 4.f)
+				{
+					PlayerCombat->SlowBy(0.55f, 1.f);
+					if (Hz.Sprung == 0) { ++Hz.Sprung; ++WildHazardsSprung; PlayerCombat->ShowMessage(TEXT("The ground gives under you: bog. Get out before it takes you")); }
+				}
+				else { ++Hz.Sprung; PlayerCombat->HurtByTrap(0.03f * Hz.P, 0.6f, 2.f, TEXT("The bog drags at your legs")); }
+			}
+			else if (Hz.Kind == TEXT("pit"))
+			{
+				// (the third phase: "deep, noisy leaf litter that hides pits, roots and tracks": a pit under the leaves, once a minute)
+				if (!bIn || Now < Hz.ReadyAt) continue;
+				Hz.ReadyAt = Now + 60.f; ++Hz.Sprung; ++WildHazardsSprung;
+				PlayerCombat->HurtByTrap(0.07f * Hz.P, 0.5f, 2.f, TEXT("Your foot goes through the leaves into a hidden pit"));
 			}
 			else if (Hz.Kind == TEXT("wakes"))
 			{

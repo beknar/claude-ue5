@@ -12,6 +12,11 @@ helpers and its noise are used here):
   Fireweed, Granary  the second phase's (the farms, savannahs, cold steppes and the burned plain): a baobab, termite mounds, nomads'
                    yurts, steppe stone figures, a cairn with prayer flags, a steaming pool, a salt pan's crust, rocks cut with
                    spirals and hunters, fused glass shards, a grass fire's smoke on the horizon, fireweed, a granary on staddle stones
+  Flume, SeidStone, Lavvu_A/B, BeaverLodge, BeaverDam, FurStretcher, StiltCache, CharcoalMound, FungusLog, CarvedFace,
+  ResinPine_A/B, GoldCard  the third phase's (the forests): a logging camp's timber chute, a sacred stone on three stones, herders'
+                   cone tents, a beaver's lodge and dam, a trapper's fur stretcher and his cache on stilts, a charcoal burner's clamp,
+                   a log of shelf fungi, an oak's trunk with a carved face, a tapped pine (its herringbone scar and clay cup), and a
+                   card whose gold leaves and needles are the gold aspens' and larches' material
   StormCell        a storm cell for the far horizon: an anvil cloud 3.2 km across, a rain curtain, a funnel (the far storms)
   Drystone_A/B     a 3 m length of field wall laid dry, its copes on edge (the shepherd's pen)
   AppleTree_A/B,   the old orchard's gnarled fruit trees: a short leaning trunk, a low wide crown of leaf clusters with their
@@ -95,6 +100,12 @@ def sphere(bm, uvl, c, r, mat, rx=1.0, ry=1.0, rz=1.0, seg=10, rough=0.0, rng=No
             except ValueError: continue
             f.material_index = mat
             for lp, uv in zip(f.loops, ((k / seg, i / seg), ((k + 1) / seg, i / seg), ((k + 1) / seg, (i + 1) / seg), (k / seg, (i + 1) / seg))): lp[uvl].uv = uv
+
+
+def floor(bm):
+    """what a dome puts under the ground, set on it (a piece is laid by its lowest point: its underside would stand in view)"""
+    for v in bm.verts:
+        if v.co.z < 0.0: v.co.z = 0.0
 
 
 def finish(me, ob, bm, slots, masked=(), translucent=(), flat=False):
@@ -449,6 +460,175 @@ def fruit_tree(kind, variant, seed):
     finish(me, ob, bm, [f"{kind}TreeBark", f"{kind}TreeLeaves"], masked=[f"{kind}TreeLeaves"])
 
 
+# ------------------------------------------------------------------------------------------------ the third phase: the forests
+def flume():
+    """a timber chute: a V trough of planks 12 m long on trestles, falling 2.5 m along it (the logging camp's)"""
+    me, ob, bm, uvl = new_mesh("SM_N13_Flume")
+    L, drop = 12.0, 2.5
+    for k in range(7):
+        t = k / 6; x = -L / 2 + L * t; z = 1.6 + drop * (1 - t)
+        for s in (-1, 1):
+            tube(bm, uvl, [Vector((x, s * 0.55, 0.0)), Vector((x, s * 0.3, z))], [0.08, 0.07], 6, 1)
+        box(bm, uvl, (x, 0, z - 0.05), (0.12, 0.9, 0.1), 1)
+    for s in (-1, 1):
+        a = Vector((-L / 2, s * 0.02, 1.6 + drop)); b = Vector((L / 2, s * 0.02, 1.6))
+        n = Vector((0, s * 0.42, 0.42))
+        # (each wall wound to face into the trough (PR #67's review: the -Y wall faced out, culled from inside the V))
+        quad = (a, b, b + n, a + n) if s > 0 else (b, a, a + n, b + n)
+        vs = [bm.verts.new(p) for p in quad]
+        f = bm.faces.new(vs); f.material_index = 0
+        for lp, uv in zip(f.loops, ((0, 0), (6, 0), (6, 1), (0, 1))): lp[uvl].uv = uv
+    finish(me, ob, bm, ["FlumePlanks", "FlumeTrestle"])
+
+
+def seid_stone():
+    """a seid: a great rounded boulder 2.4 m high set up on three small stones (the herders' sacred stone)"""
+    rng = random.Random(401)
+    me, ob, bm, uvl = new_mesh("SM_N13_SeidStone")
+    for k in range(3):
+        a = k * 2 * math.pi / 3 + 0.4
+        sphere(bm, uvl, (math.cos(a) * 0.7, math.sin(a) * 0.7, 0.25), 0.35, 0, 1.0, 1.0, 0.8, 7, 0.15, rng)
+    sphere(bm, uvl, (0, 0, 1.55), 1.25, 0, 1.25, 1.0, 0.85, 12, 0.08, rng)
+    finish(me, ob, bm, ["SeidStoneRock"])
+
+
+def lavvu(variant, seed):
+    """a herders' lavvu: a cone of poles 4.5 m across, its canvas to 3.4 m, the poles crossing out of its top, a door flap"""
+    rng = random.Random(seed)
+    me, ob, bm, uvl = new_mesh(f"SM_N13_Lavvu_{variant}")
+    R = rng.uniform(2.1, 2.4)
+    lathe(bm, uvl, [(R, 0.0), (R * 0.55, 1.6), (0.32, 3.2), (0.25, 3.4)], 16, 0, urep=3.0)
+    for k in range(10):
+        a = k * 2 * math.pi / 10 + rng.uniform(-0.1, 0.1)
+        tube(bm, uvl, [Vector((math.cos(a) * R * 1.02, math.sin(a) * R * 1.02, 0)), Vector((-math.cos(a) * 0.35, -math.sin(a) * 0.35, 4.3))], [0.05, 0.03], 5, 1)
+    box(bm, uvl, (R * 0.92, 0, 0.7), (0.06, 0.8, 1.4), 2)
+    finish(me, ob, bm, [f"Lavvu{variant}Canvas", f"Lavvu{variant}Pole", f"Lavvu{variant}Door"])
+
+
+def beaver_lodge():
+    """a beaver's lodge: a dome of mud and sticks 5 m across and 1.6 m high, sticks poking out of it every way"""
+    rng = random.Random(409)
+    me, ob, bm, uvl = new_mesh("SM_N13_BeaverLodge")
+    sphere(bm, uvl, (0, 0, -0.2), 2.5, 0, 1.0, 1.0, 0.72, 12, 0.07, rng)
+    for i in range(70):
+        a = rng.uniform(0, 2 * math.pi); el = rng.uniform(0.05, 1.3); r = 2.5
+        p = Vector((math.cos(a) * math.cos(el) * r, math.sin(a) * math.cos(el) * r, -0.2 + math.sin(el) * r * 0.72))
+        d = Vector((rng.uniform(-1, 1), rng.uniform(-1, 1), rng.uniform(-0.3, 0.6))).normalized() * rng.uniform(0.8, 1.6)
+        tube(bm, uvl, [p - d * 0.5, p + d * 0.5], [0.035, 0.025], 4, 1)
+    floor(bm)
+    finish(me, ob, bm, ["BeaverLodgeMud", "BeaverLodgeSticks"])
+
+
+def beaver_dam():
+    """a beaver dam: a low bank of sticks and mud 10 m long, 1.3 m high, 2 m thick at its foot"""
+    rng = random.Random(419)
+    me, ob, bm, uvl = new_mesh("SM_N13_BeaverDam")
+    for k in range(9):
+        sphere(bm, uvl, (-4.5 + k * 1.12, rng.uniform(-0.2, 0.2), 0.0), 1.0, 0, 0.8, 1.0, 1.1, 8, 0.1, rng)
+    for i in range(90):
+        x = rng.uniform(-5, 5); p = Vector((x, rng.uniform(-0.7, 0.7), rng.uniform(0.2, 1.1)))
+        d = Vector((rng.uniform(-0.4, 0.4), rng.uniform(-1, 1), rng.uniform(-0.3, 0.3))).normalized() * rng.uniform(0.9, 1.8)
+        tube(bm, uvl, [p - d * 0.5, p + d * 0.5], [0.04, 0.03], 4, 1)
+    floor(bm)
+    finish(me, ob, bm, ["BeaverLodgeMud", "BeaverLodgeSticks"])
+
+
+def fur_stretcher():
+    """a trapper's fur stretcher: a bent-wood hoop 1.4 m across on a stake, a pelt laced inside it"""
+    me, ob, bm, uvl = new_mesh("SM_N13_FurStretcher")
+    ring = [Vector((0, math.sin(a) * 0.7, 1.35 + math.cos(a) * 0.7)) for a in np.linspace(0, 2 * math.pi, 20)]
+    tube(bm, uvl, ring, [0.035] * 20, 6, 0)
+    tube(bm, uvl, [Vector((0, 0, 0)), Vector((0, 0, 0.66))], [0.05, 0.05], 6, 0)
+    card(bm, uvl, Vector((0, 0, 1.35)), 1.2, Vector((0, 1, 0)), Vector((0, 0, 1)), 1)
+    finish(me, ob, bm, ["FurStretcherWood", "FurStretcherPelt"], masked=["FurStretcherPelt"])
+
+
+def stilt_cache():
+    """a trapper's cache on stilts: a log box 2 m square with a plank roof, up on four 2.6 m poles, a ladder to its door"""
+    me, ob, bm, uvl = new_mesh("SM_N13_StiltCache")
+    for x in (-0.9, 0.9):
+        for y in (-0.9, 0.9):
+            tube(bm, uvl, [Vector((x, y, 0)), Vector((x, y, 2.7))], [0.11, 0.09], 7, 0)
+    box(bm, uvl, (0, 0, 2.75), (2.2, 2.2, 0.15), 0)
+    box(bm, uvl, (0, 0, 3.45), (2.0, 2.0, 1.3), 0)
+    n0 = len(bm.verts)
+    lathe(bm, uvl, [(1.75, 4.05), (0.001, 4.75)], 4, 1)
+    for v in list(bm.verts)[n0:]:
+        x, y = v.co.x, v.co.y; v.co.x, v.co.y = (x - y) * 0.7071, (x + y) * 0.7071
+    for s in (-0.25, 0.25):
+        tube(bm, uvl, [Vector((1.9, s, 0)), Vector((1.15, s, 2.8))], [0.04, 0.04], 5, 0)
+    for k in range(6):
+        t = (k + 0.5) / 6
+        tube(bm, uvl, [Vector((1.9 - 0.75 * t, -0.25, 2.8 * t)), Vector((1.9 - 0.75 * t, 0.25, 2.8 * t))], [0.025, 0.025], 4, 0)
+    finish(me, ob, bm, ["StiltCacheLogs", "StiltCacheRoof"])
+
+
+def charcoal_mound():
+    """a charcoal burner's clamp: a turf-covered dome 4.5 m across and 1.7 m high, its vents round its foot"""
+    rng = random.Random(431)
+    me, ob, bm, uvl = new_mesh("SM_N13_CharcoalMound")
+    sphere(bm, uvl, (0, 0, -0.3), 2.3, 0, 1.0, 1.0, 0.86, 14, 0.05, rng)
+    for k in range(8):
+        a = k * math.pi / 4
+        box(bm, uvl, (math.cos(a) * 2.05, math.sin(a) * 2.05, 0.18), (0.25, 0.25, 0.25), 1)
+    floor(bm)
+    finish(me, ob, bm, ["CharcoalMoundTurf", "CharcoalMoundVent"])
+
+
+def fungus_log():
+    """a fallen trunk 7 m long, 0.6 m thick, its bark peeling, shelf fungi stepped along its side"""
+    rng = random.Random(439)
+    me, ob, bm, uvl = new_mesh("SM_N13_FungusLog")
+    pts = [Vector((-3.5 + 7 * t, 0.15 * math.sin(t * 3), 0.32)) for t in np.linspace(0, 1, 8)]
+    tube(bm, uvl, pts, [0.34 - 0.06 * t for t in np.linspace(0, 1, 8)], 10, 0)
+    for i in range(22):
+        x = rng.uniform(-3.2, 3.2); s = rng.choice((-1, 1)); z = rng.uniform(0.15, 0.6)
+        n0 = len(bm.verts)
+        lathe(bm, uvl, [(0.001, 0.06), (0.16, 0.05), (0.22, 0.0), (0.001, -0.03)], 10, 1)
+        for v in list(bm.verts)[n0:]:
+            v.co.y = v.co.y * 0.7 + s * (0.3 + abs(v.co.y) * 0.2); v.co.x += x; v.co.z += z
+    finish(me, ob, bm, ["FungusLogBark", "FungusLogShelf"])
+
+
+def carved_face():
+    """a great oak's lower trunk, 3.2 m and 1.1 m thick, a solemn face carved into its front (a harvest shrine's)"""
+    rng = random.Random(443)
+    me, ob, bm, uvl = new_mesh("SM_N13_CarvedFace")
+    lathe(bm, uvl, [(0.75, 0.0), (0.56, 0.4), (0.55, 2.6), (0.6, 3.2), (0.001, 3.25)], 14, 0)
+    vs = [bm.verts.new((0.565, y, z)) for (y, z) in ((-0.42, 1.0), (0.42, 1.0), (0.42, 2.3), (-0.42, 2.3))]
+    f = bm.faces.new(vs); f.material_index = 1
+    for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+    finish(me, ob, bm, ["CarvedFaceBark", "CarvedFaceFace"], masked=["CarvedFaceFace"])
+
+
+def resin_pine(variant, seed):
+    """a tapped pine: a straight trunk 16 m, a high crown of needle clusters, a herringbone scar cut into its foot over a clay cup"""
+    rng = random.Random(seed)
+    me, ob, bm, uvl = new_mesh(f"SM_N13_ResinPine_{variant}")
+    H = rng.uniform(14.0, 17.0)
+    # (its lean from 0 at the foot, where the scar and cup are laid for a trunk on x=0 (PR #67's review: centred at 0.15 sin(seed), the
+    # scar stood 16 cm off the bark and the cup in the air))
+    tube(bm, uvl, [Vector((0.15 * (math.sin(t * 2 + seed) - math.sin(seed)), 0, H * t)) for t in np.linspace(0, 1, 8)], [0.32 * (1 - 0.8 * t) for t in np.linspace(0, 1, 8)], 9, 0)
+    for k in range(9):
+        z = H * rng.uniform(0.55, 0.98); a = rng.uniform(0, 2 * math.pi); o = rng.uniform(0.6, 2.2) * (1.2 - z / H)
+        cluster(bm, uvl, Vector((math.cos(a) * o, math.sin(a) * o, z)), rng.uniform(1.8, 2.6), rng, 1)
+    vs = [bm.verts.new((0.33, y, z)) for (y, z) in ((-0.22, 0.4), (0.22, 0.4), (0.22, 1.6), (-0.22, 1.6))]
+    f = bm.faces.new(vs); f.material_index = 2
+    for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+    n0 = len(bm.verts)
+    lathe(bm, uvl, [(0.001, 0.0), (0.1, 0.02), (0.12, 0.18), (0.13, 0.2)], 8, 3)
+    for v in list(bm.verts)[n0:]: v.co.x += 0.42; v.co.z += 0.35
+    finish(me, ob, bm, [f"ResinPine{variant}Bark", f"ResinPine{variant}Needles", f"ResinPine{variant}Scar", f"ResinPine{variant}Cup"], masked=[f"ResinPine{variant}Needles", f"ResinPine{variant}Scar"])
+
+
+def gold_card():
+    """one card of gold leaves: only its material is used (the gold aspens' and larches' crowns, a part's mat=)"""
+    me, ob, bm, uvl = new_mesh("SM_N13_GoldCard")
+    card(bm, uvl, Vector((0, 0, 0.5)), 1.0, Vector((1, 0, 0)), Vector((0, 0, 1)), 0)
+    card(bm, uvl, Vector((0, 0, 0.5)), 1.0, Vector((0, 1, 0)), Vector((0, 0, 1)), 1)
+    finish(me, ob, bm, ["GoldLeaves", "GoldNeedles"], masked=["GoldLeaves", "GoldNeedles"])
+
+
 # ------------------------------------------------------------------------------------------------ the pictures
 def pictures():
     n = 256
@@ -604,6 +784,71 @@ def pictures():
         rgba[..., :3] *= (0.72 + 0.28 * np.clip(r / 0.45, 0, 1))[..., None]
         WT.save_png(f"T_N13_{kind}TreeLeaves", rgba)
 
+    # (the third phase's pieces: the forests)
+    planks = grain((0.46, 0.34, 0.22), 60, 0.2) * (0.8 + 0.2 * (np.sin(yy * math.pi * 2 * 6) > -0.9)[..., None]) * (0.9 + 0.1 * np.sin(xx * 120)[..., None])
+    png("T_N13_FlumePlanks", planks); png("T_N13_FlumeTrestle", grain((0.40, 0.30, 0.20), 61, 0.2))
+    png("T_N13_SeidStoneRock", grain((0.50, 0.50, 0.47), 62, 0.3) * (1.0 - 0.25 * (noise(n, 63, ((8, 1.0),)) > 0.7))[..., None])
+    for v in ("A", "B"):
+        png(f"T_N13_Lavvu{v}Canvas", grain((0.70, 0.64, 0.52) if v == "A" else (0.55, 0.50, 0.42), 64 + len(v), 0.12) * (0.85 + 0.15 * (yy > 0.6))[..., None])
+        png(f"T_N13_Lavvu{v}Pole", grain((0.42, 0.32, 0.22), 66, 0.2))
+        png(f"T_N13_Lavvu{v}Door", grain((0.34, 0.22, 0.16), 67, 0.15))
+    png("T_N13_BeaverLodgeMud", grain((0.30, 0.24, 0.17), 68, 0.35))
+    png("T_N13_BeaverLodgeSticks", grain((0.44, 0.36, 0.26), 69, 0.25) * (0.8 + 0.2 * np.sin(xx * 60)[..., None]))
+    png("T_N13_FurStretcherWood", grain((0.48, 0.36, 0.24), 70, 0.2))
+    # (the pelt: a stretched hide's outline, brown fur on its front; nothing round it)
+    px, py = xx - 0.5, yy - 0.5
+    pelt = ((px / 0.33) ** 2 + (py / 0.42) ** 2 < 1.0) | (((px / 0.42) ** 2 + ((py - 0.25) / 0.12) ** 2) < 1.0)
+    png("T_N13_FurStretcherPelt", grain((0.42, 0.30, 0.20), 71, 0.25), pelt.astype(float))
+    png("T_N13_StiltCacheLogs", grain((0.44, 0.34, 0.23), 72, 0.2) * (0.78 + 0.22 * np.abs(np.sin(yy * math.pi * 10)))[..., None])
+    png("T_N13_StiltCacheRoof", grain((0.32, 0.28, 0.22), 73, 0.25) * (0.85 + 0.15 * np.sin(xx * 90)[..., None]))
+    turf = grain((0.28, 0.30, 0.16), 74, 0.35); bare = noise(n, 75, ((6, 1.0), (16, 0.5))) > 0.62
+    turf[bare] = np.array((0.16, 0.13, 0.10)) * (0.8 + 0.4 * noise(n, 76)[bare][:, None])
+    png("T_N13_CharcoalMoundTurf", turf); png("T_N13_CharcoalMoundVent", np.full((n, n, 3), 0.03))
+    png("T_N13_FungusLogBark", grain((0.30, 0.25, 0.19), 77, 0.3) * (0.75 + 0.25 * np.abs(np.sin(xx * 40 + noise(n, 78, ((4, 1.0),)) * 6)))[..., None])
+    png("T_N13_FungusLogShelf", grain((0.66, 0.52, 0.34), 79, 0.15) * (0.75 + 0.25 * np.sin(yy * math.pi * 2 * 5)[..., None] * 0.5 + 0.25))
+    oak = grain((0.36, 0.31, 0.25), 80, 0.3) * (0.7 + 0.3 * np.abs(np.sin(xx * 34 + noise(n, 81, ((4, 1.0),)) * 7)) ** 0.5)[..., None]
+    png("T_N13_CarvedFaceBark", oak)
+    fa = np.zeros((n, n))
+    def groove(x0, y0, x1, y1, w=0.022):
+        gx, gy = xx, 1 - yy; dx, dy = x1 - x0, y1 - y0; L2 = dx * dx + dy * dy + 1e-9
+        t = np.clip(((gx - x0) * dx + (gy - y0) * dy) / L2, 0, 1)
+        fa[(gx - x0 - t * dx) ** 2 + (gy - y0 - t * dy) ** 2 < w * w] = 1.0
+    for ex in (0.33, 0.67):                                               # deep eyes, brows
+        fa[((xx - ex) / 0.07) ** 2 + ((1 - yy - 0.66) / 0.04) ** 2 < 1.0] = 1.0; groove(ex - 0.12, 0.75, ex + 0.12, 0.73)
+    groove(0.5, 0.70, 0.46, 0.45); groove(0.46, 0.45, 0.55, 0.43)          # the nose
+    groove(0.32, 0.30, 0.5, 0.25); groove(0.5, 0.25, 0.68, 0.30)          # the mouth, turned down
+    for k in range(7): groove(0.18 + k * 0.1, 0.12, 0.2 + k * 0.1, 0.02, 0.012)   # a beard of cuts
+    WT.save_png("T_N13_CarvedFaceFace", np.concatenate([oak * 0.35, fa[..., None]], -1))
+    for v in ("A", "B"):
+        png(f"T_N13_ResinPine{v}Bark", grain((0.42, 0.28, 0.20), 82, 0.3) * (0.7 + 0.3 * np.abs(np.sin(yy * 50 + noise(n, 83, ((4, 1.0),)) * 5)) ** 0.5)[..., None])
+        rg = np.zeros((512, 512, 4)); R5 = np.random.default_rng(84 + len(v)); Y5, X5 = np.mgrid[0:512, 0:512] / 512
+        for _ in range(240):
+            a = R5.uniform(0, 2 * math.pi); d = math.sqrt(R5.random()) * 0.45; cx, cy = 0.5 + math.cos(a) * d, 0.5 + math.sin(a) * d
+            rot = R5.uniform(0, math.pi); u = (X5 - cx) * math.cos(rot) + (Y5 - cy) * math.sin(rot); w_ = -(X5 - cx) * math.sin(rot) + (Y5 - cy) * math.cos(rot)
+            m = (np.abs(u) < 0.045) & (np.abs(w_) < 0.004)
+            rg[m, :3] = np.array((0.16, 0.26, 0.12)) * R5.uniform(0.8, 1.2); rg[m, 3] = 1.0
+        WT.save_png(f"T_N13_ResinPine{v}Needles", rg)
+        sc = np.zeros((n, n))
+        for k in range(8):                                               # the herringbone cuts: a V stepped down the face, a channel
+            y0 = 0.9 - k * 0.1
+            for s in (-1, 1):
+                gx, gy = xx - 0.5, 1 - yy
+                t = np.clip((gx * s) / 0.35, 0, 1); yl = y0 - 0.12 * t
+                sc[(np.abs(gy - yl) < 0.014) & (gx * s >= 0) & (gx * s < 0.35)] = 1.0
+        sc[np.abs(xx - 0.5) < 0.015] = 1.0
+        WT.save_png(f"T_N13_ResinPine{v}Scar", np.concatenate([np.ones((n, n, 3)) * np.array((0.80, 0.62, 0.30)), sc[..., None]], -1))
+        png(f"T_N13_ResinPine{v}Cup", grain((0.62, 0.38, 0.24), 85, 0.15))
+    # (gold leaves: the aspen's round leaves in yellow and gold; gold needles: a larch's sprays)
+    for name, shape in (("GoldLeaves", "leaf"), ("GoldNeedles", "needle")):
+        rg = np.zeros((512, 512, 4)); R6 = np.random.default_rng(90 + len(name)); Y6, X6 = np.mgrid[0:512, 0:512] / 512
+        pal = [(0.92, 0.70, 0.12), (0.85, 0.58, 0.08), (0.96, 0.80, 0.22)]
+        for _ in range(200 if shape == "leaf" else 300):
+            a = R6.uniform(0, 2 * math.pi); d = math.sqrt(R6.random()) * 0.46; cx, cy = 0.5 + math.cos(a) * d, 0.5 + math.sin(a) * d
+            rot = R6.uniform(0, math.pi); u = (X6 - cx) * math.cos(rot) + (Y6 - cy) * math.sin(rot); w_ = -(X6 - cx) * math.sin(rot) + (Y6 - cy) * math.cos(rot)
+            m = ((u / 0.035) ** 2 + (w_ / 0.03) ** 2 < 1.0) if shape == "leaf" else ((np.abs(u) < 0.04) & (np.abs(w_) < 0.004))
+            rg[m, :3] = np.array(pal[R6.integers(3)]) * R6.uniform(0.85, 1.1); rg[m, 3] = 1.0
+        WT.save_png(f"T_N13_{name}", rg)
+
 
 if __name__ == "__main__":
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -615,7 +860,11 @@ if __name__ == "__main__":
             "PrayerCairn": prayer_cairn, "HotSpring": hot_spring, "SaltPan": salt_pan, "Petroglyph_A": lambda: petroglyph("A", 349), "Petroglyph_B": lambda: petroglyph("B", 353),
             "FusedGlass": fused_glass, "SmokePlume": smoke_plume, "Fireweed": fireweed, "Granary": granary,
             "AppleTree_A": lambda: fruit_tree("Apple", "A", 101), "AppleTree_B": lambda: fruit_tree("Apple", "B", 133),
-            "PlumTree_A": lambda: fruit_tree("Plum", "A", 151), "PlumTree_B": lambda: fruit_tree("Plum", "B", 177)}
+            "PlumTree_A": lambda: fruit_tree("Plum", "A", 151), "PlumTree_B": lambda: fruit_tree("Plum", "B", 177),
+            "Flume": flume, "SeidStone": seid_stone, "Lavvu_A": lambda: lavvu("A", 401), "Lavvu_B": lambda: lavvu("B", 403),
+            "BeaverLodge": beaver_lodge, "BeaverDam": beaver_dam, "FurStretcher": fur_stretcher, "StiltCache": stilt_cache,
+            "CharcoalMound": charcoal_mound, "FungusLog": fungus_log, "CarvedFace": carved_face,
+            "ResinPine_A": lambda: resin_pine("A", 451), "ResinPine_B": lambda: resin_pine("B", 457), "GoldCard": gold_card}
     for k, f in todo.items():
         if not ONLY or k in ONLY: f()
     old = json.load(open(os.path.join(OUT, "scenery13_kit.json"))) if os.path.exists(os.path.join(OUT, "scenery13_kit.json")) else {}

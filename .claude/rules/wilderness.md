@@ -276,4 +276,22 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
     - A skin's rim eases to the ground.
     - A console command's help follows its table.
     - A scenery's monsters come from one helper. A name part is matched with case kept ("Rat" is not "Pirate").
+- **Phase 3 (the forests)**:
+  - **A trace from far above lands in the crowns**: `ground_put`'s trace from 30 m stood her on trees 10 to 12 m up. She fell to her death, and her own pile then took F from a charcoal burner. A hunt was dropped as soon as she stood more than 9 m over its monster (`Dz < 900`). The scenery step traces from 4 m over the ground (`G["put_from_m"]`).
+  - **A hazard that is a use's neighbour springs at the use**: the uses are tried before the hazards. A use inside a wake's reach woke the bear first, and the hazard step counted nothing new. Keep each use outside its hazards' reach.
+  - **Python cannot set every UPROPERTY**: `bHunting` is read-only there. A test's spawn takes the setting as a parameter (`SpawnTestAmbusher(..., bHunt)`).
+  - **Rivers are rare in the forest cells**: no river kind was found within 150 km. A kind that needs water takes "any" unless only a river will do.
+  - **A dome built round its middle reaches under its foot**: the beaver lodge's sphere was 3.9 m tall with half of it below 0, and a piece is laid by its lowest point. `scenery13_kit.py`'s `floor()` flattens what is under 0.
+  - **A tinted landform under the sky is lighter than its tint**: the dunes' sand at (0.62, 0.55, 0.40) read as snow, at (0.40, 0.34, 0.24) as sand. Judge a tint in the pictures.
+  - **The forests' scenery hides at 40 m**: trunks stand between the camera and the kind. Look at the 15 m pictures too.
+  - **PR #67's review (2026-11-15)**:
+    - What takes plants out must do it where they are made. A clearing removed its own chunk's trees at its laying, and a neighbouring chunk kept its trees inside the square. The chunk's plant pass now skips every scenery's clearing round it.
+    - A slow is renewed only through `SlowBy`, which lets an ended one go first. A max with an expired bog's 0.6 slowed a later sting's 0.15 to 0.6.
+    - Two hazards of one kind must not overlap. The muskeg's two bogs dragged at her twice.
+    - Stepping back into a hazard starts it again: the last drag's wait held the slow off.
+    - A measure taken and never asserted is no test. The bog's slow is checked against her speed out of it.
+    - A count that finds nothing anywhere proves nothing. The clearing's check also needs the forest's trees within 60 m.
+    - A pass on hit points lost must tie them to the cause. The ambush's monsters must be seen striking (`CombatBranch`).
+    - A world sample a frame for what changes over hundreds of metres is waste: the quiet floor looks twice a second.
+    - A piece's parts are laid for its own shape. The tapped pine's scar floated off its leaning foot, and the flume's -Y wall faced out.
   - **The editor can stop at "Wait for ZenServer?"** with the server already up (its health answered 200): Yes brings it back every minute, No lets the editor go on. The session's launcher answers it.
