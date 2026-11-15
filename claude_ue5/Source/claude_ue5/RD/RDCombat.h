@@ -901,6 +901,8 @@ public:
 	/** the list of 2026-11-12: a trap stepped on: Share of her hit points (no blow: no dodge, shield or armour takes it, as a
 	 *  fall), and her speed slowed by SlowShare for SlowSecs */
 	void HurtByTrap(float Share, float SlowShare, float SlowSecs, const FString& Msg);
+	/** the list of 2026-11-14's third phase: her speed slowed by Share for Secs with no harm, no sound, no line (wading a bog) */
+	void SlowBy(float Share, float Secs) { if (bDead || !GetWorld()) return; const float Now = GetWorld()->GetTimeSeconds(); SlowMeShare = FMath::Max(Now < SlowMeUntil ? SlowMeShare : 0.f, Share); SlowMeUntil = FMath::Max(SlowMeUntil, Now + Secs); }
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild12") int32 TrapsHurt = 0;
 private:
 	/** a hit with a slash on a monster: its bonus (with Dmg, the hit's own damage, for the shares) and effect */

@@ -1,0 +1,987 @@
+{
+ "tag": "s13p3a",
+ "plan": [
+  "scenery13=resin_camp+sunlit_clearing+granite_outcrop+lightning_pine+logging_camp+owl_hollow+pine_ridge+lichen_heath+esker+pine_dunes+kettle_lake+fire_scar+herder_camp+seid_stone",
+  "land13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "scenery13",
+   "ok": false,
+   "kinds": {
+    "resin_camp": {
+     "found": true,
+     "id": 67343555,
+     "at_km": [
+      57.64,
+      -32.62
+     ],
+     "name": "Resin camp",
+     "laid": {
+      "kind": "resin_camp",
+      "title": "Resin camp",
+      "x": 57637.1,
+      "y": -32616.9,
+      "pieces": 13,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 1,
+      "fx_on": 1,
+      "herd": 0,
+      "yaw": 256.9
+     },
+     "bottom_over_ground_cm": [
+      -26,
+      -13,
+      -6
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "clearing": {
+      "r_m": 10.4,
+      "trees_in": 0,
+      "trees_60m_out": 1
+     },
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "forage",
+       "prompt": "collect the resin from the cups",
+       "f": "scenery",
+       "said": "You take 2 Pine Resin",
+       "got": {
+        "Pine Resin": 2
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "folk": {
+      "want": 1,
+      "found": 1,
+      "talk": [
+       {
+        "prompt": "talk to the Resin tapper",
+        "f": "bark",
+        "said": "The Resin tapper:  \"Every cut bleeds a cup a week. The still makes turpentine for the shipwrights at Graymourne.\""
+       }
+      ]
+     },
+     "told": "Resin camp: pines tapped for their resin, a clay cup under every scar, a still for turpentine | You take 2 Pine Resin",
+     "ok": true
+    },
+    "sunlit_clearing": {
+     "found": true,
+     "id": 67343635,
+     "at_km": [
+      57.68,
+      15.26
+     ],
+     "name": "Sunlit clearing",
+     "laid": {
+      "kind": "sunlit_clearing",
+      "title": "Sunlit clearing",
+      "x": 57680.0,
+      "y": 15264.5,
+      "pieces": 4,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 3,
+      "fx_on": 3,
+      "herd": 5,
+      "yaw": 64.7
+     },
+     "bottom_over_ground_cm": null,
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "clearing": {
+      "r_m": 17.6,
+      "trees_in": 0,
+      "trees_60m_out": 4
+     },
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "heal",
+       "prompt": "rest in the sun of the clearing",
+       "f": "scenery",
+       "said": "You sit in the sun a while. The forest is quiet round you.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "herd": {
+      "n": 5,
+      "stampedes": 0,
+      "hits": 0,
+      "migrate": 0,
+      "stampede": 0,
+      "walked_12s_m": 2.1
+     },
+     "told": "Sunlit clearing: the canopy breaks and the sun comes down in shafts on grass and deer | You sit in the sun a while. The forest is quiet round you.",
+     "ok": true
+    },
+    "granite_outcrop": {
+     "found": true,
+     "id": 67346626,
+     "at_km": [
+      59.7,
+      -33.1
+     ],
+     "name": "Granite outcrop",
+     "laid": {
+      "kind": "granite_outcrop",
+      "title": "Granite outcrop",
+      "x": 59698.5,
+      "y": -33097.6,
+      "pieces": 30,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 27.9
+     },
+     "bottom_over_ground_cm": [
+      -81,
+      -10,
+      -7
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "climb",
+       "prompt": "climb the outcrop",
+       "f": "scenery",
+       "said": "You scramble up the granite. The pines run on below you.  From up here you can see 1.5 km round you: the map fills in.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 4.3,
+       "revealed_more": 2712,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Granite outcrop: grey granite slabs and boulders among widely spaced trunks | You scramble up the granite. The pines run on below you.  From up here you can see 1.5 km round you: the map fills in.",
+     "ok": true
+    },
+    "lightning_pine": {
+     "found": true,
+     "id": 67346629,
+     "at_km": [
+      59.36,
+      -31.55
+     ],
+     "name": "Lightning-struck pine",
+     "laid": {
+      "kind": "lightning_pine",
+      "title": "Lightning-struck pine",
+      "x": 59356.0,
+      "y": -31549.7,
+      "pieces": 3,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 2,
+      "fx_on": 2,
+      "herd": 0,
+      "yaw": 173.3
+     },
+     "bottom_over_ground_cm": [
+      -166,
+      -42,
+      -20
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "forage",
+       "prompt": "",
+       "f": "",
+       "said": "Lightning-struck pine: a great pine split by lightning, its wood charred and still smoking",
+       "got": {
+        "Wood Log": 0
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 0,
+       "ok": false
+      }
+     ],
+     "hazards": [],
+     "told": "Lightning-struck pine: a great pine split by lightning, its wood charred and still smoking",
+     "ok": false
+    },
+    "logging_camp": {
+     "found": true,
+     "id": 67344578,
+     "at_km": [
+      58.36,
+      -33.32
+     ],
+     "name": "Logging camp",
+     "laid": {
+      "kind": "logging_camp",
+      "title": "Logging camp",
+      "x": 58355.9,
+      "y": -33321.2,
+      "pieces": 17,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 331.3
+     },
+     "bottom_over_ground_cm": [
+      -86,
+      -11,
+      -5
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "clearing": {
+      "r_m": 14.4,
+      "trees_in": 0,
+      "trees_60m_out": 1
+     },
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "trade",
+       "prompt": "trade with the loggers",
+       "f": "scenery",
+       "said": "You trade 1 Bread for 3 Wood Log.",
+       "got": {
+        "Wood Log": 3
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "folk": {
+      "want": 1,
+      "found": 1,
+      "talk": [
+       {
+        "prompt": "talk to the Logger",
+        "f": "bark",
+        "said": "The Logger:  \"The chute takes them down to the river by noon.\""
+       }
+      ]
+     },
+     "told": "Logging camp: a loggers' camp: felled trunks, a timber chute running downhill, saws and stumps | You trade 1 Bread for 3 Wood Log.",
+     "ok": true
+    },
+    "owl_hollow": {
+     "found": true,
+     "id": 67350726,
+     "at_km": [
+      61.72,
+      -30.86
+     ],
+     "name": "Owl's hollow",
+     "laid": {
+      "kind": "owl_hollow",
+      "title": "Owl's hollow",
+      "x": 61723.7,
+      "y": -30864.5,
+      "pieces": 15,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 22.2
+     },
+     "bottom_over_ground_cm": [
+      -168,
+      -17,
+      -10
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "loot",
+       "prompt": "reach into the hollow",
+       "f": "scenery",
+       "said": "Someone hid a satchel in the hollow.  You take 2 Bread, 1 Small Healing Potion",
+       "got": {
+        "Bread": 2,
+        "Small Healing Potion": 1,
+        "Straw Rope": 0
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Owl's hollow: an old tree hollowed by woodpeckers, an owl watching from the dark of it; something is tucked inside | Someone hid a satchel in the hollow.  You take 2 Bread, 1 Small Healing Potion",
+     "ok": true
+    },
+    "pine_ridge": {
+     "found": true,
+     "id": 67358953,
+     "at_km": [
+      66.67,
+      -10.05
+     ],
+     "name": "Pine ridge",
+     "laid": {
+      "kind": "pine_ridge",
+      "title": "Pine ridge",
+      "x": 66665.1,
+      "y": -10049.4,
+      "pieces": 7,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 19.7
+     },
+     "bottom_over_ground_cm": [
+      -59,
+      -22,
+      -20
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "climb",
+       "prompt": "climb the ridge's rock",
+       "f": "scenery",
+       "said": "From the ridge the forest falls away to the valley.  From up here you can see 2.5 km round you: the map fills in.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 2.6,
+       "revealed_more": 7731,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Pine ridge: a ridgeline strewn with pine cones, the valley spread out below it | From the ridge the forest falls away to the valley.  From up here you can see 2.5 km round you: the map fills in.",
+     "ok": true
+    },
+    "lichen_heath": {
+     "found": true,
+     "id": 67419327,
+     "at_km": [
+      102.09,
+      -35.05
+     ],
+     "name": "Lichen heath",
+     "laid": {
+      "kind": "lichen_heath",
+      "title": "Lichen heath",
+      "x": 102091.5,
+      "y": -35046.7,
+      "pieces": 5,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 7,
+      "yaw": 244.2
+     },
+     "bottom_over_ground_cm": [
+      -24,
+      -19,
+      -19
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "forage",
+       "prompt": "gather the reindeer lichen",
+       "f": "scenery",
+       "said": "Lichen for a poultice, as the herders use it.  You take 2 Herbs",
+       "got": {
+        "Herbs": 2
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "herd": {
+      "n": 7,
+      "stampedes": 0,
+      "hits": 0,
+      "migrate": 0,
+      "stampede": 0,
+      "walked_12s_m": 1.5
+     },
+     "told": "Lichen heath: pale lichen carpets the sand under the pines, crunching underfoot; reindeer graze on it | Lichen for a poultice, as the herders use it.  You take 2 Herbs",
+     "ok": true
+    },
+    "esker": {
+     "found": true,
+     "id": 67416239,
+     "at_km": [
+      100.37,
+      -44.75
+     ],
+     "name": "Esker",
+     "laid": {
+      "kind": "esker",
+      "title": "Esker",
+      "x": 100365.2,
+      "y": -44754.1,
+      "pieces": 15,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 136.3
+     },
+     "bottom_over_ground_cm": [
+      -21,
+      24,
+      40
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "walk the gravel ridge",
+       "f": "scenery",
+       "said": "Sand and rounded stones, laid down by a river under the ice. It runs on for miles, dry above the bogs.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Esker: a long gravel ridge left by the ice, winding through the forest: a raised trail | Sand and rounded stones, laid down by a river under the ice. It runs on for miles, dry above the bogs.",
+     "ok": true
+    },
+    "pine_dunes": {
+     "found": true,
+     "id": 67419323,
+     "at_km": [
+      101.96,
+      -37.46
+     ],
+     "name": "Pine dunes",
+     "laid": {
+      "kind": "pine_dunes",
+      "title": "Pine dunes",
+      "x": 101956.8,
+      "y": -37464.6,
+      "pieces": 8,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 182.8
+     },
+     "bottom_over_ground_cm": [
+      -9,
+      174,
+      240
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the dunes",
+       "f": "scenery",
+       "said": "The wind once moved this sand. The pines' roots hold it now.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Pine dunes: old sand dunes held in place by pines | The wind once moved this sand. The pines' roots hold it now.",
+     "ok": true
+    },
+    "kettle_lake": {
+     "found": true,
+     "id": 67417266,
+     "at_km": [
+      100.8,
+      -43.13
+     ],
+     "name": "Kettle lake",
+     "laid": {
+      "kind": "kettle_lake",
+      "title": "Kettle lake",
+      "x": 100803.0,
+      "y": -43128.0,
+      "pieces": 15,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 135.0
+     },
+     "bottom_over_ground_cm": [
+      -77,
+      -24,
+      -9
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "fish",
+       "prompt": "fish the clear water",
+       "f": "scenery",
+       "said": "The water is clear to a great depth. Fish turn in it.  You take 2 Fish",
+       "got": {
+        "Fish": 2
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Kettle lake: a round, clear, deep lake left by the ice, boulders on its shore | The water is clear to a great depth. Fish turn in it.  You take 2 Fish",
+     "ok": true
+    },
+    "fire_scar": {
+     "found": true,
+     "id": 67345606,
+     "at_km": [
+      58.85,
+      -30.76
+     ],
+     "name": "Old fire scar",
+     "laid": {
+      "kind": "fire_scar",
+      "title": "Old fire scar",
+      "x": 58846.9,
+      "y": -30761.2,
+      "pieces": 20,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 300.9
+     },
+     "bottom_over_ground_cm": [
+      -102,
+      -12,
+      -7
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "read the fire scars",
+       "f": "scenery",
+       "said": "The young pines all sprang up the year after the fire. Twenty years, perhaps.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Old fire scar: trunks scarred by an old fire, and young pines all of one age where it burned | The young pines all sprang up the year after the fire. Twenty years, perhaps.",
+     "ok": true
+    },
+    "herder_camp": {
+     "found": true,
+     "id": 67417273,
+     "at_km": [
+      100.79,
+      -38.53
+     ],
+     "name": "Reindeer herders' camp",
+     "laid": {
+      "kind": "herder_camp",
+      "title": "Reindeer herders' camp",
+      "x": 100790.6,
+      "y": -38532.4,
+      "pieces": 17,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 2,
+      "hazards": 0,
+      "fx": 1,
+      "fx_on": 1,
+      "herd": 6,
+      "yaw": 167.5
+     },
+     "bottom_over_ground_cm": [
+      -41,
+      -11,
+      -8
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "clearing": {
+      "r_m": 12.8,
+      "trees_in": 0,
+      "trees_60m_out": 0
+     },
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "heal",
+       "prompt": "share the herders' fire",
+       "f": "scenery",
+       "said": "They give you dried meat and a place by the fire.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      },
+      {
+       "do": "trade",
+       "prompt": "trade with the herders",
+       "f": "scenery",
+       "said": "You trade 1 Coarse Hide for 2 Bread.",
+       "got": {
+        "Bread": 2
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "herd": {
+      "n": 6,
+      "stampedes": 0,
+      "hits": 0,
+      "migrate": 0,
+      "stampede": 0,
+      "walked_12s_m": 2.0,
+      "outside_pen": 0
+     },
+     "folk": {
+      "want": 1,
+      "found": 1,
+      "talk": [
+       {
+        "prompt": "talk to the Reindeer herder",
+        "f": "bark",
+        "said": "The Reindeer herder:  \"The herd goes where the lichen is. We go where the herd is.\""
+       }
+      ]
+     },
+     "told": "Reindeer herders' camp: cone tents of the reindeer herders, a corral, meat drying on racks | They give you dried meat and a place by the fire. | You trade 1 Coarse Hide for 2 Bread.",
+     "ok": true
+    },
+    "seid_stone": {
+     "found": true,
+     "id": 67417267,
+     "at_km": [
+      100.79,
+      -42.46
+     ],
+     "name": "Seid stone",
+     "laid": {
+      "kind": "seid_stone",
+      "title": "Seid stone",
+      "x": 100793.5,
+      "y": -42456.8,
+      "pieces": 8,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 346.0
+     },
+     "bottom_over_ground_cm": [
+      -22,
+      -7,
+      -4
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "offer",
+       "prompt": "leave an offering at the seid",
+       "f": "scenery",
+       "said": "The stone is warm under your hand.  You leave 1 Bread. Blessing of the Seid: your blows 6% stronger, 12% less of each blow reaches you, for 10 minutes",
+       "got": {},
+       "blessing": "Blessing of the Seid",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Seid stone: a great boulder set up on three small stones, offerings round its foot | The stone is warm under your hand.  You leave 1 Bread. Blessing of the Seid: your blows 6% stronger, 12% less of each blow reaches you, for 10 minutes",
+     "ok": true
+    }
+   },
+   "table": 88,
+   "counts_30km": {
+    "tall_grass": 75,
+    "burrow_town": 252,
+    "hanged_tree": 59,
+    "nest_tree": 68,
+    "shrine_tree": 73,
+    "erratic": 233,
+    "migration": 5,
+    "wallow": 64,
+    "hive_meadow": 31,
+    "brook_crossing": 0,
+    "fairy_ring": 53,
+    "shepherd_hut": 316,
+    "reed_pond": 1,
+    "old_orchard": 113,
+    "dusk_meadow": 17,
+    "butte": 209,
+    "battlefield": 228,
+    "milestone_road": 6,
+    "crossroads_gibbet": 4,
+    "crossroads_shrine": 3,
+    "crossroads_notice": 0,
+    "wagon_wreck": 1,
+    "hedged_fields": 337,
+    "scarecrows": 38,
+    "threshing_yard": 20,
+    "mill_pond": 2,
+    "pumpkin_patch": 31,
+    "abandoned_farm": 85,
+    "loose_livestock": 84,
+    "baobab": 2,
+    "acacia_shade": 5,
+    "termite_mounds": 7,
+    "kopje": 10,
+    "waterhole": 2,
+    "vulture_kill": 9,
+    "salt_pan": 5,
+    "yurt_camp": 0,
+    "kurgan": 73,
+    "prayer_cairn": 106,
+    "petroglyph_rocks": 364,
+    "hot_spring": 4,
+    "pingo": 0,
+    "charred_snags": 0,
+    "hot_spots": 0,
+    "ash_drift": 0,
+    "regrowth": 0,
+    "scorched_farmstead": 0,
+    "looters_camp": 0,
+    "fire_break": 0,
+    "fused_glass": 0,
+    "beast_carcasses": 0,
+    "resin_camp": 0,
+    "sunlit_clearing": 0,
+    "granite_outcrop": 0,
+    "lightning_pine": 0,
+    "logging_camp": 0,
+    "owl_hollow": 0,
+    "pine_ridge": 0,
+    "lichen_heath": 0,
+    "esker": 0,
+    "pine_dunes": 0,
+    "kettle_lake": 0,
+    "fire_scar": 0,
+    "herder_camp": 0,
+    "seid_stone": 0,
+    "muskeg_bog": 0,
+    "spruce_thicket": 0,
+    "beaver_pond": 0,
+    "moose_wallow": 0,
+    "trapline_cabin": 0,
+    "drunken_forest": 0,
+    "gold_larches": 0,
+    "leaf_pits": 0,
+    "fungus_glade": 0,
+    "hollow_giant": 0,
+    "mossy_walls": 0,
+    "nut_cache": 0,
+    "charcoal_hearth": 0,
+    "dawn_hollow": 0,
+    "harvest_shrine": 0,
+    "watching_aspens": 0,
+    "clonal_grove": 0,
+    "carved_aspens": 0,
+    "gold_stand": 0,
+    "beaver_stumps": 0,
+    "aspen_meadow": 0,
+    "aspen_edge": 0,
+    "windthrow": 0,
+    "cells": 10201
+   }
+  },
+  {
+   "step": "land13",
+   "ok": false,
+   "error": "RDMonster: Property 'bHunting' for attribute 'hunting' on 'RDMonster' is read-only and cannot be set",
+   "trace": "Traceback (most recent call last):\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\888_wilderness_test.py\", line 4332, in run\n    yield from STEPS[name]()\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\888_wilderness_test.py\", line 1586, in step_land13\n    m.set_editor_property(\"hunting\", False); yield from rwait(0.4)\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nException: RDMonster: Property 'bHunting' for attribute 'hunting' on 'RDMonster' is read-only and cannot be set\n"
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s13p3a_scenery13_resin_camp.png",
+  "wd_s13p3a_scenery13_resin_camp_near.png",
+  "wd_s13p3a_scenery13_sunlit_clearing.png",
+  "wd_s13p3a_scenery13_sunlit_clearing_near.png",
+  "wd_s13p3a_scenery13_granite_outcrop.png",
+  "wd_s13p3a_scenery13_granite_outcrop_near.png",
+  "wd_s13p3a_scenery13_lightning_pine.png",
+  "wd_s13p3a_scenery13_lightning_pine_near.png",
+  "wd_s13p3a_scenery13_logging_camp.png",
+  "wd_s13p3a_scenery13_logging_camp_near.png",
+  "wd_s13p3a_scenery13_owl_hollow.png",
+  "wd_s13p3a_scenery13_owl_hollow_near.png",
+  "wd_s13p3a_scenery13_pine_ridge.png",
+  "wd_s13p3a_scenery13_pine_ridge_near.png",
+  "wd_s13p3a_scenery13_lichen_heath.png",
+  "wd_s13p3a_scenery13_lichen_heath_near.png",
+  "wd_s13p3a_scenery13_esker.png",
+  "wd_s13p3a_scenery13_esker_near.png",
+  "wd_s13p3a_scenery13_pine_dunes.png",
+  "wd_s13p3a_scenery13_pine_dunes_near.png",
+  "wd_s13p3a_scenery13_kettle_lake.png",
+  "wd_s13p3a_scenery13_kettle_lake_near.png",
+  "wd_s13p3a_scenery13_fire_scar.png",
+  "wd_s13p3a_scenery13_fire_scar_near.png",
+  "wd_s13p3a_scenery13_herder_camp.png",
+  "wd_s13p3a_scenery13_herder_camp_near.png",
+  "wd_s13p3a_scenery13_seid_stone.png",
+  "wd_s13p3a_scenery13_seid_stone_near.png",
+  "wd_s13p3a_land13_arroyo.png",
+  "wd_s13p3a_land13_dry riverbed.png",
+  "wd_s13p3a_land13_irrigation ditch.png",
+  "wd_s13p3a_land13_fire break.png",
+  "wd_s13p3a_land13_holloway.png",
+  "wd_s13p3a_land13_storm.png",
+  "wd_s13p3a_land13_grassfire.png",
+  "wd_s13p3a_land13_dust.png",
+  "wd_s13p3a_land13_whiteout.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

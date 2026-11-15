@@ -417,6 +417,29 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 		const FString L = M.FindRef(TEXT("L"));
 		const FString Pre = M.FindRef(TEXT("p"));
 		const FString BoxPiece = M.FindRef(TEXT("box"));
+		if (L == TEXT("clear"))
+		{
+			// (the list of 2026-11-14's third phase: "sunlit clearings where the canopy breaks": the chunk's plants taken out of a square r
+			// metres round its point (the trees, the grass to come), as a house's floor is kept clear (RDWild10.cpp))
+			const float Rr = RDR12Num(M, TEXT("r"), 15.f, R), Ox = RDR12Num(M, TEXT("x"), 0.f, R), Oy = RDR12Num(M, TEXT("y"), 0.f, R);
+			const FVector2D At = O + FVector2D(Frame.RotateVector(FVector(Ox, Oy, 0.0)));
+			const FTransform Gt = C->Ground->GetComponentTransform();
+			const FVector Lc = Gt.InverseTransformPosition(FVector(At.X * 100.0, At.Y * 100.0, 0.0));
+			ARDWildChunk::FClear Cl; Cl.C = FVector2D(Lc.X, Lc.Y); Cl.H = FVector2D(Rr * 100.f, Rr * 100.f); Cl.Yaw = Yaw0 - Gt.Rotator().Yaw;
+			C->Clears.Add(Cl);
+			const FVector Wc(At.X * 100.0, At.Y * 100.0, 0.0);
+			const FBox Wb(Wc - FVector(Rr * 150.f, Rr * 150.f, 1e6f), Wc + FVector(Rr * 150.f, Rr * 150.f, 1e6f));
+			auto Clean = [&](UHierarchicalInstancedStaticMeshComponent* Hm)
+			{
+				if (!Hm) return;
+				TArray<int32> Out;
+				for (const int32 I : Hm->GetInstancesOverlappingBox(Wb, true)) { FTransform It; if (Hm->GetInstanceTransform(I, It, true) && C->IsClear(Gt.InverseTransformPosition(It.GetLocation()))) Out.Add(I); }
+				if (Out.Num() > 0) Hm->RemoveInstances(Out);
+			};
+			for (UHierarchicalInstancedStaticMeshComponent* Hm : C->Foliage) Clean(Hm);
+			for (UHierarchicalInstancedStaticMeshComponent* Hm : C->NearFoliage) Clean(Hm);
+			continue;
+		}
 		if (L == TEXT("mound") || L == TEXT("cone") || L == TEXT("ridge") || L == TEXT("patch"))
 		{
 			// (phase 2: L=patch, a skin over the ground in a colour of its own (tint=r,g,b, linear) or a material of the table's (mat=):
@@ -463,7 +486,9 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 		// (the list of 2026-11-14's second phase: its pieces in a material of the table's ("mat=<name>": WildSceneryMats' "m13_<name>"))
 		UMaterialInterface* PartMat = nullptr;
 		if (const FString Mn = M.FindRef(TEXT("mat")); !Mn.IsEmpty()) if (const TObjectPtr<UMaterialInterface>* Mi = WildSceneryMats.Find(FName(*(TEXT("m13_") + Mn)))) PartMat = Mi->Get();
-		auto Dress = [&](UMeshComponent* Mc) { if (Mc && PartMat) for (int32 Si = 0; Si < Mc->GetNumMaterials(); ++Si) Mc->SetMaterial(Si, PartMat); };
+		// (the third phase: "slot=<n>" dresses that slot alone (a gold larch's needles, its bark kept))
+		const int32 MatSlot = M.Contains(TEXT("slot")) ? FCString::Atoi(*M[TEXT("slot")]) : -1;
+		auto Dress = [&](UMeshComponent* Mc) { if (Mc && PartMat) for (int32 Si = 0; Si < Mc->GetNumMaterials(); ++Si) if (MatSlot < 0 || Si == MatSlot) Mc->SetMaterial(Si, PartMat); };
 		const int32 N = FMath::Max(1, FMath::RoundToInt(RDR12Num(M, TEXT("n"), 1.f, R)));
 		const int32 N2 = FMath::Max(1, FMath::RoundToInt(RDR12Num(M, TEXT("n2"), 1.f, R)));
 		const float Rad = RDR12Num(M, TEXT("r"), 8.f, R), Rad2 = RDR12Num(M, TEXT("r2"), Rad, R);

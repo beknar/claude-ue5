@@ -447,7 +447,7 @@ void ARDDungeonGenerator::SetMapRevealAll(bool bAll)
 	UE_LOG(LogRDList11, Log, TEXT("RDMAP the whole map %s"), bAll ? TEXT("shown") : TEXT("as she has seen it"));
 }
 
-ARDMonster* ARDDungeonGenerator::SpawnTestAmbusher(FVector At, int32 Tier)
+ARDMonster* ARDDungeonGenerator::SpawnTestAmbusher(FVector At, int32 Tier, bool bHunt)
 {
 	// (as the wilds' ambush makes its monsters: one of the tier's kinds, on the wild section, hunting her a minute)
 	ARDSection* Ws_ = bWild ? EnsureWildSection() : nullptr;
@@ -461,7 +461,7 @@ ARDMonster* ARDDungeonGenerator::SpawnTestAmbusher(FVector At, int32 Tier)
 	const float Gz = GetWorld()->LineTraceSingleByChannel(H, At + FVector(0, 0, 3000.f), At - FVector(0, 0, 6000.f), ECC_Visibility, Q) ? H.ImpactPoint.Z : WildGroundZ(At);
 	ARDMonster* M = SpawnWildMonsterAt(Def, FVector(At.X, At.Y, Gz), 0.f, 4242 + WildRoamers.Num(), FMath::Max(Tier, 1), 1.f, TEXT("Ambusher"));
 	if (!M) return nullptr;
-	M->bHunting = true; M->HuntUntil = GetWorld()->GetTimeSeconds() + 60.f;
+	if (bHunt) { M->bHunting = true; M->HuntUntil = GetWorld()->GetTimeSeconds() + 60.f; }
 	WildRoamers.Add(M);
 	return M;
 }

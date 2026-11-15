@@ -1,0 +1,339 @@
+{
+ "tag": "s13p3f",
+ "plan": [
+  "scenery13=aspen_edge",
+  "land13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "scenery13",
+   "ok": true,
+   "kinds": {
+    "aspen_edge": {
+     "found": true,
+     "id": 67339542,
+     "at_km": [
+      55.45,
+      17.11
+     ],
+     "name": "Grove's edge",
+     "laid": {
+      "kind": "aspen_edge",
+      "title": "Grove's edge",
+      "x": 55450.5,
+      "y": 17108.7,
+      "pieces": 11,
+      "boxes": 1,
+      "guards": 2,
+      "uses": 0,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 163.6
+     },
+     "bottom_over_ground_cm": [
+      -89,
+      -25,
+      -9
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 1,
+     "want_chests": 1,
+     "ambush_low": {
+      "monsters": 2,
+      "lying_low": 2,
+      "hunting": 0
+     },
+     "told_from_m": 20.0,
+     "ambush_sprung": {
+      "monsters": 2,
+      "hunting": 2,
+      "lying_low": 0,
+      "m_from_her": [
+       9.1,
+       9.1
+      ],
+      "hp_lost": 54.4
+     },
+     "uses": [],
+     "hazards": [],
+     "told": "Grove's edge: where the aspens meet the pines: a cold camp, and someone watching from the trees | The grass moves against the wind: something was lying in wait!",
+     "ok": true
+    }
+   },
+   "table": 88,
+   "counts_30km": {
+    "tall_grass": 76,
+    "burrow_town": 253,
+    "hanged_tree": 58,
+    "nest_tree": 69,
+    "shrine_tree": 74,
+    "erratic": 233,
+    "migration": 9,
+    "wallow": 62,
+    "hive_meadow": 31,
+    "brook_crossing": 0,
+    "fairy_ring": 53,
+    "shepherd_hut": 315,
+    "reed_pond": 1,
+    "old_orchard": 111,
+    "dusk_meadow": 17,
+    "butte": 209,
+    "battlefield": 227,
+    "milestone_road": 8,
+    "crossroads_gibbet": 6,
+    "crossroads_shrine": 3,
+    "crossroads_notice": 2,
+    "wagon_wreck": 1,
+    "hedged_fields": 335,
+    "scarecrows": 39,
+    "threshing_yard": 20,
+    "mill_pond": 2,
+    "pumpkin_patch": 28,
+    "abandoned_farm": 83,
+    "loose_livestock": 85,
+    "baobab": 2,
+    "acacia_shade": 5,
+    "termite_mounds": 7,
+    "kopje": 10,
+    "waterhole": 2,
+    "vulture_kill": 9,
+    "salt_pan": 5,
+    "yurt_camp": 0,
+    "kurgan": 71,
+    "prayer_cairn": 106,
+    "petroglyph_rocks": 364,
+    "hot_spring": 4,
+    "pingo": 0,
+    "charred_snags": 0,
+    "hot_spots": 0,
+    "ash_drift": 0,
+    "regrowth": 0,
+    "scorched_farmstead": 0,
+    "looters_camp": 0,
+    "fire_break": 0,
+    "fused_glass": 0,
+    "beast_carcasses": 0,
+    "resin_camp": 0,
+    "sunlit_clearing": 0,
+    "granite_outcrop": 0,
+    "lightning_pine": 0,
+    "logging_camp": 0,
+    "owl_hollow": 0,
+    "pine_ridge": 0,
+    "lichen_heath": 0,
+    "esker": 0,
+    "pine_dunes": 0,
+    "kettle_lake": 0,
+    "fire_scar": 0,
+    "herder_camp": 0,
+    "seid_stone": 0,
+    "muskeg_bog": 0,
+    "spruce_thicket": 0,
+    "beaver_pond": 0,
+    "moose_wallow": 0,
+    "trapline_cabin": 0,
+    "drunken_forest": 0,
+    "gold_larches": 0,
+    "leaf_pits": 0,
+    "fungus_glade": 0,
+    "hollow_giant": 0,
+    "mossy_walls": 0,
+    "nut_cache": 0,
+    "charcoal_hearth": 0,
+    "dawn_hollow": 0,
+    "harvest_shrine": 0,
+    "watching_aspens": 0,
+    "clonal_grove": 0,
+    "carved_aspens": 0,
+    "gold_stand": 0,
+    "beaver_stumps": 0,
+    "aspen_meadow": 0,
+    "aspen_edge": 0,
+    "windthrow": 0,
+    "cells": 10201
+   }
+  },
+  {
+   "step": "land13",
+   "ok": true,
+   "channels": {
+    "arroyo": {
+     "near": 5,
+     "at_km": [
+      2.15,
+      7.04
+     ],
+     "width_m": 10.9,
+     "depth_m": 3.5,
+     "bed_under_banks_m": 3.83,
+     "her_feet_under_banks_m": 3.42,
+     "ok": true
+    },
+    "dry riverbed": {
+     "near": 5,
+     "at_km": [
+      -12.06,
+      -30.89
+     ],
+     "width_m": 15.8,
+     "depth_m": 1.9,
+     "bed_under_banks_m": 1.64,
+     "her_feet_under_banks_m": 1.5,
+     "ok": true
+    },
+    "irrigation ditch": {
+     "near": 5,
+     "at_km": [
+      3.06,
+      1.49
+     ],
+     "width_m": 1.8,
+     "depth_m": 0.9,
+     "bed_under_banks_m": 0.83,
+     "her_feet_under_banks_m": 0.82,
+     "ok": true
+    },
+    "fire break": {
+     "near": 5,
+     "at_km": [
+      71.02,
+      -4.79
+     ],
+     "width_m": 8.1,
+     "depth_m": 0.7,
+     "bed_under_banks_m": 0.71,
+     "her_feet_under_banks_m": 0.71,
+     "ok": true
+    },
+    "holloway": {
+     "near": 5,
+     "at_km": [
+      22.16,
+      -73.9
+     ],
+     "width_m": 4.3,
+     "depth_m": 3.4,
+     "bed_under_banks_m": 3.42,
+     "her_feet_under_banks_m": 3.41,
+     "ok": true
+    }
+   },
+   "swales": {
+    "grasslands": {
+     "found": true,
+     "at_km": [
+      6.0,
+      0.0
+     ],
+     "amp": 3.5,
+     "range_m": 23.5,
+     "crests_1600m": 8,
+     "crests_hiding_300m": 7
+    },
+    "savannahs": {
+     "found": true,
+     "at_km": [
+      -15.0,
+      -25.98
+     ],
+     "amp": 3.0,
+     "range_m": 40.1,
+     "crests_1600m": 5,
+     "crests_hiding_300m": 3
+    },
+    "plains": {
+     "found": true,
+     "at_km": [
+      -6.43,
+      -7.66
+     ],
+     "amp": 5.0,
+     "range_m": 105.1,
+     "crests_1600m": 3,
+     "crests_hiding_300m": 2
+    }
+   },
+   "crossroads_50km": 56,
+   "storm": {
+    "on": 1,
+    "km": 6.0
+   },
+   "grassfire": {
+    "name": "grassfire",
+    "on": 1,
+    "km": 8.0
+   },
+   "dust": {
+    "fair_fog": [
+     0.42,
+     0.45,
+     0.5
+    ],
+    "dust_fog": [
+     0.651,
+     0.495,
+     0.31
+    ],
+    "weather": "dust"
+   },
+   "whiteout": {
+    "fair_fog": [
+     0.42,
+     0.45,
+     0.5
+    ],
+    "white_fog": [
+     0.567,
+     0.621,
+     0.725
+    ],
+    "weather": "whiteout"
+   },
+   "field_stages": {
+    "ripe": 2882,
+    "sprouting": 1122,
+    "fallow": 708,
+    "burned": 287,
+    "fields": 4999
+   },
+   "quiet": {
+    "pine forests": {
+     "scale": 0.65,
+     "notice_m": 25.0,
+     "start_m": 20.0,
+     "after_3s_m": 20.0,
+     "came": false
+    },
+    "grasslands": {
+     "scale": 1.0,
+     "notice_m": 25.0,
+     "start_m": 19.9,
+     "after_3s_m": 15.5,
+     "came": true
+    }
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s13p3f_scenery13_aspen_edge.png",
+  "wd_s13p3f_scenery13_aspen_edge_near.png",
+  "wd_s13p3f_land13_arroyo.png",
+  "wd_s13p3f_land13_dry riverbed.png",
+  "wd_s13p3f_land13_irrigation ditch.png",
+  "wd_s13p3f_land13_fire break.png",
+  "wd_s13p3f_land13_holloway.png",
+  "wd_s13p3f_land13_storm.png",
+  "wd_s13p3f_land13_grassfire.png",
+  "wd_s13p3f_land13_dust.png",
+  "wd_s13p3f_land13_whiteout.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

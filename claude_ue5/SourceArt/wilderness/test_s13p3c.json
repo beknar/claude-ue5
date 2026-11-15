@@ -1,0 +1,485 @@
+{
+ "tag": "s13p3c",
+ "plan": [
+  "scenery13=watching_aspens+clonal_grove+carved_aspens+gold_stand+beaver_stumps+aspen_meadow+aspen_edge+windthrow"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "scenery13",
+   "ok": false,
+   "kinds": {
+    "watching_aspens": {
+     "found": true,
+     "id": 67340567,
+     "at_km": [
+      55.76,
+      17.55
+     ],
+     "name": "Watching aspens",
+     "laid": {
+      "kind": "watching_aspens",
+      "title": "Watching aspens",
+      "x": 55756.2,
+      "y": 17546.6,
+      "pieces": 21,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 250.1
+     },
+     "bottom_over_ground_cm": [
+      -68,
+      -31,
+      -20
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the scarred trunks",
+       "f": "scenery",
+       "said": "Every scar is an eye, and every eye is on you. It is only bark. It is only bark.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Watching aspens: white trunks with black, eye-like scars that seem to follow you | Every scar is an eye, and every eye is on you. It is only bark. It is only bark.",
+     "ok": true
+    },
+    "clonal_grove": {
+     "found": true,
+     "id": 67343639,
+     "at_km": [
+      57.61,
+      17.74
+     ],
+     "name": "One grove",
+     "laid": {
+      "kind": "clonal_grove",
+      "title": "One grove",
+      "x": 57611.4,
+      "y": 17737.1,
+      "pieces": 34,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 27.2
+     },
+     "bottom_over_ground_cm": [
+      -42,
+      -21,
+      -12
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "buff",
+       "prompt": "rest a hand on the grove",
+       "f": "scenery",
+       "said": "Every trunk on the hill shares one root. It is very old, and very patient.  The Grove's Calm: your blows 0% stronger, 10% less of each blow reaches you, for 10 ",
+       "got": {},
+       "blessing": "The Grove's Calm",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "One grove: a whole hillside of aspens grown from one root: one living thing | Every trunk on the hill shares one root. It is very old, and very patient.  The Grove's Calm: your blows 0% stronger, 10% less of each blow reaches you, for 10 minutes",
+     "ok": true
+    },
+    "carved_aspens": {
+     "found": true,
+     "id": 67345677,
+     "at_km": [
+      59.06,
+      11.46
+     ],
+     "name": "Carved trunks",
+     "laid": {
+      "kind": "carved_aspens",
+      "title": "Carved trunks",
+      "x": 59059.0,
+      "y": 11463.6,
+      "pieces": 7,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 8.1
+     },
+     "bottom_over_ground_cm": [
+      -46,
+      -26,
+      -12
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "rumour",
+       "prompt": "read the carvings",
+       "f": "scenery",
+       "said": "Names, dates, a heart, a crude map: one carving points the way to something.  A notice tells of A ruined fortress, 1.9 km south of here.",
+       "got": {},
+       "blessing": "The Grove's Calm",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Carved trunks: aspens carved with names, symbols and dates by shepherds and travellers | Names, dates, a heart, a crude map: one carving points the way to something.  A notice tells of A ruined fortress, 1.9 km south of here.",
+     "ok": true
+    },
+    "gold_stand": {
+     "found": true,
+     "id": 67341589,
+     "at_km": [
+      56.39,
+      16.33
+     ],
+     "name": "Golden stand",
+     "laid": {
+      "kind": "gold_stand",
+      "title": "Golden stand",
+      "x": 56393.3,
+      "y": 16325.8,
+      "pieces": 22,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 0,
+      "hazards": 0,
+      "fx": 1,
+      "fx_on": 1,
+      "herd": 0,
+      "yaw": 156.8
+     },
+     "bottom_over_ground_cm": [
+      -77,
+      -35,
+      -19
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [],
+     "hazards": [],
+     "told": "Golden stand: aspens turned bright gold against dark conifers",
+     "ok": true
+    },
+    "beaver_stumps": {
+     "found": false,
+     "ok": false
+    },
+    "aspen_meadow": {
+     "found": true,
+     "id": 67344653,
+     "at_km": [
+      58.25,
+      11.77
+     ],
+     "name": "Aspen undergrowth",
+     "laid": {
+      "kind": "aspen_meadow",
+      "title": "Aspen undergrowth",
+      "x": 58254.2,
+      "y": 11767.6,
+      "pieces": 10,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 2,
+      "fx_on": 2,
+      "herd": 0,
+      "yaw": 51.3
+     },
+     "bottom_over_ground_cm": [
+      -37,
+      -7,
+      -6
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "forage",
+       "prompt": "pick the berries",
+       "f": "scenery",
+       "said": "You take 3 Wild Berries",
+       "got": {
+        "Wild Berries": 3
+       },
+       "blessing": "The Grove's Calm",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Aspen undergrowth: sunny, airy undergrowth of wildflowers and berries under the aspens | You take 3 Wild Berries",
+     "ok": true
+    },
+    "aspen_edge": {
+     "found": true,
+     "id": 67339542,
+     "at_km": [
+      55.45,
+      17.11
+     ],
+     "name": "Grove's edge",
+     "laid": {
+      "kind": "aspen_edge",
+      "title": "Grove's edge",
+      "x": 55450.5,
+      "y": 17108.7,
+      "pieces": 11,
+      "boxes": 1,
+      "guards": 2,
+      "uses": 0,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 163.6
+     },
+     "bottom_over_ground_cm": [
+      -92,
+      -32,
+      -9
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 1,
+     "want_chests": 1,
+     "ambush_low": {
+      "monsters": 2,
+      "lying_low": 2,
+      "hunting": 0
+     },
+     "told_from_m": 20.0,
+     "ambush_sprung": {
+      "monsters": 2,
+      "hunting": 0,
+      "lying_low": 0,
+      "m_from_her": [
+       22.2,
+       20.7
+      ]
+     },
+     "uses": [],
+     "hazards": [],
+     "told": "Grove's edge: where the aspens meet the pines: a cold camp, and someone watching from the trees | The grass moves against the wind: something was lying in wait!",
+     "ok": false
+    },
+    "windthrow": {
+     "found": true,
+     "id": 67340563,
+     "at_km": [
+      56.12,
+      15.37
+     ],
+     "name": "Windthrow",
+     "laid": {
+      "kind": "windthrow",
+      "title": "Windthrow",
+      "x": 56119.7,
+      "y": 15370.8,
+      "pieces": 9,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 129.1
+     },
+     "bottom_over_ground_cm": [
+      -108,
+      -56,
+      -14
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the fallen trees",
+       "f": "scenery",
+       "said": "One storm laid them all the same way. You could cross the gully on that trunk.",
+       "got": {},
+       "blessing": "The Grove's Calm",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Windthrow: a storm's swath of fallen trees, root plates torn up: a barrier, a bridge, a hiding place | One storm laid them all the same way. You could cross the gully on that trunk.",
+     "ok": true
+    }
+   },
+   "table": 88,
+   "counts_30km": {
+    "tall_grass": 77,
+    "burrow_town": 249,
+    "hanged_tree": 59,
+    "nest_tree": 69,
+    "shrine_tree": 73,
+    "erratic": 233,
+    "migration": 3,
+    "wallow": 63,
+    "hive_meadow": 31,
+    "brook_crossing": 0,
+    "fairy_ring": 53,
+    "shepherd_hut": 318,
+    "reed_pond": 1,
+    "old_orchard": 111,
+    "dusk_meadow": 17,
+    "butte": 209,
+    "battlefield": 229,
+    "milestone_road": 9,
+    "crossroads_gibbet": 1,
+    "crossroads_shrine": 1,
+    "crossroads_notice": 0,
+    "wagon_wreck": 5,
+    "hedged_fields": 339,
+    "scarecrows": 39,
+    "threshing_yard": 20,
+    "mill_pond": 2,
+    "pumpkin_patch": 29,
+    "abandoned_farm": 83,
+    "loose_livestock": 83,
+    "baobab": 2,
+    "acacia_shade": 5,
+    "termite_mounds": 7,
+    "kopje": 10,
+    "waterhole": 2,
+    "vulture_kill": 9,
+    "salt_pan": 5,
+    "yurt_camp": 0,
+    "kurgan": 73,
+    "prayer_cairn": 106,
+    "petroglyph_rocks": 364,
+    "hot_spring": 4,
+    "pingo": 0,
+    "charred_snags": 0,
+    "hot_spots": 0,
+    "ash_drift": 0,
+    "regrowth": 0,
+    "scorched_farmstead": 0,
+    "looters_camp": 0,
+    "fire_break": 0,
+    "fused_glass": 0,
+    "beast_carcasses": 0,
+    "resin_camp": 0,
+    "sunlit_clearing": 0,
+    "granite_outcrop": 0,
+    "lightning_pine": 0,
+    "logging_camp": 0,
+    "owl_hollow": 0,
+    "pine_ridge": 0,
+    "lichen_heath": 0,
+    "esker": 0,
+    "pine_dunes": 0,
+    "kettle_lake": 0,
+    "fire_scar": 0,
+    "herder_camp": 0,
+    "seid_stone": 0,
+    "muskeg_bog": 0,
+    "spruce_thicket": 0,
+    "beaver_pond": 0,
+    "moose_wallow": 0,
+    "trapline_cabin": 0,
+    "drunken_forest": 0,
+    "gold_larches": 0,
+    "leaf_pits": 0,
+    "fungus_glade": 0,
+    "hollow_giant": 0,
+    "mossy_walls": 0,
+    "nut_cache": 0,
+    "charcoal_hearth": 0,
+    "dawn_hollow": 0,
+    "harvest_shrine": 0,
+    "watching_aspens": 0,
+    "clonal_grove": 0,
+    "carved_aspens": 0,
+    "gold_stand": 0,
+    "beaver_stumps": 0,
+    "aspen_meadow": 0,
+    "aspen_edge": 0,
+    "windthrow": 0,
+    "cells": 10201
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s13p3c_scenery13_watching_aspens.png",
+  "wd_s13p3c_scenery13_watching_aspens_near.png",
+  "wd_s13p3c_scenery13_clonal_grove.png",
+  "wd_s13p3c_scenery13_clonal_grove_near.png",
+  "wd_s13p3c_scenery13_carved_aspens.png",
+  "wd_s13p3c_scenery13_carved_aspens_near.png",
+  "wd_s13p3c_scenery13_gold_stand.png",
+  "wd_s13p3c_scenery13_gold_stand_near.png",
+  "wd_s13p3c_scenery13_aspen_meadow.png",
+  "wd_s13p3c_scenery13_aspen_meadow_near.png",
+  "wd_s13p3c_scenery13_aspen_edge.png",
+  "wd_s13p3c_scenery13_aspen_edge_near.png",
+  "wd_s13p3c_scenery13_windthrow.png",
+  "wd_s13p3c_scenery13_windthrow_near.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}
