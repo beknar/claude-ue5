@@ -100,14 +100,16 @@ void ARDDungeonGenerator::LayWildScenery(ARDWildChunk* C, const FRDWildPlace& P)
 		H.Who = M.FindRef(TEXT("who")); H.Hide = M.FindRef(TEXT("hide")); H.Named = M.FindRef(TEXT("named")); H.Msg = M.FindRef(TEXT("msg")); H.Count = FMath::Max(1, (int32)RDS13Num(M, TEXT("n"), 1.f));
 		if (!H.Hide.IsEmpty())
 		{
-			// (the piece it moves: of the laid ones whose mesh's name has Hide in it, the nearest within 5 m of its point (a snag that
-			// falls, a scarecrow that wakes)); where it stands, its turn, its foot and its height
-			float Best = 500.f;
+			// (the piece it moves: of the laid ones whose mesh's name has Hide in it, the nearest to its point by the piece's middle (a
+			// snag that falls, a scarecrow that wakes)); where it stands, its turn, its foot and its height. (PR #66's review: only one
+			// within 5 m of its point by the component's origin: ten snags over 18 m left about half the snags' hazards with none)
+			float Best = 1e9f;
 			for (const TWeakObjectPtr<UPrimitiveComponent>& Wc : Rec.Comps)
 			{
 				const UStaticMeshComponent* Sc = Cast<UStaticMeshComponent>(Wc.Get());
 				if (!Sc || !Sc->GetStaticMesh() || !Sc->GetStaticMesh()->GetName().Contains(H.Hide)) continue;
-				const float D = FVector::Dist2D(Sc->GetComponentLocation(), H.At);
+				H.Cands.Add(Wc);
+				const float D = FVector::Dist2D(Sc->Bounds.Origin, H.At);
 				if (D < Best) { Best = D; H.Comp = Wc; }
 			}
 			if (UPrimitiveComponent* Hc = H.Comp.Get())
@@ -210,21 +212,9 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 				if (!bIn || Now < Hz.ReadyAt) continue;
 				Hz.ReadyAt = Now + 25.f; ++Hz.Sprung; ++WildHazardsSprung;
 				PlayerCombat->HurtByTrap(0.06f * Hz.P, 0.5f, 2.5f, TEXT("The ground gives way into a tunnel"));
-				if (Hz.Sprung == 1 && bCombat)
-				{
-					// (its diggers: of the monsters whose name says so, else the region's)
-					TArray<int32> Kinds; WildKindsForTier(Wild->TierAt(H2.X, H2.Y), Kinds);
-					TArray<int32> Diggers; for (int32 Ki = 0; Ki < Monsters.Num(); ++Ki) if (Monsters[Ki].Mesh && (Monsters[Ki].Name.ToString().Contains(TEXT("Rat")) || Monsters[Ki].Name.ToString().Contains(TEXT("Pangolin")))) Diggers.Add(Ki);
-					if (Diggers.Num() > 0) Kinds = Diggers;
-					FRandomStream Rm((int32)FRDWildWorld::Hash(Hz.Id, 0x1315, Wild->Seed));
-					for (int32 I = 0; I < 2 && Kinds.Num() > 0; ++I)
-					{
-						const float A = Rm.FRandRange(0.f, 2.f * PI);
-						FVector L(Her.X + FMath::Cos(A) * 500.f, Her.Y + FMath::Sin(A) * 500.f, 0.f); L.Z = WildGroundZ(L);
-						if (ARDMonster* Mo = SpawnWildMonsterAt(Monsters[Kinds[Rm.RandRange(0, Kinds.Num() - 1)]], L, FMath::RadiansToDegrees(A) + 180.f, (int32)Rm.GetUnsignedInt(), Wild->TierAt(H2.X, H2.Y), 0.7f, FString()))
-						{ Mo->bHunting = true; Mo->HuntUntil = Now + 40.f; if (Hz.Chunk.IsValid()) Hz.Chunk->Props.Add(Mo); }
-					}
-				}
+				// (its diggers: of the monsters whose name says so, else the region's; 5 m round her (PR #66's review: one rule for a
+				// scenery's monsters, SpawnSceneryMonsters))
+				if (Hz.Sprung == 1 && bCombat) SpawnSceneryMonsters(Hz.Chunk.Get(), TEXT("Rat+Pangolin"), 2, FString(), Her, (uint32)Hz.Id, 500.f, 0.7f, 40.f);
 				UE_LOG(LogRDScen13, Log, TEXT("RDSCENHAZ collapse at (%.0f, %.0f), %d"), Hz.At.X, Hz.At.Y, Hz.Sprung);
 			}
 			else if (Hz.Kind == TEXT("sting"))
@@ -264,15 +254,24 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 			else if (Hz.Kind == TEXT("fall"))
 			{
 				// (a charred snag: as she comes near it falls, toward her, over 1.2 s; under it at the end, a heavy blow)
-				UPrimitiveComponent* Hc = Hz.Comp.Get();
-				if (!Hc) continue;
 				if (Hz.Start < 0.f)
 				{
 					if (!bIn) continue;
+					// (the snag nearest her comes down (PR #66's review: the one bound by the hazard's point could stand 18 m off her))
+					float Bd = 1e18f;
+					for (const TWeakObjectPtr<UPrimitiveComponent>& Wc : Hz.Cands)
+						if (UPrimitiveComponent* Cc = Wc.Get()) { const float Dd = FVector::DistSquared2D(Cc->Bounds.Origin, Her); if (Dd < Bd) { Bd = Dd; Hz.Comp = Wc; } }
+					UPrimitiveComponent* Hn = Hz.Comp.Get();
+					if (!Hn) continue;
+					const FBox Bb = Hn->Bounds.GetBox();
+					Hz.Rot0 = Hn->GetComponentQuat(); Hz.Loc0 = Hn->GetComponentLocation();
+					Hz.Pivot = FVector(Bb.GetCenter().X, Bb.GetCenter().Y, Bb.Min.Z); Hz.Length = Bb.GetSize().Z;
 					Hz.Start = Now; Hz.FallDir = (FVector2D(Her) - FVector2D(Hz.Pivot)).GetSafeNormal(); ++WildHazardsSprung;
 					if (Hz.FallDir.IsNearlyZero()) Hz.FallDir = FVector2D(1, 0);
 					PlayerCombat->ShowMessage(TEXT("A crack overhead: the burned tree is coming down!"));
 				}
+				UPrimitiveComponent* Hc = Hz.Comp.Get();
+				if (!Hc) continue;
 				const float T = FMath::Clamp((Now - Hz.Start) / 1.2f, 0.f, 1.f);
 				if (Hz.Sprung > 0) continue;
 				const FVector Axis = FVector::CrossProduct(FVector::UpVector, FVector(Hz.FallDir, 0.0)).GetSafeNormal();
@@ -295,7 +294,7 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 				{
 					if (FVector::Dist2D(Hunter->GetActorLocation(), Prey->GetActorLocation()) < 260.f)
 					{
-						Prey->TakeHit(1e6f, Hunter->GetActorLocation()); ++Hz.Kills; ++Hz.Sprung; ++WildHazardsSprung; Hz.Prey.Reset();
+						bWildPredatorKill = true; Prey->TakeHit(1e6f, Hunter->GetActorLocation()); bWildPredatorKill = false; ++Hz.Kills; ++Hz.Sprung; ++WildHazardsSprung; Hz.Prey.Reset();
 						if (FSceneryHerd* Hd = WildSceneryHerds.FindByPredicate([&](const FSceneryHerd& X) { return X.Id == Hz.Id / 8; }))
 							for (const TWeakObjectPtr<ARDWildAnimal>& Wa : Hd->Animals)
 								if (ARDWildAnimal* A = Wa.Get(); A && !A->IsDead())
@@ -441,12 +440,15 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 	}
 }
 
-void ARDDungeonGenerator::SpawnSceneryMonsters(ARDWildChunk* C, const FString& Who, int32 N, const FString& Named, const FVector& At, uint32 Salt)
+void ARDDungeonGenerator::SpawnSceneryMonsters(ARDWildChunk* C, const FString& Who, int32 N, const FString& Named, const FVector& At, uint32 Salt, float Ring, float Hp, float Hunt)
 {
 	if (!bCombat || !IsWildReady() || !GetWorld()) return;
 	const FVector2D A2(At.X / 100.0, At.Y / 100.0);
 	TArray<int32> Kinds; WildKindsForTier(Wild->TierAt(A2.X, A2.Y), Kinds);
-	TArray<int32> Named2; for (int32 Ki = 0; Ki < Monsters.Num(); ++Ki) if (Monsters[Ki].Mesh && !Who.IsEmpty() && Monsters[Ki].Name.ToString().Contains(Who)) Named2.Add(Ki);
+	TArray<FString> Parts; Who.ParseIntoArray(Parts, TEXT("+"), true);
+	TArray<int32> Named2;
+	for (int32 Ki = 0; Ki < Monsters.Num(); ++Ki)
+		if (Monsters[Ki].Mesh && Parts.ContainsByPredicate([&](const FString& Pt) { return Monsters[Ki].Name.ToString().Contains(Pt, ESearchCase::CaseSensitive); })) Named2.Add(Ki);
 	if (Named2.Num() > 0) Kinds = Named2;
 	if (Kinds.Num() == 0) return;
 	FRandomStream Rm((int32)FRDWildWorld::Hash((int32)Salt, 0x131A, Wild->Seed));
@@ -454,11 +456,11 @@ void ARDDungeonGenerator::SpawnSceneryMonsters(ARDWildChunk* C, const FString& W
 	const float Now = GetWorld()->GetTimeSeconds();
 	for (int32 I = 0; I < FMath::Clamp(N, 1, 8); ++I)
 	{
-		const float A = Rm.FRandRange(0.f, 2.f * PI), D = N > 1 ? Rm.FRandRange(100.f, 350.f) : 0.f;
+		const float A = Rm.FRandRange(0.f, 2.f * PI), D = Ring > 0.f ? Ring : N > 1 ? Rm.FRandRange(100.f, 350.f) : 0.f;
 		FVector L(At.X + FMath::Cos(A) * D, At.Y + FMath::Sin(A) * D, 0.f); L.Z = WildGroundZ(L);
-		const float Yaw = Her ? FMath::RadiansToDegrees(FMath::Atan2(Her->GetActorLocation().Y - L.Y, Her->GetActorLocation().X - L.X)) : 0.f;
-		if (ARDMonster* Mo = SpawnWildMonsterAt(Monsters[Kinds[Rm.RandRange(0, Kinds.Num() - 1)]], L, Yaw, (int32)Rm.GetUnsignedInt(), Wild->TierAt(A2.X, A2.Y), 1.f, Named))
-		{ Mo->bHunting = true; Mo->HuntUntil = Now + 60.f; if (C) C->Props.Add(Mo); }
+		const float Yaw = Ring > 0.f ? FMath::RadiansToDegrees(A) + 180.f : Her ? FMath::RadiansToDegrees(FMath::Atan2(Her->GetActorLocation().Y - L.Y, Her->GetActorLocation().X - L.X)) : 0.f;
+		if (ARDMonster* Mo = SpawnWildMonsterAt(Monsters[Kinds[Rm.RandRange(0, Kinds.Num() - 1)]], L, Yaw, (int32)Rm.GetUnsignedInt(), Wild->TierAt(A2.X, A2.Y), Hp, Named))
+		{ Mo->bHunting = true; Mo->HuntUntil = Now + Hunt; if (C) C->Props.Add(Mo); }
 	}
 }
 
@@ -620,6 +622,15 @@ FString ARDDungeonGenerator::WildSceneryInteract(const FVector& From)
 		FString Gn, Gc = TEXT("1"); M.FindRef(TEXT("give")).Split(TEXT("|"), &Gn, &Gc);
 		if (Gn.IsEmpty()) Gn = M.FindRef(TEXT("give"));
 		const int32 Need = FMath::Max(1, FCString::Atoi(*Gc));
+		// (what a trade gives, read before anything is taken (PR #66's review: a "get" with no count or an item the table lacks took her
+		// things for nothing))
+		FString Rn, Rc = TEXT("1"); M.FindRef(TEXT("get")).Split(TEXT("|"), &Rn, &Rc);
+		if (Rn.IsEmpty()) Rn = M.FindRef(TEXT("get"));
+		if (Do == TEXT("trade") && FindItem(FName(*Rn)) < 0)
+		{
+			UE_LOG(LogRDScen13, Warning, TEXT("RDSCEN %s: a trade for %s, which is no item"), *K.Name.ToString(), *Rn);
+			return TEXT("scenery");
+		}
 		if (FindItem(FName(*Gn)) < 0 || PlayerCombat->GetItemCount(FName(*Gn)) < Need)
 		{
 			PlayerCombat->ShowMessage(FString::Printf(TEXT("You have no %s to %s."), *Gn.ToLower(), Do == TEXT("offer") ? TEXT("leave here") : TEXT("trade")));
@@ -635,9 +646,8 @@ FString ARDDungeonGenerator::WildSceneryInteract(const FVector& From)
 		}
 		else
 		{
-			FString Rn, Rc = TEXT("1"); M.FindRef(TEXT("get")).Split(TEXT("|"), &Rn, &Rc);
 			const int32 Got = FMath::Max(1, FCString::Atoi(*Rc));
-			if (FindItem(FName(*Rn)) >= 0) PlayerCombat->AddItem(FName(*Rn), Got);
+			PlayerCombat->AddItem(FName(*Rn), Got);
 			Said = FString::Printf(TEXT("%s%sYou trade %d %s for %d %s."), *Said, Said.IsEmpty() ? TEXT("") : TEXT("  "), Need, *Gn, Got, *Rn);
 		}
 	}

@@ -547,6 +547,7 @@ void FRDWildWorld::FarmAt(double X, double Y, float FarmW, FRDWFarm& O) const
 		O.Plot = Fl;
 		O.Crop = PickCrop(G.X, G.Y, Seed + 141u);
 		O.Stage = RDWFieldStage(Rand01(G.X, G.Y, Seed + 142u));
+		if (O.Stage >= 2) O.Crop = -1;          // (fallow or burned: no crop to tend, harvest or plant (PR #66's review))
 		O.Field = Fade * RDWSmooth(2.f, 4.5f, (float)Ef) * (1.f - 0.65f * O.Furrow);
 		O.Ridge = (0.28f + 0.14f * Rand01(Fl.X, Fl.Y, Seed + 100u)) * Rd * Fade * RDWSmooth(1.f, 5.f, (float)Ef);
 		O.Shade = 0.91f + 0.18f * Rand01(O.Strip, Fl.X * 7919 + Fl.Y, Seed + 101u);
@@ -571,6 +572,7 @@ void FRDWildWorld::FarmAt(double X, double Y, float FarmW, FRDWFarm& O) const
 	{
 		O.Crop = PickCrop(G.X * 3 + (int32)(Rand01(Pl.X, Pl.Y, Seed + 105u) * 3.f), G.Y, Seed + 111u);
 		O.Stage = RDWFieldStage(Rand01(Pl.X, Pl.Y, Seed + 143u));
+		if (O.Stage >= 2) O.Crop = -1;
 		O.Field = Fade * RDWSmooth(1.2f, 3.5f, (float)Ep) * RDWSmooth(0.f, 6.f, (float)(Reach - Dsite));
 		O.Shade = 0.94f + 0.12f * Rand01(Pl.X, Pl.Y, Seed + 108u);
 	}
@@ -997,6 +999,9 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 		if (Fm.Stage >= 2 && Fm.Field > 0.f)
 		{
 			const float Fsh = Fm.Field * (1.f - RDWSmooth(25.f, 110.f, PixelM));
+			// (still a field to every other rule (PR #66's review: with no share the plants, the places and the scenery took a burned
+			// field for open land))
+			Field = Fsh;
 			const FLinearColor Sc = Fm.Stage == 3 ? FLinearColor(0.055f, 0.05f, 0.045f) : FLinearColor(0.20f, 0.17f, 0.10f);
 			const FLinearColor Wc = Fm.Stage == 3 ? FLinearColor(0.10f, 0.09f, 0.07f) : FLinearColor(0.20f, 0.27f, 0.09f);
 			const float Mix = 0.5f + 0.5f * Fbm(X, Y, 1.0 / 7.0, 2, Seed + 144u);
@@ -2109,6 +2114,20 @@ void FRDWildWorld::SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) cons
 	// a kind of open ground)
 	const int32 Bc = BiomeAt(X0 + SceneryCellM * 0.5, Y0 + SceneryCellM * 0.5);
 	const FString Bn = BiomeName(Bc);
+	// (the ponds (Want 4) and lakes (2) or both (0) whose middle lies in the cell, 60 m inside it: from every 2 km hash cell the
+	// scenery cell covers (PR #66's review: the one under its middle missed a pond across a hash cell's edge))
+	auto CellWaters = [&](int32 Want)
+	{
+		TArray<const FLake*> Ws;
+		auto In = [&](const FLake& L) { return L.Kind != 6 && L.C.X >= X0 + 60.0 && L.C.X <= X0 + SceneryCellM - 60.0 && L.C.Y >= Y0 + 60.0 && L.C.Y <= Y0 + SceneryCellM - 60.0; };
+		for (int32 I = FMath::FloorToInt(X0 / HashM); I <= FMath::FloorToInt((X0 + SceneryCellM) / HashM); ++I)
+			for (int32 J = FMath::FloorToInt(Y0 / HashM); J <= FMath::FloorToInt((Y0 + SceneryCellM) / HashM); ++J)
+			{
+				if (Want != 2) for (auto It = PondHash.CreateConstKeyIterator(FIntPoint(I, J)); It; ++It) if (In(Ponds[It.Value()])) Ws.AddUnique(&Ponds[It.Value()]);
+				if (Want != 4) for (auto It = LakeHash.CreateConstKeyIterator(FIntPoint(I, J)); It; ++It) if (In(Lakes[It.Value()])) Ws.AddUnique(&Lakes[It.Value()]);
+			}
+		return Ws;
+	};
 	// (a cell that holds a crossroads takes a kind that stands at one four times in five, one a road crosses a roadside kind two in five:
 	// drawn among all kinds, the 155 crossroads of a world held one of their kinds about one time in nine)
 	FString Only;
@@ -2127,13 +2146,7 @@ void FRDWildWorld::SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) cons
 					}
 		// (phase 2: a cell that holds a pond's or a lake's middle takes a kind that stands by water three times in five: drawn among all
 		// of a savannah's kinds, a waterhole met a pond nowhere within 150 km)
-		bool bWater = false;
-		{
-			const FIntPoint Hc(FMath::FloorToInt((X0 + SceneryCellM * 0.5) / HashM), FMath::FloorToInt((Y0 + SceneryCellM * 0.5) / HashM));
-			auto In = [&](const FLake& L) { return L.Kind != 6 && L.C.X >= X0 + 60.0 && L.C.X <= X0 + SceneryCellM - 60.0 && L.C.Y >= Y0 + 60.0 && L.C.Y <= Y0 + SceneryCellM - 60.0; };
-			for (auto It = PondHash.CreateConstKeyIterator(Hc); It && !bWater; ++It) bWater = In(Ponds[It.Value()]);
-			for (auto It = LakeHash.CreateConstKeyIterator(Hc); It && !bWater; ++It) bWater = In(Lakes[It.Value()]);
-		}
+		const bool bWater = CellWaters(0).Num() > 0;
 		const float U = Rand01(Cell.X, Cell.Y, Seed + 1304u);
 		if (bCross && U < 0.8f) Only = TEXT("crossroads");
 		else if (bRoad && U < 0.4f) Only = TEXT("road");
@@ -2246,13 +2259,8 @@ void FRDWildWorld::SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) cons
 			// the rays from random spots found a waterhole nowhere within 150 km)
 			if (Want == 0 || Want == 2 || Want == 4)
 			{
-				TArray<const FLake*> Ws;
-				const FIntPoint Hc(FMath::FloorToInt((X0 + SceneryCellM * 0.5) / HashM), FMath::FloorToInt((Y0 + SceneryCellM * 0.5) / HashM));
-				if (Want != 2) for (auto It = PondHash.CreateConstKeyIterator(Hc); It; ++It) Ws.Add(&Ponds[It.Value()]);
-				if (Want != 4) for (auto It = LakeHash.CreateConstKeyIterator(Hc); It; ++It) Ws.Add(&Lakes[It.Value()]);
-				for (const FLake* L : Ws)
+				for (const FLake* L : CellWaters(Want))
 				{
-					if (L->Kind == 6 || L->C.X < X0 + 60.0 || L->C.X > X0 + SceneryCellM - 60.0 || L->C.Y < Y0 + 60.0 || L->C.Y > Y0 + SceneryCellM - 60.0) continue;
 					FRDWSample Sm; Sample(L->C.X, L->C.Y, Sm, false);
 					if (Sm.WaterKind == 0 || Sm.WaterKind == 6) continue;
 					const int32 A0 = (int32)(Rand01(Cell.X, Cell.Y, Seed + 1310u) * 8.f);

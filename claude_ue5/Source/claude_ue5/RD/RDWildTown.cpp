@@ -264,7 +264,9 @@ void ARDDungeonGenerator::TickWildPlaces(const FVector2D& AtM)
 			const float Now = GetWorld()->GetTimeSeconds();
 			TArray<int32> Again;
 			for (const TPair<int32, float>& T : WildSceneryToldAt) if (Now - T.Value < 1.f) Again.Add(T.Key);
-			for (const int32 Id : Again) { WildSceneryTold.Remove(Id); WildSceneryToldAt.Remove(Id); }
+			// (its told time kept, moved to now: a stampede still waits its 3 s after the last line (PR #66's review: removed, it could
+			// start at once and hide the discovery))
+			for (const int32 Id : Again) { WildSceneryTold.Remove(Id); WildSceneryToldAt.Add(Id, Now); }
 		}
 	}
 }

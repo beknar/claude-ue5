@@ -1377,15 +1377,18 @@ def step_scenery13():
                     if wp: G["pawn"].set_actor_location(V(wp[0] * 100.0, wp[1] * 100.0, sample(*wp)["z"] + 60.0), False, True)
                     yield from watching(rwait(2.0), msgs)
                 elif hz["kind"] == "hunt":
-                    # (from 40 m off the waterhole, waiting for the hunt: a predator runs a beast of the herd down)
+                    # (from 40 m off the waterhole, waiting for the hunt: a predator runs a beast of the herd down; the kill is not hers
+                    # (PR #66's review: it counted as her kill, kept dead with the game, and dropped its meat))
+                    ak0 = g.get_editor_property("animals_killed")
                     ground_put(hz["x"] / 100.0 + 40.0, hz["y"] / 100.0); yield from watching(rwait(20.0), msgs)
+                    v["counted_hers"] = g.get_editor_property("animals_killed") - ak0
                 else:
                     ground_put(hz["x"] / 100.0, hz["y"] / 100.0)
                     yield from watching(rwait(4.0 if hz["kind"] in ("sting", "heat") else 2.2), msgs)
                 v["hp_lost"] = round(hp0 - cb().get_health(), 1)
                 v["sprung"] = next((x["sprung"] for x in scen_things(g, sid)["haz"] if abs(x["x"] - hz["x"]) < 1 and abs(x["y"] - hz["y"]) < 1), 0)
                 v["monsters_came"] = len(mine_mons()) - mons0
-                v["ok"] = v["sprung"] > 0 and (v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting", "heat", "fall") else True if hz["kind"] == "hunt" else v["monsters_came"] > 0)
+                v["ok"] = v["sprung"] > 0 and (v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting", "heat", "fall") else v.get("counted_hers", 0) == 0 if hz["kind"] == "hunt" else v["monsters_came"] > 0)
                 r["hazards"].append(v)
                 cb().set_health(cb().get_max_health())
                 ground_put(*near); yield from rwait(1.0)

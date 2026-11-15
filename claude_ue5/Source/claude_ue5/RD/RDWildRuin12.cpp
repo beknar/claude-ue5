@@ -58,7 +58,8 @@ namespace
 	{
 		T = FMath::Clamp(T, 0.f, 1.f);
 		// (phase 2: a patch lies on the ground as it is, its height throughout (a salt pan's crust))
-		if (Type == TEXT("patch")) return 1.f;
+		// (eased down over its last 15 % to its foot under the ground (PR #66's review: whole to its rim, the rim stood as a 10 cm lip))
+		if (Type == TEXT("patch")) return 1.f - FMath::SmoothStep(0.85f, 1.f, T);
 		if (Type == TEXT("cone") && Cr > 0.f)
 		{
 			if (T < Cr) return 1.f - 0.5f * (1.f - FMath::Square(T / Cr));

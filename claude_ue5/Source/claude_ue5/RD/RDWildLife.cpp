@@ -212,6 +212,9 @@ void ARDDungeonGenerator::OnWildAnimalKilled(ARDWildAnimal* A)
 	if (!A || !WildFauna.IsValidIndex(A->Def) || !GetWorld()) return;
 	const FRDWildFauna& F = WildFauna[A->Def];
 	const float Now = GetWorld()->GetTimeSeconds();
+	// (a scenery's predator's kill (PR #66's review): not hers: not counted, not kept with the game (the herd is whole when laid
+	// again), nothing dropped; her kills alone thin a herd for good)
+	if (bWildPredatorKill) { UE_LOG(LogRDWildLife, Log, TEXT("RDWILDLIFE %s taken by a predator"), *F.Name.ToString()); return; }
 	++AnimalsKilled;
 	// (a scenery's herd's beast (the list of 2026-11-14): killed for good, kept with the game; its herd is not the loose animals', so
 	// it holds no place against their cap (PR #65's review))

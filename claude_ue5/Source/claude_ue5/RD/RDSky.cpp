@@ -203,7 +203,9 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 		float Pick = ((H >> 4) % 10000u) / 10000.f * Sum;
 		int32 K = 0;
 		for (; K < NumRotationWeathers - 1; ++K) { if (Pick < Wt[K]) break; Pick -= Wt[K]; }
-		if (K == Weather) { K = (K + 1) % NumRotationWeathers; if (K == 6 || (K == WeatherWhiteout && !(bWhiteLand && bSkyCold)) || (K == WeatherDust && !(bDustLand && !bSkyCold))) K = 7; }
+		// (the same weather drawn again: the next of the turn that may come here (PR #66's review: from fog the step went to the
+		// whiteout, was sent back to fog where there is none, and fog held another period))
+		if (K == Weather) for (int32 Step = 1; Step < NumRotationWeathers; ++Step) { const int32 Kn = (Weather + Step) % NumRotationWeathers; if (Wt[Kn] > 0.f) { K = Kn; break; } }
 		if (bSkyCold && (K == 4 || K == 5)) K = 6;
 		Weather = K;
 		const FRDWeatherLook& Lk = RDWeatherLooks[Weather];

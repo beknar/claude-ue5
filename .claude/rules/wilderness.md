@@ -265,4 +265,15 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
   - **A flat piece laid by its lowest corner lies under the ground wherever the land rises over that corner**: the 30 m salt pan and the hot spring's 0.5 m rim were laid, counted and passed while nothing of them showed in the pictures. The pan is a skin over the ground (`L=patch`, the ground's own material in its colour: the kit's masked crust on that mesh drew black), a hollow's kind wants level ground (1.5 m over its 10 m ring), and every picture is looked at.
   - **A hazard's reach is less than the distance she is told from**: the carcasses' wyrm (22 m) woke while she came within the line's 35 m, before the test stood her there, and its count read nothing new. A monster that rises with nothing hidden rises 8 m from her, not on her.
   - **Count a line's fields before indexing it**: the farm line has 14; the test read the 16th and counted no field anywhere.
+  - **PR #66's review (2026-11-15)**:
+    - A death that goes through the player's path is hers: a predator's kill by `TakeHit` counted, was kept dead with the game and dropped meat. `bWildPredatorKill` marks it.
+    - A "pick another" step must pick from what may come: from fog the step to the whiteout was sent back to fog where there is none. Step to the next weight over 0.
+    - A piece a hazard moves is found among all its kind laid, by the piece's middle (`Bounds.Origin`), and the falling one is the nearest her as it springs. "Within 5 m of the point by its origin" left half the snags' hazards with none.
+    - A search over a cell walks every hash cell the cell covers, not the one under its middle.
+    - A trade reads what it gives before it takes anything.
+    - A told time another rule waits on is moved, never removed. Removed, the stampede's 3 s wait was gone.
+    - A field that grows nothing is still a field to every other rule. Fallow and burned keep their share and report no crop.
+    - A skin's rim eases to the ground.
+    - A console command's help follows its table.
+    - A scenery's monsters come from one helper. A name part is matched with case kept ("Rat" is not "Pirate").
   - **The editor can stop at "Wait for ZenServer?"** with the server already up (its health answered 200): Yes brings it back every minute, No lets the editor go on. The session's launcher answers it.

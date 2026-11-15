@@ -2647,6 +2647,8 @@ public:
 		// scarecrow that wakes) and its fall's start; the beasts a waterhole's hunt is between)
 		FString Who, Hide, Named, Msg; int32 Count = 1; TWeakObjectPtr<UPrimitiveComponent> Comp; FQuat Rot0 = FQuat::Identity; FVector Pivot = FVector::ZeroVector, Loc0 = FVector::ZeroVector; FVector2D FallDir = FVector2D(1, 0);
 		float Start = -1.f, Length = 0.f; TArray<TWeakObjectPtr<ARDWildAnimal>> Hunters; TWeakObjectPtr<ARDWildAnimal> Prey; int32 Kills = 0;
+		/** (PR #66's review) every laid piece Hide names: a fall takes the one nearest her as it springs */
+		TArray<TWeakObjectPtr<UPrimitiveComponent>> Cands;
 	};
 	struct FSceneryFx { TWeakObjectPtr<class UNiagaraComponent> Comp; FString Hours; };
 	struct FSceneryHerd { int32 Id = 0; TArray<TWeakObjectPtr<ARDWildAnimal>> Animals; FVector2D Home = FVector2D::ZeroVector; FVector2D Way = FVector2D(1, 0); float Phase = 0.f, Pen = 0.f; bool bMigrate = false, bStampede = false; float StampedeUntil = -1.f, NextHit = 0.f; int32 Stampedes = 0, Hits = 0; };
@@ -2666,10 +2668,13 @@ public:
 	bool WildSceneryFirst(const FVector& From) const;
 	/** when each was told (its line as she came): a stampede waits 3 s after it, or its line would hide the first (one HUD line) */
 	TMap<int32, float> WildSceneryToldAt;
+	/** (PR #66's review) set while a scenery's predator kills a herd beast: no kill of hers (not counted, not kept, nothing dropped) */
+	bool bWildPredatorKill = false;
 	bool IsWildSceneryUsed(const FSceneryUse& U) const;
-	/** monsters of a scenery's own (a hazard's, a use's): N of the kinds whose name has Who in it (else the tier's), round At, hunting
-	 *  her, gone with the chunk */
-	void SpawnSceneryMonsters(ARDWildChunk* C, const FString& Who, int32 N, const FString& Named, const FVector& At, uint32 Salt);
+	/** monsters of a scenery's own (a hazard's, a use's): N of the kinds whose name has one of Who's parts in it ("Rat+Pangolin", case
+	 *  kept: "Rat" is not "Pirate"; else the tier's), round At (1 to 3.5 m for several; Ring cm out, facing it, when given), hunting her
+	 *  for Hunt seconds, gone with the chunk */
+	void SpawnSceneryMonsters(ARDWildChunk* C, const FString& Who, int32 N, const FString& Named, const FVector& At, uint32 Salt, float Ring = 0.f, float Hp = 1.f, float Hunt = 60.f);
 	/** the far storm about (its middle, way, its parts) */
 	TWeakObjectPtr<class UStaticMeshComponent> WildStormCloud; int32 WildFarSightOn = -1;
 	FVector2D WildStormAt = FVector2D::ZeroVector, WildStormWay = FVector2D(1, 0); float WildStormLook = 0.f; float WildStormUntil = -1.f;
