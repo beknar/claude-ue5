@@ -107,7 +107,7 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 			Lines(R.P, FLinearColor(0.20f, 0.36f, 0.42f, 0.9f), FMath::Clamp((float)(R.W.Last() / Mpp), 1.2f, 4.f) * Sc);
 	for (const FRDWildWorld::FRoad& R : W.Roads)
 		if (R.Box.Max.X > X0 && R.Box.Min.X < X1 && R.Box.Max.Y > Y0 && R.Box.Min.Y < Y1)
-			Lines(R.P, FLinearColor(0.42f, 0.33f, 0.22f, 0.9f), FMath::Clamp((float)(5.0 / Mpp), 1.3f, 3.f) * Sc);
+			Lines(R.P, R.bTrack ? FLinearColor(0.45f, 0.37f, 0.26f, 0.75f) : FLinearColor(0.42f, 0.33f, 0.22f, 0.9f), FMath::Clamp((float)((R.bTrack ? 2.5 : 5.0) / Mpp), R.bTrack ? 0.8f : 1.3f, R.bTrack ? 1.8f : 3.f) * Sc);
 	// the fog
 	{
 		FVector2D U0, U1;

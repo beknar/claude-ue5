@@ -7,29 +7,16 @@ C++ first (RD/RDList12.cpp: the pointer over the big map, rd.MapTeleport's click
 RDWildHUD.cpp: the wilds' map drawn only inside the scroll's edge, at the insets bs_scroll.py measures on its picture).
 Args: steps [dir]"""
 import os, sys, unreal
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import importlib, ui_tex
+importlib.reload(ui_tex)
+from ui_tex import ui_texture          # (shared with 926: ui_tex.py)
 eal = unreal.EditorAssetLibrary
 les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
 STEPS = [s for a in sys.argv[1:] if not os.path.isabs(a) for s in a.split(",") if s]
 DIRS = [a for a in sys.argv[1:] if os.path.isabs(a)]
 REPORT = []
-
-
-def ui_texture(png, dest, name):
-    """a picture as a UI texture (883's settings: no mips, never streamed, sRGB, clamped)"""
-    t = unreal.AssetImportTask()
-    t.set_editor_property("filename", png); t.set_editor_property("destination_path", dest); t.set_editor_property("destination_name", name)
-    t.set_editor_property("replace_existing", True); t.set_editor_property("automated", True); t.set_editor_property("save", False)
-    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([t])
-    a = unreal.load_asset(f"{dest}/{name}")
-    assert a, f"923: {png} was not imported"
-    a.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_EDITOR_ICON)
-    a.set_editor_property("lod_group", unreal.TextureGroup.TEXTUREGROUP_UI)
-    a.set_editor_property("mip_gen_settings", unreal.TextureMipGenSettings.TMGS_NO_MIPMAPS)
-    a.set_editor_property("never_stream", True); a.set_editor_property("srgb", True)
-    a.set_editor_property("address_x", unreal.TextureAddress.TA_CLAMP); a.set_editor_property("address_y", unreal.TextureAddress.TA_CLAMP)
-    eal.save_loaded_asset(a, False)
-    return a
 
 
 GAME_MAPS = ("mistward_castle", "martial_arts", "brokenspire", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress")

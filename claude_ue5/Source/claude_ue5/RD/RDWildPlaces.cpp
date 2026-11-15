@@ -85,7 +85,8 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 		// (the farms' farmsteads: RDWildFarm.cpp)
 		// (one a frame, after the chunk's own steps: a farmstead is some 30 pieces, 10 animals and 4 people (PR #30's review))
 		if (P.Kind == TEXT("farmstead")) { WildFarmQueue.Add({ C, P }); continue; }
-		if (P.Poi >= 0) { SpawnWildPoi(C, P); continue; }          // (the seventh phase's small points of interest: RDWildPoi.cpp)
+		if (P.Poi >= 0) { SpawnWildPoi(C, P); continue; }
+		if (P.Scenery >= 0) { LayWildScenery(C, P); continue; }          // (the list of 2026-11-14: the biomes' scenery, RDWildScenery13.cpp)          // (the seventh phase's small points of interest: RDWildPoi.cpp)
 		// (the list of 2026-11-12's fifth phase: a structure, RDWildSite12.cpp; its guards, as a ruin's)
 		if (P.Site >= 0)
 		{
@@ -275,6 +276,7 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 	// (the list of 2026-11-12: a ruin's guardians, its kind's number, after the draws)
 	if (const int32 Rk = P.Kind == TEXT("ruins") && P.Quest.IsEmpty() ? WildRuinKindOf(P) : -1; Rk >= 0) N = WildRuinKinds[Rk].Guards;
 	if (WildSiteKinds.IsValidIndex(P.Site)) N = WildSiteKinds[P.Site].Guards;          // (a structure's)
+	if (WildSceneryKinds.IsValidIndex(P.Scenery)) N = WildSceneryKinds[P.Scenery].Guards;          // (a scenery's, the list of 2026-11-14)
 	// (the list of 2026-11-11: hell's quarter more, after the draw: the place's other draws keep their order; the kills are kept
 	// by number, so the extra ones come last)
 	N = DifficultyCount(N);

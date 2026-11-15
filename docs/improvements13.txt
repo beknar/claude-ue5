@@ -1,0 +1,421 @@
+for these biomes: grasslands, meadows, plains, farms, savannahs, cold steppes, and burned plains, these are a list of scenery that are in them:
+Grasslands
+
+Tall grass that hides predators, ambushes and lost objects
+Burrow towns of prairie dogs or giant rodents, with collapsing tunnels
+A lone tree that serves as a landmark, with a hanged man, a nest or a shrine
+Arroyos and dry creek beds that cut hidden paths below the horizon
+Glacial erratics: huge boulders stranded in open land, good for climbing and vantage points
+Herd migrations that block roads or start stampedes
+Wallows and mud holes where tracks pile up
+
+Meadows
+
+Wildflower patches with bees and wild hives, which can mean honey or stings
+Brooks with stepping stones, small falls and fishing spots
+Fairy rings and mushroom circles
+A shepherd’s hut, sheepfold or drystone pen
+Reed-fringed ponds with frogs, herons and something under the surface
+Wild apple or plum trees left from an old orchard
+Butterfly or firefly swarms at dusk
+
+Plains
+
+Rolling swales that hide what’s over the next rise
+Buttes and mesas that break the skyline and serve as climbable lookouts
+An old battlefield with rusted blades, bones and burial cairns
+Milestones, a broken road or a toppled waymarker
+A crossroads with a gibbet, shrine or notice post
+A wagon wreck with scattered cargo and something that tells the story
+Distant storm cells or tornadoes visible for miles
+
+Farms
+
+Hedgerows and stone walls that turn fields into a maze
+Scarecrows (are they all just scarecrows?)
+Haystacks, a threshing floor and a granary with rats
+A mill and millpond, irrigation ditches, a well
+Orchards, beehives, a pumpkin patch
+Fields at different stages: fallow, sprouting, ripe, burned
+An abandoned farmstead with a root cellar and a door that’s locked from the inside
+Livestock that wanders, escapes or gets taken
+
+Savannahs
+
+Acacia and baobab trees, which give shade, nests and lookouts
+Termite mounds, sometimes taller than a person
+Kopjes: rocky outcrops that attract big cats and hold caves
+Waterholes where every species comes to drink and fights happen
+Kills with circling vultures, which lead the player to danger or loot
+Salt pans and cracked dry riverbeds
+Smoke from grass fires on the horizon
+
+Cold steppes
+
+Nomad yurt camps with horse herds, trading and hospitality customs
+Kurgans and stone figures watching from the hills
+Cairns wrapped in prayer cloth where travelers leave an offering
+Frozen lakes with cracking ice, trapped things and ice fishing holes
+Wind-carved rock and petroglyphs
+Hot springs that steam in the cold and make a natural camp
+Whiteout blizzards or dust storms that wipe out visibility
+Frost heaves and pingos (ice-cored hills)
+
+Burned plains
+
+Charred tree snags, some still standing and some falling
+Smoldering hot spots and ember gusts, which act as hazard zones
+Ash drifts that preserve footprints, making tracking easy
+Early regrowth like fireweed and morels, which signals renewal and gives foraging
+Scorched farmsteads and a survivor or looter camp
+Fire breaks and ditches that show someone fought the blaze
+Fused glass or blackened stone, which hints that this wasn’t a normal fire
+Carcasses drawing scavengers, and the creature that started the fire
+
+General tips for any open terrain
+
+Gentle verticality: Small rises and dips control what the player can see, so each crest can reveal something new.
+A landmark always in view: A tower, tree or smoke column gives the player something to walk toward.
+Moving things: Herds, weather, caravans and patrols make even empty land feel alive.
+Small stories: A campfire still warm, a dropped satchel, tracks that split. These are cheap to build and keep players curious.
+
+
+scenery for these biomes: pine forests, boreal pine forest, taigas, temperate autumn forests, temperate aspen
+Pine forests (temperate or montane)
+
+A soft floor of needles that muffles footsteps, good for stealth
+Resin-tapping camps with clay pots and scarred trunks, plus a turpentine still
+Sunlit clearings where the canopy breaks, with grasses and deer
+Rocky outcrops and granite slabs between widely spaced trunks
+Lightning-struck pines that are split, charred or still smoking
+Logging camps, timber chutes and log flumes running downhill
+Woodpecker trees and owl hollows that can hide caches
+Pine-cone-strewn ridgelines with long views across the valley
+
+Boreal pine forest (dry, sandy and open)
+
+Pale lichen carpets that crunch underfoot, with reindeer grazing on them
+Eskers: long sinuous gravel ridges left by glaciers that make natural raised trails
+Sandy dunes held in place by pines
+Kettle lakes: round, clear and deep
+Old fire scars on trunks and even-aged regrowth stands
+Reindeer herder camps, corrals and drying racks
+Seid stones and sacred boulders with offerings
+The midnight sun or polar night, and auroras over the treetops
+
+Taiga (spruce, fir and larch, wet and dense)
+
+Muskeg and bogs: sinking ground, peat holes and bodies preserved in the peat
+Black spruce thickets so dense they’re almost walls
+Beaver dams and flooded “ghost forests” of drowned trees
+Moose wallows and bear-scratched trunks that warn of territory
+Trapline cabins with snares, fur stretchers and a cache on stilts
+Larches that turn gold and drop their needles in autumn
+Permafrost “drunken forests,” where trees lean every direction as the ground thaws
+Frozen rivers used as winter roads, with ice that can crack
+
+Temperate autumn forests (oak, maple, beech)
+
+Deep, noisy leaf litter that hides pits, roots and tracks
+Mushroom rings, shelf fungi on dead logs and foraging spots
+Old-growth giants with hollow trunks big enough to shelter in
+Sunken lanes and holloways worn into the earth by centuries of travel
+Mossy stone walls running through the woods from forgotten fields
+Acorn and nut caches with squirrels, boars and foragers competing for them
+Charcoal-burner hearths, coppiced stools and woodcutter huts
+Fog in low hollows at dawn and early dusk
+Harvest shrines, carved faces in trees and seasonal festival sites
+
+Temperate aspen groves
+
+White trunks with black eye-like scars that seem to watch you
+Clonal groves where a whole hillside is one organism that shares roots, which is great for fantasy
+Leaves that tremble and rustle even in still air, so sound is always moving
+Carved trunks: names, symbols and dates left by travelers or shepherds
+Bright gold stands in autumn set against dark conifers
+Elk browse lines and beaver-felled stumps near streams
+Sunny, airy undergrowth with wildflowers, berries and grouse
+A sharp edge where the aspen meets pine or meadow, a natural spot for ambushes or camps
+
+What helps any forest
+
+Light changes: Shafts of sun, dark stands and sudden clearings set the pace.
+Sound: Creaking trunks, birdsong that suddenly stops, distant axes.
+Water: Streams, springs and ponds give the player paths to follow and places to stop.
+Deadfall and windthrow: Fallen trees create natural barriers, bridges and hiding spots.
+
+
+
+list of scenery for these biomes: hills, highland moorland, mountains, mountains and peaks, glacial
+Hills
+
+Hillforts: earthen rings and ditches on the summits
+Chalk figures cut into the slopes, like giant horses and men visible for miles
+Terraced fields and drystone walls following the contours
+Holloways and sheep tracks winding between hilltops
+Dew ponds: artificial hilltop ponds that never seem to dry up
+Folly towers, beacon posts and signal fires on the crests
+Quarries cut into a hillside, with abandoned tools and caves behind them
+Vineyards, orchards or sheep grazing on sunny slopes
+Combes and coves: hidden valleys tucked between hills
+
+Highland moorland
+
+Bogs and peat hags: black channels, sinking ground, will-o’-the-wisps
+Tors: wind-sculpted granite stacks on hilltops, good for lookouts and lairs
+Heather and gorse that bloom purple and gold and can catch fire
+Standing stones, stone rows and hut circles from prehistoric settlers
+Peat-cutting banks with stacked turves drying
+Rolling mist that wipes out landmarks and gets people lost
+A lonely shepherd’s bothy, an abandoned croft or a ruined shieling
+Grouse butts, hunting lodges and gamekeeper paths
+Streams rushing through peat-stained water, with fords and stepping stones
+
+Mountains
+
+Switchback trails cut into slopes, with mule trains and rockfall
+Alpine pastures with summer herders, cheese huts and cowbells
+Mountain passes with a fortress, toll gate or hospice monastery
+Scree slopes that slide underfoot
+Waterfalls dropping off hanging valleys
+Mines and adits bored into the rock, with ore carts and tailings
+Cliff-side monasteries or shrines reachable only by ladders or ropes
+Rope bridges over gorges
+Tarns: small dark lakes cupped in rock basins
+Eagles, mountain goats and wild sheep on impossible ledges
+
+Mountains and peaks (high alpine, above the treeline)
+
+Knife-edge ridges and arêtes with sheer drops on both sides
+Summit cairns, prayer flags and the bones of failed climbers
+Thin air that drains stamina and makes the player dizzy
+Cornices: snow overhangs that can collapse underfoot
+Avalanche chutes and cleared paths from past slides
+Couloirs: steep gullies used as climbing routes or death traps
+Wind-carved snow, rime-coated rock and ice-glazed ledges
+Abandoned climbers’ camps with frozen tents, ropes and journals
+Sea-of-clouds views with other peaks rising like islands
+Dragon aeries, giant nests or the source of a sacred river
+
+Glacial
+
+Crevasses, some hidden under snow bridges
+Seracs: towering ice blocks that can topple at any time
+Ice caves with blue light and meltwater tunnels running through them
+Moulins: vertical shafts where meltwater drains into the glacier
+Moraines: ridges of rock and gravel pushed by the ice
+Meltwater lakes, milky-blue rivers and calving ice fronts
+Things frozen in the ice: animals, people, ships, ancient creatures
+Nunataks: rocky peaks poking through an ice sheet like islands
+Snowfields with whiteouts, sun glare and snow blindness
+Ice-locked ruins slowly emerging as the glacier retreats
+
+What helps any high terrain
+
+Vertical goals: Peaks pull players upward the way landmarks pull them across plains.
+Changing routes: Weather, rockfalls and avalanches can reshape paths.
+Rewarding views: Every summit should show the player somewhere new to go.
+Safe havens: Huts, caves and hot springs give relief from the cold and exposure.
+
+
+
+
+ list of scenery for these biomes: canyons, canyon networks, mesas:
+Canyons
+
+Banded cliff walls whose colored strata read like a timeline, sometimes with fossils exposed
+Slot canyons so narrow you can touch both walls, with light shafts from above and flash-flood danger
+A river or creek on the canyon floor with cottonwoods, sandbars and fords
+Cliff dwellings and granaries tucked into alcoves high on the walls
+Petroglyphs and pictographs: handprints, spirals and figures nobody can explain
+Natural arches and bridges carved by wind and water
+Hanging gardens: ferns and flowers growing where seeps leak out of the rock
+Echoes that carry voices, war drums or something calling back
+Rockfall debris, toppled boulders and fresh scars where the wall gave way
+Rim-to-floor trails, toe-hold steps cut into the rock and old rope ladders
+
+Canyon networks (mazes, badlands and branching gorges)
+
+Dead ends and box canyons, which make good traps and ambush points
+Junctions where side canyons split, marked by cairns, carvings or warning signs
+Hidden side canyons reachable only by squeezing, climbing or swimming
+Pour-offs: dry waterfalls that block upstream travel until you climb them
+Potholes and tinajas: rock basins that hold rain water, the only drinks for miles
+Outlaw hideouts, smuggler routes and bandit lookouts on the rims
+Mineral seams, old mines and gold-panning sites along the washes
+Flash-flood debris jammed high in the walls, a warning of how high the water gets
+Hoodoos and fins: rock spires and walls creating a stone forest
+Distant thunder that means you should leave the canyon floor right now
+
+Mesas
+
+Flat sky islands with sheer sides and their own isolated ecosystem
+Mesa-top pueblos or fortresses reachable by one carved stair or hidden path
+Buttes and spires: smaller relatives of mesas that make standalone landmarks
+Talus aprons: steep rubble slopes ringing the base
+Overlooks with views across the desert for dozens of miles
+Sky shrines, solstice markers and sun daggers that light up a carving once a year
+Wind-scoured caprock with pools after rain and lizards sunning themselves
+Eagle and condor nests on ledges below the rim
+A lone juniper or piñon clinging to the edge
+Storms seen from above, with lightning striking below the mesa top
+
+What helps canyon country
+
+Light as a clock: Walls glow red at sunrise and sunset, and slot canyons go dark early, which signals time to move.
+Water as power: Springs, potholes and rivers drive who lives where and what they fight over.
+Rims versus floors: Two layers of travel with very different views, threats and routes.
+Weather danger: Flash floods turn beautiful terrain deadly, which raises tension without needing enemies.
+
+
+
+
+ list of scenery for these biomes: volcanoes, volcanic tundra, geothermal caldera:
+Volcanoes
+
+Lava flows: glowing rivers by night and cooling crusts you can just about walk on
+Lava tubes: tunnels left when lava drained away, used as natural dungeons, shelters or highways
+Cinder cones: small black hills of loose scoria that slide underfoot
+Ash-buried villages with only roofs and church spires poking out
+Volcanic bombs: blobs of rock thrown from the crater and scattered across the slopes
+Fumaroles: vents hissing sulfur steam with yellow crystal crusts
+Obsidian fields of black volcanic glass, good for crafting and dangerous to fall on
+The crater rim, with views into a smoking pit or a lava lake
+Eruption warnings like tremors, ash fall, dying birds and sudden steam
+Fire temples, forges or dwarven foundries built to tap the heat
+
+Volcanic tundra (cold, barren lava land, Iceland-style)
+
+Moss-covered lava fields: soft green blankets over jagged rock that hide holes
+Black sand plains and beaches with icebergs washed up on them
+Basalt columns: hexagonal pillars forming cliffs, caves and giant “steps”
+Glacier volcanoes where the ice melts from below and causes floods
+Rift valleys and fissures you can stand inside, where the land is pulling apart
+Pseudocraters: small craters formed when lava ran over wet ground
+Sod huts, turf-roofed farms and stone sheep pens
+Hot rivers in cold air, steaming water running through snow
+Auroras over black lava and white snow
+Troll rocks: rock formations local legend says are petrified giants
+
+Geothermal caldera
+
+Geysers that erupt on a schedule, which can serve as a natural clock or a puzzle
+Hot springs and terraced pools in white, orange and teal mineral steps
+Mud pots: bubbling, plopping gray mud that’s boiling hot
+Bacterial mats coloring the runoff in bright rainbow bands
+Thin crust where the ground looks solid but has boiling water underneath
+Steam fields where visibility drops to almost nothing
+A crater lake filling the caldera, sometimes acidic, sometimes beautiful
+Resurgent domes and ring fractures: the caldera floor rising, a sign of the next eruption
+Bathhouses, spa villages and healing shrines built around the springs
+Petrified forests or trees killed by heat and gas, standing bare and white
+Gas pockets: low hollows where CO₂ collects and kills animals that wander in
+
+What helps volcanic terrain
+
+Visible danger: Steam, glow and smell all warn the player before the hazard hits.
+Contrast: Black rock against snow, green moss, turquoise water or orange lava.
+A living world: Small tremors, shifting vents and new flows make the land feel active.
+Resource rewards: Obsidian, sulfur, rare minerals and fire-touched materials make the risk worth it.
+
+
+
+
+ list of scenery for these biomes: tundras, arctic regions:
+Tundras
+
+Polygon ground: frost-cracked earth forming a honeycomb pattern you can see from above
+Pingos: ice-cored hills rising out of flat land, used as lookouts or burial mounds
+Thaw lakes and ponds by the thousands in summer, which bring mosquito swarms
+Caribou or reindeer migrations, with trampled trails, herders following and predators shadowing them
+Inuksuit and stone markers that point the way, mark caches or warn of danger
+Mammoth bones and tusks emerging from thawing permafrost
+Cotton grass, lichen and dwarf willow, a tiny forest at ankle height
+Wolf dens, fox burrows, snowy owl perches
+Summer bloom: short bursts of wildflowers across the whole plain
+Herder camps with tents, sledges, drying fish and antler piles
+
+Arctic regions (ice sheets, frozen seas and polar coasts)
+
+Pack ice and pressure ridges: jagged walls of ice pushed up by shifting floes
+Open leads: sudden cracks of black water between ice floes, very dangerous to cross
+Icebergs locked in the sea ice, some hollowed into caves
+Snow drifts and sastrugi: wind-carved ridges that make walking hard
+Seal breathing holes, polar bear tracks and walrus haul-outs on gravel spits
+Frozen-in shipwrecks with masts sticking out, logbooks and frozen crew
+Ice shelves: cliffs of ice above the sea, calving with a roar
+Abandoned expedition huts with supplies, notes and graves
+Snow houses and seasonal hunting camps
+Whiteouts and polar night, when the horizon disappears
+Auroras, sun dogs and halos: strange lights that can guide or mislead
+
+What helps polar terrain
+
+Survival gameplay: Cold, food and shelter give the player constant reasons to keep moving.
+Scarce landmarks: Each rock, cairn or ship stands out because nothing else does.
+Seasonal change: Summer thaw and winter ice turn the same map into two very different places.
+Things preserved in the ice: The cold keeps old stories intact for the player to find.
+
+
+
+list of scenery for these biomes: marshes, wetlands, coastal regions, rocky costal
+Marshes
+
+Reed beds taller than a person, which hide paths, nests and ambushers
+Boardwalks and plank trails, some rotten or deliberately broken
+Stilt villages and fishing huts raised above the water
+Will-o’-the-wisps and marsh lights that lure travelers off the path
+Herons, cranes and flocks that explode into the air when startled
+Eel traps, fish weirs and punts tied up in channels
+Salt marsh creeks that flood and drain with the tide
+Duck blinds and hunters’ hides
+Sunken causeways: ancient stone roads now just below the waterline
+Drowned churches with only the bell tower showing
+
+Wetlands (swamps, bogs and fens)
+
+Cypress or mangrove swamps with knobby roots, hanging moss and dark water
+Peat bogs that preserve bodies, wooden idols and weapons for thousands of years
+Floating mats of vegetation that look solid but sink when stepped on
+Quicksand and sucking mud
+Hummocks: small islands of dry ground with camps, shrines or a witch’s hut
+Rotting logs and fallen trees serving as bridges
+Pitcher plants and sundews: carnivorous plants, scaled up for fantasy
+Swamp gas bubbling up, which is flammable
+Crocodiles, snakes, leeches and giant insects
+Hidden smuggler or rebel camps that no army can reach
+
+Coastal regions (beaches, dunes and estuaries)
+
+Sandy beaches with driftwood, shells and things washed ashore
+Dunes that shift over time to bury or uncover ruins
+Tidal flats that open a path at low tide and trap people at high tide
+Fishing villages with drying nets, boats pulled up and smokehouses
+Lighthouses, watchtowers and signal fires along the coast
+Shipwrecks on sandbars with salvage, ghosts and cargo
+Lagoons and estuaries with brackish water and mixed wildlife
+Salt pans and evaporation ponds
+Seabird colonies: noise, eggs and guano
+Wreckers’ coves: false lights that lure ships onto rocks
+
+Rocky coastal
+
+Sea cliffs with crashing surf, nesting birds and dizzying drops
+Sea stacks and arches: pillars of rock standing offshore
+Sea caves reachable only at low tide, used by smugglers or sea creatures
+Tide pools full of crabs, anemones and stranger things
+Blowholes that spray water high when waves hit
+Kelp forests visible just offshore
+Seal and sea lion colonies on flat rocks
+Clifftop ruins: abbeys, forts or castles slowly falling into the sea
+Rock-cut stairs down to hidden coves
+Lighthouses on islets reached by causeway or boat
+Storm surge: waves that sweep over rocks and drag people in
+
+What helps water terrain
+
+The tide as a clock: Paths open and close, so timing becomes gameplay.
+Footing: Mud, rock and water change speed, stealth and combat.
+What lies beneath: Drowned ruins and sunken treasure reward the player for looking down.
+Sound and fog: Waves, bird cries and mist set the mood and hide threats.
+

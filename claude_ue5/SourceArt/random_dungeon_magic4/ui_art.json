@@ -218,11 +218,14 @@
     {"name": "summon_2", "kind": "icon", "size": [1024, 1024], "prompt": "a game ability illustration of a glowing yellow summoning circle on the ground seen from slightly above, a ragged mutant gunner holding a crude rifle rising out of its yellow light, the circle and the gunner small in the middle of the picture"},
     {"name": "summon_3", "kind": "icon", "size": [1024, 1024], "prompt": "a game ability illustration of a glowing orange summoning circle on the ground seen from slightly above, a hulking green orc warrior with an axe rising out of its orange light, the circle and the orc small in the middle of the picture"},
     {"name": "summon_4", "kind": "icon", "size": [1024, 1024], "prompt": "a game ability illustration of a glowing magenta summoning circle on the ground seen from slightly above, an armoured insectoid alien warrior with a chitin shell rising out of its magenta light, the circle and the alien small in the middle of the picture"},
-    {"name": "summon_5", "kind": "icon", "size": [1024, 1024], "prompt": "a game ability illustration of a glowing crimson summoning circle on the ground seen from slightly above, a giant black spider rising out of its crimson light, the circle and the spider small in the middle of the picture"}
+    {"name": "summon_5", "kind": "icon", "size": [1024, 1024], "prompt": "a game ability illustration of a glowing crimson summoning circle on the ground seen from slightly above, a giant black spider rising out of its crimson light, the circle and the spider small in the middle of the picture"},
+    {"name": "honey", "kind": "icon", "size": [1024, 1024], "prompt": "a game item illustration of a slab of golden honeycomb dripping amber honey, slight three-quarter view from above"},
+    {"name": "eggs", "kind": "icon", "size": [1024, 1024], "pieces": true, "prompt": "a game item illustration of three speckled pale blue-green bird eggs resting together on a few twigs, slight three-quarter view from above"},
+    {"name": "mushrooms", "kind": "icon", "size": [1024, 1024], "pieces": true, "prompt": "a game item illustration of a small cluster of four pale brown field mushrooms with cream gills, slight three-quarter view"}
  ],
  "picks": {
   "_note": "the seed chosen for each element, by its measurements (no flag) and by eye: no symbol, signature, plate or backdrop; the sweet roll from the teal round",
-  "panel": 581825022, "slot": 739131222, "bar_health": 963699389, "bar_mana": 1729531870, "icon_gold": 1526966597,
+  "panel": 581825022, "slot": 739131222, "bar_health": 963699389, "bar_mana": 1729531870, "icon_gold": 1526966597, "honey": 2134883203, "eggs": 60094301, "mushrooms": 741442945,
   "healing_vial": 2052433557, "healing_flask": 1199155713, "healing_large": 685098752, "healing_ornate": 1022223967,
   "mana_vial": 1152784735, "mana_flask": 1763123420, "mana_large": 112926950, "mana_ornate": 222855137,
   "speed_vial": 1464087945, "speed_flask": 104177295, "speed_large": 1771684754, "speed_ornate": 1760770904,

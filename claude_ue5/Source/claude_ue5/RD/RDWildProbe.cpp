@@ -49,8 +49,10 @@ int32 URDWildProbeCommandlet::Main(const FString& Params)
 
 	FRDWildWorld W;
 	W.bPortSea = Gen->bPortWaterOpen && !FParse::Param(*Params, TEXT("NoPortSea"));   // (the level's own world: the port's open sea, the list of 2026-11-11; -NoPortSea: as before it)
+	W.ChannelRules = Gen->WildChannelRules;          // (the list of 2026-11-14: the dry channels cut into the land, as the game's)
 	W.Init(Seed, Gen->WildBiomes);
-	UE_LOG(LogRDWildProbe, Display, TEXT("RDWILDPROBE the world made: seed %u, %d biomes, %d towns, %.2f s"), Seed, W.Biomes.Num(), W.Towns.Num(), W.InitSeconds);
+	UE_LOG(LogRDWildProbe, Display, TEXT("RDWILDPROBE the world made: seed %u, %d biomes, %d towns, %d roads, %d channels, %d crossroads, %.2f s"), Seed, W.Biomes.Num(), W.Towns.Num(), W.Roads.Num(), W.Channels.Num(), W.Crossroads.Num(), W.InitSeconds);
+	for (const FVector2D& Q : W.Crossroads) UE_LOG(LogRDWildProbe, Display, TEXT("RDWILDPROBE crossroads at (%.0f, %.0f)"), Q.X, Q.Y);
 
 	// (the grid)
 	const int32 N = FMath::FloorToInt(2.0 * Half / Step) + 1;

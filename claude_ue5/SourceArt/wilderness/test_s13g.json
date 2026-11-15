@@ -1,0 +1,695 @@
+{
+ "tag": "s13g",
+ "plan": [
+  "scenery13=shepherd_hut+reed_pond+old_orchard+dusk_meadow+butte+battlefield+milestone_road+crossroads_gibbet+crossroads_shrine+crossroads_notice+wagon_wreck",
+  "land13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "scenery13",
+   "ok": false,
+   "kinds": {
+    "shepherd_hut": {
+     "found": true,
+     "id": 67253495,
+     "at_km": [
+      5.07,
+      -1.32
+     ],
+     "name": "Shepherd's hut",
+     "laid": {
+      "kind": "shepherd_hut",
+      "title": "Shepherd's hut",
+      "x": 5074.3,
+      "y": -1320.0,
+      "pieces": 15,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 5,
+      "yaw": 120.8
+     },
+     "bottom_over_ground_cm": [
+      -24,
+      -16,
+      -10
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "heal",
+       "prompt": "rest in the shepherd's hut",
+       "f": "scenery",
+       "said": "You rest a while by the cold hearth.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "herd": {
+      "n": 5,
+      "stampedes": 0,
+      "hits": 0,
+      "migrate": 0,
+      "stampede": 0,
+      "walked_12s_m": 1.4,
+      "outside_pen": 0
+     },
+     "told": "Shepherd's hut: a low stone hut and a drystone fold, a few goats grazing inside | You rest a while by the cold hearth.",
+     "ok": true
+    },
+    "reed_pond": {
+     "found": true,
+     "id": 67254510,
+     "at_km": [
+      5.59,
+      -7.0
+     ],
+     "name": "Reed pond",
+     "laid": {
+      "kind": "reed_pond",
+      "title": "Reed pond",
+      "x": 5586.7,
+      "y": -6996.9,
+      "pieces": 32,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 0,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 135.0
+     },
+     "bottom_over_ground_cm": [
+      -24,
+      -12,
+      -8
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [],
+     "hazards": [
+      {
+       "kind": "lurker",
+       "water_found": true,
+       "hp_lost": 0.0,
+       "sprung": 1,
+       "monsters_came": 1,
+       "ok": true
+      }
+     ],
+     "told": "Reed pond: a still pond fringed with reeds, herons stalking its edge; something stirs under the surface | Something rises from under the surface!",
+     "ok": true
+    },
+    "old_orchard": {
+     "found": true,
+     "id": 67245307,
+     "at_km": [
+      -0.06,
+      1.04
+     ],
+     "name": "Old orchard",
+     "laid": {
+      "kind": "old_orchard",
+      "title": "Old orchard",
+      "x": -57.4,
+      "y": 1042.9,
+      "pieces": 35,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 118.6
+     },
+     "bottom_over_ground_cm": [
+      -52,
+      -3,
+      -2
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "forage",
+       "prompt": "gather fruit from the old trees",
+       "f": "scenery",
+       "said": "You take 3 Wild Apples, 3 Wild Plums",
+       "got": {
+        "Wild Apples": 3,
+        "Wild Plums": 3
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Old orchard: an orchard long gone wild, its gnarled trees still heavy with fruit | You take 3 Wild Apples, 3 Wild Plums",
+     "ok": true
+    },
+    "dusk_meadow": {
+     "found": true,
+     "id": 67258625,
+     "at_km": [
+      7.8,
+      4.28
+     ],
+     "name": "Butterfly meadow",
+     "laid": {
+      "kind": "dusk_meadow",
+      "title": "Butterfly meadow",
+      "x": 7802.1,
+      "y": 4282.0,
+      "pieces": 4,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 0,
+      "hazards": 0,
+      "fx": 6,
+      "fx_on": 3,
+      "herd": 0,
+      "yaw": 56.8
+     },
+     "bottom_over_ground_cm": null,
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [],
+     "hazards": [],
+     "told": "Butterfly meadow: a hollow of flowers where butterflies drift by day and fireflies rise at dusk",
+     "ok": true
+    },
+    "butte": {
+     "found": true,
+     "id": 67253492,
+     "at_km": [
+      5.05,
+      -3.29
+     ],
+     "name": "Lookout butte",
+     "laid": {
+      "kind": "butte",
+      "title": "Lookout butte",
+      "x": 5051.0,
+      "y": -3291.1,
+      "pieces": 9,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 270.0
+     },
+     "bottom_over_ground_cm": [
+      -206,
+      -9,
+      -6
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "climb",
+       "prompt": "climb the butte",
+       "f": "scenery",
+       "said": "You scramble up the worn way to the top.  From up here you can see 2.5 km round you: the map fills in.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 21.3,
+       "revealed_more": 7612,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Lookout butte: a lone flat-topped butte breaking the skyline; a worn way leads up its side | You scramble up the worn way to the top.  From up here you can see 2.5 km round you: the map fills in.",
+     "ok": true
+    },
+    "battlefield": {
+     "found": true,
+     "id": 67253491,
+     "at_km": [
+      4.96,
+      -3.92
+     ],
+     "name": "Old battlefield",
+     "laid": {
+      "kind": "battlefield",
+      "title": "Old battlefield",
+      "x": 4959.7,
+      "y": -3922.4,
+      "pieces": 34,
+      "boxes": 1,
+      "guards": 2,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 244.5
+     },
+     "bottom_over_ground_cm": [
+      -70,
+      -9,
+      -3
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 1,
+     "want_chests": 1,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "loot",
+       "prompt": "search the rusted arms",
+       "f": "scenery",
+       "said": "You pry a few usable pieces of iron from the rusted blades.  You take nothing",
+       "got": {
+        "Iron Ingot": 0
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": false
+      }
+     ],
+     "hazards": [],
+     "told": "Old battlefield: rusted blades and bones in the grass, and the burial cairns of an old war's dead | You pry a few usable pieces of iron from the rusted blades.  You take nothing",
+     "ok": false
+    },
+    "milestone_road": {
+     "found": true,
+     "id": 67240189,
+     "at_km": [
+      -3.0,
+      2.02
+     ],
+     "name": "Old milestone",
+     "laid": {
+      "kind": "milestone_road",
+      "title": "Old milestone",
+      "x": -3005.0,
+      "y": 2017.3,
+      "pieces": 8,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": -133.8
+     },
+     "bottom_over_ground_cm": [
+      -73,
+      -57,
+      -11
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "milestone",
+       "prompt": "read the milestone",
+       "f": "scenery",
+       "said": "It reads:  Brokenspire 3.6 km north-west;  Ashenreach 73.0 km north",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Old milestone: a milestone of the old road, its paving broken, a waymarker toppled in the grass | It reads:  Brokenspire 3.6 km north-west;  Ashenreach 73.0 km north",
+     "ok": true
+    },
+    "crossroads_gibbet": {
+     "found": true,
+     "id": 67261671,
+     "at_km": [
+      9.7,
+      -11.03
+     ],
+     "name": "Crossroads gibbet",
+     "laid": {
+      "kind": "crossroads_gibbet",
+      "title": "Crossroads gibbet",
+      "x": 9699.8,
+      "y": -11026.3,
+      "pieces": 2,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 1,
+      "fx_on": 1,
+      "herd": 0,
+      "yaw": 202.5
+     },
+     "bottom_over_ground_cm": [
+      -15,
+      -8,
+      -8
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the gibbet",
+       "f": "scenery",
+       "said": "A board nailed to the post: HIGHWAYMAN. The crows have done the rest.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Crossroads gibbet: a gibbet where the roads meet, a warning to whoever passes | A board nailed to the post: HIGHWAYMAN. The crows have done the rest.",
+     "ok": true
+    },
+    "crossroads_shrine": {
+     "found": true,
+     "id": 67239166,
+     "at_km": [
+      -3.72,
+      2.73
+     ],
+     "name": "Wayside shrine",
+     "laid": {
+      "kind": "crossroads_shrine",
+      "title": "Wayside shrine",
+      "x": -3718.5,
+      "y": 2730.5,
+      "pieces": 11,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 202.5
+     },
+     "bottom_over_ground_cm": [
+      -9,
+      -6,
+      -6
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "buff",
+       "prompt": "pray at the wayside shrine",
+       "f": "scenery",
+       "said": "Traveller's Blessing: your blows 5% stronger, 8% less of each blow reaches you, for 8 minutes",
+       "got": {},
+       "blessing": "Traveller's Blessing",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Wayside shrine: a stone saint watching over the meeting of the roads, candles left by travellers | Traveller's Blessing: your blows 5% stronger, 8% less of each blow reaches you, for 8 minutes",
+     "ok": true
+    },
+    "crossroads_notice": {
+     "found": true,
+     "id": 67230986,
+     "at_km": [
+      -8.41,
+      10.09
+     ],
+     "name": "Notice post",
+     "laid": {
+      "kind": "crossroads_notice",
+      "title": "Notice post",
+      "x": -8414.8,
+      "y": 10087.4,
+      "pieces": 1,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 202.5
+     },
+     "bottom_over_ground_cm": [
+      -11,
+      -11,
+      -11
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "rumour",
+       "prompt": "read the notices",
+       "f": "scenery",
+       "said": "A notice tells of A mountain pass, 2.0 km south-east of here.",
+       "got": {},
+       "blessing": "Traveller's Blessing",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Notice post: a notice post where the roads meet, its papers flapping in the wind | A notice tells of A mountain pass, 2.0 km south-east of here.",
+     "ok": true
+    },
+    "wagon_wreck": {
+     "found": true,
+     "id": 67243256,
+     "at_km": [
+      -0.93,
+      -0.84
+     ],
+     "name": "Wagon wreck",
+     "laid": {
+      "kind": "wagon_wreck",
+      "title": "Wagon wreck",
+      "x": -930.6,
+      "y": -835.5,
+      "pieces": 29,
+      "boxes": 1,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 15.7
+     },
+     "bottom_over_ground_cm": [
+      -29,
+      -15,
+      -2
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 1,
+     "want_chests": 1,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "read the bloodied letter",
+       "f": "scenery",
+       "said": "The letter is to a daughter in the next town. It ends mid-sentence: they came out of the tall grass...",
+       "got": {},
+       "blessing": "Traveller's Blessing",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Wagon wreck: a wagon on its side, its cargo strewn and arrows still in the boards | The letter is to a daughter in the next town. It ends mid-sentence: they came out of the tall grass...",
+     "ok": true
+    }
+   },
+   "table": 22,
+   "counts_30km": {
+    "tall_grass": 145,
+    "burrow_town": 358,
+    "hanged_tree": 101,
+    "nest_tree": 124,
+    "shrine_tree": 104,
+    "erratic": 342,
+    "migration": 10,
+    "wallow": 159,
+    "hive_meadow": 52,
+    "brook_crossing": 0,
+    "fairy_ring": 96,
+    "shepherd_hut": 870,
+    "reed_pond": 3,
+    "old_orchard": 414,
+    "dusk_meadow": 34,
+    "butte": 313,
+    "battlefield": 295,
+    "milestone_road": 20,
+    "crossroads_gibbet": 4,
+    "crossroads_shrine": 4,
+    "crossroads_notice": 5,
+    "wagon_wreck": 13,
+    "cells": 10201
+   }
+  },
+  {
+   "step": "land13",
+   "ok": true,
+   "channels": {
+    "arroyo": {
+     "near": 5,
+     "at_km": [
+      2.15,
+      7.04
+     ],
+     "width_m": 10.9,
+     "depth_m": 3.5,
+     "bed_under_banks_m": 4.36,
+     "her_feet_under_banks_m": 3.95,
+     "ok": true
+    }
+   },
+   "swales": {
+    "grasslands": {
+     "found": true,
+     "at_km": [
+      6.0,
+      0.0
+     ],
+     "amp": 3.5,
+     "range_m": 23.5,
+     "crests_1600m": 8,
+     "crests_hiding_300m": 7
+    },
+    "savannahs": {
+     "found": true,
+     "at_km": [
+      -15.0,
+      -25.98
+     ],
+     "amp": 3.0,
+     "range_m": 40.1,
+     "crests_1600m": 5,
+     "crests_hiding_300m": 3
+    },
+    "plains": {
+     "found": true,
+     "at_km": [
+      -6.43,
+      -7.66
+     ],
+     "amp": 5.0,
+     "range_m": 105.1,
+     "crests_1600m": 3,
+     "crests_hiding_300m": 2
+    }
+   },
+   "crossroads_50km": 44,
+   "storm": {
+    "on": 1,
+    "km": 6.0
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s13g_scenery13_shepherd_hut.png",
+  "wd_s13g_scenery13_shepherd_hut_near.png",
+  "wd_s13g_scenery13_reed_pond.png",
+  "wd_s13g_scenery13_reed_pond_near.png",
+  "wd_s13g_scenery13_old_orchard.png",
+  "wd_s13g_scenery13_old_orchard_near.png",
+  "wd_s13g_scenery13_dusk_meadow.png",
+  "wd_s13g_scenery13_dusk_meadow_near.png",
+  "wd_s13g_scenery13_butte.png",
+  "wd_s13g_scenery13_butte_near.png",
+  "wd_s13g_scenery13_battlefield.png",
+  "wd_s13g_scenery13_battlefield_near.png",
+  "wd_s13g_scenery13_milestone_road.png",
+  "wd_s13g_scenery13_milestone_road_near.png",
+  "wd_s13g_scenery13_crossroads_gibbet.png",
+  "wd_s13g_scenery13_crossroads_gibbet_near.png",
+  "wd_s13g_scenery13_crossroads_shrine.png",
+  "wd_s13g_scenery13_crossroads_shrine_near.png",
+  "wd_s13g_scenery13_crossroads_notice.png",
+  "wd_s13g_scenery13_crossroads_notice_near.png",
+  "wd_s13g_scenery13_wagon_wreck.png",
+  "wd_s13g_scenery13_wagon_wreck_near.png",
+  "wd_s13g_land13_arroyo.png",
+  "wd_s13g_land13_storm.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

@@ -900,6 +900,7 @@ bool ARDMonster::TickCombat(float Dt)
 		// (the final boss: his band fighting her, he joins them from as far as she would be lost from (a rehearsal's band fought
 		// her for 20 s while he wandered 77 m off, unaware of her))
 		if (bFinalBoss && G->AggroDistance > 0.f && G->bFinalBandFighting) Aggro = FMath::Max(Aggro, FMath::Max(G->LoseDistance * 0.9f, 4000.f));
+		if (NoticeCap >= 0.f) Aggro = FMath::Min(Aggro, NoticeCap);          // (lying low in an ambush, the list of 2026-11-14)
 		if (Dist > Aggro || Dz > (bOpenGround ? 700.f : 300.f) || ChaseTimer > 0.f) return false;
 		// (open ground: one past its leash walks home first and notices her again within 0.8 of it: it took her and dropped
 		// her again each tick at the leash's edge, standing there and never striking back)

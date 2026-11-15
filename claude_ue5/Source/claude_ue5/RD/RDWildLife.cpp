@@ -122,6 +122,16 @@ void ARDWildAnimal::SetState(int32 S, float Now, const FVector& Away)
 	Play(S == 1 && F.Eat ? F.Eat.Get() : F.Idle.Get(), 1.f);
 }
 
+void ARDWildAnimal::Drive(const FVector& To0, bool bRun, float Seconds)
+{
+	if (bDead || !Gen || !Gen->WildFauna.IsValidIndex(Def) || !GetWorld()) return;
+	const FRDWildFauna& F = Gen->WildFauna[Def];
+	const float Sc = FMath::Max(F.Scale, 0.1f);
+	State = bRun ? 3 : 2; To = To0; Until = GetWorld()->GetTimeSeconds() + Seconds;
+	if (bRun) Play(F.Run ? F.Run.Get() : F.Walk.Get(), F.Run ? F.RunSpeed / FMath::Max(F.RunClipSpeed * Sc, 1.f) : 3.f);
+	else Play(F.Walk, F.WalkSpeed / FMath::Max(F.WalkClipSpeed * Sc, 1.f));
+}
+
 void ARDWildAnimal::Tick(float Dt)
 {
 	Super::Tick(Dt);
@@ -269,12 +279,13 @@ void ARDDungeonGenerator::TickWildLife(float Dt, const FVector& Her)
 		if (!IsValid(A)) { WildAnimals.RemoveAt(I); continue; }
 		// (the list of 2026-11-07: a killed animal's body lies a while, then goes)
 		const bool bGone = A->IsDead() && NowT - A->DeadAt > WildCorpseSeconds;
-		if (!bReady || bGone || FVector::Dist2D(A->GetActorLocation(), Her) > 23000.f) { A->Destroy(); WildAnimals.RemoveAt(I); }
+		// (a scenery's herd (the list of 2026-11-14) goes with its chunk, not by her distance)
+		if (!bReady || bGone || (A->HerdId < 0 && FVector::Dist2D(A->GetActorLocation(), Her) > 23000.f)) { A->Destroy(); WildAnimals.RemoveAt(I); }
 	}
 	// (a killed kind's place waits WildAnimalRespawnSeconds: then another of the kind may come, as the others do)
 	AnimalRespawns.RemoveAll([NowT](const TPair<int32, float>& P) { return P.Value <= NowT; });
 	// (the living only: a body lying there held its place against the cap as long as it lay (888 animals8: no deer came back))
-	int32 Living = 0; for (const ARDWildAnimal* A : WildAnimals) if (IsValid(A) && !A->IsDead()) ++Living;
+	int32 Living = 0; for (const ARDWildAnimal* A : WildAnimals) if (IsValid(A) && !A->IsDead() && A->HerdId < 0) ++Living;
 	if (bReady && !bInTown && Living + AnimalRespawns.Num() < WildAnimalsMax && WildFauna.Num() > 0)
 	{
 		// (a try a half second: a point 60 to 150 m off, its biome's kinds weighed by how many live there a km²)

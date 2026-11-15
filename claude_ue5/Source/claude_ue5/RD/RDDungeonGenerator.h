@@ -2563,7 +2563,9 @@ public:
 	/** a piece laid by its box: its bottom on the lowest ground under it (less Sink cm), scaled to H metres high or by S */
 	UStaticMeshComponent* LayRuinPiece(ARDWildChunk* C, UStaticMesh* M, const FVector& At, const FRotator& Rot, const FVector& Scale, float Sink, bool bCollide);
 	/** the ruins laid (tests, the message as she comes): id, kind, its centre, how many pieces and containers */
-	struct FRuinLaid { int32 Id = 0; int32 Kind = -1; FVector2D At = FVector2D::ZeroVector; int32 Pieces = 0; int32 Boxes = 0; int32 Guards = 0; FString Name; float Yaw = 0.f; TArray<TWeakObjectPtr<UPrimitiveComponent>> Comps; TArray<float> Lifts; FVector2D Exit = FVector2D::ZeroVector; float OutR = 0.f; };
+	struct FRuinLaid { int32 Id = 0; int32 Kind = -1; FVector2D At = FVector2D::ZeroVector; int32 Pieces = 0; int32 Boxes = 0; int32 Guards = 0; FString Name; float Yaw = 0.f; TArray<TWeakObjectPtr<UPrimitiveComponent>> Comps; TArray<float> Lifts; FVector2D Exit = FVector2D::ZeroVector; float OutR = 0.f;
+		/** the list of 2026-11-14: its effects (fx= parts) and the hours each shows at ("" always, day, night, dusk) */
+		TArray<TWeakObjectPtr<class UNiagaraComponent>> Fx; TArray<FString> FxHours; };
 	/** a kind of a table (the ruins' kinds, the lairs' covers) for a place: by its biome and the kinds' weights, from a hash of its
 	 *  id and Salt; the water kinds only when bWet */
 	int32 PickWildKind(const TArray<FRDWildRuinKind>& T, const FRDWildPlace& P, uint32 Salt, bool bWet) const;
@@ -2577,6 +2579,9 @@ public:
 	/** an earth bank laid as the ground is drawn (the ground's material and vertex data from the world): a ring of middle radius
 	 *  Rm and width Wm (metres), Hm high, open over GapDeg about the way GapYaw (world degrees), its ends sloping down */
 	class UProceduralMeshComponent* LayWildBerm(ARDWildChunk* C, const FVector2D& O, float Rm, float Wm, float Hm, float GapYaw, float GapDeg);
+	/** the list of 2026-11-14: a rise of the land laid as the ground is drawn (as the berm): "mound" a dome of radius Rm, "cone" a cone
+	 *  with a crater of Crater's share of it at the top, "ridge" a long bank Rm wide each side and R2m long each way along Yaw; Hm high */
+	class UProceduralMeshComponent* LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater);
 	// ---- the list of 2026-11-12's fifth phase: the structures of the wilds (RDWildSite12.cpp, 924 sites) and their quests
 	/** the structures' kinds (924 sites, from SourceArt/wilderness/sites12.json): the world's SitesIn places them, a chunk lays
 	 *  them (LayWildSite) */
@@ -2606,6 +2611,75 @@ public:
 	TArray<TWeakObjectPtr<ARDTownsfolk>> WildSiteFolk;
 	TArray<FRuinLaid> WildSitesLaid;
 	void TickWildSites12(float Dt, const FVector& Her);
+	// ---- the list of 2026-11-14 (docs/improvements13.txt): the biomes' scenery (RDWildScenery13.cpp, 926 from SourceArt/wilderness/
+	// scenery13.json): the world places them (FRDWildWorld::SceneryIn), a chunk lays each (LayWildScenery) by the ruins' layout language
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TArray<FRDWildSceneryKind> WildSceneryKinds;
+	/** the share of the 600 m grid's cells that hold one */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildSceneryFill = 0.6f;
+	/** the dry channels' kinds (FRDWildWorld::ChannelRules: "biomes=..;n=..;len=..;w=..;d=..;wall=..;turn=..;name=..") */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TArray<FString> WildChannelRules;
+	/** the effects a part may lay ("fx=<name>": "f13_<name>") */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TMap<FName, TObjectPtr<class UNiagaraSystem>> WildSceneryFx;
+	/** the far storms over the open lands ("distant storm cells or tornadoes visible for miles"): the biomes they come over, their funnel's
+	 *  effect and mesh, the rain's curtain, how often one is about (0-1) and how far (km) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TArray<FString> WildStormBiomes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TObjectPtr<class UNiagaraSystem> WildStormFunnel = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TObjectPtr<class UStaticMesh> WildStormMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TObjectPtr<class UMaterialInterface> WildStormMaterial = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildStormChance = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildStormKmMin = 4.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildStormKmMax = 9.f;
+	void LayWildScenery(ARDWildChunk* C, const FRDWildPlace& P);
+	void TickWildScenery13(float Dt, const FVector& Her);
+	/** a laid scenery's things: what F does (its uses), what hurts (its hazards), the effects its hours show, its herd */
+	struct FSceneryUse { int32 Id = 0; int32 Kind = -1; int32 Use = 0; FVector At = FVector::ZeroVector; float Reach = 250.f; TWeakObjectPtr<ARDWildChunk> Chunk; };
+	struct FSceneryHazard { int32 Id = 0; FName Kind; FVector At = FVector::ZeroVector; float R = 500.f; float P = 1.f; float ReadyAt = 0.f; int32 Sprung = 0; float In = 0.f; TWeakObjectPtr<ARDWildChunk> Chunk; };
+	struct FSceneryFx { TWeakObjectPtr<class UNiagaraComponent> Comp; FString Hours; };
+	struct FSceneryHerd { int32 Id = 0; TArray<TWeakObjectPtr<ARDWildAnimal>> Animals; FVector2D Home = FVector2D::ZeroVector; FVector2D Way = FVector2D(1, 0); float Phase = 0.f, Pen = 0.f; bool bMigrate = false, bStampede = false; float StampedeUntil = -1.f, NextHit = 0.f; int32 Stampedes = 0, Hits = 0; };
+	TArray<FSceneryUse> WildSceneryUses;
+	TArray<FSceneryHazard> WildSceneryHazards;
+	TArray<FSceneryFx> WildSceneryFxOn;
+	TArray<FSceneryHerd> WildSceneryHerds;
+	TArray<FRuinLaid> WildSceneryLaid;
+	TSet<int32> WildSceneryTold, WildScenerySprung;
+	TMap<int32, float> WildSceneryReadyAt;
+	float WildSceneryLook = 0.f;
+	/** F at a scenery's use within reach: what it says ("" none) */
+	FString WildSceneryDescribe(const FVector& From) const;
+	FString WildSceneryInteract(const FVector& From);
+	const FSceneryUse* WildSceneryUseNear(const FVector& From) const;
+	/** a scenery's use within reach is nearer than any point of interest F could use (then it takes F) */
+	bool WildSceneryFirst(const FVector& From) const;
+	/** when each was told (its line as she came): a stampede waits 3 s after it, or its line would hide the first (one HUD line) */
+	TMap<int32, float> WildSceneryToldAt;
+	bool IsWildSceneryUsed(const FSceneryUse& U) const;
+	/** the far storm about (its middle, way, its parts) */
+	TWeakObjectPtr<class UNiagaraComponent> WildStormFx; TWeakObjectPtr<class UStaticMeshComponent> WildStormCloud;
+	FVector2D WildStormAt = FVector2D::ZeroVector, WildStormWay = FVector2D(1, 0); float WildStormLook = 0.f; float WildStormUntil = -1.f;
+	void TickWildStorm13(float Dt, const FVector& Her);
+	/** tests: "scen|<id>|<kind>|<title>|<x>|<y>|<pieces>|<boxes>|<guards standing>|<uses>|<hazards>|<fx>|<fx on>|<herd>|<yaw>|<name>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild13") TArray<FString> GetWildSceneryLines() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild13") TArray<FString> GetWildSceneryPieceLines(int32 Id) const;
+	/** tests: a laid scenery's uses ("use|<i>|<do>|<x>|<y>|<z>|<used>"), hazards ("haz|<kind>|<x>|<y>|<z>|<r cm>|<sprung>") and herd
+	 *  ("herd|<animals>|<stampedes>|<hits>" then "ani|<x>|<y>|<state>") */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild13") TArray<FString> GetWildSceneryThingLines(int32 Id) const;
+	/** tests: the nearest scenery of a kind within MaxKm: "id|x|y|yaw|name" or "" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild13") FString FindWildScenery(FName Kind, float X, float Y, float MaxKm) const;
+	/** tests: every kind's count within MaxKm: "<kind>|<count>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild13") TArray<FString> CountWildScenery(float X, float Y, float MaxKm) const;
+	/** tests: the dry channels of a kind near a point: "chan|<index>|<kind name>|<x>|<y> of its middle point|<width>|<depth>|<points>"
+	 *  (the nearest MaxN within MaxKm), and the ground across one: "<offset m>|<height m>" every metre at its point I */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild13") TArray<FString> FindWildChannels(FString Kind, float X, float Y, float MaxKm, int32 MaxN) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild13") TArray<FString> GetWildChannelProfile(int32 Index, int32 Point, float HalfM) const;
+	/** tests: the crossroads within MaxKm: "<x>|<y>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild13") TArray<FString> FindWildCrossroads(float X, float Y, float MaxKm) const;
+	/** tests: a storm brought now (Km off, its way) or sent away (Km 0); its state "storm|<x>|<y>|<km from her>|<on>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild13") void ForceWildStorm(float Km);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild13") FString GetWildStormLine() const;
+	/** tests: a herd of a laid scenery set off (its stampede), as her coming does */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild13") bool StartWildStampede(int32 Id);
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild13") int32 WildSceneryUsed = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild13") int32 WildHazardsSprung = 0;
 	/** F on a structure's person (a prisoner freed, a quest's giver): what it did ("" when nothing) */
 	FString WildSiteTalk(ARDTownsfolk* T);
 	/** tests: "site|<id>|<kind>|<title>|<x>|<y>|<pieces>|<boxes>|<guards standing>|<inside a piece>|<prisoners>|<freed>|<traps>|<name>|<yaw>" */

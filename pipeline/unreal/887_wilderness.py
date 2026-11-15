@@ -369,6 +369,7 @@ def data():
         B.set_editor_property("color_a", srgb(b["a"])); B.set_editor_property("color_b", srgb(b["b"])); B.set_editor_property("rock", srgb(b["rock"]))
         B.set_editor_property("snow", float(b.get("snow", 0))); B.set_editor_property("canopy", float(b.get("canopy", 0)))
         B.set_editor_property("ponds", float(b.get("ponds", 0))); B.set_editor_property("steam", float(b.get("steam", 0)))
+        B.set_editor_property("swale", float(b.get("swale", 0)))          # (the list of 2026-11-14: low rises that hide what lies beyond)
         Ly = b.get("layers", [0, 0, 0, 0]); B.set_editor_property("layers", unreal.Vector4(*[float(x) for x in Ly]))
         # (the list of 2026-11-07: a farm's fields' crops (898): their soil and leaves seen from afar, their rows' spacing)
         crops = []

@@ -373,6 +373,59 @@ The list of 2026-11-12's fifth phase (`docs/improvements12.txt`: the wilderness'
 
 ![The 34 structures, each from 40 m before its front](../images/sites12_kinds.jpg)
 
+## The list of 2026-11-14: the biomes' scenery
+
+The user's list of 2026-11-14 ([docs/improvements13.txt](../improvements13.txt)): for each of the 29 biomes a list of the scenery found in it, and what helps each kind of land. Built in phases, a PR each (the user's choices: every item to full depth, set pieces, hazards, new land shapes, weather; what no pack has made in Blender). C++ `RD/RDWildScenery13.cpp` (the uses, hazards, herds, ambushes, far storms), the layout language's new parts in `RD/RDWildRuin12.cpp`, the world's scenery, dry channels, tracks and crossroads in `RD/RDWildWorld.cpp`; stage `926_scenery13.py` from `SourceArt/wilderness/scenery13.json`; the pieces no pack has from `blender_numpy/scenery13_kit.py`. Measured in `888 scenery13,land13 -Light` (`test_s13f.json`, `test_s13g.json`).
+
+### How a piece of scenery is placed and laid
+
+- **Where**: the world puts one in 60 % of the cells of a 600 m grid (`FRDWildWorld::SceneryIn`, ids `SceneryIdBase` 2^26 + the cell), a kind of the cell's region by the kinds' weights, 1 km or more from a town, 120 m from the places and 150 m from the structures, on dry gentle ground off the fields and yards, and as its kind asks: beside a road (`road`, facing it), at a crossroads (`crossroads`), on the highest of six tries (`rise`), the lowest (`low`), or on the shore of water of its kind within 400 m (`need_water`: a river, a pond, a lake, the sea), facing the water. A cell that holds a crossroads takes a crossroads kind four times in five, one a road crosses a roadside kind two in five.
+- **What**: its parts by the ruins' layout language, with four new: `fx=<name>` an effect at the layout's points (at its hours: day, night, dusk), `inst=1` many as instances (a patch of tall grass or flowers, faded from 100 m), `far=1` a landmark never culled (a lone tree, a butte), and `L=mound|cone|ridge` a rise of the land laid as the ground is drawn (a burrow's spoil, a burial cairn). Its chests are kept looted under `(7 << 40)` + its id x 8 + n.
+- **As she comes**: within 35 m its name and a line of what it is. F at one of its uses (`Uses`): take (loot, forage, fish, honey: its things; a reuse after a while), rest, pray (a blessing), read (a milestone's towns, a notice post's nearest structure, the tracks in a wallow's mud: the nearest lair's way), climb (a boulder or a butte: set on its top, the map revealed round it), step into a fairy ring (by night only). The nearer of a scenery's use and a point of interest takes F.
+- **What hurts there** (`Hazards`): `collapse` (a burrow town's tunnels give way: 6 % of her hit points and a slow, and twice its diggers come up), `sting` (lingering 1.5 s by the hives: the bees, 3 % a sting while she stays), `lurker` (wading into a reed pond: something rises, once a play).
+- **Its herd** (`Herd`): a fauna kind and a count laid round it, gone with its chunk; `migrate` walks it back and forth across 140 m along its way (across a road), `stampede` sets it running through where she stands when she comes within 16 m (a trampling 8 % and a slow), `pen` keeps it in a fold. The farm animals (goats, cows, pigs) are wild animals of no biome for this (`926 fauna`).
+- **Its ambush** (`AmbushR`): its guards notice her no farther than 2.5 m until she comes within the kind's reach, then hunt her (the tall grass's).
+
+### The land
+
+- **The dry channels** (the grasslands' "arroyos and dry creek beds that cut hidden paths below the horizon"): `ChannelRules` (`scenery13.json`'s `channels`): wandering lines cut into the land at Init (3 a grassland region cell, 0.6 to 1.6 km long, 8 to 14 m wide, 2.2 to 3.6 m deep, a flat sandy bed and walls), hashed on their own (`ChanHash`), cut in `Feature` (what she walks and what is drawn alike). The nearest's bed lies 4.4 m under its banks (depth 3.5 m); no seam in the 6 km square round it (`RDWildProbe`, `wild_seams.py`: 0 steps over 6 m).
+- **The swales** ("rolling swales that hide what's over the next rise"): a biome's `Swale` (plains 5 m, grasslands 3.5, savannahs 3) adds low rises 400 m apart. Along 1.6 km lines: 3 crests in the plains, 8 in the grasslands, 5 in the savannahs; from most crests a 1.7 m eye does not see the ground 300 m on.
+- **The tracks and crossroads**: the six roads join the towns and never met; tracks now leave them (`MakeTracks`: 152 in a world, from points 2.5 km apart, 1.5 to 4 km long, a third with one of their own), narrower, their beds eased less, drawn thinner on the map. Where a track leaves a road or a track is a crossroads (155 in a world, 49 within 50 km of Brokenspire).
+- **The far storms** ("distant storm cells or tornadoes visible for miles"): over the plains, grasslands, savannahs and cold steppes now and then a storm cell 5 to 10 km off drifts across her view for six minutes (`ForceWildStorm`): the kit's cell, an anvil cloud 3.4 km across with a rain curtain (translucent, `M_N13_Translucent`) and a funnel to the ground, never culled.
+
+### The open lands, first part: grasslands, meadows and plains
+
+| Kind | Biomes | What stands there | What she does there |
+|---|---|---|---|
+| Tall grass | grasslands, savannahs | 650 stems of tall grass 1.8 to 2.5 m | two monsters lie low in it and come at her from 12 m; a lost chest |
+| Burrow town | grasslands, plains, savannahs | 14 burrow mouths, four spoil mounds | the ground gives way in four places; rats come up |
+| The hanging tree | grasslands, plains (on a rise) | a lone dead willow, a noose, bones, crows | search the dead man's coat |
+| The nesting tree | grasslands, meadows, plains (rise) | a lone 18 m beech, a great nest in its crown | gather eggs and feathers fallen from it |
+| The shrine tree | grasslands, meadows, plains (rise) | a lone beech, a praying statue, candles, flowers | pray: a blessing |
+| Glacial erratic | grasslands, plains, cold steppes, tundras | a boulder 16 by 12 by 6.5 m | climb it: the map shows 1.5 km round |
+| Herd on the move | grasslands, plains, savannahs, steppes, tundras (by a road) | 14 deer | they walk across the road; too near and they stampede through her |
+| Mud wallow | grasslands, savannahs, plains (a hollow) | churned mud, reeds | read the tracks: the nearest lair's way and distance |
+| Wild hives | meadows | 220 flowers, straw skeps on benches, bees | take honey; the bees sting whoever lingers |
+| Stepping stones | meadows, grasslands, autumn forests, hills (by a river) | stones across the water, a small fall, reeds | fish the pool |
+| Fairy ring | meadows, grasslands, autumn forests | a ring of 28 mushrooms, fireflies by night | step in by night: the Fair Folk's Favour; pick mushrooms |
+| Shepherd's hut | meadows, hills, moorland, grasslands | a stone hut, a drystone fold, five goats in it | rest in the hut |
+| Reed pond | meadows, grasslands, wetlands, marshes (by a pond) | reeds, two herons | wade in and something rises |
+| Old orchard | meadows, grasslands, farms | gnarled apple and plum trees, fallen apples | gather wild fruit |
+| Butterfly meadow | meadows | flowers, butterflies by day, fireflies at dusk | |
+| Lookout butte | plains, grasslands, savannahs | a banded rock stack 24 m high | climb it: the map shows 2.5 km round |
+| Old battlefield | plains, grasslands, cold steppes | rusted swords and spears, shields, bones, three burial cairns | two of the restless dead; iron to salvage; a chest |
+| Old milestone | plains, grasslands, meadows, farms, steppes (by a road) | a cut milestone, broken paving, a toppled waymarker | read it: the two nearest towns |
+| Crossroads gibbet | plains, grasslands, meadows, farms, hills (a crossroads) | a gibbet, bones, crows | its board: HIGHWAYMAN |
+| Wayside shrine | (a crossroads) | a seated stone saint, candles | pray: the Traveller's Blessing |
+| Notice post | (a crossroads) | a notice board | read the notices: the nearest structure of the wilds |
+| Wagon wreck | the open lands (by a road) | a wagon on its side, a wheel, barrels, crates, sacks, arrows, a letter | read the letter; a chest |
+
+- **Its new things** (on every map of the game, their pictures painted with `rdm4_ui_gen.py`): Wild Honey, Wild Apples, Wild Plums, Bird's Eggs, Field Mushrooms (food).
+- **Its own pieces** (`scenery13_kit.py`, measured after their import: true size): straw skeps on benches, a great nest, two herons, a burrow mouth, a milestone, a noose, two drystone wall lengths, two apple and two plum trees, the storm cell.
+- **Measured** (`test_s13f.json`, `test_s13g.json`; the hanging tree, the wagon wreck, the battlefield and the milestone again after their fixes: `test_s13h.json`, `test_s13i.json`): every kind found within 150 km of Brokenspire and visited: laid of its kind, no piece floating or walked through, its chest where it has one, its line told as she comes within 35 m; every use from beside it (the prompt named it, F did what it says: what it gave, how far she rose climbing (the erratic 4.8 m, the butte 21.3 m) and the map revealed, the blessing, the reading); every hazard stood in (the burrows 8.4 hit points each and their rats, the bees 12.6, the pond's lurker); the migrating herd walking (20.6 m in 12 s), set off beside her (56 m run in 7 s, trampling her twice for 11.2); the goats in their fold after 12 s; the tall grass's two monsters lying low (noticing within 2.5 m) at 30 m and coming at her from 15.1 to 11.5 m in 2.5 s once she came within 12 m. A picture of each from 40 m and from 15 m.
+
+![The open lands' 22 kinds, each from 15 m](../images/scenery13_open.jpg)
+
 ## The TODO sweep (2026-11-14)
 
 The open items of `TODO.md` that a test could settle in the wilds (`888 ... -Light`):
