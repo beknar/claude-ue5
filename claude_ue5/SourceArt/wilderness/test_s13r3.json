@@ -1,14 +1,261 @@
 {
- "tag": "s13p3c",
+ "tag": "s13r3",
  "plan": [
-  "scenery13=watching_aspens+clonal_grove+carved_aspens+gold_stand+beaver_stumps+aspen_meadow+aspen_edge+windthrow"
+  "scenery13=nut_cache+charcoal_hearth+dawn_hollow+harvest_shrine+watching_aspens+clonal_grove+carved_aspens+gold_stand+beaver_stumps+aspen_meadow+aspen_edge+windthrow"
  ],
  "level": "brokenspire",
  "steps": [
   {
    "step": "scenery13",
-   "ok": false,
+   "ok": true,
    "kinds": {
+    "nut_cache": {
+     "found": true,
+     "id": 67290250,
+     "at_km": [
+      26.58,
+      -66.74
+     ],
+     "name": "Nut cache",
+     "laid": {
+      "kind": "nut_cache",
+      "title": "Nut cache",
+      "x": 26582.9,
+      "y": -66735.3,
+      "pieces": 2,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 5,
+      "yaw": 103.0
+     },
+     "bottom_over_ground_cm": [
+      -11,
+      -11,
+      -11
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "forage",
+       "prompt": "gather the nuts",
+       "f": "scenery",
+       "said": "You take 3 Nuts and Seeds",
+       "got": {
+        "Nuts and Seeds": 3
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "herd": {
+      "n": 5,
+      "stampedes": 0,
+      "hits": 0,
+      "migrate": 0,
+      "stampede": 0,
+      "walked_12s_m": 4.0
+     },
+     "folk": {
+      "want": 1,
+      "found": 1,
+      "talk": [
+       {
+        "prompt": "talk to the Forager",
+        "f": "bark",
+        "said": "The Forager:  \"The squirrels were here first. The boars will come by dusk.\""
+       }
+      ]
+     },
+     "told": "Nut cache: acorns and nuts heaped in the roots of an oak, squirrels and a forager arguing over them | You take 3 Nuts and Seeds",
+     "ok": true
+    },
+    "charcoal_hearth": {
+     "found": true,
+     "id": 67359979,
+     "at_km": [
+      67.22,
+      -8.48
+     ],
+     "name": "Charcoal hearth",
+     "laid": {
+      "kind": "charcoal_hearth",
+      "title": "Charcoal hearth",
+      "x": 67220.2,
+      "y": -8480.4,
+      "pieces": 11,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 1,
+      "fx_on": 1,
+      "herd": 0,
+      "yaw": 163.4
+     },
+     "bottom_over_ground_cm": [
+      -38,
+      -10,
+      -9
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "clearing": {
+      "r_m": 12.0,
+      "trees_in": 0,
+      "trees_within_60m": 50
+     },
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "trade",
+       "prompt": "trade with the charcoal burner",
+       "f": "scenery",
+       "said": "You trade 1 Bread for 2 Wood Log.",
+       "got": {
+        "Wood Log": 2
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "folk": {
+      "want": 1,
+      "found": 1,
+      "talk": [
+       {
+        "prompt": "talk to the Charcoal burner",
+        "f": "bark",
+        "said": "The Charcoal burner:  \"Five days she burns, and I don't sleep for any of them.\""
+       }
+      ]
+     },
+     "told": "Charcoal hearth: a charcoal burner's smoking clamp, coppiced stools round it and his hut | You trade 1 Bread for 2 Wood Log.",
+     "ok": true
+    },
+    "dawn_hollow": {
+     "found": true,
+     "id": 67344657,
+     "at_km": [
+      58.46,
+      14.21
+     ],
+     "name": "Misty hollow",
+     "laid": {
+      "kind": "dawn_hollow",
+      "title": "Misty hollow",
+      "x": 58462.2,
+      "y": 14210.6,
+      "pieces": 20,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 3,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 79.0
+     },
+     "bottom_over_ground_cm": [
+      -14,
+      -9,
+      -8
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "stand in the hollow",
+       "f": "scenery",
+       "said": "The cold air pools here. At dawn the fog fills it to the brim.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Misty hollow: a low hollow where the fog lies at dawn and dusk | The cold air pools here. At dawn the fog fills it to the brim.",
+     "ok": true
+    },
+    "harvest_shrine": {
+     "found": true,
+     "id": 67285128,
+     "at_km": [
+      23.72,
+      -68.05
+     ],
+     "name": "Harvest shrine",
+     "laid": {
+      "kind": "harvest_shrine",
+      "title": "Harvest shrine",
+      "x": 23720.8,
+      "y": -68054.9,
+      "pieces": 14,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 284.5
+     },
+     "bottom_over_ground_cm": [
+      -44,
+      -9,
+      -7
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "offer",
+       "prompt": "leave an offering at the carved face",
+       "f": "scenery",
+       "said": "The carved eyes seem kinder for it.  You leave 1 Bread. Blessing of the Harvest: your blows 5% stronger, 8% less of each blow reaches you, for 15 minutes",
+       "got": {},
+       "blessing": "Blessing of the Harvest",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Harvest shrine: a face carved in an old oak, gourds and candles at its foot: a festival ground | The carved eyes seem kinder for it.  You leave 1 Bread. Blessing of the Harvest: your blows 5% stronger, 8% less of each blow reaches you, for 15 minutes",
+     "ok": true
+    },
     "watching_aspens": {
      "found": true,
      "id": 67340567,
@@ -50,7 +297,7 @@
        "f": "scenery",
        "said": "Every scar is an eye, and every eye is on you. It is only bark. It is only bark.",
        "got": {},
-       "blessing": "",
+       "blessing": "Blessing of the Harvest",
        "rose_m": 0.0,
        "revealed_more": 0,
        "used_after": 1,
@@ -205,8 +452,64 @@
      "ok": true
     },
     "beaver_stumps": {
-     "found": false,
-     "ok": false
+     "found": true,
+     "id": 67348701,
+     "at_km": [
+      60.79,
+      -17.18
+     ],
+     "name": "Beaver-felled stumps",
+     "laid": {
+      "kind": "beaver_stumps",
+      "title": "Beaver-felled stumps",
+      "x": 60791.8,
+      "y": -17175.1,
+      "pieces": 12,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 3,
+      "yaw": 0.0
+     },
+     "bottom_over_ground_cm": [
+      -70,
+      -12,
+      -7
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the stumps",
+       "f": "scenery",
+       "said": "Gnawed to points, every one. And the low branches all bitten off at the height of an elk's mouth.",
+       "got": {},
+       "blessing": "The Grove's Calm",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "herd": {
+      "n": 3,
+      "stampedes": 0,
+      "hits": 0,
+      "migrate": 0,
+      "stampede": 0,
+      "walked_12s_m": 2.0
+     },
+     "told": "Beaver-felled stumps: pointed stumps by the stream where beavers felled the aspens; elk have browsed the rest | Gnawed to points, every one. And the low branches all bitten off at the height of an elk's mouth.",
+     "ok": true
     },
     "aspen_meadow": {
      "found": true,
@@ -247,9 +550,9 @@
        "do": "forage",
        "prompt": "pick the berries",
        "f": "scenery",
-       "said": "You take 3 Wild Berries",
+       "said": "You take 2 Wild Berries",
        "got": {
-        "Wild Berries": 3
+        "Wild Berries": 2
        },
        "blessing": "The Grove's Calm",
        "rose_m": 0.0,
@@ -259,7 +562,7 @@
       }
      ],
      "hazards": [],
-     "told": "Aspen undergrowth: sunny, airy undergrowth of wildflowers and berries under the aspens | You take 3 Wild Berries",
+     "told": "Aspen undergrowth: sunny, airy undergrowth of wildflowers and berries under the aspens | You take 2 Wild Berries",
      "ok": true
     },
     "aspen_edge": {
@@ -286,8 +589,8 @@
       "yaw": 163.6
      },
      "bottom_over_ground_cm": [
-      -92,
-      -32,
+      -89,
+      -25,
       -9
      ],
      "pieces_gone": 0,
@@ -303,17 +606,21 @@
      "told_from_m": 20.0,
      "ambush_sprung": {
       "monsters": 2,
-      "hunting": 0,
+      "hunting": 2,
       "lying_low": 0,
+      "branches": [
+       "swing"
+      ],
       "m_from_her": [
-       22.2,
-       20.7
-      ]
+       7.2,
+       7.2
+      ],
+      "hp_lost": 49.0
      },
      "uses": [],
      "hazards": [],
      "told": "Grove's edge: where the aspens meet the pines: a cold camp, and someone watching from the trees | The grass moves against the wind: something was lying in wait!",
-     "ok": false
+     "ok": "{'swing'}"
     },
     "windthrow": {
      "found": true,
@@ -370,34 +677,34 @@
    },
    "table": 88,
    "counts_30km": {
-    "tall_grass": 77,
-    "burrow_town": 249,
+    "tall_grass": 78,
+    "burrow_town": 253,
     "hanged_tree": 59,
     "nest_tree": 69,
-    "shrine_tree": 73,
-    "erratic": 233,
-    "migration": 3,
+    "shrine_tree": 72,
+    "erratic": 232,
+    "migration": 4,
     "wallow": 63,
     "hive_meadow": 31,
     "brook_crossing": 0,
     "fairy_ring": 53,
-    "shepherd_hut": 318,
+    "shepherd_hut": 316,
     "reed_pond": 1,
-    "old_orchard": 111,
+    "old_orchard": 114,
     "dusk_meadow": 17,
-    "butte": 209,
-    "battlefield": 229,
-    "milestone_road": 9,
-    "crossroads_gibbet": 1,
-    "crossroads_shrine": 1,
-    "crossroads_notice": 0,
-    "wagon_wreck": 5,
-    "hedged_fields": 339,
-    "scarecrows": 39,
+    "butte": 206,
+    "battlefield": 227,
+    "milestone_road": 8,
+    "crossroads_gibbet": 4,
+    "crossroads_shrine": 2,
+    "crossroads_notice": 2,
+    "wagon_wreck": 4,
+    "hedged_fields": 336,
+    "scarecrows": 36,
     "threshing_yard": 20,
     "mill_pond": 2,
     "pumpkin_patch": 29,
-    "abandoned_farm": 83,
+    "abandoned_farm": 85,
     "loose_livestock": 83,
     "baobab": 2,
     "acacia_shade": 5,
@@ -464,20 +771,30 @@
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor",
  "shots": [
-  "wd_s13p3c_scenery13_watching_aspens.png",
-  "wd_s13p3c_scenery13_watching_aspens_near.png",
-  "wd_s13p3c_scenery13_clonal_grove.png",
-  "wd_s13p3c_scenery13_clonal_grove_near.png",
-  "wd_s13p3c_scenery13_carved_aspens.png",
-  "wd_s13p3c_scenery13_carved_aspens_near.png",
-  "wd_s13p3c_scenery13_gold_stand.png",
-  "wd_s13p3c_scenery13_gold_stand_near.png",
-  "wd_s13p3c_scenery13_aspen_meadow.png",
-  "wd_s13p3c_scenery13_aspen_meadow_near.png",
-  "wd_s13p3c_scenery13_aspen_edge.png",
-  "wd_s13p3c_scenery13_aspen_edge_near.png",
-  "wd_s13p3c_scenery13_windthrow.png",
-  "wd_s13p3c_scenery13_windthrow_near.png"
+  "wd_s13r3_scenery13_nut_cache.png",
+  "wd_s13r3_scenery13_nut_cache_near.png",
+  "wd_s13r3_scenery13_charcoal_hearth.png",
+  "wd_s13r3_scenery13_charcoal_hearth_near.png",
+  "wd_s13r3_scenery13_dawn_hollow.png",
+  "wd_s13r3_scenery13_dawn_hollow_near.png",
+  "wd_s13r3_scenery13_harvest_shrine.png",
+  "wd_s13r3_scenery13_harvest_shrine_near.png",
+  "wd_s13r3_scenery13_watching_aspens.png",
+  "wd_s13r3_scenery13_watching_aspens_near.png",
+  "wd_s13r3_scenery13_clonal_grove.png",
+  "wd_s13r3_scenery13_clonal_grove_near.png",
+  "wd_s13r3_scenery13_carved_aspens.png",
+  "wd_s13r3_scenery13_carved_aspens_near.png",
+  "wd_s13r3_scenery13_gold_stand.png",
+  "wd_s13r3_scenery13_gold_stand_near.png",
+  "wd_s13r3_scenery13_beaver_stumps.png",
+  "wd_s13r3_scenery13_beaver_stumps_near.png",
+  "wd_s13r3_scenery13_aspen_meadow.png",
+  "wd_s13r3_scenery13_aspen_meadow_near.png",
+  "wd_s13r3_scenery13_aspen_edge.png",
+  "wd_s13r3_scenery13_aspen_edge_near.png",
+  "wd_s13r3_scenery13_windthrow.png",
+  "wd_s13r3_scenery13_windthrow_near.png"
  ],
  "error": null,
  "saves_put_back": 1,

@@ -671,7 +671,9 @@ void URDCombatComponent::HurtByTrap(float Share, float SlowShare, float SlowSecs
 	Health = FMath::Max(0.f, Health - Amount);
 	if (Health <= 0.f && Now < PactUntil) { Health = FMath::Max(1.f, MaxHealth * PactShare); PactUntil = Now; ++PactSaves; SetAura(ERDSpellKind::Pact, nullptr, false); }
 	DamageTaken += Amount; LastHurtTime = Now; ++TrapsHurt;
-	if (SlowShare > 0.f) { SlowMeShare = FMath::Max(SlowMeShare, SlowShare); SlowMeUntil = FMath::Max(SlowMeUntil, Now + SlowSecs); }
+	// (through SlowBy, which lets an ended slow go first (PR #67's review: the max with an expired bog's 0.6 slowed a later sting's
+	// 0.15 to 0.6))
+	if (SlowShare > 0.f) SlowBy(SlowShare, SlowSecs);
 	if (AActor* O = GetOwner())
 	{
 		Generator->AddHitText(O->GetActorLocation() + FVector(0, 0, 90.f), Amount, true);

@@ -473,7 +473,9 @@ def flume():
     for s in (-1, 1):
         a = Vector((-L / 2, s * 0.02, 1.6 + drop)); b = Vector((L / 2, s * 0.02, 1.6))
         n = Vector((0, s * 0.42, 0.42))
-        vs = [bm.verts.new(p) for p in (a, b, b + n, a + n)]
+        # (each wall wound to face into the trough (PR #67's review: the -Y wall faced out, culled from inside the V))
+        quad = (a, b, b + n, a + n) if s > 0 else (b, a, a + n, b + n)
+        vs = [bm.verts.new(p) for p in quad]
         f = bm.faces.new(vs); f.material_index = 0
         for lp, uv in zip(f.loops, ((0, 0), (6, 0), (6, 1), (0, 1))): lp[uvl].uv = uv
     finish(me, ob, bm, ["FlumePlanks", "FlumeTrestle"])
@@ -604,7 +606,9 @@ def resin_pine(variant, seed):
     rng = random.Random(seed)
     me, ob, bm, uvl = new_mesh(f"SM_N13_ResinPine_{variant}")
     H = rng.uniform(14.0, 17.0)
-    tube(bm, uvl, [Vector((0.15 * math.sin(t * 2 + seed), 0, H * t)) for t in np.linspace(0, 1, 8)], [0.32 * (1 - 0.8 * t) for t in np.linspace(0, 1, 8)], 9, 0)
+    # (its lean from 0 at the foot, where the scar and cup are laid for a trunk on x=0 (PR #67's review: centred at 0.15 sin(seed), the
+    # scar stood 16 cm off the bark and the cup in the air))
+    tube(bm, uvl, [Vector((0.15 * (math.sin(t * 2 + seed) - math.sin(seed)), 0, H * t)) for t in np.linspace(0, 1, 8)], [0.32 * (1 - 0.8 * t) for t in np.linspace(0, 1, 8)], 9, 0)
     for k in range(9):
         z = H * rng.uniform(0.55, 0.98); a = rng.uniform(0, 2 * math.pi); o = rng.uniform(0.6, 2.2) * (1.2 - z / H)
         cluster(bm, uvl, Vector((math.cos(a) * o, math.sin(a) * o, z)), rng.uniform(1.8, 2.6), rng, 1)

@@ -1,14 +1,66 @@
 {
- "tag": "s13p3b",
+ "tag": "s13r2",
  "plan": [
-  "scenery13=muskeg_bog+spruce_thicket+beaver_pond+moose_wallow+trapline_cabin+drunken_forest+gold_larches+leaf_pits+fungus_glade+hollow_giant+mossy_walls+nut_cache+charcoal_hearth+dawn_hollow+harvest_shrine"
+  "scenery13=seid_stone+muskeg_bog+spruce_thicket+beaver_pond+moose_wallow+trapline_cabin+drunken_forest+gold_larches+leaf_pits+fungus_glade+hollow_giant+mossy_walls"
  ],
  "level": "brokenspire",
  "steps": [
   {
    "step": "scenery13",
-   "ok": false,
+   "ok": true,
    "kinds": {
+    "seid_stone": {
+     "found": true,
+     "id": 67417267,
+     "at_km": [
+      100.79,
+      -42.46
+     ],
+     "name": "Seid stone",
+     "laid": {
+      "kind": "seid_stone",
+      "title": "Seid stone",
+      "x": 100793.5,
+      "y": -42456.8,
+      "pieces": 8,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 346.0
+     },
+     "bottom_over_ground_cm": [
+      -22,
+      -7,
+      -4
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "offer",
+       "prompt": "leave an offering at the seid",
+       "f": "scenery",
+       "said": "The stone is warm under your hand.  You leave 1 Bread. Blessing of the Seid: your blows 6% stronger, 12% less of each blow reaches you, for 10 minutes",
+       "got": {},
+       "blessing": "Blessing of the Seid",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Seid stone: a great boulder set up on three small stones, offerings round its foot | The stone is warm under your hand.  You leave 1 Bread. Blessing of the Seid: your blows 6% stronger, 12% less of each blow reaches you, for 10 minutes",
+     "ok": true
+    },
     "muskeg_bog": {
      "found": true,
      "id": 67415216,
@@ -26,7 +78,7 @@
       "boxes": 0,
       "guards": 0,
       "uses": 1,
-      "hazards": 2,
+      "hazards": 1,
       "fx": 0,
       "fx_on": 0,
       "herd": 0,
@@ -48,12 +100,12 @@
        "do": "loot",
        "prompt": "search the body in the peat",
        "f": "scenery",
-       "said": "A man, brown as leather, his face peaceful. He has lain here a long time.  You take 1 Coarse Hide, 1 Small Healing Potion",
+       "said": "A man, brown as leather, his face peaceful. He has lain here a long time.  You take 1 Coarse Hide",
        "got": {
         "Coarse Hide": 1,
-        "Small Healing Potion": 1
+        "Small Healing Potion": 0
        },
-       "blessing": "",
+       "blessing": "Blessing of the Seid",
        "rose_m": 0.0,
        "revealed_more": 0,
        "used_after": 1,
@@ -64,21 +116,14 @@
       {
        "kind": "bog",
        "walk_speed_in_bog": 159,
-       "hp_lost": 8.4,
-       "sprung": 3,
-       "monsters_came": 0,
-       "ok": true
-      },
-      {
-       "kind": "bog",
-       "walk_speed_in_bog": 159,
+       "walk_speed_out": 353,
        "hp_lost": 8.4,
        "sprung": 3,
        "monsters_came": 0,
        "ok": true
       }
      ],
-     "told": "Muskeg: sinking ground of moss and peat; something lies preserved in the peat | A man, brown as leather, his face peaceful. He has lain here a long time.  You take 1 Coarse Hide, 1 Small Healing Potion | The ground gives under you: bog. Get out before it takes you | The bog drags at your legs: 4 damage | The ground gives under you: bog. Get out before it takes you | The bog drags at your legs: 4 damage",
+     "told": "Muskeg: sinking ground of moss and peat; something lies preserved in the peat | A man, brown as leather, his face peaceful. He has lain here a long time.  You take 1 Coarse Hide | The ground gives under you: bog. Get out before it takes you | The bog drags at your legs: 4 damage",
      "ok": true
     },
     "spruce_thicket": {
@@ -121,8 +166,56 @@
      "ok": true
     },
     "beaver_pond": {
-     "found": false,
-     "ok": false
+     "found": true,
+     "id": 67364049,
+     "at_km": [
+      69.74,
+      -24.37
+     ],
+     "name": "Beaver dam",
+     "laid": {
+      "kind": "beaver_pond",
+      "title": "Beaver dam",
+      "x": 69742.5,
+      "y": -24372.4,
+      "pieces": 13,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": -90.0
+     },
+     "bottom_over_ground_cm": [
+      -74,
+      -20,
+      -5
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the beaver dam",
+       "f": "scenery",
+       "said": "Gnawed stumps, a lodge of sticks and mud, and a drowned forest where the water rose.",
+       "got": {},
+       "blessing": "Blessing of the Seid",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Beaver dam: a beaver dam holding back a pond, drowned trees standing grey in it | Gnawed stumps, a lodge of sticks and mud, and a drowned forest where the water rose.",
+     "ok": true
     },
     "moose_wallow": {
      "found": true,
@@ -165,7 +258,7 @@
        "f": "scenery",
        "said": "Moose, and over them the broad pads of a bear.  Only deer and boar have come this way.",
        "got": {},
-       "blessing": "",
+       "blessing": "Blessing of the Seid",
        "rose_m": 0.0,
        "revealed_more": 0,
        "used_after": 1,
@@ -177,12 +270,12 @@
        "kind": "wakes",
        "hp_lost": 0.0,
        "sprung": 1,
-       "monsters_came": 0,
-       "ok": false
+       "monsters_came": 1,
+       "ok": true
       }
      ],
-     "told": "Bear's ground: a wallow churned by moose, and trunks scored high by a bear's claws: someone's territory | A bear rises out of the brush: this is its ground | Moose, and over them the broad pads of a bear.  Only deer and boar have come this way.",
-     "ok": false
+     "told": "Bear's ground: a wallow churned by moose, and trunks scored high by a bear's claws: someone's territory | Moose, and over them the broad pads of a bear.  Only deer and boar have come this way. | A bear rises out of the brush: this is its ground",
+     "ok": true
     },
     "trapline_cabin": {
      "found": true,
@@ -220,7 +313,7 @@
      "clearing": {
       "r_m": 9.600000000000001,
       "trees_in": 0,
-      "trees_60m_out": 0
+      "trees_within_60m": 52
      },
      "told_from_m": 20.0,
      "uses": [
@@ -234,7 +327,7 @@
         "Straw Rope": 2,
         "Bread": 1
        },
-       "blessing": "",
+       "blessing": "Blessing of the Seid",
        "rose_m": 0.0,
        "revealed_more": 0,
        "used_after": 1,
@@ -286,7 +379,7 @@
        "f": "scenery",
        "said": "The frozen ground under the moss is thawing. Nothing here stands straight.",
        "got": {},
-       "blessing": "",
+       "blessing": "Blessing of the Seid",
        "rose_m": 0.0,
        "revealed_more": 0,
        "used_after": 1,
@@ -338,7 +431,7 @@
        "f": "scenery",
        "said": "Larches: the only needles that turn and fall.",
        "got": {},
-       "blessing": "",
+       "blessing": "Blessing of the Seid",
        "rose_m": 0.0,
        "revealed_more": 0,
        "used_after": 1,
@@ -390,7 +483,7 @@
        "f": "scenery",
        "said": "Something heavy came through the leaves, not long ago.  Tracks of something big lead south-east, toward Boar Lair, 2.3 km off.",
        "got": {},
-       "blessing": "",
+       "blessing": "Blessing of the Seid",
        "rose_m": 0.0,
        "revealed_more": 0,
        "used_after": 1,
@@ -455,12 +548,12 @@
        "do": "forage",
        "prompt": "pick the mushrooms",
        "f": "scenery",
-       "said": "You take 2 Field Mushrooms",
+       "said": "You take 3 Field Mushrooms",
        "got": {
-        "Field Mushrooms": 2,
+        "Field Mushrooms": 3,
         "Herbs": 0
        },
-       "blessing": "",
+       "blessing": "Blessing of the Seid",
        "rose_m": 0.0,
        "revealed_more": 0,
        "used_after": 1,
@@ -468,7 +561,7 @@
       }
      ],
      "hazards": [],
-     "told": "Fungus glade: shelf fungi stepping up fallen logs, a ring of mushrooms: a forager's spot | You take 2 Field Mushrooms",
+     "told": "Fungus glade: shelf fungi stepping up fallen logs, a ring of mushrooms: a forager's spot | You take 3 Field Mushrooms",
      "ok": true
     },
     "hollow_giant": {
@@ -512,7 +605,7 @@
        "f": "scenery",
        "said": "Dry inside, and out of the wind. You sleep an hour.",
        "got": {},
-       "blessing": "",
+       "blessing": "Blessing of the Seid",
        "rose_m": 0.0,
        "revealed_more": 0,
        "used_after": 1,
@@ -564,7 +657,7 @@
        "f": "scenery",
        "said": "Field walls, deep in the forest. Nobody has ploughed here for a hundred years.",
        "got": {},
-       "blessing": "",
+       "blessing": "Blessing of the Seid",
        "rose_m": 0.0,
        "revealed_more": 0,
        "used_after": 1,
@@ -574,282 +667,39 @@
      "hazards": [],
      "told": "Mossy walls: mossy stone walls running through the woods from forgotten fields | Field walls, deep in the forest. Nobody has ploughed here for a hundred years.",
      "ok": true
-    },
-    "nut_cache": {
-     "found": true,
-     "id": 67290250,
-     "at_km": [
-      26.58,
-      -66.74
-     ],
-     "name": "Nut cache",
-     "laid": {
-      "kind": "nut_cache",
-      "title": "Nut cache",
-      "x": 26582.9,
-      "y": -66735.3,
-      "pieces": 2,
-      "boxes": 0,
-      "guards": 0,
-      "uses": 1,
-      "hazards": 0,
-      "fx": 0,
-      "fx_on": 0,
-      "herd": 5,
-      "yaw": 103.0
-     },
-     "bottom_over_ground_cm": [
-      -11,
-      -11,
-      -11
-     ],
-     "pieces_gone": 0,
-     "floating": [],
-     "walked_through": [],
-     "chests": 0,
-     "want_chests": 0,
-     "told_from_m": 20.0,
-     "uses": [
-      {
-       "do": "forage",
-       "prompt": "gather the nuts",
-       "f": "scenery",
-       "said": "You take 4 Nuts and Seeds",
-       "got": {
-        "Nuts and Seeds": 4
-       },
-       "blessing": "",
-       "rose_m": 0.0,
-       "revealed_more": 0,
-       "used_after": 1,
-       "ok": true
-      }
-     ],
-     "hazards": [],
-     "herd": {
-      "n": 5,
-      "stampedes": 0,
-      "hits": 0,
-      "migrate": 0,
-      "stampede": 0,
-      "walked_12s_m": 2.5
-     },
-     "folk": {
-      "want": 1,
-      "found": 1,
-      "talk": [
-       {
-        "prompt": "talk to the Forager",
-        "f": "bark",
-        "said": "The Forager:  \"The squirrels were here first. The boars will come by dusk.\""
-       }
-      ]
-     },
-     "told": "Nut cache: acorns and nuts heaped in the roots of an oak, squirrels and a forager arguing over them | You take 4 Nuts and Seeds",
-     "ok": true
-    },
-    "charcoal_hearth": {
-     "found": true,
-     "id": 67359979,
-     "at_km": [
-      67.22,
-      -8.48
-     ],
-     "name": "Charcoal hearth",
-     "laid": {
-      "kind": "charcoal_hearth",
-      "title": "Charcoal hearth",
-      "x": 67220.2,
-      "y": -8480.4,
-      "pieces": 11,
-      "boxes": 0,
-      "guards": 0,
-      "uses": 1,
-      "hazards": 0,
-      "fx": 1,
-      "fx_on": 1,
-      "herd": 0,
-      "yaw": 163.4
-     },
-     "bottom_over_ground_cm": [
-      -38,
-      -10,
-      -9
-     ],
-     "pieces_gone": 0,
-     "floating": [],
-     "walked_through": [],
-     "chests": 0,
-     "want_chests": 0,
-     "clearing": {
-      "r_m": 12.0,
-      "trees_in": 0,
-      "trees_60m_out": 2
-     },
-     "told_from_m": 20.0,
-     "uses": [
-      {
-       "do": "trade",
-       "prompt": "trade with the charcoal burner",
-       "f": "scenery",
-       "said": "You trade 1 Bread for 2 Wood Log.",
-       "got": {
-        "Wood Log": 2
-       },
-       "blessing": "",
-       "rose_m": 0.0,
-       "revealed_more": 0,
-       "used_after": 1,
-       "ok": true
-      }
-     ],
-     "hazards": [],
-     "folk": {
-      "want": 1,
-      "found": 1,
-      "talk": [
-       {
-        "prompt": "take up your things (17)",
-        "f": "loot",
-        "said": "You take up your things again (17)"
-       }
-      ]
-     },
-     "told": "Charcoal hearth: a charcoal burner's smoking clamp, coppiced stools round it and his hut | A hard fall of 11.4 m: 91 damage | A hard fall of 10.4 m: 79 damage | You trade 1 Bread for 2 Wood Log.",
-     "ok": false
-    },
-    "dawn_hollow": {
-     "found": true,
-     "id": 67344657,
-     "at_km": [
-      58.46,
-      14.21
-     ],
-     "name": "Misty hollow",
-     "laid": {
-      "kind": "dawn_hollow",
-      "title": "Misty hollow",
-      "x": 58462.2,
-      "y": 14210.6,
-      "pieces": 20,
-      "boxes": 0,
-      "guards": 0,
-      "uses": 1,
-      "hazards": 0,
-      "fx": 3,
-      "fx_on": 0,
-      "herd": 0,
-      "yaw": 79.0
-     },
-     "bottom_over_ground_cm": null,
-     "pieces_gone": 20,
-     "floating": [],
-     "walked_through": [],
-     "chests": 0,
-     "want_chests": 0,
-     "told_from_m": 20.0,
-     "uses": [
-      {
-       "do": "lore",
-       "prompt": "stand in the hollow",
-       "f": "scenery",
-       "said": "The cold air pools here. At dawn the fog fills it to the brim.",
-       "got": {},
-       "blessing": "",
-       "rose_m": 0.0,
-       "revealed_more": 0,
-       "used_after": 1,
-       "ok": true
-      }
-     ],
-     "hazards": [],
-     "told": "Brokenspire | Misty hollow: a low hollow where the fog lies at dawn and dusk | A hard fall of 12.6 m: 108 damage | The cold air pools here. At dawn the fog fills it to the brim.",
-     "ok": false
-    },
-    "harvest_shrine": {
-     "found": true,
-     "id": 67285128,
-     "at_km": [
-      23.72,
-      -68.05
-     ],
-     "name": "Harvest shrine",
-     "laid": {
-      "kind": "harvest_shrine",
-      "title": "Harvest shrine",
-      "x": 23720.8,
-      "y": -68054.9,
-      "pieces": 14,
-      "boxes": 0,
-      "guards": 0,
-      "uses": 1,
-      "hazards": 0,
-      "fx": 0,
-      "fx_on": 0,
-      "herd": 0,
-      "yaw": 284.5
-     },
-     "bottom_over_ground_cm": [
-      -44,
-      -9,
-      -7
-     ],
-     "pieces_gone": 0,
-     "floating": [],
-     "walked_through": [],
-     "chests": 0,
-     "want_chests": 0,
-     "told_from_m": 20.0,
-     "uses": [
-      {
-       "do": "offer",
-       "prompt": "leave an offering at the carved face",
-       "f": "scenery",
-       "said": "The carved eyes seem kinder for it.  You leave 1 Bread. Blessing of the Harvest: your blows 5% stronger, 8% less of each blow reaches you, for 15 minutes",
-       "got": {},
-       "blessing": "Blessing of the Harvest",
-       "rose_m": 0.0,
-       "revealed_more": 0,
-       "used_after": 1,
-       "ok": true
-      }
-     ],
-     "hazards": [],
-     "told": "Harvest shrine: a face carved in an old oak, gourds and candles at its foot: a festival ground | The carved eyes seem kinder for it.  You leave 1 Bread. Blessing of the Harvest: your blows 5% stronger, 8% less of each blow reaches you, for 15 minutes",
-     "ok": true
     }
    },
    "table": 88,
    "counts_30km": {
     "tall_grass": 78,
-    "burrow_town": 248,
+    "burrow_town": 253,
     "hanged_tree": 59,
     "nest_tree": 69,
-    "shrine_tree": 73,
+    "shrine_tree": 72,
     "erratic": 232,
-    "migration": 5,
+    "migration": 4,
     "wallow": 63,
     "hive_meadow": 31,
     "brook_crossing": 0,
     "fairy_ring": 53,
-    "shepherd_hut": 317,
+    "shepherd_hut": 316,
     "reed_pond": 1,
-    "old_orchard": 111,
+    "old_orchard": 113,
     "dusk_meadow": 17,
-    "butte": 208,
-    "battlefield": 229,
-    "milestone_road": 7,
-    "crossroads_gibbet": 3,
-    "crossroads_shrine": 3,
-    "crossroads_notice": 4,
-    "wagon_wreck": 5,
-    "hedged_fields": 337,
-    "scarecrows": 38,
+    "butte": 206,
+    "battlefield": 228,
+    "milestone_road": 9,
+    "crossroads_gibbet": 2,
+    "crossroads_shrine": 2,
+    "crossroads_notice": 2,
+    "wagon_wreck": 4,
+    "hedged_fields": 338,
+    "scarecrows": 36,
     "threshing_yard": 20,
     "mill_pond": 2,
     "pumpkin_patch": 30,
-    "abandoned_farm": 83,
-    "loose_livestock": 84,
+    "abandoned_farm": 86,
+    "loose_livestock": 83,
     "baobab": 2,
     "acacia_shade": 5,
     "termite_mounds": 7,
@@ -915,34 +765,30 @@
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor",
  "shots": [
-  "wd_s13p3b_scenery13_muskeg_bog.png",
-  "wd_s13p3b_scenery13_muskeg_bog_near.png",
-  "wd_s13p3b_scenery13_spruce_thicket.png",
-  "wd_s13p3b_scenery13_spruce_thicket_near.png",
-  "wd_s13p3b_scenery13_moose_wallow.png",
-  "wd_s13p3b_scenery13_moose_wallow_near.png",
-  "wd_s13p3b_scenery13_trapline_cabin.png",
-  "wd_s13p3b_scenery13_trapline_cabin_near.png",
-  "wd_s13p3b_scenery13_drunken_forest.png",
-  "wd_s13p3b_scenery13_drunken_forest_near.png",
-  "wd_s13p3b_scenery13_gold_larches.png",
-  "wd_s13p3b_scenery13_gold_larches_near.png",
-  "wd_s13p3b_scenery13_leaf_pits.png",
-  "wd_s13p3b_scenery13_leaf_pits_near.png",
-  "wd_s13p3b_scenery13_fungus_glade.png",
-  "wd_s13p3b_scenery13_fungus_glade_near.png",
-  "wd_s13p3b_scenery13_hollow_giant.png",
-  "wd_s13p3b_scenery13_hollow_giant_near.png",
-  "wd_s13p3b_scenery13_mossy_walls.png",
-  "wd_s13p3b_scenery13_mossy_walls_near.png",
-  "wd_s13p3b_scenery13_nut_cache.png",
-  "wd_s13p3b_scenery13_nut_cache_near.png",
-  "wd_s13p3b_scenery13_charcoal_hearth.png",
-  "wd_s13p3b_scenery13_charcoal_hearth_near.png",
-  "wd_s13p3b_scenery13_dawn_hollow.png",
-  "wd_s13p3b_scenery13_dawn_hollow_near.png",
-  "wd_s13p3b_scenery13_harvest_shrine.png",
-  "wd_s13p3b_scenery13_harvest_shrine_near.png"
+  "wd_s13r2_scenery13_seid_stone.png",
+  "wd_s13r2_scenery13_seid_stone_near.png",
+  "wd_s13r2_scenery13_muskeg_bog.png",
+  "wd_s13r2_scenery13_muskeg_bog_near.png",
+  "wd_s13r2_scenery13_spruce_thicket.png",
+  "wd_s13r2_scenery13_spruce_thicket_near.png",
+  "wd_s13r2_scenery13_beaver_pond.png",
+  "wd_s13r2_scenery13_beaver_pond_near.png",
+  "wd_s13r2_scenery13_moose_wallow.png",
+  "wd_s13r2_scenery13_moose_wallow_near.png",
+  "wd_s13r2_scenery13_trapline_cabin.png",
+  "wd_s13r2_scenery13_trapline_cabin_near.png",
+  "wd_s13r2_scenery13_drunken_forest.png",
+  "wd_s13r2_scenery13_drunken_forest_near.png",
+  "wd_s13r2_scenery13_gold_larches.png",
+  "wd_s13r2_scenery13_gold_larches_near.png",
+  "wd_s13r2_scenery13_leaf_pits.png",
+  "wd_s13r2_scenery13_leaf_pits_near.png",
+  "wd_s13r2_scenery13_fungus_glade.png",
+  "wd_s13r2_scenery13_fungus_glade_near.png",
+  "wd_s13r2_scenery13_hollow_giant.png",
+  "wd_s13r2_scenery13_hollow_giant_near.png",
+  "wd_s13r2_scenery13_mossy_walls.png",
+  "wd_s13r2_scenery13_mossy_walls_near.png"
  ],
  "error": null,
  "saves_put_back": 1,

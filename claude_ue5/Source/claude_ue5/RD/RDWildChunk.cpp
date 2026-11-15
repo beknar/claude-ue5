@@ -190,6 +190,42 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 	TMap<int32, int32> Present;
 	for (int32 K = 0; K < Nv * Nv; K += 7) { const FRDWSample& Q = Sat(K / Nv, K % Nv); Present.FindOrAdd(Q.Biome)++; if (Q.W1 < 0.9f) Present.FindOrAdd(Q.Biome2)++; }
 	auto Nearest = [&](double Lx, double Ly, int32& I, int32& J) { I = FMath::Clamp(FMath::RoundToInt(Lx / St), 0, Nv - 1); J = FMath::Clamp(FMath::RoundToInt(Ly / St), 0, Nv - 1); };
+	// (the list of 2026-11-14's third phase: the scenery's clearings (L=clear, a square r metres round a point, turned with its place)
+	// keep the plants out wherever they reach, across the chunks' edges (PR #67's review: the chunk that laid one took out its own alone))
+	TArray<FVector4> Clears;          // (x, y, half size, yaw)
+	{
+		TArray<FRDWildPlace> Sc;
+		const FIntPoint N0 = W.SceneryCellOf(X0, Y0) - FIntPoint(1, 1), N1 = W.SceneryCellOf(X0 + Cm, Y0 + Cm) + FIntPoint(1, 1);
+		for (int32 Ci = N0.X; Ci <= N1.X; ++Ci) for (int32 Cj = N0.Y; Cj <= N1.Y; ++Cj) W.SceneryIn(FIntPoint(Ci, Cj), Sc);
+		for (const FRDWildPlace& P : Sc)
+		{
+			if (!W.SceneryKinds.IsValidIndex(P.Scenery)) continue;
+			for (const FString& Ln : W.SceneryKinds[P.Scenery].Parts)
+			{
+				if (!Ln.StartsWith(TEXT("L=clear"))) continue;
+				float Rr = 15.f, Ox = 0.f, Oy = 0.f;
+				TArray<FString> ClParts; Ln.ParseIntoArray(ClParts, TEXT(";"), true);
+				for (const FString& ClPart : ClParts)
+				{
+					FString ClKey, ClVal; if (!ClPart.Split(TEXT("="), &ClKey, &ClVal)) continue;
+					if (ClKey == TEXT("r")) Rr = FCString::Atof(*ClVal); else if (ClKey == TEXT("x")) Ox = FCString::Atof(*ClVal); else if (ClKey == TEXT("y")) Oy = FCString::Atof(*ClVal);
+				}
+				const float Yr = FMath::DegreesToRadians(P.Yaw);
+				Clears.Add(FVector4(P.At.X + Ox * FMath::Cos(Yr) - Oy * FMath::Sin(Yr), P.At.Y + Ox * FMath::Sin(Yr) + Oy * FMath::Cos(Yr), Rr, Yr));
+			}
+		}
+	}
+	auto InClear = [&](double Wx, double Wy)
+	{
+		for (const FVector4& Cl : Clears)
+		{
+			const double Cdx = Wx - Cl.X, Cdy = Wy - Cl.Y;
+			if (FMath::Abs(Cdx) > Cl.Z * 1.5 || FMath::Abs(Cdy) > Cl.Z * 1.5) continue;
+			const double Cu = Cdx * FMath::Cos(Cl.W) + Cdy * FMath::Sin(Cl.W), Cv = -Cdx * FMath::Sin(Cl.W) + Cdy * FMath::Cos(Cl.W);
+			if (FMath::Abs(Cu) < Cl.Z && FMath::Abs(Cv) < Cl.Z) return true;
+		}
+		return false;
+	};
 	for (const auto& Kv : Present)
 	{
 		const int32 Bi = Kv.Key;
@@ -221,6 +257,7 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 					// (the list of 2026-11-11: a meadow's trees in clusters and strips, its clearings bare)
 					if (F.Grove > 0.f) Wb *= FMath::Lerp(1.f, W.Grove(X0 + Lx, Y0 + Ly), FMath::Clamp(F.Grove, 0.f, 1.f));
 					if (Q.Road > 0.15f || (Q.Snow > 0.85f && !bTree && F.Kind != TEXT("rock") && F.Kind != TEXT("ice"))) continue;
+					if (Clears.Num() > 0 && InClear(X0 + Lx, Y0 + Ly)) continue;
 					if (bCrop ? Q.Field < 0.5f : (Q.Field > 0.3f && F.Kind != TEXT("rock"))) continue;
 					// (a farmstead's yard: its grass only (its house, barn and paddock stand there))
 					if (Q.FarmKind == 4 && F.Kind != TEXT("grass") && F.Kind != TEXT("flower")) continue;

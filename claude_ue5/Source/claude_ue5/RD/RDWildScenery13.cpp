@@ -200,7 +200,10 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 	const FVector2D H2(Her.X / 100.0, Her.Y / 100.0);
 	TickWildStorm13(Dt, Her);
 	// ---- the third phase: a quiet floor under her (the pine forests' needles): the monsters notice her from less far
+	// (twice a second: her region changes over hundreds of metres (PR #67's review: a whole sample every frame))
+	if (Now >= WildQuietAt)
 	{
+		WildQuietAt = Now + 0.5f;
 		FRDWSample Qs; Wild->Sample(H2.X, H2.Y, Qs, false);
 		WildQuietScale = WildQuietBiomes.Contains(Wild->BiomeName(Qs.Biome)) ? FMath::Clamp(WildQuietNotice, 0.1f, 1.f) : 1.f;
 	}
@@ -243,6 +246,8 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 			{
 				// (the third phase: "muskeg and bogs: sinking ground": she wades slowed from her first step, and after 4 s in it the bog
 				// drags at her every 2 s)
+				// (stepping back in starts it again: slowed at once (PR #67's review: the last drag's wait held the slow off 2 s))
+				if (bIn && Hz.In <= 0.f) Hz.ReadyAt = 0.f;
 				Hz.In = bIn ? Hz.In + Dt : 0.f;
 				if (!bIn || Now < Hz.ReadyAt) continue;
 				Hz.ReadyAt = Now + (Hz.In < 4.f ? 0.9f : 2.f);

@@ -1,14 +1,14 @@
 {
- "tag": "s13p3a",
+ "tag": "s13r1",
  "plan": [
-  "scenery13=resin_camp+sunlit_clearing+granite_outcrop+lightning_pine+logging_camp+owl_hollow+pine_ridge+lichen_heath+esker+pine_dunes+kettle_lake+fire_scar+herder_camp+seid_stone",
+  "scenery13=resin_camp+sunlit_clearing+granite_outcrop+lightning_pine+logging_camp+owl_hollow+pine_ridge+lichen_heath+esker+pine_dunes+kettle_lake+fire_scar+herder_camp",
   "land13"
  ],
  "level": "brokenspire",
  "steps": [
   {
    "step": "scenery13",
-   "ok": false,
+   "ok": true,
    "kinds": {
     "resin_camp": {
      "found": true,
@@ -46,7 +46,7 @@
      "clearing": {
       "r_m": 10.4,
       "trees_in": 0,
-      "trees_60m_out": 1
+      "trees_within_60m": 35
      },
      "told_from_m": 20.0,
      "uses": [
@@ -54,9 +54,9 @@
        "do": "forage",
        "prompt": "collect the resin from the cups",
        "f": "scenery",
-       "said": "You take 2 Pine Resin",
+       "said": "You take 4 Pine Resin",
        "got": {
-        "Pine Resin": 2
+        "Pine Resin": 4
        },
        "blessing": "",
        "rose_m": 0.0,
@@ -77,7 +77,7 @@
        }
       ]
      },
-     "told": "Resin camp: pines tapped for their resin, a clay cup under every scar, a still for turpentine | You take 2 Pine Resin",
+     "told": "Resin camp: pines tapped for their resin, a clay cup under every scar, a still for turpentine | You take 4 Pine Resin",
      "ok": true
     },
     "sunlit_clearing": {
@@ -112,7 +112,7 @@
      "clearing": {
       "r_m": 17.6,
       "trees_in": 0,
-      "trees_60m_out": 4
+      "trees_within_60m": 49
      },
      "told_from_m": 20.0,
      "uses": [
@@ -136,7 +136,7 @@
       "hits": 0,
       "migrate": 0,
       "stampede": 0,
-      "walked_12s_m": 2.1
+      "walked_12s_m": 0.4
      },
      "told": "Sunlit clearing: the canopy breaks and the sun comes down in shafts on grass and deer | You sit in the sun a while. The forest is quiet round you.",
      "ok": true
@@ -230,22 +230,22 @@
      "uses": [
       {
        "do": "forage",
-       "prompt": "",
-       "f": "",
-       "said": "Lightning-struck pine: a great pine split by lightning, its wood charred and still smoking",
+       "prompt": "salvage the split wood",
+       "f": "scenery",
+       "said": "The heartwood is dry and sound under the char.  You take 1 Wood Log",
        "got": {
-        "Wood Log": 0
+        "Wood Log": 1
        },
        "blessing": "",
        "rose_m": 0.0,
        "revealed_more": 0,
-       "used_after": 0,
-       "ok": false
+       "used_after": 1,
+       "ok": true
       }
      ],
      "hazards": [],
-     "told": "Lightning-struck pine: a great pine split by lightning, its wood charred and still smoking",
-     "ok": false
+     "told": "Lightning-struck pine: a great pine split by lightning, its wood charred and still smoking | The heartwood is dry and sound under the char.  You take 1 Wood Log",
+     "ok": true
     },
     "logging_camp": {
      "found": true,
@@ -283,7 +283,7 @@
      "clearing": {
       "r_m": 14.4,
       "trees_in": 0,
-      "trees_60m_out": 1
+      "trees_within_60m": 48
      },
      "told_from_m": 20.0,
      "uses": [
@@ -482,7 +482,7 @@
       "hits": 0,
       "migrate": 0,
       "stampede": 0,
-      "walked_12s_m": 1.5
+      "walked_12s_m": 2.5
      },
      "told": "Lichen heath: pale lichen carpets the sand under the pines, crunching underfoot; reindeer graze on it | Lichen for a poultice, as the herders use it.  You take 2 Herbs",
      "ok": true
@@ -511,9 +511,9 @@
       "yaw": 136.3
      },
      "bottom_over_ground_cm": [
-      -21,
-      24,
-      40
+      -6,
+      12,
+      31
      ],
      "pieces_gone": 0,
      "floating": [],
@@ -733,7 +733,7 @@
      "clearing": {
       "r_m": 12.8,
       "trees_in": 0,
-      "trees_60m_out": 0
+      "trees_within_60m": 21
      },
      "told_from_m": 20.0,
      "uses": [
@@ -771,7 +771,7 @@
       "hits": 0,
       "migrate": 0,
       "stampede": 0,
-      "walked_12s_m": 2.0,
+      "walked_12s_m": 1.2,
       "outside_pen": 0
      },
      "folk": {
@@ -787,90 +787,38 @@
      },
      "told": "Reindeer herders' camp: cone tents of the reindeer herders, a corral, meat drying on racks | They give you dried meat and a place by the fire. | You trade 1 Coarse Hide for 2 Bread.",
      "ok": true
-    },
-    "seid_stone": {
-     "found": true,
-     "id": 67417267,
-     "at_km": [
-      100.79,
-      -42.46
-     ],
-     "name": "Seid stone",
-     "laid": {
-      "kind": "seid_stone",
-      "title": "Seid stone",
-      "x": 100793.5,
-      "y": -42456.8,
-      "pieces": 8,
-      "boxes": 0,
-      "guards": 0,
-      "uses": 1,
-      "hazards": 0,
-      "fx": 0,
-      "fx_on": 0,
-      "herd": 0,
-      "yaw": 346.0
-     },
-     "bottom_over_ground_cm": [
-      -22,
-      -7,
-      -4
-     ],
-     "pieces_gone": 0,
-     "floating": [],
-     "walked_through": [],
-     "chests": 0,
-     "want_chests": 0,
-     "told_from_m": 20.0,
-     "uses": [
-      {
-       "do": "offer",
-       "prompt": "leave an offering at the seid",
-       "f": "scenery",
-       "said": "The stone is warm under your hand.  You leave 1 Bread. Blessing of the Seid: your blows 6% stronger, 12% less of each blow reaches you, for 10 minutes",
-       "got": {},
-       "blessing": "Blessing of the Seid",
-       "rose_m": 0.0,
-       "revealed_more": 0,
-       "used_after": 1,
-       "ok": true
-      }
-     ],
-     "hazards": [],
-     "told": "Seid stone: a great boulder set up on three small stones, offerings round its foot | The stone is warm under your hand.  You leave 1 Bread. Blessing of the Seid: your blows 6% stronger, 12% less of each blow reaches you, for 10 minutes",
-     "ok": true
     }
    },
    "table": 88,
    "counts_30km": {
-    "tall_grass": 75,
-    "burrow_town": 252,
+    "tall_grass": 77,
+    "burrow_town": 248,
     "hanged_tree": 59,
-    "nest_tree": 68,
+    "nest_tree": 69,
     "shrine_tree": 73,
     "erratic": 233,
     "migration": 5,
-    "wallow": 64,
+    "wallow": 63,
     "hive_meadow": 31,
     "brook_crossing": 0,
     "fairy_ring": 53,
-    "shepherd_hut": 316,
+    "shepherd_hut": 318,
     "reed_pond": 1,
-    "old_orchard": 113,
+    "old_orchard": 111,
     "dusk_meadow": 17,
     "butte": 209,
     "battlefield": 228,
     "milestone_road": 6,
-    "crossroads_gibbet": 4,
-    "crossroads_shrine": 3,
-    "crossroads_notice": 0,
-    "wagon_wreck": 1,
+    "crossroads_gibbet": 2,
+    "crossroads_shrine": 2,
+    "crossroads_notice": 3,
+    "wagon_wreck": 5,
     "hedged_fields": 337,
-    "scarecrows": 38,
+    "scarecrows": 39,
     "threshing_yard": 20,
     "mill_pond": 2,
-    "pumpkin_patch": 31,
-    "abandoned_farm": 85,
+    "pumpkin_patch": 30,
+    "abandoned_farm": 84,
     "loose_livestock": 84,
     "baobab": 2,
     "acacia_shade": 5,
@@ -936,50 +884,202 @@
   },
   {
    "step": "land13",
-   "ok": false,
-   "error": "RDMonster: Property 'bHunting' for attribute 'hunting' on 'RDMonster' is read-only and cannot be set",
-   "trace": "Traceback (most recent call last):\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\888_wilderness_test.py\", line 4332, in run\n    yield from STEPS[name]()\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\888_wilderness_test.py\", line 1586, in step_land13\n    m.set_editor_property(\"hunting\", False); yield from rwait(0.4)\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nException: RDMonster: Property 'bHunting' for attribute 'hunting' on 'RDMonster' is read-only and cannot be set\n"
+   "ok": true,
+   "channels": {
+    "arroyo": {
+     "near": 5,
+     "at_km": [
+      2.15,
+      7.04
+     ],
+     "width_m": 10.9,
+     "depth_m": 3.5,
+     "bed_under_banks_m": 3.83,
+     "her_feet_under_banks_m": 3.42,
+     "ok": true
+    },
+    "dry riverbed": {
+     "near": 5,
+     "at_km": [
+      -12.06,
+      -30.89
+     ],
+     "width_m": 15.8,
+     "depth_m": 1.9,
+     "bed_under_banks_m": 1.64,
+     "her_feet_under_banks_m": 1.5,
+     "ok": true
+    },
+    "irrigation ditch": {
+     "near": 5,
+     "at_km": [
+      3.06,
+      1.49
+     ],
+     "width_m": 1.8,
+     "depth_m": 0.9,
+     "bed_under_banks_m": 0.83,
+     "her_feet_under_banks_m": 0.82,
+     "ok": true
+    },
+    "fire break": {
+     "near": 5,
+     "at_km": [
+      71.02,
+      -4.79
+     ],
+     "width_m": 8.1,
+     "depth_m": 0.7,
+     "bed_under_banks_m": 0.71,
+     "her_feet_under_banks_m": 0.71,
+     "ok": true
+    },
+    "holloway": {
+     "near": 5,
+     "at_km": [
+      22.16,
+      -73.9
+     ],
+     "width_m": 4.3,
+     "depth_m": 3.4,
+     "bed_under_banks_m": 3.42,
+     "her_feet_under_banks_m": 3.41,
+     "ok": true
+    }
+   },
+   "swales": {
+    "grasslands": {
+     "found": true,
+     "at_km": [
+      6.0,
+      0.0
+     ],
+     "amp": 3.5,
+     "range_m": 23.5,
+     "crests_1600m": 8,
+     "crests_hiding_300m": 7
+    },
+    "savannahs": {
+     "found": true,
+     "at_km": [
+      -15.0,
+      -25.98
+     ],
+     "amp": 3.0,
+     "range_m": 40.1,
+     "crests_1600m": 5,
+     "crests_hiding_300m": 3
+    },
+    "plains": {
+     "found": true,
+     "at_km": [
+      -6.43,
+      -7.66
+     ],
+     "amp": 5.0,
+     "range_m": 105.1,
+     "crests_1600m": 3,
+     "crests_hiding_300m": 2
+    }
+   },
+   "crossroads_50km": 44,
+   "storm": {
+    "on": 1,
+    "km": 6.0
+   },
+   "grassfire": {
+    "name": "grassfire",
+    "on": 1,
+    "km": 8.0
+   },
+   "dust": {
+    "fair_fog": [
+     0.42,
+     0.45,
+     0.5
+    ],
+    "dust_fog": [
+     0.651,
+     0.495,
+     0.31
+    ],
+    "weather": "dust"
+   },
+   "whiteout": {
+    "fair_fog": [
+     0.42,
+     0.45,
+     0.5
+    ],
+    "white_fog": [
+     0.567,
+     0.621,
+     0.725
+    ],
+    "weather": "whiteout"
+   },
+   "field_stages": {
+    "ripe": 2882,
+    "sprouting": 1122,
+    "fallow": 708,
+    "burned": 287,
+    "fields": 4999
+   },
+   "quiet": {
+    "pine forests": {
+     "scale": 0.65,
+     "notice_m": 25.0,
+     "start_m": 20.0,
+     "after_3s_m": 20.0,
+     "came": false
+    },
+    "grasslands": {
+     "scale": 1.0,
+     "notice_m": 25.0,
+     "start_m": 19.8,
+     "after_3s_m": 15.4,
+     "came": true
+    }
+   }
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor",
  "shots": [
-  "wd_s13p3a_scenery13_resin_camp.png",
-  "wd_s13p3a_scenery13_resin_camp_near.png",
-  "wd_s13p3a_scenery13_sunlit_clearing.png",
-  "wd_s13p3a_scenery13_sunlit_clearing_near.png",
-  "wd_s13p3a_scenery13_granite_outcrop.png",
-  "wd_s13p3a_scenery13_granite_outcrop_near.png",
-  "wd_s13p3a_scenery13_lightning_pine.png",
-  "wd_s13p3a_scenery13_lightning_pine_near.png",
-  "wd_s13p3a_scenery13_logging_camp.png",
-  "wd_s13p3a_scenery13_logging_camp_near.png",
-  "wd_s13p3a_scenery13_owl_hollow.png",
-  "wd_s13p3a_scenery13_owl_hollow_near.png",
-  "wd_s13p3a_scenery13_pine_ridge.png",
-  "wd_s13p3a_scenery13_pine_ridge_near.png",
-  "wd_s13p3a_scenery13_lichen_heath.png",
-  "wd_s13p3a_scenery13_lichen_heath_near.png",
-  "wd_s13p3a_scenery13_esker.png",
-  "wd_s13p3a_scenery13_esker_near.png",
-  "wd_s13p3a_scenery13_pine_dunes.png",
-  "wd_s13p3a_scenery13_pine_dunes_near.png",
-  "wd_s13p3a_scenery13_kettle_lake.png",
-  "wd_s13p3a_scenery13_kettle_lake_near.png",
-  "wd_s13p3a_scenery13_fire_scar.png",
-  "wd_s13p3a_scenery13_fire_scar_near.png",
-  "wd_s13p3a_scenery13_herder_camp.png",
-  "wd_s13p3a_scenery13_herder_camp_near.png",
-  "wd_s13p3a_scenery13_seid_stone.png",
-  "wd_s13p3a_scenery13_seid_stone_near.png",
-  "wd_s13p3a_land13_arroyo.png",
-  "wd_s13p3a_land13_dry riverbed.png",
-  "wd_s13p3a_land13_irrigation ditch.png",
-  "wd_s13p3a_land13_fire break.png",
-  "wd_s13p3a_land13_holloway.png",
-  "wd_s13p3a_land13_storm.png",
-  "wd_s13p3a_land13_grassfire.png",
-  "wd_s13p3a_land13_dust.png",
-  "wd_s13p3a_land13_whiteout.png"
+  "wd_s13r1_scenery13_resin_camp.png",
+  "wd_s13r1_scenery13_resin_camp_near.png",
+  "wd_s13r1_scenery13_sunlit_clearing.png",
+  "wd_s13r1_scenery13_sunlit_clearing_near.png",
+  "wd_s13r1_scenery13_granite_outcrop.png",
+  "wd_s13r1_scenery13_granite_outcrop_near.png",
+  "wd_s13r1_scenery13_lightning_pine.png",
+  "wd_s13r1_scenery13_lightning_pine_near.png",
+  "wd_s13r1_scenery13_logging_camp.png",
+  "wd_s13r1_scenery13_logging_camp_near.png",
+  "wd_s13r1_scenery13_owl_hollow.png",
+  "wd_s13r1_scenery13_owl_hollow_near.png",
+  "wd_s13r1_scenery13_pine_ridge.png",
+  "wd_s13r1_scenery13_pine_ridge_near.png",
+  "wd_s13r1_scenery13_lichen_heath.png",
+  "wd_s13r1_scenery13_lichen_heath_near.png",
+  "wd_s13r1_scenery13_esker.png",
+  "wd_s13r1_scenery13_esker_near.png",
+  "wd_s13r1_scenery13_pine_dunes.png",
+  "wd_s13r1_scenery13_pine_dunes_near.png",
+  "wd_s13r1_scenery13_kettle_lake.png",
+  "wd_s13r1_scenery13_kettle_lake_near.png",
+  "wd_s13r1_scenery13_fire_scar.png",
+  "wd_s13r1_scenery13_fire_scar_near.png",
+  "wd_s13r1_scenery13_herder_camp.png",
+  "wd_s13r1_scenery13_herder_camp_near.png",
+  "wd_s13r1_land13_arroyo.png",
+  "wd_s13r1_land13_dry riverbed.png",
+  "wd_s13r1_land13_irrigation ditch.png",
+  "wd_s13r1_land13_fire break.png",
+  "wd_s13r1_land13_holloway.png",
+  "wd_s13r1_land13_storm.png",
+  "wd_s13r1_land13_grassfire.png",
+  "wd_s13r1_land13_dust.png",
+  "wd_s13r1_land13_whiteout.png"
  ],
  "error": null,
  "saves_put_back": 1,

@@ -1,0 +1,751 @@
+{
+ "tag": "s13r6",
+ "plan": [
+  "scenery13=tall_grass+burrow_town+hanged_tree+nest_tree+shrine_tree+erratic+migration+wallow+hive_meadow+brook_crossing+fairy_ring"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "scenery13",
+   "ok": true,
+   "kinds": {
+    "tall_grass": {
+     "found": true,
+     "id": 67251458,
+     "at_km": [
+      3.54,
+      4.96
+     ],
+     "name": "Tall grass",
+     "laid": {
+      "kind": "tall_grass",
+      "title": "Tall grass",
+      "x": 3535.9,
+      "y": 4958.0,
+      "pieces": 3,
+      "boxes": 1,
+      "guards": 2,
+      "uses": 0,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 120.2
+     },
+     "bottom_over_ground_cm": null,
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 1,
+     "want_chests": 1,
+     "ambush_low": {
+      "monsters": 2,
+      "lying_low": 2,
+      "hunting": 0
+     },
+     "told_from_m": 20.0,
+     "ambush_sprung": {
+      "monsters": 2,
+      "hunting": 2,
+      "lying_low": 0,
+      "branches": [
+       "chase"
+      ],
+      "m_from_her": [
+       13.2,
+       9.5
+      ],
+      "hp_lost": 0.0
+     },
+     "uses": [],
+     "hazards": [],
+     "told": "Tall grass: grass taller than a man, rippling against the wind where something moves through it | The grass moves against the wind: something was lying in wait!",
+     "ok": true
+    },
+    "burrow_town": {
+     "found": true,
+     "id": 67254521,
+     "at_km": [
+      5.3,
+      -0.23
+     ],
+     "name": "Burrow town",
+     "laid": {
+      "kind": "burrow_town",
+      "title": "Burrow town",
+      "x": 5298.9,
+      "y": -225.8,
+      "pieces": 18,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 0,
+      "hazards": 4,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 56.9
+     },
+     "bottom_over_ground_cm": [
+      -42,
+      -24,
+      -11
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [],
+     "hazards": [
+      {
+       "kind": "collapse",
+       "hp_lost": 8.4,
+       "sprung": 1,
+       "monsters_came": 2,
+       "ok": true
+      },
+      {
+       "kind": "collapse",
+       "hp_lost": 8.4,
+       "sprung": 1,
+       "monsters_came": 2,
+       "ok": true
+      },
+      {
+       "kind": "collapse",
+       "hp_lost": 8.4,
+       "sprung": 1,
+       "monsters_came": 2,
+       "ok": true
+      },
+      {
+       "kind": "collapse",
+       "hp_lost": 8.4,
+       "sprung": 1,
+       "monsters_came": 2,
+       "ok": true
+      }
+     ],
+     "told": "Burrow town: the ground here is honeycombed with burrows; it sounds hollow underfoot | The ground gives way into a tunnel: 8 damage",
+     "ok": true
+    },
+    "hanged_tree": {
+     "found": true,
+     "id": 67256572,
+     "at_km": [
+      6.93,
+      1.42
+     ],
+     "name": "The hanging tree",
+     "laid": {
+      "kind": "hanged_tree",
+      "title": "The hanging tree",
+      "x": 6927.8,
+      "y": 1422.7,
+      "pieces": 3,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 1,
+      "fx_on": 1,
+      "herd": 0,
+      "yaw": 341.4
+     },
+     "bottom_over_ground_cm": [
+      -179,
+      -17,
+      233
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "loot",
+       "prompt": "search the dead man's coat",
+       "f": "scenery",
+       "said": "Whoever hung here had little: a crust, a length of rope.  You take 2 Straw Rope",
+       "got": {
+        "Bread": 0,
+        "Straw Rope": 2,
+        "Small Healing Potion": 0
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "The hanging tree: a lone dead tree on the rise, a noose still swaying from its lowest bough | Whoever hung here had little: a crust, a length of rope.  You take 2 Straw Rope",
+     "ok": true
+    },
+    "nest_tree": {
+     "found": true,
+     "id": 67254518,
+     "at_km": [
+      5.31,
+      -2.03
+     ],
+     "name": "The nesting tree",
+     "laid": {
+      "kind": "nest_tree",
+      "title": "The nesting tree",
+      "x": 5307.7,
+      "y": -2029.9,
+      "pieces": 2,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 165.3
+     },
+     "bottom_over_ground_cm": [
+      -144,
+      915,
+      915
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "forage",
+       "prompt": "gather from the fallen nest",
+       "f": "scenery",
+       "said": "Eggs and feathers have fallen from the great nest above.  You take 3 Bird's Eggs",
+       "got": {
+        "Bird's Eggs": 3,
+        "Seraph Feather": 0
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "The nesting tree: a lone great beech with a nest the size of a cart in its crown | Eggs and feathers have fallen from the great nest above.  You take 3 Bird's Eggs",
+     "ok": true
+    },
+    "shrine_tree": {
+     "found": true,
+     "id": 67255538,
+     "at_km": [
+      6.26,
+      -4.42
+     ],
+     "name": "The shrine tree",
+     "laid": {
+      "kind": "shrine_tree",
+      "title": "The shrine tree",
+      "x": 6261.4,
+      "y": -4419.9,
+      "pieces": 13,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 202.4
+     },
+     "bottom_over_ground_cm": [
+      -101,
+      -8,
+      -7
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "buff",
+       "prompt": "pray at the shrine",
+       "f": "scenery",
+       "said": "Blessing of the Lone Tree: your blows 10% stronger, 12% less of each blow reaches you, for 6 minutes",
+       "got": {},
+       "blessing": "Blessing of the Lone Tree",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "The shrine tree: a lone beech on the rise, a weathered shrine at its foot and candles still burning | Blessing of the Lone Tree: your blows 10% stronger, 12% less of each blow reaches you, for 6 minutes",
+     "ok": true
+    },
+    "erratic": {
+     "found": true,
+     "id": 67254520,
+     "at_km": [
+      5.71,
+      -0.83
+     ],
+     "name": "Glacial erratic",
+     "laid": {
+      "kind": "erratic",
+      "title": "Glacial erratic",
+      "x": 5711.0,
+      "y": -833.0,
+      "pieces": 5,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 105.7
+     },
+     "bottom_over_ground_cm": [
+      -157,
+      -21,
+      -16
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "climb",
+       "prompt": "climb the great boulder",
+       "f": "scenery",
+       "said": "You climb to the top.  From up here you can see 1.5 km round you: the map fills in.",
+       "got": {},
+       "blessing": "Blessing of the Lone Tree",
+       "rose_m": 4.8,
+       "revealed_more": 2465,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Glacial erratic: a boulder the size of a house, stranded on the open land by ice that left long ago | You climb to the top.  From up here you can see 1.5 km round you: the map fills in.",
+     "ok": true
+    },
+    "migration": {
+     "found": true,
+     "id": 67261671,
+     "at_km": [
+      9.79,
+      -11.05
+     ],
+     "name": "Herd on the move",
+     "laid": {
+      "kind": "migration",
+      "title": "Herd on the move",
+      "x": 9788.2,
+      "y": -11049.9,
+      "pieces": 3,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 0,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 14,
+      "yaw": 72.8
+     },
+     "bottom_over_ground_cm": null,
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [],
+     "hazards": [],
+     "herd": {
+      "n": 14,
+      "stampedes": 1,
+      "hits": 2,
+      "migrate": 1,
+      "stampede": 1,
+      "walked_12s_m": 15.6,
+      "started": true,
+      "ran_m": 60.1,
+      "hp_lost": 22.4
+     },
+     "told": "Herd on the move: a herd crosses the road, unhurried, and nothing will turn it | The herd panics: a stampede comes thundering your way! | Trampled by the stampede: 11 damage",
+     "ok": true
+    },
+    "wallow": {
+     "found": true,
+     "id": 67250437,
+     "at_km": [
+      2.86,
+      6.85
+     ],
+     "name": "Mud wallow",
+     "laid": {
+      "kind": "wallow",
+      "title": "Mud wallow",
+      "x": 2862.7,
+      "y": 6845.5,
+      "pieces": 17,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 169.4
+     },
+     "bottom_over_ground_cm": [
+      -25,
+      -8,
+      -6
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "tracks",
+       "prompt": "read the tracks in the mud",
+       "f": "scenery",
+       "said": "Only deer and boar have come this way.",
+       "got": {},
+       "blessing": "Blessing of the Lone Tree",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Mud wallow: a churned hollow of mud where every beast for miles comes to wallow; the tracks pile up | Only deer and boar have come this way.",
+     "ok": true
+    },
+    "hive_meadow": {
+     "found": true,
+     "id": 67257605,
+     "at_km": [
+      7.31,
+      6.83
+     ],
+     "name": "Wild hives",
+     "laid": {
+      "kind": "hive_meadow",
+      "title": "Wild hives",
+      "x": 7307.3,
+      "y": 6826.4,
+      "pieces": 7,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 1,
+      "fx_on": 1,
+      "herd": 0,
+      "yaw": 85.4
+     },
+     "bottom_over_ground_cm": [
+      -8,
+      -7,
+      -7
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "honey",
+       "prompt": "take honey from the hives",
+       "f": "scenery",
+       "said": "Bees! The hive's swarm stings you: 4 damage",
+       "got": {
+        "Wild Honey": 2
+       },
+       "blessing": "Blessing of the Lone Tree",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "sting",
+       "hp_lost": 12.6,
+       "sprung": 4,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "Wild hives: a sweep of wildflowers loud with bees, old straw skeps set out among them | You smoke the bees and cut a comb.  You take 2 Wild Honey | Bees! The hive's swarm stings you: 4 damage",
+     "ok": true
+    },
+    "brook_crossing": {
+     "found": true,
+     "id": 67292282,
+     "at_km": [
+      27.54,
+      -76.43
+     ],
+     "name": "Stepping stones",
+     "laid": {
+      "kind": "brook_crossing",
+      "title": "Stepping stones",
+      "x": 27539.7,
+      "y": -76427.5,
+      "pieces": 15,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 90.0
+     },
+     "bottom_over_ground_cm": [
+      -89,
+      -17,
+      -6
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "fish",
+       "prompt": "fish at the pool below the stones",
+       "f": "scenery",
+       "said": "You wait by the pool.  You take 2 Fish",
+       "got": {
+        "Fish": 2
+       },
+       "blessing": "Blessing of the Lone Tree",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Stepping stones: a line of stones across the water, a little fall chattering beside them | You wait by the pool.  You take 2 Fish",
+     "ok": true
+    },
+    "fairy_ring": {
+     "found": true,
+     "id": 67247368,
+     "at_km": [
+      1.25,
+      8.65
+     ],
+     "name": "Fairy ring",
+     "laid": {
+      "kind": "fairy_ring",
+      "title": "Fairy ring",
+      "x": 1251.3,
+      "y": 8646.3,
+      "pieces": 28,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 2,
+      "hazards": 0,
+      "fx": 1,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 352.5
+     },
+     "bottom_over_ground_cm": [
+      -8,
+      -7,
+      -6
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "fairy",
+       "prompt": "step into the fairy ring",
+       "f": "scenery",
+       "said": "The night goes still. Laughter that is not quite laughter rings round you.  The Fair Folk's Favour: your blows 15% stronger, 8% less of each blow reaches you, f",
+       "got": {},
+       "blessing": "The Fair Folk's Favour",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      },
+      {
+       "do": "forage",
+       "prompt": "pick from the mushroom ring",
+       "f": "scenery",
+       "said": "You take 2 Field Mushrooms",
+       "got": {
+        "Field Mushrooms": 2
+       },
+       "blessing": "The Fair Folk's Favour",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Fairy ring: a perfect ring of pale mushrooms in the grass; nothing grows inside it | The night goes still. Laughter that is not quite laughter rings round you.  The Fair Folk's Favour: your blows 15% stronger, 8% less of each blow reaches you, for 5 minutes | You take 2 Field Mushrooms",
+     "ok": true
+    }
+   },
+   "table": 88,
+   "counts_30km": {
+    "tall_grass": 76,
+    "burrow_town": 254,
+    "hanged_tree": 59,
+    "nest_tree": 69,
+    "shrine_tree": 72,
+    "erratic": 233,
+    "migration": 3,
+    "wallow": 64,
+    "hive_meadow": 31,
+    "brook_crossing": 0,
+    "fairy_ring": 53,
+    "shepherd_hut": 316,
+    "reed_pond": 1,
+    "old_orchard": 112,
+    "dusk_meadow": 17,
+    "butte": 206,
+    "battlefield": 228,
+    "milestone_road": 7,
+    "crossroads_gibbet": 4,
+    "crossroads_shrine": 2,
+    "crossroads_notice": 1,
+    "wagon_wreck": 1,
+    "hedged_fields": 338,
+    "scarecrows": 38,
+    "threshing_yard": 20,
+    "mill_pond": 2,
+    "pumpkin_patch": 31,
+    "abandoned_farm": 84,
+    "loose_livestock": 84,
+    "baobab": 2,
+    "acacia_shade": 5,
+    "termite_mounds": 7,
+    "kopje": 10,
+    "waterhole": 2,
+    "vulture_kill": 9,
+    "salt_pan": 5,
+    "yurt_camp": 0,
+    "kurgan": 73,
+    "prayer_cairn": 106,
+    "petroglyph_rocks": 364,
+    "hot_spring": 4,
+    "pingo": 0,
+    "charred_snags": 0,
+    "hot_spots": 0,
+    "ash_drift": 0,
+    "regrowth": 0,
+    "scorched_farmstead": 0,
+    "looters_camp": 0,
+    "fire_break": 0,
+    "fused_glass": 0,
+    "beast_carcasses": 0,
+    "resin_camp": 0,
+    "sunlit_clearing": 0,
+    "granite_outcrop": 0,
+    "lightning_pine": 0,
+    "logging_camp": 0,
+    "owl_hollow": 0,
+    "pine_ridge": 0,
+    "lichen_heath": 0,
+    "esker": 0,
+    "pine_dunes": 0,
+    "kettle_lake": 0,
+    "fire_scar": 0,
+    "herder_camp": 0,
+    "seid_stone": 0,
+    "muskeg_bog": 0,
+    "spruce_thicket": 0,
+    "beaver_pond": 0,
+    "moose_wallow": 0,
+    "trapline_cabin": 0,
+    "drunken_forest": 0,
+    "gold_larches": 0,
+    "leaf_pits": 0,
+    "fungus_glade": 0,
+    "hollow_giant": 0,
+    "mossy_walls": 0,
+    "nut_cache": 0,
+    "charcoal_hearth": 0,
+    "dawn_hollow": 0,
+    "harvest_shrine": 0,
+    "watching_aspens": 0,
+    "clonal_grove": 0,
+    "carved_aspens": 0,
+    "gold_stand": 0,
+    "beaver_stumps": 0,
+    "aspen_meadow": 0,
+    "aspen_edge": 0,
+    "windthrow": 0,
+    "cells": 10201
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s13r6_scenery13_tall_grass.png",
+  "wd_s13r6_scenery13_tall_grass_near.png",
+  "wd_s13r6_scenery13_burrow_town.png",
+  "wd_s13r6_scenery13_burrow_town_near.png",
+  "wd_s13r6_scenery13_hanged_tree.png",
+  "wd_s13r6_scenery13_hanged_tree_near.png",
+  "wd_s13r6_scenery13_nest_tree.png",
+  "wd_s13r6_scenery13_nest_tree_near.png",
+  "wd_s13r6_scenery13_shrine_tree.png",
+  "wd_s13r6_scenery13_shrine_tree_near.png",
+  "wd_s13r6_scenery13_erratic.png",
+  "wd_s13r6_scenery13_erratic_near.png",
+  "wd_s13r6_scenery13_migration.png",
+  "wd_s13r6_scenery13_migration_near.png",
+  "wd_s13r6_scenery13_wallow.png",
+  "wd_s13r6_scenery13_wallow_near.png",
+  "wd_s13r6_scenery13_hive_meadow.png",
+  "wd_s13r6_scenery13_hive_meadow_near.png",
+  "wd_s13r6_scenery13_brook_crossing.png",
+  "wd_s13r6_scenery13_brook_crossing_near.png",
+  "wd_s13r6_scenery13_fairy_ring.png",
+  "wd_s13r6_scenery13_fairy_ring_near.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

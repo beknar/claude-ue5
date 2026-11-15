@@ -1641,8 +1641,7 @@
    ],
    "weight": 1.0,
    "hazards": [
-    "kind=bog;x=0;y=0;r=8",
-    "kind=bog;x=8;y=5;r=4"
+    "kind=bog;x=1;y=1;r=9"
    ],
    "uses": [
     "do=loot;x=-9;y=-4;r=2.8;verb=search;what=body in the peat;things=Coarse Hide|1|1|1,Small Healing Potion|1|1|0.3;text=A man, brown as leather, his face peaceful. He has lain here a long time."

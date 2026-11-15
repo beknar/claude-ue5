@@ -2642,6 +2642,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TArray<FString> WildQuietBiomes;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildQuietNotice = 0.65f;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild13") float WildQuietScale = 1.f;
+	float WildQuietAt = -1.f;
 	void LayWildScenery(ARDWildChunk* C, const FRDWildPlace& P);
 	void TickWildScenery13(float Dt, const FVector& Her);
 	/** a laid scenery's things: what F does (its uses), what hurts (its hazards), the effects its hours show, its herd */
