@@ -26,8 +26,7 @@
   "fog": "/Game/FrozenNorseEnvironment/VFX/NS_NS1_Fog_01",
   "fallingleaves": "/Game/Wildlands/VFX/FX/NS_Fallin_Leaves",
   "fire": "/Game/Medieval_Lake_Village/VFX/NS_Fire",
-  "wisps": "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Projectiles/NS_Projectile_Ghostly01",
-  "mist": "/Game/FrozenNorseEnvironment/Particles/NS_Mist01"
+  "wisps": "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Projectiles/NS_Projectile_Ghostly01"
  },
  "items": [
   {
@@ -388,9 +387,6 @@
   ],
   "fern": [
    "/Game/CastleofEternalMist/Scanned_Foliage/Objects/Foliage/EagleFern/SM_EagleFern_01"
-  ],
-  "dewpond": [
-   "/Game/RandomDungeon/Wild13/Kit/SM_N13_DewPond"
   ],
   "turfstack": [
    "/Game/RandomDungeon/Wild13/Kit/SM_N13_TurfStack_A",
@@ -1544,7 +1540,7 @@
     "do=forage;x=0;y=4;r=3;verb=gather;what=reindeer lichen;things=Herbs|1|2|1;reuse=600;text=Lichen for a poultice, as the herders use it."
    ],
    "parts": [
-    "L=patch;r=16;hb=0.06;tint=0.72,0.74,0.60",
+    "L=patch;r=16;hb=0.25;tint=0.72,0.74,0.60",
     "L=scatter;p=n13_pinemed#;n=4;r=18;r0=12;h=9-11;yaw=rand;col=1"
    ]
   },
@@ -1678,7 +1674,7 @@
     "do=loot;x=-9;y=-4;r=2.8;verb=search;what=body in the peat;things=Coarse Hide|1|1|1,Small Healing Potion|1|1|0.3;text=A man, brown as leather, his face peaceful. He has lain here a long time."
    ],
    "parts": [
-    "L=patch;r=13;hb=0.05;tint=0.20,0.19,0.11",
+    "L=patch;r=13;hb=0.25;tint=0.20,0.19,0.11",
     "L=scatter;p=s12_reeds#;n=14;r=10;h=1.0-1.4;yaw=rand;col=0",
     "L=scatter;p=n13_moss#;n=26;r=11;h=0.3;yaw=rand;col=0",
     "L=scatter;p=n13_deadtree#;n=3;r=12;r0=8;h=6-8;yaw=rand;col=1;sink=30"
@@ -2151,8 +2147,8 @@
     "do=heal;x=7.5;y=0;r=3;verb=drink at;what=dew pond;reuse=300;text=Rain, mist and dew, held in the clay. It is cold and clean."
    ],
    "parts": [
-    "L=patch;r=6.8;hb=0.2;tint=0.70,0.68,0.60",
-    "L=patch;r=5.4;hb=0.3;tint=0.04,0.07,0.08",
+    "L=patch;r=6.8;hb=0.25;tint=0.70,0.68,0.60",
+    "L=patch;r=5.4;hb=0.34;tint=0.04,0.07,0.08",
     "L=scatter;p=s12_reeds#;n=6;r=6.5;r0=6;h=1.0;yaw=rand;col=0"
    ]
   },
@@ -2267,7 +2263,7 @@
     "do=lore;x=-12;y=4;r=3;verb=look at;what=peat hags;text=The lights drift over the bog at night. Follow them and the moor keeps you."
    ],
    "parts": [
-    "L=patch;r=12;hb=0.05;tint=0.11,0.09,0.07",
+    "L=patch;r=12;hb=0.25;tint=0.11,0.09,0.07",
     "L=scatter;p=n13_moss#;n=20;r=11;h=0.3;yaw=rand;col=0",
     "L=scatter;fx=wisps;n=3;r=8;z=1.2;s=0.5;hours=night"
    ]
@@ -2356,7 +2352,7 @@
     "do=lore;x=0;y=0;r=3;verb=stand in;what=mist;text=Every way looks the same. The stone row was to the north. Or was it?"
    ],
    "parts": [
-    "L=scatter;fx=mist;n=4;r=10;z=0.5;s=1.4",
+    "L=mist;r=70",
     "L=scatter;p=l12_gorse#;n=7;r=12;r0=4;h=1.0-1.4;yaw=rand;col=0",
     "L=scatter;p=r12_standing#;n=1;r=8;r0=6;h=1.8;yaw=rand;col=1"
    ]

@@ -539,15 +539,15 @@ The user's list of 2026-11-14 ([docs/improvements13.txt](../improvements13.txt))
 | Heather and gorse | moorland, hills | gorse and heather in bloom, butterflies by day | gather heather |
 | Stone row | moorland | a row of eight standing stones, two hut circles | walk along it |
 | Peat cutting | moorland | a peat bank cut into the moor, turves stacked to dry, a spade | take dried turves |
-| Mist on the moor | moorland | the mist lying on the moor | |
+| Mist on the moor | moorland | gorse and a standing stone in a mist: the world's fog thickened round it, from 5 m out, whole within 35 m | |
 | Shepherd's bothy | moorland | a bothy, a ruined shieling, bedding, a fire | rest in the bothy |
 | Grouse butts | moorland | a line of shooting butts, the hunting lodge, the gamekeeper | trade a hide for food; talk |
 | Peat-water ford | moorland, hills (by water) | stepping stones, reeds | fish |
 
-- **What is new**: a skin of the land in an outline (`L=patch;poly=`: points round its middle, -1 to 1 of its reach; only what lies inside is laid: the chalk horse); the moors' fog comes three times as often in the weather's turn (`WeatherWeights`, read by `GetWeatherWeightsHere`); the hills' sheep tracks and holloways (dry channels' rules).
+- **What is new**: a skin of the land in an outline (`L=patch;poly=`: points round its middle, -1 to 1 of its reach; only what lies inside is laid: the chalk horse); a scenery's mist (`L=mist;r=`: the world's fog thickened round it as the port's is); the moors' fog three times as heavy in the weather's turn (`WeatherWeights`; `CountWeatherPicksHere` runs the pick itself); the hills' sheep tracks and holloways (dry channels' rules).
 - **Its new things**: Grapes (food), Peat Turf (a component, as a log).
-- **Its own pieces** (`scenery13_kit.py`): two stacks of peat turves (a dew pond piece too, unused: laid flat on its hilltop it lay buried, and the pond is two skins of the land, clay and water).
-- **Measured** (`test_s13p4a.json`, `test_s13p4b.json`, `test_s13p4c.json`): every kind found within 150 km of Brokenspire and visited. She climbed the folly 10.5 m and the tor 5.3 m, and saw 7,613 and 4,903 more of the map. The peat hags' bog took her walk from 353 to 159 cm/s and dragged at her (8.4 hit points). The quarry laid its two lurkers and the tor its one. The weather's turn weighs fog 1.8 on the moor against 0.6 on the grassland. The sheep track's bed lies 0.2 m under its banks and the hills' holloway's 2.6 m.
+- **Its own pieces** (`scenery13_kit.py`): two stacks of peat turves (the dew pond is two skins of the land, clay and water: a pond piece laid flat on its hilltop lay buried).
+- **Measured** (`test_s13p4a.json`, `test_s13p4b.json`, `test_s13p4c.json`; after PR #68's review `test_s13p4d.json`): every kind found within 150 km of Brokenspire and visited. She climbed the folly 10.5 m and the tor 5.3 m, and saw 7,613 and 4,903 more of the map. The peat hags' bog took her walk from 353 to 159 cm/s and dragged at her (8.4 hit points). The quarry laid its two lurkers and the tor its one. The weather's own pick, 4,000 turns of it where she stood, brought fog 12.7 % of the time on the moor and 4.5 % on the grassland (2.8 times: a repeat is turned away). The mist's fog in its middle: density 0.18 from 5 m (0.02 from 250 m, 200 m off). The sheep track's bed lies 0.2 m under its banks and the hills' holloway's 2.6 m.
 
 ![Hills and moorland's 18 kinds, from 15 m](../images/scenery13_hills.jpg)
 

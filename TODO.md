@@ -30,7 +30,7 @@ The biomes' scenery, in phases with a PR each (the user's choices: every item to
   - The reindeer, moose and elk are the wilds' deer; the woodpeckers, the owl and the grouse are not there.
 - [ ] **Phase 4 (hills and moorland), what is not done or measured:**
   - The heather and gorse do not catch fire (nothing in the game sets the land alight); the will-o'-the-wisps are a pack's ghostly projectile laid still.
-  - The moors' mist is the fog weather coming three times as often (its weights read in the test); nobody has walked lost in it. The "Mist on the moor" kind's own effect (FrozenNorse's `NS_Mist01`) shows nothing in its noon pictures, and the chalk horse, flat on its slope, is a white sliver from the ground 40 m off (it reads from a hill across, not checked).
+  - The moors' mist is the fog weather coming three times as often (its weights read in the test); nobody has walked lost in it. The "Mist on the moor" kind is the world's fog thickened round it (measured), and the chalk horse, flat on its slope, is a white sliver from the ground 40 m off (it reads from a hill across, not checked).
   - The sheep are the farms' goats; the grouse are the packs' birds.
 - [ ] **Phases 5 to 10:** the mountains, peaks and glaciers; the canyons and mesas; the volcanic lands; the tundra and the arctic; the marshes, wetlands and coasts (tides); the lists' "what helps" across all of them.
 - [ ] **Phase 1, what is not done or measured:**

@@ -735,23 +735,6 @@
   ],
   "translucent": []
  },
- "SM_N13_DewPond": {
-  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_DewPond.fbx",
-  "size_m": [
-   12.4,
-   12.4,
-   0.42
-  ],
-  "triangles": 824,
-  "slots": [
-   "DewPondBank",
-   "DewPondWater"
-  ],
-  "masked": [],
-  "translucent": [
-   "DewPondWater"
-  ]
- },
  "SM_N13_TurfStack_A": {
   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_TurfStack_A.fbx",
   "size_m": [

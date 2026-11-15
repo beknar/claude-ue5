@@ -1461,6 +1461,16 @@ def step_scenery13():
                     hd["hits"] = t2["hits"]; hd["hp_lost"] = round(hp0 - cb().get_health(), 1)
                     cb().set_health(cb().get_max_health())
                 r["herd"] = hd
+            # (the fourth phase: a kind's mist (L=mist): the world's fog component, its density and start, in its middle against 200 m
+            # off, each after 8 s to ease in (PR #68's review: a pack's mist effect showed nothing))
+            if any(str(pt).startswith("L=mist") for pt in k.get_editor_property("parts")):
+                def fogq():
+                    q = str(g.get_sky_state()).split("|")
+                    return {"density": float(q[22]), "start_m": float(q[23]), "local": float(q[24])}
+                ground_put(cx, cy); yield from watching(rwait(8.0), msgs); f_in = fogq()
+                ground_put(cx + 200.0, cy); yield from watching(rwait(8.0), msgs); f_out = fogq()
+                r["mist"] = {"in": f_in, "out": f_out}
+                ground_put(*near); yield from watching(rwait(0.5), msgs)
             # (its people: each where the kind puts them, and spoken to)
             folk = [str(x) for x in k.get_editor_property("folk")]
             if folk:
@@ -1493,6 +1503,7 @@ def step_scenery13():
             if h.get("stampede"): okk = okk and h["started"] and h["ran_m"] >= 20.0
         # (none inside, and the forest's trees there round it: a count that finds no trees anywhere proves nothing (PR #67's review))
         if v.get("clearing"): okk = okk and v["clearing"]["trees_in"] == 0 and v["clearing"]["trees_within_60m"] > 0
+        if v.get("mist"): okk = okk and v["mist"]["in"]["local"] > 0.8 and v["mist"]["in"]["density"] > v["mist"]["out"]["density"] * 2 and v["mist"]["in"]["start_m"] < v["mist"]["out"]["start_m"]
         return okk
     for kd, v in res["kinds"].items(): v["ok"] = kind_ok(kd, v)
     ok = all(v["ok"] for v in res["kinds"].values()) and len(res["kinds"]) == len(want)
@@ -1517,12 +1528,11 @@ def step_land13():
             if ch:
                 c = ch[0]; idx = int(c[1]); w = float(c[5]); dep = float(c[6]); npts = int(c[7])
                 prof = [tuple(float(z) for z in str(l).split("|")) for l in g.get_wild_channel_profile(idx, npts // 2, w * 1.6)]
-                # (spans of at least a metre: the profile is sampled every metre, and a sheep track 1.5 m wide had no sample within
-                # 0.2 of its width of its middle (the fourth phase))
-                mid_h = min(p_[1] for p_ in prof if abs(p_[0]) <= max(w * 0.2, 0.6))
+                # (GetWildChannelProfile samples a narrow channel finely: PR #68's review)
+                mid_h = min(p_[1] for p_ in prof if abs(p_[0]) <= w * 0.2)
                 # (the banks just past its edge (its half width 0.5 w): measured 1.2 to 1.6 widths out, a wide shallow riverbed's banks
                 # read the land's own curve over 25 m (0.78 m for a 1.9 m cut))
-                bank = [p_[1] for p_ in prof if w * 0.55 <= abs(p_[0]) <= max(w * 0.8, w * 0.55 + 1.2)]
+                bank = [p_[1] for p_ in prof if w * 0.55 <= abs(p_[0]) <= w * 0.8]
                 v.update({"at_km": [round(float(c[3]) / 1000.0, 2), round(float(c[4]) / 1000.0, 2)], "width_m": w, "depth_m": dep,
                           "bed_under_banks_m": round(sum(bank) / max(1, len(bank)) - mid_h, 2)})
                 # (in its bed, looking along it)
@@ -1580,7 +1590,7 @@ def step_land13():
             # light), at noon, against fair weather's in the same place)
             def fog_rgb():
                 q = str(g.get_sky_state()).split("|")
-                return [float(x) for x in q[-3:]]
+                return [float(x) for x in q[19:22]]          # (the fog's light r, g, b: fields 19 to 21)
             g.set_town_hour(12.0); g.set_weather(1, True); yield from rwait(4.0); fair = fog_rgb()
             g.set_weather(9, True); yield from rwait(45.0); dust = fog_rgb(); shot("land13_dust", "1280x720"); yield from rwait(1.0)
             res["dust"] = {"fair_fog": [round(x, 3) for x in fair], "dust_fog": [round(x, 3) for x in dust], "weather": str(g.get_sky_state()).split("|")[0]}
@@ -1627,14 +1637,15 @@ def step_land13():
                 m.destroy_actor(); cb().set_health(cb().get_max_health())
         finally:
             quiet(True)
-        # (the fourth phase: "rolling mist that wipes out landmarks": the weathers' turn's weight of fog on the moor and on the grassland)
+        # (the fourth phase: "rolling mist that wipes out landmarks": how often the weather's own turn brings fog on the moor and on the
+        # grassland, 4000 turns of its pick where she stands (PR #68's review: its weights alone are not what comes))
         res["moor_fog"] = {}
         for bn in ("highland moorland", "grasslands"):
             pt = find_biome_point(bn, 160)
             if not pt: res["moor_fog"][bn] = None; continue
             g.wild_put_her(*pt); yield from wait_chunks(30, 50); yield from rwait(1.5)
-            w_ = dict(x.split(":") for x in str(g.get_weather_weights_here()).split("|"))
-            res["moor_fog"][bn] = {"fog": float(w_.get("fog", -1)), "weights": str(g.get_weather_weights_here())}
+            c_ = {a: int(b) for a, b in (x.split(":") for x in str(g.count_weather_picks_here(4000)).split("|"))}
+            res["moor_fog"][bn] = {"fog_share": round(c_.get("fog", 0) / 4000.0, 4), "counts": c_}
     finally:
         quiet(False)
     g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
@@ -1646,7 +1657,7 @@ def step_land13():
           and all(res.get("field_stages", {}).get(k, 0) > 0 for k in ("ripe", "sprouting", "fallow"))
           and res.get("quiet", {}).get("pine forests", {}).get("came") is False and res.get("quiet", {}).get("grasslands", {}).get("came") is True
           and res["quiet"]["pine forests"]["scale"] < 1.0
-          and (res.get("moor_fog", {}).get("highland moorland") or {}).get("fog", 0) > (res.get("moor_fog", {}).get("grasslands") or {}).get("fog", 9) * 2
+          and (res.get("moor_fog", {}).get("highland moorland") or {}).get("fog_share", 0) > (res.get("moor_fog", {}).get("grasslands") or {}).get("fog_share", 9) * 2.2
           and all(v.get("found") and v["crests_1600m"] >= 2 for v in res["swales"].values())
           and res["crossroads_50km"] > 0 and res.get("storm", {}).get("on") == 1)
     step_result("land13", ok, **res)

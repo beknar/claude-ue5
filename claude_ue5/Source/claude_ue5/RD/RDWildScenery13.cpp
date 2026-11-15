@@ -402,11 +402,22 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 		if (bOn != Nc->IsVisible()) { Nc->SetVisibility(bOn); if (bOn) Nc->Activate(true); else Nc->Deactivate(); }
 	}
 	// (told as she comes: its name and a line of what it is; an ambush sprung as she comes within its reach)
+	float MistWant = 0.f;
 	for (const FRuinLaid& X : WildSceneryLaid)
 	{
 		if (!WildSceneryKinds.IsValidIndex(X.Kind)) continue;
 		const FRDWildSceneryKind& K = WildSceneryKinds[X.Kind];
 		const float D = FVector2D::Distance(X.At, H2);
+		// (the fourth phase: a kind's mist ("L=mist;r=<m>"): the world's fog thickened round it, whole within half its reach (PR #68's
+		// review: a pack's mist effect showed nothing by day, and she stood in clear air told every way looked the same))
+		float& MistR = WildSceneryMistR.FindOrAdd(X.Kind, -1.f);
+		if (MistR < 0.f)
+		{
+			MistR = 0.f;
+			for (const FString& Ln : K.Parts)
+				if (Ln.StartsWith(TEXT("L=mist"))) { const TMap<FString, FString> Mm = RDS13Parse(Ln); MistR = RDS13Num(Mm, TEXT("r"), 60.f); }
+		}
+		if (MistR > 0.f) MistWant = FMath::Max(MistWant, 1.f - FMath::Clamp((D - MistR * 0.5f) / (MistR * 0.5f), 0.f, 1.f));
 		// (phase 2: told once no other line is under 2 s old: a farmstead discovered in the same tick hid the old orchard's line)
 		if (!WildSceneryTold.Contains(X.Id) && D < 35.f && Now - PlayerCombat->MessageTime >= 2.f)
 		{
@@ -432,6 +443,7 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 			}
 		}
 	}
+	WildMistWant = MistWant;
 	// (the herds: a migration walks its herd back and forth along its way across 140 m; a stampede sets it running when she comes
 	// within 16 m (or a test sets it off), through and past her)
 	for (FSceneryHerd& Hd : WildSceneryHerds)
@@ -931,10 +943,13 @@ TArray<FString> ARDDungeonGenerator::GetWildChannelProfile(int32 Index, int32 Po
 	const FRDWildWorld::FChannel& C = Wild->Channels[Index];
 	const int32 I = FMath::Clamp(Point, 1, C.P.Num() - 2);
 	const FVector2D Dir = (C.P[I + 1] - C.P[I - 1]).GetSafeNormal(), Side(-Dir.Y, Dir.X);
-	for (float O = -HalfM; O <= HalfM + 0.01f; O += 1.f)
+	// (a step of a metre or an eighth of the half span, finer for a narrow channel (PR #68's review: a sheep track 1.5 m wide had no
+	// sample in its bed))
+	const float Step = FMath::Clamp(HalfM / 8.f, 0.1f, 1.f);
+	for (float O = -HalfM; O <= HalfM + 0.01f; O += Step)
 	{
 		const FVector2D Q = C.P[I] + Side * O;
-		Out.Add(FString::Printf(TEXT("%.1f|%.2f|%.2f"), O, Wild->Height(Q.X, Q.Y), Wild->BareHeight(Q.X, Q.Y)));
+		Out.Add(FString::Printf(TEXT("%.2f|%.2f|%.2f"), O, Wild->Height(Q.X, Q.Y), Wild->BareHeight(Q.X, Q.Y)));
 	}
 	return Out;
 }

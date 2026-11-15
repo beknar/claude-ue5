@@ -300,4 +300,15 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
   - **A profile sampled every metre misses a channel under 2 m wide**: the sheep track's bed span (0.2 of its width) held no sample, and the step crashed. The bed and bank spans are a metre at least.
   - **A kind of effects alone lays no pieces**, and the visit wants one. Give it something to stand among.
   - **FrozenNorse's fog draws a dark smoke** (its broken masters again): screen a pack's effect in the pictures before it stands for mist.
+  - **PR #68's review (2026-11-15)**:
+    - A cut through a skin is a rim too: the outline's edge stood as a 25 cm lip until its vertices went to the foot.
+    - A rule made for one case reaches the next. Every skin the phase laid was under 25 cm, the earlier phases' lichen and muskeg too.
+    - A mist is the world's fog thickened round her (`L=mist`, the port's way: `PortFog`'s want, the greater of the two). An effect for it showed nothing.
+    - A test of how often something comes runs the game's own pick (`CountWeatherPicksHere`), not its weights. The moors' fog is 3 times as heavy and comes about 2.7 times as often: a repeat is turned away.
+    - What a rise records for the parts after it is what it lays: an outline's disc is left out.
+    - Read the ground only under the points that are laid.
+    - A ridge's outline takes its length along it.
+    - A piece left unused goes, from the script, its files and the table.
+    - Two variants seeded by `len(v)` are one.
+    - Fix a sampling step where it is taken (`GetWildChannelProfile`'s step for a narrow channel), not in each caller.
   - **The editor can stop at "Wait for ZenServer?"** with the server already up (its health answered 200): Yes brings it back every minute, No lets the editor go on. The session's launcher answers it.

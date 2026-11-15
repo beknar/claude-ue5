@@ -330,8 +330,10 @@ UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, 
 	// (T 0 the middle, 1 the foot; a cone's crater inside its rim at Cr of the radius, its floor at half the height)
 	auto Profile = [&](float T) -> float { return RDR12LandProfile(Type, T, Cr); };
 	const FVector Base = C->GetActorLocation();
-	TArray<FVector> V; TArray<FVector2D> Xy;
-	V.Reserve((Nu + 1) * (Nv + 1)); Xy.Reserve((Nu + 1) * (Nv + 1));
+	// (the grid's points and their lift first; the ground is read only under the points a laid quad uses (PR #68's review: an outline
+	// that keeps a share of its disc sampled the world under all of it))
+	TArray<FVector2D> Xy; TArray<float> Bumps; TArray<uint8> EdgeV;
+	Xy.Reserve((Nu + 1) * (Nv + 1)); Bumps.Reserve((Nu + 1) * (Nv + 1)); EdgeV.Reserve((Nu + 1) * (Nv + 1));
 	for (int32 I = 0; I <= Nu; ++I)
 		for (int32 J = 0; J <= Nv; ++J)
 		{
@@ -350,33 +352,46 @@ UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, 
 				P2 = O + FVector2D(FMath::Cos(A), FMath::Sin(A)) * (Rm * T);
 				Bump = Hm * Profile(T);
 			}
-			const float G = WildGroundZ(FVector(P2.X * 100.0, P2.Y * 100.0, 0.0));
-			const bool bEdge = bRidge ? (J == 0 || J == Nv || I == 0 || I == Nu) : J == Nv;
-			V.Add(FVector(P2.X * 100.0, P2.Y * 100.0, G + Bump * 100.f - (bEdge ? 15.f : 0.f)) - Base);
-			Xy.Add(P2);
+			Xy.Add(P2); Bumps.Add(Bump);
+			EdgeV.Add(bRidge ? (J == 0 || J == Nv || I == 0 || I == Nu) : J == Nv);
 		}
+	const bool bPoly = Poly && Poly->Num() >= 3;
 	TArray<int32> Tr;
+	TArray<uint8> Used, Cut; Used.SetNumZeroed(Xy.Num()); Cut.SetNumZeroed(Xy.Num());
 	for (int32 I = 0; I < Nu; ++I)
 		for (int32 J = 0; J < Nv; ++J)
 		{
 			const int32 A = I * (Nv + 1) + J, B = (I + 1) * (Nv + 1) + J, Cc = I * (Nv + 1) + J + 1, E = (I + 1) * (Nv + 1) + J + 1;
-			// (an outline's figure: only the quads whose middle lies inside it, in the landform's own frame, -1 to 1 of its reach)
-			if (Poly && Poly->Num() >= 3)
+			// (an outline's figure: only the quads whose middle lies inside it, in the landform's own frame, -1 to 1 of its reach: a
+			// ridge's along its length R2, across it R (PR #68's review: both by R squeezed a ridge's outline to a sliver))
+			if (bPoly)
 			{
 				const FVector2D Mq = (Xy[A] + Xy[B] + Xy[Cc] + Xy[E]) * 0.25 - O;
-				const FVector2D Lq(FVector2D::DotProduct(Mq, Ax) / Rm, FVector2D::DotProduct(Mq, Ay) / Rm);
+				const FVector2D Lq(FVector2D::DotProduct(Mq, Ax) / (bRidge ? FMath::Max(R2m, 0.1f) : Rm), FVector2D::DotProduct(Mq, Ay) / Rm);
 				bool bInside = false;
 				for (int32 Pi = 0, Pj = Poly->Num() - 1; Pi < Poly->Num(); Pj = Pi++)
 				{
 					const FVector2D& Pa = (*Poly)[Pi]; const FVector2D& Pb = (*Poly)[Pj];
 					if ((Pa.Y > Lq.Y) != (Pb.Y > Lq.Y) && Lq.X < (Pb.X - Pa.X) * (Lq.Y - Pa.Y) / (Pb.Y - Pa.Y) + Pa.X) bInside = !bInside;
 				}
-				if (!bInside) continue;
+				if (!bInside) { Cut[A] = Cut[B] = Cut[Cc] = Cut[E] = 1; continue; }
 			}
+			Used[A] = Used[B] = Used[Cc] = Used[E] = 1;
 			Tr.Add(A); Tr.Add(B); Tr.Add(Cc);
 			Tr.Add(B); Tr.Add(E); Tr.Add(Cc);
 		}
 	if (Tr.Num() == 0) return nullptr;
+	// (each used point on the ground there, lifted; its foot 15 cm under the ground at the rim, and along an outline's cut too (PR #68's
+	// review: the chalk horse's edges stood as a 25 cm lip over the turf, as the disc's rim had before PR #66's review))
+	TArray<FVector> V; V.SetNum(Xy.Num());
+	const float Gmid = WildGroundZ(FVector(O.X * 100.0, O.Y * 100.0, 0.0));
+	for (int32 K = 0; K < Xy.Num(); ++K)
+	{
+		if (!Used[K]) { V[K] = FVector(Xy[K].X * 100.0, Xy[K].Y * 100.0, Gmid) - Base; continue; }
+		const float G = WildGroundZ(FVector(Xy[K].X * 100.0, Xy[K].Y * 100.0, 0.0));
+		const bool bFoot = EdgeV[K] || Cut[K];
+		V[K] = FVector(Xy[K].X * 100.0, Xy[K].Y * 100.0, G + (bFoot ? -15.f : Bumps[K] * 100.f)) - Base;
+	}
 	// (wound to face up whichever way the grid runs: the first triangle's normal decides)
 	if (Tr.Num() >= 3)
 	{
@@ -398,6 +413,7 @@ UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, 
 		FVector Nr = N[K].GetSafeNormal(); if (Nr.IsNearlyZero()) Nr = FVector::UpVector; if (Nr.Z < 0.f) Nr = -Nr;
 		N[K] = Nr;
 		Tg[K] = FProcMeshTangent((FVector(1, 0, 0) - Nr * Nr.X).GetSafeNormal(), false);
+		if (!Used[K]) { Col[K] = FLinearColor::Black; continue; }
 		FRDWSample Q; Wild->Sample(Xy[K].X, Xy[K].Y, Q, false);
 		Q.Road = 0.f; Q.FieldCrop = -1; Q.Field = 0.f; Q.WaterKind = 0;
 		// (a tinted landform: the ground's own material in the tint's colour, bare (the salt pan's crust: the kit's masked crust on this
@@ -431,6 +447,8 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 		const FString L = M.FindRef(TEXT("L"));
 		const FString Pre = M.FindRef(TEXT("p"));
 		const FString BoxPiece = M.FindRef(TEXT("box"));
+		// (the fourth phase: a mist's reach, read by the scenery's tick (WildSceneryMistR); nothing is laid)
+		if (L == TEXT("mist")) continue;
 		if (L == TEXT("clear"))
 		{
 			// (the list of 2026-11-14's third phase: "sunlit clearings where the canopy breaks": the chunk's plants taken out of a square r
@@ -481,7 +499,11 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 			{
 				if (const FString Mn = M.FindRef(TEXT("mat")); !Mn.IsEmpty())
 					if (const TObjectPtr<UMaterialInterface>* Mi = WildSceneryMats.Find(FName(*(TEXT("m13_") + Mn)))) Lm->SetMaterial(0, Mi->Get());
-				++Rec.Pieces; Rec.Comps.Add(Lm); Rec.Lifts.Add(-1.f); WildPartsLand.Add({ At, L, Rr, R2, Hh, Yaw0 + Ga, Cr }); }
+				++Rec.Pieces; Rec.Comps.Add(Lm); Rec.Lifts.Add(-1.f);
+				// (a rise for what is laid after it; an outline's is not its whole disc, and is left out (PR #68's review: a part beside the
+				// chalk horse stood its height over the bare turf))
+				if (Poly.Num() < 3) WildPartsLand.Add({ At, L, Rr, R2, Hh, Yaw0 + Ga, Cr });
+			}
 			continue;
 		}
 		if (L == TEXT("berm"))
