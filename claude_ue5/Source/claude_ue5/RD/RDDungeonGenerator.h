@@ -3032,4 +3032,19 @@ public:
 	void TickWildLoad();
 	/** where she comes back to life in the wilderness: the square of the nearest town she has found (loaded now) */
 	FVector WildRespawnAt();
+	/** the packaged game out in the wilds (RDWildSelfTest.cpp, -RDWildTest=<file>): the town, out of the gate, a journey, a save
+	 *  loaded, a long walk with its memory; each stage written to the file */
+	struct FRDWildTest
+	{
+		bool bRead = false, bOn = false, bLoadPending = false, bFailed = false, bJourney = false, bWasDead = false;
+		FString File;
+		int32 Stage = 0, Sub = 0, Turns = 0, Deaths = 0;
+		float WalkMinutes = 20.f, T0 = 0.f, LastMoveAt = 0.f, MemAt = 0.f;
+		FVector SavedAt = FVector::ZeroVector, LastAt = FVector::ZeroVector, WalkFrom = FVector::ZeroVector, Heading = FVector(1, 0, 0);
+		double Mem0 = 0.0, MemMax = 0.0, FramesAt = 0.0;
+		int32 Frames = 0, Stuck = 0, Puts = 0;
+		double PathCm = 0.0;
+	} WildTest;
+	void TickWildSelfTest(APawn* P);
+	void WildSelfTestLine(const FString& Line);
 };

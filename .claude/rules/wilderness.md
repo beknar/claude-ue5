@@ -57,6 +57,7 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
 - Steps that move her far leave the town unloaded: a step that needs a town loads it first.
 - A step whose pawn is gone keeps "passing" on what it no longer measures: the look step checks her pawn and the chunks round her at every visit.
 - **The whole test in one play session ran the machine short of memory** (the editor's committed memory 32 to 34 GB; two background runs were killed). Trimming after drops held eight long teleports flat at about 30.3 GB, but the 28 template visits still ran out: run the test in batches with the editor restarted between them (`world`; `look=<seven templates>` four times; `stream,towns,gate,map`; `places,travel,save`). Don't restart a run that was killed for memory without asking.
+- **A walk that measures memory must walk** (the packaged game's `wild` run, 2026-11-14): started in Vel Morrath's streets, a heading turned 75 degrees whenever held up went 0.16 km in 20 minutes (181 turns), and the memory line read flat for a pawn standing still. It starts on dry ground 3 km out of the town (the map's teleport), is stepped 200 m on after 15 s of getting nowhere, and fails under 1 km walked (4.17 km).
 - What is built but not yet tested, and the known limits, are in `TODO.md`: keep it current when a step is added or a limit removed.
 
 ## The list of 2026-11-04 (`890`, `RD/RDSky.cpp`, `RD/RDWildLife.cpp`, `docs/improvements7.txt`)
