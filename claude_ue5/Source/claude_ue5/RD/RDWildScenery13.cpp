@@ -97,7 +97,57 @@ void ARDDungeonGenerator::LayWildScenery(ARDWildChunk* C, const FRDWildPlace& P)
 	{
 		const TMap<FString, FString> M = RDS13Parse(K.Hazards[I]);
 		FSceneryHazard H; H.Id = P.Id * 8 + I; H.Kind = FName(*M.FindRef(TEXT("kind"))); H.At = WorldOf(M); H.R = RDS13Num(M, TEXT("r"), 5.f) * 100.f; H.P = RDS13Num(M, TEXT("p"), 1.f); H.Chunk = C;
+		H.Who = M.FindRef(TEXT("who")); H.Hide = M.FindRef(TEXT("hide")); H.Named = M.FindRef(TEXT("named")); H.Msg = M.FindRef(TEXT("msg")); H.Count = FMath::Max(1, (int32)RDS13Num(M, TEXT("n"), 1.f));
+		if (!H.Hide.IsEmpty())
+		{
+			// (the piece it moves: of the laid ones whose mesh's name has Hide in it, the nearest within 5 m of its point (a snag that
+			// falls, a scarecrow that wakes)); where it stands, its turn, its foot and its height
+			float Best = 500.f;
+			for (const TWeakObjectPtr<UPrimitiveComponent>& Wc : Rec.Comps)
+			{
+				const UStaticMeshComponent* Sc = Cast<UStaticMeshComponent>(Wc.Get());
+				if (!Sc || !Sc->GetStaticMesh() || !Sc->GetStaticMesh()->GetName().Contains(H.Hide)) continue;
+				const float D = FVector::Dist2D(Sc->GetComponentLocation(), H.At);
+				if (D < Best) { Best = D; H.Comp = Wc; }
+			}
+			if (UPrimitiveComponent* Hc = H.Comp.Get())
+			{
+				const FBox Bb = Hc->Bounds.GetBox();
+				H.Rot0 = Hc->GetComponentQuat(); H.Loc0 = Hc->GetComponentLocation();
+				H.Pivot = FVector(Bb.GetCenter().X, Bb.GetCenter().Y, Bb.Min.Z); H.Length = Bb.GetSize().Z;
+			}
+		}
+		if (H.Kind == TEXT("hunt") && !H.Who.IsEmpty())
+		{
+			// (a waterhole's hunters: the predators that come for the herd now and then, laid with it, gone with its chunk)
+			FRandomStream Rw((int32)FRDWildWorld::Hash(H.Id, 0x1318, Wild->Seed));
+			for (int32 Hn = 0, N = FMath::Max(1, (int32)RDS13Num(M, TEXT("n"), 2.f)); Hn < N; ++Hn)
+			{
+				const float A = Rw.FRandRange(0.f, 2.f * PI);
+				if (ARDWildAnimal* An = SpawnWildAnimalAt(FName(*H.Who), H.At + FVector(FMath::Cos(A), FMath::Sin(A), 0.f) * H.R * 1.2f)) { An->HerdId = P.Id; C->Props.Add(An); H.Hunters.Add(An); }
+			}
+		}
 		WildSceneryHazards.Add(H);
+	}
+	// (its people: standing at their places, saying their own lines; the structures' list keeps them for F)
+	for (int32 I = 0; I < K.Folk.Num(); ++I)
+	{
+		TArray<FString> F; K.Folk[I].ParseIntoArray(F, TEXT("|"), false);
+		if (F.Num() < 3) continue;
+		const int32 Def = Townsfolk.IndexOfByPredicate([&](const FRDTownsfolkDef& X) { return X.Mesh && X.Name.ToString().StartsWith(F[0]); });
+		if (Def < 0) { UE_LOG(LogRDScen13, Warning, TEXT("RDSCEN %s: no townsfolk %s"), *K.Name.ToString(), *F[0]); continue; }
+		const FVector2D Xy = P.At + FVector2D(Frame.RotateVector(FVector(F.Num() > 3 ? FCString::Atof(*F[3]) : 0.0, F.Num() > 4 ? FCString::Atof(*F[4]) : 0.0, 0.0)));
+		const FVector Q(Xy.X * 100.0, Xy.Y * 100.0, WildPartsGroundZ(FVector(Xy.X * 100.0, Xy.Y * 100.0, 0.0)) + 92.f);
+		FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		const float Yw = P.Yaw + 180.f;
+		if (ARDTownsfolk* T = GetWorld()->SpawnActor<ARDTownsfolk>(ARDTownsfolk::StaticClass(), FTransform(FRotator(0, Yw, 0), Q), Sp))
+		{
+			T->Init(this, nullptr, Def, Q, Yw, 0.f, FRDWildWorld::Hash(P.Id, 0x1319 + I, Wild->Seed));
+			T->SetTitle(F[1]);
+			F[2].ParseIntoArray(T->OwnLines, TEXT("/"), true);
+			WildSiteFolk.Add(T);
+			C->Props.Add(T);
+		}
 	}
 	// (its effects, shown at their hours)
 	for (int32 I = 0; I < Rec.Fx.Num(); ++I) WildSceneryFxOn.Add({ Rec.Fx[I], Rec.FxHours.IsValidIndex(I) ? Rec.FxHours[I] : FString() });
@@ -185,6 +235,88 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 				Hz.ReadyAt = Now + 1.4f; ++Hz.Sprung; ++WildHazardsSprung;
 				PlayerCombat->HurtByTrap(0.03f * Hz.P, 0.15f, 1.f, TEXT("Bees! The hive's swarm stings you"));
 			}
+			else if (Hz.Kind == TEXT("heat"))
+			{
+				// (smouldering ground: a burn every second she stands on it)
+				if (!bIn || Now < Hz.ReadyAt) continue;
+				Hz.ReadyAt = Now + 1.f; ++Hz.Sprung; ++WildHazardsSprung;
+				PlayerCombat->HurtByTrap(0.025f * Hz.P, 0.f, 0.f, TEXT("The ground smoulders under you"));
+			}
+			else if (Hz.Kind == TEXT("wakes"))
+			{
+				// (one of the scarecrows is not a scarecrow: as she comes near it, it is gone and what it was stands there, once a play)
+				if (!bIn || WildScenerySprung.Contains(Hz.Id)) continue;
+				WildScenerySprung.Add(Hz.Id); ++Hz.Sprung; ++WildHazardsSprung;
+				FVector L = Hz.At;
+				if (UPrimitiveComponent* Hc = Hz.Comp.Get()) { L = FVector(Hc->Bounds.Origin.X, Hc->Bounds.Origin.Y, Hz.At.Z); Hc->SetVisibility(false); Hc->SetCollisionEnabled(ECollisionEnabled::NoCollision); }
+				else
+				{
+					// (nothing hidden that it was: it rises 8 m from her, toward the hazard's middle (phase 2: risen where she stood, the
+					// Ash Wyrm never stood at all))
+					FVector2D Dh = FVector2D(Hz.At) - FVector2D(Her);
+					if (Dh.Size() < 300.f) { const float Ah = (Hz.Id % 360) * PI / 180.f; Dh = FVector2D(FMath::Cos(Ah), FMath::Sin(Ah)); }
+					Dh.Normalize();
+					L = FVector(Her.X + Dh.X * 800.f, Her.Y + Dh.Y * 800.f, Hz.At.Z);
+				}
+				SpawnSceneryMonsters(Hz.Chunk.Get(), Hz.Who, Hz.Count, Hz.Named, L, (uint32)Hz.Id);
+				PlayerCombat->ShowMessage(!Hz.Msg.IsEmpty() ? Hz.Msg : FString::Printf(TEXT("%s turns its head toward you."), Hz.Named.IsEmpty() ? TEXT("The scarecrow") : *Hz.Named));
+			}
+			else if (Hz.Kind == TEXT("fall"))
+			{
+				// (a charred snag: as she comes near it falls, toward her, over 1.2 s; under it at the end, a heavy blow)
+				UPrimitiveComponent* Hc = Hz.Comp.Get();
+				if (!Hc) continue;
+				if (Hz.Start < 0.f)
+				{
+					if (!bIn) continue;
+					Hz.Start = Now; Hz.FallDir = (FVector2D(Her) - FVector2D(Hz.Pivot)).GetSafeNormal(); ++WildHazardsSprung;
+					if (Hz.FallDir.IsNearlyZero()) Hz.FallDir = FVector2D(1, 0);
+					PlayerCombat->ShowMessage(TEXT("A crack overhead: the burned tree is coming down!"));
+				}
+				const float T = FMath::Clamp((Now - Hz.Start) / 1.2f, 0.f, 1.f);
+				if (Hz.Sprung > 0) continue;
+				const FVector Axis = FVector::CrossProduct(FVector::UpVector, FVector(Hz.FallDir, 0.0)).GetSafeNormal();
+				const FQuat Q(Axis, FMath::DegreesToRadians(84.f * T * T));
+				Hc->SetWorldLocationAndRotation(Hz.Pivot + Q.RotateVector(Hz.Loc0 - Hz.Pivot), Q * Hz.Rot0);
+				if (T < 1.f) continue;
+				++Hz.Sprung;
+				const FVector2D Dh = FVector2D(Her) - FVector2D(Hz.Pivot);
+				const float Along = (float)FVector2D::DotProduct(Dh, Hz.FallDir), Across = (float)FMath::Abs(FVector2D::CrossProduct(Hz.FallDir, Dh));
+				if (Along > 0.f && Along < Hz.Length && Across < 160.f) PlayerCombat->HurtByTrap(0.15f * Hz.P, 0.4f, 2.f, TEXT("The burned tree crashes down on you"));
+			}
+			else if (Hz.Kind == TEXT("hunt"))
+			{
+				// (a waterhole's hunt: while she is near, now and then a predator runs down one of the herd, and the herd scatters)
+				ARDWildAnimal* Prey = Hz.Prey.Get();
+				ARDWildAnimal* Hunter = nullptr;
+				for (const TWeakObjectPtr<ARDWildAnimal>& Wh : Hz.Hunters) if (ARDWildAnimal* A = Wh.Get(); A && !A->IsDead()) { Hunter = A; break; }
+				if (!Hunter) continue;
+				if (Prey && !Prey->IsDead())
+				{
+					if (FVector::Dist2D(Hunter->GetActorLocation(), Prey->GetActorLocation()) < 260.f)
+					{
+						Prey->TakeHit(1e6f, Hunter->GetActorLocation()); ++Hz.Kills; ++Hz.Sprung; ++WildHazardsSprung; Hz.Prey.Reset();
+						if (FSceneryHerd* Hd = WildSceneryHerds.FindByPredicate([&](const FSceneryHerd& X) { return X.Id == Hz.Id / 8; }))
+							for (const TWeakObjectPtr<ARDWildAnimal>& Wa : Hd->Animals)
+								if (ARDWildAnimal* A = Wa.Get(); A && !A->IsDead())
+								{
+									const FVector Away = (A->GetActorLocation() - Hunter->GetActorLocation()).GetSafeNormal2D();
+									A->Drive(A->GetActorLocation() + Away * 6000.f, true, 8.f);
+								}
+						Hunter->Drive(Hunter->GetActorLocation(), false, 20.f);
+					}
+					else if (Now >= Hz.In) { Hunter->Drive(Prey->GetActorLocation(), true, 3.f); Hz.In = Now + 0.4f; }
+					continue;
+				}
+				if (D > Hz.R || Now < Hz.ReadyAt) continue;
+				Hz.ReadyAt = Now + 60.f;
+				const FSceneryHerd* Hd = WildSceneryHerds.FindByPredicate([&](const FSceneryHerd& X) { return X.Id == Hz.Id / 8; });
+				if (!Hd) continue;
+				float Best = 1e9f;
+				for (const TWeakObjectPtr<ARDWildAnimal>& Wa : Hd->Animals)
+					if (ARDWildAnimal* A = Wa.Get(); A && !A->IsDead()) { const float Dd = FVector::Dist2D(A->GetActorLocation(), Hunter->GetActorLocation()); if (Dd < Best) { Best = Dd; Hz.Prey = A; } }
+				if (Hz.Prey.IsValid()) { Hunter->Drive(Hz.Prey->GetActorLocation(), true, 3.f); Hz.In = Now + 0.4f; }
+			}
 			else if (Hz.Kind == TEXT("lurker"))
 			{
 				// (something under a pond's surface: she wades in near it, and it rises, once a play)
@@ -243,7 +375,8 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 		if (!WildSceneryKinds.IsValidIndex(X.Kind)) continue;
 		const FRDWildSceneryKind& K = WildSceneryKinds[X.Kind];
 		const float D = FVector2D::Distance(X.At, H2);
-		if (!WildSceneryTold.Contains(X.Id) && D < 35.f)
+		// (phase 2: told once no other line is under 2 s old: a farmstead discovered in the same tick hid the old orchard's line)
+		if (!WildSceneryTold.Contains(X.Id) && D < 35.f && Now - PlayerCombat->MessageTime >= 2.f)
 		{
 			WildSceneryTold.Add(X.Id); WildSceneryToldAt.Add(X.Id, Now);
 			PlayerCombat->ShowMessage(FString::Printf(TEXT("%s: %s"), *K.Title, *K.Text));
@@ -305,6 +438,27 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 			const FVector2D Off = (FVector2D(A->GetActorLocation()) / 100.0 - Mid).GetClampedToMaxSize(15.0);
 			A->Drive(FVector((Goal.X + Off.X) * 100.0, (Goal.Y + Off.Y) * 100.0, 0.0), false, 6.f);
 		}
+	}
+}
+
+void ARDDungeonGenerator::SpawnSceneryMonsters(ARDWildChunk* C, const FString& Who, int32 N, const FString& Named, const FVector& At, uint32 Salt)
+{
+	if (!bCombat || !IsWildReady() || !GetWorld()) return;
+	const FVector2D A2(At.X / 100.0, At.Y / 100.0);
+	TArray<int32> Kinds; WildKindsForTier(Wild->TierAt(A2.X, A2.Y), Kinds);
+	TArray<int32> Named2; for (int32 Ki = 0; Ki < Monsters.Num(); ++Ki) if (Monsters[Ki].Mesh && !Who.IsEmpty() && Monsters[Ki].Name.ToString().Contains(Who)) Named2.Add(Ki);
+	if (Named2.Num() > 0) Kinds = Named2;
+	if (Kinds.Num() == 0) return;
+	FRandomStream Rm((int32)FRDWildWorld::Hash((int32)Salt, 0x131A, Wild->Seed));
+	const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
+	const float Now = GetWorld()->GetTimeSeconds();
+	for (int32 I = 0; I < FMath::Clamp(N, 1, 8); ++I)
+	{
+		const float A = Rm.FRandRange(0.f, 2.f * PI), D = N > 1 ? Rm.FRandRange(100.f, 350.f) : 0.f;
+		FVector L(At.X + FMath::Cos(A) * D, At.Y + FMath::Sin(A) * D, 0.f); L.Z = WildGroundZ(L);
+		const float Yaw = Her ? FMath::RadiansToDegrees(FMath::Atan2(Her->GetActorLocation().Y - L.Y, Her->GetActorLocation().X - L.X)) : 0.f;
+		if (ARDMonster* Mo = SpawnWildMonsterAt(Monsters[Kinds[Rm.RandRange(0, Kinds.Num() - 1)]], L, Yaw, (int32)Rm.GetUnsignedInt(), Wild->TierAt(A2.X, A2.Y), 1.f, Named))
+		{ Mo->bHunting = true; Mo->HuntUntil = Now + 60.f; if (C) C->Props.Add(Mo); }
 	}
 }
 
@@ -385,7 +539,8 @@ FString ARDDungeonGenerator::WildSceneryDescribe(const FVector& From) const
 	FString Verb = M.FindRef(TEXT("verb"));
 	if (Verb.IsEmpty())
 		Verb = Do == TEXT("loot") ? TEXT("search") : Do == TEXT("honey") ? TEXT("take honey from") : Do == TEXT("fish") ? TEXT("fish at") : Do == TEXT("forage") ? TEXT("gather from")
-		     : Do == TEXT("milestone") || Do == TEXT("rumour") ? TEXT("read") : Do == TEXT("heal") ? TEXT("rest at") : Do == TEXT("buff") ? TEXT("pray at") : Do == TEXT("fairy") ? TEXT("step into") : TEXT("look at");
+		     : Do == TEXT("milestone") || Do == TEXT("rumour") ? TEXT("read") : Do == TEXT("heal") ? TEXT("rest at") : Do == TEXT("buff") ? TEXT("pray at") : Do == TEXT("fairy") ? TEXT("step into")
+		     : Do == TEXT("offer") ? TEXT("leave an offering at") : Do == TEXT("trade") ? TEXT("trade at") : TEXT("look at");
 	FString What = M.FindRef(TEXT("what"));
 	if (What.IsEmpty()) What = WildSceneryKinds[U->Kind].Title.ToLower();
 	return FString::Printf(TEXT("%s the %s"), *Verb, *What);
@@ -459,6 +614,33 @@ FString ARDDungeonGenerator::WildSceneryInteract(const FVector& From)
 			Said = FString::Printf(TEXT("%s%sTracks of something big lead %s, toward %s, %.1f km off."), *Said, Said.IsEmpty() ? TEXT("") : TEXT("  "), RDS13Compass(At - F2), *Got.Name, FVector2D::Distance(At, F2) / 1000.0);
 		else Said = FString::Printf(TEXT("%s%sOnly deer and boar have come this way."), *Said, Said.IsEmpty() ? TEXT("") : TEXT("  "));
 	}
+	else if (Do == TEXT("offer") || Do == TEXT("trade"))
+	{
+		// (an offering left (a cairn's: "where travelers leave an offering"): its blessing; a trade: what is given for what is had)
+		FString Gn, Gc = TEXT("1"); M.FindRef(TEXT("give")).Split(TEXT("|"), &Gn, &Gc);
+		if (Gn.IsEmpty()) Gn = M.FindRef(TEXT("give"));
+		const int32 Need = FMath::Max(1, FCString::Atoi(*Gc));
+		if (FindItem(FName(*Gn)) < 0 || PlayerCombat->GetItemCount(FName(*Gn)) < Need)
+		{
+			PlayerCombat->ShowMessage(FString::Printf(TEXT("You have no %s to %s."), *Gn.ToLower(), Do == TEXT("offer") ? TEXT("leave here") : TEXT("trade")));
+			return TEXT("scenery");
+		}
+		PlayerCombat->RemoveItem(FName(*Gn), Need);
+		if (Do == TEXT("offer"))
+		{
+			const float Dm = RDS13Num(M, TEXT("dmg"), 0.1f), Ar = RDS13Num(M, TEXT("armour"), 0.1f), Sp = RDS13Num(M, TEXT("speed"), 0.f), Sec = RDS13Num(M, TEXT("secs"), 600.f);
+			const FString Name = M.Contains(TEXT("name")) ? M[TEXT("name")] : K.Title;
+			PlayerCombat->Bless(Name, Dm, Ar, Sp, Sec);
+			Said = FString::Printf(TEXT("%s%sYou leave %d %s. %s: your blows %.0f%% stronger, %.0f%% less of each blow reaches you, for %.0f minutes"), *Said, Said.IsEmpty() ? TEXT("") : TEXT("  "), Need, *Gn, *Name, Dm * 100.f, Ar * 100.f, Sec / 60.f);
+		}
+		else
+		{
+			FString Rn, Rc = TEXT("1"); M.FindRef(TEXT("get")).Split(TEXT("|"), &Rn, &Rc);
+			const int32 Got = FMath::Max(1, FCString::Atoi(*Rc));
+			if (FindItem(FName(*Rn)) >= 0) PlayerCombat->AddItem(FName(*Rn), Got);
+			Said = FString::Printf(TEXT("%s%sYou trade %d %s for %d %s."), *Said, Said.IsEmpty() ? TEXT("") : TEXT("  "), Need, *Gn, Got, *Rn);
+		}
+	}
 	else if (Do == TEXT("heal")) { PlayerCombat->SetHealth(PlayerCombat->GetMaxHealth()); PlayerCombat->SetMana(PlayerCombat->GetMaxMana()); if (Said.IsEmpty()) Said = TEXT("You rest: your wounds close, your mana comes back"); }
 	else if (Do == TEXT("buff") || Do == TEXT("fairy"))
 	{
@@ -495,6 +677,12 @@ FString ARDDungeonGenerator::WildSceneryInteract(const FVector& From)
 		Said = bGot ? FString::Printf(TEXT("%s%sA notice tells of %s, %.1f km %s of here."), *Said, Said.IsEmpty() ? TEXT("") : TEXT("  "), *Got.Name, Best / 1000.0, RDS13Compass(At - F2))
 		            : (Said.IsEmpty() ? FString(TEXT("The notices are too weathered to read.")) : Said);
 	}
+	// (what it wakes: "spawn=<name part>:<n>:<title>" (the barred cellar's))
+	if (const FString Sp = M.FindRef(TEXT("spawn")); !Sp.IsEmpty())
+	{
+		TArray<FString> Q; Sp.ParseIntoArray(Q, TEXT(":"), false);
+		SpawnSceneryMonsters(U.Chunk.Get(), Q.Num() > 0 ? Q[0] : FString(), Q.Num() > 1 ? FCString::Atoi(*Q[1]) : 1, Q.Num() > 2 ? Q[2] : FString(), U.At, (uint32)(U.Id * 8 + U.Use));
+	}
 	PlayerCombat->ShowMessage(Said);
 	const int64 Key = RDS13UseKeys + (int64)(uint32)U.Id * 8 + U.Use;
 	if (const float Re = RDS13Num(M, TEXT("reuse"), 0.f); Re > 0.f) WildSceneryReadyAt.Add((int32)(Key & 0x7FFFFFFF), Now + Re);
@@ -505,88 +693,79 @@ FString ARDDungeonGenerator::WildSceneryInteract(const FVector& From)
 	return TEXT("scenery");
 }
 
-// ------------------------------------------------------------------------------------------------ the far storm over the open lands
+// ------------------------------------------------------------------------------------------------ the far sights
 void ARDDungeonGenerator::TickWildStorm13(float Dt, const FVector& Her)
 {
 	UWorld* W = GetWorld();
 	const float Now = W->GetTimeSeconds();
 	const FVector2D H2(Her.X / 100.0, Her.Y / 100.0);
-	UNiagaraComponent* Fx = WildStormFx.Get();
-	UStaticMeshComponent* Cl = WildStormCloud.Get();
-	if (Fx || Cl)
+	if (UStaticMeshComponent* Cl = WildStormCloud.Get())
 	{
-		// (it drifts along its way at 9 m/s; it goes when its time is up or it is 16 km off)
-		WildStormAt += WildStormWay * (9.0 * Dt);
+		// (it drifts along its way; it goes when its time is up or it is 16 km off)
+		const float Drift = WildFarSights.IsValidIndex(WildFarSightOn) ? WildFarSights[WildFarSightOn].Drift : 9.f;
+		WildStormAt += WildStormWay * (double(Drift) * Dt);
 		const double Km = FVector2D::Distance(WildStormAt, H2) / 1000.0;
-		const FVector L(WildStormAt.X * 100.0, WildStormAt.Y * 100.0, Wild->ToZ(Wild->Height(WildStormAt.X, WildStormAt.Y)));
-		if (Fx) Fx->SetWorldLocation(L);
-		if (Cl) Cl->SetWorldLocation(L);
-		if (Now > WildStormUntil || Km > 16.0) ForceWildStorm(0.f);
+		Cl->SetWorldLocation(FVector(WildStormAt.X * 100.0, WildStormAt.Y * 100.0, Wild->ToZ(Wild->Height(WildStormAt.X, WildStormAt.Y))));
+		if (Now > WildStormUntil || Km > 16.0) ForceWildFarSight(NAME_None, 0.f);
 		return;
 	}
 	WildStormLook -= Dt;
 	if (WildStormLook > 0.f) return;
 	WildStormLook = 30.f;
-	if (WildStormBiomes.Num() == 0 || (!WildStormFunnel && !WildStormMesh)) return;
-	if (!WildStormBiomes.Contains(Wild->BiomeName(Wild->BiomeAt(H2.X, H2.Y)))) return;
-	// (a draw every half minute from the session's seed and the time: never the play's streams)
-	const float U = FRDWildWorld::Rand01((int32)SessionSeed, FMath::RoundToInt(Now / 30.f), 0x5170u);
-	if (U < WildStormChance * 0.25f) ForceWildStorm(FMath::Lerp(WildStormKmMin, WildStormKmMax, FRDWildWorld::Rand01((int32)SessionSeed, FMath::RoundToInt(Now / 30.f), 0x5171u)));
+	// (a draw every half minute from the session's seed and the time, never the play's streams: of the sights of her region, each by
+	// its own chance)
+	const FString Bn = Wild->BiomeName(Wild->BiomeAt(H2.X, H2.Y));
+	for (int32 I = 0; I < WildFarSights.Num(); ++I)
+	{
+		const FRDWildFarSight& F = WildFarSights[I];
+		if (!F.Mesh || !F.Biomes.Contains(Bn)) continue;
+		const float U = FRDWildWorld::Rand01((int32)SessionSeed + I * 7919, FMath::RoundToInt(Now / 30.f), 0x5170u);
+		if (U >= F.Chance * 0.25f) continue;
+		ForceWildFarSight(F.Name, FMath::Lerp(F.Km.X, F.Km.Y, FRDWildWorld::Rand01((int32)SessionSeed + I, FMath::RoundToInt(Now / 30.f), 0x5171u)));
+		return;
+	}
 }
 
-void ARDDungeonGenerator::ForceWildStorm(float Km)
+void ARDDungeonGenerator::ForceWildStorm(float Km) { ForceWildFarSight(TEXT("storm"), Km); }
+
+void ARDDungeonGenerator::ForceWildFarSight(FName Name, float Km)
 {
-	if (UNiagaraComponent* F = WildStormFx.Get()) F->DestroyComponent();
 	if (UStaticMeshComponent* C = WildStormCloud.Get()) C->DestroyComponent();
-	WildStormFx.Reset(); WildStormCloud.Reset();
+	WildStormCloud.Reset(); WildFarSightOn = -1;
 	const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
-	if (Km <= 0.f || !Her || !IsWildReady()) return;
+	const int32 Si = WildFarSights.IndexOfByPredicate([&](const FRDWildFarSight& F) { return F.Name == Name; });
+	if (Km <= 0.f || !Her || !IsWildReady() || Si < 0 || !WildFarSights[Si].Mesh) return;
+	const FRDWildFarSight& F = WildFarSights[Si];
 	const float Now = GetWorld()->GetTimeSeconds();
 	const FVector2D H2 = FVector2D(Her->GetActorLocation()) / 100.0;
 	const float A = FRDWildWorld::Rand01((int32)SessionSeed, FMath::RoundToInt(Now), 0x5172u) * 2.f * PI;
 	WildStormAt = H2 + FVector2D(FMath::Cos(A), FMath::Sin(A)) * (Km * 1000.0);
 	// (drifting across her view, not at her)
 	WildStormWay = FVector2D(-FMath::Sin(A), FMath::Cos(A));
-	WildStormUntil = Now + 360.f;
+	WildStormUntil = Now + F.Seconds;
 	const FVector L(WildStormAt.X * 100.0, WildStormAt.Y * 100.0, Wild->ToZ(Wild->Height(WildStormAt.X, WildStormAt.Y)));
-	if (WildStormFunnel)
-	{
-		UNiagaraComponent* Nc = NewObject<UNiagaraComponent>(this);
-		Nc->SetAsset(WildStormFunnel);
-		Nc->SetupAttachment(GetRootComponent());
-		Nc->SetUsingAbsoluteLocation(true); Nc->SetUsingAbsoluteRotation(true); Nc->SetUsingAbsoluteScale(true);
-		Nc->SetWorldLocation(L);
-		Nc->SetWorldScale3D(FVector(40.f));
-		Nc->RegisterComponent();
-		Nc->Activate(true);
-		WildStormFx = Nc;
-	}
-	if (WildStormMesh)
-	{
-		// (the storm cell (scenery13_kit.py's: its anvil cloud 3.2 km across, its rain and funnel to the ground) at its own size, its
-		// origin on the ground under it, seen from the whole of the land round it; the effect alone was not seen from 6 km)
-		UStaticMeshComponent* Sm = NewObject<UStaticMeshComponent>(this);
-		Sm->SetStaticMesh(WildStormMesh);
-		Sm->SetupAttachment(GetRootComponent());
-		Sm->SetUsingAbsoluteLocation(true); Sm->SetUsingAbsoluteRotation(true); Sm->SetUsingAbsoluteScale(true);
-		Sm->SetWorldRotation(FRotator(0.f, FMath::RadiansToDegrees(A), 0.f));
-		Sm->SetWorldLocation(L);
-		Sm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		Sm->SetCastShadow(false);
-		Sm->SetCachedMaxDrawDistance(0.f); Sm->bNeverDistanceCull = true;
-		if (WildStormMaterial) Sm->SetMaterial(0, WildStormMaterial);
-		Sm->RegisterComponent();
-		WildStormCloud = Sm;
-	}
-	UE_LOG(LogRDScen13, Log, TEXT("RDSTORM a storm %.1f km off at (%.0f, %.0f)"), Km, WildStormAt.X, WildStormAt.Y);
+	// (its mesh (scenery13_kit.py's: the storm cell 3.4 km across, the smoke plume 1.8 km high) at its own size, its origin on the
+	// ground under it, seen from the whole of the land round it; an effect alone was not seen from 6 km)
+	UStaticMeshComponent* Sm = NewObject<UStaticMeshComponent>(this);
+	Sm->SetStaticMesh(F.Mesh);
+	Sm->SetupAttachment(GetRootComponent());
+	Sm->SetUsingAbsoluteLocation(true); Sm->SetUsingAbsoluteRotation(true); Sm->SetUsingAbsoluteScale(true);
+	Sm->SetWorldRotation(FRotator(0.f, FMath::RadiansToDegrees(A), 0.f));
+	Sm->SetWorldLocation(L);
+	Sm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Sm->SetCastShadow(false);
+	Sm->SetCachedMaxDrawDistance(0.f); Sm->bNeverDistanceCull = true;
+	Sm->RegisterComponent();
+	WildStormCloud = Sm; WildFarSightOn = Si;
+	UE_LOG(LogRDScen13, Log, TEXT("RDFARSIGHT %s %.1f km off at (%.0f, %.0f)"), *Name.ToString(), Km, WildStormAt.X, WildStormAt.Y);
 }
 
 FString ARDDungeonGenerator::GetWildStormLine() const
 {
 	const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
-	const bool bOn = WildStormFx.IsValid() || WildStormCloud.IsValid();
+	const bool bOn = WildStormCloud.IsValid();
 	const double Km = Her ? FVector2D::Distance(WildStormAt, FVector2D(Her->GetActorLocation()) / 100.0) / 1000.0 : -1.0;
-	return FString::Printf(TEXT("storm|%.0f|%.0f|%.2f|%d"), WildStormAt.X, WildStormAt.Y, Km, bOn ? 1 : 0);
+	return FString::Printf(TEXT("%s|%.0f|%.0f|%.2f|%d"), WildFarSights.IsValidIndex(WildFarSightOn) ? *WildFarSights[WildFarSightOn].Name.ToString() : TEXT("none"), WildStormAt.X, WildStormAt.Y, Km, bOn ? 1 : 0);
 }
 
 // ------------------------------------------------------------------------------------------------ tests

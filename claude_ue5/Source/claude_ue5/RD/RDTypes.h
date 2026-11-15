@@ -907,6 +907,24 @@ struct FRDWildSceneryKind : public FRDWildSiteKind
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Herd;
 	/** its guards lie hidden until she comes within AmbushR metres, then hunt her (0: they keep watch as a ruin's) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float AmbushR = 0.f;
+	/** its people (the second phase: nomads, survivors, herders): "<townsfolk def's name begins>|<title>|<line>/<line>/...|x|y" */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Folk;
+};
+
+/** the list of 2026-11-14: something seen far off over a land (a storm cell over the plains, a grass fire's smoke over the savannah):
+ *  its mesh laid Km off, drifting across her view for Seconds, now and then (Chance a half minute's look) while she is in one of
+ *  its Biomes; one at a time */
+USTRUCT(BlueprintType)
+struct FRDWildFarSight
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Biomes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<class UStaticMesh> Mesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Chance = 0.15f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector2D Km = FVector2D(5.f, 10.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Drift = 9.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Seconds = 360.f;
 };
 
 /** the list of 2026-11-12's fifth phase: a quest of the wilds, found at a structure (RD/RDWildQuest12.cpp; 924 quests from

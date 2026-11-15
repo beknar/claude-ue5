@@ -422,9 +422,53 @@ The user's list of 2026-11-14 ([docs/improvements13.txt](../improvements13.txt))
 
 - **Its new things** (on every map of the game, their pictures painted with `rdm4_ui_gen.py`): Wild Honey, Wild Apples, Wild Plums, Bird's Eggs, Field Mushrooms (food).
 - **Its own pieces** (`scenery13_kit.py`, measured after their import: true size): straw skeps on benches, a great nest, two herons, a burrow mouth, a milestone, a noose, two drystone wall lengths, two apple and two plum trees, the storm cell.
-- **Measured** (`test_s13f.json`, `test_s13g.json`; the hanging tree, the wagon wreck, the battlefield and the milestone again after their fixes: `test_s13h.json`, `test_s13i.json`): every kind found within 150 km of Brokenspire and visited: laid of its kind, no piece floating or walked through, its chest where it has one, its line told as she comes within 35 m; every use from beside it (the prompt named it, F did what it says: what it gave, how far she rose climbing (the erratic 4.8 m, the butte 21.3 m) and the map revealed, the blessing, the reading); every hazard stood in (the burrows 8.4 hit points each and their rats, the bees 12.6, the pond's lurker); the migrating herd walking (20.6 m in 12 s), set off beside her (56 m run in 7 s, trampling her twice for 11.2); the goats in their fold after 12 s; the tall grass's two monsters lying low (noticing within 2.5 m) at 30 m and coming at her from 15.1 to 11.5 m in 2.5 s once she came within 12 m. A picture of each from 40 m and from 15 m.
+- **Measured** (`test_s13f.json`, `test_s13g.json`, after PR #65's review): every kind found within 150 km of Brokenspire and visited: laid of its kind, no piece floating or walked through, its chest where it has one, its line told as she comes within 35 m; every use from beside it (the prompt named it, F did what it says: what it gave, how far she rose climbing (the erratic 4.8 m, the butte 21.3 m) and the map revealed, the blessing, the reading); every hazard stood in (the burrows 8.4 hit points each and their rats, the bees 12.6, the pond's lurker); the migrating herd walking (20.6 m in 12 s), set off beside her (56 m run in 7 s, trampling her twice for 11.2); the goats in their fold after 12 s; the tall grass's two monsters lying low (noticing within 2.5 m) at 30 m and coming at her from 15.1 to 11.5 m in 2.5 s once she came within 12 m. A picture of each from 40 m and from 15 m.
 
 ![The open lands' 22 kinds, each from 15 m](../images/scenery13_open.jpg)
+
+### The open lands, second part: farms, savannahs, cold steppes and the burned plain
+
+| Kind | Biomes | What stands there | What she does there |
+|---|---|---|---|
+| Hedged fields | farms, meadows, hills | hedgerows and drystone walls in small enclosures | a chest in one of them |
+| Scarecrows | farms | three scarecrows over the furrows | one is not a scarecrow: as she comes near it is gone and a creature stands there ("The Scarecrow") |
+| Threshing yard | farms | haystacks, a stone threshing floor, a granary on staddle stones | gather threshed grain; rats pour out from under the granary |
+| Mill and millpond | farms, meadows, grasslands (by water) | a water wheel, the miller's house, millstones, a well | drink from the well |
+| Pumpkin patch | farms | pumpkins, skeps | gather pumpkins; the bees sting whoever lingers |
+| Abandoned farmstead | farms, grasslands, meadows | a shut house, its fence fallen, the yard gone to tall grass, a root cellar's hatch | force the hatch: bread, potions, iron, and the rats living below |
+| Loose livestock | farms, meadows, grasslands | five cows out of their broken fence | wolves come for them: one is taken while she is near |
+| Baobab | savannahs (a rise) | a lone baobab 14 m high, seen from afar | climb it: the map shows 2 km round |
+| Acacia shade | savannahs | five flat-topped acacias, deer in their shade | rest in the shade |
+| Termite mounds | savannahs | a dozen mounds, some taller than she is | |
+| Kopje | savannahs, cold steppes | a rocky outcrop, a cave mouth | two beasts lair in it; a chest |
+| Waterhole | savannahs, grasslands (by a pond) | mud and reeds on a pond's shore, nine deer | a wolf runs one down while she watches; the herd scatters |
+| A kill | savannahs, burned plain, cold steppes | a carcass and bones under circling crows | two scavengers at it; search the carcass: hides |
+| Salt pan | savannahs, cold steppes (a hollow) | a white crust over the ground, 28 m across | read the tracks across it |
+| Nomad camp | cold steppes | three yurts round a fire, the camp's horses grazing | two nomads to talk to; share their fire (rest); trade hides for cheese |
+| Kurgan | cold steppes, grasslands, plains (a rise) | a great burial mound, stone figures on it | read the figures |
+| Prayer cairn | cold steppes, mountains, moorland, tundras (a rise) | a cairn wrapped in prayer cloth | leave bread: the Blessing of the Steppe Wind |
+| Carved rocks | cold steppes, savannahs, canyons, mesas | wind-carved rocks with petroglyphs | read the carvings |
+| Hot spring | cold steppes, tundras, volcanic tundra, mountains (a hollow) | a steaming pool, a camp's fire | soak: healed |
+| Pingo | cold steppes, tundras | an ice-cored hill | climb it and look out |
+| Charred snags | burned plain | ten black trunks | one comes down as she nears: under it, a heavy blow |
+| Smouldering ground | burned plain | charcoal, a burnt trunk, embers gusting, smoke | three hot spots burn while she stands in them |
+| Ash drifts | burned plain | ash with tracks in it | read the tracks: what came through |
+| First regrowth | burned plain | fireweed, morels | pick morels |
+| Scorched farmstead | burned plain | a burnt house and fence, the survivors' tent and smoking fire | talk to the survivor; share bread for a potion |
+| Looters' camp | burned plain | tents, crates, a fire | three looters; a chest |
+| Fire break | burned plain | a cut line, its dug ditch | read it: the fire jumped it |
+| Fused glass | burned plain | glassy, blackened stone | read it: this was no grass fire |
+| Carcasses in the ash | burned plain | carcasses, bones, crows | the thing that started the fire rises from the ash: the Ash Wyrm |
+
+- **What is new to the scenery** (`RD/RDWildScenery13.cpp`): hazards that `wake` (a laid piece hidden by its mesh's name and a monster, named, in its place, once a play; or a monster rising 8 m from her), `heat` (a burn a second while she stands in it), `fall` (the nearest burnt trunk topples toward her over 1.2 s: a blow if she is under it) and `hunt` (a predator runs one of the scenery's herd down while she is near, and the herd scatters); uses that `offer` (she leaves an item: a blessing) and `trade` (one thing for another); its people (`Folk`: townsfolk with their own lines, spoken to with F); `spawn=` on a use (the root cellar's rats); a part's material (`mat=`: the burnt timber) and a skin over the ground in a colour of its own (`L=patch;tint=`: the salt pan's crust).
+- **Where**: a kind that stands by water is placed on the shore of a pond or lake in its cell first, walked out from its middle; a cell holding a pond's or lake's middle takes such a kind three times in five. A kind of a hollow wants level ground (1.5 m over its 10 m ring).
+- **The land**: the farms' fields at their stages (each great field and each croft plot drawn ripe, sprouting, fallow or burned: a sprouting crop at a third of its height, fallow and burned ground drawn bare and black); the dry channels of the savannahs (dry riverbeds 14 to 24 m wide), the farms (irrigation ditches) and the burned plain (fire breaks).
+- **The weather**: two of the regions' own, `whiteout` (snow and a white fog where the cold lands are) and `dust` (a brown fog where the dry ones are), in the weather's turn with the rest; the fog's colour follows the weather (`SkyFogTint`). Over the savannahs now and then a grass fire's smoke column stands on the horizon 6 to 10 km off (`WildFarSights`: the storm cell and the smoke plume alike, `ForceWildFarSight`).
+- **Its new things**: Morels (food); the pumpkins are the kitchen's.
+- **Its own pieces** (`scenery13_kit.py`): two baobabs, two termite mounds, two yurts, two stone figures (balbals), a prayer cairn, a hot spring's pool, a salt pan, two carved rocks, fused glass, a smoke plume 1.9 km high, fireweed, a granary. The steppe's horses are the ridable horse's body and gaits as a herd animal (`926 fauna`).
+- **Measured** (`test_s13p2e.json`, `test_s13p2f.json`, `test_s13p2i.json`, `test_s13p2j.json`, `test_s13p2k.json`; the first part's 22 again in `test_s13p2g.json`, `test_s13p2h.json`, the old orchard in `test_s13p2j.json`): every kind found within 150 km of Brokenspire and visited as the first part's were (laid, nothing floating or walked through, its chest, its line told within 35 m, each use from beside it, each hazard stood in, its herd and people). The scarecrow and the Ash Wyrm rose (one monster each), three rats came from under the granary; the bees stung 8.4, the falling snag struck 21 and each hot spot burned 14 in 4 s; the wolves ran down a cow of the loose livestock and a deer at the waterhole; she rose 12.9 m up the baobab and saw 4,904 more of the map; the cairn took her bread for the Blessing of the Steppe Wind, the nomads two hides for two cheeses and the survivors her bread for a potion; the camp's two nomads and the farmstead's survivor were found and spoken to; the horses grazed (4.7 m in 12 s). The land (`land13`): the dry riverbed's bed 1.64 m under its banks (cut 1.9 m), the irrigation ditch's 0.83 (0.9), the fire break's 0.71 (0.7), her feet in each within 0.15 m of its bed; within 5 km of Brokenspire 4,999 fields and plots, 2,882 ripe, 1,122 sprouting, 708 fallow and 287 burned; the dust storm's fog (0.65, 0.50, 0.31) against fair weather's (0.42, 0.45, 0.50), the whiteout's (0.57, 0.62, 0.73); the grass fire's smoke standing 8 km off.
+
+![The second part's 29 kinds, each from 15 m (the termite mounds from 40 m)](../images/scenery13_open2.jpg)
 
 ## The TODO sweep (2026-11-14)
 

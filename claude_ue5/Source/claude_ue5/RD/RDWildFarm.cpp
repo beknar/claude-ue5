@@ -124,8 +124,9 @@ FString ARDDungeonGenerator::GetWildFarmAt(float Xm, float Ym) const
 {
 	if (!IsWildReady()) return FString();
 	FRDWFarm Fm; Wild->FarmAt(Xm, Ym, Wild->FarmWeight(Xm, Ym), Fm);
-	return FString::Printf(TEXT("%d|%d,%d|%d,%d|%d|%.3f|%.4f|%.2f|%.2f|%d|%.3f|%.3f|%.3f|%.3f"), (int32)Fm.Kind, Fm.Great.X, Fm.Great.Y, Fm.Plot.X, Fm.Plot.Y, Fm.Crop, Fm.Field, Fm.Ang,
-		Fm.StripW, Fm.StripOff, Fm.Strip, Fm.Furrow, Fm.Ridge, Wild->Height(Xm, Ym), Wild->BareHeight(Xm, Ym));
+	// (the list of 2026-11-14: its field's stage last: 0 ripe, 1 sprouting, 2 fallow, 3 burned)
+	return FString::Printf(TEXT("%d|%d,%d|%d,%d|%d|%.3f|%.4f|%.2f|%.2f|%d|%.3f|%.3f|%.3f|%.3f|%d"), (int32)Fm.Kind, Fm.Great.X, Fm.Great.Y, Fm.Plot.X, Fm.Plot.Y, Fm.Crop, Fm.Field, Fm.Ang,
+		Fm.StripW, Fm.StripOff, Fm.Strip, Fm.Furrow, Fm.Ridge, Wild->Height(Xm, Ym), Wild->BareHeight(Xm, Ym), (int32)Fm.Stage);
 }
 
 TArray<FString> ARDDungeonGenerator::FindWildFarmsteads(float Xm, float Ym, float Rm) const

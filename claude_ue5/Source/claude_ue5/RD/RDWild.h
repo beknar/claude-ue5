@@ -190,6 +190,7 @@ struct FRDWSample
 	// open field's strips: their width across FieldAng's way and where they start (metres), 0 where it has none)
 	uint8 FarmKind = 0;
 	float StripW = 0.f, StripOff = 0.f;
+	uint8 FieldStage = 0;             // (the list of 2026-11-14: its field's stage (FRDWFarm::Stage))
 	// (the list of 2026-11-14: a dry channel's bed there (an arroyo, a creek bed, a slot canyon): 0-1 toward its middle, its kind)
 	float Chan = 0.f; int32 ChanKind = -1;
 };
@@ -228,6 +229,8 @@ struct FRDWFarm
 	float Furrow = 0.f;                       // 1 in the furrow between two strips
 	float Ridge = 0.f;                        // metres over the ground (ridge-and-furrow)
 	float Shade = 1.f;                        // the strip's own shade (each strip ploughed and sown by another hand)
+	/** the list of 2026-11-14 ("fields at different stages: fallow, sprouting, ripe, burned"): 0 ripe, 1 sprouting, 2 fallow, 3 burned */
+	uint8 Stage = 0;
 };
 
 /** the world's model (see the file's head) */

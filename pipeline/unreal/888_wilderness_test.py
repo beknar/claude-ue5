@@ -1331,6 +1331,10 @@ def step_scenery13():
                 v = {"do": u["do"]}
                 if spec.get("do") == "fairy": g.set_town_hour(22.5)
                 things = [t.split("|")[0] for t in spec.get("things", "").split(",") if t]
+                if spec.get("do") in ("offer", "trade") and spec.get("give"):
+                    gn, gc = (spec["give"].split("|") + ["1"])[:2]
+                    cb().add_item(gn, int(gc) + 1)
+                if spec.get("do") == "trade" and spec.get("get"): things.append(spec["get"].split("|")[0])
                 before = {t: cb().get_item_count(t) for t in things}
                 hp0 = cb().get_health(); cb().set_health(cb().get_max_health())
                 ground_put(u["x"] / 100.0, u["y"] / 100.0); yield from watching(rwait(0.8), msgs)
@@ -1349,7 +1353,8 @@ def step_scenery13():
                 v["ok"] = (v["f"] == "scenery" and spec.get("what", "").split(" ")[0].lower() in v["prompt"].lower()
                            and (d not in ("loot", "forage", "fish", "honey") or sum(v["got"].values()) > 0)
                            and (d != "climb" or (v["rose_m"] >= float(spec.get("tz", 3)) * 0.6 and v["revealed_more"] > 0))
-                           and (d not in ("buff", "fairy") or v["blessing"] != "")
+                           and (d not in ("buff", "fairy", "offer") or v["blessing"] != "")
+                           and (d != "trade" or sum(v["got"].values()) > 0)
                            and (d not in ("milestone", "rumour", "tracks") or len(v["said"]) > 20))
                 r["uses"].append(v)
                 ground_put(*near); yield from rwait(0.6)
@@ -1371,13 +1376,16 @@ def step_scenery13():
                     v["water_found"] = wp is not None
                     if wp: G["pawn"].set_actor_location(V(wp[0] * 100.0, wp[1] * 100.0, sample(*wp)["z"] + 60.0), False, True)
                     yield from watching(rwait(2.0), msgs)
+                elif hz["kind"] == "hunt":
+                    # (from 40 m off the waterhole, waiting for the hunt: a predator runs a beast of the herd down)
+                    ground_put(hz["x"] / 100.0 + 40.0, hz["y"] / 100.0); yield from watching(rwait(20.0), msgs)
                 else:
                     ground_put(hz["x"] / 100.0, hz["y"] / 100.0)
-                    yield from watching(rwait(4.0 if hz["kind"] == "sting" else 1.6), msgs)
+                    yield from watching(rwait(4.0 if hz["kind"] in ("sting", "heat") else 2.2), msgs)
                 v["hp_lost"] = round(hp0 - cb().get_health(), 1)
                 v["sprung"] = next((x["sprung"] for x in scen_things(g, sid)["haz"] if abs(x["x"] - hz["x"]) < 1 and abs(x["y"] - hz["y"]) < 1), 0)
                 v["monsters_came"] = len(mine_mons()) - mons0
-                v["ok"] = v["sprung"] > 0 and (v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting") else v["monsters_came"] > 0)
+                v["ok"] = v["sprung"] > 0 and (v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting", "heat", "fall") else True if hz["kind"] == "hunt" else v["monsters_came"] > 0)
                 r["hazards"].append(v)
                 cb().set_health(cb().get_max_health())
                 ground_put(*near); yield from rwait(1.0)
@@ -1408,6 +1416,16 @@ def step_scenery13():
                     hd["hits"] = t2["hits"]; hd["hp_lost"] = round(hp0 - cb().get_health(), 1)
                     cb().set_health(cb().get_max_health())
                 r["herd"] = hd
+            # (its people: each where the kind puts them, and spoken to)
+            folk = [str(x) for x in k.get_editor_property("folk")]
+            if folk:
+                ppl = [t for t in GS.get_all_actors_of_class(G["w"], unreal.RDTownsfolk) if unreal.SystemLibrary.is_valid(t)
+                       and math.hypot(t.get_actor_location().x / 100.0 - cx, t.get_actor_location().y / 100.0 - cy) < 25.0]
+                r["folk"] = {"want": len(folk), "found": len(ppl), "talk": []}
+                for t in ppl[:3]:
+                    tl = t.get_actor_location(); ground_put(tl.x / 100.0 + 1.3, tl.y / 100.0); yield from rwait(0.5)
+                    pr = str(g.describe_nearest(G["pawn"].get_actor_location(), 300.0)); f = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.6)
+                    r["folk"]["talk"].append({"prompt": pr, "f": f, "said": str(cb().message)[:120]})
             r["told"] = " | ".join(msgs)
             res["kinds"][kd] = r
     finally:
@@ -1421,6 +1439,7 @@ def step_scenery13():
                and all(u["ok"] for u in v["uses"]) and all(h["ok"] for h in v["hazards"]))
         if "ambush_low" in v: okk = okk and v["ambush_low"]["monsters"] > 0 and v["ambush_low"]["hunting"] == 0 and v["ambush_low"]["lying_low"] > 0 \
             and v["ambush_sprung"]["hunting"] > 0 and v["ambush_sprung"]["m_from_her"][1] < v["ambush_sprung"]["m_from_her"][0] - 1.0
+        if v.get("folk"): okk = okk and v["folk"]["found"] >= v["folk"]["want"] and all(t["f"] in ("bark", "gift") and t["prompt"].startswith("talk") for t in v["folk"]["talk"])
         if v.get("herd"):
             h = v["herd"]
             if h.get("migrate"): okk = okk and 2.0 <= h["walked_12s_m"] <= 30.0          # (a walk: deer walk 1.3 m/s)
@@ -1451,7 +1470,9 @@ def step_land13():
                 c = ch[0]; idx = int(c[1]); w = float(c[5]); dep = float(c[6]); npts = int(c[7])
                 prof = [tuple(float(z) for z in str(l).split("|")) for l in g.get_wild_channel_profile(idx, npts // 2, w * 1.6)]
                 mid_h = min(p_[1] for p_ in prof if abs(p_[0]) <= w * 0.2)
-                bank = [p_[1] for p_ in prof if abs(p_[0]) >= w * 1.2]
+                # (the banks just past its edge (its half width 0.5 w): measured 1.2 to 1.6 widths out, a wide shallow riverbed's banks
+                # read the land's own curve over 25 m (0.78 m for a 1.9 m cut))
+                bank = [p_[1] for p_ in prof if w * 0.55 <= abs(p_[0]) <= w * 0.8]
                 v.update({"at_km": [round(float(c[3]) / 1000.0, 2), round(float(c[4]) / 1000.0, 2)], "width_m": w, "depth_m": dep,
                           "bed_under_banks_m": round(sum(bank) / max(1, len(bank)) - mid_h, 2)})
                 # (in its bed, looking along it)
@@ -1494,10 +1515,55 @@ def step_land13():
             G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=4, yaw=math.degrees(math.atan2(float(st[2]) * 100.0 - p.y, float(st[1]) * 100.0 - p.x))))
             yield from rwait(2.0); shot("land13_storm", "1280x720"); yield from rwait(1.0)
             g.force_wild_storm(0.0)
+        # (the second phase: a grass fire's smoke over the savannah, 8 km off)
+        pt = find_biome_point("savannahs")
+        if pt:
+            g.wild_put_her(*pt); yield from wait_chunks(30, 50)
+            g.force_wild_far_sight("grassfire", 8.0); yield from rwait(3.0)
+            st = str(g.get_wild_storm_line()).split("|")
+            res["grassfire"] = {"name": st[0], "on": int(st[4]), "km": float(st[3])}
+            p = G["pawn"].get_actor_location()
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=6, yaw=math.degrees(math.atan2(float(st[2]) * 100.0 - p.y, float(st[1]) * 100.0 - p.x))))
+            yield from rwait(2.0); shot("land13_grassfire", "1280x720"); yield from rwait(1.0)
+            g.force_wild_far_sight("grassfire", 0.0)
+            # (the dust storm here, the whiteout on the cold steppe: the fog's colour from the sky's state (its last three: the fog's
+            # light), at noon, against fair weather's in the same place)
+            def fog_rgb():
+                q = str(g.get_sky_state()).split("|")
+                return [float(x) for x in q[-3:]]
+            g.set_town_hour(12.0); g.set_weather(1, True); yield from rwait(4.0); fair = fog_rgb()
+            g.set_weather(9, True); yield from rwait(45.0); dust = fog_rgb(); shot("land13_dust", "1280x720"); yield from rwait(1.0)
+            res["dust"] = {"fair_fog": [round(x, 3) for x in fair], "dust_fog": [round(x, 3) for x in dust], "weather": str(g.get_sky_state()).split("|")[0]}
+        pt = find_biome_point("cold steppes", 160)
+        if pt:
+            g.wild_put_her(*pt); yield from wait_chunks(30, 50)
+            g.set_town_hour(12.0); g.set_weather(1, True); yield from rwait(4.0); fair = fog_rgb()
+            g.set_weather(8, True); yield from rwait(45.0); white = fog_rgb(); shot("land13_whiteout", "1280x720"); yield from rwait(1.0)
+            res["whiteout"] = {"fair_fog": [round(x, 3) for x in fair], "white_fog": [round(x, 3) for x in white], "weather": str(g.get_sky_state()).split("|")[0]}
+        g.set_weather(1, True)
+        # (the farms' fields at their stages: round Brokenspire, where the farms lie (a farm region's middle 60 km out held no field
+        # in its 1.2 km square), every 50 m of a 10 km square: each open field's furlong and each croft plot once)
+        st = [0, 0, 0, 0]; cells = set()
+        for i in range(201):
+            for j in range(201):
+                fx, fy = -5000.0 + i * 50.0, -5000.0 + j * 50.0
+                if fx * fx + fy * fy < 1200.0 ** 2: continue
+                q = str(g.get_wild_farm_at(fx, fy)).split("|")
+                # (kind | great | plot | crop | field | ang | strip w | off | strip | furrow | ridge | h | bare h | stage)
+                if len(q) < 14 or q[0] not in ("1", "2") or float(q[4]) < 0.3: continue
+                key = (q[0], q[1], q[2])
+                if key in cells: continue
+                cells.add(key); st[int(q[13])] += 1
+        res["field_stages"] = {"ripe": st[0], "sprouting": st[1], "fallow": st[2], "burned": st[3], "fields": len(cells)}
     finally:
         quiet(False)
     g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    ff = res.get("dust", {}); wf = res.get("whiteout", {})
     ok = (all(v.get("ok") for v in res["channels"].values()) and res["channels"]
+          and res.get("grassfire", {}).get("on") == 1
+          and ff.get("weather") == "dust" and ff["dust_fog"][0] / max(ff["dust_fog"][2], 1e-3) > ff["fair_fog"][0] / max(ff["fair_fog"][2], 1e-3) * 1.3
+          and wf.get("weather") == "whiteout" and sum(wf["white_fog"]) > sum(wf["fair_fog"]) * 1.1
+          and all(res.get("field_stages", {}).get(k, 0) > 0 for k in ("ripe", "sprouting", "fallow"))
           and all(v.get("found") and v["crests_1600m"] >= 2 for v in res["swales"].values())
           and res["crossroads_50km"] > 0 and res.get("storm", {}).get("on") == 1)
     step_result("land13", ok, **res)

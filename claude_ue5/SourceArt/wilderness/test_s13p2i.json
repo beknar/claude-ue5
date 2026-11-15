@@ -1,0 +1,533 @@
+{
+ "tag": "s13p2i",
+ "plan": [
+  "scenery13=old_orchard+yurt_camp+hanged_tree+scarecrows+salt_pan+hot_spring+regrowth+termite_mounds"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "scenery13",
+   "ok": true,
+   "kinds": {
+    "old_orchard": {
+     "found": true,
+     "id": 67247350,
+     "at_km": [
+      1.45,
+      -2.11
+     ],
+     "name": "Old orchard",
+     "laid": {
+      "kind": "old_orchard",
+      "title": "Old orchard",
+      "x": 1451.3,
+      "y": -2108.6,
+      "pieces": 37,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 114.9
+     },
+     "bottom_over_ground_cm": [
+      -36,
+      -2,
+      -2
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "forage",
+       "prompt": "gather fruit from the old trees",
+       "f": "scenery",
+       "said": "You take 2 Wild Apples",
+       "got": {
+        "Wild Apples": 2,
+        "Wild Plums": 0
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Old orchard: an orchard long gone wild, its gnarled trees still heavy with fruit | You take 2 Wild Apples",
+     "ok": true
+    },
+    "yurt_camp": {
+     "found": true,
+     "id": 67378529,
+     "at_km": [
+      78.17,
+      62.16
+     ],
+     "name": "Nomad camp",
+     "laid": {
+      "kind": "yurt_camp",
+      "title": "Nomad camp",
+      "x": 78166.9,
+      "y": 62162.3,
+      "pieces": 5,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 2,
+      "hazards": 0,
+      "fx": 1,
+      "fx_on": 1,
+      "herd": 5,
+      "yaw": 54.7
+     },
+     "bottom_over_ground_cm": [
+      -62,
+      -20,
+      -9
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "heal",
+       "prompt": "share the nomads' fire",
+       "f": "scenery",
+       "said": "They feed you mutton and tea and let you sleep by the fire.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      },
+      {
+       "do": "trade",
+       "prompt": "trade with the herders",
+       "f": "scenery",
+       "said": "You trade 2 Coarse Hide for 2 Cheese.",
+       "got": {
+        "Cheese": 2
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "herd": {
+      "n": 5,
+      "stampedes": 0,
+      "hits": 0,
+      "migrate": 0,
+      "stampede": 0,
+      "walked_12s_m": 4.7
+     },
+     "folk": {
+      "want": 2,
+      "found": 2,
+      "talk": [
+       {
+        "prompt": "talk to the Nomad herder",
+        "f": "bark",
+        "said": "The Nomad herder:  \"Sit by the fire, traveller. A guest is fed here before anything is asked.\""
+       },
+       {
+        "prompt": "talk to the Nomad elder",
+        "f": "bark",
+        "said": "The Nomad elder:  \"Three days north the ice cracks under the snow. Go round the lakes.\""
+       }
+      ]
+     },
+     "told": "Nomad camp: felt yurts round a fire, the camp's horses grazing beside them; the herders here keep the old guest-right | They feed you mutton and tea and let you sleep by the fire. | You trade 2 Coarse Hide for 2 Cheese.",
+     "ok": true
+    },
+    "hanged_tree": {
+     "found": true,
+     "id": 67256572,
+     "at_km": [
+      6.93,
+      1.42
+     ],
+     "name": "The hanging tree",
+     "laid": {
+      "kind": "hanged_tree",
+      "title": "The hanging tree",
+      "x": 6927.8,
+      "y": 1422.7,
+      "pieces": 3,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 1,
+      "fx_on": 1,
+      "herd": 0,
+      "yaw": 341.4
+     },
+     "bottom_over_ground_cm": [
+      -179,
+      -17,
+      233
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "loot",
+       "prompt": "search the dead man's coat",
+       "f": "scenery",
+       "said": "Whoever hung here had little: a crust, a length of rope.  You take 1 Bread, 2 Straw Rope",
+       "got": {
+        "Bread": 1,
+        "Straw Rope": 2,
+        "Small Healing Potion": 0
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "The hanging tree: a lone dead tree on the rise, a noose still swaying from its lowest bough | Whoever hung here had little: a crust, a length of rope.  You take 1 Bread, 2 Straw Rope",
+     "ok": true
+    },
+    "scarecrows": {
+     "found": true,
+     "id": 67243259,
+     "at_km": [
+      -1.1,
+      0.94
+     ],
+     "name": "Scarecrows",
+     "laid": {
+      "kind": "scarecrows",
+      "title": "Scarecrows",
+      "x": -1104.9,
+      "y": 940.7,
+      "pieces": 3,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 0,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 341.1
+     },
+     "bottom_over_ground_cm": [
+      -14,
+      -7,
+      -7
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [],
+     "hazards": [
+      {
+       "kind": "wakes",
+       "hp_lost": 0.0,
+       "sprung": 1,
+       "monsters_came": 1,
+       "ok": true
+      }
+     ],
+     "told": "Scarecrows: three scarecrows stand over the furrows; one of them is not quite like the others | The scarecrow turns its sackcloth head toward you.",
+     "ok": true
+    },
+    "salt_pan": {
+     "found": true,
+     "id": 67217609,
+     "at_km": [
+      -16.02,
+      -29.29
+     ],
+     "name": "Salt pan",
+     "laid": {
+      "kind": "salt_pan",
+      "title": "Salt pan",
+      "x": -16019.9,
+      "y": -29287.5,
+      "pieces": 1,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 223.3
+     },
+     "bottom_over_ground_cm": null,
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the salt crust",
+       "f": "scenery",
+       "said": "The crust crunches underfoot. Something dragged itself across it, not long ago.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Salt pan: a dry salt pan, its white crust cracked into plates and glaring in the sun | The crust crunches underfoot. Something dragged itself across it, not long ago.",
+     "ok": true
+    },
+    "hot_spring": {
+     "found": true,
+     "id": 67231002,
+     "at_km": [
+      -8.39,
+      19.39
+     ],
+     "name": "Hot spring",
+     "laid": {
+      "kind": "hot_spring",
+      "title": "Hot spring",
+      "x": -8392.0,
+      "y": 19391.5,
+      "pieces": 2,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 1,
+      "fx_on": 1,
+      "herd": 0,
+      "yaw": 321.6
+     },
+     "bottom_over_ground_cm": [
+      -9,
+      -6,
+      -6
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "heal",
+       "prompt": "bathe in the hot spring",
+       "f": "scenery",
+       "said": "The heat soaks the cold and the aches out of you.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Hot spring: a pool steaming in the cold air, its rim crusted pale; a natural camp | The heat soaks the cold and the aches out of you.",
+     "ok": true
+    },
+    "regrowth": {
+     "found": true,
+     "id": 67354878,
+     "at_km": [
+      64.3,
+      2.51
+     ],
+     "name": "First regrowth",
+     "laid": {
+      "kind": "regrowth",
+      "title": "First regrowth",
+      "x": 64296.8,
+      "y": 2506.8,
+      "pieces": 15,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 158.4
+     },
+     "bottom_over_ground_cm": [
+      -6,
+      -5,
+      -5
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "forage",
+       "prompt": "gather the morels",
+       "f": "scenery",
+       "said": "You take 2 Morels",
+       "got": {
+        "Morels": 2
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "First regrowth: fireweed already flowering in the ash, and morels coming up where the fire burned hottest | You take 2 Morels",
+     "ok": true
+    },
+    "termite_mounds": {
+     "found": true,
+     "id": 67226828,
+     "at_km": [
+      -10.48,
+      -27.35
+     ],
+     "name": "Termite mounds",
+     "laid": {
+      "kind": "termite_mounds",
+      "title": "Termite mounds",
+      "x": -10483.5,
+      "y": -27349.2,
+      "pieces": 12,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 0,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 326.3
+     },
+     "bottom_over_ground_cm": [
+      -33,
+      -26,
+      -16
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [],
+     "hazards": [],
+     "told": "Termite mounds: red spires of earth taller than a man, alive with termites",
+     "ok": true
+    }
+   },
+   "table": 51,
+   "counts_30km": {
+    "tall_grass": 76,
+    "burrow_town": 250,
+    "hanged_tree": 59,
+    "nest_tree": 69,
+    "shrine_tree": 72,
+    "erratic": 232,
+    "migration": 7,
+    "wallow": 63,
+    "hive_meadow": 31,
+    "brook_crossing": 0,
+    "fairy_ring": 53,
+    "shepherd_hut": 316,
+    "reed_pond": 1,
+    "old_orchard": 115,
+    "dusk_meadow": 17,
+    "butte": 208,
+    "battlefield": 228,
+    "milestone_road": 13,
+    "crossroads_gibbet": 0,
+    "crossroads_shrine": 1,
+    "crossroads_notice": 2,
+    "wagon_wreck": 4,
+    "hedged_fields": 340,
+    "scarecrows": 39,
+    "threshing_yard": 21,
+    "mill_pond": 2,
+    "pumpkin_patch": 31,
+    "abandoned_farm": 84,
+    "loose_livestock": 86,
+    "baobab": 2,
+    "acacia_shade": 5,
+    "termite_mounds": 7,
+    "kopje": 10,
+    "waterhole": 2,
+    "vulture_kill": 9,
+    "salt_pan": 5,
+    "yurt_camp": 0,
+    "kurgan": 73,
+    "prayer_cairn": 106,
+    "petroglyph_rocks": 364,
+    "hot_spring": 4,
+    "pingo": 0,
+    "charred_snags": 0,
+    "hot_spots": 0,
+    "ash_drift": 0,
+    "regrowth": 0,
+    "scorched_farmstead": 0,
+    "looters_camp": 0,
+    "fire_break": 0,
+    "fused_glass": 0,
+    "beast_carcasses": 0,
+    "cells": 10201
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s13p2i_scenery13_old_orchard.png",
+  "wd_s13p2i_scenery13_old_orchard_near.png",
+  "wd_s13p2i_scenery13_yurt_camp.png",
+  "wd_s13p2i_scenery13_yurt_camp_near.png",
+  "wd_s13p2i_scenery13_hanged_tree.png",
+  "wd_s13p2i_scenery13_hanged_tree_near.png",
+  "wd_s13p2i_scenery13_scarecrows.png",
+  "wd_s13p2i_scenery13_scarecrows_near.png",
+  "wd_s13p2i_scenery13_salt_pan.png",
+  "wd_s13p2i_scenery13_salt_pan_near.png",
+  "wd_s13p2i_scenery13_hot_spring.png",
+  "wd_s13p2i_scenery13_hot_spring_near.png",
+  "wd_s13p2i_scenery13_regrowth.png",
+  "wd_s13p2i_scenery13_regrowth_near.png",
+  "wd_s13p2i_scenery13_termite_mounds.png",
+  "wd_s13p2i_scenery13_termite_mounds_near.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

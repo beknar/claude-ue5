@@ -144,7 +144,8 @@ void ARDDungeonGenerator::ApplyDayNight()
 		// and with the sun high, so noon's and night's are as before)
 		const float Dusk = bSky7 && bWild ? RDTDSmooth(-6.f, 0.f, Elev) * (1.f - RDTDSmooth(4.f, 28.f, Elev)) : 0.f;
 		const FLinearColor DuskTint = FMath::Lerp(FLinearColor::White, Low * FogLowSunShare, Dusk);
-		DayFog->SetFogInscatteringColor(DayFogLight * FMath::Lerp(0.12f, 1.f, DayLight) * DuskTint);
+		// (the list of 2026-11-14: a whiteout's white and a dust storm's brown, eased in with the weather (SkyFogTint))
+		DayFog->SetFogInscatteringColor(DayFogLight * FMath::Lerp(0.12f, 1.f, DayLight) * DuskTint * SkyFogTint);
 	}
 	if (DayPost)
 	{

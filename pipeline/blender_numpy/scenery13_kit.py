@@ -8,6 +8,10 @@ helpers and its noise are used here):
   BurrowMouth      a burrow's mouth: a ring of thrown-up earth round a dark hole (a burrow town)
   Milestone        a stone post, its top rounded, its face cut with a mark and numerals (beside the old roads)
   Noose            a rope hanging from a branch in a noose (the hanged man's tree)
+  Baobab_A/B, Termite_A/B, Yurt_A/B, Balbal_A/B, PrayerCairn, HotSpring, SaltPan, Petroglyph_A/B, FusedGlass, SmokePlume,
+  Fireweed, Granary  the second phase's (the farms, savannahs, cold steppes and the burned plain): a baobab, termite mounds, nomads'
+                   yurts, steppe stone figures, a cairn with prayer flags, a steaming pool, a salt pan's crust, rocks cut with
+                   spirals and hunters, fused glass shards, a grass fire's smoke on the horizon, fireweed, a granary on staddle stones
   StormCell        a storm cell for the far horizon: an anvil cloud 3.2 km across, a rain curtain, a funnel (the far storms)
   Drystone_A/B     a 3 m length of field wall laid dry, its copes on edge (the shepherd's pen)
   AppleTree_A/B,   the old orchard's gnarled fruit trees: a short leaning trunk, a low wide crown of leaf clusters with their
@@ -258,6 +262,159 @@ def storm():
 def lerp_(a, b, t): return a + (b - a) * t
 
 
+def baobab(variant, seed):
+    """a baobab: a fat bottle trunk 3 m across, short stubby limbs from its top, sparse leaf clusters at their ends"""
+    rng = random.Random(seed)
+    me, ob, bm, uvl = new_mesh(f"SM_N13_Baobab_{variant}")
+    H = rng.uniform(11.0, 14.0); r0 = rng.uniform(1.4, 1.8)
+    prof = [(r0 * f, H * t) for t, f in ((0.0, 1.05), (0.15, 1.0), (0.45, 0.92), (0.7, 0.72), (0.85, 0.5), (1.0, 0.35))]
+    lathe(bm, uvl, prof, 14, 0)
+    top = Vector((0, 0, H)); n = rng.randint(6, 8)
+    for i in range(n):
+        a = i * 2 * math.pi / n + rng.uniform(-0.3, 0.3); out = rng.uniform(2.5, 4.0)
+        end = top + Vector((math.cos(a) * out, math.sin(a) * out, rng.uniform(1.0, 2.5)))
+        pts = [top + (end - top) * t + Vector((0, 0, math.sin(t * math.pi) * 0.6)) for t in np.linspace(0, 1, 6)]
+        tube(bm, uvl, pts, [r0 * 0.3 * (1 - 0.7 * t) for t in np.linspace(0, 1, 6)], 6, 0)
+        for c in range(2):
+            cluster(bm, uvl, end + Vector((rng.uniform(-0.6, 0.6), rng.uniform(-0.6, 0.6), rng.uniform(0, 0.5))), rng.uniform(1.6, 2.2), rng, 1)
+    finish(me, ob, bm, [f"Baobab{variant}Bark", f"Baobab{variant}Leaves"], masked=[f"Baobab{variant}Leaves"])
+
+
+def termite(variant, seed):
+    """a termite mound: a lumpy spire of red earth 2.5 to 4 m high, a few lesser spires leaning on it"""
+    rng = random.Random(seed)
+    me, ob, bm, uvl = new_mesh(f"SM_N13_Termite_{variant}")
+    H = rng.uniform(2.6, 4.2)
+    for k in range(rng.randint(3, 5)):
+        h = H * (1.0 if k == 0 else rng.uniform(0.4, 0.75)); r = rng.uniform(0.5, 0.75) * (1.0 if k == 0 else 0.7)
+        cx, cy = (0, 0) if k == 0 else (rng.uniform(-0.6, 0.6), rng.uniform(-0.6, 0.6))
+        bmv = len(bm.verts)
+        lathe(bm, uvl, [(r * 1.25, -0.05), (r, h * 0.25), (r * 0.7, h * 0.6), (r * 0.35, h * 0.9), (0.05, h)], 10, 0)
+        for v in list(bm.verts)[bmv:]:
+            v.co.x += cx + rng.uniform(-0.06, 0.06); v.co.y += cy + rng.uniform(-0.06, 0.06); v.co.z += rng.uniform(-0.04, 0.04) * h
+    finish(me, ob, bm, [f"Termite{variant}Earth"])
+
+
+def yurt(variant, seed):
+    """a nomads' yurt: a round felt wall 6 m across and 1.7 m high on a lattice, a low cone of a roof to a crown, a painted door"""
+    rng = random.Random(seed)
+    me, ob, bm, uvl = new_mesh(f"SM_N13_Yurt_{variant}")
+    R = rng.uniform(2.8, 3.3)
+    lathe(bm, uvl, [(R, 0.0), (R, 1.7)], 24, 0, urep=4.0)
+    lathe(bm, uvl, [(R + 0.15, 1.65), (R * 0.55, 2.6), (0.45, 3.1), (0.42, 3.25), (0.0, 3.3)], 24, 1, urep=3.0)
+    box(bm, uvl, (R + 0.04, 0, 0.75), (0.08, 0.95, 1.5), 2)
+    finish(me, ob, bm, [f"Yurt{variant}Felt", f"Yurt{variant}Roof", f"Yurt{variant}Door"])
+
+
+def balbal(variant, seed):
+    """a steppe stone figure: a squared stone pillar 1.6 to 2.2 m, its top rounded to a head, a face and arms cut into its front"""
+    rng = random.Random(seed)
+    me, ob, bm, uvl = new_mesh(f"SM_N13_Balbal_{variant}")
+    h = rng.uniform(1.5, 2.1)
+    box(bm, uvl, (0, 0, h * 0.4 - 0.2), (0.32, 0.5, h * 0.8 + 0.4), 0)
+    sphere(bm, uvl, (0, 0, h * 0.85), 0.24, 0, 1.0, 1.1, 1.25, 8, 0.05, rng)
+    vs = [bm.verts.new((0.165, y, z)) for (y, z) in ((-0.22, h * 0.25), (0.22, h * 0.25), (0.22, h * 0.95), (-0.22, h * 0.95))]
+    f = bm.faces.new(vs); f.material_index = 1
+    for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+    finish(me, ob, bm, [f"Balbal{variant}Stone", f"Balbal{variant}Face"])
+
+
+def prayer_cairn():
+    """a cairn of stones 1.5 m high, a pole in its top with strings of cloth flags running down to stones round it"""
+    rng = random.Random(203)
+    me, ob, bm, uvl = new_mesh("SM_N13_PrayerCairn")
+    for i in range(40):
+        a = rng.uniform(0, 2 * math.pi); d = rng.random() * 1.0; z = (1.0 - d) * 1.2 * rng.uniform(0.6, 1.0)
+        sphere(bm, uvl, (math.cos(a) * d, math.sin(a) * d, z + 0.12), rng.uniform(0.15, 0.3), 0, 1.0, 0.9, 0.6, 6, 0.15, rng)
+    tube(bm, uvl, [Vector((0, 0, 0.8)), Vector((0, 0, 3.4))], [0.05, 0.03], 6, 1)
+    for k in range(4):
+        a = k * math.pi / 2 + 0.3; end = Vector((math.cos(a) * 3.2, math.sin(a) * 3.2, 0.3))
+        top = Vector((0, 0, 3.3))
+        for i in range(9):
+            t = (i + 0.5) / 9
+            p = top + (end - top) * t - Vector((0, 0, math.sin(t * math.pi) * 0.35))
+            card(bm, uvl, p, 0.22, Vector((-math.sin(a), math.cos(a), 0)), Vector((0, 0, 1)), 2)
+    finish(me, ob, bm, ["PrayerCairnStone", "PrayerCairnPole", "PrayerCairnFlags"], masked=["PrayerCairnFlags"])
+
+
+def hot_spring():
+    """a steaming pool 5 m across in a rim of pale mineral stone, its water a hair over the ground"""
+    rng = random.Random(211)
+    me, ob, bm, uvl = new_mesh("SM_N13_HotSpring")
+    for i in range(26):
+        a = i * 2 * math.pi / 26 + rng.uniform(-0.06, 0.06); d = 2.5 + rng.uniform(-0.15, 0.15)
+        sphere(bm, uvl, (math.cos(a) * d, math.sin(a) * d, 0.08), rng.uniform(0.28, 0.45), 0, 1.2, 0.9, 0.55, 7, 0.15, rng)
+    lathe(bm, uvl, [(2.45, 0.06), (0.0, 0.06)], 28, 1)
+    finish(me, ob, bm, ["HotSpringRim", "HotSpringWater"], translucent=["HotSpringWater"])
+
+
+def salt_pan():
+    """a dry salt pan's crust: a flat white disc 30 m across, cracked into plates, a hair over the ground"""
+    me, ob, bm, uvl = new_mesh("SM_N13_SaltPan")
+    prof = [(15.0 * (1 - t) + 0.01, 0.03 + 0.01 * math.sin(t * 9)) for t in np.linspace(0, 1, 8)]
+    lathe(bm, uvl, prof, 40, 0, urep=6.0)
+    finish(me, ob, bm, ["SaltPanCrust"], masked=["SaltPanCrust"])
+
+
+def petroglyph(variant, seed):
+    """a rounded rock 2 m high with a smoothed face, spirals and hunting figures cut into it"""
+    rng = random.Random(seed)
+    me, ob, bm, uvl = new_mesh(f"SM_N13_Petroglyph_{variant}")
+    sphere(bm, uvl, (0, 0, 0.8), 1.0, 0, 1.4, 0.9, 1.0, 10, 0.08, rng)
+    vs = [bm.verts.new((0.78, y, z)) for (y, z) in ((-0.9, 0.35), (0.9, 0.35), (0.9, 1.35), (-0.9, 1.35))]
+    f = bm.faces.new(vs); f.material_index = 1
+    for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+    finish(me, ob, bm, [f"Petroglyph{variant}Rock", f"Petroglyph{variant}Face"], masked=[f"Petroglyph{variant}Face"])
+
+
+def fused_glass():
+    """a scatter of black glassy shards where the burn ran hottest: twisted blades of glass up to 1.4 m"""
+    rng = random.Random(223)
+    me, ob, bm, uvl = new_mesh("SM_N13_FusedGlass")
+    for i in range(18):
+        a = rng.uniform(0, 2 * math.pi); d = rng.random() * 2.0; h = rng.uniform(0.3, 1.4)
+        base = Vector((math.cos(a) * d, math.sin(a) * d, -0.1)); tip = base + Vector((rng.uniform(-0.3, 0.3), rng.uniform(-0.3, 0.3), h))
+        tube(bm, uvl, [base, (base + tip) * 0.5, tip], [rng.uniform(0.08, 0.18), rng.uniform(0.05, 0.12), 0.005], 4, 0)
+    finish(me, ob, bm, ["FusedGlassGlass"], flat=True)
+
+
+def smoke_plume():
+    """a grass fire's smoke on the horizon: a leaning column 200 m across at its foot widening to 900 m, 1.8 km high (see-through)"""
+    me, ob, bm, uvl = new_mesh("SM_N13_SmokePlume")
+    pts = [Vector((t * 500.0, 0.0, 1800.0 * t)) for t in np.linspace(0, 1, 12)]
+    tube(bm, uvl, pts, [100.0 + 350.0 * t ** 0.8 for t in np.linspace(0, 1, 12)], 24, 0)
+    finish(me, ob, bm, ["SmokePlumeSmoke"], translucent=["SmokePlumeSmoke"])
+
+
+def fireweed():
+    """a clump of fireweed: tall pink flower spikes on crossed cards, 1.2 to 1.6 m"""
+    rng = random.Random(229)
+    me, ob, bm, uvl = new_mesh("SM_N13_Fireweed")
+    for i in range(7):
+        c = Vector((rng.uniform(-0.3, 0.3), rng.uniform(-0.3, 0.3), 0.7)); a = rng.uniform(0, math.pi)
+        card(bm, uvl, c, 1.4, Vector((math.cos(a), math.sin(a), 0)), Vector((0, 0, 1)), 0)
+        card(bm, uvl, c, 1.4, Vector((-math.sin(a), math.cos(a), 0)), Vector((0, 0, 1)), 0)
+    finish(me, ob, bm, ["FireweedSpike"], masked=["FireweedSpike"])
+
+
+def granary():
+    """a small timber granary up on staddle stones (mushroom-shaped stones the rats cannot climb), its roof a thatched pyramid"""
+    me, ob, bm, uvl = new_mesh("SM_N13_Granary")
+    for x in (-1.5, 0.0, 1.5):
+        for y in (-1.1, 1.1):
+            n0 = len(bm.verts)
+            lathe(bm, uvl, [(0.18, 0.0), (0.12, 0.42), (0.36, 0.48), (0.34, 0.6), (0.001, 0.62)], 8, 0)
+            for v in list(bm.verts)[n0:]: v.co.x += x; v.co.y += y
+    box(bm, uvl, (0, 0, 0.68), (3.8, 2.9, 0.12), 1)
+    box(bm, uvl, (0, 0, 1.74), (3.6, 2.7, 2.0), 1)
+    n0 = len(bm.verts)
+    lathe(bm, uvl, [(2.75, 2.7), (0.001, 4.0)], 4, 2)
+    for v in list(bm.verts)[n0:]:
+        x, y = v.co.x, v.co.y
+        v.co.x, v.co.y = (x - y) * 0.7071 * 1.25, (x + y) * 0.7071
+    finish(me, ob, bm, ["GranaryStone", "GranaryWood", "GranaryThatch"])
+
+
 def noose():
     me, ob, bm, uvl = new_mesh("SM_N13_Noose")
     # (a rope from 2.4 m down to a loop at 1.1 m, its knot a thick wrap: hung from a branch)
@@ -346,6 +503,80 @@ def pictures():
         lich = noise(n, sd + 9, ((8, 1.0), (16, 0.5))) > 0.75
         g[lich] = g[lich] * 0.75 + np.array([0.62, 0.64, 0.42]) * 0.25
         png(f"T_N13_Drystone{v}Stone", g)
+
+    # (the second phase's pieces: farms, savannahs, cold steppes, the burned plain)
+    def grain(col, seed, var=0.35, octs=((8, 1.0), (32, 0.5), (64, 0.25))):
+        return np.array(col)[None, None] * (1 - var + 2 * var * noise(n, seed, octs)[..., None])
+    for v in ("A", "B"):
+        png(f"T_N13_Baobab{v}Bark", grain((0.52, 0.47, 0.42), 30) * (0.85 + 0.15 * np.sin(xx * 50)[..., None]))
+        rng2 = np.random.default_rng(31); N = 512; Y, X = np.mgrid[0:N, 0:N] / N; rg = np.zeros((N, N, 4))
+        for _ in range(110):
+            a = rng2.uniform(0, 2 * math.pi); dd = math.sqrt(rng2.random()) * 0.45; cx, cy = 0.5 + math.cos(a) * dd, 0.5 + math.sin(a) * dd
+            m = (X - cx) ** 2 + ((Y - cy) * 1.6) ** 2 < 0.03 ** 2
+            rg[m, :3] = np.array((0.30, 0.42, 0.14)) * rng2.uniform(0.8, 1.2); rg[m, 3] = 1.0
+        WT.save_png(f"T_N13_Baobab{v}Leaves", rg)
+        png(f"T_N13_Termite{v}Earth", grain((0.62, 0.36, 0.20), 33 + len(v)))
+        felt = grain((0.86, 0.80, 0.68), 35, 0.12)
+        band = (np.abs(yy - 0.82) < 0.05) | (np.abs(yy - 0.2) < 0.03)
+        felt[band] = np.array((0.62, 0.14, 0.10)); felt[(np.abs(yy - 0.82) < 0.05) & (np.sin(xx * math.pi * 24) > 0.6)] = np.array((0.90, 0.72, 0.30))
+        png(f"T_N13_Yurt{v}Felt", felt)
+        png(f"T_N13_Yurt{v}Roof", grain((0.82, 0.77, 0.66), 36, 0.1))
+        door = grain((0.60, 0.12, 0.08), 37, 0.1); door[(np.abs(xx - 0.5) < 0.42) & (np.abs(yy - 0.5) < 0.45) & ((np.abs(xx - 0.5) > 0.38) | (np.abs(yy - 0.5) > 0.41))] = np.array((0.85, 0.65, 0.2))
+        png(f"T_N13_Yurt{v}Door", door)
+        stone = grain((0.58, 0.55, 0.50), 38 + len(v))
+        png(f"T_N13_Balbal{v}Stone", stone)
+        face = stone.copy()
+        def cut(x0, y0, x1, y1, w=0.03):
+            px, py = xx, 1 - yy; dx, dy = x1 - x0, y1 - y0; L2 = dx * dx + dy * dy
+            t = np.clip(((px - x0) * dx + (py - y0) * dy) / L2, 0, 1)
+            face[(px - x0 - t * dx) ** 2 + (py - y0 - t * dy) ** 2 < w * w] *= 0.45
+        for a0, a1 in ((0.35, 0.82), (0.65, 0.82)): cut(a0 - 0.06, a1, a0 + 0.06, a1)          # eyes
+        cut(0.5, 0.80, 0.5, 0.70); cut(0.40, 0.64, 0.60, 0.64)                                   # nose, mouth
+        cut(0.15, 0.50, 0.50, 0.35); cut(0.85, 0.50, 0.50, 0.35); cut(0.44, 0.35, 0.56, 0.32)  # arms to a cup
+        png(f"T_N13_Balbal{v}Face", face)
+        rock = grain((0.60, 0.50, 0.42), 40 + len(v))
+        png(f"T_N13_Petroglyph{v}Rock", rock)
+        al = np.zeros((n, n))
+        def mark(x0, y0, x1, y1, w=0.012):
+            px, py = xx, 1 - yy; dx, dy = x1 - x0, y1 - y0; L2 = dx * dx + dy * dy + 1e-9
+            t = np.clip(((px - x0) * dx + (py - y0) * dy) / L2, 0, 1)
+            al[(px - x0 - t * dx) ** 2 + (py - y0 - t * dy) ** 2 < w * w] = 1.0
+        for k in range(48):                                                   # a spiral
+            t0, t1 = k * 0.35, (k + 1) * 0.35; r0, r1 = 0.012 * t0, 0.012 * t1
+            mark(0.25 + r0 * math.cos(t0 * 2), 0.6 + r0 * math.sin(t0 * 2), 0.25 + r1 * math.cos(t1 * 2), 0.6 + r1 * math.sin(t1 * 2))
+        for hx in (0.55, 0.72):                                               # two stick hunters with spears
+            mark(hx, 0.35, hx, 0.55); mark(hx, 0.55, hx - 0.05, 0.62); mark(hx, 0.55, hx + 0.05, 0.62); mark(hx, 0.35, hx - 0.04, 0.25); mark(hx, 0.35, hx + 0.04, 0.25)
+            sphere_mask = (xx - hx) ** 2 + (1 - yy - 0.6) ** 2 < 0.025 ** 2; al[sphere_mask] = 1.0
+            mark(hx + 0.06, 0.45, hx + 0.06, 0.75)
+        mark(0.82, 0.42, 0.95, 0.42); mark(0.84, 0.42, 0.84, 0.32); mark(0.93, 0.42, 0.93, 0.32); mark(0.95, 0.42, 0.98, 0.5)   # a beast
+        WT.save_png(f"T_N13_Petroglyph{v}Face", np.concatenate([np.full((n, n, 3), 0.88), al[..., None]], -1))
+    png("T_N13_PrayerCairnStone", grain((0.56, 0.54, 0.50), 42))
+    png("T_N13_PrayerCairnPole", grain((0.40, 0.30, 0.20), 43, 0.15))
+    fl = np.zeros((n, n, 4)); cols = [(0.15, 0.30, 0.75), (0.95, 0.95, 0.92), (0.80, 0.12, 0.10), (0.15, 0.55, 0.20), (0.92, 0.80, 0.15)]
+    for k, c in enumerate(cols):
+        m = (xx >= k / 5 + 0.02) & (xx < (k + 1) / 5 - 0.02) & (yy > 0.1) & (yy < 0.9); fl[m, :3] = c; fl[m, 3] = 1.0
+    WT.save_png("T_N13_PrayerCairnFlags", fl)
+    png("T_N13_HotSpringRim", grain((0.86, 0.78, 0.62), 44, 0.2))
+    png("T_N13_HotSpringWater", grain((0.20, 0.62, 0.62), 45, 0.1), np.full((n, n), 0.85))
+    crust = grain((0.92, 0.91, 0.88), 46, 0.06)
+    cr = noise(n, 47, ((6, 1.0), (12, 0.6)))
+    cracks = np.abs(np.sin(cr * 40)) < 0.06
+    crust[cracks] = np.array((0.55, 0.50, 0.44))
+    png("T_N13_SaltPanCrust", crust, np.clip((1.0 - yy) * 6.0 + noise(n, 48) - 0.4, 0, 1))
+    png("T_N13_FusedGlassGlass", grain((0.06, 0.06, 0.07), 49, 0.5))
+    png("T_N13_SmokePlumeSmoke", grain((0.80, 0.78, 0.74), 50, 0.2), np.clip(0.55 + 0.45 * noise(n, 51) - 0.3 * yy, 0, 1))
+    sp = np.zeros((n, n, 4))
+    rs3 = np.random.default_rng(52)
+    for k in range(6):
+        cx = 0.12 + k * 0.15
+        stem = (np.abs(xx - cx) < 0.008) & (yy > 0.05); sp[stem, :3] = (0.25, 0.35, 0.12); sp[stem, 3] = 1.0
+        for _ in range(26):
+            fy = rs3.uniform(0.05, 0.55); fx = cx + rs3.uniform(-0.03, 0.03)
+            m = (xx - fx) ** 2 + (yy - fy) ** 2 < 0.018 ** 2; sp[m, :3] = np.array((0.86, 0.30, 0.62)) * rs3.uniform(0.85, 1.1); sp[m, 3] = 1.0
+    WT.save_png("T_N13_FireweedSpike", sp)
+    png("T_N13_GranaryStone", grain((0.62, 0.60, 0.55), 53))
+    png("T_N13_GranaryWood", grain((0.42, 0.32, 0.22), 54, 0.2) * (0.85 + 0.15 * np.sin(yy * 90)[..., None]))
+    png("T_N13_GranaryThatch", grain((0.62, 0.52, 0.30), 55, 0.25) * (0.8 + 0.2 * np.sin(xx * 160)[..., None]))
     # the orchard trees: dark gnarled bark; leaves with their fruit (red apples, dark purple plums)
     for kind, fruit in (("Apple", (0.72, 0.12, 0.08)), ("Plum", (0.30, 0.10, 0.32))):
         b = np.array([0.30, 0.25, 0.20])[None, None] * (0.6 + 0.5 * noise(n, 20 + len(kind))[..., None])
@@ -379,6 +610,10 @@ if __name__ == "__main__":
     pictures()
     todo = {"Skep_A": lambda: skep("A", 3), "Skep_B": lambda: skep("B", 5), "Nest": nest, "Heron_A": lambda: heron("A"), "Heron_B": lambda: heron("B"),
             "StormCell": storm, "BurrowMouth": burrow, "Milestone": milestone, "Noose": noose, "Drystone_A": lambda: drystone("A", 61), "Drystone_B": lambda: drystone("B", 67),
+            "Baobab_A": lambda: baobab("A", 301), "Baobab_B": lambda: baobab("B", 307), "Termite_A": lambda: termite("A", 311), "Termite_B": lambda: termite("B", 313),
+            "Yurt_A": lambda: yurt("A", 317), "Yurt_B": lambda: yurt("B", 331), "Balbal_A": lambda: balbal("A", 337), "Balbal_B": lambda: balbal("B", 347),
+            "PrayerCairn": prayer_cairn, "HotSpring": hot_spring, "SaltPan": salt_pan, "Petroglyph_A": lambda: petroglyph("A", 349), "Petroglyph_B": lambda: petroglyph("B", 353),
+            "FusedGlass": fused_glass, "SmokePlume": smoke_plume, "Fireweed": fireweed, "Granary": granary,
             "AppleTree_A": lambda: fruit_tree("Apple", "A", 101), "AppleTree_B": lambda: fruit_tree("Apple", "B", 133),
             "PlumTree_A": lambda: fruit_tree("Plum", "A", 151), "PlumTree_B": lambda: fruit_tree("Plum", "B", 177)}
     for k, f in todo.items():

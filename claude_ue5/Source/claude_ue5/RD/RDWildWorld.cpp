@@ -493,6 +493,9 @@ float FRDWildWorld::FarmWeight(double X, double Y) const
 	return F;
 }
 
+/** a field's stage from a draw (the list of 2026-11-14): ripe a little over half, sprouting a fifth, fallow a sixth, burned one in 16 */
+static uint8 RDWFieldStage(float U) { return U < 0.56f ? 0 : U < 0.78f ? 1 : U < 0.94f ? 2 : 3; }
+
 void FRDWildWorld::FarmAt(double X, double Y, float FarmW, FRDWFarm& O) const
 {
 	O = FRDWFarm();
@@ -543,6 +546,7 @@ void FRDWildWorld::FarmAt(double X, double Y, float FarmW, FRDWFarm& O) const
 		const float Rd = Strips(Ang, Wd, Rand01(Fl.X, Fl.Y, Seed + 99u) * Wd);
 		O.Plot = Fl;
 		O.Crop = PickCrop(G.X, G.Y, Seed + 141u);
+		O.Stage = RDWFieldStage(Rand01(G.X, G.Y, Seed + 142u));
 		O.Field = Fade * RDWSmooth(2.f, 4.5f, (float)Ef) * (1.f - 0.65f * O.Furrow);
 		O.Ridge = (0.28f + 0.14f * Rand01(Fl.X, Fl.Y, Seed + 100u)) * Rd * Fade * RDWSmooth(1.f, 5.f, (float)Ef);
 		O.Shade = 0.91f + 0.18f * Rand01(O.Strip, Fl.X * 7919 + Fl.Y, Seed + 101u);
@@ -566,6 +570,7 @@ void FRDWildWorld::FarmAt(double X, double Y, float FarmW, FRDWFarm& O) const
 	if (Rand01(Pl.X, Pl.Y, Seed + 103u) < 0.6f)
 	{
 		O.Crop = PickCrop(G.X * 3 + (int32)(Rand01(Pl.X, Pl.Y, Seed + 105u) * 3.f), G.Y, Seed + 111u);
+		O.Stage = RDWFieldStage(Rand01(Pl.X, Pl.Y, Seed + 143u));
 		O.Field = Fade * RDWSmooth(1.2f, 3.5f, (float)Ep) * RDWSmooth(0.f, 6.f, (float)(Reach - Dsite));
 		O.Shade = 0.94f + 0.12f * Rand01(Pl.X, Pl.Y, Seed + 108u);
 	}
@@ -978,7 +983,7 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 	if (Lift > 0.f) { H += Lift; if (Kind != 0) Water += Lift; }
 	// farms: the great fields (FarmAt): open fields of strips, crofts, pasture
 	float Field = 0.f;
-	O.FieldCell = FIntPoint(MIN_int32, MIN_int32); O.FieldCrop = -1; O.FieldAng = 0.f; O.FarmKind = 0; O.StripW = 0.f; O.StripOff = 0.f;
+	O.FieldCell = FIntPoint(MIN_int32, MIN_int32); O.FieldCrop = -1; O.FieldAng = 0.f; O.FarmKind = 0; O.StripW = 0.f; O.StripOff = 0.f; O.FieldStage = 0;
 	// (the ground before the port's lift, as Height's test (PR #50's review: one was before the lift and one after))
 	if (Farm > 0.2f && Fs.Road < 0.1f && Fs.WaterKind == 0 && H - Lift >= 0.5f)
 	{
@@ -987,14 +992,25 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 		H += Fm.Ridge * (1.f - RDWSmooth(0.02f, 0.1f, Fs.Road));
 		O.FarmKind = Fm.Kind;
 		const FRDWildBiome* Fb = Biomes.IsValidIndex(FarmsBiome) ? &Biomes[FarmsBiome] : nullptr;
-		if (Fb && Fb->Crops.IsValidIndex(Fm.Crop) && Fm.Field > 0.f)
+		O.FieldStage = Fm.Stage;
+		// (a fallow field (soil gone to weeds) or a burned one (charred stubble) grows no crop: the ground's own colour, no rows)
+		if (Fm.Stage >= 2 && Fm.Field > 0.f)
+		{
+			const float Fsh = Fm.Field * (1.f - RDWSmooth(25.f, 110.f, PixelM));
+			const FLinearColor Sc = Fm.Stage == 3 ? FLinearColor(0.055f, 0.05f, 0.045f) : FLinearColor(0.20f, 0.17f, 0.10f);
+			const FLinearColor Wc = Fm.Stage == 3 ? FLinearColor(0.10f, 0.09f, 0.07f) : FLinearColor(0.20f, 0.27f, 0.09f);
+			const float Mix = 0.5f + 0.5f * Fbm(X, Y, 1.0 / 7.0, 2, Seed + 144u);
+			Col = FMath::Lerp(Col, FMath::Lerp(Sc, Wc, Fm.Stage == 3 ? Mix * 0.4f : Mix * 0.6f), Fsh * 0.85f);
+		}
+		else if (Fb && Fb->Crops.IsValidIndex(Fm.Crop) && Fm.Field > 0.f)
 		{
 			// (seen from far, a pixel spans fields: their own colours fade into the region's (the list of 2026-11-07: a field
 			// eases in from its edge, its colour its crop's (soil with its leaves over a share of it) drawn half way toward the
 			// region's own ground, its rows the ground material's))
 			Field = Fm.Field * (1.f - RDWSmooth(25.f, 110.f, PixelM));
 			const FRDWildCrop& Cr = Fb->Crops[Fm.Crop];
-			FLinearColor Cc = FMath::Lerp(Cr.Soil, Cr.Leaf, FMath::Clamp(Cr.Cover, 0.f, 1.f));
+			// (a sprouting field: its soil with a little of its leaf over it)
+			FLinearColor Cc = FMath::Lerp(Cr.Soil, Cr.Leaf, FMath::Clamp(Cr.Cover, 0.f, 1.f) * (Fm.Stage == 1 ? 0.3f : 1.f));
 			// (the strips: each a shade of its own ("a few very large single-crop areas cut into thin stripes"), the furrows
 			// between them bare soil; both faded out where a pixel spans several)
 			Cc *= FMath::Lerp(Fm.Shade, 1.f, RDWSmooth(8.f, 30.f, PixelM));
@@ -2109,9 +2125,19 @@ void FRDWildWorld::SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) cons
 						const FVector2D M = Roads[(V >> 16) & 0x7FFF].P[V & 0xFFFF];
 						if (M.X >= X0 && M.X < X0 + SceneryCellM && M.Y >= Y0 && M.Y < Y0 + SceneryCellM) { bRoad = true; break; }
 					}
+		// (phase 2: a cell that holds a pond's or a lake's middle takes a kind that stands by water three times in five: drawn among all
+		// of a savannah's kinds, a waterhole met a pond nowhere within 150 km)
+		bool bWater = false;
+		{
+			const FIntPoint Hc(FMath::FloorToInt((X0 + SceneryCellM * 0.5) / HashM), FMath::FloorToInt((Y0 + SceneryCellM * 0.5) / HashM));
+			auto In = [&](const FLake& L) { return L.Kind != 6 && L.C.X >= X0 + 60.0 && L.C.X <= X0 + SceneryCellM - 60.0 && L.C.Y >= Y0 + 60.0 && L.C.Y <= Y0 + SceneryCellM - 60.0; };
+			for (auto It = PondHash.CreateConstKeyIterator(Hc); It && !bWater; ++It) bWater = In(Ponds[It.Value()]);
+			for (auto It = LakeHash.CreateConstKeyIterator(Hc); It && !bWater; ++It) bWater = In(Lakes[It.Value()]);
+		}
 		const float U = Rand01(Cell.X, Cell.Y, Seed + 1304u);
 		if (bCross && U < 0.8f) Only = TEXT("crossroads");
 		else if (bRoad && U < 0.4f) Only = TEXT("road");
+		else if (bWater && U < 0.6f) Only = TEXT("water");
 	}
 	auto Pick = [&](bool bOpenOnly, uint32 Salt)
 	{
@@ -2119,7 +2145,7 @@ void FRDWildWorld::SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) cons
 		for (const FRDWildSceneryKind& K : SceneryKinds)
 		{
 			const bool bFit = (K.Biomes.Contains(TEXT("*")) || K.Biomes.Contains(Bn)) && !(bOpenOnly && (!K.Place.IsEmpty() || !K.NeedWater.IsEmpty()))
-				&& (bOpenOnly || Only.IsEmpty() || K.Place == Only);
+				&& (bOpenOnly || Only.IsEmpty() || (Only == TEXT("water") ? !K.NeedWater.IsEmpty() && K.NeedWater != TEXT("river") && K.NeedWater != TEXT("sea") : K.Place == Only));
 			const float W = bFit ? FMath::Max(K.Weight, 0.f) : 0.f; Wt.Add(W); Sum += W;
 		}
 		if (Sum <= 0.f) return -1;
@@ -2216,6 +2242,36 @@ void FRDWildWorld::SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) cons
 		{
 			// (water of its kind within 400 m of a spot (16 rays, 10 m steps; ponds and marsh pools too), its middle on the shore)
 			const int32 Want = Wn == TEXT("sea") ? 1 : Wn == TEXT("lake") ? 2 : Wn == TEXT("river") ? 3 : Wn == TEXT("pond") ? 4 : 0;
+			// (phase 2: the ponds and lakes whose middle lies in the cell first, walked out from their middle to the shore on 8 rays:
+			// the rays from random spots found a waterhole nowhere within 150 km)
+			if (Want == 0 || Want == 2 || Want == 4)
+			{
+				TArray<const FLake*> Ws;
+				const FIntPoint Hc(FMath::FloorToInt((X0 + SceneryCellM * 0.5) / HashM), FMath::FloorToInt((Y0 + SceneryCellM * 0.5) / HashM));
+				if (Want != 2) for (auto It = PondHash.CreateConstKeyIterator(Hc); It; ++It) Ws.Add(&Ponds[It.Value()]);
+				if (Want != 4) for (auto It = LakeHash.CreateConstKeyIterator(Hc); It; ++It) Ws.Add(&Lakes[It.Value()]);
+				for (const FLake* L : Ws)
+				{
+					if (L->Kind == 6 || L->C.X < X0 + 60.0 || L->C.X > X0 + SceneryCellM - 60.0 || L->C.Y < Y0 + 60.0 || L->C.Y > Y0 + SceneryCellM - 60.0) continue;
+					FRDWSample Sm; Sample(L->C.X, L->C.Y, Sm, false);
+					if (Sm.WaterKind == 0 || Sm.WaterKind == 6) continue;
+					const int32 A0 = (int32)(Rand01(Cell.X, Cell.Y, Seed + 1310u) * 8.f);
+					for (int32 A = 0; A < 8; ++A)
+					{
+						const double Ang = (A0 + A) * PI / 4.0;
+						const FVector2D D(FMath::Cos(Ang), FMath::Sin(Ang));
+						for (double Rr = 4.0; Rr <= L->R * 1.6 + 40.0; Rr += 2.0)
+						{
+							const FVector2D Q = L->C + D * Rr;
+							FRDWSample Sb; Sample(Q.X, Q.Y, Sb, false);
+							if (Sb.WaterKind != 0 && Sb.Water > Sb.H) continue;
+							const FVector2D Sh = Q + D * 4.0;
+							if (Fine(Sh, S, 3.5f, false)) { At = Sh; Yaw = FMath::RadiansToDegrees(FMath::Atan2(-D.Y, -D.X)); return true; }
+							break;
+						}
+					}
+				}
+			}
 			for (int32 T = 0; T < 3; ++T)
 			{
 				const FVector2D C = Try(T);
@@ -2226,7 +2282,9 @@ void FRDWildWorld::SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) cons
 					{
 						FRDWSample Sq; Sample(C.X + D.X * Rr, C.Y + D.Y * Rr, Sq, false);
 						if (Sq.WaterKind == 0) continue;
-						if ((Want != 0 && Sq.WaterKind != Want && !(Want == 4 && Sq.WaterKind == 5)) || Sq.WaterKind == 6 || Sq.Water < Sq.H + 0.3f) break;
+						if ((Want != 0 && Sq.WaterKind != Want && !(Want == 4 && Sq.WaterKind == 5)) || Sq.WaterKind == 6) break;
+						// (the water's edge is shallow: step on to where it is 30 cm deep, not give the ray up there)
+						if (Sq.Water < Sq.H + 0.3f) continue;
 						// (back to the shore: the first dry ground, 4 m on)
 						for (double Bk = Rr; Bk > 0.0; Bk -= 2.0)
 						{
@@ -2252,7 +2310,9 @@ void FRDWildWorld::SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) cons
 		{
 			const FVector2D C = Try(T);
 			FRDWSample Sc;
-			if (!Fine(C, Sc, bRise ? 5.f : 3.f, false)) continue;
+			// (a hollow's kind wants it level, 1.5 m over its 10 m ring (phase 2: a hot spring's 0.5 m rim laid on 3 m of fall lay under
+			// the uphill ground, its water unseen))
+			if (!Fine(C, Sc, bRise ? 5.f : bLow ? 1.5f : 3.f, false)) continue;
 			if (!bRise && !bLow) { At = C; S = Sc; return true; }
 			if (bRise ? Sc.H > BestH : Sc.H < BestH) { BestH = Sc.H; At = C; S = Sc; bGot = true; }
 		}
