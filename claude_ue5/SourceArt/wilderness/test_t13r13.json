@@ -1,0 +1,59 @@
+{
+ "tag": "t13r13",
+ "plan": [
+  "swim13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "swim13",
+   "ok": true,
+   "lake": {
+    "at_m": [
+     15152,
+     1203
+    ],
+    "depth_m": 5.8,
+    "swimming": true,
+    "line": "swim|1|Anim_Idle_Swim_Warrior3|16.8|0|194|0|1|10|-34.3"
+   },
+   "river": {
+    "at_m": [
+     19183,
+     801
+    ],
+    "depth_m": 5.6,
+    "swimming": true,
+    "line": "swim|1|Anim_Idle_Swim_Warrior3|17.4|0|194|0|1|15|-33.2"
+   },
+   "fall": {
+    "hp_lost": 0.0,
+    "swimming": true,
+    "dead": false
+   },
+   "save_swimming": true,
+   "saved": true,
+   "load": true,
+   "after_load": {
+    "from_save_m": 0.0,
+    "swimming": true,
+    "line": "swim|1|Anim_Idle_Swim_Warrior3|20.0|0|194|0|1|7|-31.0"
+   },
+   "death": {
+    "dead": true,
+    "alive_after": true,
+    "swimming_after": false,
+    "town": "Brokenspire",
+    "in_walls": true
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_t13r13_swim13_lake.png",
+  "wd_t13r13_swim13_river.png"
+ ],
+ "error": null,
+ "saves_put_back": 2,
+ "windows_shown_again": 1
+}

@@ -1,5 +1,5 @@
 {
- "tag": "t13r1",
+ "tag": "t13r12",
  "plan": [
   "quests12=tame",
   "tamesave13",
@@ -81,13 +81,16 @@
   },
   {
    "step": "questsave13",
-   "ok": false,
-   "captain": false,
+   "ok": true,
+   "captain": true,
+   "captain_tries": [
+    "talk to Captain Hale Brannock"
+   ],
    "pack": 4,
    "before_save": {
     "killed": 2,
     "quest": {
-     "state": "offered",
+     "state": "taken",
      "progress": 0,
      "count": 1,
      "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
@@ -99,34 +102,34 @@
     "killed": 2,
     "alive_at_den": 2,
     "quest": {
-     "state": "offered",
+     "state": "taken",
      "progress": 0,
      "count": 1,
      "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
     }
    },
    "after_all": {
-    "state": "offered",
+    "state": "ready",
     "progress": 1,
     "count": 1,
     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
    },
    "patrol_before_save": {
-    "state": "offered",
+    "state": "ready",
     "progress": 1,
     "count": 1,
     "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
    },
    "patrol_after_load": {
-    "state": "offered",
+    "state": "ready",
     "progress": 1,
     "count": 1,
     "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
    },
-   "gold": 0,
+   "gold": 320,
    "done": {
-    "captain_wolves": "offered",
-    "captain_patrol": "offered"
+    "captain_wolves": "done",
+    "captain_patrol": "done"
    }
   }
  ],

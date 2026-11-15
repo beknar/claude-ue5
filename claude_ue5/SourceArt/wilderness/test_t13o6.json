@@ -1,5 +1,5 @@
 {
- "tag": "t13o5",
+ "tag": "t13o6",
  "plan": [
   "animals8"
  ],
@@ -16,15 +16,14 @@
      "dead": true,
      "drops": [
       "Coarse Hide",
-      "Light Leather"
+      "Coarse Hide"
      ],
      "lying_roll": 0.0,
      "length_z": 0.0,
      "up_z": 0.0,
      "f_names": "harvest the parts (2)",
      "taken": {
-      "Coarse Hide": 1,
-      "Light Leather": 1
+      "Coarse Hide": 2
      }
     },
     "Wolf": {
@@ -34,15 +33,14 @@
      "dead": true,
      "drops": [
       "Coarse Hide",
-      "Hound Fang"
+      "Coarse Hide"
      ],
      "lying_roll": 0.0,
      "length_z": 0.0,
      "up_z": 0.0,
      "f_names": "harvest the parts (2)",
      "taken": {
-      "Hound Fang": 1,
-      "Coarse Hide": 1
+      "Coarse Hide": 2
      }
     },
     "Hare": {
@@ -72,7 +70,7 @@
    "pending_after_kills": [
     [
      "Deer",
-     25
+     24
     ],
     [
      "Wolf",
@@ -83,7 +81,7 @@
      40
     ]
    ],
-   "places_freed_after_s": 40.5,
+   "places_freed_after_s": 40.6,
    "wild_deer": {
     "killed": true,
     "casts": 3,
@@ -95,15 +93,15 @@
      ]
     ],
     "deer_at_20s": 1,
-    "another_came_after_s": 46.4
+    "another_came_after_s": 45.5
    }
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor",
  "shots": [
-  "wd_t13o5_animals8_deer_dead.png",
-  "wd_t13o5_animals8_wolf_dead.png",
-  "wd_t13o5_animals8_hare_dead.png"
+  "wd_t13o6_animals8_deer_dead.png",
+  "wd_t13o6_animals8_wolf_dead.png",
+  "wd_t13o6_animals8_hare_dead.png"
  ],
  "error": null,
  "saves_put_back": 1,

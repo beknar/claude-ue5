@@ -3373,21 +3373,10 @@ def step_animals8():
             al = target.get_actor_location()
             p.set_actor_location(V(al.x - 800.0, al.y, al.z + 100.0), False, True); p.set_actor_rotation(unreal.Rotator(roll=0, pitch=0, yaw=0.0), True)
             G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-5, yaw=0.0)); yield from rwait(1.0)
-            n_ = 0
             # (held before her as the test's own (struck, a deer runs off faster than her bolts' reach): what is measured
             # here is its place, not the chase; at 120 cm, in a sword's reach as well as a bolt's (at 300 the Warrior's ten
-            # swings struck nothing: test_t13o3))
-            def hold_t(sec):
-                t1 = time.time()
-                while time.time() - t1 < sec and not target.is_dead():
-                    l = p.get_actor_location(); fw = p.get_actor_forward_vector()
-                    target.set_actor_location(V(l.x + fw.x * 120.0, l.y + fw.y * 120.0, target.get_actor_location().z), False, True)
-                    yield
-            while not target.is_dead() and n_ < 10:
-                cb().set_mana(cb().get_max_mana())          # (the kills before spent her mana)
-                yield from hold_t(0.2)
-                cb().simulate_key(key("LeftMouseButton"), True); yield from hold_t(0.12); cb().simulate_key(key("LeftMouseButton"), False)
-                yield from hold_t(1.4); n_ += 1
+            # swings struck nothing: test_t13o3); her mana filled before each (the kills before spent it))
+            n_ = yield from hold_and_strike13(target, 120.0, 10)
             rw["killed"] = target.is_dead(); rw["casts"] = n_
             deer = lambda: sum(1 for x in life() if x["kind"] == "Deer" and not x["dead"])
             rw["deer_after_kill"] = deer(); rw["waiting"] = [[k_, round(s_)] for k_, s_ in pending()]
@@ -3440,11 +3429,16 @@ def wild_life13():
         if p[0] == "animal": out.append({"kind": p[1], "at": V(float(p[2]), float(p[3]), float(p[4])), "dead": int(p[9]) if len(p) > 9 else 0})
     return out
 def until_loaded13(sec=150):
-    """a load: the level opened again and the save's place reached"""
-    G["travel_until"] = time.time() + sec + 10; t0 = time.time()
+    """a load: the level opened again (a world other than the one the load was asked in) and the save's place reached there (the
+    old world's count of arrivals is already 1 after an earlier load: PR #63's review)"""
+    w0 = UES.get_game_world()
+    G["travel_until"] = time.time() + sec + 10; t0 = time.time(); fresh = False
     while time.time() - t0 < sec:
         yield
-        if UES.get_game_world() is None: continue
+        w = UES.get_game_world()
+        if w is None: fresh = True; continue
+        if w != w0: fresh = True
+        if not fresh: continue
         refresh()
         try:
             if G.get("gen") and G.get("pawn") and G["gen"].is_wild_ready() and save_state()["arrived"] >= 1: break
@@ -3519,18 +3513,22 @@ def step_hunt13():
             shots.append({"m_off": round(d, 1), "hit": a.get_health() < h_ or a.is_dead()})
         res["deer"] = {"shots": shots, "hits": sum(1 for s in shots if s["hit"]), "dead": a.is_dead(), "hp_left": round(a.get_health() / max(hp0, 1), 2)}
     if str(g.get_editor_property("current_hero")) != "Warrior": g.switch_hero("Warrior"); yield from rwait(1.5); refresh(); g = G["gen"]
+    # (running: a hero switched in walks until her run is switched on, and the first run walked after the hare (PR #63's review))
+    cb().set_run_mode(True)
     p = G["pawn"]; l = p.get_actor_location(); fw = p.get_actor_forward_vector()
     h = g.spawn_wild_animal_at("Hare", V(l.x + fw.x * 250.0, l.y + fw.y * 250.0, l.z))
     if h:
-        blows = []; t0 = time.time()
+        blows = []; t0 = time.time(); top = [0.0]
         while time.time() - t0 < 12.0 and not h.is_dead():
             q = h.get_actor_location(); me = p.get_actor_location(); d = math.hypot(q.x - me.x, q.y - me.y)
+            top[0] = max(top[0], p.get_velocity().length())
             yaw = math.degrees(math.atan2(q.y - me.y, q.x - me.x)); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-5, yaw=yaw))
             if d > 180: p.add_movement_input(V((q.x - me.x) / d, (q.y - me.y) / d, 0), 1.0, False); yield
             else:
                 hh = h.get_health(); cb().simulate_key(key("LeftMouseButton"), True); yield from rwait(0.12); cb().simulate_key(key("LeftMouseButton"), False); yield from rwait(0.6)
                 blows.append({"m": round(d / 100, 1), "hit": h.get_health() < hh or h.is_dead()})
-        res["hare"] = {"blows": blows, "dead": h.is_dead(), "secs": round(time.time() - t0, 1)}
+        res["hare"] = {"blows": blows, "dead": h.is_dead(), "secs": round(time.time() - t0, 1), "her_top_mps": round(top[0] / 100.0, 1)}
+    cb().set_run_mode(False)
     if str(g.get_editor_property("current_hero")) != hero0: g.switch_hero(hero0); yield from rwait(1.5); refresh()
     quiet(False)
     # (a record, not a judgment: done when both were tried)
@@ -3553,6 +3551,7 @@ def step_questsave13():
         try: g.close_town_panel()
         except Exception: pass
         res.setdefault("captain_tries", []).append(str(g.describe_nearest(G["pawn"].get_actor_location())))
+    if not res["captain"]: quiet(False); step_result("questsave13", False, error="the captain's panel never opened", **res); return
     g.activate_town_entry(line_of("accept", "Mill Road")); yield from rwait(0.2)
     g.activate_town_entry(line_of("accept", "Lost Patrol")); yield from rwait(0.2); g.close_town_panel(); yield from rwait(0.3)
     fw = (math.cos(math.radians(den["yaw"])), math.sin(math.radians(den["yaw"])))
@@ -3589,9 +3588,10 @@ def step_questsave13():
     g.close_town_panel(); res["gold"] = g.get_gold() - g0
     res["done"] = {q: (quest_of(q) or {}).get("state") for q in ("captain_wolves", "captain_patrol")}
     quiet(False)
+    st = lambda q: (q or {}).get("state")          # (a quest not there is None: PR #63's review)
     ok = (res["pack"] == 4 and res["saved"] and res["load"] and res["before_save"]["killed"] == 2 and res["after_load"]["killed"] == 2 and res["after_load"]["alive_at_den"] == 2
-          and res["after_load"]["quest"]["state"] == "taken" and res["after_all"]["state"] == "ready" and res["patrol_before_save"]["state"] == "ready"
-          and res["patrol_after_load"]["state"] == "ready" and res["done"] == {"captain_wolves": "done", "captain_patrol": "done"} and res["gold"] > 0)
+          and st(res["after_load"]["quest"]) == "taken" and st(res["after_all"]) == "ready" and st(res["patrol_before_save"]) == "ready"
+          and st(res["patrol_after_load"]) == "ready" and res["done"] == {"captain_wolves": "done", "captain_patrol": "done"} and res["gold"] > 0)
     step_result("questsave13", ok, **res)
 
 def step_tamesave13():
@@ -3614,14 +3614,31 @@ def step_tamesave13():
           and float(res["mounted_after"]) == 1.0)
     step_result("tamesave13", ok, **res)
 
-def find_water13(kind, depth_m, rmax_km=60.0):
-    """the nearest point (m) whose water is of that kind and at least that deep (rings round Brokenspire, 400 m apart)"""
-    for r in range(2, int(rmax_km * 1000 / 400)):
-        rr = r * 400.0; n = max(8, int(2 * math.pi * rr / 400.0))
+def ring_find13(pred, step_m, rmax_km):
+    """the nearest sample (x, y, sample) round Brokenspire that pred accepts: rings step_m apart, points step_m apart on each, a
+    frame given back after each ring (the one search of the sweep's steps: PR #63's review)"""
+    for r in range(2, int(rmax_km * 1000 / step_m)):
+        rr = r * step_m; n = max(8, int(2 * math.pi * rr / step_m))
         for k in range(n):
             a = 2 * math.pi * k / n; x, y = rr * math.cos(a), rr * math.sin(a); s = sample(x, y)
-            if int(s["water"]) == kind and s["water_m"] - s["h"] >= depth_m: return x, y, s
-        if r % 4 == 0: yield
+            if pred(s): return x, y, s
+        yield
+    return None
+def find_water13(kind, depth_m, rmax_km=60.0):
+    """the nearest point (m) whose water is of that kind and at least that deep"""
+    f = yield from ring_find13(lambda s: int(s["water"]) == kind and s["water_m"] - s["h"] >= depth_m, 400.0, rmax_km)
+    return f
+def shot_wait13(name, res="1280x720", sec=12.0):
+    """a picture taken and waited for on disk (its old file of the same name taken away first); its path, or None"""
+    fp = os.path.join(SHOTS, f"wd_{TAG}_{name}.png")
+    if os.path.exists(fp): os.remove(fp)
+    shot(name, res); t0 = time.time(); last = -1
+    while time.time() - t0 < sec:
+        yield from rwait(0.4)
+        if os.path.exists(fp):
+            n = os.path.getsize(fp)
+            if n > 0 and n == last: return fp
+            last = n
     return None
 def step_swim13():
     """swimming in the other waters (the TODO: a lake's and a river's deep water, a fall into water, a death while swimming, a
@@ -3671,17 +3688,11 @@ def step_swim13():
 
 def step_caldera13():
     """the caldera's steam and the volcanoes' lava seen from her view: the nearest lava (sampled) found, she stands on dry gentle
-    ground 45 to 140 m from it facing it; the effects near counted; pictures by day and by night"""
+    ground 45 to 140 m from it facing it; pictures by day and by night, the lava's glow measured in the night's; the nearest hot
+    spring, its steam effect pictured shown and hidden and the two compared"""
     g = G["gen"]; res = {}; quiet(True)
     yield from wait_ready(90)
-    found = None
-    for r in range(2, 400):
-        rr = r * 500.0; n = max(8, int(2 * math.pi * rr / 500.0))
-        for k in range(n):
-            a = 2 * math.pi * k / n; x, y = rr * math.cos(a), rr * math.sin(a); s = sample(x, y)
-            if s["lava"] > 0.5: found = (x, y, s); break
-        if found: break
-        if r % 3 == 0: yield
+    found = yield from ring_find13(lambda s: s["lava"] > 0.5, 500.0, 200.0)
     if not found: quiet(False); step_result("caldera13", False, error="no lava within 200 km"); return
     x, y, s = found; res["lava_km"] = [round(x / 1000, 2), round(y / 1000, 2)]; res["biome"] = s["biome"]
     spot = None
@@ -3700,17 +3711,16 @@ def step_caldera13():
     res["effects_near"] = sorted({c_.get_asset().get_name() for c_ in nia})[:12]; res["effects_n"] = len(nia)
     res["stood_m_from_lava"] = round(math.hypot(px - x, py - y), 1); res["alive"] = not cb().is_dead()
     shot("caldera13_day", "1280x720"); yield from rwait(1.2)
-    g.set_town_hour(21.5); yield from rwait(2.0); shot("caldera13_night", "1280x720"); yield from rwait(1.2); g.set_town_hour(11.0)
+    # (the lava itself in the night's picture (PR #63's review: the effects counted near it were birds and loot): the picture's
+    # lower part left of the status panel and over the quick bar, in 8 x 4 cells; its brightest cell against their median)
+    g.set_town_hour(21.5); yield from rwait(2.0); fp = yield from shot_wait13("caldera13_night"); g.set_town_hour(11.0)
+    if fp:
+        cells = sorted(v for row in png_grid(fp, (0.0, 0.5, 0.74, 0.9), 8, 4) for v in row)
+        res["night_lava_luma"] = {"max": round(cells[-1], 1), "median": round(cells[len(cells) // 2], 1)}
+    res["lava_seen"] = bool(fp) and res["night_lava_luma"]["max"] >= 90 and res["night_lava_luma"]["max"] >= 3 * max(res["night_lava_luma"]["median"], 1.0)
     # ---- the caldera's steam: the nearest hot spring (the water kind 6), she 30 to 60 m from it facing it; the steam's effects
     # near it named and counted (test_t13r3's lava was a volcano's flow: no steam there)
-    hs = None
-    for r in range(2, 400):
-        rr = r * 500.0; n = max(8, int(2 * math.pi * rr / 500.0))
-        for k in range(n):
-            a2 = 2 * math.pi * k / n; x2, y2 = rr * math.cos(a2), rr * math.sin(a2); s2 = sample(x2, y2)
-            if int(s2["water"]) == 6: hs = (x2, y2, s2); break
-        if hs: break
-        if r % 3 == 0: yield
+    hs = yield from ring_find13(lambda s: int(s["water"]) == 6, 500.0, 200.0)
     sp_ = None
     if hs:
         res["spring_km"] = [round(hs[0] / 1000, 2), round(hs[1] / 1000, 2)]; res["spring_biome"] = hs[2]["biome"]
@@ -3746,12 +3756,27 @@ def step_caldera13():
             me = G["pawn"].get_actor_location(); res["steam_shot_m"] = round(math.hypot(me.x - sl.x, me.y - sl.y) / 100, 1)
             G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-5, yaw=math.degrees(math.atan2(sl.y - me.y, sl.x - me.x))))
             G["pawn"].set_actor_hidden_in_game(True)
+            # (the steam itself in the picture (PR #63's review: active is not seen): pictures with it shown, hidden, hidden again
+            # (the water's own shimmer between two pictures); the middle's 8 x 6 cells, the steam seen where shown and hidden differ
+            # by 3 more than the two hidden ones do)
             try:
-                yield from rwait(2.0); shot("caldera13_steam", "1280x720"); yield from rwait(1.2)
+                yield from rwait(2.0)
+                f_on = yield from shot_wait13("caldera13_steam")
+                for c_ in st_: c_.set_visibility(False, True)
+                yield from rwait(1.0)
+                f_off = yield from shot_wait13("caldera13_steam_off"); f_off2 = yield from shot_wait13("caldera13_steam_off2")
             finally:
+                for c_ in st_: c_.set_visibility(True, True)
                 G["pawn"].set_actor_hidden_in_game(False)
+            if f_on and f_off and f_off2:
+                box = (0.25, 0.15, 0.75, 0.75)
+                a_, b_, c2_ = (png_grid(f_, box, 8, 6) for f_ in (f_on, f_off, f_off2))
+                diff = max(abs(a_[j][i] - b_[j][i]) for j in range(6) for i in range(8))
+                noise = max(abs(c2_[j][i] - b_[j][i]) for j in range(6) for i in range(8))
+                res["steam_luma"] = {"shown_vs_hidden": round(diff, 1), "hidden_vs_hidden": round(noise, 1)}
+                res["steam_seen"] = diff >= noise + 3.0
     quiet(False)
-    step_result("caldera13", res["alive"] and res["effects_n"] > 0 and bool(sp_) and res.get("spring_steam", 0) > 0 and all(res.get("steam_active", [False])), **res)
+    step_result("caldera13", res["alive"] and res.get("lava_seen", False) and bool(sp_) and res.get("spring_steam", 0) > 0 and res.get("steam_seen", False), **res)
 
 def step_weather13():
     """an hour of the game's own weather and music (the TODO: never watched for an hour): rd.GameSpeed 10 for about 6 real
@@ -3789,26 +3814,46 @@ def step_farms1x13():
     over 100 ms and the frame times' spread (the TODO: measured only at 5x)"""
     g = G["gen"]; res = {}; quiet(True)
     yield from wait_ready(90)
-    for name, start in (("farms", (2500.0, 1500.0)), ("grassland", clear_spot("grasslands") or (9000.0, -4000.0))):
+    # (the farms' start a field found round Brokenspire, the run outward from the town; the share of her run over fields read each
+    # second (PR #63's review: a fixed start and way could have measured grassland))
+    ff = yield from ring_find13(lambda s: bool(s.get("field")), 100.0, 6.0)
+    farm_start = (ff[0], ff[1]) if ff else (2500.0, 1500.0)
+    for name, start in (("farms", farm_start), ("grassland", clear_spot("grasslands") or (9000.0, -4000.0))):
         g.wild_put_her(*start); yield from wait_chunks(40, 50); yield from rwait(3.0)
-        frames = []; last = time.time()
-        for _ in run_her((1.0, 0.15), 60.0):
+        rr_ = max(math.hypot(*start), 1.0); way = (start[0] / rr_, start[1] / rr_)
+        frames = []; last = time.time(); fields = []; next_s = time.time() + 1.0
+        for _ in run_her(way, 60.0):
             t = time.time(); frames.append(t - last); last = t
             cb().set_health(cb().get_max_health())
+            if t >= next_s:
+                next_s = t + 1.0; l_ = G["pawn"].get_actor_location(); fields.append(bool(sample(l_.x / 100.0, l_.y / 100.0).get("field")))
             yield
         ms = sorted(f * 1000 for f in frames[5:])
         res[name] = {"frames": len(ms), "over_100ms": sum(1 for f in ms if f > 100), "median_ms": round(ms[len(ms) // 2], 1) if ms else None,
-                     "p95_ms": round(ms[int(len(ms) * 0.95)], 1) if ms else None, "field_at_start": sample(*start).get("field")}
+                     "p95_ms": round(ms[int(len(ms) * 0.95)], 1) if ms else None, "field_at_start": sample(*start).get("field"),
+                     "field_share": round(sum(fields) / max(len(fields), 1), 2)}
     quiet(False)
-    step_result("farms1x13", res["farms"]["frames"] > 100 and res["grassland"]["frames"] > 100, **res)
+    # (long frames counted against their base rate in the same run, the grassland's (the wilderness's rule: most long frames are
+    # the editor's own); test_t13r14 had 7 over the farms and 50 over the grassland, test_t13r4 none on either)
+    fm, gl = res["farms"], res["grassland"]
+    share = lambda r: r["over_100ms"] / max(r["frames"], 1)
+    res["long_share"] = {"farms": round(share(fm), 4), "grassland": round(share(gl), 4)}
+    step_result("farms1x13", fm["frames"] > 100 and bool(fm["field_at_start"]) and fm["field_share"] >= 0.5 and gl["frames"] > 100
+                and share(fm) <= share(gl) + 0.002, **res)
 
 def step_quests12b():
     """the branching quests played the other way (quests12 plays the clearing's raiders, the manhunt's letting go, the dispute's
     druids): the clearing's settlers, the manhunt's bringing in, the dispute's other side"""
     G["flip"] = True
-    if not G.get("look_only"): G["look_only"] = ["clearing", "manhunt", "dispute"]
+    had = "look_only" in G; lo0 = G.get("look_only")
+    if not lo0: G["look_only"] = ["clearing", "manhunt", "dispute"]
     try: yield from step_quests12()
-    finally: G.pop("flip", None)
+    finally:
+        # (the flag and the list both put back as found: left set, every later step of the plan read the three quests'
+        # names as its own list (PR #63's review))
+        G.pop("flip", None)
+        if had: G["look_only"] = lo0
+        else: G.pop("look_only", None)
     if R["steps"] and R["steps"][-1]["step"] == "quests12": R["steps"][-1]["step"] = "quests12b"
 STEPS13 = {"quests12b": step_quests12b, "animals13": step_animals13, "hunt13": step_hunt13, "questsave13": step_questsave13, "tamesave13": step_tamesave13,
            "swim13": step_swim13, "caldera13": step_caldera13, "weather13": step_weather13, "farms1x13": step_farms1x13}
