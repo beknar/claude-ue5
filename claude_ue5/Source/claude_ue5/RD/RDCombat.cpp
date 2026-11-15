@@ -635,6 +635,14 @@ void URDCombatComponent::TickFallDamage()
 	bInAir = false;
 	const float Drop = AirTopZ - Z;
 	LastFallDrop = Drop;
+	// (a fall into water she swims in hurts nothing: her feet the swim's depth or more under its face where she lands (the TODO
+	// sweep, 888 swim13: dropped 15 m into a lake she lost 82.7 hit points); into wading water a fall still hurts. The swim's own
+	// depth, one of the set that changes together (RDWild.h; PR #63's review: a 100 cm of its own spared wading falls))
+	{
+		float Fz = 0.f;
+		const float Half = Ch->GetCapsuleComponent() ? Ch->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : 90.f;
+		if (Generator && Generator->WaterFaceAt(Ch->GetActorLocation(), Fz) && Fz - (Z - Half) > FRDWildWorld::SwimDepthCm) { LastFallDamage = 0.f; return; }
+	}
 	const float Safe = Generator->FallSafeHeight, Lethal = FMath::Max(Generator->FallLethalHeight, Safe + 100.f);
 	if (Drop <= Safe) return;
 	const float Amount = MaxHealth * FMath::Clamp((Drop - Safe) / (Lethal - Safe), 0.f, 1.f);

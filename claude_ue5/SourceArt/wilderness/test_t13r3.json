@@ -1,0 +1,78 @@
+{
+ "tag": "t13r3",
+ "plan": [
+  "swim13",
+  "caldera13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "swim13",
+   "ok": false,
+   "lake": {
+    "at_m": [
+     15152,
+     1203
+    ],
+    "depth_m": 5.8,
+    "swimming": false,
+    "line": "swim|0|None|-429.4|0|353|0|0|0|-480.3"
+   },
+   "river": {
+    "at_m": [
+     19183,
+     801
+    ],
+    "depth_m": 5.6,
+    "swimming": false,
+    "line": "swim|0|None|-419.5|0|353|0|0|0|-470.3"
+   },
+   "fall": {
+    "hp_lost": 82.7,
+    "swimming": true,
+    "dead": false
+   },
+   "save_swimming": false,
+   "saved": true,
+   "load": true,
+   "after_load": {
+    "from_save_m": 0.0,
+    "swimming": false,
+    "line": "swim|0|None|-428.6|0|353|0|0|0|-479.5"
+   },
+   "death": {
+    "dead": true,
+    "alive_after": true,
+    "swimming_after": false,
+    "town": "Brokenspire",
+    "in_walls": true
+   }
+  },
+  {
+   "step": "caldera13",
+   "ok": true,
+   "lava_km": [
+    23.58,
+    4.48
+   ],
+   "biome": "volcanoes",
+   "effects_near": [
+    "NS_BirdFlock",
+    "NS_LootDrop03_lvl5_yellow"
+   ],
+   "effects_n": 9,
+   "stood_m_from_lava": 60.0,
+   "alive": true
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_t13r3_swim13_lake.png",
+  "wd_t13r3_swim13_river.png",
+  "wd_t13r3_caldera13_day.png",
+  "wd_t13r3_caldera13_night.png"
+ ],
+ "error": null,
+ "saves_put_back": 2,
+ "windows_shown_again": 1
+}

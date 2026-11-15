@@ -1,0 +1,88 @@
+{
+ "tag": "t13r14",
+ "plan": [
+  "hunt13",
+  "farms1x13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "hunt13",
+   "ok": true,
+   "deer": {
+    "shots": [
+     {
+      "m_off": 10.0,
+      "hit": true
+     },
+     {
+      "m_off": 11.3,
+      "hit": false
+     },
+     {
+      "m_off": 22.4,
+      "hit": false
+     },
+     {
+      "m_off": 33.7,
+      "hit": false
+     },
+     {
+      "m_off": 45.4,
+      "hit": false
+     },
+     {
+      "m_off": 55.5,
+      "hit": false
+     },
+     {
+      "m_off": 55.5,
+      "hit": false
+     },
+     {
+      "m_off": 55.5,
+      "hit": false
+     }
+    ],
+    "hits": 1,
+    "dead": false,
+    "hp_left": 0.38
+   },
+   "hare": {
+    "blows": [
+     {
+      "m": 1.7,
+      "hit": true
+     }
+    ],
+    "dead": true,
+    "secs": 1.1,
+    "her_top_mps": 3.5
+   }
+  },
+  {
+   "step": "farms1x13",
+   "ok": false,
+   "farms": {
+    "frames": 2351,
+    "over_100ms": 7,
+    "median_ms": 23.9,
+    "p95_ms": 28.6,
+    "field_at_start": 0.33,
+    "field_share": 1.0
+   },
+   "grassland": {
+    "frames": 2217,
+    "over_100ms": 50,
+    "median_ms": 24.1,
+    "p95_ms": 30.1,
+    "field_at_start": 0.0,
+    "field_share": 0.0
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

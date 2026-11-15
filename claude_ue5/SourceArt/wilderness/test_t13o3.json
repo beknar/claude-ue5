@@ -1,0 +1,166 @@
+{
+ "tag": "t13o3",
+ "plan": [
+  "animals8",
+  "rain8",
+  "speed8"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "animals8",
+   "ok": false,
+   "kills": {
+    "Deer": {
+     "hp0": 40.0,
+     "hp_after_first_blow": 25.700000762939453,
+     "blows": 3,
+     "dead": true,
+     "drops": [
+      "Coarse Hide"
+     ],
+     "lying_roll": 0.0,
+     "length_z": 0.0,
+     "up_z": 0.0,
+     "f_names": "harvest the parts (1)",
+     "taken": {
+      "Coarse Hide": 1
+     }
+    },
+    "Wolf": {
+     "hp0": 55.0,
+     "hp_after_first_blow": 40.70000076293945,
+     "blows": 4,
+     "dead": true,
+     "drops": [
+      "Coarse Hide",
+      "Coarse Hide",
+      "Hound Fang"
+     ],
+     "lying_roll": 0.0,
+     "length_z": 0.0,
+     "up_z": 0.0,
+     "f_names": "harvest the parts (3)",
+     "taken": {
+      "Coarse Hide": 2,
+      "Hound Fang": 1
+     }
+    },
+    "Hare": {
+     "hp0": 10.0,
+     "hp_after_first_blow": 0.0,
+     "blows": 1,
+     "dead": true,
+     "drops": [
+      "Light Leather"
+     ],
+     "lying_roll": 90.0,
+     "length_z": 0.0,
+     "up_z": 0.0,
+     "f_names": "harvest the parts (1)",
+     "taken": {
+      "Light Leather": 1
+     }
+    }
+   },
+   "alive_at_kill": {
+    "Deer": 2,
+    "Wolf": 0,
+    "Hare": 3
+   },
+   "killed": 3,
+   "respawn_wait_s": 45.0,
+   "pending_after_kills": [
+    [
+     "Deer",
+     25
+    ],
+    [
+     "Wolf",
+     34
+    ],
+    [
+     "Hare",
+     40
+    ]
+   ],
+   "places_freed_after_s": 40.6,
+   "wild_deer": {
+    "killed": false,
+    "casts": 10,
+    "deer_after_kill": 2,
+    "waiting": [],
+    "deer_at_20s": 2,
+    "another_came_after_s": null
+   }
+  },
+  {
+   "step": "rain8",
+   "ok": true,
+   "sky": {
+    "weather": "rain",
+    "cover": 0.96,
+    "rain": 0.7,
+    "wind": 0.55,
+    "fog": 0.35,
+    "snowing": 0.0,
+    "changes": 2.0,
+    "next_s": 536.0,
+    "clouds": 1.0,
+    "stars": 0.0,
+    "moon": 0.0,
+    "fog_cutoff_m": 1000000.0,
+    "rain_on": 1.0,
+    "snow_on": 0.0,
+    "wind_fx": 0.0
+   },
+   "drops": {
+    "count": 9000,
+    "scale0": [
+     0.2952,
+     0.009,
+     1.0
+    ],
+    "up_share": 1.0,
+    "pairs_crossed": 1.0,
+    "field_yaw": 0.0,
+    "camera_yaw": 40.0
+   }
+  },
+  {
+   "step": "speed8",
+   "ok": true,
+   "x1": {
+    "applied": 1.0,
+    "m_per_s": 3.4,
+    "max_over_ground": 2.599999999999909,
+    "held": 0
+   },
+   "x10": {
+    "applied": 10.0,
+    "m_per_s": 33.8,
+    "max_over_ground": 3.7000000000000455,
+    "held": 0
+   },
+   "x40": {
+    "applied": 40.0,
+    "m_per_s": 126.4,
+    "max_over_ground": 34.59999999999991,
+    "held": 0
+   },
+   "after": 1.0
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_t13o3_animals8_deer_dead.png",
+  "wd_t13o3_animals8_wolf_dead.png",
+  "wd_t13o3_animals8_hare_dead.png",
+  "wd_t13o3_rain8_day.png",
+  "wd_t13o3_rain8_up.png",
+  "wd_t13o3_rain8_dusk.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

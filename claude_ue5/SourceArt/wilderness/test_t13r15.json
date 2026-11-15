@@ -1,0 +1,64 @@
+{
+ "tag": "t13r15",
+ "plan": [
+  "caldera13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "caldera13",
+   "ok": false,
+   "lava_km": [
+    23.58,
+    4.48
+   ],
+   "biome": "volcanoes",
+   "effects_near": [
+    "NS_BirdFlock",
+    "NS_LootDrop03_lvl5_yellow"
+   ],
+   "effects_n": 9,
+   "stood_m_from_lava": 60.0,
+   "alive": true,
+   "night_lava_luma": {
+    "max": 157.6,
+    "median": 33.7
+   },
+   "lava_seen": true,
+   "spring_km": [
+    45.52,
+    -107.78
+   ],
+   "spring_biome": "geothermal caldera",
+   "spring_effects": [
+    "NS_BirdFlock",
+    "NS_LootDrop03_lvl5_yellow",
+    "NS_NS1_Steam"
+   ],
+   "steam_fx": "NS_NS1_Steam",
+   "spring_steam": 1,
+   "spring_alive": true,
+   "steam_active": [
+    true
+   ],
+   "steam_shot_m": 35.0,
+   "steam_luma": {
+    "shown_vs_hidden": 4.4,
+    "hidden_vs_hidden": 4.0
+   },
+   "steam_seen": false
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_t13r15_caldera13_day.png",
+  "wd_t13r15_caldera13_night.png",
+  "wd_t13r15_caldera13_spring.png",
+  "wd_t13r15_caldera13_steam.png",
+  "wd_t13r15_caldera13_steam_off.png",
+  "wd_t13r15_caldera13_steam_off2.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}
