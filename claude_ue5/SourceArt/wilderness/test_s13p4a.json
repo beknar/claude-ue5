@@ -1,0 +1,637 @@
+{
+ "tag": "s13p4a",
+ "plan": [
+  "scenery13=hillfort+chalk_figure+terraced_fields+dew_pond+folly_tower+beacon_hill+quarry+hillside_vines+combe",
+  "land13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "scenery13",
+   "ok": true,
+   "kinds": {
+    "hillfort": {
+     "found": true,
+     "id": 67227908,
+     "at_km": [
+      -9.87,
+      6.42
+     ],
+     "name": "Hillfort",
+     "laid": {
+      "kind": "hillfort",
+      "title": "Hillfort",
+      "x": -9870.6,
+      "y": 6418.9,
+      "pieces": 5,
+      "boxes": 1,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 265.8
+     },
+     "bottom_over_ground_cm": [
+      -12,
+      -12,
+      -11
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 1,
+     "want_chests": 1,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look over the ramparts",
+       "f": "scenery",
+       "said": "Two rings of bank and ditch, the gate on the side away from the wind. Older than any town.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Hillfort: the earthen rings and ditches of an old fort on the summit | Two rings of bank and ditch, the gate on the side away from the wind. Older than any town.",
+     "ok": true
+    },
+    "chalk_figure": {
+     "found": true,
+     "id": 67226886,
+     "at_km": [
+      -10.5,
+      7.38
+     ],
+     "name": "Chalk horse",
+     "laid": {
+      "kind": "chalk_figure",
+      "title": "Chalk horse",
+      "x": -10501.9,
+      "y": 7377.4,
+      "pieces": 1,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 120.7
+     },
+     "bottom_over_ground_cm": null,
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the chalk horse",
+       "f": "scenery",
+       "said": "Somebody scours it every seven years, or the turf would have it back.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Chalk horse: a great horse cut into the hillside, white chalk showing through the turf: seen for miles | Somebody scours it every seven years, or the turf would have it back.",
+     "ok": true
+    },
+    "terraced_fields": {
+     "found": true,
+     "id": 67229958,
+     "at_km": [
+      -9.11,
+      7.28
+     ],
+     "name": "Terraced fields",
+     "laid": {
+      "kind": "terraced_fields",
+      "title": "Terraced fields",
+      "x": -9106.4,
+      "y": 7281.2,
+      "pieces": 22,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 239.9
+     },
+     "bottom_over_ground_cm": [
+      -17,
+      -14,
+      -9
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "forage",
+       "prompt": "gather the herbs in the terraces",
+       "f": "scenery",
+       "said": "You take 1 Herbs",
+       "got": {
+        "Herbs": 1
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Terraced fields: terraced fields stepping down the slope, held by drystone walls along the contours | You take 1 Herbs",
+     "ok": true
+    },
+    "dew_pond": {
+     "found": true,
+     "id": 67226882,
+     "at_km": [
+      -10.56,
+      5.22
+     ],
+     "name": "Dew pond",
+     "laid": {
+      "kind": "dew_pond",
+      "title": "Dew pond",
+      "x": -10555.9,
+      "y": 5224.3,
+      "pieces": 7,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 15.4
+     },
+     "bottom_over_ground_cm": [
+      -70,
+      -9,
+      -8
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "heal",
+       "prompt": "drink at the dew pond",
+       "f": "scenery",
+       "said": "Rain, mist and dew, held in the clay. It is cold and clean.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Dew pond: a round pond on the hilltop, lined with clay, that never seems to dry | Rain, mist and dew, held in the clay. It is cold and clean.",
+     "ok": true
+    },
+    "folly_tower": {
+     "found": true,
+     "id": 67224833,
+     "at_km": [
+      -12.09,
+      4.69
+     ],
+     "name": "Folly tower",
+     "laid": {
+      "kind": "folly_tower",
+      "title": "Folly tower",
+      "x": -12092.5,
+      "y": 4694.5,
+      "pieces": 1,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 32.5
+     },
+     "bottom_over_ground_cm": [
+      -66,
+      -66,
+      -66
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "climb",
+       "prompt": "climb the folly",
+       "f": "scenery",
+       "said": "From the top of the folly the hills roll away on every side.  From up here you can see 2.5 km round you: the map fills in.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 10.5,
+       "revealed_more": 7613,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Folly tower: a lord's folly: a tower on the crest built for the view and nothing else | From the top of the folly the hills roll away on every side.  From up here you can see 2.5 km round you: the map fills in.",
+     "ok": true
+    },
+    "beacon_hill": {
+     "found": true,
+     "id": 67221763,
+     "at_km": [
+      -13.63,
+      5.53
+     ],
+     "name": "Beacon hill",
+     "laid": {
+      "kind": "beacon_hill",
+      "title": "Beacon hill",
+      "x": -13630.6,
+      "y": 5534.9,
+      "pieces": 4,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 1,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 275.2
+     },
+     "bottom_over_ground_cm": [
+      -26,
+      -21,
+      -12
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the beacon",
+       "f": "scenery",
+       "said": "Lit, it would be seen from the next hill, and that one's from the next. It is kept dry and ready.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Beacon hill: a beacon on the crest, ready to pass a warning from hill to hill; it burns at night | Lit, it would be seen from the next hill, and that one's from the next. It is kept dry and ready.",
+     "ok": true
+    },
+    "quarry": {
+     "found": true,
+     "id": 67223808,
+     "at_km": [
+      -12.38,
+      3.98
+     ],
+     "name": "Old quarry",
+     "laid": {
+      "kind": "quarry",
+      "title": "Old quarry",
+      "x": -12378.6,
+      "y": 3981.7,
+      "pieces": 10,
+      "boxes": 1,
+      "guards": 2,
+      "uses": 0,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 22.1
+     },
+     "bottom_over_ground_cm": [
+      -33,
+      -8,
+      -7
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 1,
+     "want_chests": 1,
+     "told_from_m": 20.0,
+     "uses": [],
+     "hazards": [],
+     "told": "Old quarry: a quarry cut into the hillside, its tools left lying, a cave behind its face",
+     "ok": true
+    },
+    "hillside_vines": {
+     "found": true,
+     "id": 67230980,
+     "at_km": [
+      -8.45,
+      6.13
+     ],
+     "name": "Hillside vines",
+     "laid": {
+      "kind": "hillside_vines",
+      "title": "Hillside vines",
+      "x": -8452.8,
+      "y": 6133.4,
+      "pieces": 40,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 4,
+      "yaw": 120.0
+     },
+     "bottom_over_ground_cm": [
+      -13,
+      -8,
+      -5
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "forage",
+       "prompt": "pick the grapes",
+       "f": "scenery",
+       "said": "You take 4 Grapes",
+       "got": {
+        "Grapes": 4
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "herd": {
+      "n": 4,
+      "stampedes": 0,
+      "hits": 0,
+      "migrate": 0,
+      "stampede": 0,
+      "walked_12s_m": 1.6
+     },
+     "told": "Hillside vines: old vines in rows on a sunny slope, and a few sheep among them | You take 4 Grapes",
+     "ok": true
+    },
+    "combe": {
+     "found": true,
+     "id": 67226880,
+     "at_km": [
+      -10.74,
+      4.02
+     ],
+     "name": "Hidden combe",
+     "laid": {
+      "kind": "combe",
+      "title": "Hidden combe",
+      "x": -10736.1,
+      "y": 4021.3,
+      "pieces": 5,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 332.5
+     },
+     "bottom_over_ground_cm": [
+      -34,
+      -21,
+      -8
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "forage",
+       "prompt": "pick the apples",
+       "f": "scenery",
+       "said": "You take 3 Wild Apples",
+       "got": {
+        "Wild Apples": 3
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "folk": {
+      "want": 1,
+      "found": 1,
+      "talk": [
+       {
+        "prompt": "talk to the Hermit",
+        "f": "bark",
+        "said": "The Hermit:  \"You found the combe. Most walk past it on the ridge and never know.\""
+       }
+      ]
+     },
+     "told": "Hidden combe: a hidden valley tucked between the hills, a hermit's hut in it | You take 3 Wild Apples",
+     "ok": true
+    }
+   },
+   "table": 106,
+   "counts_30km": {
+    "tall_grass": 76,
+    "burrow_town": 254,
+    "hanged_tree": 59,
+    "nest_tree": 69,
+    "shrine_tree": 72,
+    "erratic": 233,
+    "migration": 3,
+    "wallow": 64,
+    "hive_meadow": 31,
+    "brook_crossing": 0,
+    "fairy_ring": 53,
+    "shepherd_hut": 116,
+    "reed_pond": 1,
+    "old_orchard": 112,
+    "dusk_meadow": 17,
+    "butte": 206,
+    "battlefield": 228,
+    "milestone_road": 7,
+    "crossroads_gibbet": 4,
+    "crossroads_shrine": 2,
+    "crossroads_notice": 1,
+    "wagon_wreck": 1,
+    "hedged_fields": 115,
+    "scarecrows": 38,
+    "threshing_yard": 20,
+    "mill_pond": 2,
+    "pumpkin_patch": 31,
+    "abandoned_farm": 84,
+    "loose_livestock": 84,
+    "baobab": 2,
+    "acacia_shade": 5,
+    "termite_mounds": 7,
+    "kopje": 10,
+    "waterhole": 2,
+    "vulture_kill": 9,
+    "salt_pan": 5,
+    "yurt_camp": 0,
+    "kurgan": 73,
+    "prayer_cairn": 106,
+    "petroglyph_rocks": 364,
+    "hot_spring": 4,
+    "pingo": 0,
+    "charred_snags": 0,
+    "hot_spots": 0,
+    "ash_drift": 0,
+    "regrowth": 0,
+    "scorched_farmstead": 0,
+    "looters_camp": 0,
+    "fire_break": 0,
+    "fused_glass": 0,
+    "beast_carcasses": 0,
+    "resin_camp": 0,
+    "sunlit_clearing": 0,
+    "granite_outcrop": 0,
+    "lightning_pine": 0,
+    "logging_camp": 0,
+    "owl_hollow": 0,
+    "pine_ridge": 0,
+    "lichen_heath": 0,
+    "esker": 0,
+    "pine_dunes": 0,
+    "kettle_lake": 0,
+    "fire_scar": 0,
+    "herder_camp": 0,
+    "seid_stone": 0,
+    "muskeg_bog": 0,
+    "spruce_thicket": 0,
+    "beaver_pond": 0,
+    "moose_wallow": 0,
+    "trapline_cabin": 0,
+    "drunken_forest": 0,
+    "gold_larches": 0,
+    "leaf_pits": 0,
+    "fungus_glade": 0,
+    "hollow_giant": 0,
+    "mossy_walls": 0,
+    "nut_cache": 0,
+    "charcoal_hearth": 0,
+    "dawn_hollow": 0,
+    "harvest_shrine": 0,
+    "watching_aspens": 0,
+    "clonal_grove": 0,
+    "carved_aspens": 0,
+    "gold_stand": 0,
+    "beaver_stumps": 0,
+    "aspen_meadow": 0,
+    "aspen_edge": 0,
+    "windthrow": 0,
+    "hillfort": 27,
+    "chalk_figure": 58,
+    "terraced_fields": 69,
+    "dew_pond": 36,
+    "folly_tower": 31,
+    "beacon_hill": 37,
+    "quarry": 70,
+    "hillside_vines": 52,
+    "combe": 13,
+    "peat_hags": 0,
+    "tor": 12,
+    "heather_gorse": 61,
+    "stone_row": 0,
+    "peat_cutting": 0,
+    "moor_mist": 0,
+    "bothy": 0,
+    "grouse_butts": 0,
+    "moor_ford": 1,
+    "cells": 10201
+   }
+  },
+  {
+   "step": "land13",
+   "ok": false,
+   "error": "min() arg is an empty sequence",
+   "trace": "Traceback (most recent call last):\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\888_wilderness_test.py\", line 4375, in run\n    yield from STEPS[name]()\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\888_wilderness_test.py\", line 1520, in step_land13\n    mid_h = min(p_[1] for p_ in prof if abs(p_[0]) <= w * 0.2)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: min() arg is an empty sequence\n"
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s13p4a_scenery13_hillfort.png",
+  "wd_s13p4a_scenery13_hillfort_near.png",
+  "wd_s13p4a_scenery13_chalk_figure.png",
+  "wd_s13p4a_scenery13_chalk_figure_near.png",
+  "wd_s13p4a_scenery13_terraced_fields.png",
+  "wd_s13p4a_scenery13_terraced_fields_near.png",
+  "wd_s13p4a_scenery13_dew_pond.png",
+  "wd_s13p4a_scenery13_dew_pond_near.png",
+  "wd_s13p4a_scenery13_folly_tower.png",
+  "wd_s13p4a_scenery13_folly_tower_near.png",
+  "wd_s13p4a_scenery13_beacon_hill.png",
+  "wd_s13p4a_scenery13_beacon_hill_near.png",
+  "wd_s13p4a_scenery13_quarry.png",
+  "wd_s13p4a_scenery13_quarry_near.png",
+  "wd_s13p4a_scenery13_hillside_vines.png",
+  "wd_s13p4a_scenery13_hillside_vines_near.png",
+  "wd_s13p4a_scenery13_combe.png",
+  "wd_s13p4a_scenery13_combe_near.png",
+  "wd_s13p4a_land13_arroyo.png",
+  "wd_s13p4a_land13_dry riverbed.png",
+  "wd_s13p4a_land13_irrigation ditch.png",
+  "wd_s13p4a_land13_fire break.png",
+  "wd_s13p4a_land13_holloway.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

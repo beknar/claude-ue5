@@ -17,6 +17,7 @@ helpers and its noise are used here):
                    cone tents, a beaver's lodge and dam, a trapper's fur stretcher and his cache on stilts, a charcoal burner's clamp,
                    a log of shelf fungi, an oak's trunk with a carved face, a tapped pine (its herringbone scar and clay cup), and a
                    card whose gold leaves and needles are the gold aspens' and larches' material
+  TurfStack_A/B    the fourth phase's (hills and moorland): peat turves stacked to dry (the dew pond is two skins of the land)
   StormCell        a storm cell for the far horizon: an anvil cloud 3.2 km across, a rain curtain, a funnel (the far storms)
   Drystone_A/B     a 3 m length of field wall laid dry, its copes on edge (the shepherd's pen)
   AppleTree_A/B,   the old orchard's gnarled fruit trees: a short leaning trunk, a low wide crown of leaf clusters with their
@@ -621,6 +622,20 @@ def resin_pine(variant, seed):
     finish(me, ob, bm, [f"ResinPine{variant}Bark", f"ResinPine{variant}Needles", f"ResinPine{variant}Scar", f"ResinPine{variant}Cup"], masked=[f"ResinPine{variant}Needles", f"ResinPine{variant}Scar"])
 
 
+# ------------------------------------------------------------------------------------------------ the fourth phase: hills and moorland
+def turf_stack(variant, seed):
+    """peat turves set up to dry: a ridge of dark bricks stacked in a long crossed heap 3 m long and 1 m high"""
+    rng = random.Random(seed)
+    me, ob, bm, uvl = new_mesh(f"SM_N13_TurfStack_{variant}")
+    for layer in range(5):
+        n = 9 - layer
+        for k in range(n):
+            x = -1.5 + (k + 0.5 + layer * 0.5) * 0.33
+            if layer % 2 == 0: box(bm, uvl, (x, rng.uniform(-0.05, 0.05), 0.11 + layer * 0.2), (0.3, 0.6, 0.18), 0, (rng.random() * 0.5, rng.random() * 0.5), 0.5)
+            else: box(bm, uvl, (x, rng.uniform(-0.05, 0.05), 0.11 + layer * 0.2), (0.6, 0.3, 0.18), 0, (rng.random() * 0.5, rng.random() * 0.5), 0.5)
+    finish(me, ob, bm, [f"TurfStack{variant}Peat"], flat=True)
+
+
 def gold_card():
     """one card of gold leaves: only its material is used (the gold aspens' and larches' crowns, a part's mat=)"""
     me, ob, bm, uvl = new_mesh("SM_N13_GoldCard")
@@ -838,6 +853,9 @@ def pictures():
         sc[np.abs(xx - 0.5) < 0.015] = 1.0
         WT.save_png(f"T_N13_ResinPine{v}Scar", np.concatenate([np.ones((n, n, 3)) * np.array((0.80, 0.62, 0.30)), sc[..., None]], -1))
         png(f"T_N13_ResinPine{v}Cup", grain((0.62, 0.38, 0.24), 85, 0.15))
+    # (the fourth phase: peat turves, each variant its own grain (PR #68's review: seeded by len(v), A and B came out alike))
+    for v in ("A", "B"):
+        png(f"T_N13_TurfStack{v}Peat", grain((0.17, 0.12, 0.08), 103 + ord(v), 0.35) * (0.8 + 0.2 * (noise(n, 105 + ord(v), ((16, 1.0),)) > 0.5))[..., None])
     # (gold leaves: the aspen's round leaves in yellow and gold; gold needles: a larch's sprays)
     for name, shape in (("GoldLeaves", "leaf"), ("GoldNeedles", "needle")):
         rg = np.zeros((512, 512, 4)); R6 = np.random.default_rng(90 + len(name)); Y6, X6 = np.mgrid[0:512, 0:512] / 512
@@ -864,7 +882,8 @@ if __name__ == "__main__":
             "Flume": flume, "SeidStone": seid_stone, "Lavvu_A": lambda: lavvu("A", 401), "Lavvu_B": lambda: lavvu("B", 403),
             "BeaverLodge": beaver_lodge, "BeaverDam": beaver_dam, "FurStretcher": fur_stretcher, "StiltCache": stilt_cache,
             "CharcoalMound": charcoal_mound, "FungusLog": fungus_log, "CarvedFace": carved_face,
-            "ResinPine_A": lambda: resin_pine("A", 451), "ResinPine_B": lambda: resin_pine("B", 457), "GoldCard": gold_card}
+            "ResinPine_A": lambda: resin_pine("A", 451), "ResinPine_B": lambda: resin_pine("B", 457), "GoldCard": gold_card,
+            "TurfStack_A": lambda: turf_stack("A", 511), "TurfStack_B": lambda: turf_stack("B", 523)}
     for k, f in todo.items():
         if not ONLY or k in ONLY: f()
     old = json.load(open(os.path.join(OUT, "scenery13_kit.json"))) if os.path.exists(os.path.join(OUT, "scenery13_kit.json")) else {}

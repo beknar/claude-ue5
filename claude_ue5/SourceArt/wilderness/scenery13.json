@@ -10,7 +10,9 @@
   "biomes=savannahs;n=2;len=900-2200;w=14-24;d=1.4-2.4;wall=0.3;turn=9;name=dry riverbed",
   "biomes=farms;n=4;len=300-900;w=1.6-2.2;d=0.8-1.1;wall=0.7;turn=1.5;name=irrigation ditch",
   "biomes=burned plain;n=3;len=400-1200;w=6-9;d=0.4-0.7;wall=0.2;turn=2;name=fire break",
-  "biomes=temperate autumn forests;n=3;len=500-1400;w=4-6;d=2.8-4.2;wall=0.85;turn=4;name=holloway"
+  "biomes=temperate autumn forests;n=3;len=500-1400;w=4-6;d=2.8-4.2;wall=0.85;turn=4;name=holloway",
+  "biomes=hills;n=4;len=600-1500;w=1.2-1.8;d=0.25-0.4;wall=0.5;turn=6;name=sheep track",
+  "biomes=hills;n=2;len=500-1200;w=4-5;d=2.4-3.4;wall=0.85;turn=4;name=hill holloway"
  ],
  "fx": {
   "bees": "/Game/Volstok_District/VFX/NS_Flies_01a",
@@ -22,7 +24,9 @@
   "steam": "/Game/LiquidSurfaceFX/FX/NS_Water_Steam",
   "rays": "/Game/MysticDungeon/VFX/NS_LightRayFX_01",
   "fog": "/Game/FrozenNorseEnvironment/VFX/NS_NS1_Fog_01",
-  "fallingleaves": "/Game/Wildlands/VFX/FX/NS_Fallin_Leaves"
+  "fallingleaves": "/Game/Wildlands/VFX/FX/NS_Fallin_Leaves",
+  "fire": "/Game/Medieval_Lake_Village/VFX/NS_Fire",
+  "wisps": "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Projectiles/NS_Projectile_Ghostly01"
  },
  "items": [
   {
@@ -102,6 +106,21 @@
    "weight": 20,
    "icon": "fruit",
    "looks": "a handful of berries from the sunny undergrowth of an aspen grove"
+  },
+  {
+   "name": "Grapes",
+   "like": "Bread",
+   "amount": 0.015,
+   "seconds": 10,
+   "weight": 25,
+   "icon": "fruit",
+   "looks": "a bunch of small dark grapes from a hillside's old vines"
+  },
+  {
+   "name": "Peat Turf",
+   "like": "Wood Log",
+   "icon": "comp_wood_log",
+   "looks": "a cut turf of peat, dried on the moor: it burns slow and smoky"
   }
  ],
  "fauna": [
@@ -368,6 +387,14 @@
   ],
   "fern": [
    "/Game/CastleofEternalMist/Scanned_Foliage/Objects/Foliage/EagleFern/SM_EagleFern_01"
+  ],
+  "turfstack": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_TurfStack_A",
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_TurfStack_B"
+  ],
+  "cliffface": [
+   "/Game/Feather/Geometry/SM_Cliff_01",
+   "/Game/Feather/Geometry/SM_Cliff_03"
   ]
  },
  "kinds": [
@@ -1513,7 +1540,7 @@
     "do=forage;x=0;y=4;r=3;verb=gather;what=reindeer lichen;things=Herbs|1|2|1;reuse=600;text=Lichen for a poultice, as the herders use it."
    ],
    "parts": [
-    "L=patch;r=16;hb=0.06;tint=0.72,0.74,0.60",
+    "L=patch;r=16;hb=0.25;tint=0.72,0.74,0.60",
     "L=scatter;p=n13_pinemed#;n=4;r=18;r0=12;h=9-11;yaw=rand;col=1"
    ]
   },
@@ -1647,7 +1674,7 @@
     "do=loot;x=-9;y=-4;r=2.8;verb=search;what=body in the peat;things=Coarse Hide|1|1|1,Small Healing Potion|1|1|0.3;text=A man, brown as leather, his face peaceful. He has lain here a long time."
    ],
    "parts": [
-    "L=patch;r=13;hb=0.05;tint=0.20,0.19,0.11",
+    "L=patch;r=13;hb=0.25;tint=0.20,0.19,0.11",
     "L=scatter;p=s12_reeds#;n=14;r=10;h=1.0-1.4;yaw=rand;col=0",
     "L=scatter;p=n13_moss#;n=26;r=11;h=0.3;yaw=rand;col=0",
     "L=scatter;p=n13_deadtree#;n=3;r=12;r0=8;h=6-8;yaw=rand;col=1;sink=30"
@@ -2053,6 +2080,338 @@
     "L=scatter;p=n13_pinefallen#;n=6;r=10;s=1;yaw=rand;col=1",
     "L=scatter;p=s12_roots#;n=3;r=9;r0=4;h=2.5;yaw=rand;col=1"
    ]
+  },
+  {
+   "name": "hillfort",
+   "title": "Hillfort",
+   "text": "the earthen rings and ditches of an old fort on the summit",
+   "biomes": [
+    "hills"
+   ],
+   "weight": 1.0,
+   "place": "rise",
+   "loot": "Small Healing Potion|1|1|0.6;Iron Ingot|1|2|0.6",
+   "uses": [
+    "do=lore;x=-4;y=3;r=3;verb=look over;what=ramparts;text=Two rings of bank and ditch, the gate on the side away from the wind. Older than any town."
+   ],
+   "parts": [
+    "L=berm;r=18;w=6;hb=2.2;gap=40;a=0",
+    "L=berm;r=27;w=5;hb=1.6;gap=40;a=0",
+    "L=scatter;p=s12_palisade#;n=3;r=14;r0=10;h=2.5;yaw=rand;tilt=12;col=1",
+    "L=at;box=Chest;x=3;y=2"
+   ]
+  },
+  {
+   "name": "chalk_figure",
+   "title": "Chalk horse",
+   "text": "a great horse cut into the hillside, white chalk showing through the turf: seen for miles",
+   "biomes": [
+    "hills"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=-24;r=3;verb=look at;what=chalk horse;text=Somebody scours it every seven years, or the turf would have it back."
+   ],
+   "parts": [
+    "L=patch;r=30;hb=0.25;tint=0.90,0.89,0.84;poly=-0.92,0.18 -0.72,0.06 -0.56,0.12 0.30,0.16 0.44,0.30 0.62,0.56 0.86,0.52 0.82,0.40 0.62,0.38 0.52,0.14 0.48,-0.06 0.54,-0.56 0.44,-0.56 0.36,-0.08 -0.34,-0.08 -0.38,-0.56 -0.48,-0.56 -0.56,-0.04 -0.76,0.02"
+   ]
+  },
+  {
+   "name": "terraced_fields",
+   "title": "Terraced fields",
+   "text": "terraced fields stepping down the slope, held by drystone walls along the contours",
+   "biomes": [
+    "hills"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=forage;x=0;y=3;r=3;verb=gather;what=herbs in the terraces;things=Herbs|1|2|1;reuse=600"
+   ],
+   "parts": [
+    "L=line;p=n13_drystone#;n=6;r=14;a=0;y=-6;s=1;yaw=fixed;col=1",
+    "L=line;p=n13_drystone#;n=6;r=14;a=0;y=0;s=1;yaw=fixed;col=1",
+    "L=line;p=n13_drystone#;n=6;r=14;a=0;y=6;s=1;yaw=fixed;col=1",
+    "L=scatter;p=n13_flowers#;n=80;r=14;h=0.3-0.5;yaw=rand;col=0;inst=1"
+   ]
+  },
+  {
+   "name": "dew_pond",
+   "title": "Dew pond",
+   "text": "a round pond on the hilltop, lined with clay, that never seems to dry",
+   "biomes": [
+    "hills"
+   ],
+   "weight": 1.0,
+   "place": "rise",
+   "uses": [
+    "do=heal;x=7.5;y=0;r=3;verb=drink at;what=dew pond;reuse=300;text=Rain, mist and dew, held in the clay. It is cold and clean."
+   ],
+   "parts": [
+    "L=patch;r=6.8;hb=0.25;tint=0.70,0.68,0.60",
+    "L=patch;r=5.4;hb=0.34;tint=0.04,0.07,0.08",
+    "L=scatter;p=s12_reeds#;n=6;r=6.5;r0=6;h=1.0;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "folly_tower",
+   "title": "Folly tower",
+   "text": "a lord's folly: a tower on the crest built for the view and nothing else",
+   "biomes": [
+    "hills"
+   ],
+   "weight": 1.0,
+   "place": "rise",
+   "uses": [
+    "do=climb;edge=1;r=3.5;verb=climb;what=folly;tz=10;reveal=2500;reuse=5;text=From the top of the folly the hills roll away on every side."
+   ],
+   "parts": [
+    "L=at;p=s12_stonetower#;h=12;yaw=rand;col=1;far=1"
+   ]
+  },
+  {
+   "name": "beacon_hill",
+   "title": "Beacon hill",
+   "text": "a beacon on the crest, ready to pass a warning from hill to hill; it burns at night",
+   "biomes": [
+    "hills",
+    "highland moorland"
+   ],
+   "weight": 1.0,
+   "place": "rise",
+   "uses": [
+    "do=lore;x=3;y=-3;r=3;verb=look at;what=beacon;text=Lit, it would be seen from the next hill, and that one's from the next. It is kept dry and ready."
+   ],
+   "parts": [
+    "L=at;p=s12_brazier#;h=1.6;yaw=rand;col=1",
+    "L=at;fx=fire;z=1.6;s=1;hours=night",
+    "L=at;p=s12_signpost#;x=4;y=2;h=2.2;yaw=rand;col=1",
+    "L=scatter;p=n13_logpile#;n=2;r=4;r0=3;h=1.0;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "quarry",
+   "title": "Old quarry",
+   "text": "a quarry cut into the hillside, its tools left lying, a cave behind its face",
+   "biomes": [
+    "hills"
+   ],
+   "weight": 1.0,
+   "guards": 2,
+   "loot": "Iron Ingot|1|3|0.8;Straw Rope|1|1|0.5",
+   "parts": [
+    "L=at;p=n13_cliffface#;x=-10;h=9;yaw=fixed;col=1",
+    "L=at;p=r12_cave#;x=-7;y=6;h=4;yaw=fixed;yawadd=180;col=1",
+    "L=scatter;p=r12_slab#;n=6;r=6;h=0.5-0.9;yaw=rand;col=1",
+    "L=at;p=r12_minecart#;x=3;y=-4;h=1.2;yaw=rand;col=1",
+    "L=at;p=s12_axe#;x=2;y=2;h=0.6;lie=1;yaw=rand;col=0",
+    "L=at;box=Chest;x=-5;y=7"
+   ]
+  },
+  {
+   "name": "hillside_vines",
+   "title": "Hillside vines",
+   "text": "old vines in rows on a sunny slope, and a few sheep among them",
+   "biomes": [
+    "hills"
+   ],
+   "weight": 1.0,
+   "herd": "Goat:4;r=12",
+   "uses": [
+    "do=forage;x=0;y=6;r=3;verb=pick;what=grapes;things=Grapes|2|4|1;reuse=600"
+   ],
+   "parts": [
+    "L=line;p=s12_stakes#;n=8;r=12;a=0;y=-4;h=1.2;yaw=fixed;col=0",
+    "L=line;p=s12_stakes#;n=8;r=12;a=0;y=0;h=1.2;yaw=fixed;col=0",
+    "L=line;p=s12_stakes#;n=8;r=12;a=0;y=4;h=1.2;yaw=fixed;col=0",
+    "L=line;p=l12_bush#;n=8;r=12;a=0;y=-2;h=1.0;yaw=rand;col=0",
+    "L=line;p=l12_bush#;n=8;r=12;a=0;y=2;h=1.0;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "combe",
+   "title": "Hidden combe",
+   "text": "a hidden valley tucked between the hills, a hermit's hut in it",
+   "biomes": [
+    "hills"
+   ],
+   "weight": 1.0,
+   "place": "low",
+   "folk": [
+    "Townsman|Hermit|You found the combe. Most walk past it on the ridge and never know./Take an apple. Tell no one./The hills keep their secrets in their folds.|5|-1"
+   ],
+   "uses": [
+    "do=forage;x=-6;y=6;r=3;verb=pick;what=apples;things=Wild Apples|2|3|1;reuse=600"
+   ],
+   "parts": [
+    "L=at;p=s12_stonehouse#;h=4;yaw=fixed;col=1",
+    "L=scatter;p=n13_appletree#;n=3;r=10;r0=6;h=4.5;yaw=rand;col=1",
+    "L=at;p=campfire;x=5;y=-3;s=1;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "peat_hags",
+   "title": "Peat hags",
+   "text": "black peat hags and sinking ground; lights drift over them at night",
+   "biomes": [
+    "highland moorland"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=bog;x=0;y=0;r=8"
+   ],
+   "uses": [
+    "do=lore;x=-12;y=4;r=3;verb=look at;what=peat hags;text=The lights drift over the bog at night. Follow them and the moor keeps you."
+   ],
+   "parts": [
+    "L=patch;r=12;hb=0.25;tint=0.11,0.09,0.07",
+    "L=scatter;p=n13_moss#;n=20;r=11;h=0.3;yaw=rand;col=0",
+    "L=scatter;fx=wisps;n=3;r=8;z=1.2;s=0.5;hours=night"
+   ]
+  },
+  {
+   "name": "tor",
+   "title": "Tor",
+   "text": "a wind-sculpted granite stack on the hilltop: a lookout, and a lair",
+   "biomes": [
+    "highland moorland",
+    "hills"
+   ],
+   "weight": 1.0,
+   "place": "rise",
+   "guards": 1,
+   "uses": [
+    "do=climb;edge=1;r=3.5;verb=climb;what=tor;tz=5;reveal=2000;reuse=5;text=The granite is warm in the sun. The moor rolls away in every direction."
+   ],
+   "parts": [
+    "L=at;p=l12_boulder#;h=4;yaw=rand;col=1;sink=30",
+    "L=at;p=l12_boulder#;z=3.4;h=3;yaw=rand;col=1",
+    "L=scatter;p=l12_boulder#;n=5;r=8;r0=5;h=1.5-2.5;yaw=rand;col=1;sink=30"
+   ]
+  },
+  {
+   "name": "heather_gorse",
+   "title": "Heather and gorse",
+   "text": "heather blooming purple and gorse gold, dry enough to burn",
+   "biomes": [
+    "highland moorland",
+    "hills"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=forage;x=0;y=0;r=3;verb=gather;what=heather;things=Herbs|1|2|1;reuse=600;text=Heather tips, for a tea. Gorse flowers smell of coconut in the sun."
+   ],
+   "parts": [
+    "L=scatter;p=l12_gorse#;n=14;r=12;h=1.0-1.5;yaw=rand;col=0",
+    "L=scatter;p=n13_flowers#;n=120;r=12;h=0.3-0.5;yaw=rand;col=0;inst=1",
+    "L=scatter;fx=butterflies;n=2;r=6;z=1;s=1;hours=day"
+   ]
+  },
+  {
+   "name": "stone_row",
+   "title": "Stone row",
+   "text": "a row of standing stones, and the rings of old hut circles beside it",
+   "biomes": [
+    "highland moorland"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=-4;r=3;verb=walk along;what=stone row;text=It runs straight at the hill on the skyline. Whoever raised it lived in those rings of stone."
+   ],
+   "parts": [
+    "L=line;p=r12_standing#;n=8;r=20;a=0;h=1.4-2.2;yaw=rand;col=1",
+    "L=ring;p=n13_drystone#;n=6;r=4;x=8;y=10;s=0.6;yaw=face;yawadd=90;col=1",
+    "L=ring;p=n13_drystone#;n=6;r=4;x=-6;y=11;s=0.6;yaw=face;yawadd=90;col=1"
+   ]
+  },
+  {
+   "name": "peat_cutting",
+   "title": "Peat cutting",
+   "text": "peat banks cut into the moor, turves stacked to dry",
+   "biomes": [
+    "highland moorland"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=forage;x=0;y=8;r=3;verb=take;what=dried turves;things=Peat Turf|2|4|1;reuse=600;text=Dry enough to burn. The cutter won't miss a few."
+   ],
+   "parts": [
+    "L=ridge;r=2;r2=14;hb=1.0;a=0;y=-4;tint=0.14,0.11,0.08",
+    "L=scatter;p=n13_turfstack#;n=3;r=6;r0=3;y=4;s=1;yaw=rand;col=1",
+    "L=at;p=s12_axe#;x=2;y=0;h=0.6;lie=1;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "moor_mist",
+   "title": "Mist on the moor",
+   "text": "a rolling mist that hides the landmarks: easy to get lost in",
+   "biomes": [
+    "highland moorland"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=0;r=3;verb=stand in;what=mist;text=Every way looks the same. The stone row was to the north. Or was it?"
+   ],
+   "parts": [
+    "L=mist;r=70",
+    "L=scatter;p=l12_gorse#;n=7;r=12;r0=4;h=1.0-1.4;yaw=rand;col=0",
+    "L=scatter;p=r12_standing#;n=1;r=8;r0=6;h=1.8;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "bothy",
+   "title": "Shepherd's bothy",
+   "text": "a lonely bothy, its door unlocked for whoever needs it, a ruined shieling beyond",
+   "biomes": [
+    "highland moorland"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=heal;x=5;y=0;r=3;verb=rest in;what=bothy;reuse=300;text=A dry floor, a fireplace, a note asking you to leave kindling for the next one."
+   ],
+   "parts": [
+    "L=at;p=s12_stonehouse#;h=3.6;yaw=fixed;col=1",
+    "L=at;p=r12_wallbroken#;x=-12;y=6;h=1.6;yaw=rand;col=1",
+    "L=at;p=s12_bedding#;x=4;y=2;h=0.4;yaw=rand;col=0",
+    "L=at;p=campfire;x=5;y=-2;s=1;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "grouse_butts",
+   "title": "Grouse butts",
+   "text": "a line of shooting butts across the moor, a hunting lodge and its gamekeeper",
+   "biomes": [
+    "highland moorland"
+   ],
+   "weight": 1.0,
+   "folk": [
+    "Townsman|Gamekeeper|Keep to the path: the birds are sitting./The lord comes up for the season. Until then the moor is mine./You'll not have seen a fox? I've lost three hens to one.|-8|6"
+   ],
+   "uses": [
+    "do=trade;x=-8;y=4;r=3;verb=trade with;what=gamekeeper;give=Coarse Hide|1;get=Bread|2;reuse=120"
+   ],
+   "parts": [
+    "L=line;p=n13_drystone#;n=5;r=24;a=0;y=-8;s=0.6;yaw=fixed;col=1",
+    "L=at;p=house;x=-14;y=10;h=5;yaw=face;col=1",
+    "L=scatter;fx=crows;n=1;r=2;z=6;s=1"
+   ]
+  },
+  {
+   "name": "moor_ford",
+   "title": "Peat-water ford",
+   "text": "stepping stones over a stream running brown with peat",
+   "biomes": [
+    "highland moorland",
+    "hills"
+   ],
+   "weight": 1.0,
+   "need_water": "any",
+   "uses": [
+    "do=fish;x=1;y=-4;r=3;verb=fish;what=brown water;things=Fish|1|2|0.8;reuse=240;text=Trout, dark as the water."
+   ],
+   "parts": [
+    "L=line;p=rock;n=6;r=10;x=7;a=0;s=0.35-0.5;yaw=rand;col=1;sink=20",
+    "L=scatter;p=s12_reeds#;n=8;r=6;y=-6;h=1.2;yaw=rand;col=0"
+   ]
   }
  ],
  "mats": {
@@ -2102,5 +2461,6 @@
   "boreal pine forest",
   "taigas"
  ],
- "quiet_notice": 0.65
+ "quiet_notice": 0.65,
+ "_doc_phase4": "the fourth phase (2026-11-15): the hills and the highland moorland: 18 kinds; L=patch with poly= (an outline: the chalk figure); the moors' fog three times as often (RDSky's WeatherWeights)"
 }

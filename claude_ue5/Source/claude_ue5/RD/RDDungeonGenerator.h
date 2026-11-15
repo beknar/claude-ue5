@@ -1515,6 +1515,13 @@ public:
 	/** the high clouds' height, tile and wind (the volumetric clouds' CloudWind, else +X) into their material */
 	void ApplySkyHighLayer();
 	void TickSky7(float Dt, APlayerController* PC);
+	/** the weathers' turn's weights where she is (the regions' own: the cold lands' whiteout, the dry lands' dust, the moors' fog) */
+	void WeatherWeights(bool bDry, bool bWhiteLand, bool bDustLand, bool bMoorLand, float* Wt) const;
+	bool SkyMoorLand = false, SkyDryLand = false, SkyWhiteLand = false, SkyDustLand = false;
+	/** the turn's next weather from a hash (TickSky7; CountWeatherPicksHere runs it for the test) */
+	int32 PickWeather(uint32 H, int32 Current, bool bDry, bool bWhiteLand, bool bDustLand, bool bMoorLand) const;
+	/** (the fourth phase's test) "clear:412|fair:...": N turns of the weather's own pick where she stands, how often each came */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild13") FString CountWeatherPicksHere(int32 N) const;
 	void ApplySky7();
 	UPROPERTY(Transient) TObjectPtr<class UVolumetricCloudComponent> SkyClouds;
 	UPROPERTY(Transient) TObjectPtr<class UMaterialInstanceDynamic> SkyCloudMID;
@@ -2589,7 +2596,9 @@ public:
 	/** the list of 2026-11-14: a rise of the land laid as the ground is drawn (as the berm): "mound" a dome of radius Rm, "cone" a cone
 	 *  with a crater of Crater's share of it at the top, "ridge" a long bank Rm wide each side and R2m long each way along Yaw; Hm high */
 	/** (phase 2: Tint's alpha over 0 colours the ground under it that colour, bare of sand, mud, rock and snow: a salt pan's crust) */
-	class UProceduralMeshComponent* LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater, FLinearColor Tint = FLinearColor::Transparent);
+	/** (the fourth phase: Poly, an outline in the landform's frame (-1 to 1 of its reach), keeps only the quads inside it: a chalk figure
+	 *  cut into a slope) */
+	class UProceduralMeshComponent* LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater, FLinearColor Tint = FLinearColor::Transparent, const TArray<FVector2D>* Poly = nullptr);
 	/** the rises a kind's parts have laid so far (LayWildParts clears them as it begins; LayWildScenery after its uses and hazards), and
 	 *  the ground with them: what is laid after a mound stands on it */
 	struct FWildLand { FVector2D At = FVector2D::ZeroVector; FString Type; float R = 1.f, R2 = 1.f, H = 0.f, Yaw = 0.f, Crater = 0.f; };
@@ -2643,6 +2652,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildQuietNotice = 0.65f;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild13") float WildQuietScale = 1.f;
 	float WildQuietAt = -1.f;
+	/** the fourth phase: how deep she stands in a scenery's mist (0-1: the sky thickens the world's fog with it, as the port's), and each
+	 *  kind's mist reach (its "L=mist;r=" part, read once; 0: none) */
+	float WildMistWant = 0.f;
+	TMap<int32, float> WildSceneryMistR;
 	void LayWildScenery(ARDWildChunk* C, const FRDWildPlace& P);
 	void TickWildScenery13(float Dt, const FVector& Her);
 	/** a laid scenery's things: what F does (its uses), what hurts (its hazards), the effects its hours show, its herd */
