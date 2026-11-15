@@ -8,7 +8,7 @@
     "snowrock": ["/Game/FrozenNorseEnvironment/Meshes/SM_Cliff_01"],
     "spirerock": ["/Game/PureNature_AsianValley/Models/Cliffs/SM_ThinCliff_3", "/Game/FantasyCastle/Mesh/SM_RockPillar01"],
     "overhang": ["/Game/Hyper/ResourcePack/Environments/Cliffs/Cliff01/SM_Cliff01"],
-    "mossrock": ["/Game/FantasyCastle/Mesh/SM_ToothRockUpper", "/Game/FrozenNorseEnvironment/Meshes/SM_Horst_01", "/Game/Hyper/ResourcePack/Environments/Rocks/Mountain_RockFace_002/SM_MountainRock_Closed"],
+    "mossrock": ["/Game/FantasyCastle/Mesh/SM_ToothRockUpper", "/Game/Hyper/ResourcePack/Environments/Rocks/Mountain_RockFace_002/SM_MountainRock_Closed"],
     "stonegate": ["/Game/FrozenNorseEnvironment/Meshes/SM_Gate"],
     "barricade": ["/Game/WarCamp_Collection/Props/SM_Camp_Barricade/Meshes/FBX/SM_Camp_Barricade_Var1_SM_Barricade_Var1"],
     "woodgate": ["/Game/Hive_Sherwood/Meshes/SM_maingate"],

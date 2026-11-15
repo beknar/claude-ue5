@@ -888,6 +888,27 @@ struct FRDWildSiteKind : public FRDWildRuinKind
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FName> Quests;
 };
 
+/** the list of 2026-11-14 (docs/improvements13.txt: "for these biomes ... these are a list of scenery that are in them"): a piece of
+ *  a biome's scenery (a lone tree with a hanged man, a burrow town, a wagon wreck, a fairy ring ...): a structure's fields (its parts
+ *  laid by the ruins' layout language, its biomes, weight, water, loot, guards) and where it stands (Place: "" open ground, "road"
+ *  beside a road, "crossroads" where two roads meet, "rise" the highest ground near, "low" a hollow), what F does at it (Uses), what
+ *  hurts there (Hazards), the herd that roams it and its ambush (SourceArt/wilderness/scenery13.json, 926; RD/RDWildScenery13.cpp) */
+USTRUCT(BlueprintType)
+struct FRDWildSceneryKind : public FRDWildSiteKind
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Place;
+	/** "do=<loot|lore|heal|buff|honey|fish|forage|milestone|rumour|fairy>;x=..;y=..;r=..;things=Item|min|max|chance,...;text=..;
+	 *  verb=..;what=..;night=1;reuse=<s>" (x, y in the place's frame, metres) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Uses;
+	/** "kind=<collapse|sting|lurker|...>;x=..;y=..;r=..;p=.." */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Hazards;
+	/** a herd that roams it: "<fauna>:<count>;migrate=1;stampede=1" */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Herd;
+	/** its guards lie hidden until she comes within AmbushR metres, then hunt her (0: they keep watch as a ruin's) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float AmbushR = 0.f;
+};
+
 /** the list of 2026-11-12's fifth phase: a quest of the wilds, found at a structure (RD/RDWildQuest12.cpp; 924 quests from
  *  SourceArt/wilderness/quests12.json). Its stages are lines of key=value pairs ("do=kill;at=far;n=1;named=The Grey Widow;..."):
  *  do one of talk, choose, goto, kill, collect, escort, defend, capture, tame, deliver, rite, survive, strand, reward; at a point

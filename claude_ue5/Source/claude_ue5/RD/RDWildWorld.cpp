@@ -441,6 +441,9 @@ float FRDWildWorld::LandHeight(double X, double Y, bool bDetail, int32* OutB, in
 	for (int32 Q = 0; Q < N; ++Q)
 	{
 		H += W[Q] * ShapeHeight(Bi[Q], X, Y, Si[Q], bDetail);
+		// (the list of 2026-11-14: a biome's swales, low rises some 400 m apart, so a crest hides what lies beyond it ("rolling swales
+		// that hide what's over the next rise"), weighed as its shape is: no seam where it meets another)
+		if (Biomes[Bi[Q]].Swale > 0.f) H += W[Q] * Biomes[Bi[Q]].Swale * Fbm(X, Y, 1.0 / 420.0, 2, Seed + 141u);
 		if (Biomes[Bi[Q]].Shape == ERDWShape::RockyCoast) Rocky += W[Q];
 		if (Bi[Q] == FarmsBiome) Farm += W[Q];
 	}
@@ -689,6 +692,26 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 			if (D < Rr + 6.0 && H < L.Level) { Water = L.Level; Kind = L.Kind; }
 		}
 	}
+	// the dry channels (the list of 2026-11-14: "arroyos and dry creek beds that cut hidden paths below the horizon"): cut down into
+	// the land by their depth, a flat bed to Wall's share of the half width, then the wall up to the ground; eased in over the first
+	// and last 12 % of their length
+	float Chan = 0.f; int32 ChanKind = -1;
+	{
+		double Cd = 0, Ca = 0;
+		const int32 Ci = NearestChannel(X, Y, Cd, Ca);
+		if (Ci >= 0)
+		{
+			const FChannel& Ch = Channels[Ci];
+			const float T = (float)Cd / FMath::Max(Ch.W * 0.5f, 0.5f);
+			if (T < 1.f)
+			{
+				const float F = 1.f - RDWSmooth(FMath::Clamp(Ch.Wall, 0.f, 1.f) * 0.8f, 1.f, T);
+				const float Ta = RDWSmooth(0.f, 0.12f, (float)Ca) * RDWSmooth(0.f, 0.12f, 1.f - (float)Ca);
+				H -= Ch.D * F * Ta;
+				Chan = F * Ta; ChanKind = Ch.Kind;
+			}
+		}
+	}
 	// rivers and roads: the nearest segment of each
 	double Rd = 1e18, Rt = 0; int32 Ri = -1, Rs = -1;
 	double Dd = 1e18, Dt = 0; int32 Di = -1, Ds = -1;
@@ -720,6 +743,15 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 		const FRoad& R = Roads[Di];
 		const float Z = FMath::Lerp(R.Z[Ds], R.Z[Ds + 1], (float)Dt);
 		const float D = (float)Dd;
+		if (R.bTrack)
+		{
+			// (a track: a footpath 1.2 to 1.7 m from its middle, its bed eased over 6 m and the height it makes up, half a road's bank)
+			const float Wt = 1.f - RDWSmooth(1.6f, FMath::Min(6.f + 2.f * FMath::Abs(Z - H), (float)RDWRoadBankM * 0.5f), D);
+			H = FMath::Lerp(H, Z, Wt);
+			Road = 0.85f * (1.f - RDWSmooth(1.0f + 0.5f * Perlin(X / 7.0, Y / 7.0, Seed + 72u), 1.9f, D));
+		}
+		else
+		{
 		// (the road a cart and a half wide, its edges ragged: 2.3 to 3 m from its middle (it was 1.5 to 2.9, under the 2 m
 		// mesh's spacing); its bed levelled out to 12 m. Over a dip or through a rise its bank widens with the height it makes
 		// up, 2.5 m a metre, to RDWRoadBankM: eased in over 9 m whatever the height, a bed 10 m over the ground stood on a bank
@@ -727,6 +759,7 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 		const float Wt = 1.f - RDWSmooth(3.2f, FMath::Min(12.f + 2.5f * FMath::Abs(Z - H), (float)RDWRoadBankM), D);
 		H = FMath::Lerp(H, Z, Wt);
 		Road = 1.f - RDWSmooth(2.3f + 0.7f * Perlin(X / 9.0, Y / 9.0, Seed + 71u), 3.9f, D);
+		}
 		if (Road > 0.4f && Kind == 3) { Water = -1e9f; Kind = 0; }           // a ford: the road crosses dry
 	}
 	// the towns: their ground flat (their whole section and a margin), their region round them eased into it
@@ -765,8 +798,89 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 		}
 		if (D < 170.0) Road = 0.f;
 	}
-	if (Out) { Out->Water = Water; Out->WaterKind = Kind; Out->Road = Road; }
+	if (Out) { Out->Water = Water; Out->WaterKind = Kind; Out->Road = Road; Out->Chan = Road > 0.3f ? 0.f : Chan; Out->ChanKind = ChanKind; }
 	return H;
+}
+
+// ------------------------------------------------------------------------------------------------ the list of 2026-11-14's channels
+int32 FRDWildWorld::NearestChannel(double X, double Y, double& Dist, double& Along) const
+{
+	if (Channels.Num() == 0) return -1;
+	const FIntPoint Hc(FMath::FloorToInt(X / HashM), FMath::FloorToInt(Y / HashM));
+	const FVector2D P(X, Y);
+	double Best = 1e18; int32 Bi = -1;
+	for (auto It = ChanHash.CreateConstKeyIterator(Hc); It; ++It)
+	{
+		const uint32 V = It.Value();
+		const int32 I = (V >> 16) & 0xFFFF, Sg = V & 0xFFFF;
+		const FChannel& C = Channels[I];
+		double T; const double D = RDWSegDist(P, C.P[Sg], C.P[Sg + 1], T);
+		if (D < Best) { Best = D; Bi = I; Along = (Sg + T) / FMath::Max(1, C.P.Num() - 1); }
+	}
+	Dist = Best;
+	return Bi;
+}
+
+void FRDWildWorld::MakeChannels()
+{
+	// (each rule's channels: n a region cell of its biomes (a fraction a chance), each a line wandering from a point within 5 km of
+	// the cell's site in 20 m steps, its way turning by a noise; it stops at water, the sea's edge and a town's level ground)
+	Channels.Reset(); ChanHash.Reset(); ChannelNames.Reset();
+	auto Range = [](const TMap<FString, FString>& M, const TCHAR* K, float Lo, float Hi, float U)
+	{
+		const FString* V = M.Find(K); if (!V) return FMath::Lerp(Lo, Hi, U);
+		FString A, B; if (V->Split(TEXT("-"), &A, &B) && !A.IsEmpty()) return FMath::Lerp(FCString::Atof(*A), FCString::Atof(*B), U);
+		return FCString::Atof(**V);
+	};
+	for (int32 Ri = 0; Ri < ChannelRules.Num(); ++Ri)
+	{
+		TMap<FString, FString> M;
+		{ TArray<FString> Kv; ChannelRules[Ri].ParseIntoArray(Kv, TEXT(";"), true); for (const FString& Q : Kv) { FString K, V; if (Q.Split(TEXT("="), &K, &V)) M.Add(K.TrimStartAndEnd(), V.TrimStartAndEnd()); } }
+		ChannelNames.Add(M.FindRef(TEXT("name")));
+		TArray<FString> Bs; M.FindRef(TEXT("biomes")).ParseIntoArray(Bs, TEXT(","), true);
+		TSet<int32> Want; for (FString& B : Bs) { B.TrimStartAndEndInline(); if (const int32* Bi = BiomeIndex.Find(B)) Want.Add(*Bi); }
+		const float Per = M.Contains(TEXT("n")) ? FCString::Atof(*M[TEXT("n")]) : 1.f;
+		const float Turn = M.Contains(TEXT("turn")) ? FCString::Atof(*M[TEXT("turn")]) : 12.f;
+		for (int32 Ci = 0; Ci < CellBiome.Num(); ++Ci)
+		{
+			if (!Want.Contains(CellBiome[Ci])) continue;
+			const uint32 Hs = Hash(Ci, Ri, Seed + 1401u);
+			int32 N = FMath::FloorToInt(Per); if (Rand01(Ci, Ri, Seed + 1402u) < Per - N) ++N;
+			for (int32 K = 0; K < N; ++K)
+			{
+				const uint32 Sk = Hs + 977u * K;
+				FChannel Ch; Ch.Kind = Ri;
+				Ch.W = Range(M, TEXT("w"), 8.f, 14.f, Rand01(Sk, 1, Seed)); Ch.D = Range(M, TEXT("d"), 2.f, 3.5f, Rand01(Sk, 2, Seed));
+				Ch.Wall = M.Contains(TEXT("wall")) ? FCString::Atof(*M[TEXT("wall")]) : 0.5f;
+				const float Len = Range(M, TEXT("len"), 600.f, 1400.f, Rand01(Sk, 3, Seed));
+				const FVector2D C0 = CellSite.IsValidIndex(Ci) ? CellSite[Ci] : FVector2D::ZeroVector;
+				FVector2D P = C0 + FVector2D(Rand01(Sk, 4, Seed) - 0.5, Rand01(Sk, 5, Seed) - 0.5) * 10000.0;
+				double Ang = Rand01(Sk, 6, Seed) * 2.0 * PI;
+				for (double L = 0.0; L <= Len; L += 20.0)
+				{
+					if (Continent(P.X, P.Y) < 0.03f) break;
+					double Dt; NearestTown(P.X, P.Y, Dt);
+					if (Dt < 1500.0) break;
+					FRDWSample S; Sample(P.X, P.Y, S, false);
+					if (S.WaterKind != 0 || S.H < 3.f || !Want.Contains(S.Biome)) break;
+					Ch.P.Add(P);
+					Ang += FMath::DegreesToRadians(Turn) * Perlin(L / 160.0 + Sk % 101, Sk % 37, Seed + 1403u) * 2.0;
+					P += FVector2D(FMath::Cos(Ang), FMath::Sin(Ang)) * 20.0;
+				}
+				if (Ch.P.Num() < 12) continue;
+				Ch.Box = FBox2D(Ch.P);
+				const int32 Idx = Channels.Add(MoveTemp(Ch));
+				const FChannel& C = Channels[Idx];
+				if (Idx > 0xFFFF) break;
+				for (int32 Sg = 0; Sg + 1 < C.P.Num(); ++Sg)
+				{
+					const FBox2D Bx = FBox2D(TArray<FVector2D>{ C.P[Sg], C.P[Sg + 1] }).ExpandBy(C.W + 4.0);
+					for (int32 I = FMath::FloorToInt(Bx.Min.X / HashM); I <= FMath::FloorToInt(Bx.Max.X / HashM); ++I)
+						for (int32 J = FMath::FloorToInt(Bx.Min.Y / HashM); J <= FMath::FloorToInt(Bx.Max.Y / HashM); ++J) ChanHash.Add(FIntPoint(I, J), ((uint32)Idx << 16) | (uint32)Sg);
+				}
+			}
+		}
+	}
 }
 
 float FRDWildWorld::BareHeight(double X, double Y) const
@@ -804,6 +918,7 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 		const FRDWildBiome& B = Biomes[Bi[Q]];
 		const float Wq = W[Q];
 		H += Wq * ShapeHeight(Bi[Q], X, Y, Si[Q], bDetail);
+		if (B.Swale > 0.f) H += Wq * B.Swale * Fbm(X, Y, 1.0 / 420.0, 2, Seed + 141u);          // (as LandHeight: the swales)
 		if (B.Shape == ERDWShape::RockyCoast) Rocky += Wq;
 		if (B.Shape == ERDWShape::Marsh) Marsh += Wq;
 		if (Q == N - 1) H += LandRelief(X, Y, bDetail, Bi, W, N);
@@ -853,6 +968,9 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 	H = Feature(X, Y, H, &Fs);
 	if (Fs.WaterKind != 0) { Water = Fs.Water; Kind = Fs.WaterKind; }
 	else if (Kind == 5 && H >= Water) { Water = -1e9f; Kind = 0; }
+	// (the list of 2026-11-14: a dry channel's bed, sand and gravel washed down it)
+	O.Chan = Fs.Chan; O.ChanKind = Fs.ChanKind;
+	if (Fs.Chan > 0.f) Sand = FMath::Max(Sand, Fs.Chan * 0.85f);
 	if (C < 0.f && H < 0.f && Kind == 0) { Water = 0.f; Kind = 1; }
 	if (Kind == 0 && H < 0.f && C < 0.02f) { Water = 0.f; Kind = 1; }
 	// (the list of 2026-11-11: round the port the land, the sea floor and the sea lifted together, the sea to its harbour's water)
@@ -1271,6 +1389,7 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 	const double T0 = FPlatformTime::Seconds();
 	Seed = InSeed; Biomes = InBiomes;
 	{ FScopeLock Lk(&SiteCache->Lock); SiteCache->Cells.Reset(); }
+	{ FScopeLock Lk(&SceneryCache->Lock); SceneryCache->Cells.Reset(); }
 	BiomeIndex.Reset();
 	for (int32 I = 0; I < Biomes.Num(); ++I) BiomeIndex.Add(Biomes[I].Name, I);
 	if (Biomes.Num() == 0) { FRDWildBiome B; B.Name = TEXT("grasslands"); Biomes.Add(B); BiomeIndex.Add(B.Name, 0); }
@@ -1306,9 +1425,15 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 		for (int32 I = FMath::FloorToInt((P.C.X - Pad) / HashM); I <= FMath::FloorToInt((P.C.X + Pad) / HashM); ++I)
 			for (int32 J = FMath::FloorToInt((P.C.Y - Pad) / HashM); J <= FMath::FloorToInt((P.C.Y + Pad) / HashM); ++J) PondHash.Add(FIntPoint(I, J), K);
 	}
+	// (the channels after the rivers and lakes are hashed: they stop at water (PR #65's review: cut before, they ran across rivers
+	// and cut a lake's shore under its level, dry))
 	HashSegments();
+	MakeChannels();
 	MakeRoads();
 	HashSegments();
+	MakeTracks();
+	HashSegments();
+	MakeCrossroads();
 	BaseH = Towns[0].H;
 	MakeQuestPlaces();
 	bReady = true;
@@ -1574,6 +1699,7 @@ bool FRDWildWorld::FindPlace(int32 Id, FRDWildPlace& Out) const
 		FarmsteadsIn(Gi * GreatFieldM, Gj * GreatFieldM, (Gi + 1) * GreatFieldM, (Gj + 1) * GreatFieldM, Ps);
 	}
 	else if (Id >= SiteIdBase) SitesIn(FIntPoint(((Id - SiteIdBase) >> 12) & 0xFFF, (Id - SiteIdBase) & 0xFFF), Ps);          // (a structure)
+	else if (Id >= SceneryIdBase) SceneryIn(FIntPoint(((Id - SceneryIdBase) >> 10) & 0x3FF, (Id - SceneryIdBase) & 0x3FF), Ps);          // (a piece of scenery)
 	else PlacesIn(FIntPoint((Id >> 14) & 0x3FF, (Id >> 4) & 0x3FF), Ps);
 	for (const FRDWildPlace& P : Ps) if (P.Id == Id) { Out = P; return true; }
 	return false;
@@ -1808,5 +1934,342 @@ void FRDWildWorld::PoisIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 	P.Id = PoiIdBase + ((Cell.X & 0xFFF) << 12) + (Cell.Y & 0xFFF);          // (12 bits a cell: 2500 cells across)
 	P.Kind = PoiKinds[Ki].Name.ToString(); P.Name = PoiKinds[Ki].Title; P.At = At; P.H = S.H; P.Biome = S.Biome; P.Poi = Ki;
 	P.Tier = TierAt(At.X, At.Y); P.Yaw = Rand01(Cell.X, Cell.Y, Seed + 916u) * 360.f;
+	Out.Add(P);
+}
+
+// ================================================================================================ the list of 2026-11-14's scenery
+void FRDWildWorld::MakeCrossroads()
+{
+	// (where roads meet: a road point where another road's segment comes within 12 m and either crosses it (35 degrees or more) or
+	// parts from it (400 m on or back along this road the other is 60 m off): the roads run between the towns and are smoothed, so
+	// they cross rarely and part at narrow angles (the first rule, crossings only, found none within 50 km of Brokenspire). One a
+	// 250 m)
+	Crossroads.Reset();
+	auto DistTo = [&](const FVector2D& P, int32 J)
+	{
+		double Best = 1e18;
+		const FIntPoint Hc(FMath::FloorToInt(P.X / HashM), FMath::FloorToInt(P.Y / HashM));
+		for (int32 Di = -1; Di <= 1; ++Di) for (int32 Dj = -1; Dj <= 1; ++Dj)
+			for (auto It = SegHash.CreateConstKeyIterator(Hc + FIntPoint(Di, Dj)); It; ++It)
+			{
+				const uint32 V = It.Value();
+				if ((V >> 31) == 0 || (int32)((V >> 16) & 0x7FFF) != J) continue;
+				const int32 Sg = V & 0xFFFF; double T;
+				Best = FMath::Min(Best, RDWSegDist(P, Roads[J].P[Sg], Roads[J].P[Sg + 1], T));
+			}
+		return Best;
+	};
+	for (int32 Ri = 0; Ri < Roads.Num(); ++Ri)
+	{
+		const FRoad& R = Roads[Ri];
+		for (int32 I = 1; I + 1 < R.P.Num(); ++I)
+		{
+			const FVector2D P = R.P[I];
+			const FVector2D Dir = (R.P[I + 1] - R.P[I - 1]).GetSafeNormal();
+			const FIntPoint Hc(FMath::FloorToInt(P.X / HashM), FMath::FloorToInt(P.Y / HashM));
+			bool bMeet = false;
+			for (auto It = SegHash.CreateConstKeyIterator(Hc); It && !bMeet; ++It)
+			{
+				const uint32 V = It.Value();
+				if ((V >> 31) == 0) continue;
+				const int32 J = (V >> 16) & 0x7FFF, Sg = V & 0xFFFF;
+				if (J == Ri) continue;
+				double T; const double D = RDWSegDist(P, Roads[J].P[Sg], Roads[J].P[Sg + 1], T);
+				if (D > 12.0) continue;
+				const FVector2D Od = (Roads[J].P[Sg + 1] - Roads[J].P[Sg]).GetSafeNormal();
+				if (FMath::Abs(FVector2D::DotProduct(Dir, Od)) < FMath::Cos(FMath::DegreesToRadians(35.f))) { bMeet = true; break; }
+				// (a fork: the two run together here and apart 400 m on or back (the points are 25 m apart))
+				const int32 Ia = FMath::Max(0, I - 16), Ib = FMath::Min(R.P.Num() - 1, I + 16);
+				if (DistTo(R.P[Ia], J) > 60.0 || DistTo(R.P[Ib], J) > 60.0) bMeet = true;
+			}
+			if (!bMeet) continue;
+			// (a town's roads part 1.2 to 2 km from its middle (each leaves by the gate and runs 1 km out before its way is found):
+			// kept from 1.1 km, past the town's level ground)
+			double Dt; NearestTown(P.X, P.Y, Dt);
+			if (Dt < 1100.0) continue;
+			if (Crossroads.ContainsByPredicate([&](const FVector2D& Q) { return FVector2D::DistSquared(Q, P) < 250.0 * 250.0; })) continue;
+			Crossroads.Add(P);
+		}
+	}
+}
+
+void FRDWildWorld::MakeTracks()
+{
+	// (from points of each town road every ~2.5 km (none within 2 km of its ends), a track three times in five, leaving it at 55 to 90
+	// degrees to a side and wandering on 1.5 to 4 km in 25 m steps; a third of the tracks send one of their own off half way. A track
+	// stops at water, the sea's edge and a town's level ground; its bed is the land's height smoothed along it)
+	const int32 NRoads = Roads.Num();
+	auto Grow = [&](const FVector2D& From, double Ang, double Len, uint32 Sk) -> int32
+	{
+		FRoad T; T.bTrack = true;
+		FVector2D P = From;
+		for (double L = 0.0; L <= Len; L += 25.0)
+		{
+			if (L > 0.0)
+			{
+				if (Continent(P.X, P.Y) < 0.02f) break;
+				double Dt; NearestTown(P.X, P.Y, Dt);
+				if (Dt < 1200.0) break;
+				FRDWSample S; Sample(P.X, P.Y, S, false);
+				if (S.WaterKind != 0 || S.H < 2.f) break;
+			}
+			T.P.Add(P);
+			Ang += FMath::DegreesToRadians(10.0) * Perlin(L / 180.0 + Sk % 113, Sk % 41, Seed + 1501u) * 2.0;
+			P += FVector2D(FMath::Cos(Ang), FMath::Sin(Ang)) * 25.0;
+		}
+		if (T.P.Num() < 20) return -1;
+		for (const FVector2D& Q : T.P) T.Z.Add(LandHeight(Q.X, Q.Y, false));
+		for (int32 Pass = 0; Pass < 4; ++Pass)
+		{
+			TArray<float> Z = T.Z;
+			for (int32 I = 1; I + 1 < Z.Num(); ++I) T.Z[I] = (Z[I - 1] + Z[I] * 2.f + Z[I + 1]) * 0.25f;
+		}
+		// (its first point on the road's own bed: the road levels the ground there)
+		T.Box = FBox2D(T.P);
+		return Roads.Add(MoveTemp(T));
+	};
+	for (int32 Ri = 0; Ri < NRoads; ++Ri)
+	{
+		const TArray<FVector2D> Pts = Roads[Ri].P;
+		const TArray<float> Zs = Roads[Ri].Z;
+		double Along = 0.0, Total = 0.0;
+		for (int32 I = 0; I + 1 < Pts.Num(); ++I) Total += FVector2D::Distance(Pts[I], Pts[I + 1]);
+		double Next = 2000.0;
+		for (int32 I = 1; I + 1 < Pts.Num(); ++I)
+		{
+			Along += FVector2D::Distance(Pts[I - 1], Pts[I]);
+			if (Along < Next || Total - Along < 2000.0) continue;
+			Next = Along + 2500.0;
+			const uint32 Sk = Hash(Ri, I, Seed + 1502u);
+			if (Rand01(Ri, I, Seed + 1503u) > 0.6f) continue;
+			const FVector2D Dir = (Pts[I + 1] - Pts[I - 1]).GetSafeNormal();
+			const double Side = Rand01(Ri, I, Seed + 1504u) < 0.5f ? 1.0 : -1.0;
+			const double Ang = FMath::Atan2(Dir.Y, Dir.X) + Side * FMath::DegreesToRadians(55.0 + 35.0 * Rand01(Ri, I, Seed + 1505u));
+			// (it starts 3 m off the road's middle, inside its bed: the two meet there)
+			const FVector2D Start = Pts[I] + FVector2D(FMath::Cos(Ang), FMath::Sin(Ang)) * 3.0;
+			const int32 Ti = Grow(Start, Ang, 1500.0 + 2500.0 * Rand01(Ri, I, Seed + 1506u), Sk);
+			if (Ti < 0) continue;
+			Roads[Ti].Z[0] = Zs[I];
+			if (Rand01(Ri, I, Seed + 1507u) < 0.33f)
+			{
+				const FRoad& T = Roads[Ti];
+				const int32 M = T.P.Num() / 2;
+				const FVector2D Td = (T.P[M + 1] - T.P[M - 1]).GetSafeNormal();
+				const double S2 = Rand01(Ri, I, Seed + 1508u) < 0.5f ? 1.0 : -1.0;
+				const double A2 = FMath::Atan2(Td.Y, Td.X) + S2 * FMath::DegreesToRadians(60.0 + 30.0 * Rand01(Ri, I, Seed + 1509u));
+				const FVector2D From = T.P[M];
+				const float Z0 = T.Z[M];
+				const int32 T2 = Grow(From + FVector2D(FMath::Cos(A2), FMath::Sin(A2)) * 2.0, A2, 1000.0 + 1500.0 * Rand01(Ri, I, Seed + 1510u), Sk + 7u);
+				if (T2 >= 0) Roads[T2].Z[0] = Z0;
+			}
+		}
+	}
+}
+
+void FRDWildWorld::SceneryIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
+{
+	{
+		FScopeLock Lk(&SceneryCache->Lock);
+		if (const TArray<FRDWildPlace>* Got = SceneryCache->Cells.Find(Cell)) { Out.Append(*Got); return; }
+	}
+	TArray<FRDWildPlace> Mine;
+	SceneryInCell(Cell, Mine);
+	Out.Append(Mine);
+	FScopeLock Lk(&SceneryCache->Lock);
+	SceneryCache->Cells.Add(Cell, MoveTemp(Mine));
+}
+
+void FRDWildWorld::SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
+{
+	if (SceneryKinds.Num() == 0 || Cell.X < 0 || Cell.Y < 0 || Cell.X > 0x3FF || Cell.Y > 0x3FF) return;
+	const double X0 = Xs + Cell.X * SceneryCellM, Y0 = Yw + Cell.Y * SceneryCellM;
+	if (X0 < Xs || X0 + SceneryCellM > Xn || Y0 < Yw || Y0 + SceneryCellM > Ye) return;
+	if (Rand01(Cell.X, Cell.Y, Seed + 1301u) > SceneryFill) return;
+	{
+		double Dt; NearestTown(X0 + SceneryCellM * 0.5, Y0 + SceneryCellM * 0.5, Dt);
+		if (Dt < 900.0) return;
+	}
+	// (its kind first, by the region at the cell's middle and the kinds' weights; a spot then as its kind asks; where none is found,
+	// a kind of open ground)
+	const int32 Bc = BiomeAt(X0 + SceneryCellM * 0.5, Y0 + SceneryCellM * 0.5);
+	const FString Bn = BiomeName(Bc);
+	// (a cell that holds a crossroads takes a kind that stands at one four times in five, one a road crosses a roadside kind two in five:
+	// drawn among all kinds, the 155 crossroads of a world held one of their kinds about one time in nine)
+	FString Only;
+	{
+		bool bCross = false, bRoad = false;
+		for (const FVector2D& Q : Crossroads) if (Q.X >= X0 && Q.X < X0 + SceneryCellM && Q.Y >= Y0 && Q.Y < Y0 + SceneryCellM) { bCross = true; break; }
+		if (!bCross)
+			for (int32 I = FMath::FloorToInt(X0 / HashM); I <= FMath::FloorToInt((X0 + SceneryCellM) / HashM) && !bRoad; ++I)
+				for (int32 J = FMath::FloorToInt(Y0 / HashM); J <= FMath::FloorToInt((Y0 + SceneryCellM) / HashM) && !bRoad; ++J)
+					for (auto It = SegHash.CreateConstKeyIterator(FIntPoint(I, J)); It; ++It)
+					{
+						const uint32 V = It.Value();
+						if ((V >> 31) == 0) continue;
+						const FVector2D M = Roads[(V >> 16) & 0x7FFF].P[V & 0xFFFF];
+						if (M.X >= X0 && M.X < X0 + SceneryCellM && M.Y >= Y0 && M.Y < Y0 + SceneryCellM) { bRoad = true; break; }
+					}
+		const float U = Rand01(Cell.X, Cell.Y, Seed + 1304u);
+		if (bCross && U < 0.8f) Only = TEXT("crossroads");
+		else if (bRoad && U < 0.4f) Only = TEXT("road");
+	}
+	auto Pick = [&](bool bOpenOnly, uint32 Salt)
+	{
+		TArray<float> Wt; float Sum = 0.f;
+		for (const FRDWildSceneryKind& K : SceneryKinds)
+		{
+			const bool bFit = (K.Biomes.Contains(TEXT("*")) || K.Biomes.Contains(Bn)) && !(bOpenOnly && (!K.Place.IsEmpty() || !K.NeedWater.IsEmpty()))
+				&& (bOpenOnly || Only.IsEmpty() || K.Place == Only);
+			const float W = bFit ? FMath::Max(K.Weight, 0.f) : 0.f; Wt.Add(W); Sum += W;
+		}
+		if (Sum <= 0.f) return -1;
+		float U = Rand01(Cell.X, Cell.Y, Seed + Salt) * Sum;
+		for (int32 I = 0; I < Wt.Num(); ++I) { if (Wt[I] <= 0.f) continue; if (U < Wt[I]) return I; U -= Wt[I]; }
+		for (int32 I = Wt.Num() - 1; I >= 0; --I) if (Wt[I] > 0.f) return I;
+		return -1;
+	};
+	auto Fine = [&](const FVector2D& At, FRDWSample& S, float MaxRise, bool bRoadOk) -> bool
+	{
+		// (dry, on its region, off the fields, yards and lava, off a road unless it stands by one; gentle over a 10 m ring; clear of
+		// the quests' places, the places (120 m) and the structures (150 m))
+		Sample(At.X, At.Y, S, false);
+		if (S.WaterKind != 0 || S.H < 2.f || S.Lava > 0.3f || S.Field > 0.3f || S.FarmKind == 4 || (!bRoadOk && S.Road > 0.05f)) return false;
+		if (BiomeName(S.Biome) != Bn) return false;
+		{ double Dt; NearestTown(At.X, At.Y, Dt); if (Dt < 1000.0) return false; }
+		float Lo = S.H, Hi = S.H;
+		for (int32 K = 0; K < 8; ++K) { const double A = K * PI / 4.0; const float Hk = Height(At.X + FMath::Cos(A) * 10.0, At.Y + FMath::Sin(A) * 10.0); Lo = FMath::Min(Lo, Hk); Hi = FMath::Max(Hi, Hk); }
+		if (Hi - Lo > MaxRise) return false;
+		for (const FRDWildPlace& Q : QuestPlaces) if (FVector2D::Distance(Q.At, At) < 150.0) return false;
+		return true;
+	};
+	auto ClearOfPlaces = [&](const FVector2D& At) -> bool
+	{
+		const FIntPoint Pc = PlaceCellOf(At.X, At.Y);
+		TArray<FRDWildPlace> Ps;
+		for (int32 I = -1; I <= 1; ++I) for (int32 J = -1; J <= 1; ++J) PlacesIn(Pc + FIntPoint(I, J), Ps);
+		for (const FRDWildPlace& P : Ps) if (FVector2D::Distance(P.At, At) < 120.0) return false;
+		const FIntPoint Sc = SiteCellOf(At.X, At.Y);
+		TArray<FRDWildPlace> Ss;
+		for (int32 I = -1; I <= 1; ++I) for (int32 J = -1; J <= 1; ++J) SitesIn(Sc + FIntPoint(I, J), Ss);
+		for (const FRDWildPlace& P : Ss) if (FVector2D::Distance(P.At, At) < 150.0) return false;
+		// (PR #65's review: inside its own cell by 50 m, so a shore or roadside spot does not meet the next cell's scenery; 40 m from
+		// the points of interest and 70 m from the farmsteads)
+		if (At.X < X0 + 50.0 || At.X > X0 + SceneryCellM - 50.0 || At.Y < Y0 + 50.0 || At.Y > Y0 + SceneryCellM - 50.0) return false;
+		const FIntPoint Qc = PoiCellOf(At.X, At.Y);
+		TArray<FRDWildPlace> Qs;
+		for (int32 I = -1; I <= 1; ++I) for (int32 J = -1; J <= 1; ++J) PoisIn(Qc + FIntPoint(I, J), Qs);
+		for (const FRDWildPlace& P : Qs) if (FVector2D::Distance(P.At, At) < 40.0) return false;
+		TArray<FRDWildPlace> Fs; FarmsteadsIn(At.X - 120.0, At.Y - 120.0, At.X + 120.0, At.Y + 120.0, Fs);
+		for (const FRDWildPlace& P : Fs) if (FVector2D::Distance(P.At, At) < 70.0) return false;
+		return true;
+	};
+	auto Spot = [&](int32 Ki, FVector2D& At, FRDWSample& S, float& Yaw) -> bool
+	{
+		const FRDWildSceneryKind& K = SceneryKinds[Ki];
+		Yaw = Rand01(Cell.X, Cell.Y, Seed + 1305u) * 360.f;
+		auto Try = [&](int32 T) { return FVector2D(X0 + (0.1 + 0.8 * Rand01(Cell.X, Cell.Y, Seed + 1306u + T * 41u)) * SceneryCellM, Y0 + (0.1 + 0.8 * Rand01(Cell.X, Cell.Y, Seed + 1307u + T * 41u)) * SceneryCellM); };
+		if (K.Place == TEXT("crossroads"))
+		{
+			// (the crossroads in the cell, 9 m off the meeting, facing it)
+			for (const FVector2D& Q : Crossroads)
+			{
+				if (Q.X < X0 || Q.X >= X0 + SceneryCellM || Q.Y < Y0 || Q.Y >= Y0 + SceneryCellM) continue;
+				for (int32 A = 0; A < 8; ++A)
+				{
+					const double Ang = (A + 0.5) * PI / 4.0;
+					const FVector2D C = Q + FVector2D(FMath::Cos(Ang), FMath::Sin(Ang)) * 9.0;
+					if (!Fine(C, S, 3.f, true) || S.Road > 0.3f) continue;
+					At = C; Yaw = FMath::RadiansToDegrees(Ang) + 180.f; return true;
+				}
+			}
+			return false;
+		}
+		if (K.Place == TEXT("road"))
+		{
+			// (a point of a road through the cell, stepped 10 m off it to the side the hash picks, facing the road)
+			const int32 I0 = FMath::FloorToInt(X0 / HashM), I1 = FMath::FloorToInt((X0 + SceneryCellM) / HashM);
+			const int32 J0 = FMath::FloorToInt(Y0 / HashM), J1 = FMath::FloorToInt((Y0 + SceneryCellM) / HashM);
+			TArray<TPair<FVector2D, FVector2D>> Pts;
+			for (int32 I = I0; I <= I1; ++I)
+				for (int32 J = J0; J <= J1; ++J)
+					for (auto It = SegHash.CreateConstKeyIterator(FIntPoint(I, J)); It; ++It)
+					{
+						const uint32 V = It.Value();
+						if ((V >> 31) == 0) continue;
+						const FRoad& R = Roads[(V >> 16) & 0x7FFF]; const int32 Sg = V & 0xFFFF;
+						const FVector2D M = (R.P[Sg] + R.P[Sg + 1]) * 0.5;
+						if (M.X >= X0 && M.X < X0 + SceneryCellM && M.Y >= Y0 && M.Y < Y0 + SceneryCellM) Pts.Add({ M, (R.P[Sg + 1] - R.P[Sg]).GetSafeNormal() });
+					}
+			for (int32 T = 0; T < 6 && Pts.Num() > 0; ++T)
+			{
+				const auto& Pr = Pts[FMath::Min(Pts.Num() - 1, (int32)(Rand01(Cell.X, Cell.Y, Seed + 1308u + T * 13u) * Pts.Num()))];
+				const FVector2D Side(-Pr.Value.Y, Pr.Value.X);
+				const double Sd = Rand01(Cell.X, Cell.Y, Seed + 1309u + T) < 0.5 ? -1.0 : 1.0;
+				const FVector2D C = Pr.Key + Side * Sd * 10.0;
+				if (!Fine(C, S, 3.f, true) || S.Road > 0.2f) continue;
+				At = C; Yaw = FMath::RadiansToDegrees(FMath::Atan2(-Side.Y * Sd, -Side.X * Sd)); return true;
+			}
+			return false;
+		}
+		const FString& Wn = K.NeedWater;
+		if (!Wn.IsEmpty())
+		{
+			// (water of its kind within 400 m of a spot (16 rays, 10 m steps; ponds and marsh pools too), its middle on the shore)
+			const int32 Want = Wn == TEXT("sea") ? 1 : Wn == TEXT("lake") ? 2 : Wn == TEXT("river") ? 3 : Wn == TEXT("pond") ? 4 : 0;
+			for (int32 T = 0; T < 3; ++T)
+			{
+				const FVector2D C = Try(T);
+				for (int32 Ray = 0; Ray < 16; ++Ray)
+				{
+					const FVector2D D(FMath::Cos(Ray * PI / 8.0), FMath::Sin(Ray * PI / 8.0));
+					for (double Rr = 10.0; Rr <= 400.0; Rr += 10.0)
+					{
+						FRDWSample Sq; Sample(C.X + D.X * Rr, C.Y + D.Y * Rr, Sq, false);
+						if (Sq.WaterKind == 0) continue;
+						if ((Want != 0 && Sq.WaterKind != Want && !(Want == 4 && Sq.WaterKind == 5)) || Sq.WaterKind == 6 || Sq.Water < Sq.H + 0.3f) break;
+						// (back to the shore: the first dry ground, 4 m on)
+						for (double Bk = Rr; Bk > 0.0; Bk -= 2.0)
+						{
+							const FVector2D Q = C + D * Bk;
+							FRDWSample Sb; Sample(Q.X, Q.Y, Sb, false);
+							if (Sb.WaterKind == 0 || Sb.Water <= Sb.H)
+							{
+								const FVector2D Sh = Q - D * 4.0;
+								if (!Fine(Sh, S, 3.5f, false)) break;
+								At = Sh; Yaw = FMath::RadiansToDegrees(FMath::Atan2(D.Y, D.X)); return true;
+							}
+						}
+						break;
+					}
+				}
+			}
+			return false;
+		}
+		// (open ground: up to six tries; on a rise the highest of them, in a hollow the lowest)
+		const bool bRise = K.Place == TEXT("rise"), bLow = K.Place == TEXT("low");
+		bool bGot = false; float BestH = bLow ? 1e9f : -1e9f;
+		for (int32 T = 0; T < 6; ++T)
+		{
+			const FVector2D C = Try(T);
+			FRDWSample Sc;
+			if (!Fine(C, Sc, bRise ? 5.f : 3.f, false)) continue;
+			if (!bRise && !bLow) { At = C; S = Sc; return true; }
+			if (bRise ? Sc.H > BestH : Sc.H < BestH) { BestH = Sc.H; At = C; S = Sc; bGot = true; }
+		}
+		return bGot;
+	};
+	int32 Ki = Pick(false, 1302u);
+	if (Ki < 0 && !Only.IsEmpty()) { Only.Reset(); Ki = Pick(false, 1302u); }
+	if (Ki < 0) return;
+	FVector2D At = FVector2D::ZeroVector; FRDWSample S; float Yaw = 0.f;
+	if (!Spot(Ki, At, S, Yaw) || !ClearOfPlaces(At))
+	{
+		Ki = Pick(true, 1303u);
+		if (Ki < 0 || !Spot(Ki, At, S, Yaw) || !ClearOfPlaces(At)) return;
+	}
+	FRDWildPlace P;
+	P.Id = SceneryIdBase + ((Cell.X & 0x3FF) << 10) + (Cell.Y & 0x3FF);
+	P.Kind = TEXT("scenery"); P.Scenery = Ki; P.Name = SceneryKinds[Ki].Title; P.At = At; P.H = S.H; P.Biome = S.Biome;
+	P.Tier = TierAt(At.X, At.Y); P.Yaw = Yaw;
 	Out.Add(P);
 }

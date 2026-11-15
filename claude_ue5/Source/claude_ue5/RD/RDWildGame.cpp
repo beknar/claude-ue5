@@ -78,7 +78,13 @@ void ARDDungeonGenerator::StartWild()
 	const TArray<FRDWildPoiKind> Pois = WildPoiKinds; const float Fill = WildPoiFill;
 	const bool bPortSea = bPortWaterOpen;          // (the list of 2026-11-11: Graymourne's harbour open to the sea)
 	const TArray<FRDWildSiteKind> Sites = WildSiteKinds; const float SFill = WildSiteFill;          // (the list of 2026-11-12: the structures)
-	WildStream->Init = Async(EAsyncExecution::Thread, [W, Biomes, Seed, Pois, Fill, bPortSea, Sites, SFill]() { W->PoiKinds = Pois; W->PoiFill = Fill; W->SiteKinds = Sites; W->SiteFill = SFill; W->bPortSea = bPortSea; W->Init(Seed, Biomes); });
+	// (the list of 2026-11-14: the biomes' scenery and the dry channels)
+	const TArray<FRDWildSceneryKind> Scen = WildSceneryKinds; const float NFill = WildSceneryFill; const TArray<FString> Chans = WildChannelRules;
+	WildStream->Init = Async(EAsyncExecution::Thread, [W, Biomes, Seed, Pois, Fill, bPortSea, Sites, SFill, Scen, NFill, Chans]()
+	{
+		W->PoiKinds = Pois; W->PoiFill = Fill; W->SiteKinds = Sites; W->SiteFill = SFill; W->SceneryKinds = Scen; W->SceneryFill = NFill; W->ChannelRules = Chans;
+		W->bPortSea = bPortSea; W->Init(Seed, Biomes);
+	});
 	UE_LOG(LogRDWild, Log, TEXT("RDWILD the world asked for (seed %u, %d biomes)"), Seed, Biomes.Num());
 }
 
@@ -560,6 +566,8 @@ TArray<FString> ARDDungeonGenerator::GetWildFeatureLines() const
 	for (const FRDWildWorld::FRoad& R : Wild->Roads)
 	{
 		double L = 0; for (int32 I = 0; I + 1 < R.P.Num(); ++I) L += FVector2D::Distance(R.P[I], R.P[I + 1]);
+		// (the list of 2026-11-14's tracks: no towns at their ends)
+		if (R.bTrack || !Wild->Towns.IsValidIndex(R.From) || !Wild->Towns.IsValidIndex(R.To)) { Out.Add(FString::Printf(TEXT("track|%.1f|%.0f|%.0f"), L / 1000.0, R.P[0].X, R.P[0].Y)); continue; }
 		Out.Add(FString::Printf(TEXT("road|%s|%s|%.1f|%.0f|%.0f"), *Wild->Towns[R.From].Name, *Wild->Towns[R.To].Name, L / 1000.0, R.P[0].X, R.P[0].Y));
 	}
 	return Out;

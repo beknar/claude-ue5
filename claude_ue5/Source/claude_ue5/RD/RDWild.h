@@ -99,6 +99,9 @@ struct FRDWildBiome
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Ponds = 0.f;
 	/** steam vents a 4 km cell (the caldera's hot springs) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Steam = 0.f;
+	/** the list of 2026-11-14 ("rolling swales that hide what's over the next rise"; "gentle verticality: small rises and dips control
+	 *  what the player can see"): low rises a few hundred metres apart over its shape, metres high (0 none) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Swale = 0.f;
 	/** the ground's layers for the terrain material (0-1 each): rock, snow, sand, mud; the rest is grass or soil */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector4 Layers = FVector4(0, 0, 0, 0);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FRDWildFoliage> Foliage;
@@ -155,6 +158,8 @@ struct FRDWildPlace
 	UPROPERTY(BlueprintReadOnly) int32 Poi = -1;
 	/** the list of 2026-11-12's fifth phase: a structure's kind (its index into SiteKinds; -1: none) */
 	UPROPERTY(BlueprintReadOnly) int32 Site = -1;
+	/** the list of 2026-11-14: a piece of a biome's scenery (its index into SceneryKinds; -1: none) */
+	UPROPERTY(BlueprintReadOnly) int32 Scenery = -1;
 };
 
 /** the shapes of ground a biome can have */
@@ -185,6 +190,8 @@ struct FRDWSample
 	// open field's strips: their width across FieldAng's way and where they start (metres), 0 where it has none)
 	uint8 FarmKind = 0;
 	float StripW = 0.f, StripOff = 0.f;
+	// (the list of 2026-11-14: a dry channel's bed there (an arroyo, a creek bed, a slot canyon): 0-1 toward its middle, its kind)
+	float Chan = 0.f; int32 ChanKind = -1;
 };
 
 /** a ground vertex as the ground material reads it: its colour (the lava in its alpha), UV0 the field rows' way and crop, UV1
@@ -267,7 +274,9 @@ public:
 	TArray<FRiver> Rivers;
 	struct FLake { FVector2D C; float R = 300.f; float Level = 0.f; float Depth = 6.f; int32 Kind = 2; uint32 Shape = 0; };
 	TArray<FLake> Lakes;             // lakes made at Init (ponds are found per cell, by Ponds())
-	struct FRoad { TArray<FVector2D> P; TArray<float> Z; FBox2D Box; int32 From = -1, To = -1; };
+	/** a road between two towns; or (the list of 2026-11-14, bTrack) a track off a road or another track, a footpath to nowhere in
+	 *  particular, narrower, its bed eased less (From, To -1) */
+	struct FRoad { TArray<FVector2D> P; TArray<float> Z; FBox2D Box; int32 From = -1, To = -1; bool bTrack = false; };
 	TArray<FRoad> Roads;
 	/** a spatial hash of river and road segments: (2 km cell) -> (kind << 30 | index << 16 | segment) */
 	TMultiMap<FIntPoint, uint32> SegHash;
@@ -347,6 +356,33 @@ public:
 	struct FSiteCache { FCriticalSection Lock; TMap<FIntPoint, TArray<FRDWildPlace>> Cells; };
 	TSharedPtr<FSiteCache> SiteCache = MakeShared<FSiteCache>();
 	void SitesInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) const;
+	/** the list of 2026-11-14 (docs/improvements13.txt, the biomes' scenery): a 600 m grid, one in SceneryFill of its cells, of the
+	 *  kinds of the region (SceneryKinds, set before Init from the generator's WildSceneryKinds), beside a road, at a crossroads, on a
+	 *  rise or by water as its kind asks; places of kind "scenery", ids SceneryIdBase + (cell x << 10 | cell y) (500 cells across), in
+	 *  the free range between the points of interest's (to 2^24 + 2^24) and the structures' (2^27) */
+	static constexpr int32 SceneryIdBase = 1 << 26;
+	static constexpr double SceneryCellM = 600.0;
+	TArray<FRDWildSceneryKind> SceneryKinds;
+	float SceneryFill = 0.6f;
+	FIntPoint SceneryCellOf(double X, double Y) const { return FIntPoint(FMath::FloorToInt((X - Xs) / SceneryCellM), FMath::FloorToInt((Y - Yw) / SceneryCellM)); }
+	void SceneryIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const;
+	TSharedPtr<FSiteCache> SceneryCache = MakeShared<FSiteCache>();
+	void SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) const;
+	/** where two roads meet (Init): the crossroads a scenery kind of Place "crossroads" stands at */
+	TArray<FVector2D> Crossroads;
+	/** the dry channels cut into the land (Init, from ChannelRules): arroyos and creek beds, slot canyons, crevasses, fissures; each a
+	 *  line of points, its width and depth (metres) and its kind (ChannelRules' index); its segments hashed on their own (ChanHash:
+	 *  2 km cell -> index << 16 | segment), apart from the rivers' (whatever reads SegHash takes a river for water) */
+	struct FChannel { TArray<FVector2D> P; float W = 10.f; float D = 3.f; float Wall = 0.5f; int32 Kind = 0; FBox2D Box; };
+	TArray<FChannel> Channels;
+	TMultiMap<FIntPoint, uint32> ChanHash;
+	/** the channel nearest a point within its reach: its index (-1 none), its distance from the middle line and how far along (0-1) */
+	int32 NearestChannel(double X, double Y, double& Dist, double& Along) const;
+	/** a kind of channel: "biomes=a,b;n=<per region cell>;len=lo-hi;w=lo-hi;d=lo-hi;wall=<0 a soft trough .. 1 sheer walls>;turn=<deg a
+	 *  20 m step>;name=.." (set before Init from the generator's WildChannelRules) */
+	TArray<FString> ChannelRules;
+	TArray<FString> ChannelNames;
+	void MakeChannels();
 	TArray<FRDWildPlace> QuestPlaces;
 	/** a quest goal's place ("wild:wolves" -> the den), or null */
 	const FRDWildPlace* QuestPlaceFor(const FString& Goal) const;
@@ -400,6 +436,10 @@ private:
 	void MakeLakes();
 	void MakeRoads();
 	void MakeQuestPlaces();
+	void MakeCrossroads();
+	/** the list of 2026-11-14: tracks off the roads (where they meet, the crossroads: "a crossroads with a gibbet, shrine or notice
+	 *  post"; "milestones, a broken road or a toppled waymarker") */
+	void MakeTracks();
 	void HashSegments();
 	float Feature(double X, double Y, float H, FRDWSample* S) const;   // rivers, lakes, ponds, roads, towns on H
 	int32 Biome(const TCHAR* Name) const { const int32* I = BiomeIndex.Find(Name); return I ? *I : 0; }
@@ -433,6 +473,13 @@ public:
 	float BodyRadius() const;
 	float Health = 1.f, DeadAt = -1.f, FallYaw = 0.f;
 	bool bDead = false;
+	/** the list of 2026-11-14 (a herd's migration, its stampede): walked or run toward To for Seconds, as its own wandering does; a herd's
+	 *  beast (HerdId >= 0) keeps to its herd and is not dropped with the loose animals round her */
+	void Drive(const FVector& To, bool bRun, float Seconds);
+	int32 HerdId = -1, HerdIndex = -1;
+	/** a herd's beast far from her rests: its tick and its body's off (TickWildScenery13) */
+	void SetDormant(bool bDormant);
+	bool bDormant = false;
 protected:
 	virtual void Tick(float Dt) override;
 private:

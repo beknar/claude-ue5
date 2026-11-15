@@ -212,6 +212,9 @@ public:
 	/** the list of 2026-11-10: an ambush's: it hunts her until HuntUntil (game seconds), from any distance under 150 m */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "RandomDungeon") bool bHunting = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float HuntUntil = 0.f;
+	/** the list of 2026-11-14 (a scenery's ambush: "tall grass that hides predators"): it notices her no farther than this (cm) until
+	 *  its ambush is sprung (-1: its noticing as every monster's) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float NoticeCap = -1.f;
 	float WildLeash = 6000.f;
 	/** Brokenspire: the guard of the Mistward Hall it is (the game remembers which she killed) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 GuardIndex = -1;

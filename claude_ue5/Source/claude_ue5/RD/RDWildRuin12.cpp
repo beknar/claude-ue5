@@ -13,6 +13,9 @@
 #include "RD/RDMonster.h"
 #include "RD/RDSection.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/HierarchicalInstancedStaticMeshComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
 #include "ProceduralMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "PhysicsEngine/BodySetup.h"
@@ -49,6 +52,18 @@ namespace
 
 namespace
 {
+	/** a rise of the land's height share at T (0 its middle, 1 its foot): a dome, or a cone with a crater of Cr of its radius (one rule
+	 *  for the mesh laid and for what stands on it) */
+	float RDR12LandProfile(const FString& Type, float T, float Cr)
+	{
+		T = FMath::Clamp(T, 0.f, 1.f);
+		if (Type == TEXT("cone") && Cr > 0.f)
+		{
+			if (T < Cr) return 1.f - 0.5f * (1.f - FMath::Square(T / Cr));
+			return FMath::Pow(FMath::Clamp(1.f - (T - Cr) / (1.f - Cr), 0.f, 1.f), 1.15f);
+		}
+		return FMath::Pow(FMath::Clamp(1.f - T * T, 0.f, 1.f), 1.5f);
+	}
 	/** water a ruin can stand in (over 30 cm deep), and ground with none at all (the shore) */
 	bool RDR12Deep(const FRDWildWorld& W, const FVector2D& At) { FRDWSample S; W.Sample(At.X, At.Y, S, false); return S.WaterKind != 0 && S.Water > S.H + 0.3f; }
 	bool RDR12Dry(const FRDWildWorld& W, const FVector2D& At) { FRDWSample S; W.Sample(At.X, At.Y, S, false); return S.WaterKind == 0 || S.Water <= S.H; }
@@ -169,7 +184,7 @@ UStaticMeshComponent* ARDDungeonGenerator::LayRuinPiece(ARDWildChunk* C, UStatic
 	for (int32 I = 0; I < 5; ++I)
 	{
 		const FVector2D Off = I == 4 ? FVector2D(0, 0) : FVector2D((I & 1) ? Hi.X - Mid.X : Lo.X - Mid.X, (I & 2) ? Hi.Y - Mid.Y : Lo.Y - Mid.Y) * 0.8f;
-		G = FMath::Min(G, WildGroundZ(FVector(At.X + Off.X, At.Y + Off.Y, 0.0)));
+		G = FMath::Min(G, WildPartsGroundZ(FVector(At.X + Off.X, At.Y + Off.Y, 0.0)));
 	}
 	const FVector W(At.X - Mid.X, At.Y - Mid.Y, G + At.Z - Lo.Z - Sink);
 	UStaticMeshComponent* Sm = NewObject<UStaticMeshComponent>(C);
@@ -274,16 +289,138 @@ UProceduralMeshComponent* ARDDungeonGenerator::LayWildBerm(ARDWildChunk* C, cons
 	return Pm;
 }
 
+float ARDDungeonGenerator::WildPartsGroundZ(const FVector& L) const
+{
+	// (the land's ground, raised by the rises this kind's parts have laid so far (PR #65's review: a standing stone set on a cairn's
+	// middle stood 1.1 m inside it, the burrows' mouths in their spoil mounds))
+	float Lift = 0.f;
+	const FVector2D P(L.X / 100.0, L.Y / 100.0);
+	for (const FWildLand& W : WildPartsLand)
+	{
+		const FVector2D D = P - W.At;
+		float T;
+		if (W.Type == TEXT("ridge"))
+		{
+			const FVector2D Ax(FMath::Cos(FMath::DegreesToRadians(W.Yaw)), FMath::Sin(FMath::DegreesToRadians(W.Yaw)));
+			const float U = (float)FVector2D::DotProduct(D, Ax), V = (float)FVector2D::DotProduct(D, FVector2D(-Ax.Y, Ax.X));
+			if (FMath::Abs(U) > W.R2) continue;
+			T = FMath::Abs(V) / FMath::Max(W.R, 0.1f);
+			Lift = FMath::Max(Lift, W.H * RDR12LandProfile(W.Type, T, W.Crater) * FMath::SmoothStep(0.f, W.R * 1.5f, W.R2 - FMath::Abs(U)) * 100.f);
+			continue;
+		}
+		T = (float)D.Size() / FMath::Max(W.R, 0.1f);
+		if (T < 1.f) Lift = FMath::Max(Lift, W.H * RDR12LandProfile(W.Type, T, W.Crater) * 100.f);
+	}
+	return WildGroundZ(L) + Lift;
+}
+
+UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater)
+{
+	if (!C || !Wild || Rm <= 0.f || Hm == 0.f) return nullptr;
+	// (a grid over the rise: rings round its middle (a mound, a cone) or rows across a ridge, each point on the ground there lifted by
+	// the shape's height; its foot 15 cm under the ground, as the berm's, so no seam shows on a slope)
+	const bool bRidge = Type == TEXT("ridge");
+	const int32 Nu = bRidge ? FMath::Clamp(FMath::CeilToInt(2.f * R2m / 2.f), 8, 160) : FMath::Clamp(FMath::CeilToInt(2.f * PI * Rm / 1.5f), 16, 128);
+	const int32 Nv = bRidge ? 11 : FMath::Clamp(FMath::CeilToInt(Rm / 1.2f), 6, 40);
+	const FVector2D Ax(FMath::Cos(FMath::DegreesToRadians(Yaw)), FMath::Sin(FMath::DegreesToRadians(Yaw))), Ay(-Ax.Y, Ax.X);
+	const float Cr = FMath::Clamp(Crater, 0.f, 0.8f);
+	// (T 0 the middle, 1 the foot; a cone's crater inside its rim at Cr of the radius, its floor at half the height)
+	auto Profile = [&](float T) -> float { return RDR12LandProfile(Type, T, Cr); };
+	const FVector Base = C->GetActorLocation();
+	TArray<FVector> V; TArray<FVector2D> Xy;
+	V.Reserve((Nu + 1) * (Nv + 1)); Xy.Reserve((Nu + 1) * (Nv + 1));
+	for (int32 I = 0; I <= Nu; ++I)
+		for (int32 J = 0; J <= Nv; ++J)
+		{
+			FVector2D P2; float Bump;
+			if (bRidge)
+			{
+				// (along: -R2 to +R2, its ends sloping to nothing over a radius; across: -R to +R)
+				const float U = -R2m + 2.f * R2m * I / Nu, W = -Rm + 2.f * Rm * J / Nv;
+				P2 = O + Ax * U + Ay * W;
+				const float End = FMath::SmoothStep(0.f, Rm * 1.5f, R2m - FMath::Abs(U));
+				Bump = Hm * Profile(FMath::Abs(W) / Rm) * End;
+			}
+			else
+			{
+				const float A = 2.f * PI * I / Nu, T = J / float(Nv);
+				P2 = O + FVector2D(FMath::Cos(A), FMath::Sin(A)) * (Rm * T);
+				Bump = Hm * Profile(T);
+			}
+			const float G = WildGroundZ(FVector(P2.X * 100.0, P2.Y * 100.0, 0.0));
+			const bool bEdge = bRidge ? (J == 0 || J == Nv || I == 0 || I == Nu) : J == Nv;
+			V.Add(FVector(P2.X * 100.0, P2.Y * 100.0, G + Bump * 100.f - (bEdge ? 15.f : 0.f)) - Base);
+			Xy.Add(P2);
+		}
+	TArray<int32> Tr;
+	for (int32 I = 0; I < Nu; ++I)
+		for (int32 J = 0; J < Nv; ++J)
+		{
+			const int32 A = I * (Nv + 1) + J, B = (I + 1) * (Nv + 1) + J, Cc = I * (Nv + 1) + J + 1, E = (I + 1) * (Nv + 1) + J + 1;
+			Tr.Add(A); Tr.Add(B); Tr.Add(Cc);
+			Tr.Add(B); Tr.Add(E); Tr.Add(Cc);
+		}
+	// (wound to face up whichever way the grid runs: the first triangle's normal decides)
+	if (Tr.Num() >= 3)
+	{
+		auto Up = [&](int32 K) { return FVector::CrossProduct(V[Tr[K + 1]] - V[Tr[K]], V[Tr[K + 2]] - V[Tr[K]]).Z; };
+		float Sum = 0.f; for (int32 K = 0; K + 2 < Tr.Num(); K += 3) Sum += Up(K);
+		if (Sum < 0.f) for (int32 K = 0; K + 2 < Tr.Num(); K += 3) Swap(Tr[K + 1], Tr[K + 2]);
+	}
+	TArray<FVector> N; N.Init(FVector::ZeroVector, V.Num());
+	for (int32 K = 0; K + 2 < Tr.Num(); K += 3)
+	{
+		const FVector Fn = FVector::CrossProduct(V[Tr[K + 1]] - V[Tr[K]], V[Tr[K + 2]] - V[Tr[K]]);
+		N[Tr[K]] += Fn; N[Tr[K + 1]] += Fn; N[Tr[K + 2]] += Fn;
+	}
+	TArray<FLinearColor> Col; Col.SetNum(V.Num());
+	TArray<FVector2D> U0, U1, U2, U3; U0.SetNum(V.Num()); U1.SetNum(V.Num()); U2.SetNum(V.Num()); U3.SetNum(V.Num());
+	TArray<FProcMeshTangent> Tg; Tg.SetNum(V.Num());
+	for (int32 K = 0; K < V.Num(); ++K)
+	{
+		FVector Nr = N[K].GetSafeNormal(); if (Nr.IsNearlyZero()) Nr = FVector::UpVector; if (Nr.Z < 0.f) Nr = -Nr;
+		N[K] = Nr;
+		Tg[K] = FProcMeshTangent((FVector(1, 0, 0) - Nr * Nr.X).GetSafeNormal(), false);
+		FRDWSample Q; Wild->Sample(Xy[K].X, Xy[K].Y, Q, false);
+		Q.Road = 0.f; Q.FieldCrop = -1; Q.Field = 0.f; Q.WaterKind = 0;
+		const FRDWGroundVertex Gv = RDWildGroundVertex(Q, Nr);
+		Col[K] = Gv.C; U0[K] = Gv.UV0; U1[K] = Gv.UV1; U2[K] = Gv.UV2; U3[K] = Gv.UV3;
+	}
+	if (V.ContainsByPredicate([](const FVector& X) { return X.ContainsNaN(); })) { UE_LOG(LogRDRuin12, Warning, TEXT("RDLANDFORM: a vertex is not a number: not laid")); return nullptr; }
+	UProceduralMeshComponent* Pm = NewObject<UProceduralMeshComponent>(C);
+	Pm->bUseAsyncCooking = false;
+	Pm->SetupAttachment(C->Ground);
+	Pm->SetRelativeLocation(FVector::ZeroVector);
+	Pm->RegisterComponent();
+	Pm->CreateMeshSection_LinearColor(0, V, Tr, N, U0, U1, U2, U3, Col, Tg, true);
+	if (WildGroundMaterial) Pm->SetMaterial(0, WildGroundMaterial);
+	Pm->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	Pm->SetCollisionResponseToAllChannels(ECR_Block);
+	return Pm;
+}
+
 void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, const FRDWildRuinKind& K, const FVector2D& O, const FVector2D& Shore, float Yaw0, FRandomStream& R, int64 KeyBase, FRuinLaid& Rec)
 {
 	const FRotator Frame(0.f, Yaw0, 0.f);
 	int32 BoxN = 0;
+	// (the list of 2026-11-14: rises of the land laid by this kind's parts so far: what is laid after stands on them)
+	WildPartsLand.Reset();
 	for (const FString& Line : K.Parts)
 	{
 		const TMap<FString, FString> M = RDR12Parse(Line);
 		const FString L = M.FindRef(TEXT("L"));
 		const FString Pre = M.FindRef(TEXT("p"));
 		const FString BoxPiece = M.FindRef(TEXT("box"));
+		if (L == TEXT("mound") || L == TEXT("cone") || L == TEXT("ridge"))
+		{
+			// (the list of 2026-11-14: a rise of the land, laid as the ground is drawn: a burrow's mound, a pingo, a kurgan, a cinder cone,
+			// an esker; its own draws, in the order written)
+			const float Rr = RDR12Num(M, TEXT("r"), 6.f, R), R2 = RDR12Num(M, TEXT("r2"), Rr, R), Hh = RDR12Num(M, TEXT("hb"), 1.5f, R);
+			const float Ox = RDR12Num(M, TEXT("x"), 0.f, R), Oy = RDR12Num(M, TEXT("y"), 0.f, R), Ga = RDR12Num(M, TEXT("a"), 0.f, R), Cr = RDR12Num(M, TEXT("crater"), 0.35f, R);
+			const FVector2D At = O + FVector2D(Frame.RotateVector(FVector(Ox, Oy, 0.0)));
+			if (UProceduralMeshComponent* Lm = LayWildLandform(C, At, L, Rr, R2, Hh, Yaw0 + Ga, Cr)) { ++Rec.Pieces; Rec.Comps.Add(Lm); Rec.Lifts.Add(-1.f); WildPartsLand.Add({ At, L, Rr, R2, Hh, Yaw0 + Ga, Cr }); }
+			continue;
+		}
 		if (L == TEXT("berm"))
 		{
 			// (an earth bank round the middle, open about a: the lairs' cover; its own draws, in the order written)
@@ -294,7 +431,16 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 		}
 		TArray<UStaticMesh*> Ms;
 		if (!Pre.IsEmpty()) WildPiecesOf(Pre, Ms);
-		if (Ms.Num() == 0 && BoxPiece.IsEmpty()) { UE_LOG(LogRDRuin12, Verbose, TEXT("RDRUIN %s: no pieces %s"), *K.Name.ToString(), *Pre); continue; }
+		// (the list of 2026-11-14: an effect laid at the layout's points instead of a piece (fx=<name>: WildSceneryFx's "f13_<name>"))
+		const FString FxName = M.FindRef(TEXT("fx"));
+		UNiagaraSystem* FxSys = nullptr;
+		if (!FxName.IsEmpty()) { if (const TObjectPtr<UNiagaraSystem>* Fs = WildSceneryFx.Find(FName(*(TEXT("f13_") + FxName)))) FxSys = Fs->Get(); }
+		if (Ms.Num() == 0 && BoxPiece.IsEmpty() && !FxSys) { UE_LOG(LogRDRuin12, Verbose, TEXT("RDRUIN %s: no pieces %s"), *K.Name.ToString(), *Pre); continue; }
+		const bool bInst = RDR12Num(M, TEXT("inst"), 0.f, R) > 0.5f, bFar = RDR12Num(M, TEXT("far"), 0.f, R) > 0.5f;
+		// (inst=1: one component a mesh within this part, with this part's collision, culling and see-through (PR #65's review: a map
+		// kept over the parts gave a later part the first one's))
+		TMap<UStaticMesh*, UHierarchicalInstancedStaticMeshComponent*> InstOf;
+		const FString Hours = M.FindRef(TEXT("hours"));
 		const int32 N = FMath::Max(1, FMath::RoundToInt(RDR12Num(M, TEXT("n"), 1.f, R)));
 		const int32 N2 = FMath::Max(1, FMath::RoundToInt(RDR12Num(M, TEXT("n2"), 1.f, R)));
 		const float Rad = RDR12Num(M, TEXT("r"), 8.f, R), Rad2 = RDR12Num(M, TEXT("r2"), Rad, R);
@@ -399,10 +545,24 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 				if (UStaticMeshComponent* Pc = LayWildPiece(C, Pre, Wxy, Wyaw, Sm, Sink, bCol, false, R)) { ++Rec.Pieces; Rec.Comps.Add(Pc); Rec.Lifts.Add(-1.f); SeeOnly(Pc); }
 				continue;
 			}
+			if (FxSys)
+			{
+				// (an effect on the ground there, lifted z metres, scaled by s; shown at its hours (TickWildScenery13))
+				const FVector Wp(Wxy.X * 100.0, Wxy.Y * 100.0, WildPartsGroundZ(FVector(Wxy.X * 100.0, Wxy.Y * 100.0, 0.0)) + A.Z * 100.f);
+				UNiagaraComponent* Nc = NewObject<UNiagaraComponent>(C);
+				Nc->SetAsset(FxSys);
+				Nc->SetupAttachment(C->Ground);
+				Nc->SetWorldLocationAndRotation(Wp, FRotator(0.f, Wyaw, 0.f));
+				Nc->SetWorldScale3D(FVector(Sm));
+				Nc->SetAutoActivate(true);
+				Nc->RegisterComponent();
+				Rec.Fx.Add(Nc); Rec.FxHours.Add(Hours);
+				continue;
+			}
 			if (!BoxPiece.IsEmpty())
 			{
 				// (a container: the dungeon's piece by name, on the ground, kept looted under the place's key)
-				const FVector Wp(Wxy.X * 100.0, Wxy.Y * 100.0, WildGroundZ(FVector(Wxy.X * 100.0, Wxy.Y * 100.0, 0.0)) + A.Z * 100.f);
+				const FVector Wp(Wxy.X * 100.0, Wxy.Y * 100.0, WildPartsGroundZ(FVector(Wxy.X * 100.0, Wxy.Y * 100.0, 0.0)) + A.Z * 100.f);
 				if (AddWildBox(C, FName(*BoxPiece), FTransform(FRotator(0.f, Wyaw, 0.f), Wp), FName(TEXT("chest")), KeyBase + (int64)(uint32)P.Id * 8 + FMath::Clamp(BoxN, 0, 7), K.Loot)) { ++BoxN; ++Rec.Boxes; }
 				continue;
 			}
@@ -415,9 +575,35 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 			// (its sink: with a height in metres, centimetres of the piece as laid (only stretched by sz); with a scale, centimetres
 			// of the mesh scaled. Scaled by each mesh's own size, one part's pillars sank 75 to 300 cm (PR #56's review))
 			const float SinkCm = (Hm > 0.f ? Sink : Sink * Sc) * Sz;
+			if (bInst)
+			{
+				// (the list of 2026-11-14: a patch of many (tall grass, flowers, mushrooms): instances of one component a mesh on the
+				// chunk, each on the ground at its point, its bottom there less its sink)
+				UHierarchicalInstancedStaticMeshComponent*& Hc = InstOf.FindOrAdd(Mesh);
+				if (!Hc)
+				{
+					Hc = NewObject<UHierarchicalInstancedStaticMeshComponent>(C);
+					Hc->SetStaticMesh(Mesh);
+					Hc->SetupAttachment(C->Ground);
+					Hc->SetCollisionEnabled(bCol ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
+					Hc->SetCastShadow(false);
+					if (bFar) { Hc->SetCachedMaxDrawDistance(0.f); Hc->bNeverDistanceCull = true; }
+					else Hc->SetCullDistances(10000, 12000);          // (faded from 100 m: a start of 0 faded the whole patch away at any distance)
+					Hc->RegisterComponent();
+					SeeOnly(Hc);
+					Rec.Comps.Add(Hc); Rec.Lifts.Add(-2.f); ++Rec.Pieces;
+				}
+				const FVector Gp(Wxy.X * 100.0, Wxy.Y * 100.0, WildPartsGroundZ(FVector(Wxy.X * 100.0, Wxy.Y * 100.0, 0.0)) + A.Z * 100.f);
+				const FVector Lo = FTransform(Rot, FVector::ZeroVector, FVector(Sc * Sx, Sc * Sy, Sc * Sz)).TransformPosition(FVector(0, 0, B.Min.Z));
+				Hc->AddInstance(FTransform(Rot, Gp - FVector(0, 0, Lo.Z + SinkCm), FVector(Sc * Sx, Sc * Sy, Sc * Sz)), true);
+				continue;
+			}
 			if (UStaticMeshComponent* Pc = LayRuinPiece(C, Mesh, FVector(Wxy.X * 100.0, Wxy.Y * 100.0, A.Z * 100.f), Rot, FVector(Sc * Sx, Sc * Sy, Sc * Sz), SinkCm, bCol))
 			{
-				++Rec.Pieces; Rec.Comps.Add(Pc); Rec.Lifts.Add(A.Z * 100.f); SeeOnly(Pc);
+				if (bFar) { Pc->SetCachedMaxDrawDistance(0.f); Pc->bNeverDistanceCull = true; }
+				// (its lift: its part's, and the rise it stands on (the floating test reads its bottom against the land))
+				const FVector Wc(Wxy.X * 100.0, Wxy.Y * 100.0, 0.0);
+				++Rec.Pieces; Rec.Comps.Add(Pc); Rec.Lifts.Add(A.Z * 100.f + (WildPartsLand.Num() > 0 ? WildPartsGroundZ(Wc) - WildGroundZ(Wc) : 0.f)); SeeOnly(Pc);
 				// (hide=1: a collider only (the great tree's trunk: the tree's own mesh is millions of triangles, laid without collision))
 				if (RDR12Num(M, TEXT("hide"), 0.f, R) > 0.5f) { Pc->SetVisibility(false); Pc->SetHiddenInGame(true); Pc->SetCastShadow(false); }
 			}

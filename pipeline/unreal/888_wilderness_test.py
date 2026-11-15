@@ -1188,6 +1188,341 @@ def step_gait12():
     step_result("gait12", ok, **res)
 
 
+def scen_things(g, sid):
+    out = {"uses": [], "haz": [], "herd": None, "ani": []}
+    for l in g.get_wild_scenery_thing_lines(sid):
+        q = str(l).split("|")
+        if q[0] == "use": out["uses"].append({"i": int(q[1]), "do": q[2], "x": float(q[3]), "y": float(q[4]), "z": float(q[5]), "used": int(q[6])})
+        elif q[0] == "haz": out["haz"].append({"kind": q[1], "x": float(q[2]), "y": float(q[3]), "z": float(q[4]), "r": float(q[5]), "sprung": int(q[6])})
+        elif q[0] == "herd": out["herd"] = {"n": int(q[1]), "stampedes": int(q[2]), "hits": int(q[3]), "migrate": int(q[4]), "stampede": int(q[5])}
+        elif q[0] == "ani": out["ani"].append((float(q[1]) / 100.0, float(q[2]) / 100.0, int(q[3])))
+    return out
+
+
+def scen_line(g, sid):
+    for l in g.get_wild_scenery_lines():
+        q = str(l).split("|")
+        if int(q[1]) == sid:
+            return {"kind": q[2], "title": q[3], "x": float(q[4]), "y": float(q[5]), "pieces": int(q[6]), "boxes": int(q[7]), "guards": int(q[8]), "uses": int(q[9]),
+                    "hazards": int(q[10]), "fx": int(q[11]), "fx_on": int(q[12]), "herd": int(q[13]), "yaw": float(q[14])}
+    return None
+
+
+def ground_put(x, y, up=100.0):
+    """her feet on whatever stands there (traced down from 30 m up), as 888's other steps"""
+    s0 = sample(x, y); z = s0["z"] + (max(0.0, s0["water_m"] - s0["h"]) * 100.0 if s0["water"] else 0.0)
+    hit = unreal.SystemLibrary.line_trace_single(G["w"], V(x * 100.0, y * 100.0, z + 3000.0), V(x * 100.0, y * 100.0, z - 300.0),
+                                                 unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+    ht = hit.to_tuple() if hit else None
+    if ht and ht[0]: z = max(z, ht[4].z)
+    G["pawn"].set_actor_location(V(x * 100.0, y * 100.0, z + up), False, True)
+
+
+def step_scenery13():
+    """the list of 2026-11-14 (docs/improvements13.txt; 926, RD/RDWildScenery13.cpp): the biomes' scenery. Every kind of the table
+    (scenery13=<kind>+<kind> for some) among the world's scenery within 30 km of Brokenspire (CountWildScenery), then the nearest of
+    each visited: she is put 40 m out (from its back for one by water), what was laid read (its pieces where they stand, its chest,
+    its effects, its herd, its guards), a picture, then she is moved to 20 m (the line naming it); then each of its uses is tried
+    with F from beside it (the prompt, what it gave, a climb's height and the map revealed), each hazard stood in (what it took, what
+    it sent), a herd watched (a migration's walk, a stampede set off beside her, a pen kept), an ambush sprung (lying low at 30 m,
+    hunting from 8 m). It passes when every kind is laid with its pieces (none floating, none walked through), its line is told,
+    every use does what it says, every hazard springs, and every herd and ambush behaves as its kind says"""
+    g = G["gen"]; res = {"kinds": {}}; quiet(True)
+    yield from wait_ready(90)
+    K = {str(k.get_editor_property("name")): k for k in g.get_editor_property("wild_scenery_kinds")}
+    res["table"] = len(K)
+    res["counts_30km"] = {str(l).split("|")[0]: int(str(l).split("|")[1]) for l in g.count_wild_scenery(0.0, 0.0, 30.0)}
+    # (a step's argument comes with its "_" made " " (for the biomes' names): the kinds' names keep theirs)
+    want = [w if w in K else w.replace(" ", "_") for w in (G.get("look_only") or list(K))]
+    hour0 = g.get_town_hour()
+    try:
+        for kd in want:
+            r = {}
+            f = str(g.find_wild_scenery(kd, 0.0, 0.0, 150.0))
+            if not f: res["kinds"][kd] = {"found": False}; continue
+            sid, cx, cy, yw, nm = f.split("|", 4); sid = int(sid); cx = float(cx); cy = float(cy); yw = float(yw)
+            k = K[kd]; wet = bool(str(k.get_editor_property("need_water")))
+            r.update({"found": True, "id": sid, "at_km": [round(cx / 1000.0, 2), round(cy / 1000.0, 2)], "name": nm})
+            def gentle(x, y):
+                s0 = sample(x, y)
+                if s0["water"]: return False
+                return all(abs(sample(x + dx, y + dy)["h"] - s0["h"]) < 1.2 for dx, dy in ((3, 0), (-3, 0), (0, 3), (0, -3)))
+            spot = None; a_front = yw + (180.0 if wet else 0.0)
+            for rr in (40.0, 50.0, 32.0):
+                for a in [a_front + d_ for d_ in (0, 45, -45, 90, -90, 135, -135, 180)]:
+                    sx, sy = cx + rr * math.cos(math.radians(a)), cy + rr * math.sin(math.radians(a))
+                    if gentle(sx, sy): spot = (sx, sy); break
+                if spot: break
+            spot = spot or (cx + 40.0, cy)
+            msgs = []
+            try: cb().set_editor_property("message", "")
+            except Exception: pass
+            g.set_town_hour(12.0)
+            g.wild_put_her(*spot); yield from watching(wait_chunks(30, 50), msgs); yield from watching(rwait(2.0), msgs)
+            L = scen_line(g, sid); r["laid"] = L
+            pcs = [str(l).split("|") for l in g.get_wild_scenery_piece_lines(sid)]
+            offs = sorted((float(q[3]) - float(q[5])) for q in pcs if q[0] != "gone" and len(q) > 7 and float(q[7]) >= 0)
+            r["bottom_over_ground_cm"] = [round(offs[0]), round(offs[len(offs) // 2]), round(offs[-1])] if offs else None
+            r["pieces_gone"] = sum(1 for q in pcs if q[0] == "gone")
+            r["floating"] = sorted(set(q[0] for q in pcs if q[0] != "gone" and len(q) > 7 and float(q[7]) >= 0 and float(q[3]) - float(q[5]) > float(q[7]) + 2.0))
+            r["walked_through"] = sorted(set(q[0] for q in pcs if len(q) > 6 and q[6] == "0"))
+            boxes, _f, _b = box_lines()
+            r["chests"] = sum(1 for b in boxes if (7 << 40) <= b["key"] < (8 << 40) and math.hypot(b["x"] / 100.0 - cx, b["y"] / 100.0 - cy) < 40.0)
+            r["want_chests"] = sum(1 for x in k.get_editor_property("parts") if "box=" in str(x))
+            yield from watching(wait_chunks(20, 50), msgs)
+            p = G["pawn"].get_actor_location(); gz = sample(cx, cy)["z"]
+            dh = math.hypot(cx * 100.0 - p.x, cy * 100.0 - p.y)
+            pitch = max(-25.0, min(15.0, math.degrees(math.atan2(gz + 300.0 - (p.z + 200.0), dh)) - 2.0))
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=pitch, yaw=math.degrees(math.atan2(cy * 100.0 - p.y, cx * 100.0 - p.x))))
+            yield from watching(rwait(1.5), msgs); shot(f"scenery13_{kd}", "1280x720"); yield from watching(rwait(1.2), msgs)
+            # (a migrating herd's walk, from 40 m out before she comes nearer: within 16 m it stampedes, as it should)
+            herd_walk = None
+            if str(k.get_editor_property("herd")) and "migrate=1" in str(k.get_editor_property("herd")):
+                def herd_mid():
+                    a = scen_things(g, sid)["ani"]
+                    return (sum(x[0] for x in a) / max(1, len(a)), sum(x[1] for x in a) / max(1, len(a)))
+                h0 = herd_mid(); yield from watching(rwait(12.0), msgs); h1 = herd_mid()
+                herd_walk = round(math.hypot(h1[0] - h0[0], h1[1] - h0[1]), 1)
+            # (the line as she comes within 35 m: dry ground 20 to 28 m out)
+            a0 = math.degrees(math.atan2(spot[1] - cy, spot[0] - cx)); near = None
+            for rr in (20.0, 24.0, 28.0):
+                for a in [a0 + d_ for d_ in (0, 30, -30, 60, -60, 90, -90, 120, -120, 180)]:
+                    tx, ty = cx + rr * math.cos(math.radians(a)), cy + rr * math.sin(math.radians(a))
+                    if not sample(tx, ty)["water"]: near = (tx, ty); break
+                if near: break
+            near = near or spot
+            # (an ambush: lying low while she is out at 30 m, hunting once she comes within its reach)
+            amb = float(k.get_editor_property("ambush_r"))
+            def mine_mons():
+                return [m for m in GS.get_all_actors_of_class(G["w"], unreal.RDMonster) if unreal.SystemLibrary.is_valid(m) and not m.is_dead()
+                        and math.hypot(m.get_actor_location().x / 100.0 - cx, m.get_actor_location().y / 100.0 - cy) < 30.0]
+            if amb > 0:
+                mm = mine_mons()
+                r["ambush_low"] = {"monsters": len(mm), "lying_low": sum(1 for m in mm if 0 <= m.get_editor_property("notice_cap") <= 300), "hunting": sum(1 for m in mm if m.get_editor_property("hunting"))}
+            ground_put(*near); yield from watching(rwait(1.6), msgs)
+            r["told_from_m"] = round(math.hypot(near[0] - cx, near[1] - cy), 1)
+            # (a second picture from 15 m, of what is too small to make out from 40: a fairy ring, a burrow, a hive)
+            p15 = (cx + (near[0] - cx) * 0.75, cy + (near[1] - cy) * 0.75)
+            if not sample(*p15)["water"]:
+                ground_put(*p15); yield from watching(rwait(1.0), msgs)
+                p = G["pawn"].get_actor_location(); dh = math.hypot(cx * 100.0 - p.x, cy * 100.0 - p.y)
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=max(-30.0, min(10.0, math.degrees(math.atan2(gz + 100.0 - (p.z + 200.0), dh)))),
+                                                            yaw=math.degrees(math.atan2(cy * 100.0 - p.y, cx * 100.0 - p.x))))
+                yield from watching(rwait(1.2), msgs); shot(f"scenery13_{kd}_near", "1280x720"); yield from watching(rwait(1.0), msgs)
+                ground_put(*near); yield from watching(rwait(0.6), msgs)
+            if amb > 0:
+                # (the game's noticing back for the spring: the test's quiet (no noticing) ends any hunt at once; then how far they are
+                # from her as it begins and 2.5 s on: an ambush comes at her)
+                quiet(False)
+                ground_put(cx + (near[0] - cx) * 0.3, cy + (near[1] - cy) * 0.3); yield from watching(rwait(0.6), msgs)
+                hp = G["pawn"].get_actor_location()
+                mm = mine_mons(); d0 = [m.get_actor_location().distance(hp) / 100.0 for m in mm]
+                r["ambush_sprung"] = {"monsters": len(mm), "hunting": sum(1 for m in mm if m.get_editor_property("hunting")), "lying_low": sum(1 for m in mm if 0 <= m.get_editor_property("notice_cap") <= 300)}
+                yield from watching(rwait(2.5), msgs)
+                hp = G["pawn"].get_actor_location()
+                d1 = [m.get_actor_location().distance(hp) / 100.0 for m in mm if unreal.SystemLibrary.is_valid(m)]
+                r["ambush_sprung"]["m_from_her"] = [round(sum(d0) / max(1, len(d0)), 1), round(sum(d1) / max(1, len(d1)), 1)]
+                quiet(True); cb().set_health(cb().get_max_health())
+            # (its uses: from beside each, the prompt, then F; what she has before and after)
+            th = scen_things(g, sid); r["uses"] = []
+            uses = [str(x) for x in k.get_editor_property("uses")]
+            for u in th["uses"]:
+                spec = dict(x.split("=", 1) for x in uses[u["i"]].split(";") if "=" in x)
+                v = {"do": u["do"]}
+                if spec.get("do") == "fairy": g.set_town_hour(22.5)
+                things = [t.split("|")[0] for t in spec.get("things", "").split(",") if t]
+                before = {t: cb().get_item_count(t) for t in things}
+                hp0 = cb().get_health(); cb().set_health(cb().get_max_health())
+                ground_put(u["x"] / 100.0, u["y"] / 100.0); yield from watching(rwait(0.8), msgs)
+                z0 = G["pawn"].get_actor_location().z
+                rev0 = state().get("revealed", 0)
+                v["prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 400.0))
+                v["f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from watching(rwait(1.2), msgs)
+                v["said"] = str(cb().message)[:160]
+                v["got"] = {t: cb().get_item_count(t) - before[t] for t in things}
+                v["blessing"] = str(cb().get_blessing())
+                v["rose_m"] = round((G["pawn"].get_actor_location().z - z0) / 100.0, 1)
+                v["revealed_more"] = state().get("revealed", 0) - rev0
+                v["used_after"] = next((x["used"] for x in scen_things(g, sid)["uses"] if x["i"] == u["i"]), -1)
+                if spec.get("do") == "fairy": g.set_town_hour(12.0)
+                d = spec.get("do")
+                v["ok"] = (v["f"] == "scenery" and spec.get("what", "").split(" ")[0].lower() in v["prompt"].lower()
+                           and (d not in ("loot", "forage", "fish", "honey") or sum(v["got"].values()) > 0)
+                           and (d != "climb" or (v["rose_m"] >= float(spec.get("tz", 3)) * 0.6 and v["revealed_more"] > 0))
+                           and (d not in ("buff", "fairy") or v["blessing"] != "")
+                           and (d not in ("milestone", "rumour", "tracks") or len(v["said"]) > 20))
+                r["uses"].append(v)
+                ground_put(*near); yield from rwait(0.6)
+            # (its hazards: she stands in each)
+            r["hazards"] = []
+            for hz in th["haz"]:
+                v = {"kind": hz["kind"]}
+                cb().set_health(cb().get_max_health()); hp0 = cb().get_health()
+                mons0 = len(mine_mons())
+                if hz["kind"] == "lurker":
+                    # (into the water near it: the first sample under water from its point out to its reach)
+                    wp = None
+                    for rr in (0.0, 3.0, 6.0, 8.0):
+                        for a in range(0, 360, 30):
+                            tx, ty = hz["x"] / 100.0 + rr * math.cos(math.radians(a)), hz["y"] / 100.0 + rr * math.sin(math.radians(a))
+                            sm = sample(tx, ty)
+                            if sm["water"] and sm["water_m"] - sm["h"] > 0.4: wp = (tx, ty); break
+                        if wp: break
+                    v["water_found"] = wp is not None
+                    if wp: G["pawn"].set_actor_location(V(wp[0] * 100.0, wp[1] * 100.0, sample(*wp)["z"] + 60.0), False, True)
+                    yield from watching(rwait(2.0), msgs)
+                else:
+                    ground_put(hz["x"] / 100.0, hz["y"] / 100.0)
+                    yield from watching(rwait(4.0 if hz["kind"] == "sting" else 1.6), msgs)
+                v["hp_lost"] = round(hp0 - cb().get_health(), 1)
+                v["sprung"] = next((x["sprung"] for x in scen_things(g, sid)["haz"] if abs(x["x"] - hz["x"]) < 1 and abs(x["y"] - hz["y"]) < 1), 0)
+                v["monsters_came"] = len(mine_mons()) - mons0
+                v["ok"] = v["sprung"] > 0 and (v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting") else v["monsters_came"] > 0)
+                r["hazards"].append(v)
+                cb().set_health(cb().get_max_health())
+                ground_put(*near); yield from rwait(1.0)
+            # (its herd)
+            th = scen_things(g, sid)
+            if th["herd"]:
+                hd = dict(th["herd"])
+                def mid():
+                    a = [x for x in scen_things(g, sid)["ani"]]
+                    return (sum(x[0] for x in a) / max(1, len(a)), sum(x[1] for x in a) / max(1, len(a)), a)
+                m0 = mid()
+                yield from rwait(12.0)
+                m1 = mid()
+                hd["walked_12s_m"] = herd_walk if herd_walk is not None else round(math.hypot(m1[0] - m0[0], m1[1] - m0[1]), 1)
+                herd_spec = str(k.get_editor_property("herd"))
+                pen = float(dict(x.split("=", 1) for x in herd_spec.split(";") if "=" in x).get("pen", 0))
+                if pen > 0:
+                    hd["outside_pen"] = sum(1 for x in m1[2] if math.hypot(x[0] - m1[0], x[1] - m1[1]) > pen * 2.0 + 1.0)
+                if hd["stampede"]:
+                    # (beside it on its way: 14 m from its middle along the herd's way, then set off)
+                    wx, wy = math.cos(math.radians(yw)), math.sin(math.radians(yw))
+                    ground_put(m1[0] + wx * 14.0, m1[1] + wy * 14.0); yield from rwait(0.4)
+                    cb().set_health(cb().get_max_health()); hp0 = cb().get_health()
+                    hd["started"] = bool(g.start_wild_stampede(sid))
+                    yield from watching(rwait(7.0), msgs)
+                    m2 = mid(); t2 = scen_things(g, sid)["herd"]
+                    hd["ran_m"] = round(math.hypot(m2[0] - m1[0], m2[1] - m1[1]), 1)
+                    hd["hits"] = t2["hits"]; hd["hp_lost"] = round(hp0 - cb().get_health(), 1)
+                    cb().set_health(cb().get_max_health())
+                r["herd"] = hd
+            r["told"] = " | ".join(msgs)
+            res["kinds"][kd] = r
+    finally:
+        quiet(False); g.set_town_hour(hour0)
+    g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    def kind_ok(kd, v):
+        if not v.get("found") or not v.get("laid"): return False
+        L = v["laid"]; k = K[kd]
+        okk = (L["kind"] == kd and L["pieces"] >= 1 and not v["floating"] and not v["walked_through"] and v["pieces_gone"] == 0
+               and v["chests"] >= v["want_chests"] and L["title"] in v["told"]
+               and all(u["ok"] for u in v["uses"]) and all(h["ok"] for h in v["hazards"]))
+        if "ambush_low" in v: okk = okk and v["ambush_low"]["monsters"] > 0 and v["ambush_low"]["hunting"] == 0 and v["ambush_low"]["lying_low"] > 0 \
+            and v["ambush_sprung"]["hunting"] > 0 and v["ambush_sprung"]["m_from_her"][1] < v["ambush_sprung"]["m_from_her"][0] - 1.0
+        if v.get("herd"):
+            h = v["herd"]
+            if h.get("migrate"): okk = okk and 2.0 <= h["walked_12s_m"] <= 30.0          # (a walk: deer walk 1.3 m/s)
+            if "outside_pen" in h: okk = okk and h["outside_pen"] == 0
+            if h.get("stampede"): okk = okk and h["started"] and h["ran_m"] >= 20.0
+        return okk
+    for kd, v in res["kinds"].items(): v["ok"] = kind_ok(kd, v)
+    ok = all(v["ok"] for v in res["kinds"].values()) and len(res["kinds"]) == len(want)
+    step_result("scenery13", ok, **res)
+
+
+def step_land13():
+    """the list of 2026-11-14's land: the dry channels (the arroyos: "arroyos and dry creek beds that cut hidden paths below the
+    horizon"), the swales ("rolling swales that hide what's over the next rise"), the crossroads and the far storms. The channels of
+    each kind near Brokenspire: across the nearest's middle the ground every metre (its bed under its banks by most of its depth), a
+    picture from its bed along it; the swales: along 1.6 km lines in each swaled biome, the crests and troughs of the ground and whether
+    a 1.7 m eye on a crest sees the ground 300 m on; the crossroads near Brokenspire; a storm brought 6 km off and pictured"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    try:
+        rules = [str(x) for x in g.get_editor_property("wild_channel_rules")]
+        res["channels"] = {}
+        for rl in rules:
+            nm = dict(x.split("=", 1) for x in rl.split(";") if "=" in x).get("name", "")
+            ch = [str(l).split("|") for l in g.find_wild_channels(nm, 0.0, 0.0, 200.0, 5)]
+            v = {"near": len(ch)}
+            if ch:
+                c = ch[0]; idx = int(c[1]); w = float(c[5]); dep = float(c[6]); npts = int(c[7])
+                prof = [tuple(float(z) for z in str(l).split("|")) for l in g.get_wild_channel_profile(idx, npts // 2, w * 1.6)]
+                mid_h = min(p_[1] for p_ in prof if abs(p_[0]) <= w * 0.2)
+                bank = [p_[1] for p_ in prof if abs(p_[0]) >= w * 1.2]
+                v.update({"at_km": [round(float(c[3]) / 1000.0, 2), round(float(c[4]) / 1000.0, 2)], "width_m": w, "depth_m": dep,
+                          "bed_under_banks_m": round(sum(bank) / max(1, len(bank)) - mid_h, 2)})
+                # (in its bed, looking along it)
+                mx, my = float(c[3]), float(c[4])
+                g.wild_put_her(mx, my); yield from wait_chunks(30, 50)
+                ground_put(mx, my); yield from rwait(1.5)
+                # (her feet in its bed: the ground there against the banks' (metres above the sea, as the profile's))
+                v["her_feet_under_banks_m"] = round(sum(bank) / max(1, len(bank)) - sample(mx, my)["h"], 2)
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=yw_along(mx, my)))
+                yield from rwait(1.5); shot(f"land13_{nm}", "1280x720"); yield from rwait(1.0)
+                v["ok"] = v["bed_under_banks_m"] >= dep * 0.6
+            else: v["ok"] = False
+            res["channels"][nm] = v
+        # (the swales: the biome table's, along 1.6 km lines from points of each found within 60 km)
+        res["swales"] = {}
+        sw = {str(b.name): b.get_editor_property("swale") for b in g.get_editor_property("wild_biomes") if b.get_editor_property("swale") > 0}
+        for bn, amp in sw.items():
+            pt = find_biome_point(bn)
+            if not pt: res["swales"][bn] = {"found": False}; continue
+            hs = [sample(pt[0] + i * 10.0, pt[1])["h"] for i in range(161)]
+            crests = [i for i in range(5, 156) if hs[i] == max(hs[i - 5:i + 6]) and hs[i] - min(hs[max(0, i - 30):i + 31]) >= 1.5]
+            # (from each crest, an eye 1.7 m up: is the ground 300 m on (the next rise's far side) out of sight?)
+            hid = 0
+            for c in crests:
+                j = min(160, c + 30); eye = hs[c] + 1.7
+                for q in range(c + 1, j):
+                    t = (q - c) / (j - c)
+                    if hs[q] > eye + (hs[j] - eye) * t: hid += 1; break
+            res["swales"][bn] = {"found": True, "at_km": [round(pt[0] / 1000.0, 2), round(pt[1] / 1000.0, 2)], "amp": amp, "range_m": round(max(hs) - min(hs), 1),
+                                 "crests_1600m": len(crests), "crests_hiding_300m": hid}
+        res["crossroads_50km"] = len(list(g.find_wild_crossroads(0.0, 0.0, 50.0)))
+        # (a storm 6 km off, from the nearest plains)
+        pt = find_biome_point("plains")
+        if pt:
+            g.wild_put_her(*pt); yield from wait_chunks(30, 50)
+            g.force_wild_storm(6.0); yield from rwait(3.0)
+            st = str(g.get_wild_storm_line()).split("|")
+            res["storm"] = {"on": int(st[4]), "km": float(st[3])}
+            p = G["pawn"].get_actor_location()
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=4, yaw=math.degrees(math.atan2(float(st[2]) * 100.0 - p.y, float(st[1]) * 100.0 - p.x))))
+            yield from rwait(2.0); shot("land13_storm", "1280x720"); yield from rwait(1.0)
+            g.force_wild_storm(0.0)
+    finally:
+        quiet(False)
+    g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    ok = (all(v.get("ok") for v in res["channels"].values()) and res["channels"]
+          and all(v.get("found") and v["crests_1600m"] >= 2 for v in res["swales"].values())
+          and res["crossroads_50km"] > 0 and res.get("storm", {}).get("on") == 1)
+    step_result("land13", ok, **res)
+
+
+def yw_along(x, y):
+    """the way a channel runs at a point of its bed: the line through it whose ends 8 m out lie lowest"""
+    best = None
+    for a in range(0, 180, 15):
+        dx, dy = 8.0 * math.cos(math.radians(a)), 8.0 * math.sin(math.radians(a))
+        h = sample(x + dx, y + dy)["h"] + sample(x - dx, y - dy)["h"]
+        if best is None or h < best[0]: best = (h, a)
+    return float(best[1])
+
+
+def find_biome_point(bn, max_km=80):
+    """a point of the biome's (its middle of a 300 m square of it), out in rings from Brokenspire, 1.5 km clear of the towns"""
+    for rk in range(2, max_km, 2):
+        for a in range(0, 360, 10):
+            x, y = rk * 1000.0 * math.cos(math.radians(a)), rk * 1000.0 * math.sin(math.radians(a))
+            if sample(x, y)["biome"] == bn and all(sample(x + dx, y + dy)["biome"] == bn for dx, dy in ((300, 0), (-300, 0), (0, 300), (0, -300), (900, 0), (1600, 0))):
+                return (x, y)
+    return None
+
+
 def step_ruins12():
     """the list of 2026-11-12's third phase (924 ruins, RD/RDWildRuin12.cpp): "have at least 20 kinds of ruins" and the twenty the
     list names. Every kind among the world's ruins within 150 km of Brokenspire (CountWildRuins); then the nearest ruin of each kind
@@ -3858,7 +4193,7 @@ def step_quests12b():
 STEPS13 = {"quests12b": step_quests12b, "animals13": step_animals13, "hunt13": step_hunt13, "questsave13": step_questsave13, "tamesave13": step_tamesave13,
            "swim13": step_swim13, "caldera13": step_caldera13, "weather13": step_weather13, "farms1x13": step_farms1x13}
 
-STEPS = {"list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)

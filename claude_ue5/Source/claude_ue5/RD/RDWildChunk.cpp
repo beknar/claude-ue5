@@ -345,6 +345,12 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 		const FIntPoint S0 = W.SiteCellOf(X0, Y0) - FIntPoint(1, 1), S1 = W.SiteCellOf(X0 + Cm, Y0 + Cm) + FIntPoint(1, 1);
 		for (int32 Ci = S0.X; Ci <= S1.X; ++Ci) for (int32 Cj = S0.Y; Cj <= S1.Y; ++Cj) W.SitesIn(FIntPoint(Ci, Cj), Sites);
 		for (const FRDWildPlace& P : Sites) if (P.At.X >= X0 && P.At.X < X0 + Cm && P.At.Y >= Y0 && P.At.Y < Y0 + Cm) D.Places.Add(P);
+		// (the list of 2026-11-14: the biomes' scenery whose point is in it, from the cells round it too (one by water stands on its
+		// shore, up to 400 m from its cell))
+		TArray<FRDWildPlace> Scen;
+		const FIntPoint N0 = W.SceneryCellOf(X0, Y0) - FIntPoint(1, 1), N1 = W.SceneryCellOf(X0 + Cm, Y0 + Cm) + FIntPoint(1, 1);
+		for (int32 Ci = N0.X; Ci <= N1.X; ++Ci) for (int32 Cj = N0.Y; Cj <= N1.Y; ++Cj) W.SceneryIn(FIntPoint(Ci, Cj), Scen);
+		for (const FRDWildPlace& P : Scen) if (P.At.X >= X0 && P.At.X < X0 + Cm && P.At.Y >= Y0 && P.At.Y < Y0 + Cm) D.Places.Add(P);
 	}
 	D.Ms = (FPlatformTime::Seconds() - T0) * 1000.0;
 }

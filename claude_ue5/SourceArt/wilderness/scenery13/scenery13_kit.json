@@ -1,0 +1,239 @@
+{
+ "SM_N13_Skep_A": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Skep_A.fbx",
+  "size_m": [
+   0.8,
+   0.46,
+   0.98
+  ],
+  "triangles": 320,
+  "slots": [
+   "SkepAStraw",
+   "SkepAWood"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Skep_B": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Skep_B.fbx",
+  "size_m": [
+   1.3,
+   0.49,
+   1.02
+  ],
+  "triangles": 604,
+  "slots": [
+   "SkepBStraw",
+   "SkepBWood"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Nest": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Nest.fbx",
+  "size_m": [
+   2.33,
+   2.27,
+   0.62
+  ],
+  "triangles": 3944,
+  "slots": [
+   "NestTwigs",
+   "NestEggs"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Heron_A": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Heron_A.fbx",
+  "size_m": [
+   0.96,
+   0.27,
+   1.28
+  ],
+  "triangles": 426,
+  "slots": [
+   "HeronABody",
+   "HeronANeck",
+   "HeronABill",
+   "HeronADark"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Heron_B": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Heron_B.fbx",
+  "size_m": [
+   1.13,
+   0.27,
+   0.78
+  ],
+  "triangles": 426,
+  "slots": [
+   "HeronBBody",
+   "HeronBNeck",
+   "HeronBBill",
+   "HeronBDark"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_BurrowMouth": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_BurrowMouth.fbx",
+  "size_m": [
+   2.5,
+   2.5,
+   0.42
+  ],
+  "triangles": 220,
+  "slots": [
+   "BurrowEarth",
+   "BurrowHole"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Milestone": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Milestone.fbx",
+  "size_m": [
+   0.3,
+   0.46,
+   1.45
+  ],
+  "triangles": 44,
+  "slots": [
+   "MilestoneStone",
+   "MilestoneFace"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Noose": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Noose.fbx",
+  "size_m": [
+   0.31,
+   0.08,
+   1.63
+  ],
+  "triangles": 256,
+  "slots": [
+   "NooseRope"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_AppleTree_A": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_AppleTree_A.fbx",
+  "size_m": [
+   5.38,
+   5.81,
+   6.06
+  ],
+  "triangles": 712,
+  "slots": [
+   "AppleTreeBark",
+   "AppleTreeLeaves"
+  ],
+  "masked": [
+   "AppleTreeLeaves"
+  ],
+  "translucent": []
+ },
+ "SM_N13_AppleTree_B": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_AppleTree_B.fbx",
+  "size_m": [
+   5.53,
+   6.47,
+   5.92
+  ],
+  "triangles": 704,
+  "slots": [
+   "AppleTreeBark",
+   "AppleTreeLeaves"
+  ],
+  "masked": [
+   "AppleTreeLeaves"
+  ],
+  "translucent": []
+ },
+ "SM_N13_PlumTree_A": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_PlumTree_A.fbx",
+  "size_m": [
+   5.2,
+   5.64,
+   6.21
+  ],
+  "triangles": 600,
+  "slots": [
+   "PlumTreeBark",
+   "PlumTreeLeaves"
+  ],
+  "masked": [
+   "PlumTreeLeaves"
+  ],
+  "translucent": []
+ },
+ "SM_N13_PlumTree_B": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_PlumTree_B.fbx",
+  "size_m": [
+   5.52,
+   6.17,
+   6.62
+  ],
+  "triangles": 528,
+  "slots": [
+   "PlumTreeBark",
+   "PlumTreeLeaves"
+  ],
+  "masked": [
+   "PlumTreeLeaves"
+  ],
+  "translucent": []
+ },
+ "SM_N13_Drystone_A": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Drystone_A.fbx",
+  "size_m": [
+   3.1,
+   0.68,
+   1.27
+  ],
+  "triangles": 4812,
+  "slots": [
+   "DrystoneAStone"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Drystone_B": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Drystone_B.fbx",
+  "size_m": [
+   3.04,
+   0.66,
+   1.29
+  ],
+  "triangles": 5484,
+  "slots": [
+   "DrystoneBStone"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_StormCell": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_StormCell.fbx",
+  "size_m": [
+   3878.39,
+   3369.37,
+   2660.0
+  ],
+  "triangles": 22824,
+  "slots": [
+   "StormCloud",
+   "StormRain",
+   "StormFunnel"
+  ],
+  "masked": [],
+  "translucent": [
+   "StormRain"
+  ]
+ }
+}
