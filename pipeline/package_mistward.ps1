@@ -114,6 +114,8 @@ public static class RDWin {
             if (Test-Path $saveDirs[$i]) { Remove-Item $saveDirs[$i] -Recurse -Force }
             if (Test-Path $k) { Copy-Item $k $saveDirs[$i] -Recurse }
         }
+        # (put back: the kept folder goes, so that one found at the next run's start is always a stopped run's)
+        Remove-Item $savesKept -Recurse -Force
     }
     # (the runs: the menu and the castle offscreen for 90 s each; then the castle in a window of its own with a display
     #  setting asked as the Escape menu's Apply sets it (-RDApplyDisplay: 1600 x 900, windowed), its window measured)
@@ -157,8 +159,11 @@ public static class RDWin {
         if ($run.console) { foreach ($f in @($ctest, [IO.Path]::ChangeExtension($ctest, "png"))) { if (Test-Path $f) { Remove-Item $f -Force } } }
         if ($run.wild) {
             if (Test-Path $wtest) { Remove-Item $wtest -Force }
-            if (Test-Path $savesKept) { Remove-Item $savesKept -Recurse -Force }
-            for ($i = 0; $i -lt $saveDirs.Count; $i++) { if (Test-Path $saveDirs[$i]) { Copy-Item $saveDirs[$i] (Join-Path $savesKept "$i") -Recurse } }
+            # (PR #64's review: a kept folder left over is a run stopped before it put them back (killed, the machine short of
+            #  memory): it holds the player's saves and the save folders the test's, so it is kept and taken as the player's)
+            if (Test-Path $savesKept) { "    the player's saves kept by a run that was stopped: put back from $savesKept at the end" }
+            else { New-Item -ItemType Directory -Force $savesKept | Out-Null
+                   for ($i = 0; $i -lt $saveDirs.Count; $i++) { if (Test-Path $saveDirs[$i]) { Copy-Item $saveDirs[$i] (Join-Path $savesKept "$i") -Recurse } } }
             $savesTaken = $true
         }
         $client = $null; $least = $null; $saved = $null; $dpi = 0; $want = "1600x900"

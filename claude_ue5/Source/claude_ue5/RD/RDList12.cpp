@@ -31,6 +31,42 @@ bool ARDDungeonGenerator::MapScreenToWorld(FVector2D Screen, FVector& Out) const
 	return true;
 }
 
+bool ARDDungeonGenerator::WildStandableNear(FVector2D& Wm, double MaxM) const
+{
+	// (PR #54's review: a click on a mountain's face slid her hundreds of metres to her death, one out at sea drowned her: put
+	// down only on dry ground she can stand on (3.5 m of rise over a 3 m ring at most), the nearest such within MaxM, else refused)
+	if (!Wild) return false;
+	auto Standable = [this](const FVector2D& P)
+	{
+		FRDWSample S; Wild->Sample(P.X, P.Y, S, false);
+		if (S.WaterKind != 0) return false;
+		for (int32 A = 0; A < 8; ++A)
+		{
+			const double Ang = A * PI / 4.0;
+			if (FMath::Abs(Wild->Height(P.X + FMath::Cos(Ang) * 3.0, P.Y + FMath::Sin(Ang) * 3.0) - S.H) > 3.5f) return false;
+			FRDWSample Sq; Wild->Sample(P.X + FMath::Cos(Ang) * 3.0, P.Y + FMath::Sin(Ang) * 3.0, Sq, false);
+			if (Sq.WaterKind != 0) return false;
+		}
+		return true;
+	};
+	if (Standable(Wm)) return true;
+	for (double Rr = 10.0; Rr <= MaxM; Rr += 10.0)
+		for (int32 A = 0; A < 16; ++A)
+		{
+			const FVector2D Q = Wm + FVector2D(FMath::Cos(A * PI / 8.0), FMath::Sin(A * PI / 8.0)) * Rr;
+			if (Standable(Q)) { Wm = Q; return true; }
+		}
+	return false;
+}
+
+bool ARDDungeonGenerator::WildPutDownNear(FVector2D Wm)
+{
+	// (on dry ground within 200 m of the point, a town far behind her let go as the map's travel does; never a town's own travel)
+	if (!bWild || !Wild || !WildStandableNear(Wm, 200.0)) return false;
+	if (WildTownIdx >= 0 && Wild->Towns.IsValidIndex(WildTownIdx) && FVector2D::Distance(Wm, Wild->Towns[WildTownIdx].Site) > WildTownDropM) UnloadWildTown();
+	return WildPutHer((float)Wm.X, (float)Wm.Y);
+}
+
 bool ARDDungeonGenerator::MapTeleportTo(const FVector& World)
 {
 	APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
@@ -48,31 +84,7 @@ bool ARDDungeonGenerator::MapTeleportTo(const FVector& World)
 				bTravelForced = false;
 				return bOk;
 			}
-		// (PR #54's review: a click on a mountain's face slid her hundreds of metres to her death, one out at sea drowned her: put
-		// down only on dry ground she can stand on (3.5 m of rise over a 3 m ring at most), the nearest such within 200 m, else refused)
-		auto Standable = [this](const FVector2D& P)
-		{
-			FRDWSample S; Wild->Sample(P.X, P.Y, S, false);
-			if (S.WaterKind != 0) return false;
-			for (int32 A = 0; A < 8; ++A)
-			{
-				const double Ang = A * PI / 4.0;
-				if (FMath::Abs(Wild->Height(P.X + FMath::Cos(Ang) * 3.0, P.Y + FMath::Sin(Ang) * 3.0) - S.H) > 3.5f) return false;
-				FRDWSample Sq; Wild->Sample(P.X + FMath::Cos(Ang) * 3.0, P.Y + FMath::Sin(Ang) * 3.0, Sq, false);
-				if (Sq.WaterKind != 0) return false;
-			}
-			return true;
-		};
-		bool bOk = Standable(Wm);
-		for (double Rr = 10.0; !bOk && Rr <= 200.0; Rr += 10.0)
-			for (int32 A = 0; A < 16 && !bOk; ++A)
-			{
-				const FVector2D Q = Wm + FVector2D(FMath::Cos(A * PI / 8.0), FMath::Sin(A * PI / 8.0)) * Rr;
-				if (Standable(Q)) { Wm = Q; bOk = true; }
-			}
-		if (!bOk) return false;
-		if (WildTownIdx >= 0 && Wild->Towns.IsValidIndex(WildTownIdx) && FVector2D::Distance(Wm, Wild->Towns[WildTownIdx].Site) > WildTownDropM) UnloadWildTown();
-		return WildPutHer((float)Wm.X, (float)Wm.Y);
+		return WildPutDownNear(Wm);
 	}
 	// (a town's map or a dungeon's: the floors under the point, traced down from well over it one after another (a roof, a vault,
 	// the floor under them...); of those she fits on (her capsule clear there: PR #54's review, a click on a wall or a column put

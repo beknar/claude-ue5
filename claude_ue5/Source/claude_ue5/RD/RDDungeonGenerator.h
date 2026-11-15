@@ -3000,6 +3000,10 @@ public:
 	bool bMapPress = false, bMapPointerUp = false;
 	void TickMapPointer(APlayerController* PC);
 	bool MapTeleportTo(const FVector& World);
+	/** the wilds: the nearest dry ground she can stand on within MaxM of Wm (metres; Wm moved there), false if none */
+	bool WildStandableNear(FVector2D& Wm, double MaxM) const;
+	/** the wilds: put her down on dry ground within 200 m of Wm (metres), a town far behind her let go; never a town's travel */
+	bool WildPutDownNear(FVector2D Wm);
 	void WildAutosave(const FString& Why);
 	// ---- the game saved to disk (RDSave.cpp)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") bool bAutosave = true;
@@ -3042,8 +3046,13 @@ public:
 		float WalkMinutes = 20.f, T0 = 0.f, LastMoveAt = 0.f, MemAt = 0.f;
 		FVector SavedAt = FVector::ZeroVector, LastAt = FVector::ZeroVector, WalkFrom = FVector::ZeroVector, Heading = FVector(1, 0, 0);
 		double Mem0 = 0.0, MemMax = 0.0, FramesAt = 0.0;
-		int32 Frames = 0, Stuck = 0, Puts = 0;
-		double PathCm = 0.0;
+		int32 Frames = 0, Stuck = 0, Puts = 0, Pushes = 0;
+		double PathCm = 0.0, Commit0 = 0.0, CommitMax = 0.0;
+		float NextCheckAt = 0.f, SubAt = 0.f;
+		FVector LeverAt = FVector::ZeroVector, LeverPos = FVector::ZeroVector;
+		FString GateWhat, GateOther;
+		bool bCollected = false;
+		FVector Gate = FVector::ZeroVector, GateOut = FVector(1, 0, 0);
 	} WildTest;
 	void TickWildSelfTest(APawn* P);
 	void WildSelfTestLine(const FString& Line);
