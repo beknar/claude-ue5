@@ -19,7 +19,8 @@
 # Args: [-Config Shipping|Development] [-Out <directory>] [-Test] (start the packaged game in each of its places in turn
 #   ($runs below: the menu, the town, the castle, each city by fast travel and each dungeon down from its city, without a
 #   window; then two runs in a window that takes the keyboard: a display setting, and the console typed into through
-#   Slate), and check that each got there, kept running and left no crash report) [-TestOnly] (only that) [-SkipCook]
+#   Slate; last the wilds played by the game itself for about half an hour: out of the gate, a journey, a save and load, a
+#   20-minute walk with its memory), and check that each got there, kept running and left no crash report) [-TestOnly] (only that) [-SkipCook]
 #   (stage and archive the last cook's output: after a cook that finished but was failed for its errors) [-Only <name,...>]
 #   (the test's runs of those names only, e.g. -Only console,kethrys)
 param([string]$Config = "Shipping", [string]$Out = "", [switch]$Test, [switch]$TestOnly, [switch]$SkipCook, [string[]]$Only = @())
@@ -102,6 +103,20 @@ public static class RDWin {
     # (the castle writes a mark when it begins (-RDMarkFile): a run that stayed on the menu had passed as the castle's)
     $mark = Join-Path $env:TEMP "rd_package_mark.txt"
     $ctest = Join-Path $env:TEMP "rd_package_console.txt"
+    $wtest = Join-Path $env:TEMP "rd_package_wild.txt"
+    # (the wild run saves, loads and may autosave: the packaged game's saves (Shipping's in LocalAppData, a Development
+    #  game's beside it) are kept and put back, so the player's own are as they were)
+    $saveDirs = @((Join-Path $env:LOCALAPPDATA "claude_ue5\Saved\SaveGames"), (Join-Path $Out "Windows\claude_ue5\Saved\SaveGames"))
+    $savesKept = Join-Path $env:TEMP "rd_package_saves_kept"; $savesTaken = $false
+    $putSaves = {
+        for ($i = 0; $i -lt $saveDirs.Count; $i++) {
+            $k = Join-Path $savesKept "$i"
+            if (Test-Path $saveDirs[$i]) { Remove-Item $saveDirs[$i] -Recurse -Force }
+            if (Test-Path $k) { Copy-Item $k $saveDirs[$i] -Recurse }
+        }
+        # (put back: the kept folder goes, so that one found at the next run's start is always a stopped run's)
+        Remove-Item $savesKept -Recurse -Force
+    }
     # (the runs: the menu and the castle offscreen for 90 s each; then the castle in a window of its own with a display
     #  setting asked as the Escape menu's Apply sets it (-RDApplyDisplay: 1600 x 900, windowed), its window measured)
     # (into the castle through the menu, -RDStartHero: a Shipping game drops a map named on its command line (the engine's
@@ -129,7 +144,11 @@ public static class RDWin {
               # (2026-11-08: the game's own console (RD/RDConsole.cpp), in a window of its own (the keys go to its focused line):
               #  its self-test types into it through Slate and writes what it measured, and its picture beside it; -RDConsole: it is
               #  off by default where Unreal's own console is, a Development game (2026-11-10: the Development package's run failed))
-              @{ name = "console"; args = @("-RDStartHero=Warrior", "-RDMarkFile=$mark", "-RDConsoleTest=$ctest", "-RDConsole", "-windowed", "-ResX=1280", "-ResY=720"); secs = 75; shown = $true; console = $true; castle = $true; map = "brokenspire" })
+              @{ name = "console"; args = @("-RDStartHero=Warrior", "-RDMarkFile=$mark", "-RDConsoleTest=$ctest", "-RDConsole", "-windowed", "-ResX=1280", "-ResY=720"); secs = 75; shown = $true; console = $true; castle = $true; map = "brokenspire" },
+              # (2026-11-14, the TODO sweep: the wilds in the packaged game (RD/RDWildSelfTest.cpp): from the square out of the
+              #  gate, a journey to Vel Morrath, a save, moved 300 m off and loaded, then a 20-minute walk with its memory and frame
+              #  rate every 30 s; it writes "stage|..." lines and ends with "result|ok". The run ends when the result is written.)
+              @{ name = "wild"; args = @("-RDStartHero=Warrior", "-RDWildTest=$wtest", "-RDWildTestMinutes=20"); secs = 2700; wild = $true })
     if ($Only.Count) { $Only = @($Only | ForEach-Object { $_ -split "," }); $runs = @($runs | Where-Object { $Only -contains $_.name }) }
     try {
     foreach ($run in $runs) {
@@ -138,6 +157,15 @@ public static class RDWin {
         # (the display run's "saved" must come from this run: the settings files are taken away first (put back at the end))
         if ($run.window) { foreach ($g in $gus) { if (Test-Path $g) { Remove-Item $g -Force } } }
         if ($run.console) { foreach ($f in @($ctest, [IO.Path]::ChangeExtension($ctest, "png"))) { if (Test-Path $f) { Remove-Item $f -Force } } }
+        if ($run.wild) {
+            if (Test-Path $wtest) { Remove-Item $wtest -Force }
+            # (PR #64's review: a kept folder left over is a run stopped before it put them back (killed, the machine short of
+            #  memory): it holds the player's saves and the save folders the test's, so it is kept and taken as the player's)
+            if (Test-Path $savesKept) { "    the player's saves kept by a run that was stopped: put back from $savesKept at the end" }
+            else { New-Item -ItemType Directory -Force $savesKept | Out-Null
+                   for ($i = 0; $i -lt $saveDirs.Count; $i++) { if (Test-Path $saveDirs[$i]) { Copy-Item $saveDirs[$i] (Join-Path $savesKept "$i") -Recurse } } }
+            $savesTaken = $true
+        }
         $client = $null; $least = $null; $saved = $null; $dpi = 0; $want = "1600x900"
         # (claude_ue5.exe is a launcher: the game is the exe under claude_ue5\Binaries\Win64, which it starts and waits for:
         #  claude_ue5-Win64-Shipping.exe, but in a Development package claude_ue5.exe too: found by its folder, not its name
@@ -149,7 +177,9 @@ public static class RDWin {
         $p = $null
         for ($s = 0; $s -lt 30 -and -not $p; $s++) { Start-Sleep 1; $p = Get-Process "claude_ue5*" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.ToLower().StartsWith($bin) -and $_.StartTime -ge $t0.AddSeconds(-1) } | Select-Object -First 1 }
         [long]$peak = 0; $mem = @()
-        if ($p) { for ($s = 0; $s -lt $run.secs -and -not $p.HasExited; $s += 5) { Start-Sleep 5; $p.Refresh(); if (-not $p.HasExited) { $peak = [math]::Max($peak, $p.WorkingSet64); $mem += [int]($p.WorkingSet64 / 1MB) } } }
+        if ($p) { for ($s = 0; $s -lt $run.secs -and -not $p.HasExited; $s += 5) { Start-Sleep 5; $p.Refresh(); if (-not $p.HasExited) { $peak = [math]::Max($peak, $p.WorkingSet64); if (-not $run.wild -or $s % 60 -eq 0) { $mem += [int]($p.WorkingSet64 / 1MB) } }
+            # (the wild run is over when its result is written)
+            if ($run.wild -and (Test-Path $wtest) -and (Select-String -Path $wtest -Pattern '^result\|' -Quiet)) { break } } }
         $alive = $p -and -not $p.HasExited
         if ($run.window -and $alive) {
             [void][RDWin]::SetThreadDpiAwarenessContext([IntPtr](-4)); $r = New-Object RDWin+RECT
@@ -164,7 +194,7 @@ public static class RDWin {
             [void][RDWin]::SetWindowPos($p.MainWindowHandle, [IntPtr]::Zero, 0, 0, 400, 300, 0x16); Start-Sleep 2
             $r2 = New-Object RDWin+RECT; if ([RDWin]::GetClientRect($p.MainWindowHandle, [ref]$r2)) { $least = "$($r2.R - $r2.L)x$($r2.B - $r2.T)" }
         }
-        if ($run.name -ne "menu" -and -not $run.window) { "memory every 5 s (MB): $($mem -join ' ')" }
+        if ($run.name -ne "menu" -and -not $run.window) { "memory every $(if ($run.wild) { 60 } else { 5 }) s (MB): $($mem -join ' ')" }
         foreach ($q in @($p, $l)) { if ($q -and -not $q.HasExited) { Stop-Process -Id $q.Id -Force -Confirm:$false } }
         Start-Sleep 2
         $after = @(Get-ChildItem $crashes -Directory -ErrorAction SilentlyContinue).Count
@@ -182,6 +212,16 @@ public static class RDWin {
             "    picture: $(if (Test-Path $png) { $png } else { 'none' })"
             $ok = $ok -and $lines.Count -gt 0 -and $lines[-1] -eq "result|ok"
         }
+        if ($run.wild) {
+            # (its lines: "stage|<name>|ok/FAILED|<measured>", "mem|<s>|<MB>|<km>|<chunks>|<fps>", the last "result|ok"; the game
+            #  is stopped once the result is written, so "alive" is not asked of it)
+            $lines = if (Test-Path $wtest) { @(Get-Content $wtest -Encoding UTF8) } else { @() }
+            $lines | ForEach-Object { "    $_" }
+            $ok = $after -eq $before -and $lines.Count -gt 0 -and $lines[-1] -eq "result|ok"
+            $alive = $alive -or $ok
+            & $putSaves; $savesTaken = $false
+            "    the game's saves put back as they were"
+        }
         if ($run.window) {
             # (the window's inside the size asked, its scaling the screen's (the game handles it; unaware it read 96 on a
             #  200 % screen), and this run's settings say so: Apply as the menu's)
@@ -197,6 +237,7 @@ public static class RDWin {
         # (put back whatever stopped the runs: an interrupted test left the user's next game at the test's size)
         foreach ($g in $gus) { if ($null -ne $kept[$g]) { [IO.File]::WriteAllBytes($g, $kept[$g]) } elseif (Test-Path $g) { Remove-Item $g -Force } }
         "the game's settings put back as they were"
+        if ($savesTaken) { & $putSaves; "the game's saves put back as they were" }
     }
     if ($bad) { exit 1 }
 }

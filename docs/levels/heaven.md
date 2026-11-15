@@ -35,7 +35,8 @@ A modern city surrounded by a shimmering shield, with skyscrapers, office buildi
 - `884_brokenspire_test.ps1 "descendheaven" <tag> -Light` (`test_hv10.json`): the Warrior made different in the city, through the security door into `heaven_fortress`: her state as she left and as she came in the same (57 lines both ways); its key, title and themes; the menu's "Return to Heaven"; the defender kinds, one of each spawned in a row, each one's clips playing, a picture of the row; a trooper's rounds at her from 7 m (fired, on her, a picture of a round leaving the barrel); the counter `heaven:enter` at 1. Changed again below and back by the menu: the city built round her again, she stands at `ReturnAt` (0.0 m), 2.5 m before the facility's door.
 - `888_wilderness_test.ps1 "world,towns" <tag> -Light` (`SourceArt/wilderness/test_hv7.json`): Heaven past Kethrys Spire, south-west of it, inland, 56 km off; six roads; every town built.
 - The other cities again after Heaven's changes to the shared town code and PR #33's review (its gate: no shut gate's mesh in a wild town's gateway, `spire` checks it): `884 spire,holy` (`test_hv11.json`) `forge` (`test_hv12.json`) and `port` (`test_hv13.json`), all with `-Light`, all passed.
-- Not yet run: the packaged game (`869` and `package_mistward.ps1` name `heaven_fortress` and its run down from the city, `-RDTownGo=dungeon:heaven`); the deeper tiers; the defenders fought.
+- Packaged on 2026-11-14 (Shipping, `builds\todo13`, `package_mistward.ps1 -Test`): the city ran 150 s and `heaven_fortress` 90 s, no crash report.
+- Not yet run: the deeper tiers; the defenders fought.
 
 ## Rebuild notes
 

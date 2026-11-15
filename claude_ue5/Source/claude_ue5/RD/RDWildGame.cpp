@@ -93,6 +93,7 @@ void ARDDungeonGenerator::TickWild(float Dt, APlayerController* PC)
 	APawn* P = PC ? PC->GetPawn() : nullptr;
 	if (!P) return;
 	TickWildRunSpeed(P);          // (the list of 2026-11-07: rd.WildRunSpeed)
+	TickWildSelfTest(P);          // (the TODO sweep of 2026-11-14: the packaged game's -RDWildTest)
 	const FVector L = P->GetActorLocation();
 	const double Xm = L.X / 100.0, Ym = L.Y / 100.0, Cm = WildChunkM;
 	// (every two minutes the map has grown: an autosave)
