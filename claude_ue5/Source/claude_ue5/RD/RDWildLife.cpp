@@ -11,6 +11,7 @@
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDWild.h"
 #include "RD/RDSection.h"
+#include "RD/RDGameInstance.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimSequenceBase.h"
 #include "NiagaraComponent.h"
@@ -132,6 +133,14 @@ void ARDWildAnimal::Drive(const FVector& To0, bool bRun, float Seconds)
 	else Play(F.Walk, F.WalkSpeed / FMath::Max(F.WalkClipSpeed * Sc, 1.f));
 }
 
+void ARDWildAnimal::SetDormant(bool bIn)
+{
+	if (bIn == bDormant) return;
+	bDormant = bIn;
+	SetActorTickEnabled(!bIn);
+	if (Body) Body->SetComponentTickEnabled(!bIn);
+}
+
 void ARDWildAnimal::Tick(float Dt)
 {
 	Super::Tick(Dt);
@@ -204,7 +213,10 @@ void ARDDungeonGenerator::OnWildAnimalKilled(ARDWildAnimal* A)
 	const FRDWildFauna& F = WildFauna[A->Def];
 	const float Now = GetWorld()->GetTimeSeconds();
 	++AnimalsKilled;
-	AnimalRespawns.Add(TPair<int32, float>(A->Def, Now + WildAnimalRespawnSeconds));
+	// (a scenery's herd's beast (the list of 2026-11-14): killed for good, kept with the game; its herd is not the loose animals', so
+	// it holds no place against their cap (PR #65's review))
+	if (A->HerdId >= 0 && A->HerdIndex >= 0) { if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->WildKilled.AddUnique((9LL << 40) + (int64)(uint32)A->HerdId * 32 + A->HerdIndex); }
+	else AnimalRespawns.Add(TPair<int32, float>(A->Def, Now + WildAnimalRespawnSeconds));
 	// (its things: each "Item|min|max|chance", drawn from a hash of the session and the kill (no stream of the play's))
 	TArray<FName> Got;
 	const uint32 H0 = HashCombine((uint32)SessionSeed ^ 0xA41Du, (uint32)AnimalsKilled * 2654435761u);

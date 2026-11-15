@@ -2582,6 +2582,11 @@ public:
 	/** the list of 2026-11-14: a rise of the land laid as the ground is drawn (as the berm): "mound" a dome of radius Rm, "cone" a cone
 	 *  with a crater of Crater's share of it at the top, "ridge" a long bank Rm wide each side and R2m long each way along Yaw; Hm high */
 	class UProceduralMeshComponent* LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater);
+	/** the rises a kind's parts have laid so far (LayWildParts clears them as it begins; LayWildScenery after its uses and hazards), and
+	 *  the ground with them: what is laid after a mound stands on it */
+	struct FWildLand { FVector2D At = FVector2D::ZeroVector; FString Type; float R = 1.f, R2 = 1.f, H = 0.f, Yaw = 0.f, Crater = 0.f; };
+	TArray<FWildLand> WildPartsLand;
+	float WildPartsGroundZ(const FVector& L) const;
 	// ---- the list of 2026-11-12's fifth phase: the structures of the wilds (RDWildSite12.cpp, 924 sites) and their quests
 	/** the structures' kinds (924 sites, from SourceArt/wilderness/sites12.json): the world's SitesIn places them, a chunk lays
 	 *  them (LayWildSite) */
@@ -2632,7 +2637,7 @@ public:
 	void LayWildScenery(ARDWildChunk* C, const FRDWildPlace& P);
 	void TickWildScenery13(float Dt, const FVector& Her);
 	/** a laid scenery's things: what F does (its uses), what hurts (its hazards), the effects its hours show, its herd */
-	struct FSceneryUse { int32 Id = 0; int32 Kind = -1; int32 Use = 0; FVector At = FVector::ZeroVector; float Reach = 250.f; TWeakObjectPtr<ARDWildChunk> Chunk; };
+	struct FSceneryUse { int32 Id = 0; int32 Kind = -1; int32 Use = 0; FVector At = FVector::ZeroVector; float Reach = 250.f; float Reuse = 0.f; TWeakObjectPtr<ARDWildChunk> Chunk; };
 	struct FSceneryHazard { int32 Id = 0; FName Kind; FVector At = FVector::ZeroVector; float R = 500.f; float P = 1.f; float ReadyAt = 0.f; int32 Sprung = 0; float In = 0.f; TWeakObjectPtr<ARDWildChunk> Chunk; };
 	struct FSceneryFx { TWeakObjectPtr<class UNiagaraComponent> Comp; FString Hours; };
 	struct FSceneryHerd { int32 Id = 0; TArray<TWeakObjectPtr<ARDWildAnimal>> Animals; FVector2D Home = FVector2D::ZeroVector; FVector2D Way = FVector2D(1, 0); float Phase = 0.f, Pen = 0.f; bool bMigrate = false, bStampede = false; float StampedeUntil = -1.f, NextHit = 0.f; int32 Stampedes = 0, Hits = 0; };

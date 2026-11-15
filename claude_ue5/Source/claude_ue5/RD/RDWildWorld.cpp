@@ -1425,8 +1425,10 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 		for (int32 I = FMath::FloorToInt((P.C.X - Pad) / HashM); I <= FMath::FloorToInt((P.C.X + Pad) / HashM); ++I)
 			for (int32 J = FMath::FloorToInt((P.C.Y - Pad) / HashM); J <= FMath::FloorToInt((P.C.Y + Pad) / HashM); ++J) PondHash.Add(FIntPoint(I, J), K);
 	}
-	MakeChannels();
+	// (the channels after the rivers and lakes are hashed: they stop at water (PR #65's review: cut before, they ran across rivers
+	// and cut a lake's shore under its level, dry))
 	HashSegments();
+	MakeChannels();
 	MakeRoads();
 	HashSegments();
 	MakeTracks();
@@ -2150,6 +2152,15 @@ void FRDWildWorld::SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) cons
 		TArray<FRDWildPlace> Ss;
 		for (int32 I = -1; I <= 1; ++I) for (int32 J = -1; J <= 1; ++J) SitesIn(Sc + FIntPoint(I, J), Ss);
 		for (const FRDWildPlace& P : Ss) if (FVector2D::Distance(P.At, At) < 150.0) return false;
+		// (PR #65's review: inside its own cell by 50 m, so a shore or roadside spot does not meet the next cell's scenery; 40 m from
+		// the points of interest and 70 m from the farmsteads)
+		if (At.X < X0 + 50.0 || At.X > X0 + SceneryCellM - 50.0 || At.Y < Y0 + 50.0 || At.Y > Y0 + SceneryCellM - 50.0) return false;
+		const FIntPoint Qc = PoiCellOf(At.X, At.Y);
+		TArray<FRDWildPlace> Qs;
+		for (int32 I = -1; I <= 1; ++I) for (int32 J = -1; J <= 1; ++J) PoisIn(Qc + FIntPoint(I, J), Qs);
+		for (const FRDWildPlace& P : Qs) if (FVector2D::Distance(P.At, At) < 40.0) return false;
+		TArray<FRDWildPlace> Fs; FarmsteadsIn(At.X - 120.0, At.Y - 120.0, At.X + 120.0, At.Y + 120.0, Fs);
+		for (const FRDWildPlace& P : Fs) if (FVector2D::Distance(P.At, At) < 70.0) return false;
 		return true;
 	};
 	auto Spot = [&](int32 Ki, FVector2D& At, FRDWSample& S, float& Yaw) -> bool

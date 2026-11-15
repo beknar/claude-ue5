@@ -8,7 +8,7 @@
  "steps": [
   {
    "step": "scenery13",
-   "ok": false,
+   "ok": true,
    "kinds": {
     "shepherd_hut": {
      "found": true,
@@ -65,7 +65,7 @@
       "hits": 0,
       "migrate": 0,
       "stampede": 0,
-      "walked_12s_m": 1.4,
+      "walked_12s_m": 1.0,
       "outside_pen": 0
      },
      "told": "Shepherd's hut: a low stone hut and a drystone fold, a few goats grazing inside | You rest a while by the cold hearth.",
@@ -73,17 +73,17 @@
     },
     "reed_pond": {
      "found": true,
-     "id": 67254510,
+     "id": 67207423,
      "at_km": [
-      5.59,
-      -7.0
+      -21.89,
+      3.21
      ],
      "name": "Reed pond",
      "laid": {
       "kind": "reed_pond",
       "title": "Reed pond",
-      "x": 5586.7,
-      "y": -6996.9,
+      "x": -21891.5,
+      "y": 3211.3,
       "pieces": 32,
       "boxes": 0,
       "guards": 0,
@@ -92,11 +92,11 @@
       "fx": 0,
       "fx_on": 0,
       "herd": 0,
-      "yaw": 135.0
+      "yaw": 0.0
      },
      "bottom_over_ground_cm": [
-      -24,
-      -12,
+      -31,
+      -20,
       -8
      ],
      "pieces_gone": 0,
@@ -158,10 +158,10 @@
        "do": "forage",
        "prompt": "gather fruit from the old trees",
        "f": "scenery",
-       "said": "You take 3 Wild Apples, 3 Wild Plums",
+       "said": "You take 2 Wild Apples, 1 Wild Plums",
        "got": {
-        "Wild Apples": 3,
-        "Wild Plums": 3
+        "Wild Apples": 2,
+        "Wild Plums": 1
        },
        "blessing": "",
        "rose_m": 0.0,
@@ -171,7 +171,7 @@
       }
      ],
      "hazards": [],
-     "told": "Old orchard: an orchard long gone wild, its gnarled trees still heavy with fruit | You take 3 Wild Apples, 3 Wild Plums",
+     "told": "Old orchard: an orchard long gone wild, its gnarled trees still heavy with fruit | You take 2 Wild Apples, 1 Wild Plums",
      "ok": true
     },
     "dusk_meadow": {
@@ -274,7 +274,7 @@
       "title": "Old battlefield",
       "x": 4959.7,
       "y": -3922.4,
-      "pieces": 34,
+      "pieces": 36,
       "boxes": 1,
       "guards": 2,
       "uses": 1,
@@ -285,9 +285,9 @@
       "yaw": 244.5
      },
      "bottom_over_ground_cm": [
-      -70,
-      -9,
-      -3
+      -16,
+      -5,
+      89
      ],
      "pieces_gone": 0,
      "floating": [],
@@ -300,34 +300,34 @@
        "do": "loot",
        "prompt": "search the rusted arms",
        "f": "scenery",
-       "said": "You pry a few usable pieces of iron from the rusted blades.  You take nothing",
+       "said": "You pry a few usable pieces of iron from the rusted blades.  You take 2 Iron Ingot",
        "got": {
-        "Iron Ingot": 0
+        "Iron Ingot": 2
        },
        "blessing": "",
        "rose_m": 0.0,
        "revealed_more": 0,
        "used_after": 1,
-       "ok": false
+       "ok": true
       }
      ],
      "hazards": [],
-     "told": "Old battlefield: rusted blades and bones in the grass, and the burial cairns of an old war's dead | You pry a few usable pieces of iron from the rusted blades.  You take nothing",
-     "ok": false
+     "told": "Old battlefield: rusted blades and bones in the grass, and the burial cairns of an old war's dead | You pry a few usable pieces of iron from the rusted blades.  You take 2 Iron Ingot",
+     "ok": true
     },
     "milestone_road": {
      "found": true,
-     "id": 67240189,
+     "id": 67245298,
      "at_km": [
-      -3.0,
-      2.02
+      0.32,
+      -4.32
      ],
      "name": "Old milestone",
      "laid": {
       "kind": "milestone_road",
       "title": "Old milestone",
-      "x": -3005.0,
-      "y": 2017.3,
+      "x": 322.9,
+      "y": -4324.0,
       "pieces": 8,
       "boxes": 0,
       "guards": 0,
@@ -336,12 +336,12 @@
       "fx": 0,
       "fx_on": 0,
       "herd": 0,
-      "yaw": -133.8
+      "yaw": 40.5
      },
      "bottom_over_ground_cm": [
-      -73,
-      -57,
-      -11
+      -13,
+      -10,
+      -8
      ],
      "pieces_gone": 0,
      "floating": [],
@@ -354,7 +354,7 @@
        "do": "milestone",
        "prompt": "read the milestone",
        "f": "scenery",
-       "said": "It reads:  Brokenspire 3.6 km north-west;  Ashenreach 73.0 km north",
+       "said": "It reads:  Brokenspire 4.3 km east;  Ashenreach 69.8 km north",
        "got": {},
        "blessing": "",
        "rose_m": 0.0,
@@ -364,22 +364,22 @@
       }
      ],
      "hazards": [],
-     "told": "Old milestone: a milestone of the old road, its paving broken, a waymarker toppled in the grass | It reads:  Brokenspire 3.6 km north-west;  Ashenreach 73.0 km north",
+     "told": "Old milestone: a milestone of the old road, its paving broken, a waymarker toppled in the grass | It reads:  Brokenspire 4.3 km east;  Ashenreach 69.8 km north",
      "ok": true
     },
     "crossroads_gibbet": {
      "found": true,
      "id": 67261671,
      "at_km": [
-      9.7,
-      -11.03
+      9.74,
+      -11.04
      ],
      "name": "Crossroads gibbet",
      "laid": {
       "kind": "crossroads_gibbet",
       "title": "Crossroads gibbet",
-      "x": 9699.8,
-      "y": -11026.3,
+      "x": 9744.1,
+      "y": -11037.5,
       "pieces": 2,
       "boxes": 0,
       "guards": 0,
@@ -391,9 +391,9 @@
       "yaw": 202.5
      },
      "bottom_over_ground_cm": [
-      -15,
-      -8,
-      -8
+      -16,
+      -6,
+      -6
      ],
      "pieces_gone": 0,
      "floating": [],
@@ -421,17 +421,17 @@
     },
     "crossroads_shrine": {
      "found": true,
-     "id": 67239166,
+     "id": 67219729,
      "at_km": [
-      -3.72,
-      2.73
+      -15.09,
+      13.96
      ],
      "name": "Wayside shrine",
      "laid": {
       "kind": "crossroads_shrine",
       "title": "Wayside shrine",
-      "x": -3718.5,
-      "y": 2730.5,
+      "x": -15094.1,
+      "y": 13957.4,
       "pieces": 11,
       "boxes": 0,
       "guards": 0,
@@ -443,9 +443,9 @@
       "yaw": 202.5
      },
      "bottom_over_ground_cm": [
-      -9,
-      -6,
-      -6
+      -23,
+      -10,
+      -8
      ],
      "pieces_gone": 0,
      "floating": [],
@@ -475,15 +475,15 @@
      "found": true,
      "id": 67230986,
      "at_km": [
-      -8.41,
-      10.09
+      -8.48,
+      10.06
      ],
      "name": "Notice post",
      "laid": {
       "kind": "crossroads_notice",
       "title": "Notice post",
-      "x": -8414.8,
-      "y": 10087.4,
+      "x": -8479.9,
+      "y": 10056.3,
       "pieces": 1,
       "boxes": 0,
       "guards": 0,
@@ -495,9 +495,9 @@
       "yaw": 202.5
      },
      "bottom_over_ground_cm": [
-      -11,
-      -11,
-      -11
+      -21,
+      -21,
+      -21
      ],
      "pieces_gone": 0,
      "floating": [],
@@ -528,14 +528,14 @@
      "id": 67243256,
      "at_km": [
       -0.93,
-      -0.84
+      -0.83
      ],
      "name": "Wagon wreck",
      "laid": {
       "kind": "wagon_wreck",
       "title": "Wagon wreck",
-      "x": -930.6,
-      "y": -835.5,
+      "x": -934.5,
+      "y": -833.5,
       "pieces": 29,
       "boxes": 1,
       "guards": 0,
@@ -544,12 +544,12 @@
       "fx": 0,
       "fx_on": 0,
       "herd": 0,
-      "yaw": 15.7
+      "yaw": 15.8
      },
      "bottom_over_ground_cm": [
-      -29,
+      -28,
       -15,
-      -2
+      -3
      ],
      "pieces_gone": 0,
      "floating": [],
@@ -578,28 +578,28 @@
    },
    "table": 22,
    "counts_30km": {
-    "tall_grass": 145,
-    "burrow_town": 358,
-    "hanged_tree": 101,
-    "nest_tree": 124,
-    "shrine_tree": 104,
-    "erratic": 342,
-    "migration": 10,
-    "wallow": 159,
-    "hive_meadow": 52,
+    "tall_grass": 107,
+    "burrow_town": 265,
+    "hanged_tree": 64,
+    "nest_tree": 87,
+    "shrine_tree": 75,
+    "erratic": 245,
+    "migration": 5,
+    "wallow": 116,
+    "hive_meadow": 40,
     "brook_crossing": 0,
-    "fairy_ring": 96,
-    "shepherd_hut": 870,
-    "reed_pond": 3,
-    "old_orchard": 414,
-    "dusk_meadow": 34,
-    "butte": 313,
-    "battlefield": 295,
-    "milestone_road": 20,
-    "crossroads_gibbet": 4,
-    "crossroads_shrine": 4,
-    "crossroads_notice": 5,
-    "wagon_wreck": 13,
+    "fairy_ring": 67,
+    "shepherd_hut": 631,
+    "reed_pond": 1,
+    "old_orchard": 292,
+    "dusk_meadow": 23,
+    "butte": 242,
+    "battlefield": 238,
+    "milestone_road": 8,
+    "crossroads_gibbet": 3,
+    "crossroads_shrine": 3,
+    "crossroads_notice": 4,
+    "wagon_wreck": 4,
     "cells": 10201
    }
   },

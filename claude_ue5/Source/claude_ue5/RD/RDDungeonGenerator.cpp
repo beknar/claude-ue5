@@ -1557,7 +1557,6 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 	// notice post took it from the notices))
 	if (bWild && WildSceneryFirst(From)) { const FString Ws = WildSceneryInteract(From); if (!Ws.IsEmpty()) return Ws; }
 	if (bWild) { const FString Wp = WildPoiInteract(From); if (!Wp.IsEmpty()) return Wp; }
-	if (bWild) { const FString Ws = WildSceneryInteract(From); if (!Ws.IsEmpty()) return Ws; }
 	// (Brokenspire: someone of the town, a service, the gate, a boarded door; the castle's way back)
 	if (bTown || bTownLink) { const FString Tw = TownInteract(From); if (!Tw.IsEmpty()) return Tw; }
 	// (the third list: an armory table's weapon, a shrine, a fountain, a vault's door)
@@ -1664,9 +1663,8 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 	const ARDLootPile* Lp = nullptr; float LpD = 260.f;
 	for (const ARDLootPile* P : LootPiles) if (IsValid(P)) { const float D = FVector::Dist2D(P->GetActorLocation(), From); if (D < LpD) { LpD = D; Lp = P; } }
 	if (bMounted) return TEXT("get off your horse");          // (the eighth phase)
-	if (!Lp && bWild && WildSceneryFirst(From)) { const FString Ws = WildSceneryDescribe(From); if (!Ws.IsEmpty()) return Ws; }          // (the list of 2026-11-14: the nearer)
+	if (!Lp && bWild && WildSceneryFirst(From)) { const FString Ws = WildSceneryDescribe(From); if (!Ws.IsEmpty()) return Ws; }          // (the list of 2026-11-14: the nearest)
 	if (!Lp && bWild) { const FString Wp = WildPoiDescribe(From); if (!Wp.IsEmpty()) return Wp; }          // (the seventh phase)
-	if (!Lp && bWild) { const FString Ws = WildSceneryDescribe(From); if (!Ws.IsEmpty()) return Ws; }
 	if (Lp)
 		{
 			// (hers, where she fell; or something the rules laid on the floor: the guarded ring; or a dead monster's parts)

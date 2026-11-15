@@ -19,6 +19,7 @@
 #include "Engine/StaticMesh.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
+#include "RD/RDTown.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDScen13, Log, All);
 
@@ -26,6 +27,8 @@ namespace
 {
 	/** a scenery's keys: its chests (7 << 40), its uses taken for good (8 << 40), each + its id x 8 + n (the structures' are 5 and 6) */
 	constexpr int64 RDS13BoxKeys = 7LL << 40, RDS13UseKeys = 8LL << 40;
+	/** a herd's beasts killed for good (9 << 40) + its id x 32 + n (PR #65's review: a herd laid again came back whole) */
+	constexpr int64 RDS13HerdKeys = 9LL << 40;
 	TMap<FString, FString> RDS13Parse(const FString& Line)
 	{
 		TMap<FString, FString> Out;
@@ -66,7 +69,7 @@ void ARDDungeonGenerator::LayWildScenery(ARDWildChunk* C, const FRDWildPlace& P)
 	{
 		const FVector2D Xy = P.At + FVector2D(Frame.RotateVector(FVector(RDS13Num(M, TEXT("x"), 0.f), RDS13Num(M, TEXT("y"), 0.f), 0.0)));
 		const FVector W(Xy.X * 100.0, Xy.Y * 100.0, 0.0);
-		return FVector(W.X, W.Y, WildGroundZ(W) + RDS13Num(M, TEXT("z"), 0.f) * 100.f);
+		return FVector(W.X, W.Y, WildPartsGroundZ(W) + RDS13Num(M, TEXT("z"), 0.f) * 100.f);
 	};
 	// (what F does there)
 	WildSceneryUses.RemoveAll([&](const FSceneryUse& U) { return U.Id == P.Id || !U.Chunk.IsValid(); });
@@ -74,6 +77,7 @@ void ARDDungeonGenerator::LayWildScenery(ARDWildChunk* C, const FRDWildPlace& P)
 	{
 		const TMap<FString, FString> M = RDS13Parse(K.Uses[I]);
 		FSceneryUse U; U.Id = P.Id; U.Kind = P.Scenery; U.Use = I; U.At = WorldOf(M); U.Reach = RDS13Num(M, TEXT("r"), 2.5f) * 100.f; U.Chunk = C;
+		U.Reuse = RDS13Num(M, TEXT("reuse"), 0.f);          // (read once: the prompt asks every frame (PR #65's review))
 		if (RDS13Num(M, TEXT("edge"), 0.f) > 0.5f && Rec.Comps.Num() > 0 && Rec.Comps[0].IsValid())
 		{
 			// (out along the frame's +X from the first piece's middle to the edge of its bounds, 1.5 m on: at its foot)
@@ -87,7 +91,8 @@ void ARDDungeonGenerator::LayWildScenery(ARDWildChunk* C, const FRDWildPlace& P)
 		WildSceneryUses.Add(U);
 	}
 	// (what hurts there)
-	WildSceneryHazards.RemoveAll([&](const FSceneryHazard& H) { return H.Id == P.Id || !H.Chunk.IsValid(); });
+	// (a hazard's id is its scenery's x 8 + n (PR #65's review: compared with the scenery's own, the old ones were never taken out))
+	WildSceneryHazards.RemoveAll([&](const FSceneryHazard& H) { return H.Id / 8 == P.Id || !H.Chunk.IsValid(); });
 	for (int32 I = 0; I < K.Hazards.Num(); ++I)
 	{
 		const TMap<FString, FString> M = RDS13Parse(K.Hazards[I]);
@@ -111,12 +116,15 @@ void ARDDungeonGenerator::LayWildScenery(ARDWildChunk* C, const FRDWildPlace& P)
 		FRandomStream Rh((int32)FRDWildWorld::Hash(P.Id, 0x1314, Wild->Seed));
 		const int32 N = FMath::Clamp(FCString::Atoi(*Count), 1, 30);
 		const float Spread = RDS13Num(M, TEXT("r"), 18.f) * 100.f;
+		const URDGameInstance* GI = URDGameInstance::Of(this);
 		for (int32 I = 0; I < N; ++I)
 		{
+			// (every beast's draws made, its killed ones left out: the others keep their places)
 			const float A = Rh.FRandRange(0.f, 2.f * PI), D = FMath::Sqrt(Rh.FRand()) * (Hd.Pen > 0.f ? Hd.Pen * 60.f : Spread);
+			if (GI && GI->WildKilled.Contains(RDS13HerdKeys + (int64)(uint32)P.Id * 32 + I)) continue;
 			if (ARDWildAnimal* An = SpawnWildAnimalAt(FName(*Kind.TrimStartAndEnd()), FVector(Hd.Home.X * 100.0 + FMath::Cos(A) * D, Hd.Home.Y * 100.0 + FMath::Sin(A) * D, 0.0)))
 			{
-				An->HerdId = P.Id;
+				An->HerdId = P.Id; An->HerdIndex = I;
 				C->Props.Add(An);
 				Hd.Animals.Add(An);
 			}
@@ -125,6 +133,7 @@ void ARDDungeonGenerator::LayWildScenery(ARDWildChunk* C, const FRDWildPlace& P)
 	}
 	WildSceneryLaid.RemoveAll([&](const FRuinLaid& X) { return X.Id == P.Id; });
 	WildSceneryLaid.Add(Rec);
+	WildPartsLand.Reset();          // (its rises: done with, for what is laid next)
 	UE_LOG(LogRDScen13, Log, TEXT("RDSCEN %s (%s): %d pieces, %d boxes, %d fx, %d uses, %d hazards at (%.0f, %.0f)"), *P.Name, *K.Name.ToString(), Rec.Pieces, Rec.Boxes, Rec.Fx.Num(), K.Uses.Num(), K.Hazards.Num(), P.At.X, P.At.Y);
 }
 
@@ -262,6 +271,9 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 	// within 16 m (or a test sets it off), through and past her)
 	for (FSceneryHerd& Hd : WildSceneryHerds)
 	{
+		// (a herd far from her rests: its beasts' ticks off past 250 m (PR #65's review: every herd of the chunks laid ticked))
+		for (const TWeakObjectPtr<ARDWildAnimal>& Wa : Hd.Animals)
+			if (ARDWildAnimal* A = Wa.Get(); A && !A->IsDead()) A->SetDormant(FVector2D::Distance(FVector2D(A->GetActorLocation()) / 100.0, H2) > 250.0);
 		FVector2D Mid(0, 0); int32 N = 0;
 		for (const TWeakObjectPtr<ARDWildAnimal>& Wa : Hd.Animals) if (const ARDWildAnimal* A = Wa.Get(); A && !A->IsDead()) { Mid += FVector2D(A->GetActorLocation()) / 100.0; ++N; }
 		if (N == 0) continue;
@@ -330,18 +342,23 @@ bool ARDDungeonGenerator::StartWildStampede(int32 Id)
 // ------------------------------------------------------------------------------------------------ F at one
 bool ARDDungeonGenerator::WildSceneryFirst(const FVector& From) const
 {
+	// (the nearest of a scenery's use, a point of interest, a wild door or container and a person takes F (PR #65's review: the
+	// battlefield's search took F from its chest 4.5 m from it))
 	const FSceneryUse* U = WildSceneryUseNear(From);
 	if (!U) return false;
-	const FRDWildPoiLive* P = WildPoiNear(From, 320.f);
-	return !P || FVector::Dist2D(U->At, From) <= FVector::Dist2D(P->At, From);
+	const float Du = FVector::Dist2D(U->At, From);
+	if (const FRDWildPoiLive* P = WildPoiNear(From, 320.f); P && FVector::Dist2D(P->At, From) < Du) return false;
+	int32 Di = -1;
+	if (const ARDWildChunk* C = bWildHouseInsides ? WildDoorNear(From, 190.f, Di) : nullptr; C && C->Doors.IsValidIndex(Di) && FVector::Dist2D(C->Doors[Di].At, From) < Du) return false;
+	if (const ARDTownsfolk* T = WildFolkForF(From); T && FVector::Dist2D(T->GetActorLocation(), From) < Du) return false;
+	return true;
 }
 
 bool ARDDungeonGenerator::IsWildSceneryUsed(const FSceneryUse& U) const
 {
 	if (!WildSceneryKinds.IsValidIndex(U.Kind) || !WildSceneryKinds[U.Kind].Uses.IsValidIndex(U.Use)) return true;
-	const TMap<FString, FString> M = RDS13Parse(WildSceneryKinds[U.Kind].Uses[U.Use]);
 	const int64 Key = RDS13UseKeys + (int64)(uint32)U.Id * 8 + U.Use;
-	if (RDS13Num(M, TEXT("reuse"), 0.f) > 0.f) { const float* R = WildSceneryReadyAt.Find((int32)(Key & 0x7FFFFFFF)); return R && GetWorld() && GetWorld()->GetTimeSeconds() < *R; }
+	if (U.Reuse > 0.f) { const float* R = WildSceneryReadyAt.Find((int32)(Key & 0x7FFFFFFF)); return R && GetWorld() && GetWorld()->GetTimeSeconds() < *R; }
 	const URDGameInstance* GI = URDGameInstance::Of(this);
 	return GI && GI->WildKilled.Contains(Key);
 }

@@ -476,7 +476,10 @@ public:
 	/** the list of 2026-11-14 (a herd's migration, its stampede): walked or run toward To for Seconds, as its own wandering does; a herd's
 	 *  beast (HerdId >= 0) keeps to its herd and is not dropped with the loose animals round her */
 	void Drive(const FVector& To, bool bRun, float Seconds);
-	int32 HerdId = -1;
+	int32 HerdId = -1, HerdIndex = -1;
+	/** a herd's beast far from her rests: its tick and its body's off (TickWildScenery13) */
+	void SetDormant(bool bDormant);
+	bool bDormant = false;
 protected:
 	virtual void Tick(float Dt) override;
 private:

@@ -620,7 +620,8 @@ void ARDDungeonGenerator::TickWildTravellers(const FVector& Her)
 	for (int32 Ri = 0; Ri < Wild->Roads.Num() && WildTravellers.Num() < WildTravellerGroups; ++Ri)
 	{
 		const FRDWildWorld::FRoad& Rd = Wild->Roads[Ri];
-		if (Rd.P.Num() < 4 || !Rd.Box.ExpandBy(WildTravellerM).IsInside(Hm)) continue;
+		// (the roads between towns: not the tracks of the list of 2026-11-14, which end in the open wilds (PR #65's review))
+		if (Rd.bTrack || Rd.P.Num() < 4 || !Rd.Box.ExpandBy(WildTravellerM).IsInside(Hm)) continue;
 		if (WildTravellers.ContainsByPredicate([Ri](const FTraveller& T) { return T.Road == Ri; })) continue;
 		int32 Seg; float Dm;
 		if (!RDW10NearestOnRoad(Rd, Hm, Seg, Dm) || Dm > WildTravellerM) continue;

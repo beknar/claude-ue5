@@ -250,3 +250,13 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
 - **A scenery kind that stands at a crossroads is chosen where there is one**: drawn among all of a region's kinds, few crossroads held one; a cell holding a crossroads takes a crossroads kind four times in five, one a road crosses a roadside kind two in five.
 - **A module imported by a script run through `ue_exec` stays loaded**: `wild_tables.py`'s `REPORT` carried the last run's lines into the next, and a change to it would not be seen. `924` and `926` reload it.
 - **An effect at 6 km is not seen**: AbstractFX's tornado scaled 40 times showed nothing in the storm's picture; the far storm is a mesh of our own (the kit's storm cell, its rain translucent in `M_N13_Translucent`), never culled. Its rain's picture wrapped once round a 6 km curtain drew 25 m slabs: repeat a picture round a big lathe.
+- **PR #65's review (2026-11-15)**:
+  - What Init makes from samples needs what those samples read made first: the channels were cut before the rivers and lakes were hashed, so `Sample` saw no river or lake and an arroyo ran across a river and cut a lake's shore under its level, dry. They are cut after the first `HashSegments`.
+  - A list cleared before something is laid again is cleared by the key its entries carry: a hazard's id is its scenery's x 8 + n, and compared with the scenery's own the old ones stayed (each sting would have hurt twice).
+  - What a kind lays after a rise of the land stands on it (`WildPartsGroundZ`, the rises its parts laid so far): a standing stone on a cairn's middle stood 1.1 m inside it, and the floating test, reading bottoms against the land alone, passed it.
+  - The nearest of everything F reaches takes it: a scenery's use in reach of its own chest took F from the chest (`WildSceneryFirst` weighs the points of interest, the wild doors and containers and the farm folk too).
+  - A herd laid again from the seed comes back without the beasts she killed (`(9 << 40)` + its id x 32 + n in `WildKilled`), and their deaths hold no place against the loose animals' cap; a herd past 250 m rests (`SetDormant`).
+  - Two placements from neighbouring cells can meet when either may leave its cell: a scenery stays 50 m inside its own, 40 m from the points of interest and 70 m from the farmsteads.
+  - A new kind of road must be left out by everything that walks the old kind: the travellers walked the tracks to their dead ends.
+  - What the prompt asks every frame is read once, when the thing is laid (a use's reuse), not parsed from its text each time.
+  - A component shared between parts carries the first part's settings: a patch's component is the part's own.

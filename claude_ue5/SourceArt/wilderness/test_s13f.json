@@ -49,8 +49,8 @@
       "hunting": 2,
       "lying_low": 0,
       "m_from_her": [
-       15.1,
-       11.5
+       12.4,
+       8.8
       ]
      },
      "uses": [],
@@ -60,17 +60,17 @@
     },
     "burrow_town": {
      "found": true,
-     "id": 67253494,
+     "id": 67251457,
      "at_km": [
-      5.06,
-      -1.97
+      3.78,
+      4.5
      ],
      "name": "Burrow town",
      "laid": {
       "kind": "burrow_town",
       "title": "Burrow town",
-      "x": 5061.7,
-      "y": -1971.0,
+      "x": 3779.1,
+      "y": 4497.2,
       "pieces": 18,
       "boxes": 0,
       "guards": 0,
@@ -79,12 +79,12 @@
       "fx": 0,
       "fx_on": 0,
       "herd": 0,
-      "yaw": 299.9
+      "yaw": 27.6
      },
      "bottom_over_ground_cm": [
-      -40,
-      -15,
-      -6
+      -22,
+      -14,
+      -8
      ],
      "pieces_gone": 0,
      "floating": [],
@@ -165,11 +165,11 @@
        "do": "loot",
        "prompt": "search the dead man's coat",
        "f": "scenery",
-       "said": "Whoever hung here had little: a crust, a length of rope.  You take 1 Bread, 2 Straw Rope, 1 Small Healing Potion",
+       "said": "Whoever hung here had little: a crust, a length of rope.  You take 2 Straw Rope",
        "got": {
-        "Bread": 1,
+        "Bread": 0,
         "Straw Rope": 2,
-        "Small Healing Potion": 1
+        "Small Healing Potion": 0
        },
        "blessing": "",
        "rose_m": 0.0,
@@ -179,7 +179,7 @@
       }
      ],
      "hazards": [],
-     "told": "The hanging tree: a lone dead tree on the rise, a noose still swaying from its lowest bough | Whoever hung here had little: a crust, a length of rope.  You take 1 Bread, 2 Straw Rope, 1 Small Healing Potion",
+     "told": "The hanging tree: a lone dead tree on the rise, a noose still swaying from its lowest bough | Whoever hung here had little: a crust, a length of rope.  You take 2 Straw Rope",
      "ok": true
     },
     "nest_tree": {
@@ -332,7 +332,7 @@
        "got": {},
        "blessing": "Blessing of the Lone Tree",
        "rose_m": 4.8,
-       "revealed_more": 2431,
+       "revealed_more": 2473,
        "used_after": 1,
        "ok": true
       }
@@ -343,17 +343,17 @@
     },
     "migration": {
      "found": true,
-     "id": 67261671,
+     "id": 67272929,
      "at_km": [
-      9.78,
-      -11.05
+      16.18,
+      -14.88
      ],
      "name": "Herd on the move",
      "laid": {
       "kind": "migration",
       "title": "Herd on the move",
-      "x": 9778.8,
-      "y": -11050.4,
+      "x": 16178.8,
+      "y": -14879.6,
       "pieces": 3,
       "boxes": 0,
       "guards": 0,
@@ -362,7 +362,7 @@
       "fx": 0,
       "fx_on": 0,
       "herd": 14,
-      "yaw": 72.9
+      "yaw": 108.9
      },
      "bottom_over_ground_cm": null,
      "pieces_gone": 0,
@@ -379,12 +379,12 @@
       "hits": 2,
       "migrate": 1,
       "stampede": 1,
-      "walked_12s_m": 20.6,
+      "walked_12s_m": 15.6,
       "started": true,
-      "ran_m": 55.8,
+      "ran_m": 60.2,
       "hp_lost": 11.2
      },
-     "told": "The herd panics: a stampede comes thundering your way! | Herd on the move: a herd crosses the road, unhurried, and nothing will turn it | Trampled by the stampede: 11 damage | The herd panics: a stampede comes thundering your way! | Trampled by the stampede: 11 damage",
+     "told": "Herd on the move: a herd crosses the road, unhurried, and nothing will turn it | The herd panics: a stampede comes thundering your way! | Trampled by the stampede: 11 damage | The herd panics: a stampede comes thundering your way! | Trampled by the stampede: 11 damage",
      "ok": true
     },
     "wallow": {
@@ -441,17 +441,17 @@
     },
     "hive_meadow": {
      "found": true,
-     "id": 67257601,
+     "id": 67260673,
      "at_km": [
-      7.52,
-      4.4
+      9.17,
+      4.58
      ],
      "name": "Wild hives",
      "laid": {
       "kind": "hive_meadow",
       "title": "Wild hives",
-      "x": 7519.0,
-      "y": 4402.6,
+      "x": 9165.3,
+      "y": 4578.1,
       "pieces": 7,
       "boxes": 0,
       "guards": 0,
@@ -460,12 +460,12 @@
       "fx": 1,
       "fx_on": 1,
       "herd": 0,
-      "yaw": 215.3
+      "yaw": 287.5
      },
      "bottom_over_ground_cm": [
-      -13,
       -12,
-      -11
+      -11,
+      -10
      ],
      "pieces_gone": 0,
      "floating": [],
@@ -552,7 +552,7 @@
       }
      ],
      "hazards": [],
-     "told": "Bees! The hive's swarm stings you: 4 damage | Stepping stones: a line of stones across the water, a little fall chattering beside them | You wait by the pool.  You take 2 Fish",
+     "told": "Stepping stones: a line of stones across the water, a little fall chattering beside them | You wait by the pool.  You take 2 Fish",
      "ok": true
     },
     "fairy_ring": {
@@ -624,28 +624,28 @@
    },
    "table": 22,
    "counts_30km": {
-    "tall_grass": 146,
-    "burrow_town": 363,
-    "hanged_tree": 101,
-    "nest_tree": 124,
-    "shrine_tree": 104,
-    "erratic": 343,
-    "migration": 7,
-    "wallow": 159,
-    "hive_meadow": 52,
+    "tall_grass": 107,
+    "burrow_town": 268,
+    "hanged_tree": 64,
+    "nest_tree": 87,
+    "shrine_tree": 74,
+    "erratic": 245,
+    "migration": 5,
+    "wallow": 115,
+    "hive_meadow": 40,
     "brook_crossing": 0,
-    "fairy_ring": 97,
-    "shepherd_hut": 870,
-    "reed_pond": 3,
-    "old_orchard": 412,
-    "dusk_meadow": 34,
-    "butte": 317,
-    "battlefield": 296,
-    "milestone_road": 14,
-    "crossroads_gibbet": 7,
+    "fairy_ring": 65,
+    "shepherd_hut": 633,
+    "reed_pond": 1,
+    "old_orchard": 290,
+    "dusk_meadow": 23,
+    "butte": 242,
+    "battlefield": 238,
+    "milestone_road": 13,
+    "crossroads_gibbet": 0,
     "crossroads_shrine": 3,
-    "crossroads_notice": 0,
-    "wagon_wreck": 13,
+    "crossroads_notice": 1,
+    "wagon_wreck": 5,
     "cells": 10201
    }
   }
