@@ -55,7 +55,7 @@ The biomes' scenery, in phases with a PR each (the user's choices: every item to
 - [ ] **Phase 10 (the lists' tips), what is not done or measured:**
   - Seasons ("summer thaw and winter ice turn the same map into two very different places") are not built: the world has one season.
   - Sound ("creaking trunks, birdsong that suddenly stops", "waves, bird cries") is not built for the scenery: nobody hears a test, and no sound was chosen for it.
-  - The cold has no food side (hunger is not in the game), and the warmth of a fire is any fire effect or fire piece within 8 m. The landmark is one far tower at a time, among the other far sights.
+  - The cold has no food side (hunger is not in the game), and the warmth of a fire is any fire effect or fire piece within 8 m. The landmark is one kind of tower (the kit's broken tower), the nearest one standing at a time.
 - [ ] **Phase 1, what is not done or measured:**
   - The burrows' "collapsing tunnels" are a fall's harm and a slow where the ground gives way: the ground itself does not open (a chunk's ground is one mesh).
   - The herons stand still (a mesh of our own, no clips); the bees and the birds are the packs' effects (flies as bees, the flocks as crows); the frogs are not there (no frog in the project).
