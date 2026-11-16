@@ -494,6 +494,28 @@
   ],
   "antlerpile": [
    "/Game/RandomDungeon/Wild13/Kit/SM_N13_AntlerPile"
+  ],
+  "stilthut": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_StiltHut"
+  ],
+  "lighthouse": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_Lighthouse"
+  ],
+  "pitcherplant": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_PitcherPlant"
+  ],
+  "eeltrap": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_EelTrap"
+  ],
+  "duckblind": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_DuckBlind"
+  ],
+  "seastack": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_SeaStack_A",
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_SeaStack_B"
+  ],
+  "bogidol": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_BogIdol"
   ]
  },
  "kinds": [
@@ -4545,6 +4567,692 @@
     "L=at;p=l12_boulder#;x=-3;h=1.6;yaw=rand;col=1;sink=20",
     "L=ring;p=n13_sandrock#;n=6;r=4;s=0.5;yaw=rand;col=1;sink=10"
    ]
+  },
+  {
+   "name": "reed_bed",
+   "title": "Reed bed",
+   "text": "reeds taller than a man, hiding paths, nests and whatever waits in them",
+   "biomes": [
+    "marshes",
+    "wetlands"
+   ],
+   "weight": 1.0,
+   "guards": 2,
+   "ambush_r": 11,
+   "loot": "Bird's Eggs|1|2|0.7;Fish|1|2|0.6",
+   "uses": [
+    "do=forage;x=-14;y=0;r=3;verb=search;what=reed edge;things=Bird's Eggs|1|2|0.7;reuse=300;text=Nests in the reed edge, and paths through the reeds that something has trodden."
+   ],
+   "parts": [
+    "L=scatter;p=s12_reeds#;n=60;r=12;h=2.2-2.8;yaw=rand;col=0;inst=1",
+    "L=at;p=n13_nest#;x=4;y=3;s=0.8;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "boardwalk",
+   "title": "Boardwalk",
+   "text": "a plank trail across the marsh on stakes, one stretch rotten and broken",
+   "biomes": [
+    "marshes",
+    "wetlands"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=bog;x=8;y=0;r=2.5;msg=The planks give out and you are in the black mud to your knees"
+   ],
+   "uses": [
+    "do=lore;x=-6;y=-6;r=3;verb=look at;what=planks;text=Someone keeps this trail. Someone else has sawn through a stretch of it."
+   ],
+   "parts": [
+    "L=line;p=s12_planks#;n=6;r=12;a=0;h=0.25;yaw=fixed;col=1",
+    "L=line;p=s12_stakes#;n=6;r=12;a=0;y=1.2;h=0.8;yaw=fixed;col=0",
+    "L=patch;r=4;x=8;y=0;hb=0.25;tint=0.18,0.15,0.10"
+   ]
+  },
+  {
+   "name": "stilt_village",
+   "title": "Stilt village",
+   "text": "fishing huts raised on stilts above the water, their people on the platforms",
+   "biomes": [
+    "marshes",
+    "wetlands"
+   ],
+   "weight": 1.0,
+   "need_water": "any",
+   "folk": [
+    "Townswoman|Fisher|The water rises every spring; our houses stay dry./Eels for bread, if you are hungry./Keep to the boards at night. The lights out there are not lanterns.|-2|-3"
+   ],
+   "uses": [
+    "do=trade;x=-3;y=1;r=3;verb=trade with;what=fisher;give=Bread|1;get=Fish|2;reuse=120"
+   ],
+   "parts": [
+    "L=at;p=n13_stilthut#;x=6;y=-5;s=1;yaw=fixed;yawadd=180;col=1",
+    "L=at;p=n13_stilthut#;x=8;y=6;s=0.9;yaw=fixed;yawadd=170;col=1",
+    "L=at;p=s12_fishrack#;x=-2;y=6;h=1.8;yaw=rand;col=1",
+    "L=at;p=s12_boat#;x=2;y=-9;h=1.0;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "marsh_lights",
+   "title": "Marsh lights",
+   "text": "lights drifting over the marsh at night, leading off the path",
+   "biomes": [
+    "marshes",
+    "wetlands"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=-12;y=0;r=3;verb=watch;what=lights;text=Pale lights over the black water, always a little further off. The drowned follow them; so do the foolish."
+   ],
+   "parts": [
+    "L=scatter;fx=wisps;n=4;r=12;z=1.2;s=1;hours=night",
+    "L=scatter;p=s12_reeds#;n=20;r=10;h=1.6;yaw=rand;col=0;inst=1",
+    "L=patch;r=8;hb=0.25;tint=0.04,0.07,0.06"
+   ]
+  },
+  {
+   "name": "heron_rookery",
+   "title": "Heron rookery",
+   "text": "herons and cranes wading the shallows; a flock bursts into the air",
+   "biomes": [
+    "marshes",
+    "coastal regions"
+   ],
+   "weight": 1.0,
+   "need_water": "any",
+   "uses": [
+    "do=lore;x=0;y=-8;r=3;verb=watch;what=herons;text=Grey herons stand like posts, then lift all at once with a sound like a sail."
+   ],
+   "parts": [
+    "L=scatter;p=n13_heron#;n=4;r=8;s=1;yaw=rand;col=0",
+    "L=at;fx=crows;z=10;s=1"
+   ]
+  },
+  {
+   "name": "fish_weir",
+   "title": "Fish weir",
+   "text": "a weir of stakes across a channel, eel traps in its gaps, a punt tied up",
+   "biomes": [
+    "marshes",
+    "wetlands"
+   ],
+   "weight": 1.0,
+   "need_water": "any",
+   "uses": [
+    "do=fish;x=-4;y=-4;r=3;verb=empty;what=traps;things=Fish|1|3|0.9;reuse=300;text=Two eels and a pike in the traps, still alive."
+   ],
+   "parts": [
+    "L=line;p=s12_stakes#;n=8;r=8;a=90;h=1.0;yaw=fixed;col=0",
+    "L=scatter;p=n13_eeltrap#;n=3;r=6;s=1;yaw=rand;col=1",
+    "L=at;p=s12_boat#;x=4;y=6;h=0.9;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "salt_creek",
+   "title": "Salt-marsh creek",
+   "text": "a creek through the salt marsh that floods and drains with the tide",
+   "biomes": [
+    "marshes",
+    "coastal regions"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=tide;x=0;y=0;r=4;msg=The creek is filling: the tide is coming in under the grass|The tide takes your footing in the soft mud"
+   ],
+   "uses": [
+    "do=lore;x=-12;y=-8;r=3;verb=look at;what=creek;text=Twice a day the sea comes up this creek and fills the marsh. Twice a day it goes."
+   ],
+   "parts": [
+    "L=patch;r=10;hb=0.25;tint=0.18,0.15,0.10",
+    "L=ridge;r=3;r2=14;hb=0.3;a=0;tint=0.10,0.18,0.20;tide=0.6",
+    "L=scatter;p=s12_reeds#;n=16;r=12;r0=6;h=1.2;yaw=rand;col=0;inst=1"
+   ]
+  },
+  {
+   "name": "duck_blind",
+   "title": "Duck blind",
+   "text": "a hunter's hide of reeds at the water's edge",
+   "biomes": [
+    "marshes",
+    "wetlands"
+   ],
+   "weight": 1.0,
+   "need_water": "any",
+   "uses": [
+    "do=lore;x=-5;y=0;r=3;verb=look into;what=hide;text=A plank seat, feathers, a broken arrow. From in here you could watch the whole pool."
+   ],
+   "parts": [
+    "L=at;p=n13_duckblind#;s=1;yaw=fixed;col=1"
+   ]
+  },
+  {
+   "name": "sunken_causeway",
+   "title": "Sunken causeway",
+   "text": "an old stone road running under the water, its stones just showing",
+   "biomes": [
+    "marshes",
+    "wetlands"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=-8;r=3;verb=look at;what=road;text=Dressed stones, set straight as a ruler, a hand's depth under the water. Someone built a road here before the marsh."
+   ],
+   "parts": [
+    "L=line;p=s12_beachrock#;n=10;r=16;a=0;h=0.4;yaw=rand;col=1;sink=20",
+    "L=patch;r=14;hb=0.3;tint=0.04,0.07,0.06"
+   ]
+  },
+  {
+   "name": "drowned_church",
+   "title": "Drowned church",
+   "text": "a church drowned in the marsh, only its bell tower showing",
+   "biomes": [
+    "marshes",
+    "wetlands"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=-12;y=0;r=3;verb=listen to;what=tower;text=On still nights, they say, the bell still rings under the water."
+   ],
+   "parts": [
+    "L=at;p=n13_churchspire#;s=1;yaw=rand;col=1;sink=250",
+    "L=patch;r=10;hb=0.3;tint=0.04,0.07,0.06"
+   ]
+  },
+  {
+   "name": "cypress_swamp",
+   "title": "Cypress swamp",
+   "text": "drowned trees with knobby roots and hanging moss over dark water",
+   "biomes": [
+    "wetlands"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=-16;y=0;r=3;verb=look at;what=swamp;text=Trees standing in black water to their knees, moss hanging from them like rags. Nothing moves, then something does."
+   ],
+   "parts": [
+    "L=patch;r=14;hb=0.25;tint=0.04,0.07,0.06",
+    "L=scatter;p=s12_willow#;n=6;r=13;r0=3;h=9-12;yaw=rand;col=1",
+    "L=scatter;p=s12_roots#;n=5;r=10;h=1.2;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "bog_body",
+   "title": "Bog find",
+   "text": "a peat cutting where the bog has given up an old idol, and something worse",
+   "biomes": [
+    "wetlands",
+    "marshes"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=-8;y=-6;r=3;verb=look at;what=find;text=A wooden god as tall as a man, and beside it a body with a rope still round its neck. The bog keeps everything."
+   ],
+   "parts": [
+    "L=patch;r=8;hb=0.25;tint=0.13,0.10,0.07",
+    "L=at;p=n13_bogidol#;x=3;s=1;yaw=rand;tilt=8;col=1",
+    "L=at;p=s12_ribs#;x=-3;y=2;h=0.6;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "floating_mat",
+   "title": "Floating mat",
+   "text": "a mat of floating vegetation that looks like solid ground",
+   "biomes": [
+    "wetlands",
+    "marshes"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=thin_ice;x=0;y=0;r=4;msg=The green mat sinks under your weight: cold black water to your waist"
+   ],
+   "uses": [
+    "do=lore;x=-11;y=0;r=3;verb=look at;what=mat;text=Green and firm-looking, and it moves, very slightly, when the wind blows."
+   ],
+   "parts": [
+    "L=patch;r=7;hb=0.25;tint=0.22,0.30,0.12",
+    "L=scatter;p=s12_reeds#;n=12;r=7;h=0.8;yaw=rand;col=0;inst=1"
+   ]
+  },
+  {
+   "name": "quicksand",
+   "title": "Quicksand",
+   "text": "a smooth patch of grey that swallows what steps on it",
+   "biomes": [
+    "wetlands",
+    "coastal regions"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=bog;x=0;y=0;r=4;msg=Quicksand! It closes round your legs and pulls"
+   ],
+   "uses": [
+    "do=lore;x=-9;y=0;r=3;verb=look at;what=sand;text=Smooth, grey, without a footprint on it. Nothing walks here. That is the warning."
+   ],
+   "parts": [
+    "L=patch;r=5;hb=0.25;tint=0.40,0.37,0.30"
+   ]
+  },
+  {
+   "name": "witch_hummock",
+   "title": "Witch's hummock",
+   "text": "a hummock of dry ground in the swamp, a hut on it, a woman who knows things",
+   "biomes": [
+    "wetlands"
+   ],
+   "weight": 1.0,
+   "folk": [
+    "Townswoman|Swamp witch|Bread for a cure, dearie./The lights are the drowned. Do not answer them./I knew you would come. I always know.|-4|-2"
+   ],
+   "uses": [
+    "do=offer;x=-4;y=-4;r=3;verb=leave an offering at;what=hut;give=Bread|1;name=The Witch's Charm;dmg=0.06;armour=0.1;secs=900;text=She takes the bread, mutters over a twist of hair and ties it round your wrist."
+   ],
+   "parts": [
+    "L=mound;r=10;hb=1.4;tint=0.24,0.22,0.14",
+    "L=at;p=s12_stonehouse#;x=2;h=3.4;yaw=fixed;yawadd=180;col=1",
+    "L=at;p=s12_cauldron#;x=-3;y=3;h=1.0;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "log_bridge",
+   "title": "Log bridge",
+   "text": "a fallen tree across a channel, the only dry way over",
+   "biomes": [
+    "wetlands",
+    "marshes"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=-8;r=3;verb=look at;what=log;text=Moss on top, rot underneath. It has held this long."
+   ],
+   "parts": [
+    "L=at;p=n13_pinefallen#;s=1.1;yaw=fixed;col=1",
+    "L=patch;r=8;hb=0.25;tint=0.04,0.07,0.06"
+   ]
+  },
+  {
+   "name": "pitcher_plants",
+   "title": "Pitcher plants",
+   "text": "carnivorous pitcher plants grown huge in the bog",
+   "biomes": [
+    "wetlands"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=sting;x=1;y=1;r=2.5;msg=The pitcher's sweet reek makes you dizzy, and its rim burns where you brushed it"
+   ],
+   "uses": [
+    "do=lore;x=-10;y=-6;r=3;verb=look into;what=pitcher;text=Liquid at the bottom, and in it the bones of a bird."
+   ],
+   "parts": [
+    "L=at;p=n13_pitcherplant#;s=1;yaw=rand;col=1",
+    "L=at;p=n13_pitcherplant#;x=-6;y=4;s=0.8;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "swamp_gas",
+   "title": "Swamp gas",
+   "text": "gas bubbling up through the black water; a lantern would light it",
+   "biomes": [
+    "wetlands",
+    "marshes"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=gas;x=0;y=0;r=4;msg=The marsh gas catches in your throat; your head swims"
+   ],
+   "uses": [
+    "do=lore;x=-10;y=0;r=3;verb=look at;what=bubbles;text=Bubbles rise and burst, and the smell is rot and eggs. Hold a flame to it and it burns blue."
+   ],
+   "parts": [
+    "L=patch;r=6;hb=0.25;tint=0.04,0.07,0.06",
+    "L=at;fx=steam;z=0.2;s=0.5"
+   ]
+  },
+  {
+   "name": "smugglers_camp",
+   "title": "Smugglers' camp",
+   "text": "a camp in the swamp no army can reach, its owners watching",
+   "biomes": [
+    "wetlands",
+    "marshes"
+   ],
+   "weight": 1.0,
+   "guards": 3,
+   "loot": "Iron Ingot|1|3|0.8;Small Healing Potion|1|2|0.7;Copper Ingot|1|2|0.5",
+   "uses": [
+    "do=lore;x=-8;y=-6;r=3;verb=look at;what=crates;text=Crates with the duke's seal scraped off. Whoever brought them knows the swamp's paths."
+   ],
+   "parts": [
+    "L=at;p=campfire;x=2;s=1;yaw=rand;col=0",
+    "L=scatter;p=s12_crate#;n=3;r=4;x=4;h=0.8;yaw=rand;col=1",
+    "L=at;p=s12_boat#;x=-6;y=5;h=0.9;yaw=rand;col=1",
+    "L=at;box=Chest;x=5;y=-3"
+   ]
+  },
+  {
+   "name": "driftwood_beach",
+   "title": "Driftwood beach",
+   "text": "a beach strewn with driftwood, shells and what the sea brings in",
+   "biomes": [
+    "coastal regions"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=forage;x=-4;y=4;r=3;verb=search;what=tide line;things=Straw Rope|1|1|0.5,Fish|1|1|0.5,Iron Ingot|1|1|0.3;reuse=300;text=Rope, a crab, a bent nail: the tide line's gifts."
+   ],
+   "parts": [
+    "L=patch;r=12;hb=0.25;tint=0.62,0.55,0.40",
+    "L=scatter;p=s12_driftwood#;n=6;r=10;h=0.6;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "buried_ruins",
+   "title": "Buried ruins",
+   "text": "dunes shifting off old walls, ruins coming out of the sand",
+   "biomes": [
+    "coastal regions"
+   ],
+   "weight": 1.0,
+   "loot": "Iron Ingot|1|2|0.7;Small Healing Potion|1|1|0.5",
+   "uses": [
+    "do=lore;x=-14;y=-4;r=3;verb=look at;what=walls;text=Last year this was a dune. The wind moved it, and here is a doorway nobody has walked through in a thousand years."
+   ],
+   "parts": [
+    "L=mound;r=12;hb=3;tint=0.62,0.55,0.40",
+    "L=scatter;p=r12_wallbroken#;n=3;r=9;h=1.4;yaw=rand;col=1;sink=60",
+    "L=at;box=Chest;x=-8;y=6"
+   ]
+  },
+  {
+   "name": "tidal_flat",
+   "title": "Tidal flat",
+   "text": "a flat that opens a path at low tide and drowns at high",
+   "biomes": [
+    "coastal regions",
+    "marshes"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=tide;x=0;y=0;r=8"
+   ],
+   "uses": [
+    "do=lore;x=-18;y=0;r=3;verb=look at;what=flat;text=A road across the mud at low water. The sea comes back faster than a man can run."
+   ],
+   "parts": [
+    "L=patch;r=14;hb=0.25;tint=0.18,0.15,0.10",
+    "L=patch;r=12;hb=0.3;tint=0.10,0.18,0.20;tide=0.7"
+   ]
+  },
+  {
+   "name": "fishing_village",
+   "title": "Fishing village",
+   "text": "a fishing village: nets drying, boats pulled up, a smokehouse",
+   "biomes": [
+    "coastal regions",
+    "rocky coastal"
+   ],
+   "weight": 1.0,
+   "folk": [
+    "Townsman|Fisherman|The sea gives and the sea takes; mostly it takes./Smoked fish for bread, as much as you like./Wreckers on the point. They light fires to fool the ships.|-2|-2"
+   ],
+   "uses": [
+    "do=trade;x=-2;y=-4;r=3;verb=trade with;what=fisherman;give=Bread|1;get=Fish|3;reuse=120"
+   ],
+   "parts": [
+    "L=at;p=s12_stonehouse#;x=8;y=-4;h=4;yaw=fixed;yawadd=180;col=1",
+    "L=at;p=s12_boat#;x=-4;y=-6;h=1.0;yaw=rand;col=1",
+    "L=at;p=s12_boat#;x=-6;y=2;h=1.0;yaw=rand;col=1",
+    "L=at;p=s12_net#;x=2;y=6;h=1.6;yaw=rand;col=1",
+    "L=at;p=s12_fishrack#;x=5;y=6;h=1.8;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "lighthouse",
+   "title": "Lighthouse",
+   "text": "a lighthouse on the shore, its lantern lit by night",
+   "biomes": [
+    "coastal regions",
+    "rocky coastal"
+   ],
+   "weight": 1.0,
+   "place": "rise",
+   "uses": [
+    "do=climb;edge=1;r=4;verb=climb;what=lighthouse;tx=1.7;tz=11.8;reveal=4000;reuse=5;text=Up the spiral to the gallery. The sea, the coast, the ships' lights far out."
+   ],
+   "parts": [
+    "L=at;p=n13_lighthouse#;s=1;yaw=fixed;col=1",
+    "L=at;fx=fire;z=12.6;s=1;hours=night"
+   ]
+  },
+  {
+   "name": "shipwreck_bar",
+   "title": "Shipwreck",
+   "text": "a ship wrecked on a sandbar, its cargo strewn about",
+   "biomes": [
+    "coastal regions"
+   ],
+   "weight": 1.0,
+   "loot": "Iron Ingot|1|3|0.8;Straw Rope|1|2|0.7;Copper Ingot|1|2|0.5",
+   "uses": [
+    "do=lore;x=-12;y=-6;r=3;verb=read;what=name;text=Her name is half gone from the bow. Her cargo is still coming ashore, a crate a tide."
+   ],
+   "parts": [
+    "L=at;p=s12_ship#;h=8;yaw=rand;tilt=18;col=1;sink=150",
+    "L=scatter;p=s12_crate#;n=4;r=10;r0=6;h=0.8;yaw=rand;col=1",
+    "L=at;box=Chest;x=-9;y=3"
+   ]
+  },
+  {
+   "name": "lagoon",
+   "title": "Lagoon",
+   "text": "a lagoon of brackish water behind the dunes, birds of fresh and salt water both",
+   "biomes": [
+    "coastal regions"
+   ],
+   "weight": 1.0,
+   "need_water": "any",
+   "uses": [
+    "do=fish;x=1;y=-3;r=3;verb=fish;what=lagoon;things=Fish|1|2|0.8;reuse=240;text=Half salt, half sweet, and fish from both."
+   ],
+   "parts": [
+    "L=scatter;p=s12_reeds#;n=10;r=8;h=1.2;yaw=rand;col=0;inst=1",
+    "L=at;p=n13_heron#;x=2;y=4;s=1;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "seabird_colony",
+   "title": "Seabird colony",
+   "text": "a seabird colony: noise, eggs and guano on every ledge",
+   "biomes": [
+    "coastal regions",
+    "rocky coastal"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=forage;x=-10;y=0;r=3;verb=take eggs from;what=nests;things=Bird's Eggs|1|3|0.9;reuse=300;text=The birds scream at you. The eggs are warm."
+   ],
+   "parts": [
+    "L=scatter;p=n13_nest#;n=6;r=8;s=0.6;yaw=rand;col=0",
+    "L=patch;r=8;hb=0.25;tint=0.80,0.80,0.74",
+    "L=at;fx=crows;z=8;s=1"
+   ]
+  },
+  {
+   "name": "wreckers_cove",
+   "title": "Wreckers' cove",
+   "text": "a cove where false lights lure ships onto the rocks, and its wreckers wait",
+   "biomes": [
+    "coastal regions",
+    "rocky coastal"
+   ],
+   "weight": 1.0,
+   "guards": 3,
+   "loot": "Iron Ingot|1|2|0.7;Copper Ingot|1|2|0.6;Small Healing Potion|1|1|0.5",
+   "uses": [
+    "do=lore;x=-8;y=-6;r=3;verb=look at;what=fire;text=A fire on the point where no harbour is. Ships steer for it, and break on the rocks below."
+   ],
+   "parts": [
+    "L=at;p=s12_brazier#;x=4;h=1.2;yaw=rand;col=1",
+    "L=at;fx=fire;x=4;z=1.2;s=1",
+    "L=scatter;p=s12_crate#;n=3;r=6;x=-4;h=0.8;yaw=rand;col=1",
+    "L=at;box=Chest;x=-6;y=4"
+   ]
+  },
+  {
+   "name": "sea_stacks",
+   "title": "Sea stacks",
+   "text": "pillars of rock standing off the cliffs",
+   "biomes": [
+    "rocky coastal"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=0;r=3;verb=look at;what=stacks;text=The sea took the land between them. It is still taking it."
+   ],
+   "parts": [
+    "L=scatter;p=n13_seastack#;n=3;r=18;r0=8;s=0.8-1.1;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "sea_arch",
+   "title": "Sea arch",
+   "text": "an arch of rock the waves have cut through a headland",
+   "biomes": [
+    "rocky coastal"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=-14;y=0;r=3;verb=look at;what=arch;text=One day the arch will fall and leave a stack. The waves are in no hurry."
+   ],
+   "parts": [
+    "L=at;p=s12_rockarch#;h=10;yaw=fixed;col=1"
+   ]
+  },
+  {
+   "name": "sea_cave",
+   "title": "Sea cave",
+   "text": "a sea cave in the rocks, reachable only at low tide",
+   "biomes": [
+    "rocky coastal"
+   ],
+   "weight": 1.0,
+   "loot": "Iron Ingot|1|2|0.7;Small Healing Potion|1|1|0.6",
+   "uses": [
+    "do=loot;x=4;y=-3;r=3;verb=search;what=cave;tide=low;early=The sea fills the cave's mouth. Come back at low tide.;things=Fish|1|2|0.7,Copper Ingot|1|1|0.5;reuse=600;text=Low water: the cave's floor is dry, and something left a cache on a shelf above the tide line."
+   ],
+   "parts": [
+    "L=at;p=r12_cave#;h=4;yaw=fixed;col=1",
+    "L=at;box=Chest;x=4;y=4"
+   ]
+  },
+  {
+   "name": "tide_pools",
+   "title": "Tide pools",
+   "text": "rock pools full of crabs, anemones and stranger things",
+   "biomes": [
+    "rocky coastal",
+    "coastal regions"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=forage;x=0;y=0;r=3;verb=search;what=pools;things=Fish|1|2|0.8;reuse=300;text=Crabs, anemones, a starfish, and in one pool something with too many eyes that slides under a rock."
+   ],
+   "parts": [
+    "L=patch;r=1.6;x=-3;y=2;hb=0.3;tint=0.10,0.18,0.20",
+    "L=patch;r=1.2;x=3;y=-2;hb=0.3;tint=0.10,0.18,0.20",
+    "L=patch;r=1.0;x=4;y=4;hb=0.3;tint=0.10,0.18,0.20",
+    "L=scatter;p=s12_beachrock#;n=8;r=8;r0=5;h=0.6-1.0;yaw=rand;col=1;sink=20"
+   ]
+  },
+  {
+   "name": "blowhole",
+   "title": "Blowhole",
+   "text": "a hole in the rocks that throws spray high when the waves come in",
+   "biomes": [
+    "rocky coastal"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=geyser;x=0;y=0;r=3;every=20;msg=With a boom the blowhole throws spray high into the air!|The spray knocks you off your feet"
+   ],
+   "uses": [
+    "do=geyser;x=-9;y=0;r=3;verb=watch;what=blowhole;text=The rock booms under your feet as each wave comes in."
+   ],
+   "parts": [
+    "L=scatter;p=s12_beachrock#;n=6;r=5;r0=2;h=0.8-1.2;yaw=rand;col=1;sink=20",
+    "L=at;fx=steam;z=0.3;s=0.5"
+   ]
+  },
+  {
+   "name": "seal_rocks",
+   "title": "Seal rocks",
+   "text": "flat rocks where the seals haul out",
+   "biomes": [
+    "rocky coastal",
+    "coastal regions"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=-8;r=3;verb=watch;what=seals;text=Seals on the rocks, barking. They slide into the water as you come and watch you from it."
+   ],
+   "parts": [
+    "L=scatter;p=s12_beachrock#;n=6;r=10;h=0.6;yaw=rand;col=1;sink=10"
+   ]
+  },
+  {
+   "name": "clifftop_ruin",
+   "title": "Clifftop ruin",
+   "text": "an abbey falling into the sea, a wall at a time",
+   "biomes": [
+    "rocky coastal"
+   ],
+   "weight": 1.0,
+   "place": "rise",
+   "loot": "Small Healing Potion|1|2|0.7;Iron Ingot|1|1|0.5",
+   "uses": [
+    "do=lore;x=-4;y=8;r=3;verb=look at;what=ruin;text=Half the cloister is already in the sea. The rest is waiting."
+   ],
+   "parts": [
+    "L=scatter;p=r12_wallbroken#;n=4;r=10;h=2.4;yaw=rand;col=1",
+    "L=scatter;p=r12_colbroken#;n=3;r=9;h=2.5;yaw=rand;col=1",
+    "L=at;box=Chest;x=-6;y=-4"
+   ]
+  },
+  {
+   "name": "rock_stairs",
+   "title": "Rock-cut stairs",
+   "text": "stairs cut up a rock face from a hidden cove",
+   "biomes": [
+    "rocky coastal"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=climb;edge=1;r=4;verb=climb;what=stairs;tx=8;tz=7;reveal=2000;reuse=5;text=Steps worn by smugglers' boots, up the cliff to the top."
+   ],
+   "parts": [
+    "L=at;p=n13_cliffface#;x=8;h=8;yaw=fixed;yawadd=180;col=1",
+    "L=at;p=r12_steps#;x=5;h=2;yaw=fixed;yawadd=180;col=1"
+   ]
+  },
+  {
+   "name": "storm_surge",
+   "title": "Storm surge",
+   "text": "rocks where the waves sweep over and drag the careless in",
+   "biomes": [
+    "rocky coastal"
+   ],
+   "weight": 1.0,
+   "need_water": "sea",
+   "hazards": [
+    "kind=surge;x=0;y=0;r=5"
+   ],
+   "uses": [
+    "do=lore;x=-10;y=0;r=3;verb=watch;what=waves;text=Every seventh wave comes higher than the rest. Count, and do not be on the rocks when it comes."
+   ],
+   "parts": [
+    "L=scatter;p=s12_beachrock#;n=8;r=8;h=0.8-1.4;yaw=rand;col=1;sink=20"
+   ]
   }
  ],
  "mats": {
@@ -4615,5 +5323,6 @@
    "volcanic tundra"
   ],
   "mesh": "/Game/RandomDungeon/Wild13/Kit/SM_N13_Aurora"
- }
+ },
+ "_doc_phase9": "the ninth phase (2026-11-16): marshes, wetlands, coastal regions, rocky coastal: 34 kinds; the tide (a clock: skins with tide= rise and fall, hazard tide, a use's tide=low|high); hazard surge; the geyser's lines from msg= (a blowhole)"
 }

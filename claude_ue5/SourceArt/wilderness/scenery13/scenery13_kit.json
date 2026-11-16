@@ -1267,5 +1267,133 @@
     "Opacity": 0.8
    }
   }
+ },
+ "SM_N13_StiltHut": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_StiltHut.fbx",
+  "size_m": [
+   5.33,
+   3.6,
+   5.01
+  ],
+  "triangles": 168,
+  "slots": [
+   "StiltHutPoles",
+   "StiltHutPlanks",
+   "StiltHutThatch",
+   "StiltHutDark"
+  ],
+  "masked": [],
+  "translucent": [],
+  "params": {}
+ },
+ "SM_N13_Lighthouse": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Lighthouse.fbx",
+  "size_m": [
+   4.81,
+   4.8,
+   14.6
+  ],
+  "triangles": 210,
+  "slots": [
+   "LighthouseStone",
+   "LighthouseDark",
+   "LighthouseLantern"
+  ],
+  "masked": [],
+  "translucent": [],
+  "params": {}
+ },
+ "SM_N13_PitcherPlant": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_PitcherPlant.fbx",
+  "size_m": [
+   3.28,
+   2.61,
+   2.77
+  ],
+  "triangles": 1044,
+  "slots": [
+   "PitcherPlantPitcher",
+   "PitcherPlantLeaf"
+  ],
+  "masked": [],
+  "translucent": [],
+  "params": {}
+ },
+ "SM_N13_EelTrap": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_EelTrap.fbx",
+  "size_m": [
+   1.6,
+   0.74,
+   1.1
+  ],
+  "triangles": 92,
+  "slots": [
+   "EelTrapWicker",
+   "EelTrapStake"
+  ],
+  "masked": [],
+  "translucent": [],
+  "params": {}
+ },
+ "SM_N13_DuckBlind": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_DuckBlind.fbx",
+  "size_m": [
+   1.96,
+   3.1,
+   1.69
+  ],
+  "triangles": 492,
+  "slots": [
+   "DuckBlindReeds",
+   "DuckBlindPlank"
+  ],
+  "masked": [],
+  "translucent": [],
+  "params": {}
+ },
+ "SM_N13_SeaStack_A": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_SeaStack_A.fbx",
+  "size_m": [
+   8.71,
+   6.65,
+   14.38
+  ],
+  "triangles": 480,
+  "slots": [
+   "SeaStackARock"
+  ],
+  "masked": [],
+  "translucent": [],
+  "params": {}
+ },
+ "SM_N13_SeaStack_B": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_SeaStack_B.fbx",
+  "size_m": [
+   8.08,
+   7.24,
+   13.52
+  ],
+  "triangles": 480,
+  "slots": [
+   "SeaStackBRock"
+  ],
+  "masked": [],
+  "translucent": [],
+  "params": {}
+ },
+ "SM_N13_BogIdol": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_BogIdol.fbx",
+  "size_m": [
+   0.52,
+   0.6,
+   2.82
+  ],
+  "triangles": 72,
+  "slots": [
+   "BogIdolWood"
+  ],
+  "masked": [],
+  "translucent": [],
+  "params": {}
  }
 }

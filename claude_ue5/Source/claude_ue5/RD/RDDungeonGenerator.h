@@ -2673,6 +2673,15 @@ public:
 	float WildAuroraLook = 0.f, WildAuroraFootZ = 0.f;
 	void TickWildAurora13(float Dt, const FVector& Her);
 	void TickWildAuroraLook(const FVector& Her);
+	/** the ninth phase ("the tide as a clock: paths open and close"): the sea's tide, 0 low to 1 high, on a cycle of WildTidePeriod
+	 *  seconds; the skins of the land laid with tide=<m> rise and fall with it (tidal flats, salt-marsh creeks) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildTidePeriod = 600.f;
+	/** tests: a tide held at this level (0-1), or the clock's (under 0) */
+	float WildTideForce = -1.f;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild13") void ForceWildTide(float Level) { WildTideForce = Level; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild13") float GetWildTide() const;
+	struct FTideSkin { TWeakObjectPtr<class UPrimitiveComponent> Comp; float Amp = 0.f; FVector Base = FVector::ZeroVector; };
+	TArray<FTideSkin> WildTideSkins;
 	/** tests: "on|x|y|z" (cm) or "off" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild13") FString GetWildAurora() const;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild13") int32 WildEchoesHeard = 0;

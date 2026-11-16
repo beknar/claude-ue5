@@ -48,7 +48,11 @@ The biomes' scenery, in phases with a PR each (the user's choices: every item to
   - Polar night and the midnight sun, sun dogs and halos are not there: the day and its light are the world's own everywhere. The aurora is one curtain north of her, seen by night only in its regions; it does not guide or mislead.
   - The caribou are the wilds' deer, the snowy owls and walrus are not there, the polar bear is its tracks. The sea ice is skins on land (the arctic regions' plains), not the sea's.
   - Cold, food and shelter as survival ("what helps polar terrain") are not built: the snow houses and the hut heal when used.
-- [ ] **Phases 9 and 10:** the marshes, wetlands and coasts (tides); the lists' "what helps" across all of them.
+- [ ] **Phase 9 (marshes, wetlands, coastal and rocky coastal), what is not done or measured:**
+  - The tide is a clock of its own (a ten-minute sine, the same everywhere): it lifts the tidal skins, floods the flats and closes the sea cave, but the sea and the world's water do not rise with it. The storm surge is a wave every 25 s on its rocks, not a storm.
+  - The marsh lights do not lure her anywhere; the swamp gas does not burn; the reed bed's flock does not burst from the reeds as she comes; the herons are pieces. Crocodiles, snakes, leeches, crabs, seals and sea lions are not there (lines of text), nor kelp.
+  - The dunes do not move; the buried ruins are a dune laid over walls. The sunken causeway and the drowned church stand in skins of dark water, not the world's water.
+- [ ] **Phase 10:** the lists' "what helps" across all of them.
 - [ ] **Phase 1, what is not done or measured:**
   - The burrows' "collapsing tunnels" are a fall's harm and a slow where the ground gives way: the ground itself does not open (a chunk's ground is one mesh).
   - The herons stand still (a mesh of our own, no clips); the bees and the birds are the packs' effects (flies as bees, the flocks as crows); the frogs are not there (no frog in the project).

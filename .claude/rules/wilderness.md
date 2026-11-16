@@ -367,3 +367,8 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
     - Read what changes over hundreds of metres in the look, not every frame (the aurora's foot), and over water the water's face, not the sea floor.
     - One helper for a hazard's line (`RDS13Msg`, "warn|strike" for two), so every hazard takes `msg=` and a borrowed hazard does not say the wrong thing (the ice shelf's blow said "Falling stones").
     - `a ** 2` squares what is in the brackets: `(0.35 * x) ** 2` was meant as `0.35 * x ** 2`.
+- **Phase 9 (marshes, wetlands, coastal regions, rocky coasts)**:
+  - **Measure the part that moves, not the kind's highest**: the tidal flat's mud skin under its tidal water set the "top" at low tide and the rise read 0.59 m for a 1.4 m tide. The landforms' lines come in their parts' order; the test reads the tidal part's own.
+  - **Water she wades in is no floor**: a tidal skin has no collision, or at high water she would stand on top of the sea.
+  - **A region's shape decides its places**: the rocky coasts never gave level ground at a 10 m drop (`rim`, `foot`), so a clifftop kind takes the coast's high ground (`rise`) and the stairs bring their own rock face.
+  - **A section inserted after a picture goes after its section's last picture**: phase 9's table first landed between phase 8's aurora picture and its sheet. Insert after a section's closing picture, and check what follows it.

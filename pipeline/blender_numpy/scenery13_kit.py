@@ -32,6 +32,8 @@ helpers and its noise are used here):
   Inuksuk, MammothTusks, ExpeditionHut, Igloo, Sledge, AntlerPile, Aurora  the eighth phase's (tundras, arctic regions): a stone
                    figure pointing the way, a mammoth's tusks and skull out of the thaw, a plank hut drifted with snow, a snow house, a
                    herder's sledge, a pile of shed antlers, an aurora's curtain of light 3 km long (the night sky's, not a scenery's)
+  StiltHut, Lighthouse, PitcherPlant, EelTrap, DuckBlind, SeaStack_A/B, BogIdol  the ninth phase's (marshes, wetlands, coasts):
+                   a fisher's hut on stilts, a lighthouse, giant pitcher plants, an eel trap, a duck blind, sea stacks, a bog idol
   StormCell        a storm cell for the far horizon: an anvil cloud 3.2 km across, a rain curtain, a funnel (the far storms)
   Drystone_A/B     a 3 m length of field wall laid dry, its copes on edge (the shepherd's pen)
   AppleTree_A/B,   the old orchard's gnarled fruit trees: a short leaning trunk, a low wide crown of leaf clusters with their
@@ -1108,6 +1110,117 @@ def aurora():
     finish(me, ob, bm, ["AuroraLight"], translucent=["AuroraLight"], params={"AuroraLight": {"Tint": [1.6, 1.6, 1.6], "Opacity": 0.8}})
 
 
+# ------------------------------------------------------------------------------------------------ the ninth phase: marshes, wetlands, coasts
+def stilt_hut():
+    """a fisher's hut on stilts over the water: a plank room 4 x 3 m on eight poles 1.8 m high, a thatched roof, a ladder (front +X)"""
+    me, ob, bm, uvl = new_mesh("SM_N13_StiltHut")
+    for x in (-1.9, 0.0, 1.9):
+        for y in (-1.4, 1.4):
+            tube(bm, uvl, [Vector((x, y, 0.0)), Vector((x, y, 1.9))], [0.1, 0.09], 6, 0)
+    box(bm, uvl, (0, 0, 1.95), (4.6, 3.6, 0.12), 0)                       # the platform
+    box(bm, uvl, (-0.3, 0, 3.0), (3.6, 3.0, 2.0), 1)                       # the room
+    for s in (-1, 1):
+        vs = [bm.verts.new(p) for p in ((-2.4, s * 1.8, 3.8), (1.8, s * 1.8, 3.8), (1.8, 0, 5.0), (-2.4, 0, 5.0))]
+        f = bm.faces.new(vs[::-1] if s > 0 else vs); f.material_index = 2
+        for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+    for x in (1.5, -2.1):
+        vs = [bm.verts.new(p) for p in ((x, -1.5, 4.0), (x, 1.5, 4.0), (x, 0, 4.95))]
+        f = bm.faces.new(vs if x > 0 else vs[::-1]); f.material_index = 1
+        for lp, uv in zip(f.loops, ((0, 0), (1, 0), (0.5, 1))): lp[uvl].uv = uv
+    vs = [bm.verts.new((1.52, y, z)) for (y, z) in ((-0.4, 2.0), (0.4, 2.0), (0.4, 3.7), (-0.4, 3.7))]
+    f = bm.faces.new(vs); f.material_index = 3
+    for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+    for s_ in (-0.25, 0.25):
+        tube(bm, uvl, [Vector((2.3 + 0.6, s_, 0.0)), Vector((2.3, s_, 2.0))], [0.035, 0.035], 4, 0)
+    for r_ in range(6):
+        t = (r_ + 0.5) / 6
+        tube(bm, uvl, [Vector((2.9 - 0.6 * t, -0.25, 2.0 * t)), Vector((2.9 - 0.6 * t, 0.25, 2.0 * t))], [0.025, 0.025], 4, 0)
+    finish(me, ob, bm, ["StiltHutPoles", "StiltHutPlanks", "StiltHutThatch", "StiltHutDark"], flat=True)
+
+
+def lighthouse():
+    """a lighthouse: a tapering round stone tower 14 m high, white with a red band, a lantern room glowing at the top, a gallery"""
+    me, ob, bm, uvl = new_mesh("SM_N13_Lighthouse")
+    lathe(bm, uvl, [(2.4, 0.0), (2.0, 6.0), (1.75, 11.5), (1.8, 11.6)], 16, 0, urep=1.0)
+    lathe(bm, uvl, [(2.2, 11.6), (2.2, 11.8), (1.1, 11.8)], 16, 1)
+    lathe(bm, uvl, [(1.1, 11.8), (1.1, 13.4)], 12, 2)
+    lathe(bm, uvl, [(1.3, 13.4), (0.1, 14.6)], 12, 1)
+    vs = [bm.verts.new((2.41, y, z)) for (y, z) in ((-0.5, 0.0), (0.5, 0.0), (0.5, 2.0), (-0.5, 2.0))]
+    f = bm.faces.new(vs); f.material_index = 1
+    for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+    finish(me, ob, bm, ["LighthouseStone", "LighthouseDark", "LighthouseLantern"])
+
+
+def pitcher_plant():
+    """carnivorous pitcher plants grown huge: three green-and-red pitchers 1.5 to 2.6 m tall with lids, round a rosette of leaves"""
+    rng = random.Random(907)
+    me, ob, bm, uvl = new_mesh("SM_N13_PitcherPlant")
+    for k in range(3):
+        a = k * 2.1; c = (math.cos(a) * 0.8, math.sin(a) * 0.8); hh = rng.uniform(1.5, 2.6)
+        n0 = len(bm.verts)
+        lathe(bm, uvl, [(0.12, 0.0), (0.35, hh * 0.3), (0.42, hh * 0.65), (0.32, hh * 0.92), (0.4, hh)], 12, 0)
+        for v in list(bm.verts)[n0:]: v.co.x += c[0]; v.co.y += c[1]
+        sphere(bm, uvl, (c[0] + 0.2, c[1], hh + 0.18), 0.35, 1, 1.0, 1.0, 0.35, 8, 0.1, rng)
+    for k in range(7):
+        a = k * 2 * math.pi / 7
+        sphere(bm, uvl, (math.cos(a) * 1.1, math.sin(a) * 1.1, 0.1), 0.6, 1, 1.0, 0.45, 0.12, 6, 0.1, rng)
+    floor(bm)
+    finish(me, ob, bm, ["PitcherPlantPitcher", "PitcherPlantLeaf"])
+
+
+def eel_trap():
+    """an eel trap: a long wicker cone 1.6 m with its funnel mouth, lashed to two stakes in the shallows"""
+    me, ob, bm, uvl = new_mesh("SM_N13_EelTrap")
+    n0 = len(bm.verts)
+    lathe(bm, uvl, [(0.3, 0.0), (0.32, 0.4), (0.25, 1.0), (0.08, 1.6)], 12, 0)
+    for v in list(bm.verts)[n0:]:                                 # (laid on its side along +X, 0.35 m up)
+        x, z = v.co.z, v.co.x; v.co.x, v.co.z = x - 0.8, 0.35 + z
+    for x in (-0.6, 0.6):
+        tube(bm, uvl, [Vector((x, 0.38, 0.0)), Vector((x, 0.38, 1.1))], [0.04, 0.03], 5, 1)
+    finish(me, ob, bm, ["EelTrapWicker", "EelTrapStake"])
+
+
+def duck_blind():
+    """a duck blind: a low hide of reeds and branches 3 m long with a slot to watch from, a plank seat inside"""
+    rng = random.Random(911)
+    me, ob, bm, uvl = new_mesh("SM_N13_DuckBlind")
+    for k in range(40):
+        y = rng.uniform(-1.5, 1.5); x = rng.choice((-0.8, 0.8)) + rng.uniform(-0.1, 0.1); h = rng.uniform(1.2, 1.7)
+        tube(bm, uvl, [Vector((x, y, 0.0)), Vector((x + rng.uniform(-0.15, 0.15), y + rng.uniform(-0.15, 0.15), h))], [0.05, 0.015], 4, 0)
+    for k in range(20):
+        x = rng.uniform(-0.8, 0.8); y = rng.choice((-1.5, 1.5)); h = rng.uniform(1.2, 1.6)
+        tube(bm, uvl, [Vector((x, y, 0.0)), Vector((x, y, h))], [0.05, 0.015], 4, 0)
+    box(bm, uvl, (0, 0, 0.45), (0.4, 2.4, 0.06), 1)
+    finish(me, ob, bm, ["DuckBlindReeds", "DuckBlindPlank"])
+
+
+def sea_stack(variant, seed):
+    """a sea stack: a pillar of rock 9 to 14 m high, cut off from the cliffs by the sea, its top grassy, its foot rubbled"""
+    rng = random.Random(seed)
+    me, ob, bm, uvl = new_mesh(f"SM_N13_SeaStack_{variant}")
+    H = rng.uniform(9.0, 14.0)
+    prof = [(rng.uniform(2.6, 3.2), 0.0)] + [(rng.uniform(1.9, 2.8) * (1 - 0.25 * t), H * t) for t in (0.2, 0.45, 0.7, 0.9)] + [(rng.uniform(1.4, 2.0), H), (0.1, H + 0.3)]
+    n0 = len(bm.verts)
+    lathe(bm, uvl, prof, 10, 0)
+    for v in list(bm.verts)[n0:]:
+        v.co.x += rng.uniform(-0.3, 0.3); v.co.y += rng.uniform(-0.3, 0.3)
+        if v.co.z > H - 0.05: v.co.z += rng.uniform(0, 0.2)
+    for k in range(6):
+        a = rng.uniform(0, 2 * math.pi)
+        sphere(bm, uvl, (math.cos(a) * 3.4, math.sin(a) * 3.4, 0.3), rng.uniform(0.5, 1.0), 0, 1.2, 1.0, 0.6, 6, 0.25, rng)
+    floor(bm)
+    finish(me, ob, bm, [f"SeaStack{variant}Rock"], flat=True)
+
+
+def bog_idol():
+    """a bog idol: a forked oak post carved into a long-faced figure 2.8 m tall, black with the bog's tannins"""
+    me, ob, bm, uvl = new_mesh("SM_N13_BogIdol")
+    tube(bm, uvl, [Vector((0, 0, 0)), Vector((0, 0, 1.6)), Vector((0, 0, 2.4)), Vector((0.02, 0, 2.8))], [0.26, 0.24, 0.2, 0.16], 8, 0)
+    for s in (-1, 1):
+        tube(bm, uvl, [Vector((0, s * 0.12, 0.0)), Vector((0, s * 0.18, 0.9))], [0.13, 0.12], 6, 0)
+    finish(me, ob, bm, ["BogIdolWood"])
+
+
 def gold_card():
     """one card of gold leaves: only its material is used (the gold aspens' and larches' crowns, a part's mat=)"""
     me, ob, bm, uvl = new_mesh("SM_N13_GoldCard")
@@ -1396,6 +1509,19 @@ def pictures():
     streak = 0.55 + 0.45 * np.abs(np.sin(xx * math.pi * 14 + noise(n, 301, ((8, 1.0),)) * 3))
     au_a = np.clip((1.0 - vv) ** 1.5 * streak * np.clip(vv * 8, 0, 1), 0, 1)
     png("T_N13_AuroraLight", np.clip(au_c * (0.6 + 0.4 * streak[..., None]), 0, 1), au_a)
+    # (the ninth phase: grey poles, weathered planks, thatch, dark; whitewashed stone with a red band, the lantern's glow; the pitchers
+    # green veined red, their leaves; wicker, stakes; reeds; sea-worn rock with a grassy top; bog-blackened oak with a carved face)
+    png("T_N13_StiltHutPoles", grain((0.34, 0.30, 0.25), 310, 0.15)); png("T_N13_StiltHutPlanks", grain((0.42, 0.36, 0.28), 311, 0.15) * (0.85 + 0.15 * np.sin(yy * 90)[..., None]))
+    png("T_N13_StiltHutThatch", grain((0.52, 0.44, 0.26), 312, 0.25) * (0.85 + 0.15 * np.sin(xx * 120)[..., None])); png("T_N13_StiltHutDark", np.full((n, n, 3), 0.04))
+    lh = grain((0.86, 0.85, 0.82), 313, 0.06); lh[(yy > 0.45) & (yy < 0.6)] = (0.62, 0.10, 0.08); png("T_N13_LighthouseStone", lh)
+    png("T_N13_LighthouseDark", grain((0.12, 0.12, 0.13), 314, 0.1)); png("T_N13_LighthouseLantern", np.clip(grain((1.0, 0.86, 0.45), 315, 0.05) * 1.1, 0, 1))
+    pt = grain((0.30, 0.45, 0.14), 316, 0.15); pt[np.abs(np.sin(xx * 40 + noise(n, 317, ((8, 1.0),)) * 3)) < 0.15] = (0.55, 0.12, 0.10); png("T_N13_PitcherPlantPitcher", pt)
+    png("T_N13_PitcherPlantLeaf", grain((0.24, 0.38, 0.12), 318, 0.2))
+    png("T_N13_EelTrapWicker", grain((0.52, 0.42, 0.26), 319, 0.2) * (0.8 + 0.2 * (np.abs(np.sin(xx * 60)) > 0.5) * (np.abs(np.sin(yy * 30)) > 0.4))[..., None]); png("T_N13_EelTrapStake", grain((0.36, 0.30, 0.22), 320, 0.15))
+    png("T_N13_DuckBlindReeds", grain((0.50, 0.44, 0.26), 321, 0.25)); png("T_N13_DuckBlindPlank", grain((0.40, 0.33, 0.24), 322, 0.12))
+    for v in ("A", "B"):
+        ss = grain((0.36, 0.34, 0.31), 330 + ord(v), 0.25); ss[yy < 0.06] = (0.30, 0.40, 0.18); png(f"T_N13_SeaStack{v}Rock", ss)
+    bi = grain((0.11, 0.08, 0.06), 340, 0.25); fc = (np.abs(xx - 0.5) < 0.18) & (yy < 0.22) & (yy > 0.08); bi[fc & (np.abs(np.sin(yy * 60)) < 0.3)] *= 0.4; png("T_N13_BogIdolWood", bi)
     png("T_N13_LavaTubeBasalt", grain((0.20, 0.18, 0.17), 280, 0.3) * (0.85 + 0.15 * np.sin(xx * 40 + yy * 12)[..., None])); png("T_N13_LavaTubeDark", np.full((n, n, 3), 0.02))
     # (gold leaves: the aspen's round leaves in yellow and gold; gold needles: a larch's sprays)
     for name, shape in (("GoldLeaves", "leaf"), ("GoldNeedles", "needle")):
@@ -1435,7 +1561,9 @@ if __name__ == "__main__":
             "Fumarole": fumarole, "Bomb_A": lambda: volcanic_bomb("A", 761), "Bomb_B": lambda: volcanic_bomb("B", 763),
             "SodHut": sod_hut, "GeyserCone": geyser_cone, "ChurchSpire": church_spire, "LavaTube": lava_tube,
             "Inuksuk": inuksuk, "MammothTusks": mammoth_tusks, "ExpeditionHut": expedition_hut, "Igloo": igloo, "Sledge": sledge,
-            "AntlerPile": antler_pile, "Aurora": aurora}
+            "AntlerPile": antler_pile, "Aurora": aurora,
+            "StiltHut": stilt_hut, "Lighthouse": lighthouse, "PitcherPlant": pitcher_plant, "EelTrap": eel_trap, "DuckBlind": duck_blind,
+            "SeaStack_A": lambda: sea_stack("A", 921), "SeaStack_B": lambda: sea_stack("B", 923), "BogIdol": bog_idol}
     for k, f in todo.items():
         if not ONLY or k in ONLY: f()
     old = json.load(open(os.path.join(OUT, "scenery13_kit.json"))) if os.path.exists(os.path.join(OUT, "scenery13_kit.json")) else {}

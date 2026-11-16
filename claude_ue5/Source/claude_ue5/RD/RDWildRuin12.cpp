@@ -523,6 +523,9 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 				if (const FString Mn = M.FindRef(TEXT("mat")); !Mn.IsEmpty())
 					if (const TObjectPtr<UMaterialInterface>* Mi = WildSceneryMats.Find(FName(*(TEXT("m13_") + Mn)))) Lm->SetMaterial(0, Mi->Get());
 				++Rec.Pieces; Rec.Comps.Add(Lm); Rec.Lifts.Add(-1.f);
+				// (the ninth phase: "tide=<m>": the skin rises and falls with the tide, m metres either way of where it is laid)
+				// (water she wades in, not ground: no collision)
+				if (const float Ta = RDR12Num(M, TEXT("tide"), 0.f, R); Ta > 0.f) { WildTideSkins.Add({ Lm, Ta, Lm->GetRelativeLocation() }); Lm->SetCollisionEnabled(ECollisionEnabled::NoCollision); }
 				// (a rise for what is laid after it; an outline's is not its whole disc, and is left out (PR #68's review: a part beside the
 				// chalk horse stood its height over the bare turf))
 				if (Poly.Num() < 3) WildPartsLand.Add({ At, L, Rr, R2, Hh, Yaw0 + Ga, Cr });
