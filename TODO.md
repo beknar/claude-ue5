@@ -36,7 +36,11 @@ The biomes' scenery, in phases with a PR each (the user's choices: every item to
   - The rope bridge and the knife-edge ridge stand on ordinary ground: no gorge is cut under the bridge and no drop falls away from the ridge (the world's model has no cliffs of that kind).
   - Thin air is a slow; nothing makes her dizzy. The sea of clouds is a view the cloud layer does not lie under. The milky-blue water, the calving ice fronts, the snow blindness and the sun's glare are not there.
   - The mule train is the ridable horse as a herd; the eagles are the packs' birds; the dragon is the project's Daemon.
-- [ ] **Phases 6 to 10:** the canyons and mesas; the volcanic lands; the tundra and the arctic; the marshes, wetlands and coasts (tides); the lists' "what helps" across all of them.
+- [ ] **Phase 6 (canyons, canyon networks and mesas), what is not done or measured:**
+  - The cliff dwellings and the toe-hold trail stand at a cliff's foot, not high in an alcove of its wall; the overlooks and the junipers stand at a rim the world's model drew, not at a sheer drop. The slot canyons are 4 to 6 m wide (the drawn ground cannot hold a slot you touch both walls of).
+  - The light shafts, the walls glowing red at sunrise and sunset and the slots going dark early are the sky's own light; nothing was added or measured for them. The flood is a blow, a push and splashes: no water rises. The echo is a line of text (nobody hears a test). Storms seen from above are the open lands' far storms, now in the canyons' and mesas' list too.
+  - The condors are the packs' birds; the lizards are not there. The tests ran in batches of five in the foreground: the editor's start of play left 0.7 GB free, and two background runs were stopped for memory.
+- [ ] **Phases 7 to 10:** the volcanic lands; the tundra and the arctic; the marshes, wetlands and coasts (tides); the lists' "what helps" across all of them.
 - [ ] **Phase 1, what is not done or measured:**
   - The burrows' "collapsing tunnels" are a fall's harm and a slow where the ground gives way: the ground itself does not open (a chunk's ground is one mesh).
   - The herons stand still (a mesh of our own, no clips); the bees and the birds are the packs' effects (flies as bees, the flocks as crows); the frogs are not there (no frog in the project).

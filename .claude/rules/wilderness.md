@@ -324,3 +324,20 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
     - A hazard counts its springing once each time she steps in, never each push.
   - **A test's pipe can kill the program it reads**: `Select-Object -First 3` on a commandlet's output stopped it after three lines, half its files written.
   - **The editor can stop at "Wait for ZenServer?"** with the server already up (its health answered 200): Yes brings it back every minute, No lets the editor go on. The session's launcher answers it.
+- **Phase 6 (canyons, canyon networks, mesas)**:
+  - **A kind that stands in one place of a few takes its share of them**: the slot canyons cross few cells, and five channel kinds drew among them. One random try per cell with the places checked after left two channel kinds within 30 km. Every segment is tried, each checked where it is, and a rare kind gets weight.
+  - **A climb traces at its tx, ty**: with the rock face 8 m out the trace at the middle found no top ("There is no way up from here"). A climb's piece away from the middle names its place.
+  - **A trace from far above stands her on any piece**: on the canyons' terraces the test put her on boulders and rock faces and she fell 5 to 19 m, once to her death. `ground_put` steps aside where what it would stand her on is 1.5 m or more over the ground, the 20 m spot is gentle ground, and each kind starts from whole health.
+  - **`is_valid` on a destroyed actor can raise**: "Cannot nativize RDMonster as Object" stopped a batch. `alive()` catches it.
+  - **A pack's rock is not every land's rock**: the packs' grey boulders read as blue-black lumps on red sand. The canyons' rubble is sandstone of the kit's own (`SandRock_A`-`C`, the strata picture).
+  - **An effect called light is not light**: MysticDungeon's light rays read as blue specks in a slot canyon. Screen it where it plays.
+  - **Picture a long piece across its span**: the arch laid along its place's yaw was seen end on from the test's front, a narrow box.
+  - **This machine is at its limit at play's start**: the editor rebuilds skeletal meshes and textures as play begins, and once it left 0.7 GB free (`LogAsyncCompilation: BEWARE`). Two background runs were stopped for memory, both in their third batch. Batches of five in the foreground ran through.
+  - **PR #70's review (2026-11-16)**:
+    - A hazard with a warning checks she is still there when it strikes: the flood came down round her 5 km off. Its look is laid where it is, not round her.
+    - A channel's points are a wander, not downhill: the flood's way is read from the bed's slope, and her push follows the lowest ground ahead (no wall, no bank).
+    - Layers counted from a block's foot in their own thicknesses run over the block: five layers a block, their thicknesses summing to it.
+    - One list for one question: the channel segments found once for a cell, for its choice and its spot, and only where the region has a channel kind. A special place still keeps the general rules (roads, fields, yards, lava, the shore).
+    - A word a rule does not know says so (`hours=`); a rule kept in code and in data is kept in one (the fairy ring's night is its data now).
+    - A test of "it said when" looks for those words, not the HUD's last line.
+    - A test's local name can shadow the step's: `want` for a phrase overwrote the list of kinds, and the step failed on its count with every kind passing.

@@ -1209,27 +1209,47 @@ def scen_line(g, sid):
 
 
 TREE_WORDS = ("Pine", "Tree", "Aspen", "Birch", "Spruce", "Beech", "Oak", "Willow", "Acacia", "Baobab")
+def alive(o):
+    """an actor still there (the sixth phase: is_valid on a monster destroyed in the frame raised "Cannot nativize RDMonster as
+    Object", and the step stopped)"""
+    try: return bool(unreal.SystemLibrary.is_valid(o))
+    except Exception: return False
+
+
 def ground_put(x, y, up=100.0, from_m=None):
     """her feet on whatever stands there, traced down from 30 m up; a tree's crown it hit is passed by, traced again from G["put_from_m"]
     (the scenery's step: 4 m) over the ground. (The third phase: from 30 m the trace met the forests' crowns: she stood on a tree 11 m
     up and fell to her death, and a hunt 9 m under her was dropped; traced from 4 m everywhere, she was put inside a kurgan's mound)"""
-    s0 = sample(x, y); z0 = s0["z"] + (max(0.0, s0["water_m"] - s0["h"]) * 100.0 if s0["water"] else 0.0)
-    def trace(fm):
-        hit = unreal.SystemLibrary.line_trace_single(G["w"], V(x * 100.0, y * 100.0, z0 + fm * 100.0), V(x * 100.0, y * 100.0, z0 - 300.0),
-                                                     unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
-        return hit.to_tuple() if hit else None
-    ht = trace(from_m if from_m is not None else 30.0)
-    if ht and ht[0] and from_m is None and "put_from_m" in G:
-        comp = ht[10]
-        name = ""
-        try:
-            sm = comp.static_mesh if isinstance(comp, unreal.StaticMeshComponent) else None
-            name = sm.get_name() if sm else ""
-        except Exception: pass
-        if isinstance(comp, unreal.InstancedStaticMeshComponent) or any(w in name for w in TREE_WORDS):
-            ht = trace(G["put_from_m"])
-    z = z0
-    if ht and ht[0]: z = max(z, ht[4].z)
+    def put_z(x, y):
+        s0 = sample(x, y); z0 = s0["z"] + (max(0.0, s0["water_m"] - s0["h"]) * 100.0 if s0["water"] else 0.0)
+        def trace(fm):
+            hit = unreal.SystemLibrary.line_trace_single(G["w"], V(x * 100.0, y * 100.0, z0 + fm * 100.0), V(x * 100.0, y * 100.0, z0 - 300.0),
+                                                         unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+            return hit.to_tuple() if hit else None
+        ht = trace(from_m if from_m is not None else 30.0)
+        if ht and ht[0] and from_m is None and "put_from_m" in G:
+            comp = ht[10]
+            name = ""
+            try:
+                sm = comp.static_mesh if isinstance(comp, unreal.StaticMeshComponent) else None
+                name = sm.get_name() if sm else ""
+            except Exception: pass
+            if isinstance(comp, unreal.InstancedStaticMeshComponent) or any(w in name for w in TREE_WORDS):
+                ht = trace(G["put_from_m"])
+        z = z0
+        if ht and ht[0]: z = max(z, ht[4].z)
+        return z, z0
+    z, z0 = put_z(x, y)
+    # (the sixth phase: on the canyons' terraces she was put on a boulder's or a rock face's top and fell 5 to 19 m, once to her death;
+    # where what she would stand on is 1.5 m or more over the ground, the nearest spot 2 to 4 m round where it is not)
+    if "put_from_m" in G and from_m is None and z - z0 > 150.0:
+        for rr in (2.0, 3.0, 4.0):
+            for k_ in range(8):
+                qx, qy = x + rr * math.cos(k_ * math.pi / 4), y + rr * math.sin(k_ * math.pi / 4)
+                zq, zq0 = put_z(qx, qy)
+                if zq - zq0 <= 150.0: x, y, z = qx, qy, zq; break
+            else: continue
+            break
     G["pawn"].set_actor_location(V(x * 100.0, y * 100.0, z + up), False, True)
 
 
@@ -1257,6 +1277,9 @@ def step_scenery13():
             f = str(g.find_wild_scenery(kd, 0.0, 0.0, 150.0))
             if not f: res["kinds"][kd] = {"found": False}; continue
             sid, cx, cy, yw, nm = f.split("|", 4); sid = int(sid); cx = float(cx); cy = float(cy); yw = float(yw)
+            # (each kind from whole health: the canyons' falls ran one kind's hurt into the next, and she died arriving at the arch)
+            try: cb().set_health(cb().get_max_health())
+            except Exception: pass
             k = K[kd]; wet = bool(str(k.get_editor_property("need_water")))
             r.update({"found": True, "id": sid, "at_km": [round(cx / 1000.0, 2), round(cy / 1000.0, 2)], "name": nm})
             def gentle(x, y):
@@ -1330,16 +1353,23 @@ def step_scenery13():
                 herd_walk = round(math.hypot(h1[0] - h0[0], h1[1] - h0[1]), 1)
             # (the line as she comes within 35 m: dry ground 20 to 28 m out)
             a0 = math.degrees(math.atan2(spot[1] - cy, spot[0] - cx)); near = None
+            # (gentle ground, as the picture's spot (the sixth phase: on a canyon's terraces any dry point was taken, a ledge's edge too))
             for rr in (20.0, 24.0, 28.0):
                 for a in [a0 + d_ for d_ in (0, 30, -30, 60, -60, 90, -90, 120, -120, 180)]:
                     tx, ty = cx + rr * math.cos(math.radians(a)), cy + rr * math.sin(math.radians(a))
-                    if not sample(tx, ty)["water"]: near = (tx, ty); break
+                    if gentle(tx, ty): near = (tx, ty); break
                 if near: break
+            if not near:
+                for rr in (20.0, 24.0, 28.0):
+                    for a in [a0 + d_ for d_ in (0, 30, -30, 60, -60, 90, -90, 120, -120, 180)]:
+                        tx, ty = cx + rr * math.cos(math.radians(a)), cy + rr * math.sin(math.radians(a))
+                        if not sample(tx, ty)["water"]: near = (tx, ty); break
+                    if near: break
             near = near or spot
             # (an ambush: lying low while she is out at 30 m, hunting once she comes within its reach)
             amb = float(k.get_editor_property("ambush_r"))
             def mine_mons():
-                return [m for m in GS.get_all_actors_of_class(G["w"], unreal.RDMonster) if unreal.SystemLibrary.is_valid(m) and not m.is_dead()
+                return [m for m in GS.get_all_actors_of_class(G["w"], unreal.RDMonster) if alive(m) and not m.is_dead()
                         and math.hypot(m.get_actor_location().x / 100.0 - cx, m.get_actor_location().y / 100.0 - cy) < 30.0]
             if amb > 0:
                 mm = mine_mons()
@@ -1369,10 +1399,10 @@ def step_scenery13():
                 for _q in range(10):
                     yield from watching(rwait(0.25), msgs)
                     for m in mm:
-                        if unreal.SystemLibrary.is_valid(m): branches.add(str(m.get_editor_property("combat_branch")))
+                        if alive(m): branches.add(str(m.get_editor_property("combat_branch")))
                 r["ambush_sprung"]["branches"] = sorted(branches)
                 hp = G["pawn"].get_actor_location()
-                d1 = [m.get_actor_location().distance(hp) / 100.0 for m in mm if unreal.SystemLibrary.is_valid(m)]
+                d1 = [m.get_actor_location().distance(hp) / 100.0 for m in mm if alive(m)]
                 r["ambush_sprung"]["m_from_her"] = [round(sum(d0) / max(1, len(d0)), 1), round(sum(d1) / max(1, len(d1)), 1)]
                 # (the third phase: watchers that shoot keep their range: the grove's edge's two held at 7 m and struck from there)
                 r["ambush_sprung"]["hp_lost"] = round(hp0_amb - cb().get_health(), 1)
@@ -1383,7 +1413,21 @@ def step_scenery13():
             for u in th["uses"]:
                 spec = dict(x.split("=", 1) for x in uses[u["i"]].split(";") if "=" in x)
                 v = {"do": u["do"]}
-                if spec.get("do") == "fairy": g.set_town_hour(22.5)
+                # (the sixth phase: a use of its hours is tried out of them first (it must give nothing and say when), then in them)
+                HOUR_IN = {"night": 22.5, "dawn": 6.0, "dusk": 19.0, "day": 12.0, "sunrise": 6.5}
+                if spec.get("hours"):
+                    g.set_town_hour(14.0 if spec["hours"] in ("night", "sunrise", "dawn", "dusk") else 23.0)
+                    if spec.get("do") in ("offer", "trade") and spec.get("give"): cb().add_item(spec["give"].split("|")[0], 1)
+                    ground_put(u["x"] / 100.0, u["y"] / 100.0); yield from watching(rwait(0.8), msgs)
+                    b0 = str(cb().get_blessing()); n0 = len(msgs)
+                    g.interact_nearest(G["pawn"].get_actor_location()); yield from watching(rwait(1.0), msgs)
+                    # (PR #70's review: the HUD's last line was any line (a discovery, a fall): the use's own words when, among the lines
+                    # shown after the press)
+                    when_w = (spec.get("early") or "Come back")[:30]       # (not "want": the step's list of kinds)
+                    v["out_of_hours"] = {"said": str(cb().message)[:120], "blessed": str(cb().get_blessing()) != b0,
+                                         "told_when": any(when_w in m_ for m_ in msgs[n0:]) or when_w in str(cb().message)}
+                    g.set_town_hour(HOUR_IN.get(spec["hours"], 12.0))
+                e0 = g.get_editor_property("wild_echoes_heard")
                 things = [t.split("|")[0] for t in spec.get("things", "").split(",") if t]
                 if spec.get("do") in ("offer", "trade") and spec.get("give"):
                     gn, gc = (spec["give"].split("|") + ["1"])[:2]
@@ -1402,14 +1446,20 @@ def step_scenery13():
                 v["rose_m"] = round((G["pawn"].get_actor_location().z - z0) / 100.0, 1)
                 v["revealed_more"] = state().get("revealed", 0) - rev0
                 v["used_after"] = next((x["used"] for x in scen_things(g, sid)["uses"] if x["i"] == u["i"]), -1)
-                if spec.get("do") == "fairy": g.set_town_hour(12.0)
+                if spec.get("do") == "echo":
+                    yield from watching(rwait(1.0), msgs)
+                    v["echoes"] = g.get_editor_property("wild_echoes_heard") - e0
+                    v["echo_told"] = any(spec.get("echo", "?")[:30] in m_ for m_ in msgs)
+                if spec.get("hours"): g.set_town_hour(12.0)
                 d = spec.get("do")
                 v["ok"] = (v["f"] == "scenery" and spec.get("what", "").split(" ")[0].lower() in v["prompt"].lower()
                            and (d not in ("loot", "forage", "fish", "honey") or sum(v["got"].values()) > 0)
                            and (d != "climb" or (v["rose_m"] >= float(spec.get("tz", 3)) * 0.6 and v["revealed_more"] > 0))
                            and (d not in ("buff", "fairy", "offer") or v["blessing"] != "")
                            and (d != "trade" or sum(v["got"].values()) > 0)
-                           and (d not in ("milestone", "rumour", "tracks") or len(v["said"]) > 20))
+                           and (d not in ("milestone", "rumour", "tracks") or len(v["said"]) > 20)
+                           and (d != "echo" or (v.get("echoes", 0) >= 1 and v.get("echo_told")))
+                           and (not spec.get("hours") or (not v["out_of_hours"]["blessed"] and v["out_of_hours"]["told_when"])))
                 r["uses"].append(v)
                 ground_put(*near); yield from rwait(0.6)
             # (its hazards: she stands in each)
@@ -1441,7 +1491,9 @@ def step_scenery13():
                     # (a bog drags at her only after 4 s in it: she stands 7 s, and her speed is read while she is in it; scree: how far
                     # it carries her in 3 s standing still)
                     put0 = G["pawn"].get_actor_location()
-                    yield from watching(rwait(7.0 if hz["kind"] == "bog" else 4.0 if hz["kind"] in ("sting", "heat") else 3.0 if hz["kind"] == "scree" else 2.2), msgs)
+                    # (a flood: the thunder, then the water 6 s on: she waits 8 s on the channel's floor)
+                    yield from watching(rwait(7.0 if hz["kind"] == "bog" else 8.0 if hz["kind"] == "flood" else 4.0 if hz["kind"] in ("sting", "heat") else 3.0 if hz["kind"] == "scree" else 2.2), msgs)
+                    if hz["kind"] == "flood": v["carried_m"] = round(math.hypot(G["pawn"].get_actor_location().x - put0.x, G["pawn"].get_actor_location().y - put0.y) / 100.0, 2)
                     if hz["kind"] == "scree":
                         v["carried_m"] = round(math.hypot(G["pawn"].get_actor_location().x - put0.x, G["pawn"].get_actor_location().y - put0.y) / 100.0, 2)
                         try: v["walk_speed_in"] = round(G["pawn"].get_component_by_class(unreal.CharacterMovementComponent).get_editor_property("max_walk_speed"))
@@ -1457,8 +1509,9 @@ def step_scenery13():
                 v["sprung"] = next((x["sprung"] for x in scen_things(g, sid)["haz"] if abs(x["x"] - hz["x"]) < 1 and abs(x["y"] - hz["y"]) < 1), 0)
                 v["monsters_came"] = len(mine_mons()) - mons0
                 if hz["kind"] == "bog" and v.get("walk_speed_in_bog", 0) >= v.get("walk_speed_out", 0) * 0.8: v["slow_failed"] = True
+                if hz["kind"] == "flood" and v.get("carried_m", 0) < 2.0: v["slow_failed"] = True
                 if hz["kind"] == "scree" and (v.get("carried_m", 0) < 1.0 or v.get("walk_speed_in", 1e9) >= v.get("walk_speed_out", 0) * 0.8): v["slow_failed"] = True
-                v["ok"] = v["sprung"] > 0 and not v.get("slow_failed") and (True if hz["kind"] == "scree" else v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting", "heat", "fall", "bog", "pit", "rockfall", "avalanche", "cornice", "crevasse") else v.get("counted_hers", 0) == 0 if hz["kind"] == "hunt" else v["monsters_came"] > 0)
+                v["ok"] = v["sprung"] > 0 and not v.get("slow_failed") and (True if hz["kind"] == "scree" else v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting", "heat", "fall", "bog", "pit", "rockfall", "avalanche", "cornice", "crevasse", "flood") else v.get("counted_hers", 0) == 0 if hz["kind"] == "hunt" else v["monsters_came"] > 0)
                 r["hazards"].append(v)
                 cb().set_health(cb().get_max_health())
                 ground_put(*near); yield from rwait(1.0)

@@ -590,6 +590,46 @@ The user's list of 2026-11-14 ([docs/improvements13.txt](../improvements13.txt))
 
 ![Mountains, peaks and glaciers' 28 kinds, from 15 m](../images/scenery13_mountains.jpg)
 
+### Canyons, canyon networks and mesas
+
+| Kind | Biomes | What stands there | What she does there |
+|---|---|---|---|
+| Banded cliff | canyons, networks (a cliff's foot) | rubble, great bones in the strata | look at the layers |
+| Slot canyon | canyons (a slot's floor) | sandstone rubble | thunder, then a flash flood down the slot: it strikes her and carries her off |
+| Canyon creek | canyons, networks (a channel) | a creek along the channel's bed and a sandbar (skins), cottonwoods, reeds | fish |
+| Cliff dwellings | canyons, networks (a cliff's foot) | mud-brick rooms in an alcove under an overhang, a ladder, pots | search the rooms |
+| Petroglyph panel | canyons, networks (a cliff's foot) | three carved panels | |
+| Natural arch | canyons, mesas, networks | an arch of banded stone 18 m across | |
+| Hanging garden | canyons (a cliff's foot) | ferns and flowers round a seep | gather berries |
+| Echo point | canyons, networks, mesas (a rim) | rocks, a cairn | call out: something calls back |
+| Rockfall | canyons, networks (a cliff's foot) | boulders and rubble under a fresh scar | stones come down on her |
+| Toe-hold trail | canyons, mesas (a cliff's foot) | a rock face, a rope ladder | climb it: the map shows 2.5 km round |
+| Box canyon | networks, canyons (a cliff's foot) | two walls closing a dead end, bones | an ambush; a chest |
+| Canyon junction | networks | a cairn, a carving, a signpost | read the warning |
+| Hidden side canyon | networks | a squeeze between two walls, a chest beyond | |
+| Pour-off | networks, canyons (a cliff's foot) | a dry waterfall's lip, a log jam, rubble | climb over it |
+| Tinaja | networks, canyons, mesas | three rock basins of rain water (skins), rocks | drink: wounds and mana restored |
+| Outlaw hideout | networks, canyons (a cliff's foot) | a fire, bedrolls, a lookout | its three outlaws; a chest |
+| Panning wash | networks, canyons (a channel) | a sluice trough, a mine's frame, gravel | pan for copper and iron |
+| Flood debris | networks, canyons (a channel) | a log jam, rubble | |
+| Hoodoos | networks, mesas, canyons | nine hoodoos with their caprocks | |
+| Dry wash | networks, canyons (a channel) | cracked mud, rubble, a log jam | thunder, then a flash flood |
+| Banded butte | mesas, canyons | a butte 14 m high in coloured layers, a talus apron (a landform) | |
+| Mesa-top pueblo | mesas (a rise) | mud-brick rooms, a granary, a fire, an elder | trade bread for cheese; talk |
+| Spire | mesas, canyons, networks | a needle of banded stone 24 m high (a landform) | |
+| Talus apron | mesas (a cliff's foot) | boulders and rubble | the talus slides under her |
+| Overlook | mesas, canyons (a rim) | a rock at the edge | climb it: the map shows 4 km round |
+| Sky shrine | mesas (a rise) | a slab with a pecked spiral, two leaning stones, a ring of stones | at sunrise the sun's blade crosses the spiral: The Sun's Blade |
+| Caprock pools | mesas (a rise) | rain pools on the caprock (skins) | drink |
+| Condor ledge | mesas, canyons (a rim) | a great nest, birds below the rim | take eggs |
+| Lone juniper | mesas, canyons, networks (a rim) | a twisted tree on the edge | |
+| Storm below | mesas (a rim) | rocks at the edge; the far storms over the open lands are seen from the canyons and mesas too | |
+
+- **What is new**: places `rim` (level ground at a cliff's top, facing the drop), `foot` (at a cliff's foot, facing the wall) and `channel` (a dry channel's bed, facing along it: a cell a channel crosses takes such a kind three times in five); the slot canyons, a channel rule 4 to 6 m wide and 6 to 9 deep in the canyons and networks; hazard `flood` (thunder as she comes onto the floor; 6 s on, the water comes down the channel: on its floor still, a blow and a push down it; once in 2 minutes); use `echo` (her call, then 1.6 s on what calls back); `hours=` on any use (a sun dagger's blessing only at sunrise, said so otherwise); landform `L=mesa` (a butte: a flat top, sheer sides, a talus apron) and `bands=` on any landform (its colour in layers by height); the canyons' and mesas' rock coloured in strata by height, each layer 6 to 10 m thick, the same layer at the same height across the region (`Sample`'s rock colour: the chunks and the far land alike).
+- **Its own pieces** (`scenery13_kit.py`): a natural arch of banded sandstone, two hoodoos with their caprocks, cliff dwellings in an alcove, a sun dagger's slab and its leaning stones, flood debris, sandstone boulders (the rubble of every canyon kind: the packs' grey rocks stood out on the red sand), a terraced mesa-top pueblo with its ladders.
+- **Measured** (`test_s13p6g.json` to `test_s13p6l.json`; the land pass, the slot canyons' channels 4 m wide and 8.7 m deep, in `test_s13p6a.json`): every kind found within 150 km of Brokenspire and visited. The slot canyon's flood struck her for 21 and carried her 3.3 m down it, the dry wash's 21 and 2.8 m; the rockfall 16.8; the talus slowed her to 194 cm/s against 353 out of it and carried her 1.9 m. The echo called back (one line, 1.6 s on); the sun dagger gave nothing at 14:00 and said so, and The Sun's Blade at 6:30. She climbed the toe-hold trail 9 m, the pour-off 4.5 m and the overlook's rock 2.1 m, and saw 7,734, 2,699 and 19,741 more of the map. The box canyon's three lay low at 30 m, then hunted and struck from 9 m (25 taken). The tinaja healed; the wash panned iron, the dwellings gave a potion and rope, the pueblo's elder cheese for bread. The canyons' slopes show their strata in every picture of the region (the sheet's far walls).
+
+![Canyons, canyon networks and mesas' 30 kinds, from 15 m](../images/scenery13_canyons.jpg)
 ## The TODO sweep (2026-11-14)
 
 The open items of `TODO.md` that a test could settle in the wilds (`888 ... -Light`):

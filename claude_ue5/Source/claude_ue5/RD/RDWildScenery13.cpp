@@ -47,6 +47,11 @@ namespace
 		if (Hours == TEXT("day")) return H >= 6.5f && H < 19.5f;
 		if (Hours == TEXT("night")) return H >= 20.f || H < 5.5f;
 		if (Hours == TEXT("dusk")) return (H >= 18.f && H < 21.5f) || (H >= 4.5f && H < 6.5f);
+		// (the sixth phase: a sun dagger's carving lights in the first low sun, 5:30-8:00)
+		if (Hours == TEXT("sunrise")) return H >= 5.5f && H < 8.f;
+		// (a word it does not know shows always, and says so once (PR #70's review: a misspelt hours was never gated, silently))
+		static TSet<FString> Warned;
+		if (!Warned.Contains(Hours)) { Warned.Add(Hours); UE_LOG(LogRDScen13, Warning, TEXT("RDSCEN hours '%s' is none of day, night, dusk, dawn, sunrise: shown at every hour"), *Hours); }
 		return true;
 	}
 	const TCHAR* RDS13Compass(const FVector2D& D)
@@ -101,6 +106,8 @@ void ARDDungeonGenerator::LayWildScenery(ARDWildChunk* C, const FRDWildPlace& P)
 		const TMap<FString, FString> M = RDS13Parse(K.Hazards[I]);
 		FSceneryHazard H; H.Id = P.Id * 8 + I; H.Kind = FName(*M.FindRef(TEXT("kind"))); H.At = WorldOf(M); H.R = RDS13Num(M, TEXT("r"), 5.f) * 100.f; H.P = RDS13Num(M, TEXT("p"), 1.f); H.Chunk = C;
 		H.Who = M.FindRef(TEXT("who")); H.Hide = M.FindRef(TEXT("hide")); H.Named = M.FindRef(TEXT("named")); H.Msg = M.FindRef(TEXT("msg")); H.Count = FMath::Max(1, (int32)RDS13Num(M, TEXT("n"), 1.f));
+		// (the sixth phase: a flood runs down its channel, the way the place faces (a channel's place faces along it))
+		if (H.Kind == TEXT("flood")) H.FallDir = FVector2D(FMath::Cos(FMath::DegreesToRadians(P.Yaw)), FMath::Sin(FMath::DegreesToRadians(P.Yaw)));
 		if (!H.Hide.IsEmpty())
 		{
 			// (the piece it moves: of the laid ones whose mesh's name has Hide in it, the nearest to its point by the piece's middle (a
@@ -219,6 +226,9 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 		}
 		bWildThinAir = bThin;
 	}
+	// ---- the sixth phase: what calls back, told when it does
+	for (int32 Ei = WildSceneryEchoes.Num() - 1; Ei >= 0; --Ei)
+		if (Now >= WildSceneryEchoes[Ei].Key) { PlayerCombat->ShowMessage(WildSceneryEchoes[Ei].Value); ++WildEchoesHeard; WildSceneryEchoes.RemoveAt(Ei); }
 	// ---- the hazards' bursts of dust put out, then taken away
 	for (int32 Bi = WildSceneryBursts.Num() - 1; Bi >= 0; --Bi)
 	{
@@ -325,6 +335,55 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 				if (Down.IsNearlyZero(1.f)) Down = FVector2D(FMath::Cos(Hz.Id * 0.7f), FMath::Sin(Hz.Id * 0.7f)) * 10.f;
 				Down.Normalize();
 				if (ACharacter* Pc = UGameplayStatics::GetPlayerCharacter(this, 0)) Pc->LaunchCharacter(FVector(Down.X * 380.f, Down.Y * 380.f, 60.f), true, false);
+			}
+			else if (Hz.Kind == TEXT("flood"))
+			{
+				// (the sixth phase: "slot canyons ... flash-flood danger", "distant thunder that means you should leave the canyon floor
+				// right now": as she comes onto its floor, thunder far up the canyon; 6 s on, the water comes down it: on the floor still
+				// (within its reach, her feet less than 2 m over its bed) it strikes her and carries her down the channel; once in 2 min)
+				if (Hz.Start < 0.f)
+				{
+					if (!bIn || Now < Hz.ReadyAt) continue;
+					Hz.Start = Now;
+					PlayerCombat->ShowMessage(TEXT("Thunder rolls somewhere far up the canyon. Get off the floor, now"));
+					continue;
+				}
+				if (Now - Hz.Start < 6.f) continue;
+				Hz.Start = -1.f; Hz.ReadyAt = Now + 120.f;
+				// (only while she is still about the canyon (PR #70's review: gone 5 km off, the water came down round her where she stood))
+				if (D > Hz.R * 4.f || FMath::Abs(Feet - Hz.At.Z) > 4000.f) continue;
+				++Hz.Sprung; ++WildHazardsSprung;
+				// (its way: down the bed as it lies (PR #70's review: a channel's points are a wander, not downhill, and their order ran upstream
+				// half the time): of its laid way and back, the one whose bed 15 m on lies lower)
+				FVector2D Down = Hz.FallDir.GetSafeNormal(); if (Down.IsNearlyZero()) Down = FVector2D(1, 0);
+				if (WildGroundZ(Hz.At - FVector(Down.X, Down.Y, 0.f) * 1500.f) < WildGroundZ(Hz.At + FVector(Down.X, Down.Y, 0.f) * 1500.f)) Down = -Down;
+				// (its look: splashes along the channel through its middle (PR #70's review: they had been laid through her, wherever she was), the
+				// scenery's single splash at three times as the port's (screened on the harbour's water, port11.json: this system honours the
+				// component's scale), put away with the dust)
+				if (const TObjectPtr<UNiagaraSystem>* Sp = WildSceneryFx.Find(TEXT("f13_splash")); Sp && *Sp)
+					for (int32 Si = -3; Si <= 3; ++Si)
+					{
+						const FVector Q = Hz.At + FVector(Down.X, Down.Y, 0.f) * (Si * 400.f);
+						if (UNiagaraComponent* Nc = UNiagaraFunctionLibrary::SpawnSystemAtLocation(W, *Sp, FVector(Q.X, Q.Y, WildGroundZ(Q) + 40.f), FRotator::ZeroRotator, FVector(3.f), true, true, ENCPoolMethod::None, false))
+							WildSceneryBursts.Add({ Nc, Now + 3.f, Now + 6.f });
+					}
+				if (D < Hz.R && Feet - Hz.At.Z < 200.f)
+				{
+					PlayerCombat->HurtByTrap(0.15f * Hz.P, 0.6f, 2.5f, TEXT("A wall of brown water comes down the canyon and takes you with it"));
+					// (carried down the bed where she is (PR #70's review: one segment's way, straight, could throw her at a wall or over a bank): of
+					// sixteen ways downstream, the lowest ground 5 m on that is no wall (under 1.5 m over the ground at her feet))
+					FVector2D Way = Down; float Lo = 1e9f;
+					const float G0 = WildGroundZ(Her);
+					for (int32 A = 0; A < 16; ++A)
+					{
+						const FVector2D Dv(FMath::Cos(A * PI / 8.f), FMath::Sin(A * PI / 8.f));
+						if (FVector2D::DotProduct(Dv, Down) < 0.f) continue;
+						const float Gz = WildGroundZ(Her + FVector(Dv.X, Dv.Y, 0.f) * 500.f);
+						if (Gz - G0 < 150.f && Gz < Lo) { Lo = Gz; Way = Dv; }
+					}
+					if (ACharacter* Pc = UGameplayStatics::GetPlayerCharacter(this, 0)) Pc->LaunchCharacter(FVector(Way.X * 900.f, Way.Y * 900.f, 150.f), true, true);
+				}
+				else PlayerCombat->ShowMessage(TEXT("A wall of brown water roars down the canyon below you"));
 			}
 			else if (Hz.Kind == TEXT("cornice") || Hz.Kind == TEXT("crevasse"))
 			{
@@ -714,12 +773,19 @@ FString ARDDungeonGenerator::WildSceneryInteract(const FVector& From)
 		for (const auto& Kv : N) { PlayerCombat->AddItem(Kv.Key, Kv.Value); Parts.Add(FString::Printf(TEXT("%d %s"), Kv.Value, *Kv.Key.ToString())); }
 		return Parts.Num() > 0 ? FString::Join(Parts, TEXT(", ")) : FString(TEXT("nothing"));
 	};
-	if (Do == TEXT("fairy") && !RDS13InHours(TEXT("night"), TownHour))
+	// (the sixth phase: a use of its hours ("hours=sunrise": a sun dagger lights its carving at sunrise; the fairy ring's "hours=night",
+	// in its data since PR #70's review: one rule for both); out of them it says when ("early="))
+	if (const FString Hs = M.FindRef(TEXT("hours")); !Hs.IsEmpty() && !RDS13InHours(Hs, TownHour))
 	{
-		PlayerCombat->ShowMessage(TEXT("Nothing stirs in the ring by daylight. Come back after dark."));
+		PlayerCombat->ShowMessage(M.Contains(TEXT("early")) ? M[TEXT("early")] : FString::Printf(TEXT("Nothing happens. Come back at %s."), *Hs));
 		return TEXT("scenery");
 	}
-	if (Do == TEXT("loot") || Do == TEXT("forage") || Do == TEXT("fish") || Do == TEXT("honey"))
+	if (Do == TEXT("echo"))
+	{
+		// (the sixth phase: "echoes that carry voices, war drums or something calling back": her call, then 1.6 s on what answers)
+		if (const FString Ec = M.FindRef(TEXT("echo")); !Ec.IsEmpty()) WildSceneryEchoes.Add({ Now + 1.6f, Ec });
+	}
+	else if (Do == TEXT("loot") || Do == TEXT("forage") || Do == TEXT("fish") || Do == TEXT("honey"))
 	{
 		const FString Got = Give();
 		Said = FString::Printf(TEXT("%s%sYou take %s"), *Said, Said.IsEmpty() ? TEXT("") : TEXT("  "), *Got);

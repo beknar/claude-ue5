@@ -2598,7 +2598,8 @@ public:
 	/** (phase 2: Tint's alpha over 0 colours the ground under it that colour, bare of sand, mud, rock and snow: a salt pan's crust) */
 	/** (the fourth phase: Poly, an outline in the landform's frame (-1 to 1 of its reach), keeps only the quads inside it: a chalk figure
 	 *  cut into a slope) */
-	class UProceduralMeshComponent* LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater, FLinearColor Tint = FLinearColor::Transparent, const TArray<FVector2D>* Poly = nullptr);
+	/** (the sixth phase: "mesa" a butte (a flat top, sheer sides, a talus apron); Bands its colour in layers by height, the foot's first) */
+	class UProceduralMeshComponent* LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater, FLinearColor Tint = FLinearColor::Transparent, const TArray<FVector2D>* Poly = nullptr, const TArray<FLinearColor>* Bands = nullptr);
 	/** the rises a kind's parts have laid so far (LayWildParts clears them as it begins; LayWildScenery after its uses and hazards), and
 	 *  the ground with them: what is laid after a mound stands on it */
 	struct FWildLand { FVector2D At = FVector2D::ZeroVector; FString Type; float R = 1.f, R2 = 1.f, H = 0.f, Yaw = 0.f, Crater = 0.f; };
@@ -2659,6 +2660,9 @@ public:
 	/** a hazard's burst of a looping effect (a rockfall's dust): put out at Off, taken away at Kill (game seconds) */
 	struct FSceneryBurst { TWeakObjectPtr<class UNiagaraComponent> Comp; float Off = 0.f, Kill = 0.f; };
 	TArray<FSceneryBurst> WildSceneryBursts;
+	/** the sixth phase: what calls back from a canyon's echo (its time, its line), and how many answered (tests) */
+	TArray<TPair<float, FString>> WildSceneryEchoes;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild13") int32 WildEchoesHeard = 0;
 	/** the fourth phase: how deep she stands in a scenery's mist (0-1: the sky thickens the world's fog with it, as the port's), and each
 	 *  kind's mist reach (its "L=mist;r=" part, read once; 0: none) */
 	float WildMistWant = 0.f;

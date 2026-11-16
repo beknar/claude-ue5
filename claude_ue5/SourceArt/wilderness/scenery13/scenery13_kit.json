@@ -852,5 +852,154 @@
   "translucent": [
    "IceBlockIce"
   ]
+ },
+ "SM_N13_NaturalArch": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_NaturalArch.fbx",
+  "size_m": [
+   18.3,
+   4.2,
+   10.6
+  ],
+  "triangles": 324,
+  "slots": [
+   "NaturalArchStone"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Hoodoo_A": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Hoodoo_A.fbx",
+  "size_m": [
+   2.88,
+   2.37,
+   5.9
+  ],
+  "triangles": 210,
+  "slots": [
+   "HoodooAStone",
+   "HoodooACap"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Hoodoo_B": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Hoodoo_B.fbx",
+  "size_m": [
+   3.08,
+   2.53,
+   5.77
+  ],
+  "triangles": 210,
+  "slots": [
+   "HoodooBStone",
+   "HoodooBCap"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_CliffDwelling": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_CliffDwelling.fbx",
+  "size_m": [
+   6.55,
+   17.5,
+   8.3
+  ],
+  "triangles": 272,
+  "slots": [
+   "CliffDwellingRock",
+   "CliffDwellingAdobe",
+   "CliffDwellingDark",
+   "CliffDwellingBeam"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_SunDagger": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_SunDagger.fbx",
+  "size_m": [
+   1.43,
+   2.2,
+   2.6
+  ],
+  "triangles": 36,
+  "slots": [
+   "SunDaggerFace",
+   "SunDaggerSlab"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_LogJam": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_LogJam.fbx",
+  "size_m": [
+   8.54,
+   7.62,
+   2.57
+  ],
+  "triangles": 384,
+  "slots": [
+   "LogJamWood",
+   "LogJamRoots"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_SandRock_A": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_SandRock_A.fbx",
+  "size_m": [
+   1.52,
+   1.21,
+   0.74
+  ],
+  "triangles": 144,
+  "slots": [
+   "SandRockAStone"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_SandRock_B": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_SandRock_B.fbx",
+  "size_m": [
+   1.46,
+   1.09,
+   0.61
+  ],
+  "triangles": 144,
+  "slots": [
+   "SandRockBStone"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_SandRock_C": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_SandRock_C.fbx",
+  "size_m": [
+   1.22,
+   1.09,
+   0.66
+  ],
+  "triangles": 144,
+  "slots": [
+   "SandRockCStone"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Pueblo": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Pueblo.fbx",
+  "size_m": [
+   7.84,
+   12.65,
+   7.5
+  ],
+  "triangles": 714,
+  "slots": [
+   "PuebloAdobe",
+   "PuebloDark",
+   "PuebloBeam"
+  ],
+  "masked": [],
+  "translucent": []
  }
 }

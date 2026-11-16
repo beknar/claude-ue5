@@ -60,6 +60,9 @@ namespace
 		// (phase 2: a patch lies on the ground as it is, its height throughout (a salt pan's crust))
 		// (eased down over its last 15 % to its foot under the ground (PR #66's review: whole to its rim, the rim stood as a 10 cm lip))
 		if (Type == TEXT("patch")) return 1.f - FMath::SmoothStep(0.85f, 1.f, T);
+		// (the sixth phase: a butte, a mesa's small kin: a flat top to 0.7 of its reach, sheer sides down to a talus apron at 0.15 of its
+		// height, the apron out to its foot)
+		if (Type == TEXT("mesa")) return T < 0.7f ? 1.f : T < 0.86f ? FMath::Lerp(1.f, 0.15f, FMath::SmoothStep(0.7f, 0.86f, T)) : 0.15f * (1.f - FMath::SmoothStep(0.86f, 1.f, T));
 		if (Type == TEXT("cone") && Cr > 0.f)
 		{
 			if (T < Cr) return 1.f - 0.5f * (1.f - FMath::Square(T / Cr));
@@ -317,7 +320,7 @@ float ARDDungeonGenerator::WildPartsGroundZ(const FVector& L) const
 	return WildGroundZ(L) + Lift;
 }
 
-UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater, FLinearColor Tint, const TArray<FVector2D>* Poly)
+UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater, FLinearColor Tint, const TArray<FVector2D>* Poly, const TArray<FLinearColor>* Bands)
 {
 	if (!C || !Wild || Rm <= 0.f || Hm == 0.f) return nullptr;
 	// (a grid over the rise: rings round its middle (a mound, a cone) or rows across a ridge, each point on the ground there lifted by
@@ -422,6 +425,14 @@ UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, 
 		// (a tinted landform: the ground's own material in the tint's colour, bare (the salt pan's crust: the kit's masked crust on this
 		// mesh drew black))
 		if (Tint.A > 0.f) { Q.Color = FLinearColor(Tint.R, Tint.G, Tint.B, 1.f); Q.Sand = Q.Mud = Q.Rock = Q.Snow = Q.Lava = 0.f; }
+		// (the sixth phase: "bands=r,g,b r,g,b ...": its colour in layers by its height's share, the first at the foot (a butte's strata);
+		// the steep sides keep it (the slope's rock is the band's colour))
+		if (Bands && Bands->Num() > 0 && Hm != 0.f)
+		{
+			const float Sh = FMath::Clamp(Bumps[K] / Hm, 0.f, 0.999f);
+			const FLinearColor Bc = (*Bands)[FMath::Min(Bands->Num() - 1, FMath::FloorToInt(Sh * Bands->Num()))];
+			Q.Color = Q.RockColor = FLinearColor(Bc.R, Bc.G, Bc.B, 1.f); Q.Sand = Q.Mud = Q.Snow = Q.Lava = 0.f; Q.Rock = 0.f;
+		}
 		const FRDWGroundVertex Gv = RDWildGroundVertex(Q, Nr);
 		Col[K] = Gv.C; U0[K] = Gv.UV0; U1[K] = Gv.UV1; U2[K] = Gv.UV2; U3[K] = Gv.UV3;
 	}
@@ -476,7 +487,7 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 			for (UHierarchicalInstancedStaticMeshComponent* Hm : C->NearFoliage) Clean(Hm);
 			continue;
 		}
-		if (L == TEXT("mound") || L == TEXT("cone") || L == TEXT("ridge") || L == TEXT("patch"))
+		if (L == TEXT("mound") || L == TEXT("cone") || L == TEXT("ridge") || L == TEXT("patch") || L == TEXT("mesa"))
 		{
 			// (phase 2: L=patch, a skin over the ground in a colour of its own (tint=r,g,b, linear) or a material of the table's (mat=):
 			// a flat 30 m salt pan laid as a piece lay under the land wherever the ground rose over its lowest corner, unseen from 15
@@ -499,7 +510,13 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 				TArray<FString> Pts; Ps.ParseIntoArrayWS(Pts);
 				for (const FString& Pt : Pts) { FString Px, Py; if (Pt.Split(TEXT(","), &Px, &Py)) Poly.Add(FVector2D(FCString::Atof(*Px), FCString::Atof(*Py))); }
 			}
-			if (UProceduralMeshComponent* Lm = LayWildLandform(C, At, L, Rr, R2, Hh, Yaw0 + Ga, Cr, Tint, Poly.Num() >= 3 ? &Poly : nullptr))
+			TArray<FLinearColor> Bands;
+			if (const FString Bs = M.FindRef(TEXT("bands")); !Bs.IsEmpty())
+			{
+				TArray<FString> Bt; Bs.ParseIntoArrayWS(Bt);
+				for (const FString& B1 : Bt) { TArray<FString> Tc; B1.ParseIntoArray(Tc, TEXT(",")); if (Tc.Num() == 3) Bands.Add(FLinearColor(FCString::Atof(*Tc[0]), FCString::Atof(*Tc[1]), FCString::Atof(*Tc[2]), 1.f)); }
+			}
+			if (UProceduralMeshComponent* Lm = LayWildLandform(C, At, L, Rr, R2, Hh, Yaw0 + Ga, Cr, Tint, Poly.Num() >= 3 ? &Poly : nullptr, Bands.Num() > 0 ? &Bands : nullptr))
 			{
 				if (const FString Mn = M.FindRef(TEXT("mat")); !Mn.IsEmpty())
 					if (const TObjectPtr<UMaterialInterface>* Mi = WildSceneryMats.Find(FName(*(TEXT("m13_") + Mn)))) Lm->SetMaterial(0, Mi->Get());
