@@ -2682,6 +2682,36 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild13") float GetWildTide() const;
 	struct FTideSkin { TWeakObjectPtr<class UPrimitiveComponent> Comp; float Amp = 0.f; FVector Base = FVector::ZeroVector; float LastZ = -1e9f; };
 	TArray<FTideSkin> WildTideSkins;
+	/** the tenth phase ("survival gameplay: cold, food and shelter give the player constant reasons to keep moving"): in these regions
+	 *  she grows cold away from warmth (a fire within 8 m, a town, a shelter used); past WildColdSeconds of it the cold bites, a hurt
+	 *  every 15 s, until she is warm again */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TArray<FString> WildColdBiomes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildColdSeconds = 90.f;
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildCold = 0.f;
+	float WildWarmUntil = -1.f, WildColdBiteAt = 0.f; bool bWildColdTold = false, bWildColdNow = false;
+	/** tests: a shelter's warmth for this long, as a heal use gives */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild13") void WarmWildFor(float Seconds);
+	/** tests: "<cold seconds>|<warm 0/1>|<why>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild13") FString GetWildColdState() const;
+	FString WildWarmWhy;
+	/** the tenth phase ("footing: mud, rock and water change speed"): in these regions, where the ground is mud, she is slowed */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TArray<FString> WildMudBiomes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildMudSlow = 0.15f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild13") bool bWildMud = false;
+	/** the tenth phase ("sound and fog"): the regions whose fog comes three times as often (the moors' since the fourth phase) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TArray<FString> WildFogBiomes;
+	/** the tenth phase ("a landmark always in view"; PR #74's review: a passing far sight was no landmark): a broken tower at a fixed
+	 *  place in each 6 km square of the open lands, on dry ground away from the roads and towns, solid; the nearest within WildLandmarkKm
+	 *  is laid and kept while she stays within that reach */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TArray<FString> WildLandmarkBiomes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TObjectPtr<class UStaticMesh> WildLandmarkMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildLandmarkKm = 8.f;
+	TWeakObjectPtr<class UStaticMeshComponent> WildLandmark;
+	FVector2D WildLandmarkAt = FVector2D(1e12, 1e12);
+	float WildLandmarkLook = 0.f;
+	void TickWildLandmark13(float Dt, const FVector& Her);
+	/** tests: "on|x|y|z" (cm) or "off" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild13") FString GetWildLandmark() const;
 	/** tests: "on|x|y|z" (cm) or "off" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild13") FString GetWildAurora() const;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild13") int32 WildEchoesHeard = 0;

@@ -5253,6 +5253,55 @@
    "parts": [
     "L=scatter;p=s12_beachrock#;n=8;r=8;h=0.8-1.4;yaw=rand;col=1;sink=20"
    ]
+  },
+  {
+   "name": "warm_campfire",
+   "title": "Warm campfire",
+   "text": "a campfire's ashes still warm, a bedroll left behind",
+   "biomes": [
+    "*"
+   ],
+   "weight": 0.35,
+   "uses": [
+    "do=lore;x=-3;y=-2;r=3;verb=feel;what=ashes;text=Still warm. Whoever sat here left in a hurry, and not long ago."
+   ],
+   "parts": [
+    "L=at;p=campfire;s=1;yaw=rand;col=0",
+    "L=at;fx=smoke;z=0.3;s=0.3",
+    "L=at;p=s12_bedding#;x=2;y=1;h=0.3;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "dropped_satchel",
+   "title": "Dropped satchel",
+   "text": "a satchel dropped by the way, its strap broken",
+   "biomes": [
+    "*"
+   ],
+   "weight": 0.35,
+   "uses": [
+    "do=loot;x=0;y=-2;r=3;verb=search;what=satchel;things=Bread|1|2|0.8,Small Healing Potion|1|1|0.5;text=A letter never sent, half a loaf, and a strap cut clean through."
+   ],
+   "parts": [
+    "L=at;p=s12_sack#;h=0.4;yaw=rand;col=0",
+    "L=at;p=n13_letter#;x=0.8;y=0.4;s=1;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "split_tracks",
+   "title": "Split tracks",
+   "text": "tracks in the soft ground that split two ways",
+   "biomes": [
+    "*"
+   ],
+   "weight": 0.35,
+   "uses": [
+    "do=tracks;x=-6;y=0;r=3;verb=read;what=tracks;none=One set goes on toward the road; the other turns back the way it came, running.;text=Three people walked here together, and here they parted."
+   ],
+   "parts": [
+    "L=ridge;r=0.6;r2=10;hb=0.25;a=20;x=4;y=1.5;tint=0.20,0.17,0.12",
+    "L=ridge;r=0.6;r2=10;hb=0.25;a=-20;x=4;y=-1.5;tint=0.20,0.17,0.12"
+   ]
   }
  ],
  "mats": {
@@ -5324,5 +5373,40 @@
   ],
   "mesh": "/Game/RandomDungeon/Wild13/Kit/SM_N13_Aurora"
  },
- "_doc_phase9": "the ninth phase (2026-11-16): marshes, wetlands, coastal regions, rocky coastal: 34 kinds; the tide (a clock: skins with tide= rise and fall, hazard tide, a use's tide=low|high); hazard surge; the geyser's lines from msg= (a blowhole)"
+ "_doc_phase9": "the ninth phase (2026-11-16): marshes, wetlands, coastal regions, rocky coastal: 34 kinds; the tide (a clock: skins with tide= rise and fall, hazard tide, a use's tide=low|high); hazard surge; the geyser's lines from msg= (a blowhole)",
+ "_doc_phase10": "the tenth phase (2026-11-16): the lists' tips: small stories in every region (a warm campfire, a dropped satchel, tracks that split), a landmark always in view (landmark: a broken tower fixed at each open-land region's middle, seen within its km), the cold (cold_biomes: away from warmth past cold_seconds it bites), the mud's footing (mud_biomes, mud_slow), the fog's regions (fog_biomes: the moors', marshes', coasts')",
+ "cold_biomes": [
+  "arctic regions",
+  "glacial",
+  "mountains and peaks",
+  "tundras"
+ ],
+ "cold_seconds": 90.0,
+ "mud_biomes": [
+  "marshes",
+  "wetlands"
+ ],
+ "mud_slow": 0.15,
+ "fog_biomes": [
+  "highland moorland",
+  "marshes",
+  "wetlands",
+  "coastal regions",
+  "rocky coastal"
+ ],
+ "landmark": {
+  "biomes": [
+   "grasslands",
+   "meadows",
+   "plains",
+   "savannahs",
+   "cold steppes",
+   "farms",
+   "burned plain",
+   "tundras",
+   "highland moorland"
+  ],
+  "mesh": "/Game/RandomDungeon/Wild13/Kit/SM_N13_LandmarkTower",
+  "km": 8.0
+ }
 }

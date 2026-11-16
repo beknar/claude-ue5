@@ -19,6 +19,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Engine/StaticMesh.h"
 #include "Kismet/GameplayStatics.h"
+#include "UObject/UObjectIterator.h"
 #include "GameFramework/Character.h"
 #include "RD/RDTown.h"
 
@@ -223,6 +224,7 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 	const FVector2D H2(Her.X / 100.0, Her.Y / 100.0);
 	TickWildStorm13(Dt, Her);
 	TickWildAurora13(Dt, Her);
+	TickWildLandmark13(Dt, Her);
 	// (the ninth phase: the tide's skins at its level)
 	if (WildTideSkins.Num() > 0)
 	{
@@ -255,10 +257,66 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 			if (!bWildThinAir) PlayerCombat->ShowMessage(TEXT("The air is thin up here: every step is work, and your head swims"));
 		}
 		bWildThinAir = bThin;
+		// (the tenth phase: "footing: mud ... change speed": where the ground is mud in its regions she is slowed, renewed only while
+		// nothing stronger holds her (as thin air's, PR #69))
+		const bool bMud = WildMudSlow > 0.f && WildMudBiomes.Contains(Wild->BiomeName(Qs.Biome)) && Qs.Mud > 0.18f && Qs.WaterKind == 0 && Qs.Road < 0.1f && Qs.Field < 0.3f;      // (a marsh's dry ground measured 0.25 of mud, a grassland's 0)
+		if (bMud && PlayerCombat->GetSlowness() <= WildMudSlow + 1e-3f) PlayerCombat->SlowBy(WildMudSlow, 0.7f);
+		bWildMud = bMud;
+		// (the tenth phase: "survival gameplay: cold, food and shelter": in the cold regions, away from warmth, she grows cold; warm, she
+		// warms four times as fast; past WildColdSeconds the cold bites every 15 s)
+		const bool bInTown = IsInLoadedTown(Her);
+		const bool bColdLand = WildColdBiomes.Contains(Wild->BiomeName(Qs.Biome)) && !bInTown;
+		WildWarmWhy.Reset();
+		if (bInTown) WildWarmWhy = TEXT("town");
+		else if (Now < WildWarmUntil) WildWarmWhy = TEXT("shelter");
+		else if (bColdLand || WildCold > 0.f)
+		{
+			// (a fire within 8 m: any fire effect of the world burning near her (the scenery's, the travellers' camps', the farmsteads'),
+			// fireflies apart, or a fire piece of a scenery laid near her (a campfire, a brazier))
+			for (TObjectIterator<UNiagaraComponent> It; It; ++It)
+			{
+				const UNiagaraComponent* Nc = *It;
+				if (!Nc || Nc->GetWorld() != W || !Nc->IsActive() || !Nc->GetAsset() || FVector::DistSquared(Nc->GetComponentLocation(), Her) > 800.f * 800.f) continue;
+				const FString An = Nc->GetAsset()->GetName();
+				if (An.Contains(TEXT("Fire")) && !An.Contains(TEXT("Firefl"))) { WildWarmWhy = TEXT("fire"); break; }
+			}
+			if (WildWarmWhy.IsEmpty())
+				for (const FRuinLaid& X : WildSceneryLaid)
+				{
+					if (FVector2D::Distance(X.At, H2) > 60.0) continue;
+					for (const TWeakObjectPtr<UPrimitiveComponent>& Wc : X.Comps)
+					{
+						const UStaticMeshComponent* Sc = Cast<UStaticMeshComponent>(Wc.Get());
+						if (!Sc || !Sc->GetStaticMesh()) continue;
+						const FString Mn = Sc->GetStaticMesh()->GetName();
+						if ((Mn.Contains(TEXT("ampfire")) || Mn.Contains(TEXT("Brazier")) || Mn.Contains(TEXT("Firepit"))) && FVector::Dist(Sc->Bounds.Origin, Her) < 800.f) { WildWarmWhy = TEXT("fire"); break; }
+					}
+					if (!WildWarmWhy.IsEmpty()) break;
+				}
+		}
+		const bool bWarm = !WildWarmWhy.IsEmpty();
+		bWildColdNow = bColdLand && !bWarm;
+		if (!bWildColdNow)
+		{
+			if (bWarm && bWildColdTold) PlayerCombat->ShowMessage(TEXT("The warmth comes back into your hands"));
+			bWildColdTold = false;
+			WildCold = FMath::Max(0.f, WildCold - 2.f);
+		}
+		else
+		{
+			WildCold = FMath::Min(WildCold + 0.5f, WildColdSeconds + 60.f);
+			if (WildCold > WildColdSeconds && !bWildColdTold) { bWildColdTold = true; WildColdBiteAt = Now + 15.f; PlayerCombat->ShowMessage(TEXT("You are cold to the bone. Find a fire or shelter")); }
+		}
 	}
 	// ---- the sixth phase: what calls back, told when it does
 	for (int32 Ei = WildSceneryEchoes.Num() - 1; Ei >= 0; --Ei)
 		if (Now >= WildSceneryEchoes[Ei].Key) { PlayerCombat->ShowMessage(WildSceneryEchoes[Ei].Value); ++WildEchoesHeard; WildSceneryEchoes.RemoveAt(Ei); }
+	// ---- the tenth phase: the cold's bite
+	if (bWildColdNow && bWildColdTold && WildCold > WildColdSeconds && Now >= WildColdBiteAt && !PlayerCombat->IsDead())
+	{
+		WildColdBiteAt = Now + 15.f;
+		PlayerCombat->HurtByTrap(0.03f, 0.2f, 1.f, TEXT("The cold bites. Your fingers will not close"));
+	}
 	// ---- the hazards' bursts of dust put out, then taken away
 	for (int32 Bi = WildSceneryBursts.Num() - 1; Bi >= 0; --Bi)
 	{
@@ -1034,7 +1092,7 @@ FString ARDDungeonGenerator::WildSceneryInteract(const FVector& From)
 			Said = FString::Printf(TEXT("%s%sYou trade %d %s for %d %s."), *Said, Said.IsEmpty() ? TEXT("") : TEXT("  "), Need, *Gn, Got, *Rn);
 		}
 	}
-	else if (Do == TEXT("heal")) { PlayerCombat->SetHealth(PlayerCombat->GetMaxHealth()); PlayerCombat->SetMana(PlayerCombat->GetMaxMana()); if (Said.IsEmpty()) Said = TEXT("You rest: your wounds close, your mana comes back"); }
+	else if (Do == TEXT("heal")) { PlayerCombat->SetHealth(PlayerCombat->GetMaxHealth()); PlayerCombat->SetMana(PlayerCombat->GetMaxMana()); if (Said.IsEmpty()) Said = TEXT("You rest: your wounds close, your mana comes back"); WildWarmUntil = Now + 300.f; WildCold = 0.f; bWildColdTold = false; }
 	else if (Do == TEXT("buff") || Do == TEXT("fairy"))
 	{
 		const float Dm = RDS13Num(M, TEXT("dmg"), 0.12f), Ar = RDS13Num(M, TEXT("armour"), 0.1f), Sp = RDS13Num(M, TEXT("speed"), 0.f), Sec = RDS13Num(M, TEXT("secs"), 300.f);
@@ -1153,6 +1211,63 @@ void ARDDungeonGenerator::TickWildAuroraLook(const FVector& Her)
 	Au->SetCullDistance(0.f); Au->bNeverDistanceCull = true;
 	Au->RegisterComponent();
 	WildAurora = Au;
+}
+
+void ARDDungeonGenerator::WarmWildFor(float Seconds) { WildWarmUntil = GetWorld() ? GetWorld()->GetTimeSeconds() + Seconds : -1.f; }
+
+void ARDDungeonGenerator::TickWildLandmark13(float Dt, const FVector& Her)
+{
+	// (the tenth phase: "a landmark always in view": a broken tower at a fixed place in each 6 km square of the open lands (the region
+	// cells, 14 km, left most points with none within 8 km: the first run), on dry ground off the roads and 1.5 km from a town, solid.
+	// The one standing is kept while she is within WildLandmarkKm of it (also at its foot); else the nearest one is laid. Every 2 s.)
+	WildLandmarkLook -= Dt;
+	if (WildLandmarkLook > 0.f) return;
+	WildLandmarkLook = 2.f;
+	if (!WildLandmarkMesh || WildLandmarkBiomes.Num() == 0) return;
+	const FVector2D H2 = FVector2D(Her) / 100.0;
+	const double Reach = WildLandmarkKm * 1000.0;
+	if (WildLandmark.IsValid() && FVector2D::Distance(WildLandmarkAt, H2) <= Reach) return;
+	constexpr double LmCell = 6000.0;
+	const int32 Ci = FMath::FloorToInt(H2.X / LmCell), Cj = FMath::FloorToInt(H2.Y / LmCell);
+	double Best = Reach; FVector2D Site(1e12, 1e12); bool bGot = false;
+	for (int32 I = Ci - 2; I <= Ci + 2; ++I) for (int32 J = Cj - 2; J <= Cj + 2; ++J)
+	{
+		const uint32 Hh = FRDWildWorld::Hash(I, J, Wild->Seed + 913u);
+		const FVector2D S((I + 0.2 + 0.6 * ((Hh & 1023u) / 1023.0)) * LmCell, (J + 0.2 + 0.6 * (((Hh >> 10) & 1023u) / 1023.0)) * LmCell);
+		const double D = FVector2D::Distance(S, H2);
+		if (D > Best) continue;
+		FRDWSample Sq; Wild->Sample(S.X, S.Y, Sq, false);
+		if (Sq.WaterKind != 0 || Sq.Road > 0.1f || Sq.Lava > 0.05f || !WildLandmarkBiomes.Contains(Wild->BiomeName(Sq.Biome))) continue;
+		double Dt2 = 1e12; Wild->NearestTown(S.X, S.Y, Dt2); if (Dt2 < 1500.0) continue;
+		Best = D; Site = S; bGot = true;
+	}
+	if (!bGot) { if (UStaticMeshComponent* Lm = WildLandmark.Get()) Lm->DestroyComponent(); WildLandmark.Reset(); WildLandmarkAt = FVector2D(1e12, 1e12); return; }
+	UStaticMeshComponent* Lm = WildLandmark.Get();
+	if (!Lm)
+	{
+		Lm = NewObject<UStaticMeshComponent>(this);
+		Lm->SetStaticMesh(WildLandmarkMesh);
+		Lm->SetMobility(EComponentMobility::Movable); Lm->SetCullDistance(0.f); Lm->bNeverDistanceCull = true;
+		Lm->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics); Lm->SetCollisionResponseToAllChannels(ECR_Block);
+		Lm->RegisterComponent();
+		WildLandmark = Lm;
+	}
+	WildLandmarkAt = Site;
+	Lm->SetWorldLocation(FVector(Site.X * 100.0, Site.Y * 100.0, Wild->ToZ(Wild->Height(Site.X, Site.Y)) - 200.f));
+	Lm->SetWorldRotation(FRotator(0.f, (float)(FRDWildWorld::Hash((int32)Site.X, (int32)Site.Y, Wild->Seed) % 360u), 0.f));
+}
+
+FString ARDDungeonGenerator::GetWildLandmark() const
+{
+	const UStaticMeshComponent* Lm = WildLandmark.Get();
+	if (!Lm) return TEXT("off");
+	const FVector L = Lm->GetComponentLocation();
+	return FString::Printf(TEXT("on|%.0f|%.0f|%.0f"), L.X, L.Y, L.Z);
+}
+
+FString ARDDungeonGenerator::GetWildColdState() const
+{
+	return FString::Printf(TEXT("%.1f|%d|%s"), WildCold, WildWarmWhy.IsEmpty() ? 0 : 1, *WildWarmWhy);
 }
 
 float ARDDungeonGenerator::GetWildTide() const
