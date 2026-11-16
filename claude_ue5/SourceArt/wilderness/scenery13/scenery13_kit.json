@@ -1395,5 +1395,20 @@
   "masked": [],
   "translucent": [],
   "params": {}
+ },
+ "SM_N13_LandmarkTower": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_LandmarkTower.fbx",
+  "size_m": [
+   43.87,
+   45.69,
+   181.97
+  ],
+  "triangles": 188,
+  "slots": [
+   "LandmarkTowerStone"
+  ],
+  "masked": [],
+  "translucent": [],
+  "params": {}
  }
 }

@@ -107,8 +107,8 @@ def state():
     return {a: (float(b) if "." in b else int(b)) for a, b in zip(k, p)}
 def sample(x_m, y_m):
     p = str(G["gen"].get_wild_sample_at(V(x_m * 100.0, y_m * 100.0, 0))).split("|")
-    k = ["h", "z", "biome", "biome2", "w1", "water", "water_m", "rock", "snow", "sand", "road", "field", "canopy", "lava", "tier"]
-    return {a: (b if a in ("biome", "biome2") else float(b)) for a, b in zip(k, p)}
+    k = ["h", "z", "biome", "biome2", "w1", "water", "water_m", "rock", "snow", "sand", "road", "field", "canopy", "lava", "tier", "crop", "mud"]
+    return {a: (b if a in ("biome", "biome2", "crop") else float(b)) for a, b in zip(k, p)}
 def towns():
     out = {}
     for l in G["gen"].get_wild_town_lines():
@@ -1792,10 +1792,51 @@ def step_land13():
                 res["aurora"][f"{bn}@{hr:g}"] = r_
         finally:
             g.set_town_hour(h_au)
+        # (the tenth phase: "a landmark always in view": the open lands' far landmark, brought 4 km off and pictured)
+        pt = find_biome_point("plains", 80)
+        if pt:
+            g.wild_put_her(*pt); yield from wait_chunks(30, 50)
+            g.force_wild_far_sight("landmark", 4.0); yield from rwait(3.0)
+            st = str(g.get_wild_storm_line()).split("|")
+            res["landmark"] = {"name": st[0], "on": int(st[4]), "km": float(st[3])}
+            p = G["pawn"].get_actor_location()
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=4, yaw=math.degrees(math.atan2(float(st[2]) * 100.0 - p.y, float(st[1]) * 100.0 - p.x))))
+            yield from rwait(2.0); shot("land13_landmark", "1280x720"); yield from rwait(1.0)
+            g.force_wild_far_sight("", 0.0)
+        # (the tenth phase: "survival gameplay: cold": in the arctic, cold past its limit, the cold bites (her hit points); in a town
+        # it goes; "footing: mud": her walk in a marsh's mud against the grassland's)
+        res["cold"] = {}
+        pt = find_biome_point("arctic regions", 240)
+        if pt:
+            g.wild_put_her(*pt); yield from wait_chunks(30, 50); ground_put(*pt); yield from rwait(1.0)
+            hp0 = cb().get_health()
+            g.set_editor_property("wild_cold", 200.0); yield from rwait(17.0)
+            res["cold"]["arctic"] = {"state": str(g.get_wild_cold_state()), "hp_lost": round(hp0 - cb().get_health(), 1)}
+            cb().set_health(cb().get_max_health())
+        pt = find_biome_point("grasslands", 80)
+        if pt:
+            g.wild_put_her(*pt); yield from wait_chunks(30, 50); ground_put(*pt)
+            g.set_editor_property("wild_cold", 200.0); yield from rwait(3.0)
+            res["cold"]["grasslands"] = {"state": str(g.get_wild_cold_state())}
+            g.set_editor_property("wild_cold", 0.0)
+        res["mud"] = {}
+        for bn in ("marshes", "grasslands"):
+            pt = find_biome_point(bn, 160)
+            if not pt: res["mud"][bn] = None; continue
+            # (on dry ground: the marshes' pools are water, where the mud's rule stands aside (the first run put her in one))
+            if sample(*pt)["water"]:
+                dry = next(((pt[0] + rr * math.cos(a_ * math.pi / 8), pt[1] + rr * math.sin(a_ * math.pi / 8)) for rr in (10, 20, 40, 80, 120) for a_ in range(16)
+                            if not sample(pt[0] + rr * math.cos(a_ * math.pi / 8), pt[1] + rr * math.sin(a_ * math.pi / 8))["water"]), None)
+                if dry: pt = dry
+            g.wild_put_her(*pt); yield from wait_chunks(30, 50); ground_put(*pt); yield from rwait(2.0)
+            mv_ = G["pawn"].get_component_by_class(unreal.CharacterMovementComponent)
+            res["mud"][bn] = {"mud": bool(g.get_editor_property("wild_mud")), "walk_speed": round(mv_.get_editor_property("max_walk_speed")),
+                              "at_km": [round(pt[0] / 1000.0, 2), round(pt[1] / 1000.0, 2)], "water": sample(*pt)["water"], "biome": sample(*pt)["biome"],
+                              "ground_mud": sample(*pt).get("mud")}
         # (the fourth phase: "rolling mist that wipes out landmarks": how often the weather's own turn brings fog on the moor and on the
         # grassland, 4000 turns of its pick where she stands (PR #68's review: its weights alone are not what comes))
         res["moor_fog"] = {}
-        for bn in ("highland moorland", "grasslands"):
+        for bn in ("highland moorland", "grasslands", "marshes"):
             pt = find_biome_point(bn, 160)
             if not pt: res["moor_fog"][bn] = None; continue
             g.wild_put_her(*pt); yield from wait_chunks(30, 50); yield from rwait(1.5)
@@ -1819,6 +1860,12 @@ def step_land13():
           and res["crossroads_50km"] > 0 and res.get("storm", {}).get("on") == 1
           and (res["aurora"].get("arctic regions@23") or {}).get("on") is True and 3000 <= res["aurora"]["arctic regions@23"]["north_m"] <= 5000
           and res["aurora"]["arctic regions@23"]["up_m"] > 800
+          and (res.get("landmark") or {}).get("on") == 1 and (res.get("landmark") or {}).get("name") == "landmark"
+          and ((res["cold"].get("arctic") or {}).get("hp_lost", 0) > 0)
+          and float(((res["cold"].get("grasslands") or {}).get("state") or "999").split("|")[0]) < 200
+          and (res["mud"].get("marshes") or {}).get("mud") is True and not (res["mud"].get("grasslands") or {"mud": True}).get("mud")
+          and res["mud"]["marshes"]["walk_speed"] < res["mud"]["grasslands"]["walk_speed"] * 0.95
+          and (res["moor_fog"].get("marshes") or {}).get("fog_share", 0) > (res["moor_fog"].get("grasslands") or {}).get("fog_share", 9) * 2.0
           and (res["aurora"].get("arctic regions@12") or {"on": True}).get("on") is False
           and (res["aurora"].get("grasslands@23") or {"on": True}).get("on") is False)
     step_result("land13", ok, **res)

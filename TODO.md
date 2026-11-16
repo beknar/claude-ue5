@@ -52,7 +52,10 @@ The biomes' scenery, in phases with a PR each (the user's choices: every item to
   - The tide is a clock of its own (a ten-minute sine, the same everywhere): it lifts the tidal skins, floods the flats and closes the sea cave, but the sea and the world's water do not rise with it. The storm surge is a wave every 25 s on its rocks, not a storm.
   - The marsh lights do not lure her anywhere; the swamp gas does not burn; the reed bed's flock does not burst from the reeds as she comes; the herons are pieces. Crocodiles, snakes, leeches, crabs, seals and sea lions are not there (lines of text), nor kelp.
   - The dunes do not move; the buried ruins are a dune laid over walls. The sunken causeway and the drowned church stand in skins of dark water, not the world's water.
-- [ ] **Phase 10:** the lists' "what helps" across all of them.
+- [ ] **Phase 10 (the lists' tips), what is not done or measured:**
+  - Seasons ("summer thaw and winter ice turn the same map into two very different places") are not built: the world has one season.
+  - Sound ("creaking trunks, birdsong that suddenly stops", "waves, bird cries") is not built for the scenery: nobody hears a test, and no sound was chosen for it.
+  - The cold has no food side (hunger is not in the game), and the warmth of a fire is any fire effect or fire piece within 8 m. The landmark is one far tower at a time, among the other far sights.
 - [ ] **Phase 1, what is not done or measured:**
   - The burrows' "collapsing tunnels" are a fall's harm and a slow where the ground gives way: the ground itself does not open (a chunk's ground is one mesh).
   - The herons stand still (a mesh of our own, no clips); the bees and the birds are the packs' effects (flies as bees, the flocks as crows); the frogs are not there (no frog in the project).

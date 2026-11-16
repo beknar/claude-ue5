@@ -233,7 +233,8 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 		bWhiteLand = Bn == TEXT("cold steppes") || Bn == TEXT("tundras") || Bn == TEXT("arctic regions") || Bn == TEXT("glacial") || Bn == TEXT("mountains and peaks");
 		bDustLand = Bn == TEXT("savannahs") || Bn == TEXT("cold steppes") || Bn == TEXT("burned plain") || Bn == TEXT("canyons") || Bn == TEXT("canyon networks") || Bn == TEXT("mesas");
 		// (the fourth phase: "rolling mist that wipes out landmarks and gets people lost": the moors' fog comes three times as often)
-		bMoorLand = Bn == TEXT("highland moorland");
+		// (the tenth phase: "sound and fog": a list, the marshes' and the coasts' too (WildFogBiomes; the moors' alone when it is empty))
+		bMoorLand = WildFogBiomes.Num() > 0 ? WildFogBiomes.Contains(Bn) : Bn == TEXT("highland moorland");
 	}
 	SkyMoorLand = bMoorLand; SkyDryLand = bDry; SkyWhiteLand = bWhiteLand; SkyDustLand = bDustLand;
 	// ---- the next weather, when its time comes

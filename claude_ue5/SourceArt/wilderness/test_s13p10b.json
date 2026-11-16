@@ -1,0 +1,350 @@
+{
+ "tag": "s13p10b",
+ "plan": [
+  "land13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "land13",
+   "ok": true,
+   "channels": {
+    "arroyo": {
+     "near": 5,
+     "at_km": [
+      2.15,
+      7.04
+     ],
+     "width_m": 10.9,
+     "depth_m": 3.5,
+     "bed_under_banks_m": 3.83,
+     "her_feet_under_banks_m": 3.42,
+     "ok": true
+    },
+    "dry riverbed": {
+     "near": 5,
+     "at_km": [
+      -12.06,
+      -30.89
+     ],
+     "width_m": 15.8,
+     "depth_m": 1.9,
+     "bed_under_banks_m": 1.64,
+     "her_feet_under_banks_m": 1.5,
+     "ok": true
+    },
+    "irrigation ditch": {
+     "near": 5,
+     "at_km": [
+      3.06,
+      1.49
+     ],
+     "width_m": 1.8,
+     "depth_m": 0.9,
+     "bed_under_banks_m": 0.91,
+     "her_feet_under_banks_m": 0.89,
+     "ok": true
+    },
+    "fire break": {
+     "near": 5,
+     "at_km": [
+      71.02,
+      -4.79
+     ],
+     "width_m": 8.1,
+     "depth_m": 0.7,
+     "bed_under_banks_m": 0.71,
+     "her_feet_under_banks_m": 0.71,
+     "ok": true
+    },
+    "holloway": {
+     "near": 5,
+     "at_km": [
+      22.16,
+      -73.9
+     ],
+     "width_m": 4.3,
+     "depth_m": 3.4,
+     "bed_under_banks_m": 3.56,
+     "her_feet_under_banks_m": 3.42,
+     "ok": true
+    },
+    "sheep track": {
+     "near": 5,
+     "at_km": [
+      -14.41,
+      8.72
+     ],
+     "width_m": 1.5,
+     "depth_m": 0.3,
+     "bed_under_banks_m": 0.35,
+     "her_feet_under_banks_m": 0.31,
+     "ok": true
+    },
+    "hill holloway": {
+     "near": 5,
+     "at_km": [
+      -19.98,
+      13.68
+     ],
+     "width_m": 4.0,
+     "depth_m": 2.6,
+     "bed_under_banks_m": 2.64,
+     "her_feet_under_banks_m": 2.61,
+     "ok": true
+    },
+    "slot canyon": {
+     "near": 5,
+     "at_km": [
+      -11.6,
+      -14.92
+     ],
+     "width_m": 5.0,
+     "depth_m": 8.8,
+     "bed_under_banks_m": 8.8,
+     "her_feet_under_banks_m": 8.79,
+     "ok": true
+    },
+    "fissure": {
+     "near": 5,
+     "at_km": [
+      120.03,
+      2.71
+     ],
+     "width_m": 3.6,
+     "depth_m": 6.3,
+     "bed_under_banks_m": 6.36,
+     "her_feet_under_banks_m": 6.3,
+     "ok": true
+    }
+   },
+   "swales": {
+    "grasslands": {
+     "found": true,
+     "at_km": [
+      6.0,
+      0.0
+     ],
+     "amp": 3.5,
+     "range_m": 23.5,
+     "crests_1600m": 8,
+     "crests_hiding_300m": 7
+    },
+    "savannahs": {
+     "found": true,
+     "at_km": [
+      -15.87,
+      -25.46
+     ],
+     "amp": 3.0,
+     "range_m": 87.0,
+     "crests_1600m": 7,
+     "crests_hiding_300m": 5
+    },
+    "plains": {
+     "found": true,
+     "at_km": [
+      -6.43,
+      -7.66
+     ],
+     "amp": 5.0,
+     "range_m": 105.1,
+     "crests_1600m": 3,
+     "crests_hiding_300m": 2
+    }
+   },
+   "crossroads_50km": 54,
+   "storm": {
+    "on": 1,
+    "km": 6.0
+   },
+   "grassfire": {
+    "name": "grassfire",
+    "on": 1,
+    "km": 8.0
+   },
+   "dust": {
+    "fair_fog": [
+     0.42,
+     0.45,
+     0.5
+    ],
+    "dust_fog": [
+     0.651,
+     0.495,
+     0.31
+    ],
+    "weather": "dust"
+   },
+   "whiteout": {
+    "fair_fog": [
+     0.42,
+     0.45,
+     0.5
+    ],
+    "white_fog": [
+     0.567,
+     0.621,
+     0.725
+    ],
+    "weather": "whiteout"
+   },
+   "field_stages": {
+    "ripe": 2882,
+    "sprouting": 1122,
+    "fallow": 708,
+    "burned": 287,
+    "fields": 4999
+   },
+   "quiet": {
+    "pine forests": {
+     "scale": 0.65,
+     "notice_m": 25.0,
+     "start_m": 21.1,
+     "after_3s_m": 21.1,
+     "came": false
+    },
+    "grasslands": {
+     "scale": 1.0,
+     "notice_m": 25.0,
+     "start_m": 19.8,
+     "after_3s_m": 15.4,
+     "came": true
+    }
+   },
+   "thin_air": {
+    "mountains and peaks": {
+     "thin": true,
+     "walk_speed": 300
+    },
+    "mountains": {
+     "thin": false,
+     "walk_speed": 353
+    }
+   },
+   "aurora": {
+    "arctic regions@23": {
+     "on": true,
+     "north_m": 4000,
+     "east_m": 0,
+     "up_m": 886
+    },
+    "arctic regions@12": {
+     "on": false
+    },
+    "grasslands@23": {
+     "on": false
+    }
+   },
+   "landmark": {
+    "name": "landmark",
+    "on": 1,
+    "km": 4.0
+   },
+   "cold": {
+    "arctic": {
+     "state": "216.5|0|",
+     "hp_lost": 4.2
+    },
+    "grasslands": {
+     "state": "188.0|0|"
+    }
+   },
+   "mud": {
+    "marshes": {
+     "mud": true,
+     "walk_speed": 300,
+     "at_km": [
+      41.26,
+      20.35
+     ],
+     "water": 0.0,
+     "biome": "marshes",
+     "ground_mud": 0.25
+    },
+    "grasslands": {
+     "mud": false,
+     "walk_speed": 353,
+     "at_km": [
+      6.0,
+      0.0
+     ],
+     "water": 0.0,
+     "biome": "grasslands",
+     "ground_mud": 0.0
+    }
+   },
+   "moor_fog": {
+    "highland moorland": {
+     "fog_share": 0.1355,
+     "counts": {
+      "clear": 634,
+      "fair": 827,
+      "cloudy": 803,
+      "overcast": 540,
+      "rain": 461,
+      "storm": 193,
+      "snow": 0,
+      "fog": 542,
+      "whiteout": 0,
+      "dust": 0,
+      "cloudless": 0
+     }
+    },
+    "grasslands": {
+     "fog_share": 0.0563,
+     "counts": {
+      "clear": 616,
+      "fair": 887,
+      "cloudy": 883,
+      "overcast": 619,
+      "rain": 504,
+      "storm": 266,
+      "snow": 0,
+      "fog": 225,
+      "whiteout": 0,
+      "dust": 0,
+      "cloudless": 0
+     }
+    },
+    "marshes": {
+     "fog_share": 0.1355,
+     "counts": {
+      "clear": 634,
+      "fair": 827,
+      "cloudy": 803,
+      "overcast": 540,
+      "rain": 461,
+      "storm": 193,
+      "snow": 0,
+      "fog": 542,
+      "whiteout": 0,
+      "dust": 0,
+      "cloudless": 0
+     }
+    }
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s13p10b_land13_arroyo.png",
+  "wd_s13p10b_land13_dry riverbed.png",
+  "wd_s13p10b_land13_irrigation ditch.png",
+  "wd_s13p10b_land13_fire break.png",
+  "wd_s13p10b_land13_holloway.png",
+  "wd_s13p10b_land13_sheep track.png",
+  "wd_s13p10b_land13_hill holloway.png",
+  "wd_s13p10b_land13_slot canyon.png",
+  "wd_s13p10b_land13_fissure.png",
+  "wd_s13p10b_land13_storm.png",
+  "wd_s13p10b_land13_grassfire.png",
+  "wd_s13p10b_land13_dust.png",
+  "wd_s13p10b_land13_whiteout.png",
+  "wd_s13p10b_land13_aurora.png",
+  "wd_s13p10b_land13_landmark.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

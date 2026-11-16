@@ -255,10 +255,60 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 			if (!bWildThinAir) PlayerCombat->ShowMessage(TEXT("The air is thin up here: every step is work, and your head swims"));
 		}
 		bWildThinAir = bThin;
+		// (the tenth phase: "footing: mud ... change speed": where the ground is mud in its regions she is slowed, renewed only while
+		// nothing stronger holds her (as thin air's, PR #69))
+		const bool bMud = WildMudSlow > 0.f && WildMudBiomes.Contains(Wild->BiomeName(Qs.Biome)) && Qs.Mud > 0.18f && Qs.WaterKind == 0;      // (a marsh's dry ground measured 0.25 of mud, a grassland's 0)
+		if (bMud && PlayerCombat->GetSlowness() <= WildMudSlow + 1e-3f) PlayerCombat->SlowBy(WildMudSlow, 0.7f);
+		bWildMud = bMud;
+		// (the tenth phase: "survival gameplay: cold, food and shelter": in the cold regions, away from warmth, she grows cold; warm, she
+		// warms four times as fast; past WildColdSeconds the cold bites every 15 s)
+		const bool bColdLand = WildColdBiomes.Contains(Wild->BiomeName(Qs.Biome)) && !IsInLoadedTown(Her);
+		WildWarmWhy.Reset();
+		if (IsInLoadedTown(Her)) WildWarmWhy = TEXT("town");
+		else if (Now < WildWarmUntil) WildWarmWhy = TEXT("shelter");
+		else
+		{
+			// (a fire within 8 m: a scenery's fire effect burning, or a fire piece of one laid near her (a campfire, a brazier))
+			for (const FSceneryFx& F : WildSceneryFxOn)
+			{
+				const UNiagaraComponent* Nc = F.Comp.Get();
+				if (Nc && Nc->IsActive() && Nc->GetAsset() && Nc->GetAsset()->GetName().Contains(TEXT("Fire")) && FVector::Dist(Nc->GetComponentLocation(), Her) < 800.f) { WildWarmWhy = TEXT("fire"); break; }
+			}
+			if (WildWarmWhy.IsEmpty())
+				for (const FRuinLaid& X : WildSceneryLaid)
+				{
+					if (FVector2D::Distance(X.At, H2) > 60.0) continue;
+					for (const TWeakObjectPtr<UPrimitiveComponent>& Wc : X.Comps)
+					{
+						const UStaticMeshComponent* Sc = Cast<UStaticMeshComponent>(Wc.Get());
+						if (!Sc || !Sc->GetStaticMesh()) continue;
+						const FString Mn = Sc->GetStaticMesh()->GetName();
+						if ((Mn.Contains(TEXT("ampfire")) || Mn.Contains(TEXT("Brazier")) || Mn.Contains(TEXT("Firepit"))) && FVector::Dist(Sc->Bounds.Origin, Her) < 800.f) { WildWarmWhy = TEXT("fire"); break; }
+					}
+					if (!WildWarmWhy.IsEmpty()) break;
+				}
+		}
+		const bool bWarm = !WildWarmWhy.IsEmpty();
+		if (!bColdLand || bWarm)
+		{
+			if (WildCold > WildColdSeconds && bWarm && bWildColdTold) PlayerCombat->ShowMessage(TEXT("The warmth comes back into your hands"));
+			WildCold = FMath::Max(0.f, WildCold - 2.f); if (WildCold <= WildColdSeconds) bWildColdTold = false;
+		}
+		else
+		{
+			WildCold += 0.5f;
+			if (WildCold > WildColdSeconds && !bWildColdTold) { bWildColdTold = true; WildColdBiteAt = Now + 15.f; PlayerCombat->ShowMessage(TEXT("You are cold to the bone. Find a fire or shelter")); }
+		}
 	}
 	// ---- the sixth phase: what calls back, told when it does
 	for (int32 Ei = WildSceneryEchoes.Num() - 1; Ei >= 0; --Ei)
 		if (Now >= WildSceneryEchoes[Ei].Key) { PlayerCombat->ShowMessage(WildSceneryEchoes[Ei].Value); ++WildEchoesHeard; WildSceneryEchoes.RemoveAt(Ei); }
+	// ---- the tenth phase: the cold's bite
+	if (bWildColdTold && WildCold > WildColdSeconds && Now >= WildColdBiteAt && !PlayerCombat->IsDead())
+	{
+		WildColdBiteAt = Now + 15.f;
+		PlayerCombat->HurtByTrap(0.03f, 0.2f, 1.f, TEXT("The cold bites. Your fingers will not close"));
+	}
 	// ---- the hazards' bursts of dust put out, then taken away
 	for (int32 Bi = WildSceneryBursts.Num() - 1; Bi >= 0; --Bi)
 	{
@@ -1034,7 +1084,7 @@ FString ARDDungeonGenerator::WildSceneryInteract(const FVector& From)
 			Said = FString::Printf(TEXT("%s%sYou trade %d %s for %d %s."), *Said, Said.IsEmpty() ? TEXT("") : TEXT("  "), Need, *Gn, Got, *Rn);
 		}
 	}
-	else if (Do == TEXT("heal")) { PlayerCombat->SetHealth(PlayerCombat->GetMaxHealth()); PlayerCombat->SetMana(PlayerCombat->GetMaxMana()); if (Said.IsEmpty()) Said = TEXT("You rest: your wounds close, your mana comes back"); }
+	else if (Do == TEXT("heal")) { PlayerCombat->SetHealth(PlayerCombat->GetMaxHealth()); PlayerCombat->SetMana(PlayerCombat->GetMaxMana()); if (Said.IsEmpty()) Said = TEXT("You rest: your wounds close, your mana comes back"); WildWarmUntil = Now + 300.f; WildCold = 0.f; bWildColdTold = false; }
 	else if (Do == TEXT("buff") || Do == TEXT("fairy"))
 	{
 		const float Dm = RDS13Num(M, TEXT("dmg"), 0.12f), Ar = RDS13Num(M, TEXT("armour"), 0.1f), Sp = RDS13Num(M, TEXT("speed"), 0.f), Sec = RDS13Num(M, TEXT("secs"), 300.f);
@@ -1153,6 +1203,11 @@ void ARDDungeonGenerator::TickWildAuroraLook(const FVector& Her)
 	Au->SetCullDistance(0.f); Au->bNeverDistanceCull = true;
 	Au->RegisterComponent();
 	WildAurora = Au;
+}
+
+FString ARDDungeonGenerator::GetWildColdState() const
+{
+	return FString::Printf(TEXT("%.1f|%d|%s"), WildCold, WildWarmWhy.IsEmpty() ? 0 : 1, *WildWarmWhy);
 }
 
 float ARDDungeonGenerator::GetWildTide() const

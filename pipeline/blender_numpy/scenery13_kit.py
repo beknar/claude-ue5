@@ -34,6 +34,7 @@ helpers and its noise are used here):
                    herder's sledge, a pile of shed antlers, an aurora's curtain of light 3 km long (the night sky's, not a scenery's)
   StiltHut, Lighthouse, PitcherPlant, EelTrap, DuckBlind, SeaStack_A/B, BogIdol  the ninth phase's (marshes, wetlands, coasts):
                    a fisher's hut on stilts, a lighthouse, giant pitcher plants, an eel trap, a duck blind, sea stacks, a bog idol
+  LandmarkTower    the tenth phase's: a broken tower 110 m high for the far horizon (the open lands' landmark always in view)
   StormCell        a storm cell for the far horizon: an anvil cloud 3.2 km across, a rain curtain, a funnel (the far storms)
   Drystone_A/B     a 3 m length of field wall laid dry, its copes on edge (the shepherd's pen)
   AppleTree_A/B,   the old orchard's gnarled fruit trees: a short leaning trunk, a low wide crown of leaf clusters with their
@@ -1224,6 +1225,24 @@ def bog_idol():
     finish(me, ob, bm, ["BogIdolWood"])
 
 
+# ------------------------------------------------------------------------------------------------ the tenth phase: the tips
+def landmark_tower():
+    """a landmark for the far horizon: a broken tower of an older age 180 m high and 37 m across, its top jagged where it fell (the open
+    lands' "a landmark always in view": laid as a far sight 3 to 6 km off, its size for that distance)"""
+    rng = random.Random(951)
+    me, ob, bm, uvl = new_mesh("SM_N13_LandmarkTower")
+    # (1.7 times the first: at 4 km the first, 107 m, was a faint spike 15 px high in the haze (the tenth phase's picture))
+    S_ = 1.7
+    prof = [(11.0 * S_, 0.0), (10.0 * S_, 20.0 * S_), (9.0 * S_, 55.0 * S_), (8.4 * S_, 90.0 * S_), (8.2 * S_, 100.0 * S_)]
+    lathe(bm, uvl, prof, 16, 0, urep=4.0)
+    top = [v for v in bm.verts if v.co.z > 99.0 * S_]
+    for v in top: v.co.z += rng.uniform(-14.0, 10.0) * S_          # (its broken crown)
+    for k in range(5):                                               # (buttresses round its foot)
+        a = k * 2 * math.pi / 5
+        box(bm, uvl, (math.cos(a) * 11.5 * S_, math.sin(a) * 11.5 * S_, 9.0 * S_), (5.0 * S_, 5.0 * S_, 18.0 * S_), 0)
+    finish(me, ob, bm, ["LandmarkTowerStone"], flat=True)
+
+
 def gold_card():
     """one card of gold leaves: only its material is used (the gold aspens' and larches' crowns, a part's mat=)"""
     me, ob, bm, uvl = new_mesh("SM_N13_GoldCard")
@@ -1525,6 +1544,7 @@ def pictures():
     for v in ("A", "B"):
         ss = grain((0.36, 0.34, 0.31), 330 + ord(v), 0.25); ss[yy < 0.06] = (0.30, 0.40, 0.18); png(f"T_N13_SeaStack{v}Rock", ss)
     bi = grain((0.11, 0.08, 0.06), 340, 0.25); fc = (np.abs(xx - 0.5) < 0.18) & (yy < 0.22) & (yy > 0.08); bi[fc & (np.abs(np.sin(yy * 60)) < 0.3)] *= 0.4; png("T_N13_BogIdolWood", bi)
+    png("T_N13_LandmarkTowerStone", grain((0.48, 0.46, 0.43), 350, 0.2) * (0.85 + 0.15 * (np.abs(np.sin(yy * 140)) > 0.15))[..., None])
     png("T_N13_LavaTubeBasalt", grain((0.20, 0.18, 0.17), 280, 0.3) * (0.85 + 0.15 * np.sin(xx * 40 + yy * 12)[..., None])); png("T_N13_LavaTubeDark", np.full((n, n, 3), 0.02))
     # (gold leaves: the aspen's round leaves in yellow and gold; gold needles: a larch's sprays)
     for name, shape in (("GoldLeaves", "leaf"), ("GoldNeedles", "needle")):
@@ -1566,7 +1586,8 @@ if __name__ == "__main__":
             "Inuksuk": inuksuk, "MammothTusks": mammoth_tusks, "ExpeditionHut": expedition_hut, "Igloo": igloo, "Sledge": sledge,
             "AntlerPile": antler_pile, "Aurora": aurora,
             "StiltHut": stilt_hut, "Lighthouse": lighthouse, "PitcherPlant": pitcher_plant, "EelTrap": eel_trap, "DuckBlind": duck_blind,
-            "SeaStack_A": lambda: sea_stack("A", 921), "SeaStack_B": lambda: sea_stack("B", 923), "BogIdol": bog_idol}
+            "SeaStack_A": lambda: sea_stack("A", 921), "SeaStack_B": lambda: sea_stack("B", 923), "BogIdol": bog_idol,
+            "LandmarkTower": landmark_tower}
     for k, f in todo.items():
         if not ONLY or k in ONLY: f()
     old = json.load(open(os.path.join(OUT, "scenery13_kit.json"))) if os.path.exists(os.path.join(OUT, "scenery13_kit.json")) else {}
