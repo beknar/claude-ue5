@@ -1,0 +1,888 @@
+{
+ "tag": "s13p5b",
+ "plan": [
+  "scenery13=couloir+rime_ledge+climbers_camp+cloud_sea+dragon_aerie+crevasse_field+serac_field+ice_cave+moulin+moraine+meltwater_lake+frozen_thing+nunatak+ice_ruins"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "scenery13",
+   "ok": false,
+   "kinds": {
+    "couloir": {
+     "found": true,
+     "id": 67204299,
+     "at_km": [
+      -23.86,
+      -27.72
+     ],
+     "name": "Couloir",
+     "laid": {
+      "kind": "couloir",
+      "title": "Couloir",
+      "x": -23855.5,
+      "y": -27721.5,
+      "pieces": 2,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 100.8
+     },
+     "bottom_over_ground_cm": [
+      -36,
+      -27,
+      -27
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look up the gully",
+       "f": "scenery",
+       "said": "The quickest way up. The stones know it too.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "rockfall",
+       "hp_lost": 16.8,
+       "sprung": 1,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "The air is thin up here: every step is work, and your head swims | Couloir: a steep gully between rock walls: a way up, and a way stones come down | The quickest way up. The stones know it too. | Stones rattle down the slope above you! | Falling stones strike you: 17 damage",
+     "ok": true
+    },
+    "rime_ledge": {
+     "found": true,
+     "id": 67202239,
+     "at_km": [
+      -25.19,
+      -34.94
+     ],
+     "name": "Rime ledge",
+     "laid": {
+      "kind": "rime_ledge",
+      "title": "Rime ledge",
+      "x": -25194.0,
+      "y": -34938.9,
+      "pieces": 13,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 71.4
+     },
+     "bottom_over_ground_cm": [
+      -60,
+      -13,
+      -7
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the rime",
+       "f": "scenery",
+       "said": "The wind has built feathers of ice on every stone, all pointing the same way.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Rime ledge: wind-carved snow, rime-coated rock and ice-glazed ledges | The wind has built feathers of ice on every stone, all pointing the same way.",
+     "ok": true
+    },
+    "climbers_camp": {
+     "found": true,
+     "id": 67186867,
+     "at_km": [
+      -34.11,
+      -42.16
+     ],
+     "name": "Abandoned climbers' camp",
+     "laid": {
+      "kind": "climbers_camp",
+      "title": "Abandoned climbers' camp",
+      "x": -34114.1,
+      "y": -42159.3,
+      "pieces": 5,
+      "boxes": 1,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 323.5
+     },
+     "bottom_over_ground_cm": [
+      -61,
+      -9,
+      -7
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 1,
+     "want_chests": 1,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "read the journal",
+       "f": "scenery",
+       "said": "Day nine. The weather will not break. We go for the summit tomorrow either way.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Abandoned climbers' camp: frozen tents, ropes and a journal left on the mountain | Day nine. The weather will not break. We go for the summit tomorrow either way.",
+     "ok": true
+    },
+    "cloud_sea": {
+     "found": true,
+     "id": 67199171,
+     "at_km": [
+      -26.73,
+      -32.91
+     ],
+     "name": "Above the clouds",
+     "laid": {
+      "kind": "cloud_sea",
+      "title": "Above the clouds",
+      "x": -26733.7,
+      "y": -32907.7,
+      "pieces": 1,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 274.6
+     },
+     "bottom_over_ground_cm": [
+      -52,
+      -52,
+      -52
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "climb",
+       "prompt": "climb the rock",
+       "f": "scenery",
+       "said": "Cloud below you to every horizon, and the peaks standing out of it like islands.  From up here you can see 3.0 km round you: the map fills in.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 2.4,
+       "revealed_more": 11065,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Above the clouds: a high rock above a sea of cloud, other peaks rising like islands | Cloud below you to every horizon, and the peaks standing out of it like islands.  From up here you can see 3.0 km round you: the map fills in.",
+     "ok": true
+    },
+    "dragon_aerie": {
+     "found": true,
+     "id": 67285234,
+     "at_km": [
+      23.68,
+      -4.62
+     ],
+     "name": "Aerie",
+     "laid": {
+      "kind": "dragon_aerie",
+      "title": "Aerie",
+      "x": 23680.4,
+      "y": -4618.9,
+      "pieces": 7,
+      "boxes": 1,
+      "guards": 0,
+      "uses": 0,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 80.5
+     },
+     "bottom_over_ground_cm": [
+      -50,
+      -8,
+      -6
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 1,
+     "want_chests": 1,
+     "told_from_m": 20.0,
+     "uses": [],
+     "hazards": [
+      {
+       "kind": "wakes",
+       "hp_lost": 0.0,
+       "sprung": 1,
+       "monsters_came": 1,
+       "ok": true
+      }
+     ],
+     "told": "Aerie: a nest of whole trees on a high ledge, bones round it: something enormous nests here | A shadow falls over the nest: its keeper is home",
+     "ok": true
+    },
+    "crevasse_field": {
+     "found": true,
+     "id": 67425434,
+     "at_km": [
+      105.68,
+      -57.24
+     ],
+     "name": "Crevasse field",
+     "laid": {
+      "kind": "crevasse_field",
+      "title": "Crevasse field",
+      "x": 105681.4,
+      "y": -57244.5,
+      "pieces": 6,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 354.0
+     },
+     "bottom_over_ground_cm": [
+      -7,
+      -5,
+      -5
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the crevasses",
+       "f": "scenery",
+       "said": "The open ones are easy. It is the smooth snow between them you should fear.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "crevasse",
+       "hp_lost": 28.0,
+       "sprung": 1,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "The air is thin up here: every step is work, and your head swims | Crevasse field: ice split by crevasses, some open, some hidden under snow bridges | The open ones are easy. It is the smooth snow between them you should fear. | A snow bridge gives way: you fall into a crevasse and climb out: 28 damage",
+     "ok": true
+    },
+    "serac_field": {
+     "found": true,
+     "id": 67471558,
+     "at_km": [
+      132.56,
+      -30.71
+     ],
+     "name": "Seracs",
+     "laid": {
+      "kind": "serac_field",
+      "title": "Seracs",
+      "x": 132559.7,
+      "y": -30708.2,
+      "pieces": 4,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 358.1
+     },
+     "bottom_over_ground_cm": [
+      -48,
+      -29,
+      -28
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look up at the seracs",
+       "f": "scenery",
+       "said": "They lean a little further every day. One of them goes today.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "fall",
+       "hp_lost": 21.0,
+       "sprung": 1,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "Seracs: towers of glacier ice that could topple at any time | They lean a little further every day. One of them goes today. | A crack overhead: the burned tree is coming down! | The burned tree crashes down on you: 21 damage",
+     "ok": true
+    },
+    "ice_cave": {
+     "found": true,
+     "id": 67421336,
+     "at_km": [
+      103.24,
+      -58.44
+     ],
+     "name": "Ice cave",
+     "laid": {
+      "kind": "ice_cave",
+      "title": "Ice cave",
+      "x": 103236.4,
+      "y": -58437.7,
+      "pieces": 4,
+      "boxes": 1,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 118.2
+     },
+     "bottom_over_ground_cm": [
+      -19,
+      -9,
+      -8
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 1,
+     "want_chests": 1,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look into the ice cave",
+       "f": "scenery",
+       "said": "Blue light, the sound of running water, and the cold breathing out of it.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Ice cave: an ice cave's mouth, blue light within, meltwater running out of it | Blue light, the sound of running water, and the cold breathing out of it.",
+     "ok": true
+    },
+    "moulin": {
+     "found": true,
+     "id": 67426456,
+     "at_km": [
+      106.52,
+      -58.58
+     ],
+     "name": "Moulin",
+     "laid": {
+      "kind": "moulin",
+      "title": "Moulin",
+      "x": 106521.1,
+      "y": -58577.1,
+      "pieces": 2,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 197.2
+     },
+     "bottom_over_ground_cm": null,
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look down the shaft",
+       "f": "scenery",
+       "said": "The meltwater pours down into the dark, a long way down, still falling.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "pit",
+       "hp_lost": 9.8,
+       "sprung": 1,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "Moulin: a vertical shaft where the meltwater drains into the glacier | The meltwater pours down into the dark, a long way down, still falling. | Your foot goes through the leaves into a hidden pit: 10 damage",
+     "ok": true
+    },
+    "moraine": {
+     "found": true,
+     "id": 67184830,
+     "at_km": [
+      -35.08,
+      -35.89
+     ],
+     "name": "Moraine",
+     "laid": {
+      "kind": "moraine",
+      "title": "Moraine",
+      "x": -35078.6,
+      "y": -35885.9,
+      "pieces": 7,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 123.6
+     },
+     "bottom_over_ground_cm": [
+      204,
+      271,
+      299
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the moraine",
+       "f": "scenery",
+       "said": "The ice pushed all this here, and went back the way it came.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Moraine: a ridge of rock and gravel pushed up by the ice | The ice pushed all this here, and went back the way it came.",
+     "ok": true
+    },
+    "meltwater_lake": {
+     "found": false,
+     "ok": false
+    },
+    "frozen_thing": {
+     "found": true,
+     "id": 67426453,
+     "at_km": [
+      106.21,
+      -60.45
+     ],
+     "name": "Frozen in the ice",
+     "laid": {
+      "kind": "frozen_thing",
+      "title": "Frozen in the ice",
+      "x": 106210.7,
+      "y": -60447.7,
+      "pieces": 2,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 77.0
+     },
+     "bottom_over_ground_cm": [
+      -21,
+      18,
+      18
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look into the ice",
+       "f": "scenery",
+       "said": "Ribs as long as you are tall, held in the ice. Whatever it was, it is not a bear.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Frozen in the ice: something enormous frozen in a block of clear ice | Ribs as long as you are tall, held in the ice. Whatever it was, it is not a bear.",
+     "ok": true
+    },
+    "nunatak": {
+     "found": true,
+     "id": 67419285,
+     "at_km": [
+      102.27,
+      -60.09
+     ],
+     "name": "Nunatak",
+     "laid": {
+      "kind": "nunatak",
+      "title": "Nunatak",
+      "x": 102265.7,
+      "y": -60085.4,
+      "pieces": 4,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 306.1
+     },
+     "bottom_over_ground_cm": [
+      -91,
+      -55,
+      -55
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "climb",
+       "prompt": "climb the rock",
+       "f": "scenery",
+       "said": "Rock under your hands for the first time in days. The ice runs away on every side.  From up here you can see 2.5 km round you: the map fills in.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 5.7,
+       "revealed_more": 7614,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Nunatak: a rocky peak poking through the ice sheet like an island | Rock under your hands for the first time in days. The ice runs away on every side.  From up here you can see 2.5 km round you: the map fills in.",
+     "ok": true
+    },
+    "ice_ruins": {
+     "found": true,
+     "id": 67428501,
+     "at_km": [
+      107.53,
+      -60.26
+     ],
+     "name": "Ruins in the ice",
+     "laid": {
+      "kind": "ice_ruins",
+      "title": "Ruins in the ice",
+      "x": 107528.3,
+      "y": -60256.8,
+      "pieces": 10,
+      "boxes": 1,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 228.8
+     },
+     "bottom_over_ground_cm": [
+      -71,
+      -53,
+      -43
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 1,
+     "want_chests": 1,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the walls",
+       "f": "scenery",
+       "said": "Cut stone, older than the ice that buried it. More of it shows every summer.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Ruins in the ice: the walls of something old, coming out of the ice as the glacier goes back | Cut stone, older than the ice that buried it. More of it shows every summer.",
+     "ok": true
+    }
+   },
+   "table": 134,
+   "counts_30km": {
+    "tall_grass": 78,
+    "burrow_town": 248,
+    "hanged_tree": 59,
+    "nest_tree": 69,
+    "shrine_tree": 73,
+    "erratic": 232,
+    "migration": 5,
+    "wallow": 63,
+    "hive_meadow": 31,
+    "brook_crossing": 0,
+    "fairy_ring": 53,
+    "shepherd_hut": 118,
+    "reed_pond": 1,
+    "old_orchard": 111,
+    "dusk_meadow": 17,
+    "butte": 208,
+    "battlefield": 229,
+    "milestone_road": 7,
+    "crossroads_gibbet": 3,
+    "crossroads_shrine": 3,
+    "crossroads_notice": 4,
+    "wagon_wreck": 5,
+    "hedged_fields": 115,
+    "scarecrows": 38,
+    "threshing_yard": 20,
+    "mill_pond": 2,
+    "pumpkin_patch": 30,
+    "abandoned_farm": 83,
+    "loose_livestock": 84,
+    "baobab": 2,
+    "acacia_shade": 5,
+    "termite_mounds": 7,
+    "kopje": 10,
+    "waterhole": 2,
+    "vulture_kill": 9,
+    "salt_pan": 5,
+    "yurt_camp": 0,
+    "kurgan": 73,
+    "prayer_cairn": 13,
+    "petroglyph_rocks": 364,
+    "hot_spring": 0,
+    "pingo": 0,
+    "charred_snags": 0,
+    "hot_spots": 0,
+    "ash_drift": 0,
+    "regrowth": 0,
+    "scorched_farmstead": 0,
+    "looters_camp": 0,
+    "fire_break": 0,
+    "fused_glass": 0,
+    "beast_carcasses": 0,
+    "resin_camp": 0,
+    "sunlit_clearing": 0,
+    "granite_outcrop": 0,
+    "lightning_pine": 0,
+    "logging_camp": 0,
+    "owl_hollow": 0,
+    "pine_ridge": 0,
+    "lichen_heath": 0,
+    "esker": 0,
+    "pine_dunes": 0,
+    "kettle_lake": 0,
+    "fire_scar": 0,
+    "herder_camp": 0,
+    "seid_stone": 0,
+    "muskeg_bog": 0,
+    "spruce_thicket": 0,
+    "beaver_pond": 0,
+    "moose_wallow": 0,
+    "trapline_cabin": 0,
+    "drunken_forest": 0,
+    "gold_larches": 0,
+    "leaf_pits": 0,
+    "fungus_glade": 0,
+    "hollow_giant": 0,
+    "mossy_walls": 0,
+    "nut_cache": 0,
+    "charcoal_hearth": 0,
+    "dawn_hollow": 0,
+    "harvest_shrine": 0,
+    "watching_aspens": 0,
+    "clonal_grove": 0,
+    "carved_aspens": 0,
+    "gold_stand": 0,
+    "beaver_stumps": 0,
+    "aspen_meadow": 0,
+    "aspen_edge": 0,
+    "windthrow": 0,
+    "hillfort": 28,
+    "chalk_figure": 58,
+    "terraced_fields": 69,
+    "dew_pond": 36,
+    "folly_tower": 30,
+    "beacon_hill": 37,
+    "quarry": 69,
+    "hillside_vines": 50,
+    "combe": 13,
+    "peat_hags": 0,
+    "tor": 12,
+    "heather_gorse": 61,
+    "stone_row": 0,
+    "peat_cutting": 0,
+    "moor_mist": 0,
+    "bothy": 0,
+    "grouse_butts": 0,
+    "moor_ford": 1,
+    "switchback": 7,
+    "alpine_pasture": 13,
+    "mountain_pass": 9,
+    "scree_slope": 9,
+    "hanging_waterfall": 0,
+    "mine_adit": 5,
+    "cliff_shrine": 5,
+    "rope_bridge": 6,
+    "tarn": 1,
+    "goat_ledges": 9,
+    "arete": 0,
+    "summit_cairn": 0,
+    "cornice_edge": 0,
+    "avalanche_chute": 5,
+    "couloir": 1,
+    "rime_ledge": 0,
+    "climbers_camp": 0,
+    "cloud_sea": 0,
+    "dragon_aerie": 13,
+    "crevasse_field": 0,
+    "serac_field": 0,
+    "ice_cave": 0,
+    "moulin": 0,
+    "moraine": 0,
+    "meltwater_lake": 0,
+    "frozen_thing": 0,
+    "nunatak": 0,
+    "ice_ruins": 0,
+    "cells": 10201
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s13p5b_scenery13_couloir.png",
+  "wd_s13p5b_scenery13_couloir_near.png",
+  "wd_s13p5b_scenery13_rime_ledge.png",
+  "wd_s13p5b_scenery13_rime_ledge_near.png",
+  "wd_s13p5b_scenery13_climbers_camp.png",
+  "wd_s13p5b_scenery13_climbers_camp_near.png",
+  "wd_s13p5b_scenery13_cloud_sea.png",
+  "wd_s13p5b_scenery13_cloud_sea_near.png",
+  "wd_s13p5b_scenery13_dragon_aerie.png",
+  "wd_s13p5b_scenery13_dragon_aerie_near.png",
+  "wd_s13p5b_scenery13_crevasse_field.png",
+  "wd_s13p5b_scenery13_crevasse_field_near.png",
+  "wd_s13p5b_scenery13_serac_field.png",
+  "wd_s13p5b_scenery13_serac_field_near.png",
+  "wd_s13p5b_scenery13_ice_cave.png",
+  "wd_s13p5b_scenery13_ice_cave_near.png",
+  "wd_s13p5b_scenery13_moulin.png",
+  "wd_s13p5b_scenery13_moulin_near.png",
+  "wd_s13p5b_scenery13_moraine.png",
+  "wd_s13p5b_scenery13_moraine_near.png",
+  "wd_s13p5b_scenery13_frozen_thing.png",
+  "wd_s13p5b_scenery13_frozen_thing_near.png",
+  "wd_s13p5b_scenery13_nunatak.png",
+  "wd_s13p5b_scenery13_nunatak_near.png",
+  "wd_s13p5b_scenery13_ice_ruins.png",
+  "wd_s13p5b_scenery13_ice_ruins_near.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

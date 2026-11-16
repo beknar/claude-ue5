@@ -18,6 +18,9 @@ helpers and its noise are used here):
                    a log of shelf fungi, an oak's trunk with a carved face, a tapped pine (its herringbone scar and clay cup), and a
                    card whose gold leaves and needles are the gold aspens' and larches' material
   TurfStack_A/B    the fourth phase's (hills and moorland): peat turves stacked to dry (the dew pond is two skins of the land)
+  RopeBridge, Serac_A/B, IceArch, FrozenTent, IceBlock  the fifth phase's (mountains, peaks, glaciers): a rope bridge over a
+                   gorge, towers of glacier ice, an ice cave's mouth (a moulin is a skin of the land), a climbers' tent drifted with snow, a block
+                   of clear ice for what is frozen in it
   StormCell        a storm cell for the far horizon: an anvil cloud 3.2 km across, a rain curtain, a funnel (the far storms)
   Drystone_A/B     a 3 m length of field wall laid dry, its copes on edge (the shepherd's pen)
   AppleTree_A/B,   the old orchard's gnarled fruit trees: a short leaning trunk, a low wide crown of leaf clusters with their
@@ -636,6 +639,83 @@ def turf_stack(variant, seed):
     finish(me, ob, bm, [f"TurfStack{variant}Peat"], flat=True)
 
 
+# ------------------------------------------------------------------------------------------------ the fifth phase: mountains, peaks, glaciers
+def rope_bridge():
+    """a rope bridge 24 m across a gorge: two post pairs, plank deck sagging 1.5 m between them, rope rails and hangers"""
+    me, ob, bm, uvl = new_mesh("SM_N13_RopeBridge")
+    L = 24.0; sag = 1.5
+    for x in (-L / 2, L / 2):
+        for y in (-0.7, 0.7):
+            tube(bm, uvl, [Vector((x, y, -0.6)), Vector((x, y, 1.4))], [0.1, 0.09], 6, 1)
+    deck = lambda t: Vector((-L / 2 + L * t, 0, -sag * math.sin(t * math.pi)))
+    for k in range(40):
+        t = (k + 0.5) / 40; c = deck(t)
+        box(bm, uvl, (c.x, 0, c.z), (0.42, 1.2, 0.05), 0)
+    for y in (-0.62, 0.62):
+        tube(bm, uvl, [deck(t) + Vector((0, y, 1.0 - 0.25 * math.sin(t * math.pi))) for t in np.linspace(0, 1, 16)], [0.025] * 16, 5, 2)
+        tube(bm, uvl, [deck(t) + Vector((0, y, -0.02)) for t in np.linspace(0, 1, 16)], [0.03] * 16, 5, 2)
+        for k in range(12):
+            t = (k + 0.5) / 12; c = deck(t)
+            tube(bm, uvl, [c + Vector((0, y, 0)), c + Vector((0, y, 1.0 - 0.25 * math.sin(t * math.pi)))], [0.015, 0.015], 4, 2)
+    finish(me, ob, bm, ["RopeBridgePlanks", "RopeBridgePost", "RopeBridgeRope"])
+
+
+def serac(variant, seed):
+    """a serac: a leaning tower of glacier ice 7 to 10 m, its faces broken flat, smaller blocks round its foot"""
+    rng = random.Random(seed)
+    me, ob, bm, uvl = new_mesh(f"SM_N13_Serac_{variant}")
+    H = rng.uniform(7.0, 10.0)
+    for k in range(rng.randint(4, 6)):
+        h = H * (1.0 if k == 0 else rng.uniform(0.25, 0.55)); w = rng.uniform(1.6, 2.6) * (1.0 if k == 0 else 0.7)
+        cx, cy = (0, 0) if k == 0 else (rng.uniform(-2.5, 2.5), rng.uniform(-2.5, 2.5))
+        n0 = len(bm.verts)
+        box(bm, uvl, (cx, cy, h / 2), (w, w * rng.uniform(0.7, 1.1), h), 0, (rng.random() * 0.5, rng.random() * 0.5), 0.5)
+        lean = rng.uniform(-0.12, 0.12)
+        for v in list(bm.verts)[n0:]:
+            v.co.x += lean * v.co.z + rng.uniform(-0.15, 0.15); v.co.y += rng.uniform(-0.15, 0.15)
+    floor(bm)
+    finish(me, ob, bm, [f"Serac{variant}Ice"], flat=True)
+
+
+def ice_arch():
+    """an ice cave's mouth: an arch of blue ice blocks 6 m wide and 4.5 m high over a dark opening"""
+    rng = random.Random(601)
+    me, ob, bm, uvl = new_mesh("SM_N13_IceArch")
+    for k in range(13):
+        a = math.pi * k / 12
+        x, z = math.cos(a) * 3.2, math.sin(a) * 3.8
+        box(bm, uvl, (0, x, z + 0.3), (2.2, 1.1, 1.0), 0, (rng.random() * 0.5, rng.random() * 0.5), 0.5)
+    vs = [bm.verts.new((-0.3, y, z)) for (y, z) in ((-2.6, 0.0), (2.6, 0.0), (2.6, 3.4), (-2.6, 3.4))]
+    f = bm.faces.new(vs); f.material_index = 1
+    for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+    finish(me, ob, bm, ["IceArchIce", "IceArchDark"], flat=True)
+
+
+def frozen_tent():
+    """a climbers' tent left on the mountain: a low ridge tent 2.4 m long, drifted with snow on its windward side"""
+    rng = random.Random(613)
+    me, ob, bm, uvl = new_mesh("SM_N13_FrozenTent")
+    for quad in (((-1.2, -0.9, 0.0), (1.2, -0.9, 0.0), (1.2, 0.0, 1.05), (-1.2, 0.0, 1.05)),
+                 ((-1.2, 0.0, 1.05), (1.2, 0.0, 1.05), (1.2, 0.9, 0.0), (-1.2, 0.9, 0.0))):
+        vs = [bm.verts.new(p) for p in quad]
+        f = bm.faces.new(vs); f.material_index = 0
+        for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+    sphere(bm, uvl, (0, -1.0, 0.0), 1.1, 1, 1.4, 0.6, 0.5, 8, 0.1, rng)
+    floor(bm)
+    finish(me, ob, bm, ["FrozenTentCloth", "FrozenTentSnow"])
+
+
+def ice_block():
+    """a block of clear glacier ice 3 m long, something dark held inside it (the test lays bones within): see-through"""
+    rng = random.Random(619)
+    me, ob, bm, uvl = new_mesh("SM_N13_IceBlock")
+    n0 = len(bm.verts)
+    box(bm, uvl, (0, 0, 1.0), (3.0, 1.8, 2.0), 0)
+    for v in list(bm.verts)[n0:]: v.co.x += rng.uniform(-0.2, 0.2); v.co.z += rng.uniform(-0.15, 0.15)
+    floor(bm)
+    finish(me, ob, bm, ["IceBlockIce"], translucent=["IceBlockIce"], flat=True)
+
+
 def gold_card():
     """one card of gold leaves: only its material is used (the gold aspens' and larches' crowns, a part's mat=)"""
     me, ob, bm, uvl = new_mesh("SM_N13_GoldCard")
@@ -856,6 +936,19 @@ def pictures():
     # (the fourth phase: peat turves, each variant its own grain (PR #68's review: seeded by len(v), A and B came out alike))
     for v in ("A", "B"):
         png(f"T_N13_TurfStack{v}Peat", grain((0.17, 0.12, 0.08), 103 + ord(v), 0.35) * (0.8 + 0.2 * (noise(n, 105 + ord(v), ((16, 1.0),)) > 0.5))[..., None])
+    # (the fifth phase: planks, posts and rope; glacier ice in blue-white, its shadowed hollows darker; the dark of a cave or a shaft;
+    # a tent's faded orange cloth; snow; clear ice)
+    png("T_N13_RopeBridgePlanks", grain((0.42, 0.32, 0.22), 120, 0.25) * (0.85 + 0.15 * np.sin(xx * 70)[..., None]))
+    png("T_N13_RopeBridgePost", grain((0.36, 0.28, 0.20), 121, 0.2))
+    png("T_N13_RopeBridgeRope", grain((0.62, 0.52, 0.36), 122, 0.15))
+    ice = lambda sd: grain((0.72, 0.84, 0.92), sd, 0.12) * (0.85 + 0.15 * (noise(n, sd + 1, ((4, 1.0), (16, 0.5))) > 0.5))[..., None]
+    for v in ("A", "B"):
+        # (lighter than the arch's ice: their flat faces stand mostly in their own shadow, and at 0.72 they read as dark stone)
+        png(f"T_N13_Serac{v}Ice", np.clip(grain((0.86, 0.94, 0.99), 124 + ord(v), 0.08) * 1.05, 0, 1))
+    png("T_N13_IceArchIce", ice(130)); png("T_N13_IceArchDark", np.full((n, n, 3), 0.03) + np.array((0.0, 0.02, 0.05))[None, None])
+    png("T_N13_FrozenTentCloth", grain((0.72, 0.38, 0.16), 134, 0.15) * (0.9 + 0.1 * np.sin(yy * 40)[..., None]))
+    png("T_N13_FrozenTentSnow", grain((0.92, 0.94, 0.97), 135, 0.05))
+    png("T_N13_IceBlockIce", grain((0.70, 0.84, 0.92), 136, 0.08), np.full((n, n), 0.45))
     # (gold leaves: the aspen's round leaves in yellow and gold; gold needles: a larch's sprays)
     for name, shape in (("GoldLeaves", "leaf"), ("GoldNeedles", "needle")):
         rg = np.zeros((512, 512, 4)); R6 = np.random.default_rng(90 + len(name)); Y6, X6 = np.mgrid[0:512, 0:512] / 512
@@ -883,7 +976,9 @@ if __name__ == "__main__":
             "BeaverLodge": beaver_lodge, "BeaverDam": beaver_dam, "FurStretcher": fur_stretcher, "StiltCache": stilt_cache,
             "CharcoalMound": charcoal_mound, "FungusLog": fungus_log, "CarvedFace": carved_face,
             "ResinPine_A": lambda: resin_pine("A", 451), "ResinPine_B": lambda: resin_pine("B", 457), "GoldCard": gold_card,
-            "TurfStack_A": lambda: turf_stack("A", 511), "TurfStack_B": lambda: turf_stack("B", 523)}
+            "TurfStack_A": lambda: turf_stack("A", 511), "TurfStack_B": lambda: turf_stack("B", 523),
+            "RopeBridge": rope_bridge, "Serac_A": lambda: serac("A", 631), "Serac_B": lambda: serac("B", 641), "IceArch": ice_arch,
+            "FrozenTent": frozen_tent, "IceBlock": ice_block}
     for k, f in todo.items():
         if not ONLY or k in ONLY: f()
     old = json.load(open(os.path.join(OUT, "scenery13_kit.json"))) if os.path.exists(os.path.join(OUT, "scenery13_kit.json")) else {}

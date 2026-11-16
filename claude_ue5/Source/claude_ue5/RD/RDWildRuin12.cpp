@@ -392,12 +392,15 @@ UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, 
 		const bool bFoot = EdgeV[K] || Cut[K];
 		V[K] = FVector(Xy[K].X * 100.0, Xy[K].Y * 100.0, G + (bFoot ? -15.f : Bumps[K] * 100.f)) - Base;
 	}
-	// (wound to face up whichever way the grid runs: the first triangle's normal decides)
+	// (wound to face up whichever way the grid runs, the triangles' sum deciding: UE's procedural mesh faces up when
+	// cross(V1 - V0, V2 - V0) points down, as the chunks' ground and the berm are wound. Until the fifth phase this made the cross
+	// point up: every landform was drawn inside out, a mound seen from outside by its far side's inner face (it passed for a mound)
+	// and a skin's middle culled from above (the meltwater lake and the dew pond showed only their far rims round the ground))
 	if (Tr.Num() >= 3)
 	{
 		auto Up = [&](int32 K) { return FVector::CrossProduct(V[Tr[K + 1]] - V[Tr[K]], V[Tr[K + 2]] - V[Tr[K]]).Z; };
 		float Sum = 0.f; for (int32 K = 0; K + 2 < Tr.Num(); K += 3) Sum += Up(K);
-		if (Sum < 0.f) for (int32 K = 0; K + 2 < Tr.Num(); K += 3) Swap(Tr[K + 1], Tr[K + 2]);
+		if (Sum > 0.f) for (int32 K = 0; K + 2 < Tr.Num(); K += 3) Swap(Tr[K + 1], Tr[K + 2]);
 	}
 	TArray<FVector> N; N.Init(FVector::ZeroVector, V.Num());
 	for (int32 K = 0; K + 2 < Tr.Num(); K += 3)
