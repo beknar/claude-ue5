@@ -1,0 +1,646 @@
+{
+ "tag": "s13p5g",
+ "plan": [
+  "scenery13=arete+cornice_edge+avalanche_chute+crevasse_field+moulin+moraine+meltwater_lake"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "scenery13",
+   "ok": true,
+   "kinds": {
+    "arete": {
+     "found": true,
+     "id": 67166392,
+     "at_km": [
+      -46.23,
+      -39.25
+     ],
+     "name": "Knife-edge ridge",
+     "laid": {
+      "kind": "arete",
+      "title": "Knife-edge ridge",
+      "x": -46225.0,
+      "y": -39247.4,
+      "pieces": 1,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 50.0
+     },
+     "bottom_over_ground_cm": null,
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "skins": [
+      {
+       "hit": "ProceduralMeshComponent_0",
+       "hit_z": 101046,
+       "top_z": 101140,
+       "ground_z": 100354,
+       "under": false
+      }
+     ],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look along the ridge",
+       "f": "scenery",
+       "said": "A path a boot wide along its crest. The snow on its edge overhangs nothing.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "cornice",
+       "hp_lost": 21.0,
+       "sprung": 1,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "The air is thin up here: every step is work, and your head swims | Knife-edge ridge: a narrow ridge with sheer drops on both sides; its snow overhangs | A path a boot wide along its crest. The snow on its edge overhangs nothing. | The cornice breaks under you and you fall: 21 damage",
+     "ok": true
+    },
+    "cornice_edge": {
+     "found": true,
+     "id": 67167417,
+     "at_km": [
+      -45.7,
+      -38.74
+     ],
+     "name": "Cornice",
+     "laid": {
+      "kind": "cornice_edge",
+      "title": "Cornice",
+      "x": -45702.8,
+      "y": -38735.6,
+      "pieces": 4,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 111.8
+     },
+     "bottom_over_ground_cm": [
+      -40,
+      -40,
+      -36
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "skins": [
+      {
+       "hit": "ProceduralMeshComponent_0",
+       "hit_z": 101337,
+       "top_z": 101361,
+       "ground_z": 101307,
+       "under": false
+      }
+     ],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the snow",
+       "f": "scenery",
+       "said": "It looks solid. It is not. The drop under it is a long one.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "cornice",
+       "hp_lost": 21.0,
+       "sprung": 1,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "Cornice: snow overhanging a drop, smooth and treacherous | It looks solid. It is not. The drop under it is a long one. | The cornice breaks under you and you fall: 21 damage",
+     "ok": true
+    },
+    "avalanche_chute": {
+     "found": true,
+     "id": 67287286,
+     "at_km": [
+      24.79,
+      -2.14
+     ],
+     "name": "Avalanche chute",
+     "laid": {
+      "kind": "avalanche_chute",
+      "title": "Avalanche chute",
+      "x": 24790.2,
+      "y": -2140.1,
+      "pieces": 5,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 1.7
+     },
+     "bottom_over_ground_cm": [
+      -76,
+      -49,
+      -33
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "skins": [
+      {
+       "hit": "ProceduralMeshComponent_0",
+       "hit_z": 62463,
+       "top_z": 62539,
+       "ground_z": 62433,
+       "under": false
+      }
+     ],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look up the chute",
+       "f": "scenery",
+       "said": "Nothing grows in the chute. Everything that did lies broken at its foot.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "avalanche",
+       "hp_lost": 28.0,
+       "sprung": 1,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "Avalanche chute: a chute cleared by past slides, broken trunks at its foot; more snow above | Nothing grows in the chute. Everything that did lies broken at its foot. | A crack above, then a roar: the snow is coming down! | The avalanche sweeps over you: 28 damage",
+     "ok": true
+    },
+    "crevasse_field": {
+     "found": true,
+     "id": 67425434,
+     "at_km": [
+      105.68,
+      -57.24
+     ],
+     "name": "Crevasse field",
+     "laid": {
+      "kind": "crevasse_field",
+      "title": "Crevasse field",
+      "x": 105681.4,
+      "y": -57244.5,
+      "pieces": 6,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 354.0
+     },
+     "bottom_over_ground_cm": [
+      -7,
+      -5,
+      -5
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "skins": [
+      {
+       "hit": "ProceduralMeshComponent_0",
+       "hit_z": 87325,
+       "top_z": 87450,
+       "ground_z": 87296,
+       "under": false
+      },
+      {
+       "hit": "ProceduralMeshComponent_1",
+       "hit_z": 87318,
+       "top_z": 87331,
+       "ground_z": 87289,
+       "under": false
+      }
+     ],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the crevasses",
+       "f": "scenery",
+       "said": "The open ones are easy. It is the smooth snow between them you should fear.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "crevasse",
+       "hp_lost": 28.0,
+       "sprung": 1,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "The air is thin up here: every step is work, and your head swims | Crevasse field: ice split by crevasses, some open, some hidden under snow bridges | The open ones are easy. It is the smooth snow between them you should fear. | A snow bridge gives way: you fall into a crevasse and climb out: 28 damage",
+     "ok": true
+    },
+    "moulin": {
+     "found": true,
+     "id": 67426456,
+     "at_km": [
+      106.52,
+      -58.58
+     ],
+     "name": "Moulin",
+     "laid": {
+      "kind": "moulin",
+      "title": "Moulin",
+      "x": 106521.1,
+      "y": -58577.1,
+      "pieces": 2,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 197.2
+     },
+     "bottom_over_ground_cm": null,
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "skins": [
+      {
+       "hit": "ProceduralMeshComponent_1",
+       "hit_z": 87904,
+       "top_z": 87928,
+       "ground_z": 87872,
+       "under": false
+      },
+      {
+       "hit": "ProceduralMeshComponent_1",
+       "hit_z": 87904,
+       "top_z": 87916,
+       "ground_z": 87872,
+       "under": false
+      }
+     ],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look down the shaft",
+       "f": "scenery",
+       "said": "The meltwater pours down into the dark, a long way down, still falling.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "pit",
+       "hp_lost": 9.8,
+       "sprung": 1,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "Moulin: a vertical shaft where the meltwater drains into the glacier | The meltwater pours down into the dark, a long way down, still falling. | Your foot goes through the leaves into a hidden pit: 10 damage",
+     "ok": true
+    },
+    "moraine": {
+     "found": true,
+     "id": 67184830,
+     "at_km": [
+      -35.08,
+      -35.89
+     ],
+     "name": "Moraine",
+     "laid": {
+      "kind": "moraine",
+      "title": "Moraine",
+      "x": -35078.6,
+      "y": -35885.9,
+      "pieces": 7,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 123.6
+     },
+     "bottom_over_ground_cm": [
+      204,
+      271,
+      299
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "skins": [
+      {
+       "hit": "ProceduralMeshComponent_0",
+       "hit_z": 118574,
+       "top_z": 118899,
+       "ground_z": 118185,
+       "under": false
+      }
+     ],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the moraine",
+       "f": "scenery",
+       "said": "The ice pushed all this here, and went back the way it came.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Moraine: a ridge of rock and gravel pushed up by the ice | The ice pushed all this here, and went back the way it came.",
+     "ok": true
+    },
+    "meltwater_lake": {
+     "found": true,
+     "id": 67473611,
+     "at_km": [
+      133.91,
+      -27.92
+     ],
+     "name": "Meltwater lake",
+     "laid": {
+      "kind": "meltwater_lake",
+      "title": "Meltwater lake",
+      "x": 133909.5,
+      "y": -27917.8,
+      "pieces": 9,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 33.1
+     },
+     "bottom_over_ground_cm": [
+      -52,
+      -44,
+      -27
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "skins": [
+      {
+       "hit": "ProceduralMeshComponent_0",
+       "hit_z": 123748,
+       "top_z": 123873,
+       "ground_z": 123718,
+       "under": false
+      }
+     ],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the meltwater",
+       "f": "scenery",
+       "said": "Milky with stone ground fine by the ice. Little lives in it, and it is cold enough to stop a heart.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Meltwater lake: a lake of milky meltwater at the ice's foot | Milky with stone ground fine by the ice. Little lives in it, and it is cold enough to stop a heart.",
+     "ok": true
+    }
+   },
+   "table": 134,
+   "counts_30km": {
+    "tall_grass": 76,
+    "burrow_town": 252,
+    "hanged_tree": 58,
+    "nest_tree": 69,
+    "shrine_tree": 74,
+    "erratic": 233,
+    "migration": 9,
+    "wallow": 62,
+    "hive_meadow": 31,
+    "brook_crossing": 0,
+    "fairy_ring": 53,
+    "shepherd_hut": 115,
+    "reed_pond": 1,
+    "old_orchard": 111,
+    "dusk_meadow": 17,
+    "butte": 209,
+    "battlefield": 227,
+    "milestone_road": 8,
+    "crossroads_gibbet": 5,
+    "crossroads_shrine": 3,
+    "crossroads_notice": 2,
+    "wagon_wreck": 2,
+    "hedged_fields": 113,
+    "scarecrows": 39,
+    "threshing_yard": 20,
+    "mill_pond": 2,
+    "pumpkin_patch": 27,
+    "abandoned_farm": 83,
+    "loose_livestock": 85,
+    "baobab": 2,
+    "acacia_shade": 5,
+    "termite_mounds": 7,
+    "kopje": 10,
+    "waterhole": 2,
+    "vulture_kill": 9,
+    "salt_pan": 5,
+    "yurt_camp": 0,
+    "kurgan": 71,
+    "prayer_cairn": 13,
+    "petroglyph_rocks": 364,
+    "hot_spring": 0,
+    "pingo": 0,
+    "charred_snags": 0,
+    "hot_spots": 0,
+    "ash_drift": 0,
+    "regrowth": 0,
+    "scorched_farmstead": 0,
+    "looters_camp": 0,
+    "fire_break": 0,
+    "fused_glass": 0,
+    "beast_carcasses": 0,
+    "resin_camp": 0,
+    "sunlit_clearing": 0,
+    "granite_outcrop": 0,
+    "lightning_pine": 0,
+    "logging_camp": 0,
+    "owl_hollow": 0,
+    "pine_ridge": 0,
+    "lichen_heath": 0,
+    "esker": 0,
+    "pine_dunes": 0,
+    "kettle_lake": 0,
+    "fire_scar": 0,
+    "herder_camp": 0,
+    "seid_stone": 0,
+    "muskeg_bog": 0,
+    "spruce_thicket": 0,
+    "beaver_pond": 0,
+    "moose_wallow": 0,
+    "trapline_cabin": 0,
+    "drunken_forest": 0,
+    "gold_larches": 0,
+    "leaf_pits": 0,
+    "fungus_glade": 0,
+    "hollow_giant": 0,
+    "mossy_walls": 0,
+    "nut_cache": 0,
+    "charcoal_hearth": 0,
+    "dawn_hollow": 0,
+    "harvest_shrine": 0,
+    "watching_aspens": 0,
+    "clonal_grove": 0,
+    "carved_aspens": 0,
+    "gold_stand": 0,
+    "beaver_stumps": 0,
+    "aspen_meadow": 0,
+    "aspen_edge": 0,
+    "windthrow": 0,
+    "hillfort": 28,
+    "chalk_figure": 59,
+    "terraced_fields": 70,
+    "dew_pond": 36,
+    "folly_tower": 31,
+    "beacon_hill": 36,
+    "quarry": 68,
+    "hillside_vines": 52,
+    "combe": 12,
+    "peat_hags": 0,
+    "tor": 12,
+    "heather_gorse": 62,
+    "stone_row": 0,
+    "peat_cutting": 0,
+    "moor_mist": 0,
+    "bothy": 0,
+    "grouse_butts": 0,
+    "moor_ford": 1,
+    "switchback": 7,
+    "alpine_pasture": 13,
+    "mountain_pass": 9,
+    "scree_slope": 9,
+    "hanging_waterfall": 0,
+    "mine_adit": 5,
+    "cliff_shrine": 5,
+    "rope_bridge": 6,
+    "tarn": 1,
+    "goat_ledges": 9,
+    "arete": 0,
+    "summit_cairn": 0,
+    "cornice_edge": 0,
+    "avalanche_chute": 5,
+    "couloir": 1,
+    "rime_ledge": 0,
+    "climbers_camp": 0,
+    "cloud_sea": 0,
+    "dragon_aerie": 13,
+    "crevasse_field": 0,
+    "serac_field": 0,
+    "ice_cave": 0,
+    "moulin": 0,
+    "moraine": 0,
+    "meltwater_lake": 0,
+    "frozen_thing": 0,
+    "nunatak": 0,
+    "ice_ruins": 0,
+    "cells": 10201
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s13p5g_scenery13_arete.png",
+  "wd_s13p5g_scenery13_arete_near.png",
+  "wd_s13p5g_scenery13_cornice_edge.png",
+  "wd_s13p5g_scenery13_cornice_edge_near.png",
+  "wd_s13p5g_scenery13_avalanche_chute.png",
+  "wd_s13p5g_scenery13_avalanche_chute_near.png",
+  "wd_s13p5g_scenery13_crevasse_field.png",
+  "wd_s13p5g_scenery13_crevasse_field_near.png",
+  "wd_s13p5g_scenery13_moulin.png",
+  "wd_s13p5g_scenery13_moulin_near.png",
+  "wd_s13p5g_scenery13_moraine.png",
+  "wd_s13p5g_scenery13_moraine_near.png",
+  "wd_s13p5g_scenery13_meltwater_lake.png",
+  "wd_s13p5g_scenery13_meltwater_lake_near.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

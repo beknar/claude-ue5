@@ -762,5 +762,95 @@
   ],
   "masked": [],
   "translucent": []
+ },
+ "SM_N13_RopeBridge": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_RopeBridge.fbx",
+  "size_m": [
+   24.17,
+   1.6,
+   2.94
+  ],
+  "triangles": 1320,
+  "slots": [
+   "RopeBridgePlanks",
+   "RopeBridgePost",
+   "RopeBridgeRope"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Serac_A": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Serac_A.fbx",
+  "size_m": [
+   4.46,
+   3.05,
+   9.38
+  ],
+  "triangles": 60,
+  "slots": [
+   "SeracAIce"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Serac_B": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Serac_B.fbx",
+  "size_m": [
+   6.21,
+   4.23,
+   8.15
+  ],
+  "triangles": 48,
+  "slots": [
+   "SeracBIce"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_IceArch": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_IceArch.fbx",
+  "size_m": [
+   2.2,
+   7.5,
+   4.8
+  ],
+  "triangles": 158,
+  "slots": [
+   "IceArchIce",
+   "IceArchDark"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_FrozenTent": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_FrozenTent.fbx",
+  "size_m": [
+   3.11,
+   2.55,
+   1.05
+  ],
+  "triangles": 116,
+  "slots": [
+   "FrozenTentCloth",
+   "FrozenTentSnow"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_IceBlock": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_IceBlock.fbx",
+  "size_m": [
+   3.22,
+   1.8,
+   2.05
+  ],
+  "triangles": 12,
+  "slots": [
+   "IceBlockIce"
+  ],
+  "masked": [],
+  "translucent": [
+   "IceBlockIce"
+  ]
  }
 }

@@ -15,7 +15,7 @@ Built and compiled, but no test has run it yet:
 
 ## The list of 2026-11-14 ([docs/improvements13.txt](docs/improvements13.txt))
 
-The biomes' scenery, in phases with a PR each (the user's choices: every item to full depth; [the wilderness](docs/levels/wilderness.md#the-list-of-2026-11-14-the-biomes-scenery)). Done: phase 1, the framework (placing, laying, uses, hazards, herds, ambushes, the dry channels, swales, tracks and crossroads, the far storms) and the grasslands', meadows' and plains' 22 kinds; phase 2, the farms', savannahs', cold steppes' and burned plain's 29 kinds, the fields' stages, their channels, the whiteout and dust weather and the grass fires' smoke; phase 3, the five forests' 37 kinds, the needles' quiet floor, clearings, bogs and pits, the holloways; phase 4, the hills' and moorland's 18 kinds, the chalk figure, the moors' mist.
+The biomes' scenery, in phases with a PR each (the user's choices: every item to full depth; [the wilderness](docs/levels/wilderness.md#the-list-of-2026-11-14-the-biomes-scenery)). Done: phase 1, the framework (placing, laying, uses, hazards, herds, ambushes, the dry channels, swales, tracks and crossroads, the far storms) and the grasslands', meadows' and plains' 22 kinds; phase 2, the farms', savannahs', cold steppes' and burned plain's 29 kinds, the fields' stages, their channels, the whiteout and dust weather and the grass fires' smoke; phase 3, the five forests' 37 kinds, the needles' quiet floor, clearings, bogs and pits, the holloways; phase 4, the hills' and moorland's 18 kinds, the chalk figure, the moors' mist; phase 5, the mountains', peaks' and glaciers' 28 kinds, rockfall, avalanches, scree, cornices, crevasses, thin air.
 
 - [ ] **Phase 2, what is not done or measured:**
   - The frozen lakes of the cold steppes (cracking ice, trapped things, ice fishing) wait for phase 8 (the ice of the tundra and the arctic).
@@ -32,7 +32,11 @@ The biomes' scenery, in phases with a PR each (the user's choices: every item to
   - The heather and gorse do not catch fire (nothing in the game sets the land alight); the will-o'-the-wisps are a pack's ghostly projectile laid still.
   - The moors' mist is the fog weather coming three times as often (its weights read in the test); nobody has walked lost in it. The "Mist on the moor" kind is the world's fog thickened round it (measured), and the chalk horse, flat on its slope, is a white sliver from the ground 40 m off (it reads from a hill across, not checked).
   - The sheep are the farms' goats; the grouse are the packs' birds.
-- [ ] **Phases 5 to 10:** the mountains, peaks and glaciers; the canyons and mesas; the volcanic lands; the tundra and the arctic; the marshes, wetlands and coasts (tides); the lists' "what helps" across all of them.
+- [ ] **Phase 5 (mountains, peaks and glaciers), what is not done or measured:**
+  - The rope bridge and the knife-edge ridge stand on ordinary ground: no gorge is cut under the bridge and no drop falls away from the ridge (the world's model has no cliffs of that kind).
+  - Thin air is a slow; nothing makes her dizzy. The sea of clouds is a view the cloud layer does not lie under. The milky-blue water, the calving ice fronts, the snow blindness and the sun's glare are not there.
+  - The mule train is the ridable horse as a herd; the eagles are the packs' birds; the dragon is the project's Daemon.
+- [ ] **Phases 6 to 10:** the canyons and mesas; the volcanic lands; the tundra and the arctic; the marshes, wetlands and coasts (tides); the lists' "what helps" across all of them.
 - [ ] **Phase 1, what is not done or measured:**
   - The burrows' "collapsing tunnels" are a fall's harm and a slow where the ground gives way: the ground itself does not open (a chunk's ground is one mesh).
   - The herons stand still (a mesh of our own, no clips); the bees and the birds are the packs' effects (flies as bees, the flocks as crows); the frogs are not there (no frog in the project).

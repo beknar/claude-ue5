@@ -551,6 +551,45 @@ The user's list of 2026-11-14 ([docs/improvements13.txt](../improvements13.txt))
 
 ![Hills and moorland's 18 kinds, from 15 m](../images/scenery13_hills.jpg)
 
+### Mountains, peaks and glaciers
+
+| Kind | Biomes | What stands there | What she does there |
+|---|---|---|---|
+| Switchback trail | mountains | drystone switchbacks up the slope, fallen stones, a mule train walking it | stones come down on her if she lingers |
+| Alpine pasture | mountains | a herder's stone cheese hut, flowers, cows, a fire, the herder | trade bread for cheese; talk |
+| Mountain pass | mountains, peaks | a stone gate between two timber towers, a palisade, the toll keeper | pay the toll (bread): Safe Conduct |
+| Scree slope | mountains, peaks | loose broken stone, a boulder | the scree slows her and carries her down the slope |
+| Hanging waterfall | mountains (by water) | a rock face, a waterfall off it, reeds | fish the pool |
+| Mine adit | mountains, peaks | a rock face, the adit's mouth and its frame, rails, a cart, a tailings heap | its two guards; a chest of iron |
+| Cliff shrine | mountains, peaks | a rock stack, ladders up it, candles | climb the ladders: the map shows 2.5 km round |
+| Rope bridge | mountains, peaks | a rope bridge slung between two rock stacks | |
+| Tarn | mountains, peaks (by a pond) | boulders round a dark pool | fish |
+| Goat ledges | mountains, peaks | a rock face, goats, birds over it | |
+| Knife-edge ridge | peaks | a ridge 7 m high and 110 m long | its snow gives way under her (once) |
+| Summit cairn | peaks (a rise) | a cairn with prayer flags, bones | leave bread: the Blessing of the Summit |
+| Cornice | peaks, glacial | snow-capped rocks, an overhang of snow | it gives way under her (once) |
+| Avalanche chute | peaks, mountains | broken trunks, cleared snow | the snow comes down on her if she lingers |
+| Couloir | peaks | a steep gully between two rock walls | stones come down it |
+| Rime ledge | peaks, glacial | rime-coated rocks, icicles, ice crystals | |
+| Abandoned climbers' camp | peaks | two frozen tents, stakes | read the journal; a chest |
+| Above the clouds | peaks (a rise) | a high rock | climb it: the map shows 3 km round |
+| Aerie | peaks, mountains (a rise) | a nest of whole trees, bones, skulls | its keeper, the Aerie's Drake, comes home; a chest |
+| Crevasse field | glacial | dark crevasses in the ice, icicles | a snow bridge gives way under her (once) |
+| Seracs | glacial | towers of glacier ice | the nearest one topples toward her |
+| Ice cave | glacial | an ice cave's arch, crystals inside | a chest in it |
+| Moulin | glacial | a ring of ice round a black shaft (skins of the land) | the shaft hurts if she steps in |
+| Moraine | glacial, peaks | a ridge of gravel 120 m long, boulders on it | |
+| Meltwater lake | glacial (by water) | snow-capped rocks, boulders | fish the milky water |
+| Frozen in the ice | glacial | a block of clear ice, great ribs inside it | |
+| Nunatak | glacial (a rise) | a rock peak through the ice | climb it: the map shows 2.5 km round |
+| Ruins in the ice | glacial | broken columns and walls coming out of the ice | a chest |
+
+- **What is new**: hazards `rockfall` and `avalanche` (a warning and dust as she comes; 1.2 s on, a blow if she is still near), `scree` (slowed, and carried down the slope every 0.8 s), `cornice` and `crevasse` (once a play the snow gives way: a fall's harm and she is set down 4 m off); thin air (`WildThinAirBiomes`: on the peaks and the glaciers she walks slowed, told once as she comes).
+- **Its own pieces** (`scenery13_kit.py`): a rope bridge, two seracs, an ice cave's arch, a climbers' tent drifted with snow, a block of clear ice (a moulin is two skins of the land, ice and its shaft; the meltwater lake a skin of milky blue in a hollow).
+- **Measured** (`test_s13p5a.json` to `test_s13p5g.json`): every kind found within 150 km of Brokenspire and visited. The stones struck her (16.8 on the switchback and in the couloir), the avalanche 28; the cornices and the knife-edge's snow gave way (21 each) and the crevasse's bridge (28); the nearest serac toppled onto her (21); the moulin's shaft hurt (9.8); the scree carried her 1.15 m in 3 s; the Aerie's Drake came home. She climbed the cliff shrine's ladders 9.6 m, the nunatak 5.7 m and the high rock over the clouds 2.4 m, and saw 7,480, 7,614 and 11,065 more of the map. The pass's toll gave Safe Conduct, the summit cairn its blessing, the herder two cheeses for bread. Thin air: on the peaks her walk is 315 cm/s against 371 in the mountains below. The land's rises and skins (every phase's: 23 kinds) were drawn inside out until this phase (their triangles wound the other way: a skin's middle unseen from above, a mound seen by its far side's inner face); wound as the ground is, all 23 were visited again (`test_s13p5e.json` to `g`) and each skin's middle is traced to be the skin, not the ground under it.
+
+![Mountains, peaks and glaciers' 28 kinds, from 15 m](../images/scenery13_mountains.jpg)
+
 ## The TODO sweep (2026-11-14)
 
 The open items of `TODO.md` that a test could settle in the wilds (`888 ... -Light`):

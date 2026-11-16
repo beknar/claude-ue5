@@ -392,12 +392,15 @@ UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, 
 		const bool bFoot = EdgeV[K] || Cut[K];
 		V[K] = FVector(Xy[K].X * 100.0, Xy[K].Y * 100.0, G + (bFoot ? -15.f : Bumps[K] * 100.f)) - Base;
 	}
-	// (wound to face up whichever way the grid runs: the first triangle's normal decides)
+	// (wound to face up whichever way the grid runs, the triangles' sum deciding: UE's procedural mesh faces up when
+	// cross(V1 - V0, V2 - V0) points down, as the chunks' ground and the berm are wound. Until the fifth phase this made the cross
+	// point up: every landform was drawn inside out, a mound seen from outside by its far side's inner face (it passed for a mound)
+	// and a skin's middle culled from above (the meltwater lake and the dew pond showed only their far rims round the ground))
 	if (Tr.Num() >= 3)
 	{
 		auto Up = [&](int32 K) { return FVector::CrossProduct(V[Tr[K + 1]] - V[Tr[K]], V[Tr[K + 2]] - V[Tr[K]]).Z; };
 		float Sum = 0.f; for (int32 K = 0; K + 2 < Tr.Num(); K += 3) Sum += Up(K);
-		if (Sum < 0.f) for (int32 K = 0; K + 2 < Tr.Num(); K += 3) Swap(Tr[K + 1], Tr[K + 2]);
+		if (Sum > 0.f) for (int32 K = 0; K + 2 < Tr.Num(); K += 3) Swap(Tr[K + 1], Tr[K + 2]);
 	}
 	TArray<FVector> N; N.Init(FVector::ZeroVector, V.Num());
 	for (int32 K = 0; K + 2 < Tr.Num(); K += 3)
@@ -432,6 +435,7 @@ UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, 
 	if (WildGroundMaterial) Pm->SetMaterial(0, WildGroundMaterial);
 	Pm->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	Pm->SetCollisionResponseToAllChannels(ECR_Block);
+	Pm->ComponentTags.Add(TEXT("RDLand"));            // (a landform, not a berm, for the tests' lines)
 	return Pm;
 }
 
@@ -772,10 +776,27 @@ TArray<FString> ARDDungeonGenerator::PieceLinesOf(const FRuinLaid* X) const
 		const UStaticMeshComponent* Sm = Cast<UStaticMeshComponent>(Pc);
 		if (!Sm)
 		{
-			// (an earth bank: its own procedural mesh, collision cooked from its triangles)
+			// (an earth bank or a landform ("land": a rise or a skin): its own procedural mesh, collision cooked from its triangles; the
+			// last field the share of its triangles whose front faces up, as the renderer draws them: UE's procedural mesh faces up
+			// where cross(V1 - V0, V2 - V0) points down (PR #69's review: a trace hits either face, and the landforms drawn inside out
+			// from phase 1 to 5 passed every trace))
 			const FBox Bb = Pc->Bounds.GetBox();
-			Out.Add(FString::Printf(TEXT("berm|%.0f|%.0f|%.0f|%.0f|%.0f|%s|-1"), Bb.GetCenter().X, Bb.GetCenter().Y, Bb.Min.Z, Bb.Max.Z, WildGroundZ(FVector(Bb.GetCenter().X, Bb.GetCenter().Y, 0.0)),
-				Pc->GetCollisionEnabled() == ECollisionEnabled::QueryAndPhysics ? TEXT("1") : TEXT("-")));
+			float UpShare = -1.f;
+			if (const UProceduralMeshComponent* Pm = Cast<UProceduralMeshComponent>(Pc))
+				if (const FProcMeshSection* Se = const_cast<UProceduralMeshComponent*>(Pm)->GetProcMeshSection(0))
+				{
+					int32 Up = 0, All = 0;
+					for (int32 K = 0; K + 2 < Se->ProcIndexBuffer.Num(); K += 3)
+					{
+						const FVector& A = Se->ProcVertexBuffer[Se->ProcIndexBuffer[K]].Position;
+						const float Z = FVector::CrossProduct(Se->ProcVertexBuffer[Se->ProcIndexBuffer[K + 1]].Position - A, Se->ProcVertexBuffer[Se->ProcIndexBuffer[K + 2]].Position - A).Z;
+						if (FMath::Abs(Z) < 1.f) continue;     // (a degenerate one: a disc's middle)
+						++All; if (Z < 0.f) ++Up;
+					}
+					if (All > 0) UpShare = Up / float(All);
+				}
+			Out.Add(FString::Printf(TEXT("%s|%.0f|%.0f|%.0f|%.0f|%.0f|%s|-1|%.3f"), Pc->ComponentHasTag(TEXT("RDLand")) ? TEXT("land") : TEXT("berm"), Bb.GetCenter().X, Bb.GetCenter().Y, Bb.Min.Z, Bb.Max.Z,
+				WildGroundZ(FVector(Bb.GetCenter().X, Bb.GetCenter().Y, 0.0)), Pc->GetCollisionEnabled() == ECollisionEnabled::QueryAndPhysics ? TEXT("1") : TEXT("-"), UpShare));
 			continue;
 		}
 		const FBox B = Sm->Bounds.GetBox();

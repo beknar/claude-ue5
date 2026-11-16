@@ -16,6 +16,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Engine/StaticMesh.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
@@ -206,9 +207,28 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 		WildQuietAt = Now + 0.5f;
 		FRDWSample Qs; Wild->Sample(H2.X, H2.Y, Qs, false);
 		WildQuietScale = WildQuietBiomes.Contains(Wild->BiomeName(Qs.Biome)) ? FMath::Clamp(WildQuietNotice, 0.1f, 1.f) : 1.f;
+		// (the fifth phase: "thin air that drains stamina and makes the player dizzy": high on the peaks and the ice she is slowed while
+		// she stays, told once as she comes into it)
+		const bool bThin = WildThinAirBiomes.Contains(Wild->BiomeName(Qs.Biome)) && WildThinAirSlow > 0.f;
+		// (renewed only while no stronger slow holds her: SlowBy keeps the greater share while the old one runs, and renewing it each
+		// half second kept a scree's or a monster's slow on her for as long as she stayed on the peaks (PR #69's review))
+		if (bThin)
+		{
+			if (PlayerCombat->GetSlowness() <= WildThinAirSlow + 1e-3f) PlayerCombat->SlowBy(WildThinAirSlow, 0.7f);
+			if (!bWildThinAir) PlayerCombat->ShowMessage(TEXT("The air is thin up here: every step is work, and your head swims"));
+		}
+		bWildThinAir = bThin;
+	}
+	// ---- the hazards' bursts of dust put out, then taken away
+	for (int32 Bi = WildSceneryBursts.Num() - 1; Bi >= 0; --Bi)
+	{
+		FSceneryBurst& Bu = WildSceneryBursts[Bi];
+		UNiagaraComponent* Nc = Bu.Comp.Get();
+		if (!Nc || Now >= Bu.Kill) { if (Nc) { Nc->DeactivateImmediate(); Nc->DestroyComponent(); } WildSceneryBursts.RemoveAtSwap(Bi); continue; }
+		if (Now >= Bu.Off && Nc->IsActive()) Nc->Deactivate();
 	}
 	// ---- the hazards, every frame (a handful near her)
-	const ACharacter* Ch = Cast<ACharacter>(UGameplayStatics::GetPlayerPawn(this, 0));
+	const ACharacter* Ch =Cast<ACharacter>(UGameplayStatics::GetPlayerPawn(this, 0));
 	const float Feet = Her.Z - (Ch ? Ch->GetSimpleCollisionHalfHeight() : 90.f);
 	if (!PlayerCombat->IsDead())
 		for (FSceneryHazard& Hz : WildSceneryHazards)
@@ -264,6 +284,84 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 				if (!bIn || Now < Hz.ReadyAt) continue;
 				Hz.ReadyAt = Now + 60.f; ++Hz.Sprung; ++WildHazardsSprung;
 				PlayerCombat->HurtByTrap(0.07f * Hz.P, 0.5f, 2.f, TEXT("Your foot goes through the leaves into a hidden pit"));
+			}
+			else if (Hz.Kind == TEXT("rockfall") || Hz.Kind == TEXT("avalanche"))
+			{
+				// (the fifth phase: "switchback trails ... and rockfall", "avalanche chutes": as she comes in, a warning and dust; 1.2 s on, a
+				// blow if she is still near its line; again after 40 s (an avalanche 90 s))
+				const bool bAval = Hz.Kind == TEXT("avalanche");
+				if (Hz.Start < 0.f)
+				{
+					if (!bIn || Now < Hz.ReadyAt) continue;
+					Hz.Start = Now;
+					PlayerCombat->ShowMessage(bAval ? TEXT("A crack above, then a roar: the snow is coming down!") : TEXT("Stones rattle down the slope above you!"));
+					// (the dust is the scenery's smoke, which loops: it is put out after 3 s and taken away after 8 (PR #69's review: each
+					// fall left a column standing for good))
+					if (const TObjectPtr<UNiagaraSystem>* Sm = WildSceneryFx.Find(TEXT("f13_smoke")); Sm && *Sm)
+						if (UNiagaraComponent* Nc = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), *Sm, FVector(Hz.At.X, Hz.At.Y, Hz.At.Z + 300.f), FRotator::ZeroRotator, FVector(bAval ? 2.f : 1.f), true, true, ENCPoolMethod::None, false))
+							WildSceneryBursts.Add({ Nc, Now + 3.f, Now + 8.f });
+					continue;
+				}
+				if (Now - Hz.Start < 1.2f) continue;
+				Hz.Start = -1.f; Hz.ReadyAt = Now + (bAval ? 90.f : 40.f); ++Hz.Sprung; ++WildHazardsSprung;
+				// (near its line and on its slope when it lands, as when it began (PR #69's review: climbed up or dropped down in the 1.2 s,
+				// she was struck all the same))
+				if (D < Hz.R * 0.6f && FMath::Abs(Feet - Hz.At.Z) < 250.f) PlayerCombat->HurtByTrap((bAval ? 0.2f : 0.12f) * Hz.P, 0.4f, 2.f, bAval ? TEXT("The avalanche sweeps over you") : TEXT("Falling stones strike you"));
+			}
+			else if (Hz.Kind == TEXT("scree"))
+			{
+				// (the fifth phase: "scree slopes that slide underfoot": slowed in it, and every 0.8 s the stones carry her a little down the slope)
+				// (sprung once each time she steps onto it, as the bog (PR #69's review: every push counted, the hazards' count became pushes))
+				if (!bIn) { Hz.In = 0.f; continue; }
+				PlayerCombat->SlowBy(0.45f, 0.6f);
+				if (Hz.In <= 0.f)
+				{
+					Hz.In = 1.f; ++Hz.Sprung; ++WildHazardsSprung;
+					PlayerCombat->ShowMessage(TEXT("The scree slides under your feet"));
+				}
+				if (Now < Hz.ReadyAt) continue;
+				Hz.ReadyAt = Now + 0.8f;
+				FVector2D Down(WildGroundZ(Her + FVector(-300, 0, 0)) - WildGroundZ(Her + FVector(300, 0, 0)), WildGroundZ(Her + FVector(0, -300, 0)) - WildGroundZ(Her + FVector(0, 300, 0)));
+				if (Down.IsNearlyZero(1.f)) Down = FVector2D(FMath::Cos(Hz.Id * 0.7f), FMath::Sin(Hz.Id * 0.7f)) * 10.f;
+				Down.Normalize();
+				if (ACharacter* Pc = UGameplayStatics::GetPlayerCharacter(this, 0)) Pc->LaunchCharacter(FVector(Down.X * 380.f, Down.Y * 380.f, 60.f), true, false);
+			}
+			else if (Hz.Kind == TEXT("cornice") || Hz.Kind == TEXT("crevasse"))
+			{
+				// (the fifth phase: "cornices: snow overhangs that can collapse underfoot", "crevasses, some hidden under snow bridges": once a
+				// play, the snow gives way: a fall's harm, and she is set down where it dropped her)
+				if (!bIn || WildScenerySprung.Contains(Hz.Id)) continue;
+				WildScenerySprung.Add(Hz.Id); ++Hz.Sprung; ++WildHazardsSprung;
+				const bool bCrev = Hz.Kind == TEXT("crevasse");
+				PlayerCombat->HurtByTrap((bCrev ? 0.2f : 0.15f) * Hz.P, 0.5f, 3.f, bCrev ? TEXT("A snow bridge gives way: you fall into a crevasse and climb out") : TEXT("The cornice breaks under you and you fall"));
+				// (set down where she can stand (PR #69's review: 4 m out on the height model alone, with no check, could be inside a serac
+				// or an ice block, on water or on a face she slides down): ways out from the hazard first, 4 to 8 m; the ground's standable
+				// check, then what is there traced from above and her capsule clear of it; none found, she stays where she fell)
+				if (ACharacter* Pc = UGameplayStatics::GetPlayerCharacter(this, 0))
+				{
+					FVector2D Away = FVector2D(Her - Hz.At).GetSafeNormal(); if (Away.IsNearlyZero()) Away = FVector2D(1, 0);
+					const float Hh = Pc->GetSimpleCollisionHalfHeight(), Rc = Pc->GetSimpleCollisionRadius();
+					FCollisionQueryParams Qp(SCENE_QUERY_STAT(RDS13Fall), false, Pc);
+					bool bPut = false;
+					for (float Dm : { 4.f, 6.f, 8.f })
+					{
+						for (float Ad : { 0.f, 45.f, -45.f, 90.f, -90.f })
+						{
+							const FVector2D Wy = Away.GetRotated(Ad);
+							FVector2D Wm(Her.X / 100.0 + Wy.X * Dm, Her.Y / 100.0 + Wy.Y * Dm);
+							if (!WildStandableNear(Wm, 0.0)) continue;
+							const float Gz = WildGroundZ(FVector(Wm.X * 100.0, Wm.Y * 100.0, 0.0));
+							FHitResult Hd;
+							const FVector Top(Wm.X * 100.0, Wm.Y * 100.0, Gz + 400.f), Bot(Wm.X * 100.0, Wm.Y * 100.0, Gz - 300.f);
+							const float Zf = W->LineTraceSingleByChannel(Hd, Top, Bot, ECC_Visibility, Qp) ? Hd.ImpactPoint.Z : Gz;
+							if (Zf - Gz > 100.f) continue;                 // (on a piece, not the ground)
+							const FVector At(Top.X, Top.Y, Zf + Hh + 5.f);
+							if (W->OverlapAnyTestByChannel(At, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeCapsule(Rc, Hh), Qp)) continue;
+							Pc->TeleportTo(At, Pc->GetActorRotation(), false, true); bPut = true; break;
+						}
+						if (bPut) break;
+					}
+				}
 			}
 			else if (Hz.Kind == TEXT("wakes"))
 			{

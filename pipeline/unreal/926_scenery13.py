@@ -216,6 +216,9 @@ def step_scenery():
     # (the third phase: where the needles muffle her steps, and how far the monsters notice her there)
     g.set_editor_property("wild_quiet_biomes", J.get("quiet_biomes", []))
     g.set_editor_property("wild_quiet_notice", float(J.get("quiet_notice", 1.0)))
+    # (the fifth phase: where the air is thin, and her slow there)
+    g.set_editor_property("wild_thin_air_biomes", J.get("thin_air_biomes", []))
+    g.set_editor_property("wild_thin_air_slow", float(J.get("thin_air_slow", 0.0)))
     # (every kind's people must be townsfolk of the level)
     defs = [str(t.name) for t in g.get_editor_property("townsfolk")]
     for K in J["kinds"]:
