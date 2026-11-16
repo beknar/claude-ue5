@@ -13,7 +13,8 @@
   "biomes=temperate autumn forests;n=3;len=500-1400;w=4-6;d=2.8-4.2;wall=0.85;turn=4;name=holloway",
   "biomes=hills;n=4;len=600-1500;w=1.2-1.8;d=0.25-0.4;wall=0.5;turn=6;name=sheep track",
   "biomes=hills;n=2;len=500-1200;w=4-5;d=2.4-3.4;wall=0.85;turn=4;name=hill holloway",
-  "biomes=canyons,canyon networks;n=3;len=500-1400;w=4-6;d=6-9;wall=0.95;turn=10;name=slot canyon"
+  "biomes=canyons,canyon networks;n=3;len=500-1400;w=4-6;d=6-9;wall=0.95;turn=10;name=slot canyon",
+  "biomes=volcanic tundra;n=2;len=400-1200;w=3-5;d=6-10;wall=0.95;turn=4;name=fissure"
  ],
  "fx": {
   "bees": "/Game/Volstok_District/VFX/NS_Flies_01a",
@@ -123,6 +124,18 @@
    "like": "Wood Log",
    "icon": "comp_wood_log",
    "looks": "a cut turf of peat, dried on the moor: it burns slow and smoky"
+  },
+  {
+   "name": "Obsidian",
+   "like": "Steel Ingot",
+   "icon": "comp_steel_ingot",
+   "looks": "a lump of black volcanic glass: it takes an edge sharper than steel"
+  },
+  {
+   "name": "Sulfur",
+   "like": "Oils",
+   "icon": "comp_oils",
+   "looks": "yellow crystals of sulfur scraped from a fumarole's crust: brimstone, for powders and cures"
   }
  ],
  "fauna": [
@@ -437,6 +450,32 @@
   ],
   "pueblo": [
    "/Game/RandomDungeon/Wild13/Kit/SM_N13_Pueblo"
+  ],
+  "basalt": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_Basalt_A",
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_Basalt_B"
+  ],
+  "obsidian": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_Obsidian"
+  ],
+  "fumarole": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_Fumarole"
+  ],
+  "bomb": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_Bomb_A",
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_Bomb_B"
+  ],
+  "sodhut": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_SodHut"
+  ],
+  "geysercone": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_GeyserCone"
+  ],
+  "churchspire": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_ChurchSpire"
+  ],
+  "lavatube": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_LavaTube"
   ]
  },
  "kinds": [
@@ -3539,6 +3578,582 @@
    "parts": [
     "L=scatter;p=n13_sandrock#;n=6;r=5;r0=2;s=0.4-0.8;yaw=rand;col=1;sink=15"
    ]
+  },
+  {
+   "name": "lava_flow",
+   "title": "Lava flow",
+   "text": "a river of lava glowing under its cooling crust, the crust black and cracked either side",
+   "biomes": [
+    "volcanoes",
+    "volcanic tundra"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=heat;x=0;y=0;r=3",
+    "kind=heat;x=-10;y=0;r=3",
+    "kind=heat;x=10;y=0;r=3",
+    "kind=heat;x=-20;y=0;r=3",
+    "kind=heat;x=20;y=0;r=3"
+   ],
+   "uses": [
+    "do=lore;x=0;y=-12;r=3;verb=look at;what=flow;text=The crust is black and it creaks. Under it, the orange shows through every crack."
+   ],
+   "parts": [
+    "L=ridge;r=7;r2=34;hb=0.3;a=0;tint=0.08,0.07,0.07",
+    "L=ridge;r=2.6;r2=30;hb=0.45;a=0;tint=0.12,0.05,0.03;lava=1",
+    "L=at;fx=smoke;x=6;z=1;s=1"
+   ]
+  },
+  {
+   "name": "lava_tube",
+   "title": "Lava tube",
+   "text": "the mouth of a lava tube: a tunnel the lava left when it drained away, going down into the dark",
+   "biomes": [
+    "volcanoes",
+    "volcanic tundra"
+   ],
+   "weight": 1.0,
+   "guards": 2,
+   "loot": "Obsidian|1|2|0.8;Small Healing Potion|1|1|0.5;Iron Ingot|1|2|0.5",
+   "uses": [
+    "do=lore;x=6;y=-6;r=3;verb=look into;what=tube;text=Warm air breathes out of it. The walls are glazed where the lava ran, and something has made a home in the dark."
+   ],
+   "parts": [
+    "L=at;p=n13_lavatube#;s=1;yaw=fixed;col=1",
+    "L=at;box=Chest;x=4;y=5"
+   ]
+  },
+  {
+   "name": "cinder_cone",
+   "title": "Cinder cone",
+   "text": "a small black hill of loose scoria round a crater",
+   "biomes": [
+    "volcanoes",
+    "volcanic tundra"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=scree;x=9;y=0;r=4"
+   ],
+   "uses": [
+    "do=lore;x=-17;y=4;r=3;verb=look at;what=cone;text=Cinders the size of fists, loose as gravel. Every step up slides half a step down."
+   ],
+   "parts": [
+    "L=cone;r=14;hb=9;crater=0.4;tint=0.09,0.07,0.07"
+   ]
+  },
+  {
+   "name": "ash_village",
+   "title": "Ash-buried village",
+   "text": "a village buried in ash: only roofs and the church's spire stand out of it",
+   "biomes": [
+    "volcanoes"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=loot;x=-4;y=-3;r=3;verb=dig at;what=buried door;things=Bread|1|1|0.4,Iron Ingot|1|2|0.7,Small Healing Potion|1|1|0.5;reuse=900;text=You scrape the ash from a door and reach inside a buried kitchen."
+   ],
+   "parts": [
+    "L=patch;r=18;hb=0.3;tint=0.36,0.35,0.34",
+    "L=at;p=n13_churchspire#;x=6;s=1;yaw=rand;col=1;sink=320",
+    "L=scatter;p=s12_stonehouse#;n=3;r=14;r0=8;h=5;yaw=rand;col=1;sink=380"
+   ]
+  },
+  {
+   "name": "volcanic_bombs",
+   "title": "Volcanic bombs",
+   "text": "blobs of rock the crater threw out, cooled in flight, scattered across the slope",
+   "biomes": [
+    "volcanoes"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=0;r=3;verb=look at;what=bombs;text=Each one landed still soft and split open as it cooled. The crater is two miles off."
+   ],
+   "parts": [
+    "L=scatter;p=n13_bomb#;n=8;r=14;r0=3;s=0.8-1.5;yaw=rand;col=1;sink=15"
+   ]
+  },
+  {
+   "name": "fumarole_field",
+   "title": "Fumaroles",
+   "text": "vents hissing sulfur steam, yellow crystal crusts round them",
+   "biomes": [
+    "volcanoes",
+    "geothermal caldera"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=gas;x=6;y=0;r=2.5"
+   ],
+   "uses": [
+    "do=forage;x=-4;y=-4;r=3;verb=scrape;what=sulfur;things=Sulfur|1|3|0.9;reuse=300;text=Yellow crystals flake off into your hand. The smell of rotten eggs follows you for an hour."
+   ],
+   "parts": [
+    "L=at;p=n13_fumarole#;x=6;y=0;s=1;yaw=rand;col=1",
+    "L=at;fx=steam;x=6;y=0;z=0.6;s=1",
+    "L=at;p=n13_fumarole#;x=-2;y=7;s=0.8;yaw=rand;col=1",
+    "L=at;fx=steam;x=-2;y=7;z=0.5;s=0.8"
+   ]
+  },
+  {
+   "name": "obsidian_field",
+   "title": "Obsidian field",
+   "text": "a field of black volcanic glass, sharp as knives",
+   "biomes": [
+    "volcanoes",
+    "volcanic tundra"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=pit;x=4;y=0;r=2.5;msg=The glass's edges cut through your boots"
+   ],
+   "uses": [
+    "do=forage;x=-4;y=-5;r=3;verb=gather;what=obsidian;things=Obsidian|1|2|0.9;reuse=300;text=Black glass, smooth as water on one face and sharper than any blade on the other."
+   ],
+   "parts": [
+    "L=at;p=n13_obsidian#;x=4;s=1;yaw=rand;col=1",
+    "L=at;p=n13_obsidian#;x=-6;y=5;s=0.8;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "crater_rim",
+   "title": "Volcano's shoulder",
+   "text": "high on the volcano's shoulder: the crater smokes above, the land falls away below",
+   "biomes": [
+    "volcanoes"
+   ],
+   "weight": 1.0,
+   "place": "rise",
+   "uses": [
+    "do=climb;edge=1;r=3.5;verb=climb;what=rock;tx=-4;tz=2.5;reveal=4000;reuse=5;text=Smoke pours off the crater above you and the whole country lies below."
+   ],
+   "parts": [
+    "L=at;p=l12_boulder#;x=-4;h=2.5;yaw=rand;col=1;sink=30",
+    "L=at;fx=smoke;x=30;z=6;s=3",
+    "L=scatter;p=n13_bomb#;n=4;r=10;r0=5;s=0.6-1.0;yaw=rand;col=1;sink=15"
+   ]
+  },
+  {
+   "name": "eruption_signs",
+   "title": "Eruption signs",
+   "text": "the ground trembles, ash falls from a clear sky, dead birds lie in the grey",
+   "biomes": [
+    "volcanoes"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=tremor;x=0;y=0;r=12"
+   ],
+   "uses": [
+    "do=lore;x=-14;y=0;r=3;verb=look at;what=dead birds;text=Small birds, dozens of them, dead where they fell. The air at the ground is wrong. Something is coming."
+   ],
+   "parts": [
+    "L=scatter;p=bones;n=4;r=8;s=0.4;yaw=rand;col=0",
+    "L=patch;r=10;hb=0.3;tint=0.36,0.35,0.34"
+   ]
+  },
+  {
+   "name": "fire_temple",
+   "title": "Fire temple",
+   "text": "a temple built to tap the mountain's heat: a forge's brazier, a keeper of the flame",
+   "biomes": [
+    "volcanoes"
+   ],
+   "weight": 1.0,
+   "folk": [
+    "Townsman|Keeper of the flame|The mountain's fire is ours to borrow, never to keep./Leave bread, and its heat goes with you a while./When it shakes, we pray. When it smokes, we run.|-1|-5"
+   ],
+   "uses": [
+    "do=offer;x=-3;y=1;r=3;verb=leave an offering at;what=brazier;give=Bread|1;name=The Mountain's Heat;dmg=0.12;armour=0.06;secs=600;text=The keeper takes the bread and casts it in the fire, and nods to you."
+   ],
+   "parts": [
+    "L=at;p=r12_templearch#;x=6;h=6;yaw=fixed;col=1",
+    "L=at;p=s12_brazier#;x=2;y=-3;h=1.2;yaw=rand;col=1",
+    "L=at;fx=fire;x=2;y=-3;z=1.2;s=1",
+    "L=at;p=s12_cauldron#;x=2;y=3;h=1.0;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "lava_lake",
+   "title": "Lava lake",
+   "text": "a lake of lava in a pit, its black skin splitting and turning over",
+   "biomes": [
+    "volcanoes"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=heat;x=0;y=0;r=8"
+   ],
+   "uses": [
+    "do=lore;x=-17;y=0;r=3;verb=look at;what=lava;text=The heat comes off it like a wall. Its skin cracks, glows, and folds under."
+   ],
+   "parts": [
+    "L=patch;r=10;hb=0.35;tint=0.12,0.05,0.03;lava=1",
+    "L=ring;p=l12_boulder#;n=8;r=13;h=1.5-2.5;yaw=rand;col=1;sink=20",
+    "L=at;fx=smoke;z=2;s=2"
+   ]
+  },
+  {
+   "name": "moss_lava",
+   "title": "Moss-covered lava",
+   "text": "soft green moss blanketing jagged lava; it hides the holes",
+   "biomes": [
+    "volcanic tundra"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=pit;x=3;y=2;r=2.5;msg=The moss gives way over a hole in the lava and your leg goes in to the knee"
+   ],
+   "uses": [
+    "do=lore;x=-16;y=0;r=3;verb=look at;what=moss;text=A hundred years of moss over the lava. Soft as a mattress, and under it, holes you could lose a leg in."
+   ],
+   "parts": [
+    "L=patch;r=14;hb=0.3;tint=0.20,0.30,0.12",
+    "L=scatter;p=n13_bomb#;n=10;r=12;r0=4;s=0.5-0.9;yaw=rand;col=1;sink=40"
+   ]
+  },
+  {
+   "name": "black_sand",
+   "title": "Black sand",
+   "text": "a plain of black volcanic sand, blocks of glacier ice stranded on it",
+   "biomes": [
+    "volcanic tundra"
+   ],
+   "weight": 1.0,
+   "place": "low",
+   "uses": [
+    "do=lore;x=0;y=0;r=3;verb=look at;what=ice;text=White ice on black sand, melting in the sun. The glacier calved it a mile upstream."
+   ],
+   "parts": [
+    "L=patch;r=16;hb=0.3;tint=0.05,0.05,0.055",
+    "L=scatter;p=n13_iceblock#;n=4;r=12;r0=5;s=1.5-2.5;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "basalt_columns",
+   "title": "Basalt columns",
+   "text": "hexagonal pillars of basalt, stepped like the stairs of giants",
+   "biomes": [
+    "volcanic tundra",
+    "volcanoes"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=climb;edge=1;r=4;verb=climb;what=columns;tz=6;reveal=2000;reuse=5;text=Six-sided steps, each a giant's stair, up to the top of the columns."
+   ],
+   "parts": [
+    "L=at;p=n13_basalt#;s=1;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "glacier_flood",
+   "title": "Meltwater flood",
+   "text": "a fissure that floods when the volcano under the ice melts it from below",
+   "biomes": [
+    "volcanic tundra"
+   ],
+   "weight": 1.0,
+   "place": "channel",
+   "hazards": [
+    "kind=flood;x=0;y=0;r=8"
+   ],
+   "uses": [
+    "do=lore;x=-13;y=0;r=3;verb=look at;what=ice;text=Blocks of ice in a dry rift. When the fire under the glacier wakes, the meltwater comes down here all at once."
+   ],
+   "parts": [
+    "L=scatter;p=n13_iceblock#;n=3;r=6;r0=3;s=0.6-1.0;yaw=rand;col=1",
+    "L=scatter;p=n13_sandrock#;n=6;r=5;s=0.4-0.8;yaw=rand;col=0;sink=10"
+   ]
+  },
+  {
+   "name": "rift_fissure",
+   "title": "Rift",
+   "text": "a fissure where the land is pulling apart; you can stand inside it",
+   "biomes": [
+    "volcanic tundra"
+   ],
+   "weight": 1.0,
+   "place": "channel",
+   "uses": [
+    "do=lore;x=-10;y=0;r=3;verb=look up at;what=walls;text=One wall is this land, the other wall another. They are a finger's width further apart each year."
+   ],
+   "parts": [
+    "L=scatter;p=n13_sandrock#;n=8;r=6;s=0.4-0.8;yaw=rand;col=0;sink=10"
+   ]
+  },
+  {
+   "name": "pseudocraters",
+   "title": "Pseudocraters",
+   "text": "small mossy craters where lava ran over wet ground and the steam burst through",
+   "biomes": [
+    "volcanic tundra"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=4;y=-9;r=3;verb=look at;what=craters;text=No mountain made these: the lava ran over a marsh, and the marsh boiled up through it."
+   ],
+   "parts": [
+    "L=cone;r=6;hb=2.2;crater=0.6;x=-6;y=-4;tint=0.20,0.30,0.12",
+    "L=cone;r=5;hb=1.8;crater=0.6;x=7;y=3;tint=0.20,0.30,0.12",
+    "L=cone;r=4;hb=1.5;crater=0.6;x=-2;y=9;tint=0.20,0.30,0.12"
+   ]
+  },
+  {
+   "name": "sod_farm",
+   "title": "Turf farm",
+   "text": "a turf-roofed farmhouse, a stone sheep pen, a farmer and her sheep",
+   "biomes": [
+    "volcanic tundra"
+   ],
+   "weight": 1.0,
+   "herd": "Goat:4;r=5",
+   "folk": [
+    "Townswoman|Farmer|The turf keeps the cold out and the roof green./Lava field to the north. Do not walk it in fog./Bread for wool, if you have it.|0|-5"
+   ],
+   "uses": [
+    "do=trade;x=-2;y=-6;r=3;verb=trade with;what=farmer;give=Bread|1;get=Cheese|1;reuse=120"
+   ],
+   "parts": [
+    "L=at;p=n13_sodhut#;x=5;s=1;yaw=fixed;yawadd=180;col=1",
+    "L=ring;p=n13_drystone#;n=8;r=6;x=-8;y=6;s=0.6;yaw=along;col=1"
+   ]
+  },
+  {
+   "name": "hot_river",
+   "title": "Hot river",
+   "text": "a river steaming through the snow, warm enough to bathe in",
+   "biomes": [
+    "volcanic tundra",
+    "geothermal caldera"
+   ],
+   "weight": 1.0,
+   "need_water": "any",
+   "uses": [
+    "do=heal;x=1;y=-3;r=3;verb=bathe in;what=hot river;reuse=300;text=Warm water in cold air. The ache goes out of you."
+   ],
+   "parts": [
+    "L=scatter;fx=steam;n=4;r=8;z=0.3;s=1",
+    "L=scatter;p=n13_bomb#;n=5;r=10;r0=5;s=0.5-0.9;yaw=rand;col=1;sink=20"
+   ]
+  },
+  {
+   "name": "troll_rocks",
+   "title": "Troll rocks",
+   "text": "rock pillars the stories say are giants caught by the dawn and turned to stone",
+   "biomes": [
+    "volcanic tundra"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=-14;y=0;r=3;verb=look at;what=rocks;text=Squint, and there are the faces: the brow, the nose, the open mouth. Caught at sunrise, the stories say."
+   ],
+   "parts": [
+    "L=scatter;p=n13_windrock#;n=3;r=9;r0=4;h=6-9;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "geyser",
+   "title": "Geyser",
+   "text": "a geyser's white cone; it erupts on a schedule you can set a clock by",
+   "biomes": [
+    "geothermal caldera"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=geyser;x=0;y=0;r=4;every=30"
+   ],
+   "uses": [
+    "do=geyser;x=-11;y=0;r=3;verb=watch;what=geyser;text=Steam drifts off the cone and the pool in it rises and falls."
+   ],
+   "parts": [
+    "L=at;p=n13_geysercone#;s=1.8;yaw=rand;col=1",
+    "L=at;fx=steam;z=2.5;s=1"
+   ]
+  },
+  {
+   "name": "terraced_pools",
+   "title": "Terraced pools",
+   "text": "hot pools on mineral terraces in white, orange and teal steps",
+   "biomes": [
+    "geothermal caldera"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=heal;x=-11;y=0;r=3;verb=bathe in;what=pools;reuse=300;text=You lower yourself into the warm teal water, and the mineral steps hold you like a chair."
+   ],
+   "parts": [
+    "L=patch;r=9;hb=0.3;tint=0.84,0.82,0.76",
+    "L=patch;r=6.5;hb=0.55;tint=0.78,0.42,0.12",
+    "L=patch;r=4;hb=0.8;tint=0.10,0.45,0.42",
+    "L=at;fx=steam;z=0.8;s=1"
+   ]
+  },
+  {
+   "name": "mud_pots",
+   "title": "Mud pots",
+   "text": "pools of grey mud boiling and plopping",
+   "biomes": [
+    "geothermal caldera"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=heat;x=0;y=0;r=3"
+   ],
+   "uses": [
+    "do=lore;x=-8;y=0;r=3;verb=look at;what=mud;text=Grey mud heaves up in a bubble, holds, and bursts with a wet plop. It is boiling."
+   ],
+   "parts": [
+    "L=patch;r=4;hb=0.3;tint=0.40,0.38,0.35",
+    "L=at;fx=steam;z=0.3;s=0.6"
+   ]
+  },
+  {
+   "name": "bacterial_mats",
+   "title": "Bacterial mats",
+   "text": "runoff coloured in bright rainbow bands by what lives in the hot water",
+   "biomes": [
+    "geothermal caldera"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=-13;y=0;r=3;verb=look at;what=colours;text=Orange, yellow, green, teal: each ring as hot as the life in it can stand."
+   ],
+   "parts": [
+    "L=patch;r=10;hb=0.3;tint=0.75,0.35,0.08",
+    "L=patch;r=7;hb=0.5;tint=0.80,0.70,0.15",
+    "L=patch;r=4;hb=0.7;tint=0.10,0.45,0.42"
+   ]
+  },
+  {
+   "name": "thin_crust",
+   "title": "Thin crust",
+   "text": "pale ground that looks solid; boiling water lies under it",
+   "biomes": [
+    "geothermal caldera"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=crust;x=0;y=0;r=3"
+   ],
+   "uses": [
+    "do=lore;x=-9;y=0;r=3;verb=look at;what=crust;text=It rings hollow under a thrown stone. Steam seeps from a crack. Walk round."
+   ],
+   "parts": [
+    "L=patch;r=6;hb=0.3;tint=0.80,0.78,0.72",
+    "L=at;fx=steam;x=2;z=0.2;s=0.5"
+   ]
+  },
+  {
+   "name": "steam_field",
+   "title": "Steam field",
+   "text": "a field of vents where the steam drops visibility to nothing",
+   "biomes": [
+    "geothermal caldera"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=0;r=3;verb=look at;what=steam;text=White on every side. You hear the vents hiss and cannot tell how near."
+   ],
+   "parts": [
+    "L=mist;r=30",
+    "L=scatter;fx=steam;n=6;r=12;z=0.3;s=1",
+    "L=scatter;p=n13_fumarole#;n=3;r=12;r0=4;s=0.6-0.9;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "crater_lake",
+   "title": "Crater lake",
+   "text": "a lake filling the caldera, turquoise and strange",
+   "biomes": [
+    "geothermal caldera"
+   ],
+   "weight": 1.0,
+   "place": "low",
+   "uses": [
+    "do=lore;x=-24;y=0;r=3;verb=look at;what=lake;text=The colour of a jewel, and nothing lives in it. The water is sour; the birds will not land."
+   ],
+   "parts": [
+    "L=patch;r=20;hb=0.3;tint=0.06,0.42,0.40",
+    "L=scatter;p=l12_boulder#;n=6;r=24;r0=21;h=1-2;yaw=rand;col=1;sink=20"
+   ]
+  },
+  {
+   "name": "resurgent_dome",
+   "title": "Resurgent dome",
+   "text": "the caldera's floor rising in a dome, cracked in rings: the next eruption on its way",
+   "biomes": [
+    "geothermal caldera"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=tremor;x=0;y=0;r=15"
+   ],
+   "uses": [
+    "do=lore;x=-34;y=0;r=3;verb=look at;what=dome;text=The ground here is higher than it was last year. The cracks round it are new."
+   ],
+   "parts": [
+    "L=mound;r=30;hb=6;tint=0.38,0.34,0.30",
+    "L=ridge;r=0.8;r2=18;hb=0.3;a=30;x=-12;y=10;tint=0.10,0.08,0.07",
+    "L=ridge;r=0.8;r2=16;hb=0.3;a=-40;x=14;y=8;tint=0.10,0.08,0.07"
+   ]
+  },
+  {
+   "name": "spa_village",
+   "title": "Spa village",
+   "text": "a bathhouse and a few houses round a hot spring, a healer keeping it",
+   "biomes": [
+    "geothermal caldera"
+   ],
+   "weight": 1.0,
+   "folk": [
+    "Townswoman|Bath keeper|The water cures what the doctors cannot./Bread for a bath, and the bath is yours./Do not drink it. Bathe in it.|-4|-6"
+   ],
+   "uses": [
+    "do=heal;x=-6;y=0;r=3;verb=bathe in;what=spring;reuse=300;text=Hot mineral water to the chin. Your wounds close as you soak."
+   ],
+   "parts": [
+    "L=at;p=n13_hotspring#;s=1;yaw=rand;col=0",
+    "L=at;p=s12_stonehouse#;x=12;y=-4;h=4;yaw=fixed;yawadd=180;col=1",
+    "L=at;p=s12_stonehouse#;x=10;y=8;h=3.6;yaw=fixed;yawadd=180;col=1"
+   ]
+  },
+  {
+   "name": "petrified_forest",
+   "title": "Dead forest",
+   "text": "trees killed by heat and gas, standing bare and white",
+   "biomes": [
+    "geothermal caldera",
+    "volcanoes"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=0;r=3;verb=look at;what=trees;text=Bleached white, bark gone, still standing. Nothing rotted them; nothing here lives to."
+   ],
+   "parts": [
+    "L=scatter;p=n13_deadtree#;n=9;r=16;r0=3;h=6-9;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "gas_hollow",
+   "title": "Gas hollow",
+   "text": "a still hollow where gas collects; animals lie dead in it",
+   "biomes": [
+    "geothermal caldera",
+    "volcanoes"
+   ],
+   "weight": 1.0,
+   "place": "low",
+   "hazards": [
+    "kind=gas;x=0;y=0;r=5"
+   ],
+   "uses": [
+    "do=lore;x=-12;y=0;r=3;verb=look at;what=hollow;text=A fox, a deer, a hawk, all lying where they fell, untouched. No scavenger comes down here either."
+   ],
+   "parts": [
+    "L=scatter;p=s12_ribs#;n=2;r=4;h=0.8;yaw=rand;col=0",
+    "L=scatter;p=bones;n=4;r=4;s=0.5;yaw=rand;col=0"
+   ]
   }
  ],
  "mats": {
@@ -3599,5 +4214,6 @@
   "glacial"
  ],
  "thin_air_slow": 0.15,
- "_doc_phase6": "the sixth phase (2026-11-15): canyons, canyon networks, mesas: 30 kinds; places rim (a cliff's top, facing the drop), foot (a cliff's foot, facing the wall) and channel (a dry channel's bed, facing along it); the slot canyons' channels; hazard flood (thunder, then the water down the channel); use echo (what calls back) and any use's hours (a sun dagger at sunrise); landform L=mesa (a butte) and any landform's bands=; the canyons' and mesas' rock in strata by height"
+ "_doc_phase6": "the sixth phase (2026-11-15): canyons, canyon networks, mesas: 30 kinds; places rim (a cliff's top, facing the drop), foot (a cliff's foot, facing the wall) and channel (a dry channel's bed, facing along it); the slot canyons' channels; hazard flood (thunder, then the water down the channel); use echo (what calls back) and any use's hours (a sun dagger at sunrise); landform L=mesa (a butte) and any landform's bands=; the canyons' and mesas' rock in strata by height",
+ "_doc_phase7": "the seventh phase (2026-11-16): volcanoes, volcanic tundra, geothermal caldera: 32 kinds; hazards geyser (on a schedule, every=), gas, crust, tremor; use geyser (when it goes again); any pit's msg=; any landform's lava= (the ground's own glow); the fissures' channels in the volcanic tundra; Obsidian and Sulfur, found and sold"
 }

@@ -320,7 +320,7 @@ float ARDDungeonGenerator::WildPartsGroundZ(const FVector& L) const
 	return WildGroundZ(L) + Lift;
 }
 
-UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater, FLinearColor Tint, const TArray<FVector2D>* Poly, const TArray<FLinearColor>* Bands)
+UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater, FLinearColor Tint, const TArray<FVector2D>* Poly, const TArray<FLinearColor>* Bands, float Lava)
 {
 	if (!C || !Wild || Rm <= 0.f || Hm == 0.f) return nullptr;
 	// (a grid over the rise: rings round its middle (a mound, a cone) or rows across a ridge, each point on the ground there lifted by
@@ -433,6 +433,8 @@ UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, 
 			const FLinearColor Bc = (*Bands)[FMath::Min(Bands->Num() - 1, FMath::FloorToInt(Sh * Bands->Num()))];
 			Q.Color = Q.RockColor = FLinearColor(Bc.R, Bc.G, Bc.B, 1.f); Q.Sand = Q.Mud = Q.Snow = Q.Lava = 0.f; Q.Rock = 0.f;
 		}
+		// (the seventh phase: "lava=<0-1>": the ground material's own glow (its colour's alpha), a lava lake's or a flow's; to its rim)
+		if (Lava > 0.f) Q.Lava = FMath::Clamp(Lava, 0.f, 1.f) * (EdgeV[K] ? 0.f : 1.f);
 		const FRDWGroundVertex Gv = RDWildGroundVertex(Q, Nr);
 		Col[K] = Gv.C; U0[K] = Gv.UV0; U1[K] = Gv.UV1; U2[K] = Gv.UV2; U3[K] = Gv.UV3;
 	}
@@ -516,7 +518,7 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 				TArray<FString> Bt; Bs.ParseIntoArrayWS(Bt);
 				for (const FString& B1 : Bt) { TArray<FString> Tc; B1.ParseIntoArray(Tc, TEXT(",")); if (Tc.Num() == 3) Bands.Add(FLinearColor(FCString::Atof(*Tc[0]), FCString::Atof(*Tc[1]), FCString::Atof(*Tc[2]), 1.f)); }
 			}
-			if (UProceduralMeshComponent* Lm = LayWildLandform(C, At, L, Rr, R2, Hh, Yaw0 + Ga, Cr, Tint, Poly.Num() >= 3 ? &Poly : nullptr, Bands.Num() > 0 ? &Bands : nullptr))
+			if (UProceduralMeshComponent* Lm = LayWildLandform(C, At, L, Rr, R2, Hh, Yaw0 + Ga, Cr, Tint, Poly.Num() >= 3 ? &Poly : nullptr, Bands.Num() > 0 ? &Bands : nullptr, RDR12Num(M, TEXT("lava"), 0.f, R)))
 			{
 				if (const FString Mn = M.FindRef(TEXT("mat")); !Mn.IsEmpty())
 					if (const TObjectPtr<UMaterialInterface>* Mi = WildSceneryMats.Find(FName(*(TEXT("m13_") + Mn)))) Lm->SetMaterial(0, Mi->Get());

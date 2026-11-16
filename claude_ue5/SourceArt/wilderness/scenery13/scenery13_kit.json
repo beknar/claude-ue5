@@ -1001,5 +1001,154 @@
   ],
   "masked": [],
   "translucent": []
+ },
+ "SM_N13_Basalt_A": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Basalt_A.fbx",
+  "size_m": [
+   6.78,
+   6.75,
+   6.82
+  ],
+  "triangles": 2000,
+  "slots": [
+   "BasaltAStone"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Basalt_B": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Basalt_B.fbx",
+  "size_m": [
+   6.78,
+   6.75,
+   6.91
+  ],
+  "triangles": 2016,
+  "slots": [
+   "BasaltBStone"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Obsidian": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Obsidian.fbx",
+  "size_m": [
+   6.81,
+   6.18,
+   1.4
+  ],
+  "triangles": 88,
+  "slots": [
+   "ObsidianGlass"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Fumarole": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Fumarole.fbx",
+  "size_m": [
+   4.33,
+   4.3,
+   0.9
+  ],
+  "triangles": 838,
+  "slots": [
+   "FumaroleRock",
+   "FumaroleSulfur",
+   "FumaroleVent"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Bomb_A": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Bomb_A.fbx",
+  "size_m": [
+   2.08,
+   1.43,
+   1.13
+  ],
+  "triangles": 180,
+  "slots": [
+   "BombACrust"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_Bomb_B": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Bomb_B.fbx",
+  "size_m": [
+   2.36,
+   1.48,
+   1.11
+  ],
+  "triangles": 180,
+  "slots": [
+   "BombBCrust"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_SodHut": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_SodHut.fbx",
+  "size_m": [
+   6.4,
+   4.7,
+   3.4
+  ],
+  "triangles": 46,
+  "slots": [
+   "SodHutWall",
+   "SodHutTurf",
+   "SodHutTimber",
+   "SodHutDoor"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_GeyserCone": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_GeyserCone.fbx",
+  "size_m": [
+   5.2,
+   5.2,
+   1.4
+  ],
+  "triangles": 238,
+  "slots": [
+   "GeyserConeSinter",
+   "GeyserConeVent"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_ChurchSpire": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_ChurchSpire.fbx",
+  "size_m": [
+   4.7,
+   4.7,
+   11.0
+  ],
+  "triangles": 76,
+  "slots": [
+   "ChurchSpireStone",
+   "ChurchSpireSlate",
+   "ChurchSpireDark"
+  ],
+  "masked": [],
+  "translucent": []
+ },
+ "SM_N13_LavaTube": {
+  "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_LavaTube.fbx",
+  "size_m": [
+   4.56,
+   10.16,
+   4.86
+  ],
+  "triangles": 1442,
+  "slots": [
+   "LavaTubeBasalt",
+   "LavaTubeDark"
+  ],
+  "masked": [],
+  "translucent": []
  }
 }

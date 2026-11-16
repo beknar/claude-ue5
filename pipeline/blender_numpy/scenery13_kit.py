@@ -25,6 +25,10 @@ helpers and its noise are used here):
                    mesas): a natural arch of banded sandstone, hoodoos with their caprocks, adobe cliff dwellings in an alcove, a slab
                    with a pecked spiral and two leaning slabs before it, flood debris jammed in a channel, sandstone boulders, a
                    terraced mesa-top pueblo with its ladders
+  Basalt_A/B, Obsidian, Fumarole, Bomb_A/B, SodHut, GeyserCone, ChurchSpire, LavaTube  the seventh phase's (volcanoes, volcanic
+                   tundra, geothermal caldera): hexagonal basalt columns stepped like stairs, black glass shards, a sulfur-crusted vent,
+                   volcanic bombs, a turf-roofed hut, a geyser's sinter cone, a church's spire for a village buried in ash, a lava
+                   tube's mouth (the lava lakes and flows are skins of the land with the ground's own glow, lava=)
   StormCell        a storm cell for the far horizon: an anvil cloud 3.2 km across, a rain curtain, a funnel (the far storms)
   Drystone_A/B     a 3 m length of field wall laid dry, its copes on edge (the shepherd's pen)
   AppleTree_A/B,   the old orchard's gnarled fruit trees: a short leaning trunk, a low wide crown of leaf clusters with their
@@ -864,6 +868,134 @@ def pueblo():
     finish(me, ob, bm, ["PuebloAdobe", "PuebloDark", "PuebloBeam"], flat=True)
 
 
+# ------------------------------------------------------------------------------------------------ the seventh phase: volcanic lands
+def hex_prism(bm, uvl, c, r, h, mat, uvo=(0.0, 0.0)):
+    """a hexagonal column of radius r and height h standing on c (its top capped)"""
+    ring = lambda z: [bm.verts.new((c[0] + r * math.cos(k * math.pi / 3), c[1] + r * math.sin(k * math.pi / 3), c[2] + z)) for k in range(6)]
+    lo, hi = ring(0.0), ring(h)
+    for k in range(6):
+        k2 = (k + 1) % 6
+        f = bm.faces.new((lo[k], lo[k2], hi[k2], hi[k])); f.material_index = mat
+        for lp, uv in zip(f.loops, ((uvo[0] + k / 6, uvo[1]), (uvo[0] + (k + 1) / 6, uvo[1]), (uvo[0] + (k + 1) / 6, uvo[1] + h / 6), (uvo[0] + k / 6, uvo[1] + h / 6))): lp[uvl].uv = uv
+    f = bm.faces.new(hi); f.material_index = mat
+    for lp, k in zip(f.loops, range(6)): lp[uvl].uv = (0.5 + 0.5 * math.cos(k * math.pi / 3), 0.5 + 0.5 * math.sin(k * math.pi / 3))
+
+
+def basalt_columns(variant, seed):
+    """basalt columns: hexagonal pillars 0.6 m across packed in a cluster, their tops stepped from 0.5 to 7 m like giant stairs"""
+    rng = random.Random(seed)
+    me, ob, bm, uvl = new_mesh(f"SM_N13_Basalt_{variant}")
+    r = 0.34; dx = r * 1.5; dy = r * math.sqrt(3)
+    for i in range(-6, 7):
+        for j in range(-5, 6):
+            x = i * dx; y = j * dy + (dy / 2 if i % 2 else 0.0)
+            d = math.hypot(x, y)
+            if d > 3.6 + rng.uniform(-0.3, 0.3): continue
+            h = max(0.4, 7.0 * (1.0 - d / 4.2) ** 1.3 + (x * 0.25 if variant == "B" else 0.0) + rng.uniform(-0.35, 0.35))
+            hex_prism(bm, uvl, (x, y, 0.0), r * 0.97, h, 0, (rng.random(), rng.random()))
+    finish(me, ob, bm, [f"Basalt{variant}Stone"], flat=True)
+
+
+def obsidian():
+    """a field of obsidian: black volcanic glass broken into sharp shards and blades 0.3 to 1.4 m, lying and standing"""
+    rng = random.Random(751)
+    me, ob, bm, uvl = new_mesh("SM_N13_Obsidian")
+    for k in range(22):
+        c = Vector((rng.uniform(-3, 3), rng.uniform(-3, 3), 0.0)); h = rng.uniform(0.3, 1.4); w = h * rng.uniform(0.3, 0.6)
+        a = rng.uniform(0, math.pi); tl = rng.uniform(-0.6, 0.6)
+        ax, ay = math.cos(a), math.sin(a)
+        base = [bm.verts.new((c.x + ax * w * s + ay * w * 0.3 * q, c.y + ay * w * s - ax * w * 0.3 * q, 0.0)) for s, q in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+        tip = bm.verts.new((c.x + tl * h, c.y + rng.uniform(-0.2, 0.2), h))
+        for q in range(4):
+            f = bm.faces.new((base[(q + 1) % 4], base[q], tip)); f.material_index = 0      # (outward: the base runs clockwise from above)
+            for lp, uv in zip(f.loops, ((0, 0), (1, 0), (0.5, 1))): lp[uvl].uv = uv
+    finish(me, ob, bm, ["ObsidianGlass"], flat=True)
+
+
+def fumarole():
+    """a fumarole: a low mound of grey rock crusted with yellow sulfur crystals round a dark vent (its steam is the scenery's effect)"""
+    rng = random.Random(757)
+    me, ob, bm, uvl = new_mesh("SM_N13_Fumarole")
+    lathe(bm, uvl, [(2.2, 0.0), (1.8, 0.45), (1.0, 0.85), (0.45, 0.9), (0.32, 0.5)], 14, 0)
+    for v in bm.verts: v.co.x += rng.uniform(-0.06, 0.06); v.co.y += rng.uniform(-0.06, 0.06)
+    for k in range(18):
+        a = rng.uniform(0, 2 * math.pi); d = rng.uniform(0.4, 1.5)
+        sphere(bm, uvl, (math.cos(a) * d, math.sin(a) * d, 0.75 - d * 0.3), rng.uniform(0.08, 0.2), 1, 1.0, 1.0, 0.7, 5, 0.3, rng)
+    vs = [bm.verts.new((0.3 * math.cos(k * math.pi / 4), 0.3 * math.sin(k * math.pi / 4), 0.52)) for k in range(8)]
+    f = bm.faces.new(vs); f.material_index = 2
+    for lp, k in zip(f.loops, range(8)): lp[uvl].uv = (0.5 + 0.5 * math.cos(k * math.pi / 4), 0.5 + 0.5 * math.sin(k * math.pi / 4))
+    floor(bm)
+    finish(me, ob, bm, ["FumaroleRock", "FumaroleSulfur", "FumaroleVent"], flat=True)
+
+
+def volcanic_bomb(variant, seed):
+    """a volcanic bomb: a blob of lava thrown from the crater, cooled in flight into a spindle with a cracked black crust, 1 to 2 m"""
+    rng = random.Random(seed)
+    me, ob, bm, uvl = new_mesh(f"SM_N13_Bomb_{variant}")
+    sphere(bm, uvl, (0, 0, 0.55), 0.7, 0, rng.uniform(1.3, 1.7), rng.uniform(0.8, 1.0), 0.75, 10, 0.18, rng)
+    floor(bm)
+    finish(me, ob, bm, [f"Bomb{variant}Crust"], flat=True)
+
+
+def sod_hut():
+    """a sod hut: walls of stacked stone and turf 1.6 m high, a steep turf roof grown green, a timber gable end with a door (its front +X)"""
+    me, ob, bm, uvl = new_mesh("SM_N13_SodHut")
+    L, W = 6.0, 4.2
+    box(bm, uvl, (0, W / 2 - 0.35, 0.8), (L, 0.7, 1.6), 0); box(bm, uvl, (0, -W / 2 + 0.35, 0.8), (L, 0.7, 1.6), 0)
+    box(bm, uvl, (-L / 2 + 0.35, 0, 0.8), (0.7, W, 1.6), 0)
+    for s in (-1, 1):                                           # the turf roof's two slopes, thick
+        vs = [bm.verts.new(p) for p in ((-L / 2 - 0.2, s * (W / 2 + 0.25), 1.5), (L / 2 + 0.2, s * (W / 2 + 0.25), 1.5), (L / 2 + 0.2, 0, 3.4), (-L / 2 - 0.2, 0, 3.4))]
+        f = bm.faces.new(vs[::-1] if s > 0 else vs); f.material_index = 1          # (both slopes facing out and up)
+        for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+    vs = [bm.verts.new(p) for p in ((L / 2, -W / 2 + 0.2, 0.0), (L / 2, W / 2 - 0.2, 0.0), (L / 2, W / 2 - 0.2, 1.6), (L / 2, 0, 3.3), (L / 2, -W / 2 + 0.2, 1.6))]
+    f = bm.faces.new(vs); f.material_index = 2
+    for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 0.5), (0.5, 1), (0, 0.5))): lp[uvl].uv = uv
+    vs = [bm.verts.new(p) for p in ((-L / 2, W / 2 - 0.2, 1.6), (-L / 2, -W / 2 + 0.2, 1.6), (-L / 2, 0, 3.3))]   # (the back gable, facing -X)
+    f = bm.faces.new(vs); f.material_index = 0
+    for lp, uv in zip(f.loops, ((0, 0), (1, 0), (0.5, 1))): lp[uvl].uv = uv
+    vs = [bm.verts.new((L / 2 + 0.02, y, z)) for (y, z) in ((-0.45, 0.0), (0.45, 0.0), (0.45, 1.75), (-0.45, 1.75))]
+    f = bm.faces.new(vs); f.material_index = 3
+    for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+    finish(me, ob, bm, ["SodHutWall", "SodHutTurf", "SodHutTimber", "SodHutDoor"], flat=True)
+
+
+def geyser_cone():
+    """a geyser's cone: a mound of white-grey sinter 1.4 m high, 5 m across, ringed by low terraces, a dark wet vent at its top"""
+    me, ob, bm, uvl = new_mesh("SM_N13_GeyserCone")
+    lathe(bm, uvl, [(2.6, 0.0), (2.4, 0.12), (2.0, 0.15), (1.8, 0.4), (1.3, 0.5), (1.0, 1.0), (0.55, 1.4), (0.4, 1.3)], 16, 0)
+    vs = [bm.verts.new((0.4 * math.cos(k * math.pi / 8), 0.4 * math.sin(k * math.pi / 8), 1.3)) for k in range(16)]
+    f = bm.faces.new(vs); f.material_index = 1
+    for lp, k in zip(f.loops, range(16)): lp[uvl].uv = (0.5 + 0.5 * math.cos(k * math.pi / 8), 0.5 + 0.5 * math.sin(k * math.pi / 8))
+    finish(me, ob, bm, ["GeyserConeSinter", "GeyserConeVent"])
+
+
+def church_spire():
+    """a church's spire and the top of its tower: what shows of a village buried in ash (a stone belfry 4 m with arches, a slate spire 7 m)"""
+    me, ob, bm, uvl = new_mesh("SM_N13_ChurchSpire")
+    box(bm, uvl, (0, 0, 2.0), (3.2, 3.2, 4.0), 0)
+    for (x, y) in ((1.62, 0), (-1.62, 0), (0, 1.62), (0, -1.62)):
+        sx, sy = (0.02, 1.1) if x else (1.1, 0.02)
+        box(bm, uvl, (x, y, 2.6), (sx, sy, 1.6), 2)
+    lathe(bm, uvl, [(2.35, 4.0), (0.08, 11.0)], 8, 1)
+    finish(me, ob, bm, ["ChurchSpireStone", "ChurchSpireSlate", "ChurchSpireDark"], flat=True)
+
+
+def lava_tube():
+    """a lava tube's mouth: an arch of black ropy basalt 7 m wide and 4 m high round a dark tunnel going down into the flow"""
+    rng = random.Random(769)
+    me, ob, bm, uvl = new_mesh("SM_N13_LavaTube")
+    for xo in (-0.7, 0.0, 0.7):                                 # (the arch: three thick tubes along a half circle, side by side)
+        pts = [Vector((xo, math.cos(math.pi * k / 16) * 3.6, 0.2 + math.sin(math.pi * k / 16) * 3.8)) for k in range(17)]
+        tube(bm, uvl, pts, [rng.uniform(0.75, 0.95) for _ in pts], 8, 0)
+    for k in range(8):
+        sphere(bm, uvl, (rng.uniform(-1.0, 1.5), rng.choice((-1, 1)) * rng.uniform(3.5, 5.0), 0.3), rng.uniform(0.6, 1.1), 0, 1.3, 1.0, 0.6, 7, 0.25, rng)
+    vs = [bm.verts.new((-0.6, y, z)) for (y, z) in ((-2.9, 0.0), (2.9, 0.0), (2.9, 3.6), (-2.9, 3.6))]
+    f = bm.faces.new(vs); f.material_index = 1
+    for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+    floor(bm)
+    finish(me, ob, bm, ["LavaTubeBasalt", "LavaTubeDark"], flat=True)
+
+
 def gold_card():
     """one card of gold leaves: only its material is used (the gold aspens' and larches' crowns, a part's mat=)"""
     me, ob, bm, uvl = new_mesh("SM_N13_GoldCard")
@@ -1123,6 +1255,22 @@ def pictures():
         png(f"T_N13_SandRock{v}Stone", strata(200 + ord(v)))
     png("T_N13_PuebloAdobe", grain((0.70, 0.52, 0.36), 210, 0.12)); png("T_N13_PuebloDark", np.full((n, n, 3), 0.05))
     png("T_N13_PuebloBeam", grain((0.55, 0.47, 0.38), 211, 0.15) * (0.88 + 0.12 * np.sin(xx * 60)[..., None]))
+    # (the seventh phase: grey-black basalt, glassy black obsidian with pale glints, grey rock and yellow sulfur, a dark vent, a bomb's
+    # cracked crust, turf walls and green turf, grey timber, white sinter, slate, black ropy basalt)
+    for v in ("A", "B"):
+        png(f"T_N13_Basalt{v}Stone", grain((0.26, 0.25, 0.24), 220 + ord(v), 0.18))   # (0.17 read as black stairs)
+    ob_ = grain((0.035, 0.035, 0.045), 230, 0.3); ob_[noise(n, 231) > 0.78] = (0.32, 0.34, 0.40); png("T_N13_ObsidianGlass", ob_)
+    png("T_N13_FumaroleRock", grain((0.36, 0.33, 0.30), 232, 0.2)); png("T_N13_FumaroleSulfur", grain((0.86, 0.76, 0.18), 233, 0.15))
+    png("T_N13_FumaroleVent", np.full((n, n, 3), 0.03))
+    for v in ("A", "B"):
+        cr = grain((0.09, 0.08, 0.08), 240 + ord(v), 0.25); cr[np.abs(noise(n, 242 + ord(v), ((10, 1.0),)) - 0.5) < 0.02] = (0.30, 0.10, 0.05)
+        png(f"T_N13_Bomb{v}Crust", cr)
+    png("T_N13_SodHutWall", grain((0.30, 0.27, 0.22), 250, 0.3)); png("T_N13_SodHutTurf", grain((0.24, 0.34, 0.14), 251, 0.25))
+    png("T_N13_SodHutTimber", grain((0.40, 0.36, 0.30), 252, 0.15) * (0.88 + 0.12 * np.sin(xx * 50)[..., None])); png("T_N13_SodHutDoor", grain((0.22, 0.17, 0.12), 253, 0.1))
+    png("T_N13_GeyserConeSinter", grain((0.82, 0.80, 0.74), 260, 0.08)); png("T_N13_GeyserConeVent", np.full((n, n, 3), 0.06))
+    png("T_N13_ChurchSpireStone", grain((0.52, 0.50, 0.46), 270, 0.15)); png("T_N13_ChurchSpireSlate", grain((0.22, 0.24, 0.27), 271, 0.12))
+    png("T_N13_ChurchSpireDark", np.full((n, n, 3), 0.04))
+    png("T_N13_LavaTubeBasalt", grain((0.20, 0.18, 0.17), 280, 0.3) * (0.85 + 0.15 * np.sin(xx * 40 + yy * 12)[..., None])); png("T_N13_LavaTubeDark", np.full((n, n, 3), 0.02))
     # (gold leaves: the aspen's round leaves in yellow and gold; gold needles: a larch's sprays)
     for name, shape in (("GoldLeaves", "leaf"), ("GoldNeedles", "needle")):
         rg = np.zeros((512, 512, 4)); R6 = np.random.default_rng(90 + len(name)); Y6, X6 = np.mgrid[0:512, 0:512] / 512
@@ -1156,7 +1304,10 @@ if __name__ == "__main__":
             "NaturalArch": natural_arch, "Hoodoo_A": lambda: hoodoo("A", 703), "Hoodoo_B": lambda: hoodoo("B", 707),
             "CliffDwelling": cliff_dwelling, "SunDagger": sun_dagger, "LogJam": log_jam,
             "SandRock_A": lambda: sand_rock("A", 731), "SandRock_B": lambda: sand_rock("B", 733), "SandRock_C": lambda: sand_rock("C", 739),
-            "Pueblo": pueblo}
+            "Pueblo": pueblo,
+            "Basalt_A": lambda: basalt_columns("A", 741), "Basalt_B": lambda: basalt_columns("B", 743), "Obsidian": obsidian,
+            "Fumarole": fumarole, "Bomb_A": lambda: volcanic_bomb("A", 761), "Bomb_B": lambda: volcanic_bomb("B", 763),
+            "SodHut": sod_hut, "GeyserCone": geyser_cone, "ChurchSpire": church_spire, "LavaTube": lava_tube}
     for k, f in todo.items():
         if not ONLY or k in ONLY: f()
     old = json.load(open(os.path.join(OUT, "scenery13_kit.json"))) if os.path.exists(os.path.join(OUT, "scenery13_kit.json")) else {}

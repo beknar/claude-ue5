@@ -1238,16 +1238,18 @@ def ground_put(x, y, up=100.0, from_m=None):
                 ht = trace(G["put_from_m"])
         z = z0
         if ht and ht[0]: z = max(z, ht[4].z)
-        return z, z0
-    z, z0 = put_z(x, y)
+        # (what she would stand on: a piece (a static mesh) or the land (its ground, a landform: a cone's flank is where she should be))
+        piece = bool(ht and ht[0] and isinstance(ht[10], unreal.StaticMeshComponent))
+        return z, z0, piece
+    z, z0, piece = put_z(x, y)
     # (the sixth phase: on the canyons' terraces she was put on a boulder's or a rock face's top and fell 5 to 19 m, once to her death;
     # where what she would stand on is 1.5 m or more over the ground, the nearest spot 2 to 4 m round where it is not)
-    if "put_from_m" in G and from_m is None and z - z0 > 150.0:
+    if "put_from_m" in G and from_m is None and z - z0 > 150.0 and piece:
         for rr in (2.0, 3.0, 4.0):
             for k_ in range(8):
                 qx, qy = x + rr * math.cos(k_ * math.pi / 4), y + rr * math.sin(k_ * math.pi / 4)
-                zq, zq0 = put_z(qx, qy)
-                if zq - zq0 <= 150.0: x, y, z = qx, qy, zq; break
+                zq, zq0, pq = put_z(qx, qy)
+                if zq - zq0 <= 150.0 or not pq: x, y, z = qx, qy, zq; break
             else: continue
             break
     G["pawn"].set_actor_location(V(x * 100.0, y * 100.0, z + up), False, True)
@@ -1439,8 +1441,11 @@ def step_scenery13():
                 z0 = G["pawn"].get_actor_location().z
                 rev0 = state().get("revealed", 0)
                 v["prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 400.0))
+                nf = len(msgs)
                 v["f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from watching(rwait(1.2), msgs)
                 v["said"] = str(cb().message)[:160]
+                # (every line shown after the press: the seventh phase's geyser erupted as she watched it, and its line hid the use's)
+                said_all = msgs[nf:] + [v["said"]]
                 v["got"] = {t: cb().get_item_count(t) - before[t] for t in things}
                 v["blessing"] = str(cb().get_blessing())
                 v["rose_m"] = round((G["pawn"].get_actor_location().z - z0) / 100.0, 1)
@@ -1459,6 +1464,7 @@ def step_scenery13():
                            and (d != "trade" or sum(v["got"].values()) > 0)
                            and (d not in ("milestone", "rumour", "tracks") or len(v["said"]) > 20)
                            and (d != "echo" or (v.get("echoes", 0) >= 1 and v.get("echo_told")))
+                           and (d != "geyser" or any("again in about" in m_ or "going now" in m_ for m_ in said_all))
                            and (not spec.get("hours") or (not v["out_of_hours"]["blessed"] and v["out_of_hours"]["told_when"])))
                 r["uses"].append(v)
                 ground_put(*near); yield from rwait(0.6)
@@ -1487,12 +1493,14 @@ def step_scenery13():
                     ground_put(hz["x"] / 100.0 + 40.0, hz["y"] / 100.0); yield from watching(rwait(20.0), msgs)
                     v["counted_hers"] = g.get_editor_property("animals_killed") - ak0
                 else:
+                    nh = len(msgs)                  # (the lines from here on are this hazard's (PR #71's review: the tremor read the whole visit's))
                     ground_put(hz["x"] / 100.0, hz["y"] / 100.0)
                     # (a bog drags at her only after 4 s in it: she stands 7 s, and her speed is read while she is in it; scree: how far
                     # it carries her in 3 s standing still)
                     put0 = G["pawn"].get_actor_location()
                     # (a flood: the thunder, then the water 6 s on: she waits 8 s on the channel's floor)
-                    yield from watching(rwait(7.0 if hz["kind"] == "bog" else 8.0 if hz["kind"] == "flood" else 4.0 if hz["kind"] in ("sting", "heat") else 3.0 if hz["kind"] == "scree" else 2.2), msgs)
+                    # (the seventh phase: a geyser's cycle (30 s in the data) waited through; the gas after its breath and a half)
+                    yield from watching(rwait(7.0 if hz["kind"] == "bog" else 8.0 if hz["kind"] == "flood" else 36.0 if hz["kind"] == "geyser" else 4.0 if hz["kind"] in ("sting", "heat", "gas") else 3.0 if hz["kind"] == "scree" else 2.2), msgs)
                     if hz["kind"] == "flood": v["carried_m"] = round(math.hypot(G["pawn"].get_actor_location().x - put0.x, G["pawn"].get_actor_location().y - put0.y) / 100.0, 2)
                     if hz["kind"] == "scree":
                         v["carried_m"] = round(math.hypot(G["pawn"].get_actor_location().x - put0.x, G["pawn"].get_actor_location().y - put0.y) / 100.0, 2)
@@ -1509,9 +1517,9 @@ def step_scenery13():
                 v["sprung"] = next((x["sprung"] for x in scen_things(g, sid)["haz"] if abs(x["x"] - hz["x"]) < 1 and abs(x["y"] - hz["y"]) < 1), 0)
                 v["monsters_came"] = len(mine_mons()) - mons0
                 if hz["kind"] == "bog" and v.get("walk_speed_in_bog", 0) >= v.get("walk_speed_out", 0) * 0.8: v["slow_failed"] = True
-                if hz["kind"] == "flood" and v.get("carried_m", 0) < 2.0: v["slow_failed"] = True
+                if hz["kind"] == "flood" and v.get("carried_m", 0) < (1.0 if kd == "glacier_flood" else 2.0): v["slow_failed"] = True     # (a fissure 3 to 5 m wide: 1.4 m)
                 if hz["kind"] == "scree" and (v.get("carried_m", 0) < 1.0 or v.get("walk_speed_in", 1e9) >= v.get("walk_speed_out", 0) * 0.8): v["slow_failed"] = True
-                v["ok"] = v["sprung"] > 0 and not v.get("slow_failed") and (True if hz["kind"] == "scree" else v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting", "heat", "fall", "bog", "pit", "rockfall", "avalanche", "cornice", "crevasse", "flood") else v.get("counted_hers", 0) == 0 if hz["kind"] == "hunt" else v["monsters_came"] > 0)
+                v["ok"] = v["sprung"] > 0 and not v.get("slow_failed") and (True if hz["kind"] == "scree" else v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting", "heat", "fall", "bog", "pit", "rockfall", "avalanche", "cornice", "crevasse", "flood", "geyser", "gas", "crust") else any("shudders" in m_ for m_ in msgs[nh:]) if hz["kind"] == "tremor" else v.get("counted_hers", 0) == 0 if hz["kind"] == "hunt" else v["monsters_came"] > 0)
                 r["hazards"].append(v)
                 cb().set_health(cb().get_max_health())
                 ground_put(*near); yield from rwait(1.0)

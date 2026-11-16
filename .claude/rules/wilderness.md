@@ -341,3 +341,17 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
     - A word a rule does not know says so (`hours=`); a rule kept in code and in data is kept in one (the fairy ring's night is its data now).
     - A test of "it said when" looks for those words, not the HUD's last line.
     - A test's local name can shadow the step's: `want` for a phrase overwrote the list of kinds, and the step failed on its count with every kind passing.
+- **Phase 7 (volcanoes, volcanic tundra, geothermal caldera)**:
+  - **A landform is ground to stand on, not a piece to step off**: the sixth phase's `ground_put` stepped her aside from anything 1.5 m over the bare ground, and on the cinder cone's flank that moved her out of the scree. It steps aside from pieces (static meshes) only.
+  - **A kind of effects alone lays no pieces** (again): the hot river and the steam field were laid with nothing to visit. Give each something to stand among.
+  - **A hazard's line can hide a use's**: the geyser erupted as she watched it and its line replaced the use's before the test read it. Read every line shown after a press.
+  - **A one-sided face wound inward is not drawn**: the sod hut's +Y roof slope faced in and down, and only the roof's outline showed. Picture a hand-wound face from outside.
+  - **A rim that needs level ground is not on a volcano**: no spot on its steep upper flanks was level within 10 m. The crater's view is a shoulder (`place=rise`).
+  - **Black reads as a hole**: the basalt at 0.17 and the lava tube's boxed arch read as black stepped heaps; lighter (0.26) and a rounded arch read as rock.
+  - **PR #71's review (2026-11-16)**:
+    - A hand-wound face is checked by its winding, not its colour: black obsidian hid shards wound inward, and the sod hut had no back gable. Look at a piece from every side it can be seen from.
+    - A hazard covers what its look covers: a 60 m glowing lava ridge burned only 3 m round its middle; its heat is laid along it.
+    - Fix a game's fault in the game, not in its test: the geyser's roar hid the clock's line. The test read every line, but a player still lost the clock. A use's line moves its scenery's told time, and the roar waits 3 s after it.
+    - A hazard counts a springing when it catches her, once each time (the geyser once an eruption she is in, the gas once each entry), never by time spent near it.
+    - A field another rule fills is no home for a new value: the geyser's period in `Length` would be a hidden piece's height. One helper for one cycle (`RDS13GeyserPhase`), read by the eruptions and the clock.
+    - A bar lowered for one case stays the other cases' bar: the fissure's 1 m flood check is the fissure's alone. A check of what a step said reads the lines from that step on.

@@ -2598,8 +2598,9 @@ public:
 	/** (phase 2: Tint's alpha over 0 colours the ground under it that colour, bare of sand, mud, rock and snow: a salt pan's crust) */
 	/** (the fourth phase: Poly, an outline in the landform's frame (-1 to 1 of its reach), keeps only the quads inside it: a chalk figure
 	 *  cut into a slope) */
-	/** (the sixth phase: "mesa" a butte (a flat top, sheer sides, a talus apron); Bands its colour in layers by height, the foot's first) */
-	class UProceduralMeshComponent* LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater, FLinearColor Tint = FLinearColor::Transparent, const TArray<FVector2D>* Poly = nullptr, const TArray<FLinearColor>* Bands = nullptr);
+	/** (the sixth phase: "mesa" a butte (a flat top, sheer sides, a talus apron); Bands its colour in layers by height, the foot's first;
+	 *  the seventh: Lava its glow, 0-1, the ground material's lava) */
+	class UProceduralMeshComponent* LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater, FLinearColor Tint = FLinearColor::Transparent, const TArray<FVector2D>* Poly = nullptr, const TArray<FLinearColor>* Bands = nullptr, float Lava = 0.f);
 	/** the rises a kind's parts have laid so far (LayWildParts clears them as it begins; LayWildScenery after its uses and hazards), and
 	 *  the ground with them: what is laid after a mound stands on it */
 	struct FWildLand { FVector2D At = FVector2D::ZeroVector; FString Type; float R = 1.f, R2 = 1.f, H = 0.f, Yaw = 0.f, Crater = 0.f; };
@@ -2680,6 +2681,8 @@ public:
 		float Start = -1.f, Length = 0.f; TArray<TWeakObjectPtr<ARDWildAnimal>> Hunters; TWeakObjectPtr<ARDWildAnimal> Prey; int32 Kills = 0;
 		/** (PR #66's review) every laid piece Hide names: a fall takes the one nearest her as it springs */
 		TArray<TWeakObjectPtr<UPrimitiveComponent>> Cands;
+		/** (the seventh phase) a geyser's cycle, seconds (PR #71's review: kept in Length, a hidden piece's height overwrote it) */
+		float Every = 0.f;
 	};
 	struct FSceneryFx { TWeakObjectPtr<class UNiagaraComponent> Comp; FString Hours; };
 	struct FSceneryHerd { int32 Id = 0; TArray<TWeakObjectPtr<ARDWildAnimal>> Animals; FVector2D Home = FVector2D::ZeroVector; FVector2D Way = FVector2D(1, 0); float Phase = 0.f, Pen = 0.f; bool bMigrate = false, bStampede = false; float StampedeUntil = -1.f, NextHit = 0.f; int32 Stampedes = 0, Hits = 0; };

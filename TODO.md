@@ -40,7 +40,11 @@ The biomes' scenery, in phases with a PR each (the user's choices: every item to
   - The cliff dwellings and the toe-hold trail stand at a cliff's foot, not high in an alcove of its wall; the overlooks and the junipers stand at a rim the world's model drew, not at a sheer drop. The slot canyons are 4 to 6 m wide (the drawn ground cannot hold a slot you touch both walls of).
   - The light shafts, the walls glowing red at sunrise and sunset and the slots going dark early are the sky's own light; nothing was added or measured for them. The flood is a blow, a push and splashes: no water rises. The echo is a line of text (nobody hears a test). Storms seen from above are the open lands' far storms, now in the canyons' and mesas' list too.
   - The condors are the packs' birds; the lizards are not there. The tests ran in batches of five in the foreground: the editor's start of play left 0.7 GB free, and two background runs were stopped for memory.
-- [ ] **Phases 7 to 10:** the volcanic lands; the tundra and the arctic; the marshes, wetlands and coasts (tides); the lists' "what helps" across all of them.
+- [ ] **Phase 7 (volcanoes, volcanic tundra, geothermal caldera), what is not done or measured:**
+  - The lava flows and lakes are skins of the land with the ground's glow: no lava moves, and no new flows open. The eruption is its signs (tremors, ash, dead birds): the mountain never erupts. The lava tube's mouth leads nowhere (no tunnel to walk).
+  - The glacier volcanoes' floods are the canyons' flood in a fissure; the icebergs on black sand are blocks of ice inland (no beach was placed by the sea). The auroras come with the arctic (phase 8).
+  - The steam fields thicken the world's fog round them (measured); the smell of sulfur is a line of text. Obsidian and Sulfur are sold, not crafted with, and their pictures are the steel ingot's and the oils' (no new pictures were painted).
+- [ ] **Phases 8 to 10:** the tundra and the arctic; the marshes, wetlands and coasts (tides); the lists' "what helps" across all of them.
 - [ ] **Phase 1, what is not done or measured:**
   - The burrows' "collapsing tunnels" are a fall's harm and a slow where the ground gives way: the ground itself does not open (a chunk's ground is one mesh).
   - The herons stand still (a mesh of our own, no clips); the bees and the birds are the packs' effects (flies as bees, the flocks as crows); the frogs are not there (no frog in the project).
