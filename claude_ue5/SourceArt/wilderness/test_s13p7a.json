@@ -1,0 +1,946 @@
+{
+ "tag": "s13p7a",
+ "plan": [
+  "scenery13=lava_flow+lava_tube+cinder_cone+ash_village+volcanic_bombs+fumarole_field+obsidian_field+crater_rim",
+  "land13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "scenery13",
+   "ok": false,
+   "kinds": {
+    "lava_flow": {
+     "found": true,
+     "id": 67285258,
+     "at_km": [
+      23.68,
+      9.96
+     ],
+     "name": "Lava flow",
+     "laid": {
+      "kind": "lava_flow",
+      "title": "Lava flow",
+      "x": 23676.2,
+      "y": 9961.1,
+      "pieces": 2,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 1,
+      "fx_on": 1,
+      "herd": 0,
+      "yaw": 301.4
+     },
+     "bottom_over_ground_cm": null,
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "skins": [
+      {
+       "what": "land",
+       "up_share": 1.0,
+       "top_z": 77758,
+       "ground_z": 77322,
+       "under": false,
+       "hit": "ProceduralMeshComponent_1",
+       "hit_z": 77367
+      },
+      {
+       "what": "land",
+       "up_share": 1.0,
+       "top_z": 77751,
+       "ground_z": 77322,
+       "under": false,
+       "hit": "ProceduralMeshComponent_1",
+       "hit_z": 77367
+      }
+     ],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the flow",
+       "f": "scenery",
+       "said": "The crust is black and it creaks. Under it, the orange shows through every crack.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "heat",
+       "hp_lost": 14.0,
+       "sprung": 4,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "Lava flow: a river of lava glowing under its cooling crust, the crust black and cracked either side | The crust is black and it creaks. Under it, the orange shows through every crack. | The ground smoulders under you: 4 damage",
+     "ok": true
+    },
+    "lava_tube": {
+     "found": true,
+     "id": 67296513,
+     "at_km": [
+      29.95,
+      4.32
+     ],
+     "name": "Lava tube",
+     "laid": {
+      "kind": "lava_tube",
+      "title": "Lava tube",
+      "x": 29945.6,
+      "y": 4322.4,
+      "pieces": 1,
+      "boxes": 1,
+      "guards": 2,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 345.7
+     },
+     "bottom_over_ground_cm": [
+      -27,
+      -27,
+      -27
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 1,
+     "want_chests": 1,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look into the tube",
+       "f": "scenery",
+       "said": "Warm air breathes out of it. The walls are glazed where the lava ran, and something has made a home in the dark.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Lava tube: the mouth of a lava tube: a tunnel the lava left when it drained away, going down into the dark | Warm air breathes out of it. The walls are glazed where the lava ran, and something has made a home in the dark.",
+     "ok": true
+    },
+    "cinder_cone": {
+     "found": true,
+     "id": 67290366,
+     "at_km": [
+      26.71,
+      2.83
+     ],
+     "name": "Cinder cone",
+     "laid": {
+      "kind": "cinder_cone",
+      "title": "Cinder cone",
+      "x": 26708.1,
+      "y": 2828.3,
+      "pieces": 1,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 198.8
+     },
+     "bottom_over_ground_cm": null,
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "skins": [
+      {
+       "what": "land",
+       "up_share": 1.0,
+       "top_z": 80355,
+       "ground_z": 79416,
+       "under": false,
+       "hit": "ProceduralMeshComponent_0",
+       "hit_z": 79866
+      }
+     ],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the cone",
+       "f": "scenery",
+       "said": "Cinders the size of fists, loose as gravel. Every step up slides half a step down.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "scree",
+       "carried_m": 0.0,
+       "walk_speed_in": 353,
+       "walk_speed_out": 353,
+       "hp_lost": 0.0,
+       "sprung": 0,
+       "monsters_came": 0,
+       "slow_failed": true,
+       "ok": false
+      }
+     ],
+     "told": "Cinder cone: a small black hill of loose scoria round a crater | Cinders the size of fists, loose as gravel. Every step up slides half a step down.",
+     "ok": false
+    },
+    "ash_village": {
+     "found": true,
+     "id": 67291386,
+     "at_km": [
+      27.05,
+      0.51
+     ],
+     "name": "Ash-buried village",
+     "laid": {
+      "kind": "ash_village",
+      "title": "Ash-buried village",
+      "x": 27050.8,
+      "y": 505.9,
+      "pieces": 5,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 236.9
+     },
+     "bottom_over_ground_cm": [
+      -387,
+      -379,
+      -334
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "skins": [
+      {
+       "what": "land",
+       "up_share": 1.0,
+       "top_z": 52447,
+       "ground_z": 52322,
+       "under": false,
+       "hit": "ProceduralMeshComponent_0",
+       "hit_z": 52352
+      }
+     ],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "loot",
+       "prompt": "dig at the buried door",
+       "f": "scenery",
+       "said": "You scrape the ash from a door and reach inside a buried kitchen.  You take 1 Bread",
+       "got": {
+        "Bread": 1,
+        "Iron Ingot": 0,
+        "Small Healing Potion": 0
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Ash-buried village: a village buried in ash: only roofs and the church's spire stand out of it | You scrape the ash from a door and reach inside a buried kitchen.  You take 1 Bread",
+     "ok": true
+    },
+    "volcanic_bombs": {
+     "found": true,
+     "id": 67287296,
+     "at_km": [
+      24.61,
+      4.05
+     ],
+     "name": "Volcanic bombs",
+     "laid": {
+      "kind": "volcanic_bombs",
+      "title": "Volcanic bombs",
+      "x": 24611.7,
+      "y": 4047.7,
+      "pieces": 8,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 36.3
+     },
+     "bottom_over_ground_cm": [
+      -69,
+      -33,
+      -24
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the bombs",
+       "f": "scenery",
+       "said": "Each one landed still soft and split open as it cooled. The crater is two miles off.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Volcanic bombs: blobs of rock the crater threw out, cooled in flight, scattered across the slope | Each one landed still soft and split open as it cooled. The crater is two miles off.",
+     "ok": true
+    },
+    "fumarole_field": {
+     "found": true,
+     "id": 67286284,
+     "at_km": [
+      24.28,
+      11.17
+     ],
+     "name": "Fumaroles",
+     "laid": {
+      "kind": "fumarole_field",
+      "title": "Fumaroles",
+      "x": 24282.4,
+      "y": 11166.1,
+      "pieces": 2,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 2,
+      "fx_on": 2,
+      "herd": 0,
+      "yaw": 57.1
+     },
+     "bottom_over_ground_cm": [
+      -25,
+      -10,
+      -10
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "forage",
+       "prompt": "scrape the sulfur",
+       "f": "scenery",
+       "said": "Yellow crystals flake off into your hand. The smell of rotten eggs follows you for an hour.  You take 3 Sulfur",
+       "got": {
+        "Sulfur": 3
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "gas",
+       "hp_lost": 16.8,
+       "sprung": 3,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "Fumaroles: vents hissing sulfur steam, yellow crystal crusts round them | Yellow crystals flake off into your hand. The smell of rotten eggs follows you for an hour.  You take 3 Sulfur | Your head pounds and your breath will not come: the air in the hollow is bad: 6 damage",
+     "ok": true
+    },
+    "obsidian_field": {
+     "found": true,
+     "id": 67285257,
+     "at_km": [
+      23.59,
+      9.37
+     ],
+     "name": "Obsidian field",
+     "laid": {
+      "kind": "obsidian_field",
+      "title": "Obsidian field",
+      "x": 23593.6,
+      "y": 9368.2,
+      "pieces": 2,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 4.0
+     },
+     "bottom_over_ground_cm": [
+      -72,
+      -64,
+      -64
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "forage",
+       "prompt": "gather the obsidian",
+       "f": "scenery",
+       "said": "Black glass, smooth as water on one face and sharper than any blade on the other.  You take 1 Obsidian",
+       "got": {
+        "Obsidian": 1
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "pit",
+       "hp_lost": 9.8,
+       "sprung": 1,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "Obsidian field: a field of black volcanic glass, sharp as knives | Black glass, smooth as water on one face and sharper than any blade on the other.  You take 1 Obsidian | The glass's edges cut through your boots: 10 damage",
+     "ok": true
+    },
+    "crater_rim": {
+     "found": false,
+     "ok": false
+    }
+   },
+   "table": 195,
+   "counts_30km": {
+    "tall_grass": 77,
+    "burrow_town": 249,
+    "hanged_tree": 59,
+    "nest_tree": 69,
+    "shrine_tree": 73,
+    "erratic": 233,
+    "migration": 4,
+    "wallow": 63,
+    "hive_meadow": 31,
+    "brook_crossing": 0,
+    "fairy_ring": 53,
+    "shepherd_hut": 118,
+    "reed_pond": 1,
+    "old_orchard": 111,
+    "dusk_meadow": 17,
+    "butte": 209,
+    "battlefield": 229,
+    "milestone_road": 7,
+    "crossroads_gibbet": 1,
+    "crossroads_shrine": 1,
+    "crossroads_notice": 0,
+    "wagon_wreck": 6,
+    "hedged_fields": 114,
+    "scarecrows": 39,
+    "threshing_yard": 20,
+    "mill_pond": 2,
+    "pumpkin_patch": 29,
+    "abandoned_farm": 84,
+    "loose_livestock": 83,
+    "baobab": 2,
+    "acacia_shade": 5,
+    "termite_mounds": 7,
+    "kopje": 10,
+    "waterhole": 2,
+    "vulture_kill": 9,
+    "salt_pan": 5,
+    "yurt_camp": 0,
+    "kurgan": 73,
+    "prayer_cairn": 13,
+    "petroglyph_rocks": 54,
+    "hot_spring": 0,
+    "pingo": 0,
+    "charred_snags": 0,
+    "hot_spots": 0,
+    "ash_drift": 0,
+    "regrowth": 0,
+    "scorched_farmstead": 0,
+    "looters_camp": 0,
+    "fire_break": 0,
+    "fused_glass": 0,
+    "beast_carcasses": 0,
+    "resin_camp": 0,
+    "sunlit_clearing": 0,
+    "granite_outcrop": 0,
+    "lightning_pine": 0,
+    "logging_camp": 0,
+    "owl_hollow": 0,
+    "pine_ridge": 0,
+    "lichen_heath": 0,
+    "esker": 0,
+    "pine_dunes": 0,
+    "kettle_lake": 0,
+    "fire_scar": 0,
+    "herder_camp": 0,
+    "seid_stone": 0,
+    "muskeg_bog": 0,
+    "spruce_thicket": 0,
+    "beaver_pond": 0,
+    "moose_wallow": 0,
+    "trapline_cabin": 0,
+    "drunken_forest": 0,
+    "gold_larches": 0,
+    "leaf_pits": 0,
+    "fungus_glade": 0,
+    "hollow_giant": 0,
+    "mossy_walls": 0,
+    "nut_cache": 0,
+    "charcoal_hearth": 0,
+    "dawn_hollow": 0,
+    "harvest_shrine": 0,
+    "watching_aspens": 0,
+    "clonal_grove": 0,
+    "carved_aspens": 0,
+    "gold_stand": 0,
+    "beaver_stumps": 0,
+    "aspen_meadow": 0,
+    "aspen_edge": 0,
+    "windthrow": 0,
+    "hillfort": 28,
+    "chalk_figure": 59,
+    "terraced_fields": 69,
+    "dew_pond": 36,
+    "folly_tower": 30,
+    "beacon_hill": 37,
+    "quarry": 70,
+    "hillside_vines": 51,
+    "combe": 13,
+    "peat_hags": 0,
+    "tor": 12,
+    "heather_gorse": 61,
+    "stone_row": 0,
+    "peat_cutting": 0,
+    "moor_mist": 0,
+    "bothy": 0,
+    "grouse_butts": 0,
+    "moor_ford": 1,
+    "switchback": 7,
+    "alpine_pasture": 13,
+    "mountain_pass": 9,
+    "scree_slope": 9,
+    "hanging_waterfall": 0,
+    "mine_adit": 5,
+    "cliff_shrine": 5,
+    "rope_bridge": 6,
+    "tarn": 1,
+    "goat_ledges": 9,
+    "arete": 0,
+    "summit_cairn": 0,
+    "cornice_edge": 0,
+    "avalanche_chute": 5,
+    "couloir": 1,
+    "rime_ledge": 0,
+    "climbers_camp": 0,
+    "cloud_sea": 0,
+    "dragon_aerie": 13,
+    "crevasse_field": 0,
+    "serac_field": 0,
+    "ice_cave": 0,
+    "moulin": 0,
+    "moraine": 0,
+    "meltwater_lake": 0,
+    "frozen_thing": 0,
+    "nunatak": 0,
+    "ice_ruins": 0,
+    "banded_wall": 3,
+    "slot_canyon": 1,
+    "canyon_creek": 2,
+    "cliff_dwelling": 7,
+    "petroglyph_panel": 5,
+    "natural_arch": 76,
+    "hanging_garden": 3,
+    "echo_point": 9,
+    "rockfall_scar": 2,
+    "toehold_trail": 6,
+    "box_canyon": 5,
+    "junction_cairn": 19,
+    "hidden_side_canyon": 27,
+    "pour_off": 3,
+    "tinaja": 74,
+    "outlaw_hideout": 7,
+    "gold_wash": 2,
+    "flood_debris": 1,
+    "hoodoo_forest": 104,
+    "dry_wash": 1,
+    "banded_butte": 59,
+    "mesa_pueblo": 7,
+    "spire": 76,
+    "talus_apron": 1,
+    "overlook": 0,
+    "sky_shrine": 6,
+    "caprock_pools": 7,
+    "condor_ledge": 3,
+    "lone_juniper": 5,
+    "storm_below": 0,
+    "lava_flow": 8,
+    "lava_tube": 2,
+    "cinder_cone": 2,
+    "ash_village": 5,
+    "volcanic_bombs": 4,
+    "fumarole_field": 3,
+    "obsidian_field": 3,
+    "crater_rim": 0,
+    "eruption_signs": 3,
+    "fire_temple": 9,
+    "lava_lake": 1,
+    "moss_lava": 0,
+    "black_sand": 0,
+    "basalt_columns": 3,
+    "glacier_flood": 0,
+    "rift_fissure": 0,
+    "pseudocraters": 0,
+    "sod_farm": 0,
+    "hot_river": 0,
+    "troll_rocks": 0,
+    "geyser": 0,
+    "terraced_pools": 0,
+    "mud_pots": 0,
+    "bacterial_mats": 0,
+    "thin_crust": 0,
+    "steam_field": 0,
+    "crater_lake": 0,
+    "resurgent_dome": 0,
+    "spa_village": 0,
+    "petrified_forest": 7,
+    "gas_hollow": 0,
+    "cells": 10201
+   }
+  },
+  {
+   "step": "land13",
+   "ok": true,
+   "channels": {
+    "arroyo": {
+     "near": 5,
+     "at_km": [
+      2.15,
+      7.04
+     ],
+     "width_m": 10.9,
+     "depth_m": 3.5,
+     "bed_under_banks_m": 3.83,
+     "her_feet_under_banks_m": 3.42,
+     "ok": true
+    },
+    "dry riverbed": {
+     "near": 5,
+     "at_km": [
+      -12.06,
+      -30.89
+     ],
+     "width_m": 15.8,
+     "depth_m": 1.9,
+     "bed_under_banks_m": 1.64,
+     "her_feet_under_banks_m": 1.5,
+     "ok": true
+    },
+    "irrigation ditch": {
+     "near": 5,
+     "at_km": [
+      3.06,
+      1.49
+     ],
+     "width_m": 1.8,
+     "depth_m": 0.9,
+     "bed_under_banks_m": 0.91,
+     "her_feet_under_banks_m": 0.89,
+     "ok": true
+    },
+    "fire break": {
+     "near": 5,
+     "at_km": [
+      71.02,
+      -4.79
+     ],
+     "width_m": 8.1,
+     "depth_m": 0.7,
+     "bed_under_banks_m": 0.71,
+     "her_feet_under_banks_m": 0.71,
+     "ok": true
+    },
+    "holloway": {
+     "near": 5,
+     "at_km": [
+      22.16,
+      -73.9
+     ],
+     "width_m": 4.3,
+     "depth_m": 3.4,
+     "bed_under_banks_m": 3.56,
+     "her_feet_under_banks_m": 3.42,
+     "ok": true
+    },
+    "sheep track": {
+     "near": 5,
+     "at_km": [
+      -14.41,
+      8.72
+     ],
+     "width_m": 1.5,
+     "depth_m": 0.3,
+     "bed_under_banks_m": 0.35,
+     "her_feet_under_banks_m": 0.31,
+     "ok": true
+    },
+    "hill holloway": {
+     "near": 5,
+     "at_km": [
+      -19.98,
+      13.68
+     ],
+     "width_m": 4.0,
+     "depth_m": 2.6,
+     "bed_under_banks_m": 2.64,
+     "her_feet_under_banks_m": 2.61,
+     "ok": true
+    },
+    "slot canyon": {
+     "near": 5,
+     "at_km": [
+      -11.6,
+      -14.92
+     ],
+     "width_m": 5.0,
+     "depth_m": 8.8,
+     "bed_under_banks_m": 8.8,
+     "her_feet_under_banks_m": 8.79,
+     "ok": true
+    },
+    "fissure": {
+     "near": 5,
+     "at_km": [
+      120.03,
+      2.71
+     ],
+     "width_m": 3.6,
+     "depth_m": 6.3,
+     "bed_under_banks_m": 6.36,
+     "her_feet_under_banks_m": 6.3,
+     "ok": true
+    }
+   },
+   "swales": {
+    "grasslands": {
+     "found": true,
+     "at_km": [
+      6.0,
+      0.0
+     ],
+     "amp": 3.5,
+     "range_m": 23.5,
+     "crests_1600m": 8,
+     "crests_hiding_300m": 7
+    },
+    "savannahs": {
+     "found": true,
+     "at_km": [
+      -15.0,
+      -25.98
+     ],
+     "amp": 3.0,
+     "range_m": 40.1,
+     "crests_1600m": 5,
+     "crests_hiding_300m": 3
+    },
+    "plains": {
+     "found": true,
+     "at_km": [
+      -6.43,
+      -7.66
+     ],
+     "amp": 5.0,
+     "range_m": 105.1,
+     "crests_1600m": 3,
+     "crests_hiding_300m": 2
+    }
+   },
+   "crossroads_50km": 44,
+   "storm": {
+    "on": 1,
+    "km": 6.0
+   },
+   "grassfire": {
+    "name": "grassfire",
+    "on": 1,
+    "km": 8.0
+   },
+   "dust": {
+    "fair_fog": [
+     0.42,
+     0.45,
+     0.5
+    ],
+    "dust_fog": [
+     0.651,
+     0.495,
+     0.31
+    ],
+    "weather": "dust"
+   },
+   "whiteout": {
+    "fair_fog": [
+     0.42,
+     0.45,
+     0.5
+    ],
+    "white_fog": [
+     0.567,
+     0.621,
+     0.725
+    ],
+    "weather": "whiteout"
+   },
+   "field_stages": {
+    "ripe": 2882,
+    "sprouting": 1122,
+    "fallow": 708,
+    "burned": 287,
+    "fields": 4999
+   },
+   "quiet": {
+    "pine forests": {
+     "scale": 0.65,
+     "notice_m": 25.0,
+     "start_m": 20.0,
+     "after_3s_m": 20.0,
+     "came": false
+    },
+    "grasslands": {
+     "scale": 1.0,
+     "notice_m": 25.0,
+     "start_m": 19.9,
+     "after_3s_m": 15.5,
+     "came": true
+    }
+   },
+   "thin_air": {
+    "mountains and peaks": {
+     "thin": true,
+     "walk_speed": 300
+    },
+    "mountains": {
+     "thin": false,
+     "walk_speed": 353
+    }
+   },
+   "moor_fog": {
+    "highland moorland": {
+     "fog_share": 0.1353,
+     "counts": {
+      "clear": 598,
+      "fair": 833,
+      "cloudy": 789,
+      "overcast": 539,
+      "rain": 470,
+      "storm": 230,
+      "snow": 0,
+      "fog": 541,
+      "whiteout": 0,
+      "dust": 0,
+      "cloudless": 0
+     }
+    },
+    "grasslands": {
+     "fog_share": 0.0537,
+     "counts": {
+      "clear": 591,
+      "fair": 878,
+      "cloudy": 910,
+      "overcast": 599,
+      "rain": 546,
+      "storm": 261,
+      "snow": 0,
+      "fog": 215,
+      "whiteout": 0,
+      "dust": 0,
+      "cloudless": 0
+     }
+    }
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s13p7a_scenery13_lava_flow.png",
+  "wd_s13p7a_scenery13_lava_flow_near.png",
+  "wd_s13p7a_scenery13_lava_tube.png",
+  "wd_s13p7a_scenery13_lava_tube_near.png",
+  "wd_s13p7a_scenery13_cinder_cone.png",
+  "wd_s13p7a_scenery13_cinder_cone_near.png",
+  "wd_s13p7a_scenery13_ash_village.png",
+  "wd_s13p7a_scenery13_ash_village_near.png",
+  "wd_s13p7a_scenery13_volcanic_bombs.png",
+  "wd_s13p7a_scenery13_volcanic_bombs_near.png",
+  "wd_s13p7a_scenery13_fumarole_field.png",
+  "wd_s13p7a_scenery13_fumarole_field_near.png",
+  "wd_s13p7a_scenery13_obsidian_field.png",
+  "wd_s13p7a_scenery13_obsidian_field_near.png",
+  "wd_s13p7a_land13_arroyo.png",
+  "wd_s13p7a_land13_dry riverbed.png",
+  "wd_s13p7a_land13_irrigation ditch.png",
+  "wd_s13p7a_land13_fire break.png",
+  "wd_s13p7a_land13_holloway.png",
+  "wd_s13p7a_land13_sheep track.png",
+  "wd_s13p7a_land13_hill holloway.png",
+  "wd_s13p7a_land13_slot canyon.png",
+  "wd_s13p7a_land13_fissure.png",
+  "wd_s13p7a_land13_storm.png",
+  "wd_s13p7a_land13_grassfire.png",
+  "wd_s13p7a_land13_dust.png",
+  "wd_s13p7a_land13_whiteout.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

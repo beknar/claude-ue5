@@ -630,7 +630,48 @@ The user's list of 2026-11-14 ([docs/improvements13.txt](../improvements13.txt))
 - **Measured** (`test_s13p6g.json` to `test_s13p6l.json`; the land pass, the slot canyons' channels 4 m wide and 8.7 m deep, in `test_s13p6a.json`): every kind found within 150 km of Brokenspire and visited. The slot canyon's flood struck her for 21 and carried her 3.3 m down it, the dry wash's 21 and 2.8 m; the rockfall 16.8; the talus slowed her to 194 cm/s against 353 out of it and carried her 1.9 m. The echo called back (one line, 1.6 s on); the sun dagger gave nothing at 14:00 and said so, and The Sun's Blade at 6:30. She climbed the toe-hold trail 9 m, the pour-off 4.5 m and the overlook's rock 2.1 m, and saw 7,734, 2,699 and 19,741 more of the map. The box canyon's three lay low at 30 m, then hunted and struck from 9 m (25 taken). The tinaja healed; the wash panned iron, the dwellings gave a potion and rope, the pueblo's elder cheese for bread. The canyons' slopes show their strata in every picture of the region (the sheet's far walls).
 
 ![Canyons, canyon networks and mesas' 30 kinds, from 15 m](../images/scenery13_canyons.jpg)
-## The TODO sweep (2026-11-14)
+
+### Volcanoes, volcanic tundra and the geothermal caldera
+
+| Kind | Biomes | What stands there | What she does there |
+|---|---|---|---|
+| Lava flow | volcanoes, tundra | a ridge of lava glowing under a black crust (skins with the ground's own glow), smoke | its heat burns |
+| Lava tube | volcanoes, tundra | a lava tube's mouth of black basalt | its two guards; a chest |
+| Cinder cone | volcanoes, tundra | a black cone of scoria 9 m high round its crater (a landform) | the cinders slide under her |
+| Ash-buried village | volcanoes | grey ash, three roofs and a church's spire standing out of it | dig at a buried door |
+| Volcanic bombs | volcanoes | blobs of black rock thrown from the crater | |
+| Fumaroles | volcanoes, caldera | two sulfur-crusted vents, their steam | scrape sulfur; the gas at a vent hurts |
+| Obsidian field | volcanoes, tundra | black glass shards | gather obsidian; its edges cut |
+| Volcano's shoulder | volcanoes (a rise) | a rock, volcanic bombs, the crater's smoke above | climb the rock: the map shows 4 km round |
+| Eruption signs | volcanoes | grey ash, dead birds | the ground shudders under her, ash falls |
+| Fire temple | volcanoes | a temple's arch, a brazier's fire, a cauldron, its keeper | leave bread: The Mountain's Heat |
+| Lava lake | volcanoes | a lake of glowing lava ringed with boulders, smoke | its heat burns |
+| Moss-covered lava | tundra | green moss over a field of lava blocks | a hole under the moss |
+| Black sand | tundra (a hollow) | black sand, blocks of glacier ice on it | |
+| Basalt columns | tundra, volcanoes | hexagonal basalt columns stepped to 7 m | climb them: the map shows 2 km round |
+| Meltwater flood | tundra (a fissure) | blocks of ice in a dry rift | thunder, then the meltwater comes down the rift |
+| Rift | tundra (a fissure) | rubble in a fissure 6 to 10 m deep | |
+| Pseudocraters | tundra | three small mossy craters (landforms) | |
+| Turf farm | tundra | a turf-roofed hut, a stone sheep pen, sheep, the farmer | trade bread for cheese; talk |
+| Hot river | tundra, caldera (by water) | steam off the water | bathe: wounds and mana restored |
+| Troll rocks | tundra | three tall weathered rocks | |
+| Geyser | caldera | a geyser's white sinter cone, its steam | watch it: it says when it goes again; every 30 s it erupts, scalds and throws her |
+| Terraced pools | caldera | white, orange and teal mineral steps (skins), steam | bathe |
+| Mud pots | caldera | boiling grey mud (a skin), steam | its heat burns |
+| Bacterial mats | caldera | rings of orange, yellow and teal (skins) | |
+| Thin crust | caldera | pale crust (a skin), a wisp of steam | it breaks under her (once): a scald, her legs slowed |
+| Steam field | caldera | vents of steam, the world's fog thickened round it | |
+| Crater lake | caldera (a hollow) | a turquoise lake (a skin), boulders | |
+| Resurgent dome | caldera | a dome 6 m high and 60 m across, dark cracks round it (landforms) | the ground shudders |
+| Spa village | caldera | a steaming hot spring, two houses, the bath keeper | bathe; talk |
+| Dead forest | caldera, volcanoes | bare white dead trees | |
+| Gas hollow | caldera, volcanoes (a hollow) | dead animals' bones | the gas hurts her after a breath and a half |
+
+- **What is new**: hazards `geyser` (every `every=` seconds, its own offset in the cycle, 6 s of eruption: a column of steam, and a scald and a throw upward for her within its reach), `gas` (after a breath and a half, a hurt every second), `crust` (once a play: a scald and her legs slowed) and `tremor` (every 25 s while she is near: the ground shudders, her steps slowed a moment, ash sifting down); use `geyser` (the seconds to its next eruption, from its own hazard's cycle: a clock); a pit's `msg=`; `lava=` on any landform (the ground material's own glow: lava lakes and flows, the crater's lake below its rim); the volcanic tundra's fissures (a channel rule 3 to 5 m wide, 6 to 10 deep); Obsidian and Sulfur, gathered and sold (their pictures the steel ingot's and the oils').
+- **Its own pieces** (`scenery13_kit.py`): basalt columns, obsidian shards, a fumarole, volcanic bombs, a sod hut, a geyser's cone, a church's spire, a lava tube's mouth.
+- **Measured** (`test_s13p7a.json` to `test_s13p7g.json`; the land pass in `test_s13p7a.json`): every kind found within 150 km of Brokenspire and visited. The geyser erupted on its cycle and scalded and threw her (33.6 taken over its 6 s); its use told when it goes again. The lava flow's, the lava lake's and the mud pots' heat burned her (14 each); the gas in a hollow and at a fumarole hurt her after its breath and a half (16.8); the thin crust broke under her (16.8); the obsidian's edges and the moss's hidden hole cut (9.8); the cinder cone's scoria slowed her to 194 cm/s against 353 and carried her 1.8 m; the meltwater flood struck her (21) and pushed her 1.4 m down its fissure; the tremors shook the ground under her at the eruption signs and the resurgent dome. She climbed the basalt columns 6.6 m and the shoulder's rock 2.3 m, and saw 4,909 and 19,979 more of the map; scraped 3 Sulfur and gathered Obsidian; the fire temple's keeper gave The Mountain's Heat for bread; the farmer cheese; the spa healed her.
+
+![Volcanoes, volcanic tundra and the geothermal caldera's 31 kinds, from 15 m](../images/scenery13_volcanic.jpg)## The TODO sweep (2026-11-14)
 
 The open items of `TODO.md` that a test could settle in the wilds (`888 ... -Light`):
 

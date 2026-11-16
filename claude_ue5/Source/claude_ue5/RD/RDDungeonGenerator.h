@@ -2598,8 +2598,9 @@ public:
 	/** (phase 2: Tint's alpha over 0 colours the ground under it that colour, bare of sand, mud, rock and snow: a salt pan's crust) */
 	/** (the fourth phase: Poly, an outline in the landform's frame (-1 to 1 of its reach), keeps only the quads inside it: a chalk figure
 	 *  cut into a slope) */
-	/** (the sixth phase: "mesa" a butte (a flat top, sheer sides, a talus apron); Bands its colour in layers by height, the foot's first) */
-	class UProceduralMeshComponent* LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater, FLinearColor Tint = FLinearColor::Transparent, const TArray<FVector2D>* Poly = nullptr, const TArray<FLinearColor>* Bands = nullptr);
+	/** (the sixth phase: "mesa" a butte (a flat top, sheer sides, a talus apron); Bands its colour in layers by height, the foot's first;
+	 *  the seventh: Lava its glow, 0-1, the ground material's lava) */
+	class UProceduralMeshComponent* LayWildLandform(ARDWildChunk* C, const FVector2D& O, const FString& Type, float Rm, float R2m, float Hm, float Yaw, float Crater, FLinearColor Tint = FLinearColor::Transparent, const TArray<FVector2D>* Poly = nullptr, const TArray<FLinearColor>* Bands = nullptr, float Lava = 0.f);
 	/** the rises a kind's parts have laid so far (LayWildParts clears them as it begins; LayWildScenery after its uses and hazards), and
 	 *  the ground with them: what is laid after a mound stands on it */
 	struct FWildLand { FVector2D At = FVector2D::ZeroVector; FString Type; float R = 1.f, R2 = 1.f, H = 0.f, Yaw = 0.f, Crater = 0.f; };

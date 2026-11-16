@@ -1,0 +1,741 @@
+{
+ "tag": "s13p7b",
+ "plan": [
+  "scenery13=eruption_signs+fire_temple+lava_lake+moss_lava+black_sand+basalt_columns+glacier_flood+rift_fissure"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "scenery13",
+   "ok": false,
+   "kinds": {
+    "eruption_signs": {
+     "found": true,
+     "id": 67288323,
+     "at_km": [
+      25.22,
+      5.82
+     ],
+     "name": "Eruption signs",
+     "laid": {
+      "kind": "eruption_signs",
+      "title": "Eruption signs",
+      "x": 25217.2,
+      "y": 5819.1,
+      "pieces": 5,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 341.4
+     },
+     "bottom_over_ground_cm": [
+      -4,
+      -4,
+      -4
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "skins": [
+      {
+       "what": "land",
+       "up_share": 1.0,
+       "top_z": 169704,
+       "ground_z": 169607,
+       "under": false,
+       "hit": "ProceduralMeshComponent_0",
+       "hit_z": 169637
+      }
+     ],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the dead birds",
+       "f": "scenery",
+       "said": "Small birds, dozens of them, dead where they fell. The air at the ground is wrong. Something is coming.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "tremor",
+       "hp_lost": 0.0,
+       "sprung": 1,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "Eruption signs: the ground trembles, ash falls from a clear sky, dead birds lie in the grey | Small birds, dozens of them, dead where they fell. The air at the ground is wrong. Something is coming. | The ground shudders under your feet. Ash sifts down out of a clear sky",
+     "ok": true
+    },
+    "fire_temple": {
+     "found": true,
+     "id": 67289340,
+     "at_km": [
+      25.92,
+      1.37
+     ],
+     "name": "Fire temple",
+     "laid": {
+      "kind": "fire_temple",
+      "title": "Fire temple",
+      "x": 25915.1,
+      "y": 1374.6,
+      "pieces": 3,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 1,
+      "fx_on": 1,
+      "herd": 0,
+      "yaw": 321.1
+     },
+     "bottom_over_ground_cm": [
+      -48,
+      -30,
+      -14
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "offer",
+       "prompt": "leave an offering at the brazier",
+       "f": "scenery",
+       "said": "The keeper takes the bread and casts it in the fire, and nods to you.  You leave 1 Bread. The Mountain's Heat: your blows 12% stronger, 6% less of each blow rea",
+       "got": {},
+       "blessing": "The Mountain's Heat",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "folk": {
+      "want": 1,
+      "found": 1,
+      "talk": [
+       {
+        "prompt": "talk to the Keeper of the flame",
+        "f": "bark",
+        "said": "The Keeper of the flame:  \"The mountain's fire is ours to borrow, never to keep.\""
+       }
+      ]
+     },
+     "told": "Fire temple: a temple built to tap the mountain's heat: a forge's brazier, a keeper of the flame | The keeper takes the bread and casts it in the fire, and nods to you.  You leave 1 Bread. The Mountain's Heat: your blows 12% stronger, 6% less of each blow reaches you, for 10 minutes",
+     "ok": true
+    },
+    "lava_lake": {
+     "found": true,
+     "id": 67295486,
+     "at_km": [
+      29.3,
+      2.76
+     ],
+     "name": "Lava lake",
+     "laid": {
+      "kind": "lava_lake",
+      "title": "Lava lake",
+      "x": 29301.3,
+      "y": 2762.3,
+      "pieces": 9,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 1,
+      "fx_on": 1,
+      "herd": 0,
+      "yaw": 290.3
+     },
+     "bottom_over_ground_cm": [
+      -55,
+      -33,
+      -25
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "skins": [
+      {
+       "what": "land",
+       "up_share": 1.0,
+       "top_z": 39272,
+       "ground_z": 39182,
+       "under": false,
+       "hit": "ProceduralMeshComponent_0",
+       "hit_z": 39217
+      }
+     ],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the lava",
+       "f": "scenery",
+       "said": "The heat comes off it like a wall. Its skin cracks, glows, and folds under.",
+       "got": {},
+       "blessing": "The Mountain's Heat",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "heat",
+       "hp_lost": 14.0,
+       "sprung": 4,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "Lava lake: a lake of lava in a pit, its black skin splitting and turning over | The heat comes off it like a wall. Its skin cracks, glows, and folds under. | The ground smoulders under you: 4 damage",
+     "ok": true
+    },
+    "moss_lava": {
+     "found": true,
+     "id": 67438840,
+     "at_km": [
+      113.39,
+      -0.85
+     ],
+     "name": "Moss-covered lava",
+     "laid": {
+      "kind": "moss_lava",
+      "title": "Moss-covered lava",
+      "x": 113386.3,
+      "y": -848.7,
+      "pieces": 11,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 100.0
+     },
+     "bottom_over_ground_cm": [
+      -19,
+      -5,
+      1
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "skins": [
+      {
+       "what": "land",
+       "up_share": 1.0,
+       "top_z": 19653,
+       "ground_z": 19436,
+       "under": false,
+       "hit": "ProceduralMeshComponent_0",
+       "hit_z": 19466
+      }
+     ],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the moss",
+       "f": "scenery",
+       "said": "A hundred years of moss over the lava. Soft as a mattress, and under it, holes you could lose a leg in.",
+       "got": {},
+       "blessing": "The Mountain's Heat",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "pit",
+       "hp_lost": 9.8,
+       "sprung": 1,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "Moss-covered lava: soft green moss blanketing jagged lava; it hides the holes | A hundred years of moss over the lava. Soft as a mattress, and under it, holes you could lose a leg in. | The moss gives way over a hole in the lava and your leg goes in to the knee: 10 damage",
+     "ok": true
+    },
+    "black_sand": {
+     "found": true,
+     "id": 67457264,
+     "at_km": [
+      124.31,
+      -5.73
+     ],
+     "name": "Black sand",
+     "laid": {
+      "kind": "black_sand",
+      "title": "Black sand",
+      "x": 124308.5,
+      "y": -5733.7,
+      "pieces": 5,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 168.9
+     },
+     "bottom_over_ground_cm": [
+      -37,
+      -25,
+      9
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "skins": [
+      {
+       "what": "land",
+       "up_share": 1.0,
+       "top_z": 23660,
+       "ground_z": 23521,
+       "under": false,
+       "hit": "ProceduralMeshComponent_0",
+       "hit_z": 23551
+      }
+     ],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the ice",
+       "f": "scenery",
+       "said": "White ice on black sand, melting in the sun. The glacier calved it a mile upstream.",
+       "got": {},
+       "blessing": "The Mountain's Heat",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Black sand: a plain of black volcanic sand, blocks of glacier ice stranded on it | White ice on black sand, melting in the sun. The glacier calved it a mile upstream.",
+     "ok": true
+    },
+    "basalt_columns": {
+     "found": true,
+     "id": 67285261,
+     "at_km": [
+      23.7,
+      11.75
+     ],
+     "name": "Basalt columns",
+     "laid": {
+      "kind": "basalt_columns",
+      "title": "Basalt columns",
+      "x": 23704.0,
+      "y": 11754.7,
+      "pieces": 1,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 324.9
+     },
+     "bottom_over_ground_cm": [
+      -10,
+      -10,
+      -10
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "climb",
+       "prompt": "climb the columns",
+       "f": "scenery",
+       "said": "Six-sided steps, each a giant's stair, up to the top of the columns.  From up here you can see 2.0 km round you: the map fills in.",
+       "got": {},
+       "blessing": "The Mountain's Heat",
+       "rose_m": 6.6,
+       "revealed_more": 4909,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Basalt columns: hexagonal pillars of basalt, stepped like the stairs of giants | Six-sided steps, each a giant's stair, up to the top of the columns.  From up here you can see 2.0 km round you: the map fills in.",
+     "ok": true
+    },
+    "glacier_flood": {
+     "found": true,
+     "id": 67458292,
+     "at_km": [
+      124.95,
+      -3.11
+     ],
+     "name": "Meltwater flood",
+     "laid": {
+      "kind": "glacier_flood",
+      "title": "Meltwater flood",
+      "x": 124947.8,
+      "y": -3108.5,
+      "pieces": 9,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": -17.5
+     },
+     "bottom_over_ground_cm": [
+      -900,
+      -12,
+      -9
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the ice",
+       "f": "scenery",
+       "said": "Blocks of ice in a dry rift. When the fire under the glacier wakes, the meltwater comes down here all at once.",
+       "got": {},
+       "blessing": "The Mountain's Heat",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "flood",
+       "carried_m": 1.41,
+       "hp_lost": 21.0,
+       "sprung": 1,
+       "monsters_came": 0,
+       "slow_failed": true,
+       "ok": false
+      }
+     ],
+     "told": "Meltwater flood: a fissure that floods when the volcano under the ice melts it from below | Blocks of ice in a dry rift. When the fire under the glacier wakes, the meltwater comes down here all at once. | Thunder rolls somewhere far up the canyon. Get off the floor, now | A wall of brown water comes down the canyon and takes you with it: 21 damage",
+     "ok": false
+    },
+    "rift_fissure": {
+     "found": true,
+     "id": 67480869,
+     "at_km": [
+      138.31,
+      25.93
+     ],
+     "name": "Rift",
+     "laid": {
+      "kind": "rift_fissure",
+      "title": "Rift",
+      "x": 138313.3,
+      "y": 25931.0,
+      "pieces": 8,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 139.2
+     },
+     "bottom_over_ground_cm": [
+      -572,
+      -9,
+      -7
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look up at the walls",
+       "f": "scenery",
+       "said": "One wall is this land, the other wall another. They are a finger's width further apart each year.",
+       "got": {},
+       "blessing": "The Mountain's Heat",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Rift: a fissure where the land is pulling apart; you can stand inside it | One wall is this land, the other wall another. They are a finger's width further apart each year.",
+     "ok": true
+    }
+   },
+   "table": 195,
+   "counts_30km": {
+    "tall_grass": 77,
+    "burrow_town": 249,
+    "hanged_tree": 59,
+    "nest_tree": 69,
+    "shrine_tree": 73,
+    "erratic": 233,
+    "migration": 4,
+    "wallow": 63,
+    "hive_meadow": 31,
+    "brook_crossing": 0,
+    "fairy_ring": 53,
+    "shepherd_hut": 118,
+    "reed_pond": 1,
+    "old_orchard": 111,
+    "dusk_meadow": 17,
+    "butte": 209,
+    "battlefield": 229,
+    "milestone_road": 7,
+    "crossroads_gibbet": 1,
+    "crossroads_shrine": 1,
+    "crossroads_notice": 0,
+    "wagon_wreck": 6,
+    "hedged_fields": 114,
+    "scarecrows": 39,
+    "threshing_yard": 20,
+    "mill_pond": 2,
+    "pumpkin_patch": 29,
+    "abandoned_farm": 84,
+    "loose_livestock": 83,
+    "baobab": 2,
+    "acacia_shade": 5,
+    "termite_mounds": 7,
+    "kopje": 10,
+    "waterhole": 2,
+    "vulture_kill": 9,
+    "salt_pan": 5,
+    "yurt_camp": 0,
+    "kurgan": 73,
+    "prayer_cairn": 13,
+    "petroglyph_rocks": 54,
+    "hot_spring": 0,
+    "pingo": 0,
+    "charred_snags": 0,
+    "hot_spots": 0,
+    "ash_drift": 0,
+    "regrowth": 0,
+    "scorched_farmstead": 0,
+    "looters_camp": 0,
+    "fire_break": 0,
+    "fused_glass": 0,
+    "beast_carcasses": 0,
+    "resin_camp": 0,
+    "sunlit_clearing": 0,
+    "granite_outcrop": 0,
+    "lightning_pine": 0,
+    "logging_camp": 0,
+    "owl_hollow": 0,
+    "pine_ridge": 0,
+    "lichen_heath": 0,
+    "esker": 0,
+    "pine_dunes": 0,
+    "kettle_lake": 0,
+    "fire_scar": 0,
+    "herder_camp": 0,
+    "seid_stone": 0,
+    "muskeg_bog": 0,
+    "spruce_thicket": 0,
+    "beaver_pond": 0,
+    "moose_wallow": 0,
+    "trapline_cabin": 0,
+    "drunken_forest": 0,
+    "gold_larches": 0,
+    "leaf_pits": 0,
+    "fungus_glade": 0,
+    "hollow_giant": 0,
+    "mossy_walls": 0,
+    "nut_cache": 0,
+    "charcoal_hearth": 0,
+    "dawn_hollow": 0,
+    "harvest_shrine": 0,
+    "watching_aspens": 0,
+    "clonal_grove": 0,
+    "carved_aspens": 0,
+    "gold_stand": 0,
+    "beaver_stumps": 0,
+    "aspen_meadow": 0,
+    "aspen_edge": 0,
+    "windthrow": 0,
+    "hillfort": 28,
+    "chalk_figure": 59,
+    "terraced_fields": 69,
+    "dew_pond": 36,
+    "folly_tower": 30,
+    "beacon_hill": 37,
+    "quarry": 70,
+    "hillside_vines": 51,
+    "combe": 13,
+    "peat_hags": 0,
+    "tor": 12,
+    "heather_gorse": 61,
+    "stone_row": 0,
+    "peat_cutting": 0,
+    "moor_mist": 0,
+    "bothy": 0,
+    "grouse_butts": 0,
+    "moor_ford": 1,
+    "switchback": 7,
+    "alpine_pasture": 13,
+    "mountain_pass": 9,
+    "scree_slope": 9,
+    "hanging_waterfall": 0,
+    "mine_adit": 5,
+    "cliff_shrine": 5,
+    "rope_bridge": 6,
+    "tarn": 1,
+    "goat_ledges": 9,
+    "arete": 0,
+    "summit_cairn": 0,
+    "cornice_edge": 0,
+    "avalanche_chute": 5,
+    "couloir": 1,
+    "rime_ledge": 0,
+    "climbers_camp": 0,
+    "cloud_sea": 0,
+    "dragon_aerie": 13,
+    "crevasse_field": 0,
+    "serac_field": 0,
+    "ice_cave": 0,
+    "moulin": 0,
+    "moraine": 0,
+    "meltwater_lake": 0,
+    "frozen_thing": 0,
+    "nunatak": 0,
+    "ice_ruins": 0,
+    "banded_wall": 3,
+    "slot_canyon": 1,
+    "canyon_creek": 2,
+    "cliff_dwelling": 7,
+    "petroglyph_panel": 5,
+    "natural_arch": 76,
+    "hanging_garden": 3,
+    "echo_point": 9,
+    "rockfall_scar": 2,
+    "toehold_trail": 6,
+    "box_canyon": 5,
+    "junction_cairn": 19,
+    "hidden_side_canyon": 27,
+    "pour_off": 3,
+    "tinaja": 74,
+    "outlaw_hideout": 7,
+    "gold_wash": 2,
+    "flood_debris": 1,
+    "hoodoo_forest": 104,
+    "dry_wash": 1,
+    "banded_butte": 59,
+    "mesa_pueblo": 7,
+    "spire": 76,
+    "talus_apron": 1,
+    "overlook": 0,
+    "sky_shrine": 6,
+    "caprock_pools": 7,
+    "condor_ledge": 3,
+    "lone_juniper": 5,
+    "storm_below": 0,
+    "lava_flow": 8,
+    "lava_tube": 2,
+    "cinder_cone": 2,
+    "ash_village": 5,
+    "volcanic_bombs": 4,
+    "fumarole_field": 3,
+    "obsidian_field": 3,
+    "crater_rim": 0,
+    "eruption_signs": 3,
+    "fire_temple": 9,
+    "lava_lake": 1,
+    "moss_lava": 0,
+    "black_sand": 0,
+    "basalt_columns": 3,
+    "glacier_flood": 0,
+    "rift_fissure": 0,
+    "pseudocraters": 0,
+    "sod_farm": 0,
+    "hot_river": 0,
+    "troll_rocks": 0,
+    "geyser": 0,
+    "terraced_pools": 0,
+    "mud_pots": 0,
+    "bacterial_mats": 0,
+    "thin_crust": 0,
+    "steam_field": 0,
+    "crater_lake": 0,
+    "resurgent_dome": 0,
+    "spa_village": 0,
+    "petrified_forest": 7,
+    "gas_hollow": 0,
+    "cells": 10201
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, (untitled)",
+ "shots": [
+  "wd_s13p7b_scenery13_eruption_signs.png",
+  "wd_s13p7b_scenery13_eruption_signs_near.png",
+  "wd_s13p7b_scenery13_fire_temple.png",
+  "wd_s13p7b_scenery13_fire_temple_near.png",
+  "wd_s13p7b_scenery13_lava_lake.png",
+  "wd_s13p7b_scenery13_lava_lake_near.png",
+  "wd_s13p7b_scenery13_moss_lava.png",
+  "wd_s13p7b_scenery13_moss_lava_near.png",
+  "wd_s13p7b_scenery13_black_sand.png",
+  "wd_s13p7b_scenery13_black_sand_near.png",
+  "wd_s13p7b_scenery13_basalt_columns.png",
+  "wd_s13p7b_scenery13_basalt_columns_near.png",
+  "wd_s13p7b_scenery13_glacier_flood.png",
+  "wd_s13p7b_scenery13_glacier_flood_near.png",
+  "wd_s13p7b_scenery13_rift_fissure.png",
+  "wd_s13p7b_scenery13_rift_fissure_near.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

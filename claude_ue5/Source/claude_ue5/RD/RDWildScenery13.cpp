@@ -107,6 +107,7 @@ void ARDDungeonGenerator::LayWildScenery(ARDWildChunk* C, const FRDWildPlace& P)
 		FSceneryHazard H; H.Id = P.Id * 8 + I; H.Kind = FName(*M.FindRef(TEXT("kind"))); H.At = WorldOf(M); H.R = RDS13Num(M, TEXT("r"), 5.f) * 100.f; H.P = RDS13Num(M, TEXT("p"), 1.f); H.Chunk = C;
 		H.Who = M.FindRef(TEXT("who")); H.Hide = M.FindRef(TEXT("hide")); H.Named = M.FindRef(TEXT("named")); H.Msg = M.FindRef(TEXT("msg")); H.Count = FMath::Max(1, (int32)RDS13Num(M, TEXT("n"), 1.f));
 		// (the sixth phase: a flood runs down its channel, the way the place faces (a channel's place faces along it))
+		if (H.Kind == TEXT("geyser")) H.Length = RDS13Num(M, TEXT("every"), 45.f);
 		if (H.Kind == TEXT("flood")) H.FallDir = FVector2D(FMath::Cos(FMath::DegreesToRadians(P.Yaw)), FMath::Sin(FMath::DegreesToRadians(P.Yaw)));
 		if (!H.Hide.IsEmpty())
 		{
@@ -288,12 +289,70 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 				}
 				else { ++Hz.Sprung; PlayerCombat->HurtByTrap(0.03f * Hz.P, 0.6f, 2.f, TEXT("The bog drags at your legs")); }
 			}
+			// (the seventh phase: "geysers that erupt on a schedule, which can serve as a natural clock or a puzzle": every "every=" seconds
+			// (its own offset in the cycle from its id), 6 s of eruption: a column of steam as it starts (where she can see it, within 120 m), and
+			// while it goes a scald and a throw upward for her within its reach, once a second and a half. Quiet, it steams a little: the warning)
+			else if (Hz.Kind == TEXT("geyser"))
+			{
+				const float Every = FMath::Max(Hz.Length, 12.f);
+				const float Tc = FMath::Fmod(Now + (Hz.Id % 97) * 1.37f, Every);
+				const bool bGoing = Tc < 6.f;
+				if (!bGoing) { Hz.Start = -1.f; continue; }
+				if (Hz.Start < 0.f)
+				{
+					Hz.Start = Now;
+					if (D < 12000.f)
+					{
+						++Hz.Sprung; ++WildHazardsSprung;
+						if (const TObjectPtr<UNiagaraSystem>* Sm = WildSceneryFx.Find(TEXT("f13_steam")); Sm && *Sm)
+							for (int32 Gi = 0; Gi < 3; ++Gi)
+								if (UNiagaraComponent* Nc = UNiagaraFunctionLibrary::SpawnSystemAtLocation(W, *Sm, Hz.At + FVector(0.f, 0.f, 150.f + Gi * 450.f), FRotator::ZeroRotator, FVector(2.5f), true, true, ENCPoolMethod::None, false))
+									WildSceneryBursts.Add({ Nc, Now + 6.f, Now + 10.f });
+						if (D < Hz.R * 4.f) PlayerCombat->ShowMessage(TEXT("The geyser roars up in a column of boiling water and steam!"));
+					}
+				}
+				if (!bIn || Now < Hz.ReadyAt) continue;
+				Hz.ReadyAt = Now + 1.5f;
+				PlayerCombat->HurtByTrap(0.06f * Hz.P, 0.3f, 1.f, TEXT("Boiling water scalds you"));
+				if (ACharacter* Pc = UGameplayStatics::GetPlayerCharacter(this, 0)) Pc->LaunchCharacter(FVector(0.f, 0.f, 650.f), false, true);
+			}
+			// (the seventh phase: "gas pockets: low hollows where CO2 collects and kills animals that wander in": after a breath and a half in it,
+			// a hurt every second while she stays)
+			else if (Hz.Kind == TEXT("gas"))
+			{
+				Hz.In = bIn ? Hz.In + Dt : 0.f;
+				if (Hz.In < 1.5f || Now < Hz.ReadyAt) continue;
+				Hz.ReadyAt = Now + 1.f; ++Hz.Sprung; if (Hz.Sprung == 1) ++WildHazardsSprung;
+				PlayerCombat->HurtByTrap(0.04f * Hz.P, 0.f, 0.f, TEXT("Your head pounds and your breath will not come: the air in the hollow is bad"));
+			}
+			// (the seventh phase: "thin crust where the ground looks solid but has boiling water underneath": once a play it breaks under her, a
+			// scald and her legs slowed)
+			else if (Hz.Kind == TEXT("crust"))
+			{
+				if (!bIn || WildScenerySprung.Contains(Hz.Id)) continue;
+				WildScenerySprung.Add(Hz.Id); ++Hz.Sprung; ++WildHazardsSprung;
+				PlayerCombat->HurtByTrap(0.12f * Hz.P, 0.4f, 2.f, TEXT("The crust breaks: boiling water to your shins"));
+				PlayerCombat->SlowBy(0.5f, 2.f);
+			}
+			// (the seventh phase: "eruption warnings like tremors, ash fall": while she is near, every 25 s the ground shudders (her steps slowed
+			// a moment) and ash sifts down round her)
+			else if (Hz.Kind == TEXT("tremor"))
+			{
+				if (!bIn || Now < Hz.ReadyAt) continue;
+				Hz.ReadyAt = Now + 25.f; ++Hz.Sprung; ++WildHazardsSprung;
+				PlayerCombat->SlowBy(0.25f, 1.5f);
+				PlayerCombat->ShowMessage(TEXT("The ground shudders under your feet. Ash sifts down out of a clear sky"));
+				if (const TObjectPtr<UNiagaraSystem>* Sm = WildSceneryFx.Find(TEXT("f13_smoke")); Sm && *Sm)
+					if (UNiagaraComponent* Nc = UNiagaraFunctionLibrary::SpawnSystemAtLocation(W, *Sm, Her + FVector(300.f, 0.f, 500.f), FRotator::ZeroRotator, FVector(1.f), true, true, ENCPoolMethod::None, false))
+						WildSceneryBursts.Add({ Nc, Now + 3.f, Now + 8.f });
+			}
 			else if (Hz.Kind == TEXT("pit"))
 			{
 				// (the third phase: "deep, noisy leaf litter that hides pits, roots and tracks": a pit under the leaves, once a minute)
 				if (!bIn || Now < Hz.ReadyAt) continue;
 				Hz.ReadyAt = Now + 60.f; ++Hz.Sprung; ++WildHazardsSprung;
-				PlayerCombat->HurtByTrap(0.07f * Hz.P, 0.5f, 2.f, TEXT("Your foot goes through the leaves into a hidden pit"));
+				// (the seventh phase: its line from its data when it has one ("msg=": the moss over a lava field's holes, obsidian's edges))
+				PlayerCombat->HurtByTrap(0.07f * Hz.P, 0.5f, 2.f, Hz.Msg.IsEmpty() ? FString(TEXT("Your foot goes through the leaves into a hidden pit")) : Hz.Msg);
 			}
 			else if (Hz.Kind == TEXT("rockfall") || Hz.Kind == TEXT("avalanche"))
 			{
@@ -371,14 +430,14 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 				{
 					PlayerCombat->HurtByTrap(0.15f * Hz.P, 0.6f, 2.5f, TEXT("A wall of brown water comes down the canyon and takes you with it"));
 					// (carried down the bed where she is (PR #70's review: one segment's way, straight, could throw her at a wall or over a bank): of
-					// sixteen ways downstream, the lowest ground 5 m on that is no wall (under 1.5 m over the ground at her feet))
+					// sixteen ways downstream, the lowest ground 3 m on that is no wall (under 1.5 m over the ground at her feet))
 					FVector2D Way = Down; float Lo = 1e9f;
 					const float G0 = WildGroundZ(Her);
 					for (int32 A = 0; A < 16; ++A)
 					{
 						const FVector2D Dv(FMath::Cos(A * PI / 8.f), FMath::Sin(A * PI / 8.f));
 						if (FVector2D::DotProduct(Dv, Down) < 0.f) continue;
-						const float Gz = WildGroundZ(Her + FVector(Dv.X, Dv.Y, 0.f) * 500.f);
+						const float Gz = WildGroundZ(Her + FVector(Dv.X, Dv.Y, 0.f) * 300.f);      // (3 m on: in a 3 m fissure 5 m on was over its wall)
 						if (Gz - G0 < 150.f && Gz < Lo) { Lo = Gz; Way = Dv; }
 					}
 					if (ACharacter* Pc = UGameplayStatics::GetPlayerCharacter(this, 0)) Pc->LaunchCharacter(FVector(Way.X * 900.f, Way.Y * 900.f, 150.f), true, true);
@@ -780,7 +839,17 @@ FString ARDDungeonGenerator::WildSceneryInteract(const FVector& From)
 		PlayerCombat->ShowMessage(M.Contains(TEXT("early")) ? M[TEXT("early")] : FString::Printf(TEXT("Nothing happens. Come back at %s."), *Hs));
 		return TEXT("scenery");
 	}
-	if (Do == TEXT("echo"))
+	if (Do == TEXT("geyser"))
+	{
+		// (the seventh phase: a geyser as a clock: its own hazard's cycle read, the seconds to its next eruption told)
+		if (const FSceneryHazard* Gz = WildSceneryHazards.FindByPredicate([&](const FSceneryHazard& H) { return H.Id / 8 == U.Id && H.Kind == TEXT("geyser"); }))
+		{
+			const float Every = FMath::Max(Gz->Length, 12.f), Tc = FMath::Fmod(Now + (Gz->Id % 97) * 1.37f, Every);
+			Said = FString::Printf(TEXT("%s%s%s"), *Said, Said.IsEmpty() ? TEXT("") : TEXT("  "), Tc < 6.f ? TEXT("It is going now: stand back!")
+				: *FString::Printf(TEXT("By the rhythm of its steam it goes again in about %.0f s, and every %.0f s after."), Every - Tc, Every));
+		}
+	}
+	else if (Do == TEXT("echo"))
 	{
 		// (the sixth phase: "echoes that carry voices, war drums or something calling back": her call, then 1.6 s on what answers)
 		if (const FString Ec = M.FindRef(TEXT("echo")); !Ec.IsEmpty()) WildSceneryEchoes.Add({ Now + 1.6f, Ec });
