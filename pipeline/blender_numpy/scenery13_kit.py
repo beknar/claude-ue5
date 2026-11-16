@@ -21,6 +21,10 @@ helpers and its noise are used here):
   RopeBridge, Serac_A/B, IceArch, FrozenTent, IceBlock  the fifth phase's (mountains, peaks, glaciers): a rope bridge over a
                    gorge, towers of glacier ice, an ice cave's mouth (a moulin is a skin of the land), a climbers' tent drifted with snow, a block
                    of clear ice for what is frozen in it
+  NaturalArch, Hoodoo_A/B, CliffDwelling, SunDagger, LogJam, SandRock_A/B/C, Pueblo  the sixth phase's (canyons, canyon networks,
+                   mesas): a natural arch of banded sandstone, hoodoos with their caprocks, adobe cliff dwellings in an alcove, a slab
+                   with a pecked spiral and two leaning slabs before it, flood debris jammed in a channel, sandstone boulders, a
+                   terraced mesa-top pueblo with its ladders
   StormCell        a storm cell for the far horizon: an anvil cloud 3.2 km across, a rain curtain, a funnel (the far storms)
   Drystone_A/B     a 3 m length of field wall laid dry, its copes on edge (the shepherd's pen)
   AppleTree_A/B,   the old orchard's gnarled fruit trees: a short leaning trunk, a low wide crown of leaf clusters with their
@@ -716,6 +720,150 @@ def ice_block():
     finish(me, ob, bm, ["IceBlockIce"], translucent=["IceBlockIce"], flat=True)
 
 
+# ------------------------------------------------------------------------------------------------ the sixth phase: canyons, mesas
+def natural_arch():
+    """a natural arch of banded sandstone: two thick legs and a span 14 m across, 10 m high, its underside worn round; the stone in
+    rough flat-shaded blocks along an arc (the arch's strata are its picture's bands, by height)"""
+    rng = random.Random(701)
+    me, ob, bm, uvl = new_mesh("SM_N13_NaturalArch")
+    span, hgt = 7.0, 10.0
+    for k in range(25):
+        a = math.pi * k / 24
+        x, z = math.cos(a) * span, math.sin(a) * (hgt - 2.0)
+        th = 2.6 + 1.6 * (1.0 - math.sin(a))                  # (thicker at the legs)
+        n0 = len(bm.verts)
+        box(bm, uvl, (x, 0, z + th * 0.5), (2.2, 3.2 + rng.uniform(-0.3, 0.4), th), 0, (0.0, z / 12.0), 0.25)
+        for v in list(bm.verts)[n0:]: v.co.y += rng.uniform(-0.25, 0.25); v.co.x += rng.uniform(-0.2, 0.2)
+    for x in (-span, span):                                     # (the legs' feet, wider)
+        box(bm, uvl, (x * 1.05, 0, 1.2), (3.6, 4.2, 2.4), 0, (0.0, 0.0), 0.25)
+    floor(bm)
+    finish(me, ob, bm, ["NaturalArchStone"], flat=True)
+
+
+def hoodoo(variant, seed):
+    """a hoodoo: a spire of soft banded rock 5 to 9 m tall, pinched in places, a hard flat caprock balanced on its top"""
+    rng = random.Random(seed)
+    me, ob, bm, uvl = new_mesh(f"SM_N13_Hoodoo_{variant}")
+    H = rng.uniform(5.0, 9.0); r0 = rng.uniform(1.1, 1.6)
+    prof = []
+    for i in range(12):
+        t = i / 11
+        pinch = 1.0 - 0.35 * math.sin(t * math.pi * rng.uniform(2.0, 3.5) + rng.uniform(0, 1)) ** 2
+        prof.append((r0 * (1.0 - 0.45 * t) * pinch, H * t))
+    lathe(bm, uvl, prof, 9, 0)
+    n0 = len(bm.verts)
+    for v in list(bm.verts)[:n0]: v.co.x += rng.uniform(-0.08, 0.08); v.co.y += rng.uniform(-0.08, 0.08)
+    cw = r0 * rng.uniform(1.1, 1.5)
+    box(bm, uvl, (rng.uniform(-0.2, 0.2), 0, H + 0.35), (cw * 1.7, cw * 1.4, 0.7), 1, (0, 0), 1.0)
+    floor(bm)
+    finish(me, ob, bm, [f"Hoodoo{variant}Stone", f"Hoodoo{variant}Cap"], flat=True)
+
+
+def cliff_dwelling():
+    """cliff dwellings tucked into an alcove: an overhang of rock over a ledge 14 m wide, on it four to five adobe rooms of one and two
+    storeys with T-shaped doorways and small windows, roof beams (vigas) poking out, a round tower at one end"""
+    rng = random.Random(709)
+    me, ob, bm, uvl = new_mesh("SM_N13_CliffDwelling")
+    box(bm, uvl, (-1.5, 0, 0.4), (6.0, 16.0, 0.8), 0, (0, 0), 0.5)               # the ledge
+    box(bm, uvl, (-4.0, 0, 3.6), (2.0, 17.0, 7.2), 0, (0.5, 0), 0.5)             # the back wall of the alcove
+    box(bm, uvl, (-1.8, 0, 7.6), (6.5, 17.5, 1.4), 0, (0, 0.5), 0.5)             # the overhang
+    y = -6.5
+    while y < 5.5:
+        w = rng.uniform(2.2, 3.2); d = rng.uniform(2.4, 3.2); h = rng.choice((2.3, 2.3, 4.4))
+        box(bm, uvl, (-3.0 + d / 2, y + w / 2, 0.8 + h / 2), (d, w, h), 1, (rng.random() * 0.5, rng.random() * 0.5), 0.5)
+        fx = -3.0 + d + 0.02
+        # (a T-shaped doorway on its front (+X), dark; a window on an upper storey)
+        for (yy, zz, ww, hh) in ((y + w / 2, 0.8 + 0.6, 0.45, 1.2), (y + w / 2, 0.8 + 1.35, 0.85, 0.35)):
+            vs = [bm.verts.new((fx, yy + sy * ww / 2, zz + sz * hh / 2)) for (sy, sz) in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+            f = bm.faces.new(vs); f.material_index = 2
+            for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+        if h > 3.0:
+            vs = [bm.verts.new((fx, y + w / 2 + sy * 0.25, 3.9 + sz * 0.2)) for (sy, sz) in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+            f = bm.faces.new(vs); f.material_index = 2
+            for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+        for k in range(3):                                                       # the vigas
+            yy = y + w * (k + 1) / 4
+            tube(bm, uvl, [Vector((fx - 0.3, yy, 0.8 + h - 0.25)), Vector((fx + 0.5, yy, 0.8 + h - 0.25))], [0.08, 0.08], 5, 3)
+        y += w + rng.uniform(0.1, 0.4)
+    lathe(bm, uvl, [(1.3, 0.8), (1.25, 4.0), (1.25, 5.6)], 12, 1, z0=0.0)          # the round tower at the near end
+    for v in list(bm.verts)[-36:]: v.co.y += 6.6; v.co.x += -1.2
+    floor(bm)
+    finish(me, ob, bm, ["CliffDwellingRock", "CliffDwellingAdobe", "CliffDwellingDark", "CliffDwellingBeam"], flat=True)
+
+
+def sun_dagger():
+    """a sun dagger: a slab of stone 2.6 m tall with a spiral pecked into its face, two thin slabs leaning in front of it so a blade of
+    light falls through their gap"""
+    me, ob, bm, uvl = new_mesh("SM_N13_SunDagger")
+    box(bm, uvl, (0, 0, 1.3), (0.6, 2.2, 2.6), 0)                    # the carved slab (its face +X carries the spiral)
+    for y, lean in ((-0.55, 0.12), (0.55, -0.12)):
+        n0 = len(bm.verts)
+        box(bm, uvl, (1.0, y, 1.1), (0.25, 0.9, 2.2), 1)
+        for v in list(bm.verts)[n0:]: v.co.x -= 0.15 * (v.co.z / 2.2); v.co.y += lean * (v.co.z / 2.2)
+    floor(bm)
+    finish(me, ob, bm, ["SunDaggerFace", "SunDaggerSlab"], flat=True)
+
+
+def log_jam():
+    """flood debris jammed in a channel: bleached logs, branches and a root wad heaped 6 m across, wedged as the water left them"""
+    rng = random.Random(719)
+    me, ob, bm, uvl = new_mesh("SM_N13_LogJam")
+    for k in range(16):
+        a = rng.uniform(-0.6, 0.6) + (math.pi / 2 if k % 3 == 0 else 0.0)
+        L = rng.uniform(3.0, 7.0); c = Vector((rng.uniform(-1.5, 1.5), rng.uniform(-2.0, 2.0), rng.uniform(0.2, 1.6)))
+        d = Vector((math.cos(a), math.sin(a), rng.uniform(-0.15, 0.25))).normalized()
+        tube(bm, uvl, [c - d * L / 2, c + d * L / 2], [rng.uniform(0.12, 0.25), rng.uniform(0.06, 0.15)], 6, 0)
+    for k in range(10):
+        c = Vector((rng.uniform(-2.5, 2.5), rng.uniform(-2.5, 2.5), rng.uniform(0.3, 1.8)))
+        d = Vector((rng.uniform(-1, 1), rng.uniform(-1, 1), rng.uniform(-0.3, 0.6))).normalized()
+        tube(bm, uvl, [c, c + d * rng.uniform(1.0, 2.2)], [0.05, 0.02], 4, 0)
+    sphere(bm, uvl, (2.2, 1.2, 1.0), 0.9, 1, 1.0, 1.2, 0.8, 8, 0.3, rng)            # a root wad, earth in it
+    floor(bm)
+    finish(me, ob, bm, ["LogJamWood", "LogJamRoots"])
+
+
+def sand_rock(variant, seed):
+    """a sandstone boulder 1 m across, rounded by the wind, its layers showing (the canyons' rubble: the packs' rocks are dark grey
+    and stood out as blue-black boulders on the red sand)"""
+    rng = random.Random(seed)
+    me, ob, bm, uvl = new_mesh(f"SM_N13_SandRock_{variant}")
+    sphere(bm, uvl, (0, 0, 0.25), 0.55, 0, rng.uniform(1.0, 1.4), rng.uniform(0.8, 1.1), rng.uniform(0.55, 0.8), 9, 0.22, rng)
+    floor(bm)
+    finish(me, ob, bm, [f"SandRock{variant}Stone"], flat=True)
+
+
+def pueblo():
+    """a mesa-top pueblo: mud-brick rooms in terraces, four on the ground, three set back on them, one on top; T-shaped doorways, small
+    windows, roof beams (vigas) poking out, ladders up each terrace (its front +X)"""
+    rng = random.Random(727)
+    me, ob, bm, uvl = new_mesh("SM_N13_Pueblo")
+    def door(fx, yc, z0, t_shape=True):
+        for (yy, zz, ww, hh) in (((yc, z0 + 0.6, 0.45, 1.2), (yc, z0 + 1.35, 0.85, 0.35)) if t_shape else ((yc, z0 + 1.4, 0.45, 0.4),)):
+            vs = [bm.verts.new((fx, yy + sy * ww / 2, zz + sz * hh / 2)) for (sy, sz) in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+            f = bm.faces.new(vs); f.material_index = 1
+            for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+    H = 2.5
+    for lvl, (n, x0, depth) in enumerate(((4, 0.0, 3.4), (3, -2.2, 3.0), (1, -4.0, 2.6))):
+        w = 3.2; y0 = -n * w / 2
+        for k in range(n):
+            yc = y0 + w * (k + 0.5) + (0.0 if lvl else rng.uniform(-0.1, 0.1))
+            box(bm, uvl, (x0, yc, lvl * H + H / 2), (depth, w - 0.1, H), 0, (rng.random() * 0.5, rng.random() * 0.5), 0.5)
+            fx = x0 + depth / 2 + 0.02
+            door(fx, yc + rng.uniform(-0.5, 0.5), lvl * H, t_shape=(k % 2 == 0))
+            for j in range(3):
+                tube(bm, uvl, [Vector((x0 - depth / 2 - 0.3, yc - w / 3 + j * w / 3, lvl * H + H - 0.2)), Vector((x0 - depth / 2 + 0.4, yc - w / 3 + j * w / 3, lvl * H + H - 0.2))], [0.08, 0.08], 5, 2)
+                tube(bm, uvl, [Vector((fx - 0.4, yc - w / 3 + j * w / 3, lvl * H + H - 0.2)), Vector((fx + 0.35, yc - w / 3 + j * w / 3, lvl * H + H - 0.2))], [0.08, 0.08], 5, 2)
+        if lvl < 2:                                                     # a ladder up to the next terrace
+            lx = x0 + depth / 2 + 0.5; ly = y0 + w * 0.5 + lvl * 2.0
+            for s_ in (-0.25, 0.25):
+                tube(bm, uvl, [Vector((lx, ly + s_, (lvl) * H)), Vector((lx - 0.5, ly + s_, (lvl + 1) * H + 0.9))], [0.04, 0.04], 4, 2)
+            for r_ in range(5):
+                t = (r_ + 0.5) / 5
+                tube(bm, uvl, [Vector((lx - 0.5 * t, ly - 0.25, lvl * H + t * (H + 0.9))), Vector((lx - 0.5 * t, ly + 0.25, lvl * H + t * (H + 0.9)))], [0.025, 0.025], 4, 2)
+    floor(bm)
+    finish(me, ob, bm, ["PuebloAdobe", "PuebloDark", "PuebloBeam"], flat=True)
+
+
 def gold_card():
     """one card of gold leaves: only its material is used (the gold aspens' and larches' crowns, a part's mat=)"""
     me, ob, bm, uvl = new_mesh("SM_N13_GoldCard")
@@ -949,6 +1097,32 @@ def pictures():
     png("T_N13_FrozenTentCloth", grain((0.72, 0.38, 0.16), 134, 0.15) * (0.9 + 0.1 * np.sin(yy * 40)[..., None]))
     png("T_N13_FrozenTentSnow", grain((0.92, 0.94, 0.97), 135, 0.05))
     png("T_N13_IceBlockIce", grain((0.70, 0.84, 0.92), 136, 0.08), np.full((n, n), 0.45))
+    # (the sixth phase: banded sandstone (layers of red, orange, cream and brown along V, each its own grain), a hoodoo's dark caprock,
+    # sandstone, adobe, dark openings, pale weathered beams, a spiral pecked into a slab's face, bleached flood logs and root earth)
+    def strata(sd):
+        rr = np.random.default_rng(sd)
+        pal = np.array([(0.62, 0.30, 0.17), (0.78, 0.58, 0.40), (0.52, 0.22, 0.14), (0.70, 0.42, 0.24), (0.84, 0.72, 0.56), (0.44, 0.26, 0.21)])
+        edges = np.cumsum(rr.uniform(0.04, 0.11, 24)); idx = np.searchsorted(edges / edges[-1], (yy + 0.02 * noise(n, sd + 1)) % 1.0)
+        rgb = pal[rr.integers(0, 6, 25)[np.clip(idx, 0, 24)]]
+        return np.clip(rgb * (0.86 + 0.24 * noise(n, sd + 2)[..., None]), 0, 1)
+    png("T_N13_NaturalArchStone", strata(140))
+    for v in ("A", "B"):
+        png(f"T_N13_Hoodoo{v}Stone", strata(150 + ord(v))); png(f"T_N13_Hoodoo{v}Cap", grain((0.30, 0.22, 0.17), 160 + ord(v), 0.2))
+    png("T_N13_CliffDwellingRock", strata(170))
+    png("T_N13_CliffDwellingAdobe", grain((0.66, 0.48, 0.32), 171, 0.14))
+    png("T_N13_CliffDwellingDark", np.full((n, n, 3), 0.04) + np.array((0.02, 0.01, 0.0))[None, None])
+    png("T_N13_CliffDwellingBeam", grain((0.55, 0.47, 0.38), 172, 0.15) * (0.88 + 0.12 * np.sin(xx * 60)[..., None]))
+    face = grain((0.66, 0.46, 0.30), 180, 0.15)
+    rr_ = np.hypot(xx - 0.5, yy - 0.5); th_ = np.arctan2(yy - 0.5, xx - 0.5)
+    spiral = np.abs(((rr_ * 40.0 - th_ / (2 * math.pi) * 2.5) % 2.5) - 1.25) < 0.35
+    face[spiral & (rr_ < 0.42)] *= 0.45
+    png("T_N13_SunDaggerFace", face); png("T_N13_SunDaggerSlab", grain((0.60, 0.42, 0.28), 181, 0.18))
+    png("T_N13_LogJamWood", grain((0.62, 0.58, 0.52), 190, 0.2) * (0.85 + 0.15 * np.sin(xx * 80)[..., None]))
+    png("T_N13_LogJamRoots", grain((0.30, 0.22, 0.15), 191, 0.3))
+    for v in ("A", "B", "C"):
+        png(f"T_N13_SandRock{v}Stone", strata(200 + ord(v)))
+    png("T_N13_PuebloAdobe", grain((0.70, 0.52, 0.36), 210, 0.12)); png("T_N13_PuebloDark", np.full((n, n, 3), 0.05))
+    png("T_N13_PuebloBeam", grain((0.55, 0.47, 0.38), 211, 0.15) * (0.88 + 0.12 * np.sin(xx * 60)[..., None]))
     # (gold leaves: the aspen's round leaves in yellow and gold; gold needles: a larch's sprays)
     for name, shape in (("GoldLeaves", "leaf"), ("GoldNeedles", "needle")):
         rg = np.zeros((512, 512, 4)); R6 = np.random.default_rng(90 + len(name)); Y6, X6 = np.mgrid[0:512, 0:512] / 512
@@ -978,7 +1152,11 @@ if __name__ == "__main__":
             "ResinPine_A": lambda: resin_pine("A", 451), "ResinPine_B": lambda: resin_pine("B", 457), "GoldCard": gold_card,
             "TurfStack_A": lambda: turf_stack("A", 511), "TurfStack_B": lambda: turf_stack("B", 523),
             "RopeBridge": rope_bridge, "Serac_A": lambda: serac("A", 631), "Serac_B": lambda: serac("B", 641), "IceArch": ice_arch,
-            "FrozenTent": frozen_tent, "IceBlock": ice_block}
+            "FrozenTent": frozen_tent, "IceBlock": ice_block,
+            "NaturalArch": natural_arch, "Hoodoo_A": lambda: hoodoo("A", 703), "Hoodoo_B": lambda: hoodoo("B", 707),
+            "CliffDwelling": cliff_dwelling, "SunDagger": sun_dagger, "LogJam": log_jam,
+            "SandRock_A": lambda: sand_rock("A", 731), "SandRock_B": lambda: sand_rock("B", 733), "SandRock_C": lambda: sand_rock("C", 739),
+            "Pueblo": pueblo}
     for k, f in todo.items():
         if not ONLY or k in ONLY: f()
     old = json.load(open(os.path.join(OUT, "scenery13_kit.json"))) if os.path.exists(os.path.join(OUT, "scenery13_kit.json")) else {}

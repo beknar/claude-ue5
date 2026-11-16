@@ -12,7 +12,8 @@
   "biomes=burned plain;n=3;len=400-1200;w=6-9;d=0.4-0.7;wall=0.2;turn=2;name=fire break",
   "biomes=temperate autumn forests;n=3;len=500-1400;w=4-6;d=2.8-4.2;wall=0.85;turn=4;name=holloway",
   "biomes=hills;n=4;len=600-1500;w=1.2-1.8;d=0.25-0.4;wall=0.5;turn=6;name=sheep track",
-  "biomes=hills;n=2;len=500-1200;w=4-5;d=2.4-3.4;wall=0.85;turn=4;name=hill holloway"
+  "biomes=hills;n=2;len=500-1200;w=4-5;d=2.4-3.4;wall=0.85;turn=4;name=hill holloway",
+  "biomes=canyons,canyon networks;n=3;len=500-1400;w=4-6;d=6-9;wall=0.95;turn=10;name=slot canyon"
  ],
  "fx": {
   "bees": "/Game/Volstok_District/VFX/NS_Flies_01a",
@@ -26,7 +27,8 @@
   "fog": "/Game/FrozenNorseEnvironment/VFX/NS_NS1_Fog_01",
   "fallingleaves": "/Game/Wildlands/VFX/FX/NS_Fallin_Leaves",
   "fire": "/Game/Medieval_Lake_Village/VFX/NS_Fire",
-  "wisps": "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Projectiles/NS_Projectile_Ghostly01"
+  "wisps": "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/Projectiles/NS_Projectile_Ghostly01",
+  "splash": "/Game/ArtemisTemple/VFX/NS_SingleSplash"
  },
  "items": [
   {
@@ -411,6 +413,30 @@
   ],
   "iceblock": [
    "/Game/RandomDungeon/Wild13/Kit/SM_N13_IceBlock"
+  ],
+  "naturalarch": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_NaturalArch"
+  ],
+  "hoodoo": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_Hoodoo_A",
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_Hoodoo_B"
+  ],
+  "cliffdwelling": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_CliffDwelling"
+  ],
+  "sundagger": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_SunDagger"
+  ],
+  "logjam": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_LogJam"
+  ],
+  "sandrock": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_SandRock_A",
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_SandRock_B",
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_SandRock_C"
+  ],
+  "pueblo": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_Pueblo"
   ]
  },
  "kinds": [
@@ -2951,6 +2977,568 @@
     "L=scatter;p=s12_snowrock#;n=3;r=9;h=1.5;yaw=rand;col=1;sink=30",
     "L=at;box=Chest;x=3;y=2"
    ]
+  },
+  {
+   "name": "banded_wall",
+   "title": "Banded cliff",
+   "text": "a canyon wall in coloured bands, layer on layer, bones of something old in one of them",
+   "biomes": [
+    "canyons",
+    "canyon networks"
+   ],
+   "weight": 1.0,
+   "place": "foot",
+   "uses": [
+    "do=lore;x=2;y=5;r=3;verb=look at;what=strata;text=Red, cream, red, brown: each band an age of the world. In the third from the floor, bones as long as your arm."
+   ],
+   "parts": [
+    "L=scatter;p=n13_sandrock#;n=10;r=5;x=9;s=0.4-0.9;yaw=rand;col=1;sink=15",
+    "L=at;p=s12_ribs#;x=8;y=-4;h=1.0;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "slot_canyon",
+   "title": "Slot canyon",
+   "text": "a slot canyon a few strides wide, light falling into it in shafts; the floor is no place to be in a storm",
+   "biomes": [
+    "canyons"
+   ],
+   "weight": 1.0,
+   "place": "channel",
+   "hazards": [
+    "kind=flood;x=0;y=0;r=9"
+   ],
+   "uses": [
+    "do=lore;x=-14;y=0;r=3;verb=look up;what=walls;text=The sky is a crooked ribbon far above. Driftwood is jammed in the walls higher than your head."
+   ],
+   "parts": [
+    "L=scatter;p=n13_sandrock#;n=6;r=5;s=0.3-0.6;yaw=rand;col=0;sink=10"
+   ]
+  },
+  {
+   "name": "canyon_creek",
+   "title": "Canyon creek",
+   "text": "a creek running down the canyon floor, cottonwoods along it, a sandbar",
+   "biomes": [
+    "canyons",
+    "canyon networks"
+   ],
+   "weight": 2.5,
+   "uses": [
+    "do=fish;x=-10;y=0;r=3;verb=fish;what=creek;things=Fish|1|2|0.8;reuse=240;text=Small quick fish in the shade of the cottonwoods."
+   ],
+   "parts": [
+    "L=ridge;r=1.4;r2=16;hb=0.3;a=0;tint=0.10,0.22,0.24",
+    "L=patch;r=3;x=-6;y=0;hb=0.3;tint=0.52,0.40,0.27",
+    "L=scatter;p=n13_aspen#;n=4;r=14;r0=8;h=8-11;yaw=rand;col=1",
+    "L=scatter;p=s12_reeds#;n=6;r=5;r0=2;h=1.2;yaw=rand;col=0"
+   ],
+   "place": "channel"
+  },
+  {
+   "name": "cliff_dwelling",
+   "title": "Cliff dwellings",
+   "text": "rooms of mud brick tucked into an alcove under the canyon wall, empty for an age",
+   "biomes": [
+    "canyons",
+    "canyon networks"
+   ],
+   "weight": 1.0,
+   "place": "foot",
+   "uses": [
+    "do=loot;x=2;y=0;r=3;verb=search;what=rooms;things=Bread|1|1|0.5,Small Healing Potion|1|1|0.5,Straw Rope|1|2|0.7;reuse=900;text=Corn cobs in a bin, a cracked pot, a child's handprint in the plaster."
+   ],
+   "parts": [
+    "L=at;p=n13_cliffdwelling#;x=9;s=1;yaw=fixed;yawadd=180;col=1",
+    "L=at;p=r12_ladder#;x=4.5;y=-3;h=3;yaw=fixed;yawadd=180;tilt=10;col=0",
+    "L=scatter;p=r12_pottery#;n=3;r=2;x=3;y=4;h=0.5;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "petroglyph_panel",
+   "title": "Petroglyph panel",
+   "text": "handprints, spirals and figures pecked into the wall; nobody can say what they mean",
+   "biomes": [
+    "canyons",
+    "canyon networks"
+   ],
+   "weight": 1.0,
+   "place": "foot",
+   "uses": [
+    "do=lore;x=1;y=0;r=3;verb=look at;what=carvings;text=Handprints, spirals, a horned figure with too many fingers. Somebody wanted this remembered."
+   ],
+   "parts": [
+    "L=line;p=n13_petroglyph#;n=3;r=6;a=90;x=6;s=1.2;yaw=fixed;yawadd=180;col=1"
+   ]
+  },
+  {
+   "name": "natural_arch",
+   "title": "Natural arch",
+   "text": "a span of banded stone carved by wind and water, the sky through it",
+   "biomes": [
+    "canyons",
+    "mesas",
+    "canyon networks"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=-10;y=0;r=3;verb=look up at;what=arch;text=Wind and water and a long, long time. One day it falls; not today, you hope."
+   ],
+   "parts": [
+    "L=at;p=n13_naturalarch#;s=1;yaw=fixed;yawadd=90;col=1",
+    "L=scatter;p=n13_sandrock#;n=8;r=12;r0=9;s=0.4-0.9;yaw=rand;col=1;sink=15"
+   ]
+  },
+  {
+   "name": "hanging_garden",
+   "title": "Hanging garden",
+   "text": "ferns and flowers growing where a seep leaks out of the rock",
+   "biomes": [
+    "canyons"
+   ],
+   "weight": 1.0,
+   "place": "foot",
+   "uses": [
+    "do=forage;x=2;y=4;r=3;verb=gather from;what=seep;things=Wild Berries|1|2|0.8;reuse=300;text=Water beads on the rock and drips; maidenhair and monkeyflowers live on it."
+   ],
+   "parts": [
+    "L=scatter;p=n13_fern#;n=14;r=4;x=7;h=0.6-1.0;yaw=rand;col=0;inst=1",
+    "L=scatter;p=n13_flowers#;n=40;r=5;x=6;h=0.3-0.5;yaw=rand;col=0;inst=1",
+    "L=patch;r=3;x=7;hb=0.3;tint=0.10,0.18,0.08"
+   ]
+  },
+  {
+   "name": "echo_point",
+   "title": "Echo point",
+   "text": "a ledge over the canyon where a voice comes back, and sometimes something else does",
+   "biomes": [
+    "canyons",
+    "canyon networks",
+    "mesas"
+   ],
+   "weight": 1.0,
+   "place": "rim",
+   "uses": [
+    "do=echo;x=0;y=0;r=3;verb=call out over;what=canyon;text=You shout into the canyon.;echo=Your voice comes back from the far wall, and then a second voice, a beat late, that is not yours."
+   ],
+   "parts": [
+    "L=scatter;p=n13_sandrock#;n=6;r=4;r0=2;s=0.4-0.8;yaw=rand;col=1;sink=15",
+    "L=at;p=n13_prayercairn#;x=-6;y=4;s=0.7;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "rockfall_scar",
+   "title": "Rockfall",
+   "text": "a fresh scar on the wall, toppled boulders under it; more is waiting to come down",
+   "biomes": [
+    "canyons",
+    "canyon networks"
+   ],
+   "weight": 1.0,
+   "place": "foot",
+   "hazards": [
+    "kind=rockfall;x=3;y=0;r=6"
+   ],
+   "uses": [
+    "do=lore;x=-8;y=6;r=3;verb=look at;what=scar;text=The stone under the scar is pale, unweathered: this came down this year."
+   ],
+   "parts": [
+    "L=scatter;p=l12_boulder#;n=6;r=7;x=8;h=1.5-3.5;yaw=rand;col=1;sink=20",
+    "L=scatter;p=n13_sandrock#;n=14;r=8;x=6;s=0.3-0.7;yaw=rand;col=0;sink=10"
+   ]
+  },
+  {
+   "name": "toehold_trail",
+   "title": "Toe-hold trail",
+   "text": "steps cut into the rock up a wall, an old rope ladder for the worst of it",
+   "biomes": [
+    "canyons",
+    "mesas"
+   ],
+   "weight": 1.0,
+   "place": "foot",
+   "uses": [
+    "do=climb;edge=1;r=4;verb=climb;what=steps;tx=8;tz=9;reveal=2500;reuse=5;text=Toe-holds worn smooth by a thousand years of feet, then the rope. The rim, and the whole canyon under you."
+   ],
+   "parts": [
+    "L=at;p=n13_cliffface#;x=8;h=10;yaw=fixed;yawadd=180;col=1",
+    "L=at;p=r12_ladder#;x=5.5;h=6;yaw=fixed;yawadd=180;tilt=8;col=0"
+   ]
+  },
+  {
+   "name": "box_canyon",
+   "title": "Box canyon",
+   "text": "a dead end of sheer walls: one way in, the same way out",
+   "biomes": [
+    "canyon networks",
+    "canyons"
+   ],
+   "weight": 1.0,
+   "place": "foot",
+   "guards": 3,
+   "ambush_r": 12,
+   "loot": "Small Healing Potion|1|2|0.7;Iron Ingot|1|2|0.5",
+   "uses": [
+    "do=lore;x=-14;y=0;r=3;verb=look into;what=dead end;text=Walls on three sides and old bones on the floor. A good place to be trapped. Somebody knew it."
+   ],
+   "parts": [
+    "L=at;p=n13_cliffface#;x=12;y=-6;h=11;yaw=fixed;yawadd=150;col=1",
+    "L=at;p=n13_cliffface#;x=12;y=6;h=11;yaw=fixed;yawadd=-150;col=1",
+    "L=scatter;p=bones;n=3;r=5;x=6;s=0.7;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "junction_cairn",
+   "title": "Canyon junction",
+   "text": "where side canyons split: a cairn, a carving and a warning scratched under it",
+   "biomes": [
+    "canyon networks"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=-6;y=5;r=3;verb=read;what=warning;text=Scratched under the carving: LEFT TO WATER. RIGHT TO DEATH. And under that, in another hand: both wrong."
+   ],
+   "parts": [
+    "L=at;p=n13_prayercairn#;s=1;yaw=rand;col=1",
+    "L=at;p=n13_petroglyph#;x=5;y=3;s=0.9;yaw=rand;col=1",
+    "L=at;p=s12_signpost#;x=-4;y=-3;h=2.4;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "hidden_side_canyon",
+   "title": "Hidden side canyon",
+   "text": "a squeeze between two walls a body wide, and something kept beyond it",
+   "biomes": [
+    "canyon networks"
+   ],
+   "weight": 1.0,
+   "loot": "Small Healing Potion|1|2|0.8;Iron Ingot|1|2|0.6;Bread|1|2|0.5",
+   "uses": [
+    "do=lore;x=-12;y=6;r=3;verb=look at;what=squeeze;text=Sideways, breath out, stone on both shoulders. Footprints go in. None come out."
+   ],
+   "parts": [
+    "L=at;p=n13_cliffface#;x=0;y=-5;h=10;yaw=fixed;yawadd=90;col=1",
+    "L=at;p=n13_cliffface#;x=0;y=5;h=10;yaw=fixed;yawadd=-90;col=1",
+    "L=at;box=Chest;x=10;y=0"
+   ]
+  },
+  {
+   "name": "pour_off",
+   "title": "Pour-off",
+   "text": "a dry waterfall: a smooth lip of rock the flood pours over, too high to walk",
+   "biomes": [
+    "canyon networks",
+    "canyons"
+   ],
+   "weight": 1.0,
+   "place": "foot",
+   "uses": [
+    "do=climb;edge=1;r=4;verb=climb;what=pour-off;tx=8;tz=6;reveal=1500;reuse=5;text=Polished stone, a scoop worn by falling water, handholds where it broke. Up and over."
+   ],
+   "parts": [
+    "L=at;p=n13_cliffface#;x=8;h=7;yaw=fixed;yawadd=180;col=1",
+    "L=at;p=n13_logjam#;x=3;y=5;s=0.8;yaw=rand;col=1",
+    "L=scatter;p=n13_sandrock#;n=10;r=5;x=4;s=0.3-0.7;yaw=rand;col=0;sink=10"
+   ]
+  },
+  {
+   "name": "tinaja",
+   "title": "Tinaja",
+   "text": "rock basins full of rain water: the only drink for miles",
+   "biomes": [
+    "canyon networks",
+    "canyons",
+    "mesas"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=heal;x=-3;y=-3;r=3;verb=drink from;what=tinaja;reuse=300;text=Rain water, warm, full of wriggling things. You drink it all the same."
+   ],
+   "parts": [
+    "L=patch;r=2.4;hb=0.3;tint=0.06,0.16,0.19",
+    "L=patch;r=1.6;x=4;y=3;hb=0.3;tint=0.06,0.16,0.19",
+    "L=patch;r=1.2;x=-3;y=4;hb=0.3;tint=0.06,0.16,0.19",
+    "L=scatter;p=n13_sandrock#;n=8;r=7;r0=4;s=0.4-0.8;yaw=rand;col=1;sink=15"
+   ]
+  },
+  {
+   "name": "outlaw_hideout",
+   "title": "Outlaw hideout",
+   "text": "a camp tucked against the wall: a fire, bedrolls and a lookout on the rim",
+   "biomes": [
+    "canyon networks",
+    "canyons"
+   ],
+   "weight": 1.0,
+   "place": "foot",
+   "guards": 3,
+   "loot": "Small Healing Potion|1|2|0.7;Bread|1|3|0.8;Iron Ingot|1|2|0.5",
+   "uses": [
+    "do=lore;x=-6;y=6;r=3;verb=look at;what=camp;text=Still warm ashes. Whoever they are, they watch the canyon floor from up there."
+   ],
+   "parts": [
+    "L=at;p=campfire;x=3;s=1;yaw=rand;col=0",
+    "L=scatter;p=s12_bedding#;n=3;r=3;x=5;h=0.4;yaw=rand;col=0",
+    "L=at;p=s12_lookout#;x=8;y=-6;h=6;yaw=fixed;yawadd=180;col=1",
+    "L=at;box=Chest;x=7;y=4"
+   ]
+  },
+  {
+   "name": "gold_wash",
+   "title": "Panning wash",
+   "text": "an old placer working on a wash: a sluice box, tailings, a mine's frame in the bank",
+   "biomes": [
+    "canyon networks",
+    "canyons"
+   ],
+   "weight": 1.0,
+   "place": "channel",
+   "uses": [
+    "do=forage;x=-2;y=-5;r=3;verb=pan;what=gravel;things=Copper Ingot|1|1|0.6,Iron Ingot|1|1|0.4;reuse=600;text=Black sand, a few flakes of colour. Not a fortune; a day's wage, maybe."
+   ],
+   "parts": [
+    "L=at;p=s12_trough#;x=3;y=-2;h=0.8;yaw=fixed;col=1",
+    "L=at;p=s12_mineframe#;x=-8;y=6;h=3.2;yaw=fixed;yawadd=90;col=1",
+    "L=scatter;p=n13_sandrock#;n=10;r=5;s=0.3-0.5;yaw=rand;col=0;sink=10"
+   ]
+  },
+  {
+   "name": "flood_debris",
+   "title": "Flood debris",
+   "text": "logs and branches jammed high in the walls: how high the water gets",
+   "biomes": [
+    "canyon networks",
+    "canyons"
+   ],
+   "weight": 1.0,
+   "place": "channel",
+   "uses": [
+    "do=lore;x=-12;y=0;r=3;verb=look at;what=debris;text=A whole tree, wedged across the canyon twice your height up. The water put it there."
+   ],
+   "parts": [
+    "L=at;p=n13_logjam#;x=4;s=1;yaw=rand;col=1",
+    "L=scatter;p=n13_sandrock#;n=8;r=6;s=0.3-0.6;yaw=rand;col=0;sink=10"
+   ]
+  },
+  {
+   "name": "hoodoo_forest",
+   "title": "Hoodoos",
+   "text": "a stone forest of hoodoos and fins, each with its cap balanced on top",
+   "biomes": [
+    "canyon networks",
+    "mesas",
+    "canyons"
+   ],
+   "weight": 1.3,
+   "uses": [
+    "do=lore;x=0;y=0;r=3;verb=look up at;what=hoodoos;text=Spires of soft stone under hard caps. Where a cap has fallen the spire is already half gone."
+   ],
+   "parts": [
+    "L=scatter;p=n13_hoodoo#;n=9;r=18;r0=5;s=0.8-1.3;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "dry_wash",
+   "title": "Dry wash",
+   "text": "a dry wash under a darkening sky; thunder far up the canyons",
+   "biomes": [
+    "canyon networks",
+    "canyons"
+   ],
+   "weight": 1.0,
+   "place": "channel",
+   "hazards": [
+    "kind=flood;x=0;y=0;r=8"
+   ],
+   "uses": [
+    "do=lore;x=-13;y=0;r=3;verb=look at;what=wash;text=Mud cracked in plates, a tide line on the walls. When it rains up there, it floods down here."
+   ],
+   "parts": [
+    "L=scatter;p=n13_sandrock#;n=12;r=6;s=0.3-0.7;yaw=rand;col=0;sink=10",
+    "L=at;p=n13_logjam#;x=10;y=4;s=0.6;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "banded_butte",
+   "title": "Banded butte",
+   "text": "a lone butte of banded stone, sheer-sided, a talus apron round its foot",
+   "biomes": [
+    "mesas",
+    "canyons"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=-21;y=4;r=3;verb=look up at;what=butte;text=Layer on layer on layer, and on top a flat world nobody has walked."
+   ],
+   "parts": [
+    "L=mesa;r=16;hb=14;bands=0.52,0.22,0.14 0.70,0.42,0.24 0.84,0.72,0.56 0.62,0.30,0.17 0.78,0.58,0.40 0.44,0.26,0.21",
+    "L=scatter;p=n13_sandrock#;n=10;r=19;r0=16;s=0.4-0.9;yaw=rand;col=1;sink=15"
+   ]
+  },
+  {
+   "name": "mesa_pueblo",
+   "title": "Mesa-top pueblo",
+   "text": "a pueblo of mud-brick rooms on the mesa's top, reached by one carved stair",
+   "biomes": [
+    "mesas"
+   ],
+   "weight": 1.0,
+   "place": "rise",
+   "folk": [
+    "Townswoman|Pueblo elder|One stair, cut by our grandmothers' grandmothers. Nobody climbs it we do not see./Up here the floods cannot reach us, nor the bandits./Bring us bread from the lowlands and you are welcome.|-6|-4"
+   ],
+   "uses": [
+    "do=trade;x=-8;y=-2;r=3;verb=trade with;what=elder;give=Bread|2;get=Cheese|1;reuse=120"
+   ],
+   "parts": [
+    "L=at;p=n13_pueblo#;x=4;s=1;yaw=fixed;col=1",
+    "L=at;p=n13_granary#;x=-6;y=6;s=1;yaw=rand;col=1",
+    "L=at;p=campfire;x=-3;y=-4;s=1;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "spire",
+   "title": "Spire",
+   "text": "a needle of stone standing alone, its top a nest of something",
+   "biomes": [
+    "mesas",
+    "canyons",
+    "canyon networks"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=-11;y=0;r=3;verb=look up at;what=spire;text=A finger of stone, the softer layers wearing out from under the hard. Birds circle its top."
+   ],
+   "parts": [
+    "L=cone;r=6;hb=24;crater=0;bands=0.52,0.22,0.14 0.70,0.42,0.24 0.84,0.72,0.56 0.62,0.30,0.17 0.78,0.58,0.40 0.44,0.26,0.21",
+    "L=scatter;p=n13_sandrock#;n=8;r=9;r0=6;s=0.4-0.9;yaw=rand;col=1;sink=15"
+   ]
+  },
+  {
+   "name": "talus_apron",
+   "title": "Talus apron",
+   "text": "a steep apron of rubble round a mesa's foot; it shifts underfoot",
+   "biomes": [
+    "mesas"
+   ],
+   "weight": 1.0,
+   "place": "foot",
+   "hazards": [
+    "kind=scree;x=4;y=0;r=6"
+   ],
+   "uses": [
+    "do=lore;x=-8;y=5;r=3;verb=look at;what=talus;text=All of this was the mesa once. A little more of it comes down with every frost."
+   ],
+   "parts": [
+    "L=scatter;p=l12_boulder#;n=8;r=10;r0=4;h=1-3;yaw=rand;col=1;sink=20",
+    "L=scatter;p=n13_sandrock#;n=24;r=9;s=0.3-0.7;yaw=rand;col=0;sink=10"
+   ]
+  },
+  {
+   "name": "overlook",
+   "title": "Overlook",
+   "text": "the edge of the mesa: the desert below to the horizon",
+   "biomes": [
+    "mesas",
+    "canyons"
+   ],
+   "weight": 1.0,
+   "place": "rim",
+   "uses": [
+    "do=climb;edge=1;r=3.5;verb=climb;what=rock;tx=-4;tz=3;reveal=4000;reuse=5;text=The land drops away, red and gold and blue with distance, farther than a day's ride."
+   ],
+   "parts": [
+    "L=at;p=l12_boulder#;x=-4;h=3;yaw=rand;col=1;sink=30",
+    "L=scatter;p=n13_sandrock#;n=5;r=5;r0=2;s=0.4-0.7;yaw=rand;col=1;sink=15"
+   ]
+  },
+  {
+   "name": "sky_shrine",
+   "title": "Sky shrine",
+   "text": "a slab with a spiral pecked into it, two stones leaning before it: at sunrise a blade of light crosses the spiral",
+   "biomes": [
+    "mesas"
+   ],
+   "weight": 1.0,
+   "place": "rise",
+   "uses": [
+    "do=buff;x=-4;y=0;r=3;verb=watch;what=spiral;hours=sunrise;early=The spiral lies in shadow. The sun's blade crosses it only at sunrise.;name=The Sun's Blade;dmg=0.12;armour=0.05;secs=900;reuse=60;text=The first sun slides between the stones and a blade of light splits the spiral at its heart."
+   ],
+   "parts": [
+    "L=at;p=n13_sundagger#;s=1;yaw=fixed;col=1",
+    "L=ring;p=n13_sandrock#;n=8;r=5;s=0.5;yaw=rand;col=1;sink=10"
+   ]
+  },
+  {
+   "name": "caprock_pools",
+   "title": "Caprock pools",
+   "text": "rain pools on the wind-scoured caprock, lizards sunning round them",
+   "biomes": [
+    "mesas"
+   ],
+   "weight": 1.0,
+   "place": "rise",
+   "uses": [
+    "do=heal;x=-3;y=3;r=3;verb=drink from;what=pool;reuse=300;text=Yesterday's rain, warm from the stone. Lizards flick away from your shadow."
+   ],
+   "parts": [
+    "L=patch;r=2.0;hb=0.3;tint=0.06,0.16,0.19",
+    "L=patch;r=1.4;x=5;y=-2;hb=0.3;tint=0.06,0.16,0.19",
+    "L=scatter;p=n13_sandrock#;n=6;r=6;r0=3;s=0.3-0.6;yaw=rand;col=1;sink=15"
+   ]
+  },
+  {
+   "name": "condor_ledge",
+   "title": "Condor ledge",
+   "text": "a great nest on a ledge under the rim, condors riding the air below",
+   "biomes": [
+    "mesas",
+    "canyons"
+   ],
+   "weight": 1.0,
+   "place": "rim",
+   "uses": [
+    "do=forage;x=2;y=4;r=3;verb=reach into;what=nest;things=Bird's Eggs|1|2|0.8;reuse=600;text=Eggs the size of your fist. The parent's shadow passes over you, once, twice."
+   ],
+   "parts": [
+    "L=at;p=n13_nest#;x=-3;s=2;yaw=rand;col=1",
+    "L=at;fx=crows;z=18;s=1"
+   ]
+  },
+  {
+   "name": "lone_juniper",
+   "title": "Lone juniper",
+   "text": "a single twisted juniper clinging to the rim",
+   "biomes": [
+    "mesas",
+    "canyons",
+    "canyon networks"
+   ],
+   "weight": 1.0,
+   "place": "rim",
+   "uses": [
+    "do=lore;x=3;y=4;r=3;verb=look at;what=juniper;text=Half its trunk is dead silver wood. The other half still holds on, roots in a crack, older than any town."
+   ],
+   "parts": [
+    "L=at;p=n13_deadtree#;x=-2;h=5;yaw=rand;tilt=12;col=1",
+    "L=scatter;p=n13_sandrock#;n=4;r=4;r0=2;s=0.4-0.7;yaw=rand;col=1;sink=15"
+   ]
+  },
+  {
+   "name": "storm_below",
+   "title": "Storm below",
+   "text": "the mesa's edge in a storm's season: weather passing below you, lightning under the rim",
+   "biomes": [
+    "mesas"
+   ],
+   "weight": 1.0,
+   "place": "rim",
+   "uses": [
+    "do=lore;x=0;y=4;r=3;verb=look down at;what=weather;text=Rain falls in grey veils on the desert below; lightning stitches the plain, and you stand dry above it all."
+   ],
+   "parts": [
+    "L=scatter;p=n13_sandrock#;n=6;r=5;r0=2;s=0.4-0.8;yaw=rand;col=1;sink=15"
+   ]
   }
  ],
  "mats": {
@@ -2965,7 +3553,10 @@
     "plains",
     "grasslands",
     "savannahs",
-    "cold steppes"
+    "cold steppes",
+    "canyons",
+    "canyon networks",
+    "mesas"
    ],
    "mesh": "/Game/RandomDungeon/Wild13/Kit/SM_N13_StormCell",
    "chance": 0.15,
@@ -3007,5 +3598,6 @@
   "mountains and peaks",
   "glacial"
  ],
- "thin_air_slow": 0.15
+ "thin_air_slow": 0.15,
+ "_doc_phase6": "the sixth phase (2026-11-15): canyons, canyon networks, mesas: 30 kinds; places rim (a cliff's top, facing the drop), foot (a cliff's foot, facing the wall) and channel (a dry channel's bed, facing along it); the slot canyons' channels; hazard flood (thunder, then the water down the channel); use echo (what calls back) and any use's hours (a sun dagger at sunrise); landform L=mesa (a butte) and any landform's bands=; the canyons' and mesas' rock in strata by height"
 }
