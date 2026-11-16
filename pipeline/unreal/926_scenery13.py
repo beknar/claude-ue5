@@ -89,6 +89,10 @@ def step_kit(src):
             tx = unreal.load_asset(f"{KIT}/T_N13_{slot}")
             assert tx, f"926 kit: no picture T_N13_{slot}"
             MEL.set_material_instance_texture_parameter_value(mi, "Tex", tx)
+            # (a slot's own parameters (the aurora's glow: PR #72's review))
+            for pn, pv in R.get("params", {}).get(slot, {}).items():
+                if isinstance(pv, list): MEL.set_material_instance_vector_parameter_value(mi, pn, unreal.LinearColor(*(pv + [1.0])[:4]))
+                else: MEL.set_material_instance_scalar_parameter_value(mi, pn, float(pv))
             eal.save_loaded_asset(mi, only_if_is_dirty=False)
             m.set_material(i, mi); n += 1
         eal.save_loaded_asset(m, only_if_is_dirty=False)
@@ -219,6 +223,11 @@ def step_scenery():
     # (the fifth phase: where the air is thin, and her slow there)
     g.set_editor_property("wild_thin_air_biomes", J.get("thin_air_biomes", []))
     g.set_editor_property("wild_thin_air_slow", float(J.get("thin_air_slow", 0.0)))
+    # (the eighth phase: the auroras' regions and their curtain)
+    au = J.get("aurora", {})
+    g.set_editor_property("wild_aurora_biomes", au.get("biomes", []))
+    g.set_editor_property("wild_aurora_mesh", unreal.load_asset(au["mesh"]) if au.get("mesh") else None)
+    assert not au.get("mesh") or g.get_editor_property("wild_aurora_mesh"), "926 scenery: no aurora mesh " + au.get("mesh", "")
     # (every kind's people must be townsfolk of the level)
     defs = [str(t.name) for t in g.get_editor_property("townsfolk")]
     for K in J["kinds"]:

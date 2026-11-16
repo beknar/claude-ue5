@@ -54,6 +54,15 @@ namespace
 		if (!Warned.Contains(Hours)) { Warned.Add(Hours); UE_LOG(LogRDScen13, Warning, TEXT("RDSCEN hours '%s' is none of day, night, dusk, dawn, sunrise: shown at every hour"), *Hours); }
 		return true;
 	}
+	/** a hazard's line: its data's msg= when given, else its own; Part 1 the second of a "warn|strike" pair (an ice shelf's warning and
+	 *  its blow), part 0 the first (or the whole when it has no bar) */
+	FString RDS13Msg(const FString& Msg, const TCHAR* Default, int32 Part = 0)
+	{
+		if (Msg.IsEmpty()) return Default;
+		FString A, B;
+		if (!Msg.Split(TEXT("|"), &A, &B)) return Part == 0 ? Msg : FString(Default);
+		return Part == 0 ? A : B;
+	}
 	/** a geyser's place in its cycle (seconds since its last eruption began) and its period: one rule for its eruptions and its clock */
 	float RDS13GeyserPhase(int32 Id, float Every0, float Now, float& Every) { Every = FMath::Max(Every0, 12.f); return FMath::Fmod(Now + (Id % 97) * 1.37f, Every); }
 	constexpr float RDS13GeyserGoes = 6.f;
@@ -211,6 +220,7 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 	const float Now = W->GetTimeSeconds();
 	const FVector2D H2(Her.X / 100.0, Her.Y / 100.0);
 	TickWildStorm13(Dt, Her);
+	TickWildAurora13(Dt, Her);
 	// ---- the third phase: a quiet floor under her (the pine forests' needles): the monsters notice her from less far
 	// (twice a second: her region changes over hundreds of metres (PR #67's review: a whole sample every frame))
 	if (Now >= WildQuietAt)
@@ -255,7 +265,7 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 				// (a burrow town's tunnels: the ground gives way under her, and what dug them comes up once)
 				if (!bIn || Now < Hz.ReadyAt) continue;
 				Hz.ReadyAt = Now + 25.f; ++Hz.Sprung; ++WildHazardsSprung;
-				PlayerCombat->HurtByTrap(0.06f * Hz.P, 0.5f, 2.5f, TEXT("The ground gives way into a tunnel"));
+				PlayerCombat->HurtByTrap(0.06f * Hz.P, 0.5f, 2.5f, RDS13Msg(Hz.Msg, TEXT("The ground gives way into a tunnel")));
 				// (its diggers: of the monsters whose name says so, else the region's; 5 m round her (PR #66's review: one rule for a
 				// scenery's monsters, SpawnSceneryMonsters))
 				if (Hz.Sprung == 1 && bCombat) SpawnSceneryMonsters(Hz.Chunk.Get(), TEXT("Rat+Pangolin"), 2, FString(), Her, (uint32)Hz.Id, 500.f, 0.7f, 40.f);
@@ -267,14 +277,14 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 				Hz.In = bIn ? Hz.In + Dt : FMath::Max(0.f, Hz.In - Dt * 2.f);
 				if (Hz.In < 1.5f || Now < Hz.ReadyAt) continue;
 				Hz.ReadyAt = Now + 1.4f; ++Hz.Sprung; ++WildHazardsSprung;
-				PlayerCombat->HurtByTrap(0.03f * Hz.P, 0.15f, 1.f, TEXT("Bees! The hive's swarm stings you"));
+				PlayerCombat->HurtByTrap(0.03f * Hz.P, 0.15f, 1.f, RDS13Msg(Hz.Msg, TEXT("Bees! The hive's swarm stings you")));      // (the eighth phase: msg=, a thaw lake's mosquitoes)
 			}
 			else if (Hz.Kind == TEXT("heat"))
 			{
 				// (smouldering ground: a burn every second she stands on it)
 				if (!bIn || Now < Hz.ReadyAt) continue;
 				Hz.ReadyAt = Now + 1.f; ++Hz.Sprung; ++WildHazardsSprung;
-				PlayerCombat->HurtByTrap(0.025f * Hz.P, 0.f, 0.f, TEXT("The ground smoulders under you"));
+				PlayerCombat->HurtByTrap(0.025f * Hz.P, 0.f, 0.f, RDS13Msg(Hz.Msg, TEXT("The ground smoulders under you")));
 			}
 			else if (Hz.Kind == TEXT("bog"))
 			{
@@ -328,7 +338,7 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 				if (Hz.In < 1.5f || Now < Hz.ReadyAt) continue;
 				Hz.ReadyAt = Now + 1.f;
 				if (Hz.Start < 0.f) { Hz.Start = Now; ++Hz.Sprung; ++WildHazardsSprung; }
-				PlayerCombat->HurtByTrap(0.04f * Hz.P, 0.f, 0.f, TEXT("Your head pounds and your breath will not come: the air in the hollow is bad"));
+				PlayerCombat->HurtByTrap(0.04f * Hz.P, 0.f, 0.f, RDS13Msg(Hz.Msg, TEXT("Your head pounds and your breath will not come: the air in the hollow is bad")));
 			}
 			// (the seventh phase: "thin crust where the ground looks solid but has boiling water underneath": once a play it breaks under her, a
 			// scald and her legs slowed)
@@ -336,7 +346,7 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 			{
 				if (!bIn || WildScenerySprung.Contains(Hz.Id)) continue;
 				WildScenerySprung.Add(Hz.Id); ++Hz.Sprung; ++WildHazardsSprung;
-				PlayerCombat->HurtByTrap(0.12f * Hz.P, 0.4f, 2.f, TEXT("The crust breaks: boiling water to your shins"));
+				PlayerCombat->HurtByTrap(0.12f * Hz.P, 0.4f, 2.f, RDS13Msg(Hz.Msg, TEXT("The crust breaks: boiling water to your shins")));
 				PlayerCombat->SlowBy(0.5f, 2.f);
 			}
 			// (the seventh phase: "eruption warnings like tremors, ash fall": while she is near, every 25 s the ground shudders (her steps slowed
@@ -351,13 +361,36 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 					if (UNiagaraComponent* Nc = UNiagaraFunctionLibrary::SpawnSystemAtLocation(W, *Sm, Her + FVector(300.f, 0.f, 500.f), FRotator::ZeroRotator, FVector(1.f), true, true, ENCPoolMethod::None, false))
 						WildSceneryBursts.Add({ Nc, Now + 3.f, Now + 8.f });
 			}
+			// (the eighth phase: "open leads ... very dangerous to cross", thin ice on a frozen lake: after a second standing on it the ice gives,
+			// a hurt, her legs slowed in the cold water; again after 30 s; counted once each time she steps on)
+			else if (Hz.Kind == TEXT("thin_ice"))
+			{
+				if (!bIn) { Hz.In = 0.f; continue; }
+				Hz.In += Dt;
+				if (Hz.In < 1.f || Now < Hz.ReadyAt) continue;
+				Hz.ReadyAt = Now + 30.f; ++Hz.Sprung; ++WildHazardsSprung;
+				PlayerCombat->HurtByTrap(0.12f * Hz.P, 0.6f, 3.f, RDS13Msg(Hz.Msg, TEXT("The ice gives way: freezing water to your waist")));
+			}
+			// (the eighth phase: "snow drifts and sastrugi: wind-carved ridges that make walking hard": slowed while she is in them, told once
+			// each time she comes in)
+			else if (Hz.Kind == TEXT("drift"))
+			{
+				if (!bIn) { if (Hz.Start >= 0.f && Now - Hz.In > 2.f) Hz.Start = -1.f; continue; }
+				Hz.In = Now;
+				if (PlayerCombat->GetSlowness() <= 0.35f + 1e-3f) PlayerCombat->SlowBy(0.35f, 0.6f);
+				if (Hz.Start < 0.f)
+				{
+					Hz.Start = Now; ++Hz.Sprung; ++WildHazardsSprung;
+					if (Now >= Hz.ReadyAt) { Hz.ReadyAt = Now + 10.f; PlayerCombat->ShowMessage(RDS13Msg(Hz.Msg, TEXT("The wind-carved snow drags at every step"))); }
+				}
+			}
 			else if (Hz.Kind == TEXT("pit"))
 			{
 				// (the third phase: "deep, noisy leaf litter that hides pits, roots and tracks": a pit under the leaves, once a minute)
 				if (!bIn || Now < Hz.ReadyAt) continue;
 				Hz.ReadyAt = Now + 60.f; ++Hz.Sprung; ++WildHazardsSprung;
 				// (the seventh phase: its line from its data when it has one ("msg=": the moss over a lava field's holes, obsidian's edges))
-				PlayerCombat->HurtByTrap(0.07f * Hz.P, 0.5f, 2.f, Hz.Msg.IsEmpty() ? FString(TEXT("Your foot goes through the leaves into a hidden pit")) : Hz.Msg);
+				PlayerCombat->HurtByTrap(0.07f * Hz.P, 0.5f, 2.f, RDS13Msg(Hz.Msg, TEXT("Your foot goes through the leaves into a hidden pit")));
 			}
 			else if (Hz.Kind == TEXT("rockfall") || Hz.Kind == TEXT("avalanche"))
 			{
@@ -368,7 +401,7 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 				{
 					if (!bIn || Now < Hz.ReadyAt) continue;
 					Hz.Start = Now;
-					PlayerCombat->ShowMessage(bAval ? TEXT("A crack above, then a roar: the snow is coming down!") : TEXT("Stones rattle down the slope above you!"));
+					PlayerCombat->ShowMessage(RDS13Msg(Hz.Msg, bAval ? TEXT("A crack above, then a roar: the snow is coming down!") : TEXT("Stones rattle down the slope above you!")));      // (the eighth phase: msg=, an ice shelf calving)
 					// (the dust is the scenery's smoke, which loops: it is put out after 3 s and taken away after 8 (PR #69's review: each
 					// fall left a column standing for good))
 					if (const TObjectPtr<UNiagaraSystem>* Sm = WildSceneryFx.Find(TEXT("f13_smoke")); Sm && *Sm)
@@ -380,7 +413,7 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 				Hz.Start = -1.f; Hz.ReadyAt = Now + (bAval ? 90.f : 40.f); ++Hz.Sprung; ++WildHazardsSprung;
 				// (near its line and on its slope when it lands, as when it began (PR #69's review: climbed up or dropped down in the 1.2 s,
 				// she was struck all the same))
-				if (D < Hz.R * 0.6f && FMath::Abs(Feet - Hz.At.Z) < 250.f) PlayerCombat->HurtByTrap((bAval ? 0.2f : 0.12f) * Hz.P, 0.4f, 2.f, bAval ? TEXT("The avalanche sweeps over you") : TEXT("Falling stones strike you"));
+				if (D < Hz.R * 0.6f && FMath::Abs(Feet - Hz.At.Z) < 250.f) PlayerCombat->HurtByTrap((bAval ? 0.2f : 0.12f) * Hz.P, 0.4f, 2.f, RDS13Msg(Hz.Msg, bAval ? TEXT("The avalanche sweeps over you") : TEXT("Falling stones strike you"), 1));      // (an ice shelf: "...|The falling ice strikes you")
 			}
 			else if (Hz.Kind == TEXT("scree"))
 			{
@@ -897,7 +930,7 @@ FString ARDDungeonGenerator::WildSceneryInteract(const FVector& From)
 		const FVector2D F2(From.X / 100.0, From.Y / 100.0);
 		if (FindNearestWildPlace(F2.X, F2.Y, 3.f, [&](const FRDWildPlace& P, FVector2D& A) { if (P.Kind != TEXT("lair") && P.Kind != TEXT("spawn")) return false; A = P.At; return true; }, Got, At))
 			Said = FString::Printf(TEXT("%s%sTracks of something big lead %s, toward %s, %.1f km off."), *Said, Said.IsEmpty() ? TEXT("") : TEXT("  "), RDS13Compass(At - F2), *Got.Name, FVector2D::Distance(At, F2) / 1000.0);
-		else Said = FString::Printf(TEXT("%s%sOnly deer and boar have come this way."), *Said, Said.IsEmpty() ? TEXT("") : TEXT("  "));
+		else Said = FString::Printf(TEXT("%s%s%s"), *Said, Said.IsEmpty() ? TEXT("") : TEXT("  "), M.Contains(TEXT("none")) ? *M[TEXT("none")] : TEXT("Only deer and boar have come this way."));
 	}
 	else if (Do == TEXT("offer") || Do == TEXT("trade"))
 	{
@@ -1022,6 +1055,46 @@ void ARDDungeonGenerator::TickWildStorm13(float Dt, const FVector& Her)
 }
 
 void ARDDungeonGenerator::ForceWildStorm(float Km) { ForceWildFarSight(TEXT("storm"), Km); }
+
+void ARDDungeonGenerator::TickWildAurora13(float Dt, const FVector& Her)
+{
+	// (the eighth phase: "auroras over black lava and white snow": by night (20:00 to 5:30) in its regions, a curtain of light hanging
+	// WildAuroraKm north of her (the world's +X), WildAuroraUpM over the ground there, following her; gone by day or elsewhere. Looked at
+	// twice a second (her region changes over hundreds of metres))
+	WildAuroraLook -= Dt;
+	if (WildAuroraLook <= 0.f)
+	{
+		WildAuroraLook = 0.5f;
+		const FVector2D At = FVector2D(Her) / 100.0 + FVector2D(WildAuroraKm * 1000.0, 0.0);
+		FRDWSample Qa; Wild->Sample(At.X, At.Y, Qa, false);
+		WildAuroraFootZ = Wild->ToZ(Qa.WaterKind != 0 ? FMath::Max(Qa.H, Qa.Water) : Qa.H);
+		TickWildAuroraLook(Her);
+	}
+	if (UStaticMeshComponent* Au = WildAurora.Get())
+		Au->SetWorldLocation(FVector(Her.X + WildAuroraKm * 100000.0, Her.Y, WildAuroraFootZ + WildAuroraUpM * 100.f));
+}
+
+void ARDDungeonGenerator::TickWildAuroraLook(const FVector& Her)
+{
+	const FVector2D H2 = FVector2D(Her) / 100.0;
+	const bool bWant = WildAuroraMesh && RDS13InHours(TEXT("night"), TownHour) && WildAuroraBiomes.Contains(Wild->BiomeName(Wild->BiomeAt(H2.X, H2.Y)));
+	if (!bWant) { if (UStaticMeshComponent* Au = WildAurora.Get()) Au->DestroyComponent(); WildAurora.Reset(); return; }
+	if (WildAurora.IsValid()) return;
+	UStaticMeshComponent* Au = NewObject<UStaticMeshComponent>(this);
+	Au->SetStaticMesh(WildAuroraMesh);
+	Au->SetCollisionEnabled(ECollisionEnabled::NoCollision); Au->SetCastShadow(false); Au->SetMobility(EComponentMobility::Movable);
+	Au->SetCullDistance(0.f); Au->bNeverDistanceCull = true;
+	Au->RegisterComponent();
+	WildAurora = Au;
+}
+
+FString ARDDungeonGenerator::GetWildAurora() const
+{
+	const UStaticMeshComponent* Au = WildAurora.Get();
+	if (!Au) return TEXT("off");
+	const FVector L = Au->GetComponentLocation();
+	return FString::Printf(TEXT("on|%.0f|%.0f|%.0f"), L.X, L.Y, L.Z);
+}
 
 void ARDDungeonGenerator::ForceWildFarSight(FName Name, float Km)
 {

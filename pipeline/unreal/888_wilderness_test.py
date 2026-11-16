@@ -1276,7 +1276,8 @@ def step_scenery13():
     try:
         for kd in want:
             r = {}
-            f = str(g.find_wild_scenery(kd, 0.0, 0.0, 150.0))
+            # (220 km: the eighth phase's arctic lies 162 km north of Brokenspire at its nearest (the probe's map of the regions))
+            f = str(g.find_wild_scenery(kd, 0.0, 0.0, 220.0))
             if not f: res["kinds"][kd] = {"found": False}; continue
             sid, cx, cy, yw, nm = f.split("|", 4); sid = int(sid); cx = float(cx); cy = float(cy); yw = float(yw)
             # (each kind from whole health: the canyons' falls ran one kind's hurt into the next, and she died arriving at the arch)
@@ -1502,11 +1503,14 @@ def step_scenery13():
                     # (the seventh phase: a geyser's cycle (30 s in the data) waited through; the gas after its breath and a half)
                     yield from watching(rwait(7.0 if hz["kind"] == "bog" else 8.0 if hz["kind"] == "flood" else 36.0 if hz["kind"] == "geyser" else 4.0 if hz["kind"] in ("sting", "heat", "gas") else 3.0 if hz["kind"] == "scree" else 2.2), msgs)
                     if hz["kind"] == "flood": v["carried_m"] = round(math.hypot(G["pawn"].get_actor_location().x - put0.x, G["pawn"].get_actor_location().y - put0.y) / 100.0, 2)
+                    if hz["kind"] == "drift":
+                        try: v["walk_speed_in"] = round(G["pawn"].get_component_by_class(unreal.CharacterMovementComponent).get_editor_property("max_walk_speed"))
+                        except Exception: pass
                     if hz["kind"] == "scree":
                         v["carried_m"] = round(math.hypot(G["pawn"].get_actor_location().x - put0.x, G["pawn"].get_actor_location().y - put0.y) / 100.0, 2)
                         try: v["walk_speed_in"] = round(G["pawn"].get_component_by_class(unreal.CharacterMovementComponent).get_editor_property("max_walk_speed"))
                         except Exception: pass
-                    if hz["kind"] in ("bog", "scree"):
+                    if hz["kind"] in ("bog", "scree", "drift"):
                         # (its slow measured (PR #67's review: recorded and never asserted): her walk speed in it against out of it; the
                         # scree's too (PR #69's review))
                         mv = G["pawn"].get_component_by_class(unreal.CharacterMovementComponent)
@@ -1517,9 +1521,10 @@ def step_scenery13():
                 v["sprung"] = next((x["sprung"] for x in scen_things(g, sid)["haz"] if abs(x["x"] - hz["x"]) < 1 and abs(x["y"] - hz["y"]) < 1), 0)
                 v["monsters_came"] = len(mine_mons()) - mons0
                 if hz["kind"] == "bog" and v.get("walk_speed_in_bog", 0) >= v.get("walk_speed_out", 0) * 0.8: v["slow_failed"] = True
+                if hz["kind"] == "drift" and v.get("walk_speed_in", 1e9) >= v.get("walk_speed_out", 0) * 0.8: v["slow_failed"] = True
                 if hz["kind"] == "flood" and v.get("carried_m", 0) < (1.0 if kd == "glacier_flood" else 2.0): v["slow_failed"] = True     # (a fissure 3 to 5 m wide: 1.4 m)
                 if hz["kind"] == "scree" and (v.get("carried_m", 0) < 1.0 or v.get("walk_speed_in", 1e9) >= v.get("walk_speed_out", 0) * 0.8): v["slow_failed"] = True
-                v["ok"] = v["sprung"] > 0 and not v.get("slow_failed") and (True if hz["kind"] == "scree" else v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting", "heat", "fall", "bog", "pit", "rockfall", "avalanche", "cornice", "crevasse", "flood", "geyser", "gas", "crust") else any("shudders" in m_ for m_ in msgs[nh:]) if hz["kind"] == "tremor" else v.get("counted_hers", 0) == 0 if hz["kind"] == "hunt" else v["monsters_came"] > 0)
+                v["ok"] = v["sprung"] > 0 and not v.get("slow_failed") and (True if hz["kind"] in ("scree", "drift") else v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting", "heat", "fall", "bog", "pit", "rockfall", "avalanche", "cornice", "crevasse", "flood", "geyser", "gas", "crust", "thin_ice") else any("shudders" in m_ for m_ in msgs[nh:]) if hz["kind"] == "tremor" else v.get("counted_hers", 0) == 0 if hz["kind"] == "hunt" else v["monsters_came"] > 0)
                 r["hazards"].append(v)
                 cb().set_health(cb().get_max_health())
                 ground_put(*near); yield from rwait(1.0)
@@ -1735,6 +1740,26 @@ def step_land13():
             g.wild_put_her(*pt); yield from wait_chunks(30, 50); ground_put(*pt); yield from rwait(2.0)
             mv_ = G["pawn"].get_component_by_class(unreal.CharacterMovementComponent)
             res["thin_air"][bn] = {"thin": bool(g.get_editor_property("wild_thin_air")), "walk_speed": round(mv_.get_editor_property("max_walk_speed"))}
+        # (the eighth phase: "auroras over black lava and white snow": the curtain by night in the arctic (north of her, the world's +X,
+        # and high over her), none by day there, none by night in the grasslands; a picture of it at night)
+        res["aurora"] = {}
+        h_au = g.get_town_hour()
+        try:
+            for bn, hr in (("arctic regions", 23.0), ("arctic regions", 12.0), ("grasslands", 23.0)):
+                pt = find_biome_point(bn, 240)
+                if not pt: res["aurora"][f"{bn}@{hr:g}"] = None; continue
+                g.set_town_hour(hr); g.wild_put_her(*pt); yield from wait_chunks(30, 50); ground_put(*pt); yield from rwait(1.5)
+                a_ = str(g.get_wild_aurora()).split("|"); me_ = G["pawn"].get_actor_location()
+                r_ = {"on": a_[0] == "on"}
+                if r_["on"]:
+                    ax, ay, az = float(a_[1]), float(a_[2]), float(a_[3])
+                    r_.update({"north_m": round((ax - me_.x) / 100.0), "east_m": round((ay - me_.y) / 100.0), "up_m": round((az - me_.z) / 100.0)})
+                    if hr > 20:
+                        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=12, yaw=0)); yield from rwait(1.5)
+                        shot("land13_aurora", "1280x720"); yield from rwait(1.2)
+                res["aurora"][f"{bn}@{hr:g}"] = r_
+        finally:
+            g.set_town_hour(h_au)
         # (the fourth phase: "rolling mist that wipes out landmarks": how often the weather's own turn brings fog on the moor and on the
         # grassland, 4000 turns of its pick where she stands (PR #68's review: its weights alone are not what comes))
         res["moor_fog"] = {}
@@ -1759,7 +1784,11 @@ def step_land13():
           and (res.get("thin_air", {}).get("mountains and peaks") or {}).get("thin") is True
           and (res["thin_air"]["mountains and peaks"]["walk_speed"] < (res.get("thin_air", {}).get("mountains") or {}).get("walk_speed", 0) * 0.95)
           and all(v.get("found") and v["crests_1600m"] >= 2 for v in res["swales"].values())
-          and res["crossroads_50km"] > 0 and res.get("storm", {}).get("on") == 1)
+          and res["crossroads_50km"] > 0 and res.get("storm", {}).get("on") == 1
+          and (res["aurora"].get("arctic regions@23") or {}).get("on") is True and 3000 <= res["aurora"]["arctic regions@23"]["north_m"] <= 5000
+          and res["aurora"]["arctic regions@23"]["up_m"] > 800
+          and (res["aurora"].get("arctic regions@12") or {"on": True}).get("on") is False
+          and (res["aurora"].get("grasslands@23") or {"on": True}).get("on") is False)
     step_result("land13", ok, **res)
 
 
@@ -1775,8 +1804,11 @@ def yw_along(x, y):
 
 def find_biome_point(bn, max_km=80):
     """a point of the biome's (its middle of a 300 m square of it), out in rings from Brokenspire, 1.5 km clear of the towns"""
+    # (a point every 3 km round each ring (the eighth phase: at 160 km 10 degrees is 28 km, and the arctic's edge lay between them))
     for rk in range(2, max_km, 2):
-        for a in range(0, 360, 10):
+        na = max(36, int(2 * math.pi * rk / 3.0))
+        for ai in range(na):
+            a = ai * 360.0 / na
             x, y = rk * 1000.0 * math.cos(math.radians(a)), rk * 1000.0 * math.sin(math.radians(a))
             if sample(x, y)["biome"] == bn and all(sample(x + dx, y + dy)["biome"] == bn for dx, dy in ((300, 0), (-300, 0), (0, 300), (0, -300), (900, 0), (1600, 0))):
                 return (x, y)

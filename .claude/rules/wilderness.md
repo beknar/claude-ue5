@@ -355,3 +355,15 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
     - A hazard counts a springing when it catches her, once each time (the geyser once an eruption she is in, the gas once each entry), never by time spent near it.
     - A field another rule fills is no home for a new value: the geyser's period in `Length` would be a hidden piece's height. One helper for one cycle (`RDS13GeyserPhase`), read by the eruptions and the clock.
     - A bar lowered for one case stays the other cases' bar: the fissure's 1 m flood check is the fissure's alone. A check of what a step said reads the lines from that step on.
+- **Phase 8 (tundras and arctic regions)**:
+  - **Check a data file's names before the stage reads it**: two runs went on testing after `926 scenery` had stopped at a part named `tallgrass`, then `burrow` (the tables' names are `n13_<piece>#`), and tested the old data: every kind "not found". The run scripts stop when the stage does not finish (`926 kinds:`), and a phase's part names are checked offline against the tables first.
+  - **Where a region lies decides a test's reach**: the arctic's nearest is 162 km north of Brokenspire (the probe's map of the regions, `RDWildProbe -Half=300000 -Step=2000`), beyond the 150 km search; the scenery step searches 220 km, and `find_biome_point`'s rings take a point every 3 km (at 160 km, 10 degrees left 28 km gaps).
+  - **A hazard's reach is where it starts**: the hunt begins only while she is within its reach, and the test watches from 40 m so as not to scare the herd; a reach of 12 m never started it.
+  - **PR #72's review (2026-11-16)**:
+    - Every renewed slow is renewed only while nothing stronger holds her: the drift repeated thin air's fault (PR #69). An entry flickering at a hazard's edge is one entry (out 2 s before it counts again), its line at most every 10 s.
+    - A picture's row 0 is its top, V 1: the aurora's gradient was written with V 0 at row 0 and came out upside down. Write V from the bottom row up.
+    - A shared master's defaults are another piece's look: the see-through master's grey tint (the storm's rain) dimmed the aurora. A kit slot carries its own parameters (`params`, set by `926 kit`).
+    - A component made again under a fixed name can meet the destroyed one not yet collected: make it nameless.
+    - Read what changes over hundreds of metres in the look, not every frame (the aurora's foot), and over water the water's face, not the sea floor.
+    - One helper for a hazard's line (`RDS13Msg`, "warn|strike" for two), so every hazard takes `msg=` and a borrowed hazard does not say the wrong thing (the ice shelf's blow said "Falling stones").
+    - `a ** 2` squares what is in the brackets: `(0.35 * x) ** 2` was meant as `0.35 * x ** 2`.

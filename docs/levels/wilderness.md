@@ -671,7 +671,41 @@ The user's list of 2026-11-14 ([docs/improvements13.txt](../improvements13.txt))
 - **Its own pieces** (`scenery13_kit.py`): basalt columns, obsidian shards, a fumarole, volcanic bombs, a sod hut, a geyser's cone, a church's spire, a lava tube's mouth.
 - **Measured** (`test_s13p7a.json` to `test_s13p7g.json`; the land pass in `test_s13p7a.json`): every kind found within 150 km of Brokenspire and visited. The geyser erupted on its cycle and scalded and threw her (33.6 taken over its 6 s); its use told when it goes again. The lava flow's, the lava lake's and the mud pots' heat burned her (14 each); the gas in a hollow and at a fumarole hurt her after its breath and a half (16.8); the thin crust broke under her (16.8); the obsidian's edges and the moss's hidden hole cut (9.8); the cinder cone's scoria slowed her to 194 cm/s against 353 and carried her 1.8 m; the meltwater flood struck her (21) and pushed her 1.4 m down its fissure; the tremors shook the ground under her at the eruption signs and the resurgent dome. She climbed the basalt columns 6.6 m and the shoulder's rock 2.3 m, and saw 4,909 and 19,979 more of the map; scraped 3 Sulfur and gathered Obsidian; the fire temple's keeper gave The Mountain's Heat for bread; the farmer cheese; the spa healed her.
 
-![Volcanoes, volcanic tundra and the geothermal caldera's 31 kinds, from 15 m](../images/scenery13_volcanic.jpg)## The TODO sweep (2026-11-14)
+![Volcanoes, volcanic tundra and the geothermal caldera's 31 kinds, from 15 m](../images/scenery13_volcanic.jpg)
+
+### Tundras and arctic regions
+
+| Kind | Biomes | What stands there | What she does there |
+|---|---|---|---|
+| Polygon ground | tundras, arctic | a honeycomb of dark frost cracks 24 m across round a lichen skin (landforms) | |
+| Thaw lake | tundras (by a pond) | reeds | fish; the mosquitoes sting |
+| Caribou migration | tundras | a trampled trail (a landform), bones, the wilds' deer walking it | wolves come for the herd |
+| Inuksuk | tundras, arctic | a stone figure pointing the way | read the way: the nearest towns, how far and which way |
+| Mammoth bones | tundras | great tusks and a skull out of the thawing mud, ribs | |
+| Cotton grass | tundras | a lichen skin, cotton grass | gather berries |
+| Wolf den | tundras | a den in a mound, bones | its two guards; read the tracks |
+| Summer bloom | tundras | wildflowers across the plain | |
+| Reindeer herders' camp | tundras, arctic | two tents, a sledge, fish drying, antlers, a fire, the herd, the herder | trade bread for fish; talk |
+| Pingo | cold steppes, tundras | (phase 2's kind, now in the tundras too) | |
+| Pressure ridge | arctic | a jagged line of ice blocks | the broken ice drags at every step |
+| Open lead | arctic | sea ice with a crack of black water across it (skins) | the ice at its edge gives way |
+| Iceberg cave | arctic | a great block of ice, an ice cave's arch | a chest |
+| Sastrugi | arctic, tundras | wind-carved ridges of snow (landforms) | they slow her |
+| Seal holes | arctic | breathing holes in the sea ice (skins) | |
+| Bear tracks | arctic | a seal's ribs, its blood on the ice | read the tracks |
+| Frozen shipwreck | arctic | a ship frozen into the ice, its masts tilted, ice blocks | a chest; read the logbook |
+| Ice shelf | arctic | a line of ice towers, the shelf's front | it calves with a roar onto her |
+| Expedition hut | arctic, tundras | a plank hut drifted with snow, three graves | a chest; read the notes |
+| Snow houses | arctic, tundras | two snow houses, a fire, the hunter | warm herself: wounds and mana restored; talk |
+| Aurora hill | tundras, arctic, volcanic tundra (a rise) | a rock, a ring of stones | by night: The Lights' Blessing; by day it says to come back after dark |
+
+- **What is new**: hazards `thin_ice` (after a second on it the ice gives: a hurt, her legs slowed; again after 30 s) and `drift` (slowed while in it); `msg=` on the sting (a thaw lake's mosquitoes) and the rockfall (an ice shelf calving); the auroras (`WildAuroraBiomes`: by night in the tundras, the arctic and the volcanic tundra a curtain of light 3 km long and 600 m tall hangs 4 km north of her, 1.2 km up, following her; the kit's `Aurora`, see-through and glowing).
+- **Its own pieces** (`scenery13_kit.py`): an inuksuk, a mammoth's tusks and skull, an expedition hut, a snow house, a sledge, a pile of antlers, the aurora's curtain.
+- **Measured** (`test_s13p8a.json` to `test_s13p8d.json`; the land pass with the auroras in `test_s13p8a.json`): every kind found within 220 km of Brokenspire and visited (the arctic lies 162 km north at its nearest, the tundras 116 km). At 23:00 in the arctic the aurora hung 4,000 m north of her and 887 m over her; at noon there, and at 23:00 on the grasslands, there was none. The open lead's ice gave way under her (16.8), the ice shelf calved onto her (16.8), the thaw lake's mosquitoes stung (8.4); the pressure ridge's and the sastrugi's drifts slowed her to 230 cm/s against 353; the caribou walked 7.1 m in 12 s, and the wolves' kill was not counted hers. The inuksuk told the way to the nearest towns; the Aurora hill gave nothing by day and said so, and The Lights' Blessing by night; the herder traded fish for bread; the snow houses healed her.`r`n`r`n![The aurora over the arctic at 23:00, 4 km north of her](../images/scenery13_aurora.jpg)
+
+![Tundras and arctic regions' 21 kinds, from 15 m](../images/scenery13_polar.jpg)
+
+## The TODO sweep (2026-11-14)
 
 The open items of `TODO.md` that a test could settle in the wilds (`888 ... -Light`):
 

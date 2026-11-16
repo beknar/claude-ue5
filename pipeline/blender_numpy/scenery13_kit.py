@@ -29,6 +29,9 @@ helpers and its noise are used here):
                    tundra, geothermal caldera): hexagonal basalt columns stepped like stairs, black glass shards, a sulfur-crusted vent,
                    volcanic bombs, a turf-roofed hut, a geyser's sinter cone, a church's spire for a village buried in ash, a lava
                    tube's mouth (the lava lakes and flows are skins of the land with the ground's own glow, lava=)
+  Inuksuk, MammothTusks, ExpeditionHut, Igloo, Sledge, AntlerPile, Aurora  the eighth phase's (tundras, arctic regions): a stone
+                   figure pointing the way, a mammoth's tusks and skull out of the thaw, a plank hut drifted with snow, a snow house, a
+                   herder's sledge, a pile of shed antlers, an aurora's curtain of light 3 km long (the night sky's, not a scenery's)
   StormCell        a storm cell for the far horizon: an anvil cloud 3.2 km across, a rain curtain, a funnel (the far storms)
   Drystone_A/B     a 3 m length of field wall laid dry, its copes on edge (the shepherd's pen)
   AppleTree_A/B,   the old orchard's gnarled fruit trees: a short leaning trunk, a low wide crown of leaf clusters with their
@@ -120,7 +123,7 @@ def floor(bm):
         if v.co.z < 0.0: v.co.z = 0.0
 
 
-def finish(me, ob, bm, slots, masked=(), translucent=(), flat=False):
+def finish(me, ob, bm, slots, masked=(), translucent=(), flat=False, params=None):
     """the mesh written as an FBX (flat: every face flat-shaded, a dry wall's stones), its record"""
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0005)
     bm.to_mesh(me); bm.free()
@@ -134,7 +137,8 @@ def finish(me, ob, bm, slots, masked=(), translucent=(), flat=False):
     bpy.ops.export_scene.fbx(filepath=fn, use_selection=True, object_types={"MESH"}, apply_unit_scale=True, global_scale=1.0, axis_forward="X", axis_up="Z", mesh_smooth_type="FACE")
     xs = [v.co for v in me.vertices]
     size = [round(max(c[i] for c in xs) - min(c[i] for c in xs), 2) for i in range(3)]
-    REC[ob.name] = {"fbx": fn, "size_m": size, "triangles": sum(len(p.vertices) - 2 for p in me.polygons), "slots": list(slots), "masked": list(masked), "translucent": list(translucent)}
+    REC[ob.name] = {"fbx": fn, "size_m": size, "triangles": sum(len(p.vertices) - 2 for p in me.polygons), "slots": list(slots), "masked": list(masked), "translucent": list(translucent),
+                    "params": params or {}}
     print("N13KIT", ob.name, REC[ob.name]["size_m"], REC[ob.name]["triangles"])
 
 
@@ -996,6 +1000,114 @@ def lava_tube():
     finish(me, ob, bm, ["LavaTubeBasalt", "LavaTubeDark"], flat=True)
 
 
+# ------------------------------------------------------------------------------------------------ the eighth phase: tundras, arctic
+def inuksuk():
+    """an inuksuk: a figure of stacked flat stones 2.2 m high, legs, a lintel for arms, a head, pointing the way"""
+    rng = random.Random(801)
+    me, ob, bm, uvl = new_mesh("SM_N13_Inuksuk")
+    for (c, s) in (((0, -0.35, 0.45), (0.5, 0.35, 0.9)), ((0, 0.35, 0.45), (0.5, 0.35, 0.9)), ((0, 0, 1.0), (0.55, 1.2, 0.22)),
+                   ((0, 0, 1.3), (0.5, 0.6, 0.38)), ((0, 0, 1.58), (0.5, 1.9, 0.2)), ((0, 0, 1.85), (0.42, 0.45, 0.34)), ((0, 0, 2.1), (0.34, 0.34, 0.18))):
+        n0 = len(bm.verts)
+        box(bm, uvl, c, s, 0, (rng.random() * 0.5, rng.random() * 0.5), 0.5)
+        for v in list(bm.verts)[n0:]: v.co.x += rng.uniform(-0.04, 0.04); v.co.y += rng.uniform(-0.04, 0.04)
+    finish(me, ob, bm, ["InuksukStone"], flat=True)
+
+
+def mammoth_tusks():
+    """a mammoth's tusks and skull coming out of the thawing ground: two great curved tusks of ivory 3 m long and the dome of a skull"""
+    rng = random.Random(809)
+    me, ob, bm, uvl = new_mesh("SM_N13_MammothTusks")
+    for s in (-1, 1):
+        pts = [Vector((math.sin(t * 2.2) * 1.4, s * (0.5 + 0.9 * t), 0.25 + 1.6 * math.sin(t * 1.9))) for t in np.linspace(0, 1, 12)]
+        tube(bm, uvl, pts, list(np.linspace(0.16, 0.03, 12)), 8, 0)
+    sphere(bm, uvl, (-0.9, 0, 0.35), 0.75, 1, 1.3, 1.0, 0.8, 10, 0.06, rng)
+    floor(bm)
+    finish(me, ob, bm, ["MammothTusksIvory", "MammothTusksSkull"])
+
+
+def expedition_hut():
+    """an abandoned expedition hut: a plank hut 5 x 4 m, its gable roof drifted with snow on one side, a door on its +X end"""
+    me, ob, bm, uvl = new_mesh("SM_N13_ExpeditionHut")
+    L, W, Hw, Hr = 5.0, 4.0, 2.2, 3.4
+    box(bm, uvl, (0, 0, Hw / 2), (L, W, Hw), 0)
+    for s in (-1, 1):
+        vs = [bm.verts.new(p) for p in ((-L / 2 - 0.25, s * (W / 2 + 0.3), Hw - 0.1), (L / 2 + 0.25, s * (W / 2 + 0.3), Hw - 0.1), (L / 2 + 0.25, 0, Hr), (-L / 2 - 0.25, 0, Hr))]
+        f = bm.faces.new(vs[::-1] if s > 0 else vs); f.material_index = 1 if s > 0 else 2
+        for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+    for x in (L / 2, -L / 2):                                    # (both gables, each facing out)
+        vs = [bm.verts.new(p) for p in ((x, -W / 2, Hw), (x, W / 2, Hw), (x, 0, Hr - 0.05))]
+        f = bm.faces.new(vs if x > 0 else vs[::-1]); f.material_index = 0
+        for lp, uv in zip(f.loops, ((0, 0), (1, 0), (0.5, 1))): lp[uvl].uv = uv
+    vs = [bm.verts.new((L / 2 + 0.02, y, z)) for (y, z) in ((-0.45, 0.0), (0.45, 0.0), (0.45, 1.9), (-0.45, 1.9))]
+    f = bm.faces.new(vs); f.material_index = 3
+    for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+    finish(me, ob, bm, ["ExpeditionHutPlanks", "ExpeditionHutRoof", "ExpeditionHutSnow", "ExpeditionHutDoor"], flat=True)
+
+
+def igloo():
+    """a snow house: a dome of snow blocks 3.6 m across and 2 m high, a low entrance tunnel on its +X side"""
+    me, ob, bm, uvl = new_mesh("SM_N13_Igloo")
+    lathe(bm, uvl, [(1.8 * math.cos(a), 2.0 * math.sin(a)) for a in np.linspace(0, math.pi / 2 - 0.05, 9)] + [(0.05, 2.0)], 18, 0, urep=3.0)
+    box(bm, uvl, (2.15, 0, 0.5), (1.5, 1.2, 1.0), 0)
+    vs = [bm.verts.new((2.92, y, z)) for (y, z) in ((-0.35, 0.0), (0.35, 0.0), (0.35, 0.8), (-0.35, 0.8))]
+    f = bm.faces.new(vs); f.material_index = 1
+    for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
+    finish(me, ob, bm, ["IglooSnow", "IglooDark"])
+
+
+def sledge():
+    """a sledge: two curved wooden runners 3 m long, cross slats lashed over them, a bundle of furs on it"""
+    rng = random.Random(821)
+    me, ob, bm, uvl = new_mesh("SM_N13_Sledge")
+    for y in (-0.4, 0.4):
+        pts = [Vector((-1.5 + 3.0 * t, y, 0.06 + 0.35 * ((t - 0.82) / 0.18) ** 2 * (1 if t > 0.82 else 0))) for t in np.linspace(0, 1, 10)]
+        tube(bm, uvl, pts, [0.04] * 10, 5, 0)
+        for x in (-1.1, -0.2, 0.7):
+            tube(bm, uvl, [Vector((x, y, 0.06)), Vector((x, y, 0.32))], [0.03, 0.03], 4, 0)
+    for k in range(9):
+        box(bm, uvl, (-1.3 + k * 0.27, 0, 0.34), (0.16, 1.0, 0.04), 0)
+    sphere(bm, uvl, (-0.4, 0, 0.55), 0.45, 1, 1.6, 0.9, 0.5, 8, 0.15, rng)
+    finish(me, ob, bm, ["SledgeWood", "SledgeFur"])
+
+
+def antler_pile():
+    """a pile of shed antlers by a herders' camp: branching tines heaped 1 m high"""
+    rng = random.Random(827)
+    me, ob, bm, uvl = new_mesh("SM_N13_AntlerPile")
+    for k in range(9):
+        c = Vector((rng.uniform(-0.8, 0.8), rng.uniform(-0.8, 0.8), rng.uniform(0.05, 0.6)))
+        a = rng.uniform(0, 2 * math.pi); d = Vector((math.cos(a), math.sin(a), rng.uniform(0.1, 0.6))).normalized()
+        beam = [c + d * (t * 1.1) + Vector((0, 0, 0.25 * math.sin(t * 2.5))) for t in np.linspace(0, 1, 6)]
+        tube(bm, uvl, beam, list(np.linspace(0.05, 0.02, 6)), 5, 0)
+        for t in (0.35, 0.6, 0.85):
+            b0 = c + d * (t * 1.1) + Vector((0, 0, 0.25 * math.sin(t * 2.5)))
+            tube(bm, uvl, [b0, b0 + Vector((rng.uniform(-0.1, 0.1), rng.uniform(-0.1, 0.1), 0.3))], [0.025, 0.01], 4, 0)
+    floor(bm)
+    finish(me, ob, bm, ["AntlerPileBone"])
+
+
+def aurora():
+    """an aurora's curtain: a ribbon of light 3 km long and 600 m tall folded in slow waves, both faces drawn, see-through and glowing
+    (its picture green at the foot fading up through teal to a faint violet, streaked)"""
+    me, ob, bm, uvl = new_mesh("SM_N13_Aurora")
+    N, Lm, Hm = 64, 3000.0, 600.0
+    for back in (0.0, 0.5):                                     # (two sheets 0.5 m apart, facing either way: both faces drawn)
+        cols = []
+        for i in range(N + 1):
+            t = i / N; y = -Lm / 2 + Lm * t
+            x = 180.0 * math.sin(t * math.pi * 3.0) + 60.0 * math.sin(t * math.pi * 11.0) + back
+            cols.append((bm.verts.new((x, y, 0.0)), bm.verts.new((x + 40.0, y, Hm))))
+        for i in range(N):
+            a0, a1 = cols[i]; b0, b1 = cols[i + 1]
+            q = (a0, b0, b1, a1) if back == 0.0 else (a1, b1, b0, a0)
+            f = bm.faces.new(q); f.material_index = 0
+            u0, u1 = i / N * 6.0, (i + 1) / N * 6.0
+            uvs = ((u0, 0), (u1, 0), (u1, 1), (u0, 1)) if back == 0.0 else ((u0, 1), (u1, 1), (u1, 0), (u0, 0))
+            for lp, uv in zip(f.loops, uvs): lp[uvl].uv = uv
+    # (its own glow: the master's Tint (the storm rain's grey 0.37 dimmed it to a grey-green sheet) and Opacity (PR #72's review))
+    finish(me, ob, bm, ["AuroraLight"], translucent=["AuroraLight"], params={"AuroraLight": {"Tint": [1.6, 1.6, 1.6], "Opacity": 0.8}})
+
+
 def gold_card():
     """one card of gold leaves: only its material is used (the gold aspens' and larches' crowns, a part's mat=)"""
     me, ob, bm, uvl = new_mesh("SM_N13_GoldCard")
@@ -1270,6 +1382,20 @@ def pictures():
     png("T_N13_GeyserConeSinter", grain((0.82, 0.80, 0.74), 260, 0.08)); png("T_N13_GeyserConeVent", np.full((n, n, 3), 0.06))
     png("T_N13_ChurchSpireStone", grain((0.52, 0.50, 0.46), 270, 0.15)); png("T_N13_ChurchSpireSlate", grain((0.22, 0.24, 0.27), 271, 0.12))
     png("T_N13_ChurchSpireDark", np.full((n, n, 3), 0.04))
+    # (the eighth phase: grey lichened stone, old ivory and bone, weathered planks, tarred roof and snow, packed snow, birch wood and
+    # fur; the aurora's light green at its foot to violet at its top, streaked, its alpha fading up and at its streaks' edges)
+    png("T_N13_InuksukStone", grain((0.42, 0.42, 0.40), 290, 0.25))
+    png("T_N13_MammothTusksIvory", grain((0.74, 0.66, 0.52), 291, 0.15) * (0.9 + 0.1 * np.sin(yy * 50)[..., None])); png("T_N13_MammothTusksSkull", grain((0.58, 0.50, 0.40), 292, 0.2))
+    png("T_N13_ExpeditionHutPlanks", grain((0.40, 0.34, 0.27), 293, 0.15) * (0.85 + 0.15 * np.sin(yy * 90)[..., None])); png("T_N13_ExpeditionHutRoof", grain((0.16, 0.15, 0.14), 294, 0.12))
+    png("T_N13_ExpeditionHutSnow", grain((0.90, 0.92, 0.95), 295, 0.05)); png("T_N13_ExpeditionHutDoor", grain((0.28, 0.22, 0.16), 296, 0.1))
+    png("T_N13_IglooSnow", grain((0.88, 0.90, 0.94), 297, 0.06) * (0.92 + 0.08 * ((np.abs(np.sin(xx * 24)) < 0.06) | (np.abs(np.sin(yy * 14)) < 0.06)) * -1 + 0.08)[..., None]); png("T_N13_IglooDark", np.full((n, n, 3), 0.05))
+    png("T_N13_SledgeWood", grain((0.62, 0.52, 0.38), 298, 0.15)); png("T_N13_SledgeFur", grain((0.45, 0.38, 0.30), 299, 0.3))
+    png("T_N13_AntlerPileBone", grain((0.72, 0.66, 0.56), 300, 0.15))
+    au_c = np.zeros((n, n, 3)); vv = 1.0 - yy                    # (V 0 at the foot: the picture's bottom row, yy 1)
+    au_c[..., 0] = 0.15 + 0.45 * vv; au_c[..., 1] = 0.95 - 0.55 * vv; au_c[..., 2] = 0.45 + 0.35 * vv
+    streak = 0.55 + 0.45 * np.abs(np.sin(xx * math.pi * 14 + noise(n, 301, ((8, 1.0),)) * 3))
+    au_a = np.clip((1.0 - vv) ** 1.5 * streak * np.clip(vv * 8, 0, 1), 0, 1)
+    png("T_N13_AuroraLight", np.clip(au_c * (0.6 + 0.4 * streak[..., None]), 0, 1), au_a)
     png("T_N13_LavaTubeBasalt", grain((0.20, 0.18, 0.17), 280, 0.3) * (0.85 + 0.15 * np.sin(xx * 40 + yy * 12)[..., None])); png("T_N13_LavaTubeDark", np.full((n, n, 3), 0.02))
     # (gold leaves: the aspen's round leaves in yellow and gold; gold needles: a larch's sprays)
     for name, shape in (("GoldLeaves", "leaf"), ("GoldNeedles", "needle")):
@@ -1307,7 +1433,9 @@ if __name__ == "__main__":
             "Pueblo": pueblo,
             "Basalt_A": lambda: basalt_columns("A", 741), "Basalt_B": lambda: basalt_columns("B", 743), "Obsidian": obsidian,
             "Fumarole": fumarole, "Bomb_A": lambda: volcanic_bomb("A", 761), "Bomb_B": lambda: volcanic_bomb("B", 763),
-            "SodHut": sod_hut, "GeyserCone": geyser_cone, "ChurchSpire": church_spire, "LavaTube": lava_tube}
+            "SodHut": sod_hut, "GeyserCone": geyser_cone, "ChurchSpire": church_spire, "LavaTube": lava_tube,
+            "Inuksuk": inuksuk, "MammothTusks": mammoth_tusks, "ExpeditionHut": expedition_hut, "Igloo": igloo, "Sledge": sledge,
+            "AntlerPile": antler_pile, "Aurora": aurora}
     for k, f in todo.items():
         if not ONLY or k in ONLY: f()
     old = json.load(open(os.path.join(OUT, "scenery13_kit.json"))) if os.path.exists(os.path.join(OUT, "scenery13_kit.json")) else {}
