@@ -1282,22 +1282,26 @@ def step_scenery13():
             r["pieces_gone"] = sum(1 for q in pcs if q[0] == "gone")
             r["floating"] = sorted(set(q[0] for q in pcs if q[0] != "gone" and len(q) > 7 and float(q[7]) >= 0 and float(q[3]) - float(q[5]) > float(q[7]) + 2.0))
             r["walked_through"] = sorted(set(q[0] for q in pcs if len(q) > 6 and q[6] == "0"))
-            # (the fifth phase: a skin of the land is seen: traced down at its middle, the first thing hit is the skin, not the drawn
-            # ground's collision (the meltwater lake's skin showed only as a ring round snow; nothing had looked under a skin before).
-            # An outline's middle may lie outside its figure: those kinds are left out)
-            if not any("poly=" in str(x) for x in k.get_editor_property("parts")):
-                skins = []
-                for q in pcs:
-                    if q[0] != "berm": continue
+            # (the fifth phase: every landform and bank is drawn facing up: the share of its triangles whose front is up, as the renderer
+            # draws them (the landforms were inside out from phase 1 to 5: a skin's middle was culled from above, and the meltwater lake
+            # showed only as a ring round snow; a trace hits either face, so the review's find: measure the winding itself). A landform
+            # that is a disc (no outline, "land"), traced down at its middle, is hit before the drawn ground's collision: not buried.
+            # A bank ("berm") is a ring with nothing at its middle, and an outline's middle may lie outside its figure: not traced)
+            skins = []
+            bOutline = any("poly=" in str(x) for x in k.get_editor_property("parts"))
+            for q in pcs:
+                if q[0] not in ("land", "berm") or len(q) < 9: continue
+                s_ = {"what": q[0], "up_share": float(q[8]), "top_z": round(float(q[4])), "ground_z": round(float(q[5])), "under": False}
+                if q[0] == "land" and not bOutline:
                     bx, by, zmin, zmax = float(q[1]), float(q[2]), float(q[3]), float(q[4])
                     hit = unreal.SystemLibrary.line_trace_single(G["w"], V(bx, by, zmax + 2000.0), V(bx, by, zmin - 300.0),
                                                                  unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, True, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
                     ht = hit.to_tuple() if hit else None
                     comp = ht[10] if ht and ht[0] else None
                     nm = comp.get_name() if comp else ""
-                    skins.append({"hit": nm, "hit_z": round(ht[4].z) if comp else None, "top_z": round(zmax), "ground_z": round(float(q[5])),
-                                  "under": nm in ("Ground", "GroundCollision")})
-                r["skins"] = skins
+                    s_.update({"hit": nm, "hit_z": round(ht[4].z) if comp else None, "under": nm in ("Ground", "GroundCollision")})
+                skins.append(s_)
+            if skins: r["skins"] = skins
             boxes, _f, _b = box_lines()
             r["chests"] = sum(1 for b in boxes if (7 << 40) <= b["key"] < (8 << 40) and math.hypot(b["x"] / 100.0 - cx, b["y"] / 100.0 - cy) < 40.0)
             r["want_chests"] = sum(1 for x in k.get_editor_property("parts") if "box=" in str(x))
@@ -1442,17 +1446,18 @@ def step_scenery13():
                         v["carried_m"] = round(math.hypot(G["pawn"].get_actor_location().x - put0.x, G["pawn"].get_actor_location().y - put0.y) / 100.0, 2)
                         try: v["walk_speed_in"] = round(G["pawn"].get_component_by_class(unreal.CharacterMovementComponent).get_editor_property("max_walk_speed"))
                         except Exception: pass
-                    if hz["kind"] == "bog":
-                        # (its slow measured (PR #67's review: recorded and never asserted): her walk speed in it against out of it)
+                    if hz["kind"] in ("bog", "scree"):
+                        # (its slow measured (PR #67's review: recorded and never asserted): her walk speed in it against out of it; the
+                        # scree's too (PR #69's review))
                         mv = G["pawn"].get_component_by_class(unreal.CharacterMovementComponent)
-                        v["walk_speed_in_bog"] = round(mv.get_editor_property("max_walk_speed"))
+                        if hz["kind"] == "bog": v["walk_speed_in_bog"] = round(mv.get_editor_property("max_walk_speed"))
                         ground_put(hz["x"] / 100.0 + hz["r"] / 100.0 + 6.0, hz["y"] / 100.0); yield from rwait(2.5)
                         v["walk_speed_out"] = round(mv.get_editor_property("max_walk_speed"))
                 v["hp_lost"] = round(hp0 - cb().get_health(), 1)
                 v["sprung"] = next((x["sprung"] for x in scen_things(g, sid)["haz"] if abs(x["x"] - hz["x"]) < 1 and abs(x["y"] - hz["y"]) < 1), 0)
                 v["monsters_came"] = len(mine_mons()) - mons0
                 if hz["kind"] == "bog" and v.get("walk_speed_in_bog", 0) >= v.get("walk_speed_out", 0) * 0.8: v["slow_failed"] = True
-                if hz["kind"] == "scree" and v.get("carried_m", 0) < 1.0: v["slow_failed"] = True
+                if hz["kind"] == "scree" and (v.get("carried_m", 0) < 1.0 or v.get("walk_speed_in", 1e9) >= v.get("walk_speed_out", 0) * 0.8): v["slow_failed"] = True
                 v["ok"] = v["sprung"] > 0 and not v.get("slow_failed") and (True if hz["kind"] == "scree" else v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting", "heat", "fall", "bog", "pit", "rockfall", "avalanche", "cornice", "crevasse") else v.get("counted_hers", 0) == 0 if hz["kind"] == "hunt" else v["monsters_came"] > 0)
                 r["hazards"].append(v)
                 cb().set_health(cb().get_max_health())
@@ -1515,7 +1520,7 @@ def step_scenery13():
         okk = (L["kind"] == kd and L["pieces"] >= 1 and not v["floating"] and not v["walked_through"] and v["pieces_gone"] == 0
                and v["chests"] >= v["want_chests"] and L["title"] in v["told"]
                and all(u["ok"] for u in v["uses"]) and all(h["ok"] for h in v["hazards"])
-               and not any(s["under"] for s in v.get("skins", [])))
+               and not any(s["under"] or s["up_share"] < 0.95 for s in v.get("skins", [])))
         if "ambush_low" in v: okk = okk and v["ambush_low"]["monsters"] > 0 and v["ambush_low"]["hunting"] == 0 and v["ambush_low"]["lying_low"] > 0 \
             and v["ambush_sprung"]["hunting"] > 0 and (v["ambush_sprung"]["m_from_her"][1] < v["ambush_sprung"]["m_from_her"][0] - 1.0
                                                        or (v["ambush_sprung"].get("hp_lost", 0) > 0 and set(v["ambush_sprung"].get("branches", [])) & {"swing", "shoot", "beam", "reach"}))

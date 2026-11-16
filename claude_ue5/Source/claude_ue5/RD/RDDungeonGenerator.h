@@ -2656,6 +2656,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TArray<FString> WildThinAirBiomes;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildThinAirSlow = 0.15f;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild13") bool bWildThinAir = false;
+	/** a hazard's burst of a looping effect (a rockfall's dust): put out at Off, taken away at Kill (game seconds) */
+	struct FSceneryBurst { TWeakObjectPtr<class UNiagaraComponent> Comp; float Off = 0.f, Kill = 0.f; };
+	TArray<FSceneryBurst> WildSceneryBursts;
 	/** the fourth phase: how deep she stands in a scenery's mist (0-1: the sky thickens the world's fog with it, as the port's), and each
 	 *  kind's mist reach (its "L=mist;r=" part, read once; 0: none) */
 	float WildMistWant = 0.f;

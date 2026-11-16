@@ -435,6 +435,7 @@ UProceduralMeshComponent* ARDDungeonGenerator::LayWildLandform(ARDWildChunk* C, 
 	if (WildGroundMaterial) Pm->SetMaterial(0, WildGroundMaterial);
 	Pm->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	Pm->SetCollisionResponseToAllChannels(ECR_Block);
+	Pm->ComponentTags.Add(TEXT("RDLand"));            // (a landform, not a berm, for the tests' lines)
 	return Pm;
 }
 
@@ -775,10 +776,27 @@ TArray<FString> ARDDungeonGenerator::PieceLinesOf(const FRuinLaid* X) const
 		const UStaticMeshComponent* Sm = Cast<UStaticMeshComponent>(Pc);
 		if (!Sm)
 		{
-			// (an earth bank: its own procedural mesh, collision cooked from its triangles)
+			// (an earth bank or a landform ("land": a rise or a skin): its own procedural mesh, collision cooked from its triangles; the
+			// last field the share of its triangles whose front faces up, as the renderer draws them: UE's procedural mesh faces up
+			// where cross(V1 - V0, V2 - V0) points down (PR #69's review: a trace hits either face, and the landforms drawn inside out
+			// from phase 1 to 5 passed every trace))
 			const FBox Bb = Pc->Bounds.GetBox();
-			Out.Add(FString::Printf(TEXT("berm|%.0f|%.0f|%.0f|%.0f|%.0f|%s|-1"), Bb.GetCenter().X, Bb.GetCenter().Y, Bb.Min.Z, Bb.Max.Z, WildGroundZ(FVector(Bb.GetCenter().X, Bb.GetCenter().Y, 0.0)),
-				Pc->GetCollisionEnabled() == ECollisionEnabled::QueryAndPhysics ? TEXT("1") : TEXT("-")));
+			float UpShare = -1.f;
+			if (const UProceduralMeshComponent* Pm = Cast<UProceduralMeshComponent>(Pc))
+				if (const FProcMeshSection* Se = const_cast<UProceduralMeshComponent*>(Pm)->GetProcMeshSection(0))
+				{
+					int32 Up = 0, All = 0;
+					for (int32 K = 0; K + 2 < Se->ProcIndexBuffer.Num(); K += 3)
+					{
+						const FVector& A = Se->ProcVertexBuffer[Se->ProcIndexBuffer[K]].Position;
+						const float Z = FVector::CrossProduct(Se->ProcVertexBuffer[Se->ProcIndexBuffer[K + 1]].Position - A, Se->ProcVertexBuffer[Se->ProcIndexBuffer[K + 2]].Position - A).Z;
+						if (FMath::Abs(Z) < 1.f) continue;     // (a degenerate one: a disc's middle)
+						++All; if (Z < 0.f) ++Up;
+					}
+					if (All > 0) UpShare = Up / float(All);
+				}
+			Out.Add(FString::Printf(TEXT("%s|%.0f|%.0f|%.0f|%.0f|%.0f|%s|-1|%.3f"), Pc->ComponentHasTag(TEXT("RDLand")) ? TEXT("land") : TEXT("berm"), Bb.GetCenter().X, Bb.GetCenter().Y, Bb.Min.Z, Bb.Max.Z,
+				WildGroundZ(FVector(Bb.GetCenter().X, Bb.GetCenter().Y, 0.0)), Pc->GetCollisionEnabled() == ECollisionEnabled::QueryAndPhysics ? TEXT("1") : TEXT("-"), UpShare));
 			continue;
 		}
 		const FBox B = Sm->Bounds.GetBox();
