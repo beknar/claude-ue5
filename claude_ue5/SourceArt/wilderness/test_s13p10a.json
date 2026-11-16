@@ -86,7 +86,7 @@
       "yaw": 166.4
      },
      "bottom_over_ground_cm": [
-      -9,
+      -7,
       -6,
       -6
      ],
@@ -101,9 +101,9 @@
        "do": "loot",
        "prompt": "search the satchel",
        "f": "scenery",
-       "said": "A letter never sent, half a loaf, and a strap cut clean through.  You take 1 Bread, 1 Small Healing Potion",
+       "said": "A letter never sent, half a loaf, and a strap cut clean through.  You take 2 Bread, 1 Small Healing Potion",
        "got": {
-        "Bread": 1,
+        "Bread": 2,
         "Small Healing Potion": 1
        },
        "blessing": "",
@@ -114,7 +114,7 @@
       }
      ],
      "hazards": [],
-     "told": "Dropped satchel: a satchel dropped by the way, its strap broken | A letter never sent, half a loaf, and a strap cut clean through.  You take 1 Bread, 1 Small Healing Potion",
+     "told": "Dropped satchel: a satchel dropped by the way, its strap broken | A letter never sent, half a loaf, and a strap cut clean through.  You take 2 Bread, 1 Small Healing Potion",
      "ok": true
     },
     "split_tracks": {
@@ -172,7 +172,7 @@
        "do": "tracks",
        "prompt": "read the tracks",
        "f": "scenery",
-       "said": "Three people walked here together, and here they parted.  One set goes on toward the road",
+       "said": "Three people walked here together, and here they parted.  Tracks of something big lead north-west, toward The Mill Road Den, 2.2 km off.",
        "got": {},
        "blessing": "",
        "rose_m": 0.0,
@@ -182,41 +182,41 @@
       }
      ],
      "hazards": [],
-     "told": "Split tracks: tracks in the soft ground that split two ways | Three people walked here together, and here they parted.  One set goes on toward the road",
+     "told": "Split tracks: tracks in the soft ground that split two ways | Three people walked here together, and here they parted.  Tracks of something big lead north-west, toward The Mill Road Den, 2.2 km off.",
      "ok": true
     }
    },
    "table": 255,
    "counts_30km": {
     "tall_grass": 60,
-    "burrow_town": 208,
+    "burrow_town": 209,
     "hanged_tree": 57,
     "nest_tree": 70,
-    "shrine_tree": 64,
+    "shrine_tree": 62,
     "erratic": 191,
-    "migration": 7,
-    "wallow": 60,
+    "migration": 5,
+    "wallow": 59,
     "hive_meadow": 31,
     "brook_crossing": 0,
     "fairy_ring": 53,
-    "shepherd_hut": 102,
+    "shepherd_hut": 105,
     "reed_pond": 1,
-    "old_orchard": 96,
+    "old_orchard": 98,
     "dusk_meadow": 18,
     "butte": 166,
-    "battlefield": 193,
-    "milestone_road": 6,
-    "crossroads_gibbet": 6,
+    "battlefield": 189,
+    "milestone_road": 8,
+    "crossroads_gibbet": 2,
     "crossroads_shrine": 3,
     "crossroads_notice": 2,
-    "wagon_wreck": 1,
+    "wagon_wreck": 5,
     "hedged_fields": 111,
-    "scarecrows": 26,
-    "threshing_yard": 27,
+    "scarecrows": 27,
+    "threshing_yard": 25,
     "mill_pond": 3,
-    "pumpkin_patch": 21,
-    "abandoned_farm": 71,
-    "loose_livestock": 81,
+    "pumpkin_patch": 22,
+    "abandoned_farm": 72,
+    "loose_livestock": 84,
     "baobab": 4,
     "acacia_shade": 2,
     "termite_mounds": 9,
@@ -225,7 +225,7 @@
     "vulture_kill": 8,
     "salt_pan": 4,
     "yurt_camp": 0,
-    "kurgan": 62,
+    "kurgan": 61,
     "prayer_cairn": 13,
     "petroglyph_rocks": 51,
     "hot_spring": 0,
@@ -277,16 +277,16 @@
     "aspen_edge": 0,
     "windthrow": 0,
     "hillfort": 26,
-    "chalk_figure": 42,
+    "chalk_figure": 43,
     "terraced_fields": 57,
     "dew_pond": 37,
     "folly_tower": 29,
-    "beacon_hill": 36,
-    "quarry": 60,
+    "beacon_hill": 37,
+    "quarry": 59,
     "hillside_vines": 54,
     "combe": 11,
     "peat_hags": 0,
-    "tor": 27,
+    "tor": 28,
     "heather_gorse": 34,
     "stone_row": 0,
     "peat_cutting": 0,
@@ -440,15 +440,15 @@
     "clifftop_ruin": 0,
     "rock_stairs": 0,
     "storm_surge": 0,
-    "warm_campfire": 141,
-    "dropped_satchel": 133,
+    "warm_campfire": 142,
+    "dropped_satchel": 131,
     "split_tracks": 126,
     "cells": 10201
    }
   },
   {
    "step": "land13",
-   "ok": false,
+   "ok": true,
    "channels": {
     "arroyo": {
      "near": 5,
@@ -594,7 +594,7 @@
      "crests_hiding_300m": 2
     }
    },
-   "crossroads_50km": 56,
+   "crossroads_50km": 49,
    "storm": {
     "on": 1,
     "km": 6.0
@@ -648,8 +648,8 @@
     "grasslands": {
      "scale": 1.0,
      "notice_m": 25.0,
-     "start_m": 19.6,
-     "after_3s_m": 15.6,
+     "start_m": 19.8,
+     "after_3s_m": 15.7,
      "came": true
     }
    },
@@ -678,14 +678,35 @@
     }
    },
    "landmark": {
-    "name": "landmark",
-    "on": 1,
-    "km": 4.0
+    "p0": {
+     "on": true,
+     "at_km": [
+      -1.4,
+      -7.73
+     ],
+     "km": 5.03
+    },
+    "p1": {
+     "on": true,
+     "at_km": [
+      -1.4,
+      -7.73
+     ],
+     "km": 4.4
+    }
    },
    "cold": {
     "arctic": {
-     "state": "216.5|0|",
-     "hp_lost": 4.2
+     "state": "150.0|0|",
+     "hp_lost": 4.2,
+     "told_cold": true,
+     "bit": true
+    },
+    "arctic_warmed": {
+     "state": "86.0|1|shelter",
+     "hp_lost": 0.0,
+     "thaw_told": 1,
+     "bit": false
     },
     "grasslands": {
      "state": "188.0|0|"
@@ -693,58 +714,72 @@
    },
    "mud": {
     "marshes": {
-     "mud": false,
-     "walk_speed": 353
+     "mud": true,
+     "walk_speed": 300,
+     "at_km": [
+      41.26,
+      20.35
+     ],
+     "water": 0.0,
+     "biome": "marshes",
+     "ground_mud": 0.25
     },
     "grasslands": {
      "mud": false,
-     "walk_speed": 353
+     "walk_speed": 353,
+     "at_km": [
+      6.0,
+      0.0
+     ],
+     "water": 0.0,
+     "biome": "grasslands",
+     "ground_mud": 0.0
     }
    },
    "moor_fog": {
     "highland moorland": {
-     "fog_share": 0.1325,
+     "fog_share": 0.1305,
      "counts": {
-      "clear": 614,
-      "fair": 836,
-      "cloudy": 779,
-      "overcast": 524,
-      "rain": 486,
-      "storm": 231,
+      "clear": 613,
+      "fair": 814,
+      "cloudy": 827,
+      "overcast": 562,
+      "rain": 452,
+      "storm": 210,
       "snow": 0,
-      "fog": 530,
+      "fog": 522,
       "whiteout": 0,
       "dust": 0,
       "cloudless": 0
      }
     },
     "grasslands": {
-     "fog_share": 0.049,
+     "fog_share": 0.0483,
      "counts": {
-      "clear": 604,
-      "fair": 915,
-      "cloudy": 858,
-      "overcast": 621,
-      "rain": 536,
-      "storm": 270,
+      "clear": 610,
+      "fair": 897,
+      "cloudy": 919,
+      "overcast": 618,
+      "rain": 496,
+      "storm": 267,
       "snow": 0,
-      "fog": 196,
+      "fog": 193,
       "whiteout": 0,
       "dust": 0,
       "cloudless": 0
      }
     },
     "marshes": {
-     "fog_share": 0.1325,
+     "fog_share": 0.1305,
      "counts": {
-      "clear": 614,
-      "fair": 836,
-      "cloudy": 779,
-      "overcast": 524,
-      "rain": 486,
-      "storm": 231,
+      "clear": 613,
+      "fair": 814,
+      "cloudy": 827,
+      "overcast": 562,
+      "rain": 452,
+      "storm": 210,
       "snow": 0,
-      "fog": 530,
+      "fog": 522,
       "whiteout": 0,
       "dust": 0,
       "cloudless": 0

@@ -2688,7 +2688,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TArray<FString> WildColdBiomes;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildColdSeconds = 90.f;
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildCold = 0.f;
-	float WildWarmUntil = -1.f, WildColdBiteAt = 0.f; bool bWildColdTold = false;
+	float WildWarmUntil = -1.f, WildColdBiteAt = 0.f; bool bWildColdTold = false, bWildColdNow = false;
+	/** tests: a shelter's warmth for this long, as a heal use gives */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild13") void WarmWildFor(float Seconds);
 	/** tests: "<cold seconds>|<warm 0/1>|<why>" */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild13") FString GetWildColdState() const;
 	FString WildWarmWhy;
@@ -2698,6 +2700,18 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild13") bool bWildMud = false;
 	/** the tenth phase ("sound and fog"): the regions whose fog comes three times as often (the moors' since the fourth phase) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TArray<FString> WildFogBiomes;
+	/** the tenth phase ("a landmark always in view"; PR #74's review: a passing far sight was no landmark): a broken tower at a fixed
+	 *  place in each 6 km square of the open lands, on dry ground away from the roads and towns, solid; the nearest within WildLandmarkKm
+	 *  is laid and kept while she stays within that reach */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TArray<FString> WildLandmarkBiomes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TObjectPtr<class UStaticMesh> WildLandmarkMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildLandmarkKm = 8.f;
+	TWeakObjectPtr<class UStaticMeshComponent> WildLandmark;
+	FVector2D WildLandmarkAt = FVector2D(1e12, 1e12);
+	float WildLandmarkLook = 0.f;
+	void TickWildLandmark13(float Dt, const FVector& Her);
+	/** tests: "on|x|y|z" (cm) or "off" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild13") FString GetWildLandmark() const;
 	/** tests: "on|x|y|z" (cm) or "off" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild13") FString GetWildAurora() const;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild13") int32 WildEchoesHeard = 0;

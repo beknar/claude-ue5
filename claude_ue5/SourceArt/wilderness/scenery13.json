@@ -5280,7 +5280,7 @@
    ],
    "weight": 0.35,
    "uses": [
-    "do=loot;x=0;y=-2;r=3;verb=search;what=satchel;things=Bread|1|2|0.8,Small Healing Potion|1|1|0.5;reuse=99999;text=A letter never sent, half a loaf, and a strap cut clean through."
+    "do=loot;x=0;y=-2;r=3;verb=search;what=satchel;things=Bread|1|2|0.8,Small Healing Potion|1|1|0.5;text=A letter never sent, half a loaf, and a strap cut clean through."
    ],
    "parts": [
     "L=at;p=s12_sack#;h=0.4;yaw=rand;col=0",
@@ -5346,28 +5346,6 @@
    ],
    "drift": 3.0,
    "secs": 480
-  },
-  {
-   "name": "landmark",
-   "biomes": [
-    "grasslands",
-    "meadows",
-    "plains",
-    "savannahs",
-    "cold steppes",
-    "farms",
-    "burned plain",
-    "tundras",
-    "highland moorland"
-   ],
-   "mesh": "/Game/RandomDungeon/Wild13/Kit/SM_N13_LandmarkTower",
-   "chance": 1.0,
-   "km": [
-    2.0,
-    3.5
-   ],
-   "drift": 0.0,
-   "secs": 900
   }
  ],
  "_doc_phase3": "the third phase (2026-11-15): the forests (pine forests, boreal pine forest, taigas, temperate autumn forests, temperate aspen): 38 kinds; quiet_biomes: where the needles muffle her steps (the wilds' monsters notice her at quiet_notice of their distance); L=clear takes the forest's plants out round a point (a clearing); hazards bog and pit",
@@ -5396,7 +5374,7 @@
   "mesh": "/Game/RandomDungeon/Wild13/Kit/SM_N13_Aurora"
  },
  "_doc_phase9": "the ninth phase (2026-11-16): marshes, wetlands, coastal regions, rocky coastal: 34 kinds; the tide (a clock: skins with tide= rise and fall, hazard tide, a use's tide=low|high); hazard surge; the geyser's lines from msg= (a blowhole)",
- "_doc_phase10": "the tenth phase (2026-11-16): the lists' tips: small stories in every region (a warm campfire, a dropped satchel, tracks that split), a landmark always in view (the far sight 'landmark' on the open lands), the cold (cold_biomes: away from warmth past cold_seconds it bites), the mud's footing (mud_biomes, mud_slow), the fog's regions (fog_biomes: the moors', marshes', coasts')",
+ "_doc_phase10": "the tenth phase (2026-11-16): the lists' tips: small stories in every region (a warm campfire, a dropped satchel, tracks that split), a landmark always in view (landmark: a broken tower fixed at each open-land region's middle, seen within its km), the cold (cold_biomes: away from warmth past cold_seconds it bites), the mud's footing (mud_biomes, mud_slow), the fog's regions (fog_biomes: the moors', marshes', coasts')",
  "cold_biomes": [
   "arctic regions",
   "glacial",
@@ -5415,5 +5393,20 @@
   "wetlands",
   "coastal regions",
   "rocky coastal"
- ]
+ ],
+ "landmark": {
+  "biomes": [
+   "grasslands",
+   "meadows",
+   "plains",
+   "savannahs",
+   "cold steppes",
+   "farms",
+   "burned plain",
+   "tundras",
+   "highland moorland"
+  ],
+  "mesh": "/Game/RandomDungeon/Wild13/Kit/SM_N13_LandmarkTower",
+  "km": 8.0
+ }
 }

@@ -760,7 +760,7 @@ Each group of the list ends with what helps such land play well. What each tip b
 | Group | Tip | Where it is |
 |---|---|---|
 | Open lands | Gentle verticality | the swales (`biomes.json`'s `swale`): crests that hide the ground 300 m on (`land13`'s `swales`) |
-| | A landmark always in view | the far sight `landmark`: a broken tower 182 m high 2 to 3.5 km off on the open lands (this phase), the far storms and the grass fires' smoke |
+| | A landmark always in view | a broken tower 182 m high at a fixed place in each 6 km square of the open lands, the same tower at the same place, the nearest within 8 km standing and solid when reached (`WildLandmarkBiomes`, this phase); the far storms and the grass fires' smoke |
 | | Moving things | the herds and migrations, the far storms, the road travellers, the director's encounters |
 | | Small stories | every region's warm campfire, dropped satchel and split tracks (this phase), and each region's own (a wagon wreck, a climbers' camp, a frozen ship) |
 | Forests | Light changes, water, deadfall | the clearings, the light shafts' effect, the brooks and springs, the windthrow and log bridges (phase 3) |
@@ -771,7 +771,7 @@ Each group of the list ends with what helps such land play well. What each tip b
 | Canyon country | Light as a clock, rims and floors, weather danger | the rim, foot and channel places and the flash floods (phase 6); the light is the sky's own |
 | | Water as power | tinajas, springs and the creek (phase 6) |
 | Volcanic | Visible danger, a living world, contrast, resources | steam over the vents, the lava's glow, tremors before the eruption signs, obsidian and sulfur (phase 7) |
-| Polar | Survival: cold, food, shelter | the cold (this phase): in the arctic, the glaciers, the peaks and the tundras she grows cold away from warmth (a fire within 8 m, a town, a shelter used); past 90 s the cold bites every 15 s until she is warm |
+| Polar | Survival: cold, food, shelter | the cold (this phase): in the arctic, the glaciers, the peaks and the tundras she grows cold away from warmth (any fire within 8 m, the travellers' and farmsteads' too, a town, a shelter used); past 90 s the cold bites every 15 s while she is still cold, and stops the moment she is warm |
 | | Scarce landmarks, things preserved in the ice | inuksuit, the frozen ship, the mammoth, the thing in the ice (phases 5 and 8) |
 | | Seasonal change | not built (see TODO) |
 | Water | The tide as a clock | the tide (phase 9) |
@@ -779,8 +779,8 @@ Each group of the list ends with what helps such land play well. What each tip b
 | | What lies beneath | the sunken causeway, the drowned church, the sea cave at low tide (phase 9) |
 | | Sound and fog | the fog comes three times as often on the marshes, wetlands and coasts as on the moors (this phase) |
 
-- **What is new**: three small stories in every region (`*`: a warm campfire, a dropped satchel, split tracks); the far sight `landmark` (the kit's `LandmarkTower`); the cold (`WildColdBiomes`, `WildColdSeconds`, `GetWildColdState`); the mud's footing (`WildMudBiomes`, `WildMudSlow`); the fog's regions a list (`WildFogBiomes`, the moors' rule since the fourth phase).
-- **Measured** (`test_s13p10a.json`, `test_s13p10b.json`): the small stories stand in every region, 141 warm campfires, 133 satchels and 126 split tracks within 30 km of Brokenspire; each was visited (the campfire's line, the satchel's bread and potion, the tracks' two ways). The landmark stood 4 km off on the plains when brought (its first picture, at 107 m, showed it as a faint spike at the horizon: it is 182 m now and comes 2 to 3.5 km off; the second picture's line of sight was blocked by a tree, so its look at that size is reckoned, about 37 px high at 4 km, not pictured). In the arctic, cold past its limit, the cold bit her (4.2 over 17 s); on the grasslands it fell (200 to 188 in 3 s). In a marsh (its dry ground's mud 0.25) her walk was 300 cm/s against 353 on the grasslands. The weather's own pick brought fog 13.2 % of the time on the marshes and the moors against 5.1 % on the grasslands. The aurora as before.
+- **What is new**: three small stories in every region (`*`: a warm campfire, a dropped satchel, split tracks); the landmark (the kit's `LandmarkTower`, `WildLandmarkBiomes`, `GetWildLandmark`); the cold (`WildColdBiomes`, `WildColdSeconds`, `GetWildColdState`); the mud's footing (`WildMudBiomes`, `WildMudSlow`); the fog's regions a list (`WildFogBiomes`, the moors' rule since the fourth phase).
+- **Measured** (`test_s13p10a.json`): the small stories stand in every region, 142 warm campfires, 131 satchels and 126 split tracks within 30 km of Brokenspire; each was visited (the campfire's line, the satchel's bread, its potion at even chance, the tracks' two ways). On the plains the landmark stood 5.0 km off, and 990 m further on it was the same tower 4.4 km off; in the picture it is a dark spire on the horizon through the haze. In the arctic, cold past its limit, she was told and bitten (4.2); warmed (a shelter's warmth), the thaw was told once and nothing bit her in 16 s; on the grasslands the cold fell (200 to 188 in 3 s). In a marsh (its dry ground's mud 0.25) her walk was 300 cm/s against 353 on the grasslands. The weather's own pick brought fog 13.1 % of the time on the marshes and the moors against 4.8 % on the grasslands.
 
 ## The TODO sweep (2026-11-14)
 

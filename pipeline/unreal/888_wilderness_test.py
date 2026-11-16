@@ -1792,17 +1792,25 @@ def step_land13():
                 res["aurora"][f"{bn}@{hr:g}"] = r_
         finally:
             g.set_town_hour(h_au)
-        # (the tenth phase: "a landmark always in view": the open lands' far landmark, brought 4 km off and pictured)
+        # (the tenth phase: "a landmark always in view": the open-land region's tower at its fixed place, within 8 km of her on the
+        # plains; read twice from two points 1 km apart (the same tower), and pictured with her body hidden)
         pt = find_biome_point("plains", 80)
         if pt:
-            g.wild_put_her(*pt); yield from wait_chunks(30, 50)
-            g.force_wild_far_sight("landmark", 4.0); yield from rwait(3.0)
-            st = str(g.get_wild_storm_line()).split("|")
-            res["landmark"] = {"name": st[0], "on": int(st[4]), "km": float(st[3])}
-            p = G["pawn"].get_actor_location()
-            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=4, yaw=math.degrees(math.atan2(float(st[2]) * 100.0 - p.y, float(st[1]) * 100.0 - p.x))))
-            yield from rwait(2.0); shot("land13_landmark", "1280x720"); yield from rwait(1.0)
-            g.force_wild_far_sight("", 0.0)
+            res["landmark"] = {}
+            for i_, off in enumerate(((0.0, 0.0), (700.0, 700.0))):
+                q_ = (pt[0] + off[0], pt[1] + off[1])
+                g.wild_put_her(*q_); yield from wait_chunks(30, 50); ground_put(*q_); yield from rwait(3.0)
+                st = str(g.get_wild_landmark()).split("|")
+                p = G["pawn"].get_actor_location()
+                r_ = {"on": st[0] == "on"}
+                if r_["on"]:
+                    lx, ly = float(st[1]), float(st[2])
+                    r_.update({"at_km": [round(lx / 100000.0, 2), round(ly / 100000.0, 2)], "km": round(math.hypot(lx - p.x, ly - p.y) / 100000.0, 2)})
+                    if i_ == 0:
+                        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=5, yaw=math.degrees(math.atan2(ly - p.y, lx - p.x))))
+                        G["pawn"].set_actor_hidden_in_game(True); yield from rwait(2.0); shot("land13_landmark", "1280x720"); yield from rwait(1.0)
+                        G["pawn"].set_actor_hidden_in_game(False)
+                res["landmark"][f"p{i_}"] = r_
         # (the tenth phase: "survival gameplay: cold": in the arctic, cold past its limit, the cold bites (her hit points); in a town
         # it goes; "footing: mud": her walk in a marsh's mud against the grassland's)
         res["cold"] = {}
@@ -1810,9 +1818,18 @@ def step_land13():
         if pt:
             g.wild_put_her(*pt); yield from wait_chunks(30, 50); ground_put(*pt); yield from rwait(1.0)
             hp0 = cb().get_health()
-            g.set_editor_property("wild_cold", 200.0); yield from rwait(17.0)
-            res["cold"]["arctic"] = {"state": str(g.get_wild_cold_state()), "hp_lost": round(hp0 - cb().get_health(), 1)}
-            cb().set_health(cb().get_max_health())
+            msgs_c = []
+            g.set_editor_property("wild_cold", 140.0); yield from watching(rwait(17.0), msgs_c)
+            # (PR #74's review: the hurt tied to its cause: the cold's own lines among those shown)
+            res["cold"]["arctic"] = {"state": str(g.get_wild_cold_state()), "hp_lost": round(hp0 - cb().get_health(), 1),
+                                     "told_cold": any("cold to the bone" in m_ for m_ in msgs_c), "bit": any("The cold bites" in m_ for m_ in msgs_c)}
+            # (warm now (a shelter's warmth, as a heal use gives): no more bites while warm, the thaw told once)
+            # (the bag starts with the line already shown, left out of the count: the last bite's line stays on the HUD)
+            cb().set_health(cb().get_max_health()); hp1 = cb().get_health(); msgs_w = [str(cb().message)]
+            g.warm_wild_for(60.0); yield from watching(rwait(16.0), msgs_w); msgs_w = msgs_w[1:]
+            res["cold"]["arctic_warmed"] = {"state": str(g.get_wild_cold_state()), "hp_lost": round(hp1 - cb().get_health(), 1),
+                                            "thaw_told": sum(1 for m_ in msgs_w if "warmth comes back" in m_), "bit": any("The cold bites" in m_ for m_ in msgs_w)}
+            g.warm_wild_for(0.0); cb().set_health(cb().get_max_health())
         pt = find_biome_point("grasslands", 80)
         if pt:
             g.wild_put_her(*pt); yield from wait_chunks(30, 50); ground_put(*pt)
@@ -1860,8 +1877,10 @@ def step_land13():
           and res["crossroads_50km"] > 0 and res.get("storm", {}).get("on") == 1
           and (res["aurora"].get("arctic regions@23") or {}).get("on") is True and 3000 <= res["aurora"]["arctic regions@23"]["north_m"] <= 5000
           and res["aurora"]["arctic regions@23"]["up_m"] > 800
-          and (res.get("landmark") or {}).get("on") == 1 and (res.get("landmark") or {}).get("name") == "landmark"
-          and ((res["cold"].get("arctic") or {}).get("hp_lost", 0) > 0)
+          and all((res.get("landmark") or {}).get(k_, {}).get("on") for k_ in ("p0", "p1"))
+          and res["landmark"]["p0"]["at_km"] == res["landmark"]["p1"]["at_km"] and 1.0 <= res["landmark"]["p0"]["km"] <= 8.0
+          and ((res["cold"].get("arctic") or {}).get("hp_lost", 0) > 0) and res["cold"]["arctic"]["told_cold"] and res["cold"]["arctic"]["bit"]
+          and res["cold"]["arctic_warmed"]["hp_lost"] == 0 and not res["cold"]["arctic_warmed"]["bit"] and res["cold"]["arctic_warmed"]["thaw_told"] == 1
           and float(((res["cold"].get("grasslands") or {}).get("state") or "999").split("|")[0]) < 200
           and (res["mud"].get("marshes") or {}).get("mud") is True and not (res["mud"].get("grasslands") or {"mud": True}).get("mud")
           and res["mud"]["marshes"]["walk_speed"] < res["mud"]["grasslands"]["walk_speed"] * 0.95
