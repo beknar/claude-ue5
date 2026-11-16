@@ -2663,6 +2663,17 @@ public:
 	TArray<FSceneryBurst> WildSceneryBursts;
 	/** the sixth phase: what calls back from a canyon's echo (its time, its line), and how many answered (tests) */
 	TArray<TPair<float, FString>> WildSceneryEchoes;
+	/** the eighth phase ("auroras over black lava and white snow"): at night in these regions a curtain of light hangs WildAuroraKm
+	 *  north of her, WildAuroraUpM up (the kit's Aurora, emissive and see-through) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TArray<FString> WildAuroraBiomes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TObjectPtr<class UStaticMesh> WildAuroraMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildAuroraKm = 4.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildAuroraUpM = 1200.f;
+	TWeakObjectPtr<class UStaticMeshComponent> WildAurora;
+	float WildAuroraLook = 0.f;
+	void TickWildAurora13(float Dt, const FVector& Her);
+	/** tests: "on|x|y|z" (cm) or "off" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild13") FString GetWildAurora() const;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild13") int32 WildEchoesHeard = 0;
 	/** the fourth phase: how deep she stands in a scenery's mist (0-1: the sky thickens the world's fog with it, as the port's), and each
 	 *  kind's mist reach (its "L=mist;r=" part, read once; 0: none) */

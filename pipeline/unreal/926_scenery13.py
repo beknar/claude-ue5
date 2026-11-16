@@ -219,6 +219,11 @@ def step_scenery():
     # (the fifth phase: where the air is thin, and her slow there)
     g.set_editor_property("wild_thin_air_biomes", J.get("thin_air_biomes", []))
     g.set_editor_property("wild_thin_air_slow", float(J.get("thin_air_slow", 0.0)))
+    # (the eighth phase: the auroras' regions and their curtain)
+    au = J.get("aurora", {})
+    g.set_editor_property("wild_aurora_biomes", au.get("biomes", []))
+    g.set_editor_property("wild_aurora_mesh", unreal.load_asset(au["mesh"]) if au.get("mesh") else None)
+    assert not au.get("mesh") or g.get_editor_property("wild_aurora_mesh"), "926 scenery: no aurora mesh " + au.get("mesh", "")
     # (every kind's people must be townsfolk of the level)
     defs = [str(t.name) for t in g.get_editor_property("townsfolk")]
     for K in J["kinds"]:

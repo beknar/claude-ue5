@@ -44,7 +44,11 @@ The biomes' scenery, in phases with a PR each (the user's choices: every item to
   - The lava flows and lakes are skins of the land with the ground's glow: no lava moves, and no new flows open. The eruption is its signs (tremors, ash, dead birds): the mountain never erupts. The lava tube's mouth leads nowhere (no tunnel to walk).
   - The glacier volcanoes' floods are the canyons' flood in a fissure; the icebergs on black sand are blocks of ice inland (no beach was placed by the sea). The auroras come with the arctic (phase 8).
   - The steam fields thicken the world's fog round them (measured); the smell of sulfur is a line of text. Obsidian and Sulfur are sold, not crafted with, and their pictures are the steel ingot's and the oils' (no new pictures were painted).
-- [ ] **Phases 8 to 10:** the tundra and the arctic; the marshes, wetlands and coasts (tides); the lists' "what helps" across all of them.
+- [ ] **Phase 8 (tundras and arctic regions), what is not done or measured:**
+  - Polar night and the midnight sun, sun dogs and halos are not there: the day and its light are the world's own everywhere. The aurora is one curtain north of her, seen by night only in its regions; it does not guide or mislead.
+  - The caribou are the wilds' deer, the snowy owls and walrus are not there, the polar bear is its tracks. The sea ice is skins on land (the arctic regions' plains), not the sea's.
+  - Cold, food and shelter as survival ("what helps polar terrain") are not built: the snow houses and the hut heal when used.
+- [ ] **Phases 9 and 10:** the marshes, wetlands and coasts (tides); the lists' "what helps" across all of them.
 - [ ] **Phase 1, what is not done or measured:**
   - The burrows' "collapsing tunnels" are a fall's harm and a slow where the ground gives way: the ground itself does not open (a chunk's ground is one mesh).
   - The herons stand still (a mesh of our own, no clips); the bees and the birds are the packs' effects (flies as bees, the flocks as crows); the frogs are not there (no frog in the project).

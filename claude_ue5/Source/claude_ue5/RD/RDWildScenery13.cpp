@@ -211,6 +211,7 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 	const float Now = W->GetTimeSeconds();
 	const FVector2D H2(Her.X / 100.0, Her.Y / 100.0);
 	TickWildStorm13(Dt, Her);
+	TickWildAurora13(Dt, Her);
 	// ---- the third phase: a quiet floor under her (the pine forests' needles): the monsters notice her from less far
 	// (twice a second: her region changes over hundreds of metres (PR #67's review: a whole sample every frame))
 	if (Now >= WildQuietAt)
@@ -267,7 +268,7 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 				Hz.In = bIn ? Hz.In + Dt : FMath::Max(0.f, Hz.In - Dt * 2.f);
 				if (Hz.In < 1.5f || Now < Hz.ReadyAt) continue;
 				Hz.ReadyAt = Now + 1.4f; ++Hz.Sprung; ++WildHazardsSprung;
-				PlayerCombat->HurtByTrap(0.03f * Hz.P, 0.15f, 1.f, TEXT("Bees! The hive's swarm stings you"));
+				PlayerCombat->HurtByTrap(0.03f * Hz.P, 0.15f, 1.f, Hz.Msg.IsEmpty() ? FString(TEXT("Bees! The hive's swarm stings you")) : Hz.Msg);      // (the eighth phase: msg=, a thaw lake's mosquitoes)
 			}
 			else if (Hz.Kind == TEXT("heat"))
 			{
@@ -351,6 +352,29 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 					if (UNiagaraComponent* Nc = UNiagaraFunctionLibrary::SpawnSystemAtLocation(W, *Sm, Her + FVector(300.f, 0.f, 500.f), FRotator::ZeroRotator, FVector(1.f), true, true, ENCPoolMethod::None, false))
 						WildSceneryBursts.Add({ Nc, Now + 3.f, Now + 8.f });
 			}
+			// (the eighth phase: "open leads ... very dangerous to cross", thin ice on a frozen lake: after a second standing on it the ice gives,
+			// a hurt, her legs slowed in the cold water; again after 30 s; counted once each time she steps on)
+			else if (Hz.Kind == TEXT("thin_ice"))
+			{
+				if (!bIn) { Hz.In = 0.f; Hz.Start = -1.f; continue; }
+				if (Hz.Start < 0.f) { Hz.Start = Now; ++Hz.Sprung; ++WildHazardsSprung; }
+				Hz.In += Dt;
+				if (Hz.In < 1.f || Now < Hz.ReadyAt) continue;
+				Hz.ReadyAt = Now + 30.f;
+				PlayerCombat->HurtByTrap(0.12f * Hz.P, 0.6f, 3.f, Hz.Msg.IsEmpty() ? FString(TEXT("The ice gives way: freezing water to your waist")) : Hz.Msg);
+			}
+			// (the eighth phase: "snow drifts and sastrugi: wind-carved ridges that make walking hard": slowed while she is in them, told once
+			// each time she comes in)
+			else if (Hz.Kind == TEXT("drift"))
+			{
+				if (!bIn) { Hz.Start = -1.f; continue; }
+				PlayerCombat->SlowBy(0.35f, 0.6f);
+				if (Hz.Start < 0.f)
+				{
+					Hz.Start = Now; ++Hz.Sprung; ++WildHazardsSprung;
+					PlayerCombat->ShowMessage(Hz.Msg.IsEmpty() ? FString(TEXT("The wind-carved snow drags at every step")) : Hz.Msg);
+				}
+			}
 			else if (Hz.Kind == TEXT("pit"))
 			{
 				// (the third phase: "deep, noisy leaf litter that hides pits, roots and tracks": a pit under the leaves, once a minute)
@@ -368,7 +392,7 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 				{
 					if (!bIn || Now < Hz.ReadyAt) continue;
 					Hz.Start = Now;
-					PlayerCombat->ShowMessage(bAval ? TEXT("A crack above, then a roar: the snow is coming down!") : TEXT("Stones rattle down the slope above you!"));
+					PlayerCombat->ShowMessage(!Hz.Msg.IsEmpty() ? Hz.Msg : bAval ? FString(TEXT("A crack above, then a roar: the snow is coming down!")) : FString(TEXT("Stones rattle down the slope above you!")));      // (the eighth phase: msg=, an ice shelf calving)
 					// (the dust is the scenery's smoke, which loops: it is put out after 3 s and taken away after 8 (PR #69's review: each
 					// fall left a column standing for good))
 					if (const TObjectPtr<UNiagaraSystem>* Sm = WildSceneryFx.Find(TEXT("f13_smoke")); Sm && *Sm)
@@ -1022,6 +1046,39 @@ void ARDDungeonGenerator::TickWildStorm13(float Dt, const FVector& Her)
 }
 
 void ARDDungeonGenerator::ForceWildStorm(float Km) { ForceWildFarSight(TEXT("storm"), Km); }
+
+void ARDDungeonGenerator::TickWildAurora13(float Dt, const FVector& Her)
+{
+	// (the eighth phase: "auroras over black lava and white snow": by night (20:00 to 5:30) in its regions, a curtain of light hanging
+	// WildAuroraKm north of her (the world's +X), WildAuroraUpM over the ground there, following her; gone by day or elsewhere. Looked at
+	// twice a second (her region changes over hundreds of metres))
+	if (UStaticMeshComponent* Au = WildAurora.Get())
+	{
+		const FVector2D At = FVector2D(Her) / 100.0 + FVector2D(WildAuroraKm * 1000.0, 0.0);
+		Au->SetWorldLocation(FVector(At.X * 100.0, At.Y * 100.0, Wild->ToZ(Wild->Height(At.X, At.Y)) + WildAuroraUpM * 100.f));
+	}
+	WildAuroraLook -= Dt;
+	if (WildAuroraLook > 0.f) return;
+	WildAuroraLook = 0.5f;
+	const FVector2D H2 = FVector2D(Her) / 100.0;
+	const bool bWant = WildAuroraMesh && RDS13InHours(TEXT("night"), TownHour) && WildAuroraBiomes.Contains(Wild->BiomeName(Wild->BiomeAt(H2.X, H2.Y)));
+	if (!bWant) { if (UStaticMeshComponent* Au = WildAurora.Get()) Au->DestroyComponent(); WildAurora.Reset(); return; }
+	if (WildAurora.IsValid()) return;
+	UStaticMeshComponent* Au = NewObject<UStaticMeshComponent>(this, TEXT("RDAurora"));
+	Au->SetStaticMesh(WildAuroraMesh);
+	Au->SetCollisionEnabled(ECollisionEnabled::NoCollision); Au->SetCastShadow(false); Au->SetMobility(EComponentMobility::Movable);
+	Au->SetCullDistance(0.f); Au->bNeverDistanceCull = true;
+	Au->RegisterComponent();
+	WildAurora = Au;
+}
+
+FString ARDDungeonGenerator::GetWildAurora() const
+{
+	const UStaticMeshComponent* Au = WildAurora.Get();
+	if (!Au) return TEXT("off");
+	const FVector L = Au->GetComponentLocation();
+	return FString::Printf(TEXT("on|%.0f|%.0f|%.0f"), L.X, L.Y, L.Z);
+}
 
 void ARDDungeonGenerator::ForceWildFarSight(FName Name, float Km)
 {

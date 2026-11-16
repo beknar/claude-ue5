@@ -476,6 +476,24 @@
   ],
   "lavatube": [
    "/Game/RandomDungeon/Wild13/Kit/SM_N13_LavaTube"
+  ],
+  "inuksuk": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_Inuksuk"
+  ],
+  "mammothtusks": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_MammothTusks"
+  ],
+  "expeditionhut": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_ExpeditionHut"
+  ],
+  "igloo": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_Igloo"
+  ],
+  "sledge": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_Sledge"
+  ],
+  "antlerpile": [
+   "/Game/RandomDungeon/Wild13/Kit/SM_N13_AntlerPile"
   ]
  },
  "kinds": [
@@ -4154,6 +4172,379 @@
     "L=scatter;p=s12_ribs#;n=2;r=4;h=0.8;yaw=rand;col=0",
     "L=scatter;p=bones;n=4;r=4;s=0.5;yaw=rand;col=0"
    ]
+  },
+  {
+   "name": "polygon_ground",
+   "title": "Polygon ground",
+   "text": "frost-cracked ground in a honeycomb of polygons, plain from above",
+   "biomes": [
+    "tundras",
+    "arctic regions"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=-16;y=0;r=3;verb=look at;what=cracks;text=Every winter the ground cracks the same way, and every summer ice fills the cracks. Six sides, over and over, to the horizon."
+   ],
+   "parts": [
+    "L=ridge;r=0.5;r2=6.4;hb=0.25;a=90;x=10.4;y=0.0;tint=0.10,0.10,0.08",
+    "L=ridge;r=0.5;r2=6.4;hb=0.25;a=150;x=5.2;y=9.0;tint=0.10,0.10,0.08",
+    "L=ridge;r=0.5;r2=6.4;hb=0.25;a=210;x=-5.2;y=9.0;tint=0.10,0.10,0.08",
+    "L=ridge;r=0.5;r2=6.4;hb=0.25;a=270;x=-10.4;y=0.0;tint=0.10,0.10,0.08",
+    "L=ridge;r=0.5;r2=6.4;hb=0.25;a=330;x=-5.2;y=-9.0;tint=0.10,0.10,0.08",
+    "L=ridge;r=0.5;r2=6.4;hb=0.25;a=390;x=5.2;y=-9.0;tint=0.10,0.10,0.08",
+    "L=patch;r=8;hb=0.25;tint=0.55,0.58,0.40"
+   ]
+  },
+  {
+   "name": "thaw_lake",
+   "title": "Thaw lake",
+   "text": "a summer thaw lake, one of thousands, and the mosquitoes it breeds",
+   "biomes": [
+    "tundras"
+   ],
+   "weight": 1.0,
+   "need_water": "pond",
+   "hazards": [
+    "kind=sting;x=-2;y=-9;r=4;msg=Mosquitoes in a whining cloud: they find every bare inch of you"
+   ],
+   "uses": [
+    "do=fish;x=2;y=4;r=3;verb=fish;what=thaw lake;things=Fish|1|2|0.7;reuse=240;text=Shallow and warm for a few weeks a year. The fish know it."
+   ],
+   "parts": [
+    "L=scatter;p=s12_reeds#;n=8;r=6;h=0.8;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "caribou_migration",
+   "title": "Caribou migration",
+   "text": "caribou on their long walk, a trampled trail behind them, wolves shadowing the herd",
+   "biomes": [
+    "tundras"
+   ],
+   "weight": 1.0,
+   "herd": "Deer:8;migrate=1;r=12",
+   "hazards": [
+    "kind=hunt;x=0;y=0;r=45;who=Wolf;n=2"
+   ],
+   "uses": [
+    "do=lore;x=0;y=-12;r=3;verb=look at;what=trail;text=A trail trampled bare by ten thousand hooves, the same trail every year. The wolves walk beside it."
+   ],
+   "parts": [
+    "L=ridge;r=2;r2=30;hb=0.25;a=0;tint=0.25,0.20,0.14",
+    "L=scatter;p=bones;n=2;r=10;r0=4;s=0.5;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "inuksuk",
+   "title": "Inuksuk",
+   "text": "a figure of stacked stones pointing the way",
+   "biomes": [
+    "tundras",
+    "arctic regions"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=milestone;x=-4;y=3;r=3;verb=read the way from;what=stones;text=Its arms point the way travellers went before you."
+   ],
+   "parts": [
+    "L=at;p=n13_inuksuk#;s=1;yaw=fixed;col=1"
+   ]
+  },
+  {
+   "name": "mammoth_bones",
+   "title": "Mammoth bones",
+   "text": "a mammoth's tusks and skull coming out of the thawing permafrost",
+   "biomes": [
+    "tundras"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=6;y=-6;r=3;verb=look at;what=tusks;text=Ivory longer than you are tall, coming up out of the mud as the ground thaws. Nobody alive has seen the beast that wore it."
+   ],
+   "parts": [
+    "L=at;p=n13_mammothtusks#;s=1;yaw=rand;col=1",
+    "L=at;p=s12_ribs#;x=-5;y=3;h=1.2;yaw=rand;col=0",
+    "L=patch;r=6;hb=0.25;tint=0.22,0.18,0.12"
+   ]
+  },
+  {
+   "name": "cotton_grass",
+   "title": "Cotton grass",
+   "text": "a tundra meadow of cotton grass, lichen and dwarf willow: a forest at ankle height",
+   "biomes": [
+    "tundras"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=forage;x=0;y=0;r=3;verb=gather from;what=low bushes;things=Wild Berries|1|2|0.8;reuse=300;text=Cloudberries among the dwarf willow, the whole forest knee-high."
+   ],
+   "parts": [
+    "L=patch;r=12;hb=0.25;tint=0.55,0.58,0.40",
+    "L=scatter;p=n13_tallgrass#;n=60;r=11;h=0.3-0.5;yaw=rand;col=0;inst=1"
+   ]
+  },
+  {
+   "name": "wolf_den",
+   "title": "Wolf den",
+   "text": "a den dug into a rise, bones round its mouth",
+   "biomes": [
+    "tundras"
+   ],
+   "weight": 1.0,
+   "guards": 2,
+   "uses": [
+    "do=tracks;x=-9;y=0;r=3;verb=look at;what=tracks;text=Paw prints the size of your hand, coming and going."
+   ],
+   "parts": [
+    "L=mound;r=5;hb=1.8;tint=0.30,0.27,0.20",
+    "L=at;p=n13_burrow#;x=3;s=1.4;yaw=fixed;col=1",
+    "L=scatter;p=bones;n=4;r=6;r0=3;s=0.5;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "summer_bloom",
+   "title": "Summer bloom",
+   "text": "a short burst of wildflowers across the whole plain",
+   "biomes": [
+    "tundras"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=0;y=0;r=3;verb=look at;what=flowers;text=Three weeks of summer, and every one of them in flower at once."
+   ],
+   "parts": [
+    "L=scatter;p=n13_flowers#;n=220;r=16;h=0.25-0.45;yaw=rand;col=0;inst=1"
+   ]
+  },
+  {
+   "name": "reindeer_camp",
+   "title": "Reindeer herders' camp",
+   "text": "a reindeer herders' camp: tents, a sledge, fish drying, a pile of antlers",
+   "biomes": [
+    "tundras",
+    "arctic regions"
+   ],
+   "weight": 1.0,
+   "herd": "Deer:4;r=10",
+   "folk": [
+    "Townsman|Herder|We follow the herd; the herd follows the grass./Dried fish for bread, if you like./Wolves this year. They walk where the herd walks.|-2|-3"
+   ],
+   "uses": [
+    "do=trade;x=-3;y=1;r=3;verb=trade with;what=herder;give=Bread|1;get=Fish|2;reuse=120"
+   ],
+   "parts": [
+    "L=at;p=n13_lavvu#;x=5;y=-4;s=1;yaw=rand;col=1",
+    "L=at;p=n13_lavvu#;x=6;y=5;s=0.9;yaw=rand;col=1",
+    "L=at;p=n13_sledge#;x=-4;y=6;s=1;yaw=rand;col=1",
+    "L=at;p=s12_fishrack#;x=-6;y=-4;h=1.8;yaw=rand;col=1",
+    "L=at;p=n13_antlerpile#;x=1;y=8;s=1;yaw=rand;col=1",
+    "L=at;p=campfire;x=1;y=0;s=1;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "pressure_ridge",
+   "title": "Pressure ridge",
+   "text": "a jagged wall of ice pushed up where the floes ground together",
+   "biomes": [
+    "arctic regions"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=drift;x=0;y=7;r=5;msg=Broken ice and drifted snow: every step is a climb"
+   ],
+   "uses": [
+    "do=lore;x=0;y=-9;r=3;verb=look at;what=ridge;text=Blocks of sea ice the size of carts, heaved up and frozen where they fell."
+   ],
+   "parts": [
+    "L=line;p=n13_iceblock#;n=7;r=16;a=0;s=0.8-1.6;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "open_lead",
+   "title": "Open lead",
+   "text": "a crack of black water opened between the floes",
+   "biomes": [
+    "arctic regions"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=thin_ice;x=0;y=3.5;r=2;msg=The ice at the lead's edge gives under you: black water to your waist"
+   ],
+   "uses": [
+    "do=lore;x=-8;y=-8;r=3;verb=look at;what=lead;text=Black water, smoking with cold. It was not there yesterday; tomorrow it will be somewhere else."
+   ],
+   "parts": [
+    "L=patch;r=14;hb=0.25;tint=0.86,0.90,0.94",
+    "L=ridge;r=2.5;r2=18;hb=0.35;a=0;tint=0.03,0.06,0.09"
+   ]
+  },
+  {
+   "name": "iceberg_cave",
+   "title": "Iceberg cave",
+   "text": "an iceberg locked in the sea ice, hollowed into a cave",
+   "biomes": [
+    "arctic regions"
+   ],
+   "weight": 1.0,
+   "loot": "Fish|1|3|0.8;Small Healing Potion|1|1|0.6;Straw Rope|1|1|0.5",
+   "uses": [
+    "do=lore;x=6;y=-6;r=3;verb=look into;what=cave;text=Blue light inside the berg, and the cold breathing out of it."
+   ],
+   "parts": [
+    "L=at;p=n13_iceblock#;x=-4;s=4;yaw=rand;col=1",
+    "L=at;p=n13_icearch#;x=2;s=1;yaw=fixed;col=1",
+    "L=at;box=Chest;x=4;y=4"
+   ]
+  },
+  {
+   "name": "sastrugi",
+   "title": "Sastrugi",
+   "text": "wind-carved ridges of hard snow that make walking hard",
+   "biomes": [
+    "arctic regions",
+    "tundras"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=drift;x=0;y=4;r=8"
+   ],
+   "uses": [
+    "do=lore;x=-12;y=-10;r=3;verb=look at;what=snow;text=The wind has carved the snow into waves frozen hard as wood, all running one way."
+   ],
+   "parts": [
+    "L=ridge;r=1.2;r2=12;hb=0.45;a=20;x=-6;y=0;tint=0.92,0.93,0.96",
+    "L=ridge;r=1.0;r2=10;hb=0.4;a=20;x=0;y=4;tint=0.92,0.93,0.96",
+    "L=ridge;r=1.2;r2=12;hb=0.45;a=20;x=6;y=8;tint=0.92,0.93,0.96"
+   ]
+  },
+  {
+   "name": "seal_holes",
+   "title": "Seal holes",
+   "text": "seals' breathing holes in the sea ice",
+   "biomes": [
+    "arctic regions"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=lore;x=-12;y=0;r=3;verb=look at;what=holes;text=Little domes of ice, each over a hole. A hunter waits by one for a day; a bear waits longer."
+   ],
+   "parts": [
+    "L=patch;r=10;hb=0.25;tint=0.86,0.90,0.94",
+    "L=patch;r=0.7;x=2;y=1;hb=0.35;tint=0.03,0.06,0.09",
+    "L=patch;r=0.6;x=-3;y=4;hb=0.35;tint=0.03,0.06,0.09",
+    "L=patch;r=0.7;x=4;y=-5;hb=0.35;tint=0.03,0.06,0.09"
+   ]
+  },
+  {
+   "name": "bear_tracks",
+   "title": "Bear tracks",
+   "text": "great tracks across the ice, and what is left of a seal",
+   "biomes": [
+    "arctic regions"
+   ],
+   "weight": 1.0,
+   "uses": [
+    "do=tracks;x=-6;y=0;r=3;verb=look at;what=tracks;text=Paw prints a forearm across, sunk deep. A bear, and not long gone."
+   ],
+   "parts": [
+    "L=at;p=s12_ribs#;x=3;h=0.6;yaw=rand;col=0",
+    "L=patch;r=3;x=3;hb=0.25;tint=0.45,0.12,0.10"
+   ]
+  },
+  {
+   "name": "frozen_shipwreck",
+   "title": "Frozen shipwreck",
+   "text": "a ship frozen into the ice, its masts sticking out",
+   "biomes": [
+    "arctic regions"
+   ],
+   "weight": 1.0,
+   "loot": "Iron Ingot|1|3|0.8;Straw Rope|1|2|0.7;Small Healing Potion|1|1|0.5",
+   "uses": [
+    "do=lore;x=-12;y=-4;r=3;verb=read;what=logbook;text=Last entry: the ice has us. We wait for spring. The ink has frozen in the pot."
+   ],
+   "parts": [
+    "L=at;p=s12_ship#;h=9;yaw=rand;tilt=10;col=1;sink=250",
+    "L=scatter;p=n13_iceblock#;n=4;r=12;r0=8;s=0.8-1.2;yaw=rand;col=1",
+    "L=at;box=Chest;x=-10;y=4"
+   ]
+  },
+  {
+   "name": "ice_shelf",
+   "title": "Ice shelf",
+   "text": "the edge of an ice shelf, a cliff of ice calving with a roar",
+   "biomes": [
+    "arctic regions"
+   ],
+   "weight": 1.0,
+   "hazards": [
+    "kind=rockfall;x=6;y=0;r=8;msg=A crack like thunder: the ice front calves above you!"
+   ],
+   "uses": [
+    "do=lore;x=-10;y=0;r=3;verb=look up at;what=ice front;text=A wall of blue ice, its foot sunk in the sea. It moans. Now and then a piece the size of a house comes away."
+   ],
+   "parts": [
+    "L=line;p=n13_serac#;n=6;r=20;a=0;x=10;s=1.3;yaw=rand;col=1"
+   ]
+  },
+  {
+   "name": "expedition_hut",
+   "title": "Expedition hut",
+   "text": "an abandoned expedition's hut, supplies still in it, graves outside",
+   "biomes": [
+    "arctic regions",
+    "tundras"
+   ],
+   "weight": 1.0,
+   "loot": "Bread|1|3|0.8;Small Healing Potion|1|2|0.6;Straw Rope|1|2|0.6",
+   "uses": [
+    "do=lore;x=-6;y=-8;r=3;verb=read;what=notes;text=We have food for a month and fuel for a week. If you find this, the cairn on the ridge holds our maps."
+   ],
+   "parts": [
+    "L=at;p=n13_expeditionhut#;x=4;s=1;yaw=fixed;yawadd=180;col=1",
+    "L=line;p=r12_gravestone#;n=3;r=3;a=90;x=-4;y=8;h=0.9;yaw=fixed;col=1",
+    "L=at;box=Chest;x=-2;y=-5"
+   ]
+  },
+  {
+   "name": "snow_houses",
+   "title": "Snow houses",
+   "text": "a seasonal hunting camp of snow houses, a hunter at the fire",
+   "biomes": [
+    "arctic regions",
+    "tundras"
+   ],
+   "weight": 1.0,
+   "folk": [
+    "Townsman|Hunter|The seals come up at the holes when the light is low./A snow house is warm as any hall. Come in, sit./Bears follow the hunters. Keep your fire lit.|-4|-3"
+   ],
+   "uses": [
+    "do=heal;x=-5;y=3;r=3;verb=warm yourself at;what=fire;reuse=300;text=The hunter makes room by the fire. The cold goes out of your bones."
+   ],
+   "parts": [
+    "L=at;p=n13_igloo#;x=5;y=-4;s=1;yaw=rand;col=1",
+    "L=at;p=n13_igloo#;x=4;y=6;s=0.9;yaw=rand;col=1",
+    "L=at;p=campfire;x=-2;y=0;s=1;yaw=rand;col=0"
+   ]
+  },
+  {
+   "name": "aurora_watch",
+   "title": "Aurora hill",
+   "text": "a rise where the old ones watched the northern lights",
+   "biomes": [
+    "tundras",
+    "arctic regions",
+    "volcanic tundra"
+   ],
+   "weight": 1.0,
+   "place": "rise",
+   "uses": [
+    "do=buff;x=2;y=0;r=3;verb=watch from;what=hill;hours=night;early=Come back after dark: the lights come out over the north only by night.;name=The Lights' Blessing;dmg=0.1;armour=0.08;speed=0.05;secs=900;reuse=60;text=Green fire hangs over the north and moves like a slow wind. You feel it in your chest."
+   ],
+   "parts": [
+    "L=at;p=l12_boulder#;x=-3;h=1.6;yaw=rand;col=1;sink=20",
+    "L=ring;p=n13_sandrock#;n=6;r=4;s=0.5;yaw=rand;col=1;sink=10"
+   ]
   }
  ],
  "mats": {
@@ -4215,5 +4606,14 @@
  ],
  "thin_air_slow": 0.15,
  "_doc_phase6": "the sixth phase (2026-11-15): canyons, canyon networks, mesas: 30 kinds; places rim (a cliff's top, facing the drop), foot (a cliff's foot, facing the wall) and channel (a dry channel's bed, facing along it); the slot canyons' channels; hazard flood (thunder, then the water down the channel); use echo (what calls back) and any use's hours (a sun dagger at sunrise); landform L=mesa (a butte) and any landform's bands=; the canyons' and mesas' rock in strata by height",
- "_doc_phase7": "the seventh phase (2026-11-16): volcanoes, volcanic tundra, geothermal caldera: 32 kinds; hazards geyser (on a schedule, every=), gas, crust, tremor; use geyser (when it goes again); any pit's msg=; any landform's lava= (the ground's own glow); the fissures' channels in the volcanic tundra; Obsidian and Sulfur, found and sold"
+ "_doc_phase7": "the seventh phase (2026-11-16): volcanoes, volcanic tundra, geothermal caldera: 32 kinds; hazards geyser (on a schedule, every=), gas, crust, tremor; use geyser (when it goes again); any pit's msg=; any landform's lava= (the ground's own glow); the fissures' channels in the volcanic tundra; Obsidian and Sulfur, found and sold",
+ "_doc_phase8": "the eighth phase (2026-11-16): tundras, arctic regions: 21 kinds; hazards thin_ice (it gives after a second) and drift (slowed in it); msg= on sting and rockfall; aurora: by night in its regions a curtain of light north of her",
+ "aurora": {
+  "biomes": [
+   "tundras",
+   "arctic regions",
+   "volcanic tundra"
+  ],
+  "mesh": "/Game/RandomDungeon/Wild13/Kit/SM_N13_Aurora"
+ }
 }
