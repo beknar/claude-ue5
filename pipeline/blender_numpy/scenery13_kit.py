@@ -123,7 +123,7 @@ def floor(bm):
         if v.co.z < 0.0: v.co.z = 0.0
 
 
-def finish(me, ob, bm, slots, masked=(), translucent=(), flat=False):
+def finish(me, ob, bm, slots, masked=(), translucent=(), flat=False, params=None):
     """the mesh written as an FBX (flat: every face flat-shaded, a dry wall's stones), its record"""
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0005)
     bm.to_mesh(me); bm.free()
@@ -137,7 +137,8 @@ def finish(me, ob, bm, slots, masked=(), translucent=(), flat=False):
     bpy.ops.export_scene.fbx(filepath=fn, use_selection=True, object_types={"MESH"}, apply_unit_scale=True, global_scale=1.0, axis_forward="X", axis_up="Z", mesh_smooth_type="FACE")
     xs = [v.co for v in me.vertices]
     size = [round(max(c[i] for c in xs) - min(c[i] for c in xs), 2) for i in range(3)]
-    REC[ob.name] = {"fbx": fn, "size_m": size, "triangles": sum(len(p.vertices) - 2 for p in me.polygons), "slots": list(slots), "masked": list(masked), "translucent": list(translucent)}
+    REC[ob.name] = {"fbx": fn, "size_m": size, "triangles": sum(len(p.vertices) - 2 for p in me.polygons), "slots": list(slots), "masked": list(masked), "translucent": list(translucent),
+                    "params": params or {}}
     print("N13KIT", ob.name, REC[ob.name]["size_m"], REC[ob.name]["triangles"])
 
 
@@ -1059,7 +1060,7 @@ def sledge():
     rng = random.Random(821)
     me, ob, bm, uvl = new_mesh("SM_N13_Sledge")
     for y in (-0.4, 0.4):
-        pts = [Vector((-1.5 + 3.0 * t, y, 0.06 + (0.35 * (t - 0.82) / 0.18) ** 2 * (1 if t > 0.82 else 0))) for t in np.linspace(0, 1, 10)]
+        pts = [Vector((-1.5 + 3.0 * t, y, 0.06 + 0.35 * ((t - 0.82) / 0.18) ** 2 * (1 if t > 0.82 else 0))) for t in np.linspace(0, 1, 10)]
         tube(bm, uvl, pts, [0.04] * 10, 5, 0)
         for x in (-1.1, -0.2, 0.7):
             tube(bm, uvl, [Vector((x, y, 0.06)), Vector((x, y, 0.32))], [0.03, 0.03], 4, 0)
@@ -1103,7 +1104,8 @@ def aurora():
             u0, u1 = i / N * 6.0, (i + 1) / N * 6.0
             uvs = ((u0, 0), (u1, 0), (u1, 1), (u0, 1)) if back == 0.0 else ((u0, 1), (u1, 1), (u1, 0), (u0, 0))
             for lp, uv in zip(f.loops, uvs): lp[uvl].uv = uv
-    finish(me, ob, bm, ["AuroraLight"], translucent=["AuroraLight"])
+    # (its own glow: the master's Tint (the storm rain's grey 0.37 dimmed it to a grey-green sheet) and Opacity (PR #72's review))
+    finish(me, ob, bm, ["AuroraLight"], translucent=["AuroraLight"], params={"AuroraLight": {"Tint": [1.6, 1.6, 1.6], "Opacity": 0.8}})
 
 
 def gold_card():
@@ -1389,7 +1391,7 @@ def pictures():
     png("T_N13_IglooSnow", grain((0.88, 0.90, 0.94), 297, 0.06) * (0.92 + 0.08 * ((np.abs(np.sin(xx * 24)) < 0.06) | (np.abs(np.sin(yy * 14)) < 0.06)) * -1 + 0.08)[..., None]); png("T_N13_IglooDark", np.full((n, n, 3), 0.05))
     png("T_N13_SledgeWood", grain((0.62, 0.52, 0.38), 298, 0.15)); png("T_N13_SledgeFur", grain((0.45, 0.38, 0.30), 299, 0.3))
     png("T_N13_AntlerPileBone", grain((0.72, 0.66, 0.56), 300, 0.15))
-    au_c = np.zeros((n, n, 3)); vv = yy                          # (V 0 at the foot)
+    au_c = np.zeros((n, n, 3)); vv = 1.0 - yy                    # (V 0 at the foot: the picture's bottom row, yy 1)
     au_c[..., 0] = 0.15 + 0.45 * vv; au_c[..., 1] = 0.95 - 0.55 * vv; au_c[..., 2] = 0.45 + 0.35 * vv
     streak = 0.55 + 0.45 * np.abs(np.sin(xx * math.pi * 14 + noise(n, 301, ((8, 1.0),)) * 3))
     au_a = np.clip((1.0 - vv) ** 1.5 * streak * np.clip(vv * 8, 0, 1), 0, 1)

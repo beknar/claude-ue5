@@ -89,6 +89,10 @@ def step_kit(src):
             tx = unreal.load_asset(f"{KIT}/T_N13_{slot}")
             assert tx, f"926 kit: no picture T_N13_{slot}"
             MEL.set_material_instance_texture_parameter_value(mi, "Tex", tx)
+            # (a slot's own parameters (the aurora's glow: PR #72's review))
+            for pn, pv in R.get("params", {}).get(slot, {}).items():
+                if isinstance(pv, list): MEL.set_material_instance_vector_parameter_value(mi, pn, unreal.LinearColor(*(pv + [1.0])[:4]))
+                else: MEL.set_material_instance_scalar_parameter_value(mi, pn, float(pv))
             eal.save_loaded_asset(mi, only_if_is_dirty=False)
             m.set_material(i, mi); n += 1
         eal.save_loaded_asset(m, only_if_is_dirty=False)

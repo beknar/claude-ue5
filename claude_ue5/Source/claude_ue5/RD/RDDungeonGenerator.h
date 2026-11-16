@@ -2670,8 +2670,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildAuroraKm = 4.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildAuroraUpM = 1200.f;
 	TWeakObjectPtr<class UStaticMeshComponent> WildAurora;
-	float WildAuroraLook = 0.f;
+	float WildAuroraLook = 0.f, WildAuroraFootZ = 0.f;
 	void TickWildAurora13(float Dt, const FVector& Her);
+	void TickWildAuroraLook(const FVector& Her);
 	/** tests: "on|x|y|z" (cm) or "off" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild13") FString GetWildAurora() const;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild13") int32 WildEchoesHeard = 0;

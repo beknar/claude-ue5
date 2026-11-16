@@ -4444,7 +4444,7 @@
    ],
    "weight": 1.0,
    "uses": [
-    "do=tracks;x=-6;y=0;r=3;verb=look at;what=tracks;text=Paw prints a forearm across, sunk deep. A bear, and not long gone."
+    "do=tracks;none=The tracks lead off across the ice toward the open water.;x=-6;y=0;r=3;verb=look at;what=tracks;text=Paw prints a forearm across, sunk deep. A bear, and not long gone."
    ],
    "parts": [
     "L=at;p=s12_ribs#;x=3;h=0.6;yaw=rand;col=0",
@@ -4478,7 +4478,7 @@
    ],
    "weight": 1.0,
    "hazards": [
-    "kind=rockfall;x=6;y=0;r=8;msg=A crack like thunder: the ice front calves above you!"
+    "kind=rockfall;x=6;y=0;r=8;msg=A crack like thunder: the ice front calves above you!|Blocks of falling ice strike you"
    ],
    "uses": [
     "do=lore;x=-10;y=0;r=3;verb=look up at;what=ice front;text=A wall of blue ice, its foot sunk in the sea. It moans. Now and then a piece the size of a house comes away."

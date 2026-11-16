@@ -1215,7 +1215,7 @@
  "SM_N13_Sledge": {
   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_Sledge.fbx",
   "size_m": [
-   3.01,
+   3.03,
    1.0,
    0.76
   ],
@@ -1225,7 +1225,8 @@
    "SledgeFur"
   ],
   "masked": [],
-  "translucent": []
+  "translucent": [],
+  "params": {}
  },
  "SM_N13_AntlerPile": {
   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\scenery13\\SM_N13_AntlerPile.fbx",
@@ -1255,6 +1256,16 @@
   "masked": [],
   "translucent": [
    "AuroraLight"
-  ]
+  ],
+  "params": {
+   "AuroraLight": {
+    "Tint": [
+     1.6,
+     1.6,
+     1.6
+    ],
+    "Opacity": 0.8
+   }
+  }
  }
 }
