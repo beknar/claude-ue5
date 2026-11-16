@@ -333,3 +333,11 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
   - **An effect called light is not light**: MysticDungeon's light rays read as blue specks in a slot canyon. Screen it where it plays.
   - **Picture a long piece across its span**: the arch laid along its place's yaw was seen end on from the test's front, a narrow box.
   - **This machine is at its limit at play's start**: the editor rebuilds skeletal meshes and textures as play begins, and once it left 0.7 GB free (`LogAsyncCompilation: BEWARE`). Two background runs were stopped for memory, both in their third batch. Batches of five in the foreground ran through.
+  - **PR #70's review (2026-11-16)**:
+    - A hazard with a warning checks she is still there when it strikes: the flood came down round her 5 km off. Its look is laid where it is, not round her.
+    - A channel's points are a wander, not downhill: the flood's way is read from the bed's slope, and her push follows the lowest ground ahead (no wall, no bank).
+    - Layers counted from a block's foot in their own thicknesses run over the block: five layers a block, their thicknesses summing to it.
+    - One list for one question: the channel segments found once for a cell, for its choice and its spot, and only where the region has a channel kind. A special place still keeps the general rules (roads, fields, yards, lava, the shore).
+    - A word a rule does not know says so (`hours=`); a rule kept in code and in data is kept in one (the fairy ring's night is its data now).
+    - A test of "it said when" looks for those words, not the HUD's last line.
+    - A test's local name can shadow the step's: `want` for a phrase overwrote the list of kinds, and the step failed on its count with every kind passing.

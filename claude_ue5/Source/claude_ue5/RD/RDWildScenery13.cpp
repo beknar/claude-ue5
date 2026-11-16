@@ -49,6 +49,9 @@ namespace
 		if (Hours == TEXT("dusk")) return (H >= 18.f && H < 21.5f) || (H >= 4.5f && H < 6.5f);
 		// (the sixth phase: a sun dagger's carving lights in the first low sun, 5:30-8:00)
 		if (Hours == TEXT("sunrise")) return H >= 5.5f && H < 8.f;
+		// (a word it does not know shows always, and says so once (PR #70's review: a misspelt hours was never gated, silently))
+		static TSet<FString> Warned;
+		if (!Warned.Contains(Hours)) { Warned.Add(Hours); UE_LOG(LogRDScen13, Warning, TEXT("RDSCEN hours '%s' is none of day, night, dusk, dawn, sunrise: shown at every hour"), *Hours); }
 		return true;
 	}
 	const TCHAR* RDS13Compass(const FVector2D& D)
@@ -346,20 +349,39 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 					continue;
 				}
 				if (Now - Hz.Start < 6.f) continue;
-				Hz.Start = -1.f; Hz.ReadyAt = Now + 120.f; ++Hz.Sprung; ++WildHazardsSprung;
-				// (its look: splashes down the channel's way through her, the scenery's single splash (a burst that ends), put away with the
-				// rockfall's dust)
+				Hz.Start = -1.f; Hz.ReadyAt = Now + 120.f;
+				// (only while she is still about the canyon (PR #70's review: gone 5 km off, the water came down round her where she stood))
+				if (D > Hz.R * 4.f || FMath::Abs(Feet - Hz.At.Z) > 4000.f) continue;
+				++Hz.Sprung; ++WildHazardsSprung;
+				// (its way: down the bed as it lies (PR #70's review: a channel's points are a wander, not downhill, and their order ran upstream
+				// half the time): of its laid way and back, the one whose bed 15 m on lies lower)
+				FVector2D Down = Hz.FallDir.GetSafeNormal(); if (Down.IsNearlyZero()) Down = FVector2D(1, 0);
+				if (WildGroundZ(Hz.At - FVector(Down.X, Down.Y, 0.f) * 1500.f) < WildGroundZ(Hz.At + FVector(Down.X, Down.Y, 0.f) * 1500.f)) Down = -Down;
+				// (its look: splashes along the channel through its middle (PR #70's review: they had been laid through her, wherever she was), the
+				// scenery's single splash at three times as the port's (screened on the harbour's water, port11.json: this system honours the
+				// component's scale), put away with the dust)
 				if (const TObjectPtr<UNiagaraSystem>* Sp = WildSceneryFx.Find(TEXT("f13_splash")); Sp && *Sp)
 					for (int32 Si = -3; Si <= 3; ++Si)
 					{
-						const FVector2D Q = FVector2D(Her) + Hz.FallDir * (Si * 400.f);
-						if (UNiagaraComponent* Nc = UNiagaraFunctionLibrary::SpawnSystemAtLocation(W, *Sp, FVector(Q.X, Q.Y, Feet + 40.f), FRotator::ZeroRotator, FVector(3.f), true, true, ENCPoolMethod::None, false))
+						const FVector Q = Hz.At + FVector(Down.X, Down.Y, 0.f) * (Si * 400.f);
+						if (UNiagaraComponent* Nc = UNiagaraFunctionLibrary::SpawnSystemAtLocation(W, *Sp, FVector(Q.X, Q.Y, WildGroundZ(Q) + 40.f), FRotator::ZeroRotator, FVector(3.f), true, true, ENCPoolMethod::None, false))
 							WildSceneryBursts.Add({ Nc, Now + 3.f, Now + 6.f });
 					}
 				if (D < Hz.R && Feet - Hz.At.Z < 200.f)
 				{
 					PlayerCombat->HurtByTrap(0.15f * Hz.P, 0.6f, 2.5f, TEXT("A wall of brown water comes down the canyon and takes you with it"));
-					if (ACharacter* Pc = UGameplayStatics::GetPlayerCharacter(this, 0)) Pc->LaunchCharacter(FVector(Hz.FallDir.X * 900.f, Hz.FallDir.Y * 900.f, 150.f), true, true);
+					// (carried down the bed where she is (PR #70's review: one segment's way, straight, could throw her at a wall or over a bank): of
+					// sixteen ways downstream, the lowest ground 5 m on that is no wall (under 1.5 m over the ground at her feet))
+					FVector2D Way = Down; float Lo = 1e9f;
+					const float G0 = WildGroundZ(Her);
+					for (int32 A = 0; A < 16; ++A)
+					{
+						const FVector2D Dv(FMath::Cos(A * PI / 8.f), FMath::Sin(A * PI / 8.f));
+						if (FVector2D::DotProduct(Dv, Down) < 0.f) continue;
+						const float Gz = WildGroundZ(Her + FVector(Dv.X, Dv.Y, 0.f) * 500.f);
+						if (Gz - G0 < 150.f && Gz < Lo) { Lo = Gz; Way = Dv; }
+					}
+					if (ACharacter* Pc = UGameplayStatics::GetPlayerCharacter(this, 0)) Pc->LaunchCharacter(FVector(Way.X * 900.f, Way.Y * 900.f, 150.f), true, true);
 				}
 				else PlayerCombat->ShowMessage(TEXT("A wall of brown water roars down the canyon below you"));
 			}
@@ -751,12 +773,8 @@ FString ARDDungeonGenerator::WildSceneryInteract(const FVector& From)
 		for (const auto& Kv : N) { PlayerCombat->AddItem(Kv.Key, Kv.Value); Parts.Add(FString::Printf(TEXT("%d %s"), Kv.Value, *Kv.Key.ToString())); }
 		return Parts.Num() > 0 ? FString::Join(Parts, TEXT(", ")) : FString(TEXT("nothing"));
 	};
-	if (Do == TEXT("fairy") && !RDS13InHours(TEXT("night"), TownHour))
-	{
-		PlayerCombat->ShowMessage(TEXT("Nothing stirs in the ring by daylight. Come back after dark."));
-		return TEXT("scenery");
-	}
-	// (the sixth phase: a use of its hours ("hours=dawn": a sun dagger lights its carving at sunrise); out of them it says when ("early="))
+	// (the sixth phase: a use of its hours ("hours=sunrise": a sun dagger lights its carving at sunrise; the fairy ring's "hours=night",
+	// in its data since PR #70's review: one rule for both); out of them it says when ("early="))
 	if (const FString Hs = M.FindRef(TEXT("hours")); !Hs.IsEmpty() && !RDS13InHours(Hs, TownHour))
 	{
 		PlayerCombat->ShowMessage(M.Contains(TEXT("early")) ? M[TEXT("early")] : FString::Printf(TEXT("Nothing happens. Come back at %s."), *Hs));

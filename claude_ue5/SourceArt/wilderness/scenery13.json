@@ -653,7 +653,7 @@
     "L=at;fx=fireflies;z=0.8;s=1;hours=night"
    ],
    "uses": [
-    "do=fairy;x=0;y=0;r=3.6;verb=step into;what=fairy ring;name=The Fair Folk's Favour;dmg=0.15;armour=0.08;speed=0.1;secs=300;reuse=1200;text=The night goes still. Laughter that is not quite laughter rings round you.",
+    "do=fairy;hours=night;early=Nothing stirs in the ring by daylight. Come back after dark.;x=0;y=0;r=3.6;verb=step into;what=fairy ring;name=The Fair Folk's Favour;dmg=0.15;armour=0.08;speed=0.1;secs=300;reuse=1200;text=The night goes still. Laughter that is not quite laughter rings round you.",
     "do=forage;x=4.2;y=0;r=2;verb=pick from;what=mushroom ring;things=Field Mushrooms|2|4|1;reuse=900"
    ]
   },

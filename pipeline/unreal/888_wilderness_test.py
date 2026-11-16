@@ -1419,11 +1419,14 @@ def step_scenery13():
                     g.set_town_hour(14.0 if spec["hours"] in ("night", "sunrise", "dawn", "dusk") else 23.0)
                     if spec.get("do") in ("offer", "trade") and spec.get("give"): cb().add_item(spec["give"].split("|")[0], 1)
                     ground_put(u["x"] / 100.0, u["y"] / 100.0); yield from watching(rwait(0.8), msgs)
-                    b0 = str(cb().get_blessing())
+                    b0 = str(cb().get_blessing()); n0 = len(msgs)
                     g.interact_nearest(G["pawn"].get_actor_location()); yield from watching(rwait(1.0), msgs)
-                    v["out_of_hours"] = {"said": str(cb().message)[:120], "blessed": str(cb().get_blessing()) != b0}
+                    # (PR #70's review: the HUD's last line was any line (a discovery, a fall): the use's own words when, among the lines
+                    # shown after the press)
+                    when_w = (spec.get("early") or "Come back")[:30]       # (not "want": the step's list of kinds)
+                    v["out_of_hours"] = {"said": str(cb().message)[:120], "blessed": str(cb().get_blessing()) != b0,
+                                         "told_when": any(when_w in m_ for m_ in msgs[n0:]) or when_w in str(cb().message)}
                     g.set_town_hour(HOUR_IN.get(spec["hours"], 12.0))
-                if spec.get("do") == "fairy": g.set_town_hour(22.5)
                 e0 = g.get_editor_property("wild_echoes_heard")
                 things = [t.split("|")[0] for t in spec.get("things", "").split(",") if t]
                 if spec.get("do") in ("offer", "trade") and spec.get("give"):
@@ -1447,7 +1450,7 @@ def step_scenery13():
                     yield from watching(rwait(1.0), msgs)
                     v["echoes"] = g.get_editor_property("wild_echoes_heard") - e0
                     v["echo_told"] = any(spec.get("echo", "?")[:30] in m_ for m_ in msgs)
-                if spec.get("do") == "fairy" or spec.get("hours"): g.set_town_hour(12.0)
+                if spec.get("hours"): g.set_town_hour(12.0)
                 d = spec.get("do")
                 v["ok"] = (v["f"] == "scenery" and spec.get("what", "").split(" ")[0].lower() in v["prompt"].lower()
                            and (d not in ("loot", "forage", "fish", "honey") or sum(v["got"].values()) > 0)
@@ -1456,7 +1459,7 @@ def step_scenery13():
                            and (d != "trade" or sum(v["got"].values()) > 0)
                            and (d not in ("milestone", "rumour", "tracks") or len(v["said"]) > 20)
                            and (d != "echo" or (v.get("echoes", 0) >= 1 and v.get("echo_told")))
-                           and (not spec.get("hours") or (not v["out_of_hours"]["blessed"] and len(v["out_of_hours"]["said"]) > 10)))
+                           and (not spec.get("hours") or (not v["out_of_hours"]["blessed"] and v["out_of_hours"]["told_when"])))
                 r["uses"].append(v)
                 ground_put(*near); yield from rwait(0.6)
             # (its hazards: she stands in each)

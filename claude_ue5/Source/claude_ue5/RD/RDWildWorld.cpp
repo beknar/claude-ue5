@@ -954,14 +954,19 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 		static const FLinearColor RDWStrataCol[6] = { FLinearColor(0.62f, 0.30f, 0.17f), FLinearColor(0.78f, 0.58f, 0.40f), FLinearColor(0.52f, 0.22f, 0.14f),
 			FLinearColor(0.70f, 0.42f, 0.24f), FLinearColor(0.84f, 0.72f, 0.56f), FLinearColor(0.44f, 0.26f, 0.21f) };
 		const float Hb = H + 2.5f * Fbm(X, Y, 1.0 / 700.0, 2, Seed + 150u);
-		auto LayerAt = [&](int32 L, float& Thick) { const uint32 Hs = Hash(L, 77, Seed + 151u); Thick = 6.f + (Hs % 5); return RDWStrataCol[(Hs >> 8) % 6]; };
-		// (layers stacked from 0 in their own thicknesses: walked up from the nearest multiple of 40 m, so the stack is found in a few steps)
+		// (each 40 m block holds five layers whose thicknesses, 6 to 10 parts each from a hash, add up to the block (PR #70's review: walked
+		// in their own thicknesses from each block's foot, a layer ran over the block's top and the colour jumped there, uneased); a
+		// layer's colour from a hash of its number, the next layer's at a block's top the next block's first)
+		constexpr int32 RDWStrataPer = 5;
 		const int32 Blk = FMath::FloorToInt(Hb / 40.f);
-		float Z = Blk * 40.f, Th = 8.f; int32 L = Blk * 8;
-		FLinearColor Lc = LayerAt(L, Th);
-		for (int32 Guard = 0; Guard < 12 && Z + Th <= Hb; ++Guard) { Z += Th; ++L; Lc = LayerAt(L, Th); }
-		float Tn; const FLinearColor Nx = LayerAt(L + 1, Tn);
-		const FLinearColor Band = FMath::Lerp(Lc, Nx, RDWSmooth(0.8f, 1.f, (Hb - Z) / FMath::Max(Th, 1.f)));
+		float Wt[RDWStrataPer], Sum = 0.f;
+		for (int32 I = 0; I < RDWStrataPer; ++I) { Wt[I] = 6.f + (Hash(Blk * RDWStrataPer + I, 77, Seed + 151u) % 5); Sum += Wt[I]; }
+		auto ColOf = [&](int32 L) { return RDWStrataCol[(Hash(L, 78, Seed + 151u) >> 8) % 6]; };
+		float Z = Blk * 40.f; int32 Li = 0;
+		while (Li < RDWStrataPer - 1 && Z + Wt[Li] * 40.f / Sum <= Hb) { Z += Wt[Li] * 40.f / Sum; ++Li; }
+		const float Th = Wt[Li] * 40.f / Sum;
+		const int32 L = Blk * RDWStrataPer + Li;
+		const FLinearColor Band = FMath::Lerp(ColOf(L), ColOf(L + 1), RDWSmooth(0.8f, 1.f, (Hb - Z) / FMath::Max(Th, 1.f)));
 		RockCol = FMath::Lerp(RockCol, Band, FMath::Clamp(Strata, 0.f, 1.f) * 0.85f);
 	}
 	O.Biome = N > 0 ? Bi[0] : 0; O.Biome2 = N > 1 ? Bi[1] : O.Biome; O.W1 = N > 0 ? W[0] : 1.f;
@@ -2148,6 +2153,25 @@ void FRDWildWorld::SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) cons
 			}
 		return Ws;
 	};
+	// (the sixth phase: the dry channels' segments whose middle lies 60 m inside the cell, with their ways; found once, for the cell's
+	// choice and its spot, and only where the region has a kind that stands in one)
+	const bool bChanKinds = SceneryKinds.ContainsByPredicate([&](const FRDWildSceneryKind& K) { return K.Place == TEXT("channel") && (K.Biomes.Contains(TEXT("*")) || K.Biomes.Contains(Bn)); });
+	TArray<TPair<FVector2D, FVector2D>> ChanCache; bool bChanCached = false;
+	auto ChanPts = [&]() -> const TArray<TPair<FVector2D, FVector2D>>&
+	{
+		if (bChanCached) return ChanCache;
+		bChanCached = true;
+		for (int32 I = FMath::FloorToInt(X0 / HashM); I <= FMath::FloorToInt((X0 + SceneryCellM) / HashM); ++I)
+			for (int32 J = FMath::FloorToInt(Y0 / HashM); J <= FMath::FloorToInt((Y0 + SceneryCellM) / HashM); ++J)
+				for (auto It = ChanHash.CreateConstKeyIterator(FIntPoint(I, J)); It; ++It)
+				{
+					const FChannel& Ch = Channels[It.Value() >> 16]; const int32 Sg = It.Value() & 0xFFFF;
+					if (!Ch.P.IsValidIndex(Sg + 1)) continue;
+					const FVector2D M = (Ch.P[Sg] + Ch.P[Sg + 1]) * 0.5;
+					if (M.X >= X0 + 60.0 && M.X < X0 + SceneryCellM - 60.0 && M.Y >= Y0 + 60.0 && M.Y < Y0 + SceneryCellM - 60.0) ChanCache.AddUnique({ M, (Ch.P[Sg + 1] - Ch.P[Sg]).GetSafeNormal() });
+				}
+		return ChanCache;
+	};
 	// (a cell that holds a crossroads takes a kind that stands at one four times in five, one a road crosses a roadside kind two in five:
 	// drawn among all kinds, the 155 crossroads of a world held one of their kinds about one time in nine)
 	FString Only;
@@ -2168,17 +2192,9 @@ void FRDWildWorld::SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) cons
 		// of a savannah's kinds, a waterhole met a pond nowhere within 150 km)
 		const bool bWater = CellWaters(0).Num() > 0;
 		// (the sixth phase: a cell a dry channel crosses takes a kind that stands in one three times in five (a slot canyon's); a region
-		// with no such kind picks as before)
-		bool bChan = false;
-		for (int32 I = FMath::FloorToInt(X0 / HashM); I <= FMath::FloorToInt((X0 + SceneryCellM) / HashM) && !bChan; ++I)
-			for (int32 J = FMath::FloorToInt(Y0 / HashM); J <= FMath::FloorToInt((Y0 + SceneryCellM) / HashM) && !bChan; ++J)
-				for (auto It = ChanHash.CreateConstKeyIterator(FIntPoint(I, J)); It; ++It)
-				{
-					const FChannel& Ch = Channels[It.Value() >> 16]; const int32 Sg = It.Value() & 0xFFFF;
-					if (!Ch.P.IsValidIndex(Sg)) continue;
-					const FVector2D& M = Ch.P[Sg];
-					if (M.X >= X0 + 60.0 && M.X < X0 + SceneryCellM - 60.0 && M.Y >= Y0 + 60.0 && M.Y < Y0 + SceneryCellM - 60.0) { bChan = true; break; }
-				}
+		// with no such kind picks as before, and its cells do not look (PR #70's review: every cell walked the channels' hash); the same
+		// segments as the spot takes (PR #70's review: a vertex in the cell whose segment's middle was not left no spot))
+		const bool bChan = bChanKinds && ChanPts().Num() > 0;
 		const float U = Rand01(Cell.X, Cell.Y, Seed + 1304u);
 		if (bCross && U < 0.8f) Only = TEXT("crossroads");
 		else if (bRoad && U < 0.4f) Only = TEXT("road");
@@ -2310,19 +2326,9 @@ void FRDWildWorld::SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) cons
 		}
 		if (K.Place == TEXT("channel"))
 		{
-			// (a segment's middle in the cell, on its bed: the bed is no gentle ground, so only dry, on its region and off the places)
-			const int32 I0 = FMath::FloorToInt(X0 / HashM), I1 = FMath::FloorToInt((X0 + SceneryCellM) / HashM);
-			const int32 J0 = FMath::FloorToInt(Y0 / HashM), J1 = FMath::FloorToInt((Y0 + SceneryCellM) / HashM);
-			TArray<TPair<FVector2D, FVector2D>> Pts;
-			for (int32 I = I0; I <= I1; ++I)
-				for (int32 J = J0; J <= J1; ++J)
-					for (auto It = ChanHash.CreateConstKeyIterator(FIntPoint(I, J)); It; ++It)
-					{
-						const FChannel& Ch = Channels[It.Value() >> 16]; const int32 Sg = It.Value() & 0xFFFF;
-						if (!Ch.P.IsValidIndex(Sg + 1)) continue;
-						const FVector2D M = (Ch.P[Sg] + Ch.P[Sg + 1]) * 0.5;
-						if (M.X >= X0 + 60.0 && M.X < X0 + SceneryCellM - 60.0 && M.Y >= Y0 + 60.0 && M.Y < Y0 + SceneryCellM - 60.0) Pts.AddUnique({ M, (Ch.P[Sg + 1] - Ch.P[Sg]).GetSafeNormal() });
-					}
+			// (a segment's middle in the cell, on its bed: the bed is no gentle ground, so Fine's other rules only: dry, on its region, off
+			// the roads, fields, yards and lava and above the shore (PR #70's review: a slot canyon could be laid on a road), off the places)
+			const TArray<TPair<FVector2D, FVector2D>>& Pts = ChanPts();
 			// (every segment in the cell, from one the hash picks, each clear of the places there (the first test: six random tries, and
 			// the places checked only after, left two channel kinds within 30 km))
 			const int32 N0 = Pts.Num() > 0 ? (int32)(Rand01(Cell.X, Cell.Y, Seed + 1311u) * Pts.Num()) % Pts.Num() : 0;
@@ -2331,6 +2337,7 @@ void FRDWildWorld::SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) cons
 				const auto& Pr = Pts[(N0 + T) % Pts.Num()];
 				FRDWSample Sc; Sample(Pr.Key.X, Pr.Key.Y, Sc, false);
 				if (Sc.WaterKind != 0 || Sc.Chan <= 0.5f || BiomeName(Sc.Biome) != Bn) continue;
+				if (Sc.H < 2.f || Sc.Lava > 0.3f || Sc.Field > 0.3f || Sc.FarmKind == 4 || Sc.Road > 0.05f) continue;
 				{ double Dt; NearestTown(Pr.Key.X, Pr.Key.Y, Dt); if (Dt < 1000.0) continue; }
 				if (QuestPlaces.ContainsByPredicate([&](const FRDWildPlace& Q) { return FVector2D::Distance(Q.At, Pr.Key) < 150.0; })) continue;
 				if (!ClearOfPlaces(Pr.Key)) continue;
