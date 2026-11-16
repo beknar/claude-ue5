@@ -907,7 +907,7 @@ def obsidian():
         base = [bm.verts.new((c.x + ax * w * s + ay * w * 0.3 * q, c.y + ay * w * s - ax * w * 0.3 * q, 0.0)) for s, q in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
         tip = bm.verts.new((c.x + tl * h, c.y + rng.uniform(-0.2, 0.2), h))
         for q in range(4):
-            f = bm.faces.new((base[q], base[(q + 1) % 4], tip)); f.material_index = 0
+            f = bm.faces.new((base[(q + 1) % 4], base[q], tip)); f.material_index = 0      # (outward: the base runs clockwise from above)
             for lp, uv in zip(f.loops, ((0, 0), (1, 0), (0.5, 1))): lp[uvl].uv = uv
     finish(me, ob, bm, ["ObsidianGlass"], flat=True)
 
@@ -950,6 +950,9 @@ def sod_hut():
     vs = [bm.verts.new(p) for p in ((L / 2, -W / 2 + 0.2, 0.0), (L / 2, W / 2 - 0.2, 0.0), (L / 2, W / 2 - 0.2, 1.6), (L / 2, 0, 3.3), (L / 2, -W / 2 + 0.2, 1.6))]
     f = bm.faces.new(vs); f.material_index = 2
     for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 0.5), (0.5, 1), (0, 0.5))): lp[uvl].uv = uv
+    vs = [bm.verts.new(p) for p in ((-L / 2, W / 2 - 0.2, 1.6), (-L / 2, -W / 2 + 0.2, 1.6), (-L / 2, 0, 3.3))]   # (the back gable, facing -X)
+    f = bm.faces.new(vs); f.material_index = 0
+    for lp, uv in zip(f.loops, ((0, 0), (1, 0), (0.5, 1))): lp[uvl].uv = uv
     vs = [bm.verts.new((L / 2 + 0.02, y, z)) for (y, z) in ((-0.45, 0.0), (0.45, 0.0), (0.45, 1.75), (-0.45, 1.75))]
     f = bm.faces.new(vs); f.material_index = 3
     for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv

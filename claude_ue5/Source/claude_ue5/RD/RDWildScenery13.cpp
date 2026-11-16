@@ -54,6 +54,9 @@ namespace
 		if (!Warned.Contains(Hours)) { Warned.Add(Hours); UE_LOG(LogRDScen13, Warning, TEXT("RDSCEN hours '%s' is none of day, night, dusk, dawn, sunrise: shown at every hour"), *Hours); }
 		return true;
 	}
+	/** a geyser's place in its cycle (seconds since its last eruption began) and its period: one rule for its eruptions and its clock */
+	float RDS13GeyserPhase(int32 Id, float Every0, float Now, float& Every) { Every = FMath::Max(Every0, 12.f); return FMath::Fmod(Now + (Id % 97) * 1.37f, Every); }
+	constexpr float RDS13GeyserGoes = 6.f;
 	const TCHAR* RDS13Compass(const FVector2D& D)
 	{
 		static const TCHAR* N[8] = { TEXT("north"), TEXT("north-east"), TEXT("east"), TEXT("south-east"), TEXT("south"), TEXT("south-west"), TEXT("west"), TEXT("north-west") };
@@ -107,7 +110,7 @@ void ARDDungeonGenerator::LayWildScenery(ARDWildChunk* C, const FRDWildPlace& P)
 		FSceneryHazard H; H.Id = P.Id * 8 + I; H.Kind = FName(*M.FindRef(TEXT("kind"))); H.At = WorldOf(M); H.R = RDS13Num(M, TEXT("r"), 5.f) * 100.f; H.P = RDS13Num(M, TEXT("p"), 1.f); H.Chunk = C;
 		H.Who = M.FindRef(TEXT("who")); H.Hide = M.FindRef(TEXT("hide")); H.Named = M.FindRef(TEXT("named")); H.Msg = M.FindRef(TEXT("msg")); H.Count = FMath::Max(1, (int32)RDS13Num(M, TEXT("n"), 1.f));
 		// (the sixth phase: a flood runs down its channel, the way the place faces (a channel's place faces along it))
-		if (H.Kind == TEXT("geyser")) H.Length = RDS13Num(M, TEXT("every"), 45.f);
+		if (H.Kind == TEXT("geyser")) H.Every = RDS13Num(M, TEXT("every"), 45.f);
 		if (H.Kind == TEXT("flood")) H.FallDir = FVector2D(FMath::Cos(FMath::DegreesToRadians(P.Yaw)), FMath::Sin(FMath::DegreesToRadians(P.Yaw)));
 		if (!H.Hide.IsEmpty())
 		{
@@ -294,25 +297,25 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 			// while it goes a scald and a throw upward for her within its reach, once a second and a half. Quiet, it steams a little: the warning)
 			else if (Hz.Kind == TEXT("geyser"))
 			{
-				const float Every = FMath::Max(Hz.Length, 12.f);
-				const float Tc = FMath::Fmod(Now + (Hz.Id % 97) * 1.37f, Every);
-				const bool bGoing = Tc < 6.f;
+				float Every; const float Tc = RDS13GeyserPhase(Hz.Id, Hz.Every, Now, Every);
+				const bool bGoing = Tc < RDS13GeyserGoes;
 				if (!bGoing) { Hz.Start = -1.f; continue; }
 				if (Hz.Start < 0.f)
 				{
-					Hz.Start = Now;
+					Hz.Start = Now; Hz.In = 0.f;
 					if (D < 12000.f)
 					{
-						++Hz.Sprung; ++WildHazardsSprung;
 						if (const TObjectPtr<UNiagaraSystem>* Sm = WildSceneryFx.Find(TEXT("f13_steam")); Sm && *Sm)
 							for (int32 Gi = 0; Gi < 3; ++Gi)
 								if (UNiagaraComponent* Nc = UNiagaraFunctionLibrary::SpawnSystemAtLocation(W, *Sm, Hz.At + FVector(0.f, 0.f, 150.f + Gi * 450.f), FRotator::ZeroRotator, FVector(2.5f), true, true, ENCPoolMethod::None, false))
 									WildSceneryBursts.Add({ Nc, Now + 6.f, Now + 10.f });
-						if (D < Hz.R * 4.f) PlayerCombat->ShowMessage(TEXT("The geyser roars up in a column of boiling water and steam!"));
+						const float* Told = WildSceneryToldAt.Find(Hz.Id / 8);
+						if (D < Hz.R * 4.f && (!Told || Now - *Told > 3.f)) PlayerCombat->ShowMessage(TEXT("The geyser roars up in a column of boiling water and steam!"));
 					}
 				}
 				if (!bIn || Now < Hz.ReadyAt) continue;
 				Hz.ReadyAt = Now + 1.5f;
+				if (Hz.In <= 0.f) { Hz.In = 1.f; ++Hz.Sprung; ++WildHazardsSprung; }
 				PlayerCombat->HurtByTrap(0.06f * Hz.P, 0.3f, 1.f, TEXT("Boiling water scalds you"));
 				if (ACharacter* Pc = UGameplayStatics::GetPlayerCharacter(this, 0)) Pc->LaunchCharacter(FVector(0.f, 0.f, 650.f), false, true);
 			}
@@ -321,8 +324,10 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 			else if (Hz.Kind == TEXT("gas"))
 			{
 				Hz.In = bIn ? Hz.In + Dt : 0.f;
+				if (!bIn) Hz.Start = -1.f;
 				if (Hz.In < 1.5f || Now < Hz.ReadyAt) continue;
-				Hz.ReadyAt = Now + 1.f; ++Hz.Sprung; if (Hz.Sprung == 1) ++WildHazardsSprung;
+				Hz.ReadyAt = Now + 1.f;
+				if (Hz.Start < 0.f) { Hz.Start = Now; ++Hz.Sprung; ++WildHazardsSprung; }
 				PlayerCombat->HurtByTrap(0.04f * Hz.P, 0.f, 0.f, TEXT("Your head pounds and your breath will not come: the air in the hollow is bad"));
 			}
 			// (the seventh phase: "thin crust where the ground looks solid but has boiling water underneath": once a play it breaks under her, a
@@ -844,8 +849,8 @@ FString ARDDungeonGenerator::WildSceneryInteract(const FVector& From)
 		// (the seventh phase: a geyser as a clock: its own hazard's cycle read, the seconds to its next eruption told)
 		if (const FSceneryHazard* Gz = WildSceneryHazards.FindByPredicate([&](const FSceneryHazard& H) { return H.Id / 8 == U.Id && H.Kind == TEXT("geyser"); }))
 		{
-			const float Every = FMath::Max(Gz->Length, 12.f), Tc = FMath::Fmod(Now + (Gz->Id % 97) * 1.37f, Every);
-			Said = FString::Printf(TEXT("%s%s%s"), *Said, Said.IsEmpty() ? TEXT("") : TEXT("  "), Tc < 6.f ? TEXT("It is going now: stand back!")
+			float Every; const float Tc = RDS13GeyserPhase(Gz->Id, Gz->Every, Now, Every);
+			Said = FString::Printf(TEXT("%s%s%s"), *Said, Said.IsEmpty() ? TEXT("") : TEXT("  "), Tc < RDS13GeyserGoes ? TEXT("It is going now: stand back!")
 				: *FString::Printf(TEXT("By the rhythm of its steam it goes again in about %.0f s, and every %.0f s after."), Every - Tc, Every));
 		}
 	}
@@ -972,6 +977,8 @@ FString ARDDungeonGenerator::WildSceneryInteract(const FVector& From)
 		SpawnSceneryMonsters(U.Chunk.Get(), Q.Num() > 0 ? Q[0] : FString(), Q.Num() > 1 ? FCString::Atoi(*Q[1]) : 1, Q.Num() > 2 ? Q[2] : FString(), U.At, (uint32)(U.Id * 8 + U.Use));
 	}
 	PlayerCombat->ShowMessage(Said);
+	// (a use's line is a told line: what waits on the scenery's last line (a stampede, a geyser's roar) waits on it too (PR #71's review))
+	WildSceneryToldAt.Add(U.Id, Now);
 	const int64 Key = RDS13UseKeys + (int64)(uint32)U.Id * 8 + U.Use;
 	if (const float Re = RDS13Num(M, TEXT("reuse"), 0.f); Re > 0.f) WildSceneryReadyAt.Add((int32)(Key & 0x7FFFFFFF), Now + Re);
 	else if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->WildKilled.AddUnique(Key);

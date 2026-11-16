@@ -2681,6 +2681,8 @@ public:
 		float Start = -1.f, Length = 0.f; TArray<TWeakObjectPtr<ARDWildAnimal>> Hunters; TWeakObjectPtr<ARDWildAnimal> Prey; int32 Kills = 0;
 		/** (PR #66's review) every laid piece Hide names: a fall takes the one nearest her as it springs */
 		TArray<TWeakObjectPtr<UPrimitiveComponent>> Cands;
+		/** (the seventh phase) a geyser's cycle, seconds (PR #71's review: kept in Length, a hidden piece's height overwrote it) */
+		float Every = 0.f;
 	};
 	struct FSceneryFx { TWeakObjectPtr<class UNiagaraComponent> Comp; FString Hours; };
 	struct FSceneryHerd { int32 Id = 0; TArray<TWeakObjectPtr<ARDWildAnimal>> Animals; FVector2D Home = FVector2D::ZeroVector; FVector2D Way = FVector2D(1, 0); float Phase = 0.f, Pen = 0.f; bool bMigrate = false, bStampede = false; float StampedeUntil = -1.f, NextHit = 0.f; int32 Stampedes = 0, Hits = 0; };

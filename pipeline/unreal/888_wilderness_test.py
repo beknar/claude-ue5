@@ -1493,6 +1493,7 @@ def step_scenery13():
                     ground_put(hz["x"] / 100.0 + 40.0, hz["y"] / 100.0); yield from watching(rwait(20.0), msgs)
                     v["counted_hers"] = g.get_editor_property("animals_killed") - ak0
                 else:
+                    nh = len(msgs)                  # (the lines from here on are this hazard's (PR #71's review: the tremor read the whole visit's))
                     ground_put(hz["x"] / 100.0, hz["y"] / 100.0)
                     # (a bog drags at her only after 4 s in it: she stands 7 s, and her speed is read while she is in it; scree: how far
                     # it carries her in 3 s standing still)
@@ -1516,9 +1517,9 @@ def step_scenery13():
                 v["sprung"] = next((x["sprung"] for x in scen_things(g, sid)["haz"] if abs(x["x"] - hz["x"]) < 1 and abs(x["y"] - hz["y"]) < 1), 0)
                 v["monsters_came"] = len(mine_mons()) - mons0
                 if hz["kind"] == "bog" and v.get("walk_speed_in_bog", 0) >= v.get("walk_speed_out", 0) * 0.8: v["slow_failed"] = True
-                if hz["kind"] == "flood" and v.get("carried_m", 0) < 1.0: v["slow_failed"] = True
+                if hz["kind"] == "flood" and v.get("carried_m", 0) < (1.0 if kd == "glacier_flood" else 2.0): v["slow_failed"] = True     # (a fissure 3 to 5 m wide: 1.4 m)
                 if hz["kind"] == "scree" and (v.get("carried_m", 0) < 1.0 or v.get("walk_speed_in", 1e9) >= v.get("walk_speed_out", 0) * 0.8): v["slow_failed"] = True
-                v["ok"] = v["sprung"] > 0 and not v.get("slow_failed") and (True if hz["kind"] == "scree" else v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting", "heat", "fall", "bog", "pit", "rockfall", "avalanche", "cornice", "crevasse", "flood", "geyser", "gas", "crust") else any("shudders" in m_ for m_ in msgs) if hz["kind"] == "tremor" else v.get("counted_hers", 0) == 0 if hz["kind"] == "hunt" else v["monsters_came"] > 0)
+                v["ok"] = v["sprung"] > 0 and not v.get("slow_failed") and (True if hz["kind"] == "scree" else v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting", "heat", "fall", "bog", "pit", "rockfall", "avalanche", "cornice", "crevasse", "flood", "geyser", "gas", "crust") else any("shudders" in m_ for m_ in msgs[nh:]) if hz["kind"] == "tremor" else v.get("counted_hers", 0) == 0 if hz["kind"] == "hunt" else v["monsters_came"] > 0)
                 r["hazards"].append(v)
                 cb().set_health(cb().get_max_health())
                 ground_put(*near); yield from rwait(1.0)

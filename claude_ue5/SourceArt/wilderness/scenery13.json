@@ -3589,7 +3589,11 @@
    ],
    "weight": 1.0,
    "hazards": [
-    "kind=heat;x=0;y=0;r=3"
+    "kind=heat;x=0;y=0;r=3",
+    "kind=heat;x=-10;y=0;r=3",
+    "kind=heat;x=10;y=0;r=3",
+    "kind=heat;x=-20;y=0;r=3",
+    "kind=heat;x=20;y=0;r=3"
    ],
    "uses": [
     "do=lore;x=0;y=-12;r=3;verb=look at;what=flow;text=The crust is black and it creaks. Under it, the orange shows through every crack."

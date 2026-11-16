@@ -348,3 +348,10 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
   - **A one-sided face wound inward is not drawn**: the sod hut's +Y roof slope faced in and down, and only the roof's outline showed. Picture a hand-wound face from outside.
   - **A rim that needs level ground is not on a volcano**: no spot on its steep upper flanks was level within 10 m. The crater's view is a shoulder (`place=rise`).
   - **Black reads as a hole**: the basalt at 0.17 and the lava tube's boxed arch read as black stepped heaps; lighter (0.26) and a rounded arch read as rock.
+  - **PR #71's review (2026-11-16)**:
+    - A hand-wound face is checked by its winding, not its colour: black obsidian hid shards wound inward, and the sod hut had no back gable. Look at a piece from every side it can be seen from.
+    - A hazard covers what its look covers: a 60 m glowing lava ridge burned only 3 m round its middle; its heat is laid along it.
+    - Fix a game's fault in the game, not in its test: the geyser's roar hid the clock's line. The test read every line, but a player still lost the clock. A use's line moves its scenery's told time, and the roar waits 3 s after it.
+    - A hazard counts a springing when it catches her, once each time (the geyser once an eruption she is in, the gas once each entry), never by time spent near it.
+    - A field another rule fills is no home for a new value: the geyser's period in `Length` would be a hidden piece's height. One helper for one cycle (`RDS13GeyserPhase`), read by the eruptions and the clock.
+    - A bar lowered for one case stays the other cases' bar: the fissure's 1 m flood check is the fissure's alone. A check of what a step said reads the lines from that step on.
