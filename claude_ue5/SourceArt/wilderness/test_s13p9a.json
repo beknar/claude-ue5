@@ -1,0 +1,1030 @@
+{
+ "tag": "s13p9a",
+ "plan": [
+  "scenery13=reed_bed+boardwalk+stilt_village+marsh_lights+heron_rookery+fish_weir+salt_creek",
+  "land13"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "scenery13",
+   "ok": true,
+   "kinds": {
+    "reed_bed": {
+     "found": true,
+     "id": 67320090,
+     "at_km": [
+      44.01,
+      19.68
+     ],
+     "name": "Reed bed",
+     "laid": {
+      "kind": "reed_bed",
+      "title": "Reed bed",
+      "x": 44012.9,
+      "y": 19676.8,
+      "pieces": 3,
+      "boxes": 0,
+      "guards": 2,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 270.4
+     },
+     "bottom_over_ground_cm": [
+      -13,
+      -13,
+      -13
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "ambush_low": {
+      "monsters": 2,
+      "lying_low": 2,
+      "hunting": 0
+     },
+     "told_from_m": 20.0,
+     "ambush_sprung": {
+      "monsters": 2,
+      "hunting": 2,
+      "lying_low": 0,
+      "branches": [
+       "chase",
+       "swing"
+      ],
+      "m_from_her": [
+       15.5,
+       9.2
+      ],
+      "hp_lost": 0.0
+     },
+     "uses": [
+      {
+       "do": "forage",
+       "prompt": "search the reed edge",
+       "f": "scenery",
+       "said": "Nests in the reed edge, and paths through the reeds that something has trodden.  You take 2 Bird's Eggs",
+       "got": {
+        "Bird's Eggs": 2
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Reed bed: reeds taller than a man, hiding paths, nests and whatever waits in them | The grass moves against the wind: something was lying in wait! | Nests in the reed edge, and paths through the reeds that something has trodden.  You take 2 Bird's Eggs",
+     "ok": true
+    },
+    "boardwalk": {
+     "found": true,
+     "id": 67323166,
+     "at_km": [
+      45.66,
+      21.86
+     ],
+     "name": "Boardwalk",
+     "laid": {
+      "kind": "boardwalk",
+      "title": "Boardwalk",
+      "x": 45656.9,
+      "y": 21863.0,
+      "pieces": 13,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 143.3
+     },
+     "bottom_over_ground_cm": [
+      -32,
+      -8,
+      -7
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "skins": [
+      {
+       "what": "land",
+       "up_share": 1.0,
+       "top_z": -841,
+       "ground_z": -892,
+       "under": false,
+       "hit": "ProceduralMeshComponent_0",
+       "hit_z": -867
+      }
+     ],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the planks",
+       "f": "scenery",
+       "said": "Someone keeps this trail. Someone else has sawn through a stretch of it.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "bog",
+       "walk_speed_in_bog": 159,
+       "walk_speed_out": 353,
+       "hp_lost": 8.4,
+       "sprung": 3,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "Boardwalk: a plank trail across the marsh on stakes, one stretch rotten and broken | Someone keeps this trail. Someone else has sawn through a stretch of it. | The ground gives under you: bog. Get out before it takes you | The bog drags at your legs: 4 damage",
+     "ok": true
+    },
+    "stilt_village": {
+     "found": true,
+     "id": 67306800,
+     "at_km": [
+      36.24,
+      32.82
+     ],
+     "name": "Stilt village",
+     "laid": {
+      "kind": "stilt_village",
+      "title": "Stilt village",
+      "x": 36236.7,
+      "y": 32821.8,
+      "pieces": 4,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 45.0
+     },
+     "bottom_over_ground_cm": [
+      -65,
+      -23,
+      -14
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "trade",
+       "prompt": "trade with the fisher",
+       "f": "scenery",
+       "said": "You trade 1 Bread for 2 Fish.",
+       "got": {
+        "Fish": 2
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "folk": {
+      "want": 1,
+      "found": 1,
+      "talk": [
+       {
+        "prompt": "talk to the Fisher",
+        "f": "bark",
+        "said": "The Fisher:  \"The water rises every spring; our houses stay dry.\""
+       }
+      ]
+     },
+     "told": "Stilt village: fishing huts raised on stilts above the water, their people on the platforms | You trade 1 Bread for 2 Fish.",
+     "ok": true
+    },
+    "marsh_lights": {
+     "found": true,
+     "id": 67321113,
+     "at_km": [
+      44.56,
+      18.69
+     ],
+     "name": "Marsh lights",
+     "laid": {
+      "kind": "marsh_lights",
+      "title": "Marsh lights",
+      "x": 44558.4,
+      "y": 18690.8,
+      "pieces": 3,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 4,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 96.3
+     },
+     "bottom_over_ground_cm": null,
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "skins": [
+      {
+       "what": "land",
+       "up_share": 1.0,
+       "top_z": 20844,
+       "ground_z": 20744,
+       "under": false,
+       "hit": "ProceduralMeshComponent_0",
+       "hit_z": 20769
+      }
+     ],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "watch the lights",
+       "f": "scenery",
+       "said": "Pale lights over the black water, always a little further off. The drowned follow them",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Marsh lights: lights drifting over the marsh at night, leading off the path | Pale lights over the black water, always a little further off. The drowned follow them",
+     "ok": true
+    },
+    "heron_rookery": {
+     "found": true,
+     "id": 67325208,
+     "at_km": [
+      46.76,
+      18.48
+     ],
+     "name": "Heron rookery",
+     "laid": {
+      "kind": "heron_rookery",
+      "title": "Heron rookery",
+      "x": 46761.5,
+      "y": 18477.5,
+      "pieces": 4,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 1,
+      "fx_on": 1,
+      "herd": 0,
+      "yaw": -135.0
+     },
+     "bottom_over_ground_cm": [
+      -8,
+      -7,
+      -7
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "watch the herons",
+       "f": "scenery",
+       "said": "Grey herons stand like posts, then lift all at once with a sound like a sail.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Heron rookery: herons and cranes wading the shallows; a flock bursts into the air | Grey herons stand like posts, then lift all at once with a sound like a sail.",
+     "ok": true
+    },
+    "fish_weir": {
+     "found": true,
+     "id": 67307825,
+     "at_km": [
+      36.77,
+      33.29
+     ],
+     "name": "Fish weir",
+     "laid": {
+      "kind": "fish_weir",
+      "title": "Fish weir",
+      "x": 36768.0,
+      "y": 33285.4,
+      "pieces": 12,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 0,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 0.0
+     },
+     "bottom_over_ground_cm": [
+      -26,
+      -8,
+      -7
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "fish",
+       "prompt": "empty the traps",
+       "f": "scenery",
+       "said": "Two eels and a pike in the traps, still alive.  You take 3 Fish",
+       "got": {
+        "Fish": 3
+       },
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [],
+     "told": "Fish weir: a weir of stakes across a channel, eel traps in its gaps, a punt tied up | Two eels and a pike in the traps, still alive.  You take 3 Fish",
+     "ok": true
+    },
+    "salt_creek": {
+     "found": true,
+     "id": 67328280,
+     "at_km": [
+      48.71,
+      18.14
+     ],
+     "name": "Salt-marsh creek",
+     "laid": {
+      "kind": "salt_creek",
+      "title": "Salt-marsh creek",
+      "x": 48713.9,
+      "y": 18136.5,
+      "pieces": 4,
+      "boxes": 0,
+      "guards": 0,
+      "uses": 1,
+      "hazards": 1,
+      "fx": 0,
+      "fx_on": 0,
+      "herd": 0,
+      "yaw": 177.2
+     },
+     "bottom_over_ground_cm": null,
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "skins": [
+      {
+       "what": "land",
+       "up_share": 1.0,
+       "top_z": 4366,
+       "ground_z": 4247,
+       "under": false,
+       "hit": "ProceduralMeshComponent_0",
+       "hit_z": 4272
+      },
+      {
+       "what": "land",
+       "up_share": 1.0,
+       "top_z": 4452,
+       "ground_z": 4247,
+       "under": false,
+       "hit": "ProceduralMeshComponent_0",
+       "hit_z": 4272
+      }
+     ],
+     "tide": {
+      "amp_m": 0.6,
+      "top_low_cm": 4366,
+      "top_high_cm": 4457,
+      "rise_m": 0.91
+     },
+     "chests": 0,
+     "want_chests": 0,
+     "told_from_m": 20.0,
+     "uses": [
+      {
+       "do": "lore",
+       "prompt": "look at the creek",
+       "f": "scenery",
+       "said": "Twice a day the sea comes up this creek and fills the marsh. Twice a day it goes.",
+       "got": {},
+       "blessing": "",
+       "rose_m": 0.0,
+       "revealed_more": 0,
+       "used_after": 1,
+       "ok": true
+      }
+     ],
+     "hazards": [
+      {
+       "kind": "tide",
+       "hp_lost": 14.0,
+       "sprung": 1,
+       "monsters_came": 0,
+       "ok": true
+      }
+     ],
+     "told": "Salt-marsh creek: a creek through the salt marsh that floods and drains with the tide | Twice a day the sea comes up this creek and fills the marsh. Twice a day it goes. | The creek is filling: the tide is coming in under the grass | The tide takes your footing in the soft mud: 14 damage",
+     "ok": true
+    }
+   },
+   "table": 252,
+   "counts_30km": {
+    "tall_grass": 76,
+    "burrow_town": 252,
+    "hanged_tree": 58,
+    "nest_tree": 69,
+    "shrine_tree": 74,
+    "erratic": 233,
+    "migration": 9,
+    "wallow": 62,
+    "hive_meadow": 31,
+    "brook_crossing": 0,
+    "fairy_ring": 53,
+    "shepherd_hut": 115,
+    "reed_pond": 1,
+    "old_orchard": 111,
+    "dusk_meadow": 17,
+    "butte": 209,
+    "battlefield": 227,
+    "milestone_road": 7,
+    "crossroads_gibbet": 5,
+    "crossroads_shrine": 3,
+    "crossroads_notice": 2,
+    "wagon_wreck": 2,
+    "hedged_fields": 113,
+    "scarecrows": 39,
+    "threshing_yard": 20,
+    "mill_pond": 2,
+    "pumpkin_patch": 28,
+    "abandoned_farm": 83,
+    "loose_livestock": 85,
+    "baobab": 2,
+    "acacia_shade": 5,
+    "termite_mounds": 7,
+    "kopje": 10,
+    "waterhole": 2,
+    "vulture_kill": 9,
+    "salt_pan": 5,
+    "yurt_camp": 0,
+    "kurgan": 71,
+    "prayer_cairn": 13,
+    "petroglyph_rocks": 54,
+    "hot_spring": 0,
+    "pingo": 0,
+    "charred_snags": 0,
+    "hot_spots": 0,
+    "ash_drift": 0,
+    "regrowth": 0,
+    "scorched_farmstead": 0,
+    "looters_camp": 0,
+    "fire_break": 0,
+    "fused_glass": 0,
+    "beast_carcasses": 0,
+    "resin_camp": 0,
+    "sunlit_clearing": 0,
+    "granite_outcrop": 0,
+    "lightning_pine": 0,
+    "logging_camp": 0,
+    "owl_hollow": 0,
+    "pine_ridge": 0,
+    "lichen_heath": 0,
+    "esker": 0,
+    "pine_dunes": 0,
+    "kettle_lake": 0,
+    "fire_scar": 0,
+    "herder_camp": 0,
+    "seid_stone": 0,
+    "muskeg_bog": 0,
+    "spruce_thicket": 0,
+    "beaver_pond": 0,
+    "moose_wallow": 0,
+    "trapline_cabin": 0,
+    "drunken_forest": 0,
+    "gold_larches": 0,
+    "leaf_pits": 0,
+    "fungus_glade": 0,
+    "hollow_giant": 0,
+    "mossy_walls": 0,
+    "nut_cache": 0,
+    "charcoal_hearth": 0,
+    "dawn_hollow": 0,
+    "harvest_shrine": 0,
+    "watching_aspens": 0,
+    "clonal_grove": 0,
+    "carved_aspens": 0,
+    "gold_stand": 0,
+    "beaver_stumps": 0,
+    "aspen_meadow": 0,
+    "aspen_edge": 0,
+    "windthrow": 0,
+    "hillfort": 28,
+    "chalk_figure": 59,
+    "terraced_fields": 70,
+    "dew_pond": 36,
+    "folly_tower": 31,
+    "beacon_hill": 36,
+    "quarry": 68,
+    "hillside_vines": 52,
+    "combe": 12,
+    "peat_hags": 0,
+    "tor": 12,
+    "heather_gorse": 62,
+    "stone_row": 0,
+    "peat_cutting": 0,
+    "moor_mist": 0,
+    "bothy": 0,
+    "grouse_butts": 0,
+    "moor_ford": 1,
+    "switchback": 7,
+    "alpine_pasture": 13,
+    "mountain_pass": 9,
+    "scree_slope": 9,
+    "hanging_waterfall": 0,
+    "mine_adit": 5,
+    "cliff_shrine": 5,
+    "rope_bridge": 6,
+    "tarn": 1,
+    "goat_ledges": 9,
+    "arete": 0,
+    "summit_cairn": 0,
+    "cornice_edge": 0,
+    "avalanche_chute": 5,
+    "couloir": 1,
+    "rime_ledge": 0,
+    "climbers_camp": 0,
+    "cloud_sea": 0,
+    "dragon_aerie": 13,
+    "crevasse_field": 0,
+    "serac_field": 0,
+    "ice_cave": 0,
+    "moulin": 0,
+    "moraine": 0,
+    "meltwater_lake": 0,
+    "frozen_thing": 0,
+    "nunatak": 0,
+    "ice_ruins": 0,
+    "banded_wall": 3,
+    "slot_canyon": 1,
+    "canyon_creek": 2,
+    "cliff_dwelling": 7,
+    "petroglyph_panel": 5,
+    "natural_arch": 76,
+    "hanging_garden": 3,
+    "echo_point": 9,
+    "rockfall_scar": 2,
+    "toehold_trail": 6,
+    "box_canyon": 5,
+    "junction_cairn": 19,
+    "hidden_side_canyon": 27,
+    "pour_off": 3,
+    "tinaja": 74,
+    "outlaw_hideout": 7,
+    "gold_wash": 2,
+    "flood_debris": 1,
+    "hoodoo_forest": 104,
+    "dry_wash": 1,
+    "banded_butte": 59,
+    "mesa_pueblo": 7,
+    "spire": 76,
+    "talus_apron": 1,
+    "overlook": 0,
+    "sky_shrine": 6,
+    "caprock_pools": 7,
+    "condor_ledge": 3,
+    "lone_juniper": 5,
+    "storm_below": 0,
+    "lava_flow": 7,
+    "lava_tube": 2,
+    "cinder_cone": 2,
+    "ash_village": 5,
+    "volcanic_bombs": 4,
+    "fumarole_field": 2,
+    "obsidian_field": 3,
+    "crater_rim": 7,
+    "eruption_signs": 3,
+    "fire_temple": 9,
+    "lava_lake": 1,
+    "moss_lava": 0,
+    "black_sand": 0,
+    "basalt_columns": 3,
+    "glacier_flood": 0,
+    "rift_fissure": 0,
+    "pseudocraters": 0,
+    "sod_farm": 0,
+    "hot_river": 0,
+    "troll_rocks": 0,
+    "geyser": 0,
+    "terraced_pools": 0,
+    "mud_pots": 0,
+    "bacterial_mats": 0,
+    "thin_crust": 0,
+    "steam_field": 0,
+    "crater_lake": 0,
+    "resurgent_dome": 0,
+    "spa_village": 0,
+    "petrified_forest": 6,
+    "gas_hollow": 0,
+    "polygon_ground": 0,
+    "thaw_lake": 0,
+    "caribou_migration": 0,
+    "inuksuk": 0,
+    "mammoth_bones": 0,
+    "cotton_grass": 0,
+    "wolf_den": 0,
+    "summer_bloom": 0,
+    "reindeer_camp": 0,
+    "pressure_ridge": 0,
+    "open_lead": 0,
+    "iceberg_cave": 0,
+    "sastrugi": 0,
+    "seal_holes": 0,
+    "bear_tracks": 0,
+    "frozen_shipwreck": 0,
+    "ice_shelf": 0,
+    "expedition_hut": 0,
+    "snow_houses": 0,
+    "aurora_watch": 0,
+    "reed_bed": 0,
+    "boardwalk": 0,
+    "stilt_village": 0,
+    "marsh_lights": 0,
+    "heron_rookery": 0,
+    "fish_weir": 0,
+    "salt_creek": 0,
+    "duck_blind": 0,
+    "sunken_causeway": 0,
+    "drowned_church": 0,
+    "cypress_swamp": 0,
+    "bog_body": 0,
+    "floating_mat": 0,
+    "quicksand": 0,
+    "witch_hummock": 0,
+    "log_bridge": 0,
+    "pitcher_plants": 0,
+    "swamp_gas": 0,
+    "smugglers_camp": 0,
+    "driftwood_beach": 0,
+    "buried_ruins": 0,
+    "tidal_flat": 0,
+    "fishing_village": 0,
+    "lighthouse": 0,
+    "shipwreck_bar": 0,
+    "lagoon": 0,
+    "seabird_colony": 0,
+    "wreckers_cove": 0,
+    "sea_stacks": 0,
+    "sea_arch": 0,
+    "sea_cave": 0,
+    "tide_pools": 0,
+    "blowhole": 0,
+    "seal_rocks": 0,
+    "clifftop_ruin": 0,
+    "rock_stairs": 0,
+    "storm_surge": 0,
+    "cells": 10201
+   }
+  },
+  {
+   "step": "land13",
+   "ok": true,
+   "channels": {
+    "arroyo": {
+     "near": 5,
+     "at_km": [
+      2.15,
+      7.04
+     ],
+     "width_m": 10.9,
+     "depth_m": 3.5,
+     "bed_under_banks_m": 3.83,
+     "her_feet_under_banks_m": 3.42,
+     "ok": true
+    },
+    "dry riverbed": {
+     "near": 5,
+     "at_km": [
+      -12.06,
+      -30.89
+     ],
+     "width_m": 15.8,
+     "depth_m": 1.9,
+     "bed_under_banks_m": 1.64,
+     "her_feet_under_banks_m": 1.5,
+     "ok": true
+    },
+    "irrigation ditch": {
+     "near": 5,
+     "at_km": [
+      3.06,
+      1.49
+     ],
+     "width_m": 1.8,
+     "depth_m": 0.9,
+     "bed_under_banks_m": 0.91,
+     "her_feet_under_banks_m": 0.89,
+     "ok": true
+    },
+    "fire break": {
+     "near": 5,
+     "at_km": [
+      71.02,
+      -4.79
+     ],
+     "width_m": 8.1,
+     "depth_m": 0.7,
+     "bed_under_banks_m": 0.71,
+     "her_feet_under_banks_m": 0.71,
+     "ok": true
+    },
+    "holloway": {
+     "near": 5,
+     "at_km": [
+      22.16,
+      -73.9
+     ],
+     "width_m": 4.3,
+     "depth_m": 3.4,
+     "bed_under_banks_m": 3.56,
+     "her_feet_under_banks_m": 3.42,
+     "ok": true
+    },
+    "sheep track": {
+     "near": 5,
+     "at_km": [
+      -14.41,
+      8.72
+     ],
+     "width_m": 1.5,
+     "depth_m": 0.3,
+     "bed_under_banks_m": 0.35,
+     "her_feet_under_banks_m": 0.31,
+     "ok": true
+    },
+    "hill holloway": {
+     "near": 5,
+     "at_km": [
+      -19.98,
+      13.68
+     ],
+     "width_m": 4.0,
+     "depth_m": 2.6,
+     "bed_under_banks_m": 2.64,
+     "her_feet_under_banks_m": 2.61,
+     "ok": true
+    },
+    "slot canyon": {
+     "near": 5,
+     "at_km": [
+      -11.6,
+      -14.92
+     ],
+     "width_m": 5.0,
+     "depth_m": 8.8,
+     "bed_under_banks_m": 8.8,
+     "her_feet_under_banks_m": 8.79,
+     "ok": true
+    },
+    "fissure": {
+     "near": 5,
+     "at_km": [
+      120.03,
+      2.71
+     ],
+     "width_m": 3.6,
+     "depth_m": 6.3,
+     "bed_under_banks_m": 6.36,
+     "her_feet_under_banks_m": 6.3,
+     "ok": true
+    }
+   },
+   "swales": {
+    "grasslands": {
+     "found": true,
+     "at_km": [
+      6.0,
+      0.0
+     ],
+     "amp": 3.5,
+     "range_m": 23.5,
+     "crests_1600m": 8,
+     "crests_hiding_300m": 7
+    },
+    "savannahs": {
+     "found": true,
+     "at_km": [
+      -15.87,
+      -25.46
+     ],
+     "amp": 3.0,
+     "range_m": 87.0,
+     "crests_1600m": 7,
+     "crests_hiding_300m": 5
+    },
+    "plains": {
+     "found": true,
+     "at_km": [
+      -6.43,
+      -7.66
+     ],
+     "amp": 5.0,
+     "range_m": 105.1,
+     "crests_1600m": 3,
+     "crests_hiding_300m": 2
+    }
+   },
+   "crossroads_50km": 52,
+   "storm": {
+    "on": 1,
+    "km": 6.0
+   },
+   "grassfire": {
+    "name": "grassfire",
+    "on": 1,
+    "km": 8.0
+   },
+   "dust": {
+    "fair_fog": [
+     0.42,
+     0.45,
+     0.5
+    ],
+    "dust_fog": [
+     0.651,
+     0.495,
+     0.31
+    ],
+    "weather": "dust"
+   },
+   "whiteout": {
+    "fair_fog": [
+     0.42,
+     0.45,
+     0.5
+    ],
+    "white_fog": [
+     0.567,
+     0.621,
+     0.725
+    ],
+    "weather": "whiteout"
+   },
+   "field_stages": {
+    "ripe": 2882,
+    "sprouting": 1122,
+    "fallow": 708,
+    "burned": 287,
+    "fields": 4999
+   },
+   "quiet": {
+    "pine forests": {
+     "scale": 0.65,
+     "notice_m": 25.0,
+     "start_m": 21.1,
+     "after_3s_m": 21.1,
+     "came": false
+    },
+    "grasslands": {
+     "scale": 1.0,
+     "notice_m": 25.0,
+     "start_m": 19.7,
+     "after_3s_m": 15.4,
+     "came": true
+    }
+   },
+   "thin_air": {
+    "mountains and peaks": {
+     "thin": true,
+     "walk_speed": 300
+    },
+    "mountains": {
+     "thin": false,
+     "walk_speed": 353
+    }
+   },
+   "aurora": {
+    "arctic regions@23": {
+     "on": true,
+     "north_m": 4000,
+     "east_m": 0,
+     "up_m": 886
+    },
+    "arctic regions@12": {
+     "on": false
+    },
+    "grasslands@23": {
+     "on": false
+    }
+   },
+   "moor_fog": {
+    "highland moorland": {
+     "fog_share": 0.1253,
+     "counts": {
+      "clear": 560,
+      "fair": 822,
+      "cloudy": 835,
+      "overcast": 570,
+      "rain": 469,
+      "storm": 243,
+      "snow": 0,
+      "fog": 501,
+      "whiteout": 0,
+      "dust": 0,
+      "cloudless": 0
+     }
+    },
+    "grasslands": {
+     "fog_share": 0.049,
+     "counts": {
+      "clear": 569,
+      "fair": 915,
+      "cloudy": 921,
+      "overcast": 609,
+      "rain": 540,
+      "storm": 250,
+      "snow": 0,
+      "fog": 196,
+      "whiteout": 0,
+      "dust": 0,
+      "cloudless": 0
+     }
+    }
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s13p9a_scenery13_reed_bed.png",
+  "wd_s13p9a_scenery13_reed_bed_near.png",
+  "wd_s13p9a_scenery13_boardwalk.png",
+  "wd_s13p9a_scenery13_boardwalk_near.png",
+  "wd_s13p9a_scenery13_stilt_village.png",
+  "wd_s13p9a_scenery13_stilt_village_near.png",
+  "wd_s13p9a_scenery13_marsh_lights.png",
+  "wd_s13p9a_scenery13_marsh_lights_near.png",
+  "wd_s13p9a_scenery13_heron_rookery.png",
+  "wd_s13p9a_scenery13_heron_rookery_near.png",
+  "wd_s13p9a_scenery13_fish_weir.png",
+  "wd_s13p9a_scenery13_fish_weir_near.png",
+  "wd_s13p9a_scenery13_salt_creek.png",
+  "wd_s13p9a_scenery13_salt_creek_near.png",
+  "wd_s13p9a_land13_arroyo.png",
+  "wd_s13p9a_land13_dry riverbed.png",
+  "wd_s13p9a_land13_irrigation ditch.png",
+  "wd_s13p9a_land13_fire break.png",
+  "wd_s13p9a_land13_holloway.png",
+  "wd_s13p9a_land13_sheep track.png",
+  "wd_s13p9a_land13_hill holloway.png",
+  "wd_s13p9a_land13_slot canyon.png",
+  "wd_s13p9a_land13_fissure.png",
+  "wd_s13p9a_land13_storm.png",
+  "wd_s13p9a_land13_grassfire.png",
+  "wd_s13p9a_land13_dust.png",
+  "wd_s13p9a_land13_whiteout.png",
+  "wd_s13p9a_land13_aurora.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

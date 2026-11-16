@@ -367,3 +367,14 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
     - Read what changes over hundreds of metres in the look, not every frame (the aurora's foot), and over water the water's face, not the sea floor.
     - One helper for a hazard's line (`RDS13Msg`, "warn|strike" for two), so every hazard takes `msg=` and a borrowed hazard does not say the wrong thing (the ice shelf's blow said "Falling stones").
     - `a ** 2` squares what is in the brackets: `(0.35 * x) ** 2` was meant as `0.35 * x ** 2`.
+- **Phase 9 (marshes, wetlands, coastal regions, rocky coasts)**:
+  - **Measure the part that moves, not the kind's highest**: the tidal flat's mud skin under its tidal water set the "top" at low tide and the rise read 0.59 m for a 1.4 m tide. The landforms' lines come in their parts' order; the test reads the tidal part's own.
+  - **Water she wades in is no floor**: a tidal skin has no collision, or at high water she would stand on top of the sea.
+  - **A region's shape decides its places**: the rocky coasts never gave level ground at a 10 m drop (`rim`, `foot`), so a clifftop kind takes the coast's high ground (`rise`) and the stairs bring their own rock face.
+  - **A section inserted after a picture goes after its section's last picture**: phase 9's table first landed between phase 8's aurora picture and its sheet. Insert after a section's closing picture, and check what follows it.
+  - **PR #73's review (2026-11-16)**:
+    - Swapping two axes mirrors a mesh and turns its faces inward; a turn is a swap with a sign (the eel trap). Measure a hand-built piece's winding: `scratch i13/wind_check.py` gives the share of faces whose normal points toward the mesh's middle (the eel trap 0.91 before, 0.13 after). A lathed ring faces up when its radius falls, down when it rises; an open overhang needs its underside, an open mouth its inside.
+    - A move by a wave is a move of her: onto ground she can stand on, never off a drop, or she clings where she is.
+    - Every hazard counts once each entry, out 2 s before it counts again (the tide each time she comes onto the flat, the surge however many waves), in a field of its own (`LastIn`), not a field another rule fills.
+    - A gate's word it does not know says so (the tide as the hours). A skin that moves with the tide moves only when it has risen or fallen a centimetre.
+    - A test that holds a world's clock puts it back in the step's `finally`, and a check that traces for a buried skin leaves out the skins with no collision (the tidal ones are measured by their rise).

@@ -705,6 +705,54 @@ The user's list of 2026-11-14 ([docs/improvements13.txt](../improvements13.txt))
 
 ![Tundras and arctic regions' 21 kinds, from 15 m](../images/scenery13_polar.jpg)
 
+### Marshes, wetlands, coastal regions and rocky coasts
+
+| Kind | Biomes | What stands there | What she does there |
+|---|---|---|---|
+| Reed bed | marshes, wetlands | reeds over her head, a nest | search the reed edge for eggs; an ambush lies low in the reeds |
+| Boardwalk | marshes, wetlands | planks on stakes, a broken stretch over mud | the planks give into the mud |
+| Stilt village | marshes, wetlands (by water) | two huts on stilts, a fish rack, a boat, the fisher | trade bread for eels; talk |
+| Marsh lights | marshes, wetlands | lights drifting over dark water by night, reeds | |
+| Heron rookery | marshes, coasts (by water) | herons wading, a flock over them | |
+| Fish weir | marshes, wetlands (by water) | stakes across the water, eel traps, a punt | empty the traps |
+| Salt-marsh creek | marshes, coasts | a creek that fills and drains with the tide (a tidal skin), mud, reeds | at high tide the sea comes in over her and takes her footing |
+| Duck blind | marshes, wetlands (by water) | a hide of reeds | |
+| Sunken causeway | marshes, wetlands | stones in a line just under dark water | |
+| Drowned church | marshes, wetlands | a bell tower standing out of dark water | |
+| Cypress swamp | wetlands | willows standing in dark water, roots | |
+| Bog find | wetlands, marshes | a peat cutting, a bog idol, a body's ribs | |
+| Floating mat | wetlands, marshes | a green mat of reeds over the water | it sinks under her |
+| Quicksand | wetlands, coasts | a smooth grey patch | it pulls her in |
+| Witch's hummock | wetlands | a hut on a hummock, a cauldron, the witch | leave bread: The Witch's Charm; talk |
+| Log bridge | wetlands, marshes | a fallen tree over dark water | |
+| Pitcher plants | wetlands | giant carnivorous pitchers | their reek and rim burn |
+| Swamp gas | wetlands, marshes | dark water, bubbling steam | the gas hurts |
+| Smugglers' camp | wetlands, marshes | a fire, crates, a boat | its three smugglers; a chest |
+| Driftwood beach | coasts | sand, driftwood | search the tide line |
+| Buried ruins | coasts | a dune over broken walls | a chest |
+| Tidal flat | coasts, marshes | mud and a tidal skin of water | at high tide the sea comes over the flat |
+| Fishing village | coasts, rocky coasts | a house, boats, nets, a fish rack, the fisherman | trade bread for fish; talk |
+| Lighthouse | coasts, rocky coasts (a rise) | a lighthouse 14.6 m high, its lantern lit by night | climb to the gallery: the map shows 4 km round |
+| Shipwreck | coasts | a ship heeled on a sandbar, its crates | a chest |
+| Lagoon | coasts (by water) | reeds, a heron | fish |
+| Seabird colony | coasts, rocky coasts | nests, guano (a skin), birds | take eggs |
+| Wreckers' cove | coasts, rocky coasts | a fire on a brazier, crates | its three wreckers; a chest |
+| Sea stacks | rocky coasts | pillars of rock 13 to 14 m | |
+| Sea arch | rocky coasts | an arch of rock | |
+| Sea cave | rocky coasts | a cave's mouth, a chest | search it at low tide; at high tide the sea fills its mouth |
+| Tide pools | rocky coasts, coasts | rock pools (skins) among rocks | search the pools |
+| Blowhole | rocky coasts | rocks, a wisp of spray | watch it: it says when it goes again; every 20 s it throws spray over her |
+| Seal rocks | rocky coasts, coasts | flat rocks | |
+| Clifftop ruin | rocky coasts (a rise) | an abbey's broken walls and columns | a chest |
+| Rock-cut stairs | rocky coasts | a rock face, steps | climb: the map shows 2 km round |
+| Storm surge | rocky coasts (by the sea) | rocks | a wave breaks over her and pulls her toward the sea |
+
+- **What is new**: the tide (`GetWildTide`: a ten-minute sine on the world's clock, the same everywhere, `ForceWildTide` for tests), the skins laid with `tide=<m>` rising and falling with it (no collision: she wades); hazards `tide` (over 0.7 the sea comes in over her, slowing her; over 0.85 after 8 s it takes her footing) and `surge` (every 25 s a wave, a hurt and a pull toward the water); `tide=low|high` on a use (out of it it says when); the geyser's lines from `msg=` (a blowhole); the bog, thin ice, gas and sting given lines of their own (quicksand, a floating mat, swamp gas, a pitcher plant).
+- **Its own pieces** (`scenery13_kit.py`): a fisher's hut on stilts, a lighthouse, giant pitcher plants, an eel trap, a duck blind, two sea stacks, a bog idol.
+- **Measured** (`test_s13p9a.json` to `test_s13p9f.json`): every kind found within 220 km of Brokenspire and visited (the storm surge 198 km out). The salt-marsh creek's skin rose 1.2 m from low to high water and the tidal flat's 1.4 m; at high water each took her footing (14). The sea cave gave nothing at high tide and said so, and copper and fish at low. The blowhole's spray threw her (67.2 over its bursts), the storm surge's wave pulled her (11.2); the quicksand and the boardwalk's mud dragged (8.4), the floating mat sank under her (16.8), the swamp gas hurt (16.8), the pitcher plant stung (8.4). The reed bed's two lay low at 30 m and hunted from 9 m. She climbed the lighthouse to its gallery (11.2 m) and the rock-cut stairs (8.2 m), and saw 19,865 and 4,908 more of the map; the witch gave her charm for bread; the colony gave three eggs.
+
+![Marshes, wetlands, coastal regions and rocky coasts' 37 kinds, from 15 m](../images/scenery13_water.jpg)
+
 ## The TODO sweep (2026-11-14)
 
 The open items of `TODO.md` that a test could settle in the wilds (`888 ... -Light`):

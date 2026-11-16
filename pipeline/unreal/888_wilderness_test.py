@@ -1315,8 +1315,12 @@ def step_scenery13():
             # A bank ("berm") is a ring with nothing at its middle, and an outline's middle may lie outside its figure: not traced)
             skins = []
             bOutline = any("poly=" in str(x) for x in k.get_editor_property("parts"))
+            lparts_ = [x for x in (str(y) for y in k.get_editor_property("parts")) if x.split(";")[0] in ("L=mound", "L=cone", "L=ridge", "L=patch", "L=mesa")]
+            li_ = -1
             for q in pcs:
+                if q[0] == "land": li_ += 1
                 if q[0] not in ("land", "berm") or len(q) < 9: continue
+                if q[0] == "land" and 0 <= li_ < len(lparts_) and ";tide=" in lparts_[li_]: continue
                 s_ = {"what": q[0], "up_share": float(q[8]), "top_z": round(float(q[4])), "ground_z": round(float(q[5])), "under": False}
                 if q[0] == "land" and not bOutline:
                     bx, by, zmin, zmax = float(q[1]), float(q[2]), float(q[3]), float(q[4])
@@ -1328,6 +1332,20 @@ def step_scenery13():
                     s_.update({"hit": nm, "hit_z": round(ht[4].z) if comp else None, "under": nm in ("Ground", "GroundCollision")})
                 skins.append(s_)
             if skins: r["skins"] = skins
+            tparts = [x for x in (str(y) for y in k.get_editor_property("parts")) if ";tide=" in x]
+            if tparts:
+                amp = float(dict(x.split("=", 1) for x in tparts[0].split(";") if "=" in x)["tide"])
+                # (the tidal skin's own line: the landforms' lines come in their parts' order (the ninth phase's first test took the highest
+                # of all, and the tidal flat's mud skin under the water set it at low tide))
+                lparts = [x for x in (str(y) for y in k.get_editor_property("parts")) if x.split(";")[0] in ("L=mound", "L=cone", "L=ridge", "L=patch", "L=mesa")]
+                ti = lparts.index(tparts[0])
+                tops = []
+                for lv in (0.0, 1.0):
+                    g.force_wild_tide(lv); yield from rwait(1.0)
+                    lands = [q for q in (str(l).split("|") for l in g.get_wild_scenery_piece_lines(sid)) if q[0] == "land"]
+                    tops.append(float(lands[ti][4]))
+                g.force_wild_tide(-1.0)
+                r["tide"] = {"amp_m": amp, "top_low_cm": round(tops[0]), "top_high_cm": round(tops[1]), "rise_m": round((tops[1] - tops[0]) / 100.0, 2)}
             boxes, _f, _b = box_lines()
             r["chests"] = sum(1 for b in boxes if (7 << 40) <= b["key"] < (8 << 40) and math.hypot(b["x"] / 100.0 - cx, b["y"] / 100.0 - cy) < 40.0)
             r["want_chests"] = sum(1 for x in k.get_editor_property("parts") if "box=" in str(x))
@@ -1418,6 +1436,15 @@ def step_scenery13():
                 v = {"do": u["do"]}
                 # (the sixth phase: a use of its hours is tried out of them first (it must give nothing and say when), then in them)
                 HOUR_IN = {"night": 22.5, "dawn": 6.0, "dusk": 19.0, "day": 12.0, "sunrise": 6.5}
+                if spec.get("tide"):
+                    g.force_wild_tide(1.0 if spec["tide"] == "low" else 0.0)
+                    ground_put(u["x"] / 100.0, u["y"] / 100.0); yield from watching(rwait(0.8), msgs)
+                    n0 = len(msgs); got0 = {t_: cb().get_item_count(t_) for t_ in [t.split("|")[0] for t in spec.get("things", "").split(",") if t]}
+                    g.interact_nearest(G["pawn"].get_actor_location()); yield from watching(rwait(1.0), msgs)
+                    when_w = (spec.get("early") or "Not now")[:30]
+                    v["wrong_tide"] = {"got": sum(cb().get_item_count(t_) - c_ for t_, c_ in got0.items()),
+                                       "told_when": any(when_w in m_ for m_ in msgs[n0:]) or when_w in str(cb().message)}
+                    g.force_wild_tide(0.0 if spec["tide"] == "low" else 1.0)
                 if spec.get("hours"):
                     g.set_town_hour(14.0 if spec["hours"] in ("night", "sunrise", "dawn", "dusk") else 23.0)
                     if spec.get("do") in ("offer", "trade") and spec.get("give"): cb().add_item(spec["give"].split("|")[0], 1)
@@ -1457,6 +1484,7 @@ def step_scenery13():
                     v["echoes"] = g.get_editor_property("wild_echoes_heard") - e0
                     v["echo_told"] = any(spec.get("echo", "?")[:30] in m_ for m_ in msgs)
                 if spec.get("hours"): g.set_town_hour(12.0)
+                if spec.get("tide"): g.force_wild_tide(-1.0)
                 d = spec.get("do")
                 v["ok"] = (v["f"] == "scenery" and spec.get("what", "").split(" ")[0].lower() in v["prompt"].lower()
                            and (d not in ("loot", "forage", "fish", "honey") or sum(v["got"].values()) > 0)
@@ -1466,7 +1494,8 @@ def step_scenery13():
                            and (d not in ("milestone", "rumour", "tracks") or len(v["said"]) > 20)
                            and (d != "echo" or (v.get("echoes", 0) >= 1 and v.get("echo_told")))
                            and (d != "geyser" or any("again in about" in m_ or "going now" in m_ for m_ in said_all))
-                           and (not spec.get("hours") or (not v["out_of_hours"]["blessed"] and v["out_of_hours"]["told_when"])))
+                           and (not spec.get("hours") or (not v["out_of_hours"]["blessed"] and v["out_of_hours"]["told_when"]))
+                           and (not spec.get("tide") or (v["wrong_tide"]["got"] == 0 and v["wrong_tide"]["told_when"])))
                 r["uses"].append(v)
                 ground_put(*near); yield from rwait(0.6)
             # (its hazards: she stands in each)
@@ -1495,13 +1524,15 @@ def step_scenery13():
                     v["counted_hers"] = g.get_editor_property("animals_killed") - ak0
                 else:
                     nh = len(msgs)                  # (the lines from here on are this hazard's (PR #71's review: the tremor read the whole visit's))
+                    if hz["kind"] == "tide": g.force_wild_tide(1.0)
                     ground_put(hz["x"] / 100.0, hz["y"] / 100.0)
                     # (a bog drags at her only after 4 s in it: she stands 7 s, and her speed is read while she is in it; scree: how far
                     # it carries her in 3 s standing still)
                     put0 = G["pawn"].get_actor_location()
                     # (a flood: the thunder, then the water 6 s on: she waits 8 s on the channel's floor)
                     # (the seventh phase: a geyser's cycle (30 s in the data) waited through; the gas after its breath and a half)
-                    yield from watching(rwait(7.0 if hz["kind"] == "bog" else 8.0 if hz["kind"] == "flood" else 36.0 if hz["kind"] == "geyser" else 4.0 if hz["kind"] in ("sting", "heat", "gas") else 3.0 if hz["kind"] == "scree" else 2.2), msgs)
+                    yield from watching(rwait(7.0 if hz["kind"] == "bog" else 8.0 if hz["kind"] == "flood" else 11.0 if hz["kind"] == "tide" else 36.0 if hz["kind"] == "geyser" else 4.0 if hz["kind"] in ("sting", "heat", "gas") else 3.0 if hz["kind"] == "scree" else 2.2), msgs)
+                    if hz["kind"] == "tide": g.force_wild_tide(-1.0)
                     if hz["kind"] == "flood": v["carried_m"] = round(math.hypot(G["pawn"].get_actor_location().x - put0.x, G["pawn"].get_actor_location().y - put0.y) / 100.0, 2)
                     if hz["kind"] == "drift":
                         try: v["walk_speed_in"] = round(G["pawn"].get_component_by_class(unreal.CharacterMovementComponent).get_editor_property("max_walk_speed"))
@@ -1524,7 +1555,7 @@ def step_scenery13():
                 if hz["kind"] == "drift" and v.get("walk_speed_in", 1e9) >= v.get("walk_speed_out", 0) * 0.8: v["slow_failed"] = True
                 if hz["kind"] == "flood" and v.get("carried_m", 0) < (1.0 if kd == "glacier_flood" else 2.0): v["slow_failed"] = True     # (a fissure 3 to 5 m wide: 1.4 m)
                 if hz["kind"] == "scree" and (v.get("carried_m", 0) < 1.0 or v.get("walk_speed_in", 1e9) >= v.get("walk_speed_out", 0) * 0.8): v["slow_failed"] = True
-                v["ok"] = v["sprung"] > 0 and not v.get("slow_failed") and (True if hz["kind"] in ("scree", "drift") else v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting", "heat", "fall", "bog", "pit", "rockfall", "avalanche", "cornice", "crevasse", "flood", "geyser", "gas", "crust", "thin_ice") else any("shudders" in m_ for m_ in msgs[nh:]) if hz["kind"] == "tremor" else v.get("counted_hers", 0) == 0 if hz["kind"] == "hunt" else v["monsters_came"] > 0)
+                v["ok"] = v["sprung"] > 0 and not v.get("slow_failed") and (True if hz["kind"] in ("scree", "drift") else v["hp_lost"] > 0 if hz["kind"] in ("collapse", "sting", "heat", "fall", "bog", "pit", "rockfall", "avalanche", "cornice", "crevasse", "flood", "geyser", "gas", "crust", "thin_ice", "tide", "surge") else any("shudders" in m_ for m_ in msgs[nh:]) if hz["kind"] == "tremor" else v.get("counted_hers", 0) == 0 if hz["kind"] == "hunt" else v["monsters_came"] > 0)
                 r["hazards"].append(v)
                 cb().set_health(cb().get_max_health())
                 ground_put(*near); yield from rwait(1.0)
@@ -1578,7 +1609,7 @@ def step_scenery13():
             r["told"] = " | ".join(msgs)
             res["kinds"][kd] = r
     finally:
-        quiet(False); g.set_town_hour(hour0); G.pop("put_from_m", None)
+        quiet(False); g.set_town_hour(hour0); G.pop("put_from_m", None); g.force_wild_tide(-1.0)
     g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
     def kind_ok(kd, v):
         if not v.get("found") or not v.get("laid"): return False
@@ -1597,6 +1628,7 @@ def step_scenery13():
             if "outside_pen" in h: okk = okk and h["outside_pen"] == 0
             if h.get("stampede"): okk = okk and h["started"] and h["ran_m"] >= 20.0
         # (none inside, and the forest's trees there round it: a count that finds no trees anywhere proves nothing (PR #67's review))
+        if v.get("tide"): okk = okk and v["tide"]["rise_m"] >= v["tide"]["amp_m"] * 1.5
         if v.get("clearing"): okk = okk and v["clearing"]["trees_in"] == 0 and v["clearing"]["trees_within_60m"] > 0
         if v.get("mist"): okk = okk and v["mist"]["in"]["local"] > 0.8 and v["mist"]["in"]["density"] > v["mist"]["out"]["density"] * 2 and v["mist"]["in"]["start_m"] < v["mist"]["out"]["start_m"]
         return okk
