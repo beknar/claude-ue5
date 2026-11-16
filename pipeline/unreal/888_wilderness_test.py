@@ -1315,8 +1315,12 @@ def step_scenery13():
             # A bank ("berm") is a ring with nothing at its middle, and an outline's middle may lie outside its figure: not traced)
             skins = []
             bOutline = any("poly=" in str(x) for x in k.get_editor_property("parts"))
+            lparts_ = [x for x in (str(y) for y in k.get_editor_property("parts")) if x.split(";")[0] in ("L=mound", "L=cone", "L=ridge", "L=patch", "L=mesa")]
+            li_ = -1
             for q in pcs:
+                if q[0] == "land": li_ += 1
                 if q[0] not in ("land", "berm") or len(q) < 9: continue
+                if q[0] == "land" and 0 <= li_ < len(lparts_) and ";tide=" in lparts_[li_]: continue
                 s_ = {"what": q[0], "up_share": float(q[8]), "top_z": round(float(q[4])), "ground_z": round(float(q[5])), "under": False}
                 if q[0] == "land" and not bOutline:
                     bx, by, zmin, zmax = float(q[1]), float(q[2]), float(q[3]), float(q[4])
@@ -1605,7 +1609,7 @@ def step_scenery13():
             r["told"] = " | ".join(msgs)
             res["kinds"][kd] = r
     finally:
-        quiet(False); g.set_town_hour(hour0); G.pop("put_from_m", None)
+        quiet(False); g.set_town_hour(hour0); G.pop("put_from_m", None); g.force_wild_tide(-1.0)
     g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
     def kind_ok(kd, v):
         if not v.get("found") or not v.get("laid"): return False

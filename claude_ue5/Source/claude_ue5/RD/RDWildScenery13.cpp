@@ -120,9 +120,9 @@ void ARDDungeonGenerator::LayWildScenery(ARDWildChunk* C, const FRDWildPlace& P)
 		H.Who = M.FindRef(TEXT("who")); H.Hide = M.FindRef(TEXT("hide")); H.Named = M.FindRef(TEXT("named")); H.Msg = M.FindRef(TEXT("msg")); H.Count = FMath::Max(1, (int32)RDS13Num(M, TEXT("n"), 1.f));
 		// (the sixth phase: a flood runs down its channel, the way the place faces (a channel's place faces along it))
 		if (H.Kind == TEXT("geyser")) H.Every = RDS13Num(M, TEXT("every"), 45.f);
-		// (the ninth phase: a surge pulls toward the water, the way a place by water faces)
-		if (H.Kind == TEXT("surge")) H.FallDir = FVector2D(FMath::Cos(FMath::DegreesToRadians(P.Yaw)), FMath::Sin(FMath::DegreesToRadians(P.Yaw)));
-		if (H.Kind == TEXT("flood")) H.FallDir = FVector2D(FMath::Cos(FMath::DegreesToRadians(P.Yaw)), FMath::Sin(FMath::DegreesToRadians(P.Yaw)));
+		// (the flood runs down its channel, the way the place faces; the ninth phase's surge pulls toward the water, the way a place by
+		// water faces: one rule)
+		if (H.Kind == TEXT("surge") || H.Kind == TEXT("flood")) H.FallDir = FVector2D(FMath::Cos(FMath::DegreesToRadians(P.Yaw)), FMath::Sin(FMath::DegreesToRadians(P.Yaw)));
 		if (!H.Hide.IsEmpty())
 		{
 			// (the piece it moves: of the laid ones whose mesh's name has Hide in it, the nearest to its point by the piece's middle (a
@@ -231,7 +231,10 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 		{
 			UPrimitiveComponent* Tc = WildTideSkins[Ti].Comp.Get();
 			if (!Tc) { WildTideSkins.RemoveAtSwap(Ti); continue; }
-			Tc->SetRelativeLocation(WildTideSkins[Ti].Base + FVector(0.f, 0.f, (Tl - 0.5f) * 2.f * WildTideSkins[Ti].Amp * 100.f));
+			const float Zo = (Tl - 0.5f) * 2.f * WildTideSkins[Ti].Amp * 100.f;
+			if (FMath::Abs(Zo - WildTideSkins[Ti].LastZ) < 1.f) continue;
+			WildTideSkins[Ti].LastZ = Zo;
+			Tc->SetRelativeLocation(WildTideSkins[Ti].Base + FVector(0.f, 0.f, Zo));
 		}
 	}
 	// ---- the third phase: a quiet floor under her (the pine forests' needles): the monsters notice her from less far
@@ -402,8 +405,9 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 			else if (Hz.Kind == TEXT("tide"))
 			{
 				const float Tl = GetWildTide();
-				if (Tl < 0.6f) Hz.Start = -1.f;
-				if (!bIn || Tl < 0.7f) { Hz.In = 0.f; continue; }
+				// (an entry is one when she has been off it, or the water below 0.7, for 2 s)
+				if (!bIn || Tl < 0.7f) { Hz.In = 0.f; if (Hz.Start >= 0.f && Now - Hz.LastIn > 2.f) Hz.Start = -1.f; continue; }
+				Hz.LastIn = Now;
 				if (PlayerCombat->GetSlowness() <= 0.4f + 1e-3f) PlayerCombat->SlowBy(0.4f, 0.6f);
 				if (Hz.Start < 0.f) { Hz.Start = Now; ++Hz.Sprung; ++WildHazardsSprung; PlayerCombat->ShowMessage(RDS13Msg(Hz.Msg, TEXT("The tide is coming in fast over the flats"))); }
 				Hz.In += Dt;
@@ -415,14 +419,23 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 			// her, a hurt and a pull toward the water (the way the place faces))
 			else if (Hz.Kind == TEXT("surge"))
 			{
-				if (!bIn || Now < Hz.ReadyAt) continue;
-				Hz.ReadyAt = Now + 25.f; ++Hz.Sprung; ++WildHazardsSprung;
+				if (!bIn) { if (Hz.Start >= 0.f && Now - Hz.LastIn > 2.f) Hz.Start = -1.f; continue; }
+				Hz.LastIn = Now;
+				if (Hz.Start < 0.f) { Hz.Start = Now; ++Hz.Sprung; ++WildHazardsSprung; }
+				if (Now < Hz.ReadyAt) continue;
+				Hz.ReadyAt = Now + 25.f;
 				if (const TObjectPtr<UNiagaraSystem>* Sp = WildSceneryFx.Find(TEXT("f13_splash")); Sp && *Sp)
 					if (UNiagaraComponent* Nc = UNiagaraFunctionLibrary::SpawnSystemAtLocation(W, *Sp, FVector(Her.X, Her.Y, Feet + 60.f), FRotator::ZeroRotator, FVector(4.f), true, true, ENCPoolMethod::None, false))
 						WildSceneryBursts.Add({ Nc, Now + 3.f, Now + 6.f });
 				PlayerCombat->HurtByTrap(0.08f * Hz.P, 0.4f, 1.5f, RDS13Msg(Hz.Msg, TEXT("A wave breaks over the rocks and drags at you")));
 				const FVector2D Sea = Hz.FallDir.GetSafeNormal();
-				if (ACharacter* Pc = UGameplayStatics::GetPlayerCharacter(this, 0)) Pc->LaunchCharacter(FVector(Sea.X * 550.f, Sea.Y * 550.f, 150.f), true, true);
+				FVector2D To = FVector2D(Her) / 100.0 + Sea * 3.0;
+				const float Gto = WildGroundZ(FVector(To.X * 100.0, To.Y * 100.0, 0.f));
+				if (WildStandableNear(To, 0.0) && Feet - Gto < 150.f)
+				{
+					if (ACharacter* Pc = UGameplayStatics::GetPlayerCharacter(this, 0)) Pc->LaunchCharacter(FVector(Sea.X * 550.f, Sea.Y * 550.f, 150.f), true, true);
+				}
+				else PlayerCombat->ShowMessage(TEXT("You cling to the rocks as the water pulls back"));
 			}
 			else if (Hz.Kind == TEXT("pit"))
 			{
@@ -920,6 +933,11 @@ FString ARDDungeonGenerator::WildSceneryInteract(const FVector& From)
 	if (const FString Td = M.FindRef(TEXT("tide")); !Td.IsEmpty())
 	{
 		const float Tl = GetWildTide();
+		if (Td != TEXT("low") && Td != TEXT("high"))
+		{
+			static TSet<FString> WarnedTide;
+			if (!WarnedTide.Contains(Td)) { WarnedTide.Add(Td); UE_LOG(LogRDScen13, Warning, TEXT("RDSCEN tide '%s' is neither low nor high: usable at every tide"), *Td); }
+		}
 		if ((Td == TEXT("low") && Tl > 0.35f) || (Td == TEXT("high") && Tl < 0.65f))
 		{
 			PlayerCombat->ShowMessage(M.Contains(TEXT("early")) ? M[TEXT("early")] : FString::Printf(TEXT("Not now: come back at %s tide."), *Td));

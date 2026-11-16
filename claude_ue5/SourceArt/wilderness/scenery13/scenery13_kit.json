@@ -1293,7 +1293,7 @@
    4.8,
    14.6
   ],
-  "triangles": 210,
+  "triangles": 266,
   "slots": [
    "LighthouseStone",
    "LighthouseDark",
@@ -1310,7 +1310,7 @@
    2.61,
    2.77
   ],
-  "triangles": 1044,
+  "triangles": 1332,
   "slots": [
    "PitcherPlantPitcher",
    "PitcherPlantLeaf"

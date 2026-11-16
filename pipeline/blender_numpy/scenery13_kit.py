@@ -1145,6 +1145,8 @@ def lighthouse():
     lathe(bm, uvl, [(2.2, 11.6), (2.2, 11.8), (1.1, 11.8)], 16, 1)
     lathe(bm, uvl, [(1.1, 11.8), (1.1, 13.4)], 12, 2)
     lathe(bm, uvl, [(1.3, 13.4), (0.1, 14.6)], 12, 1)
+    lathe(bm, uvl, [(1.75, 11.6), (2.2, 11.6)], 16, 1)                  # (the gallery's underside: a ring run outward faces down)
+    lathe(bm, uvl, [(1.1, 13.4), (1.3, 13.4)], 12, 1)                   # (the cap's underside)
     vs = [bm.verts.new((2.41, y, z)) for (y, z) in ((-0.5, 0.0), (0.5, 0.0), (0.5, 2.0), (-0.5, 2.0))]
     f = bm.faces.new(vs); f.material_index = 1
     for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))): lp[uvl].uv = uv
@@ -1159,6 +1161,7 @@ def pitcher_plant():
         a = k * 2.1; c = (math.cos(a) * 0.8, math.sin(a) * 0.8); hh = rng.uniform(1.5, 2.6)
         n0 = len(bm.verts)
         lathe(bm, uvl, [(0.12, 0.0), (0.35, hh * 0.3), (0.42, hh * 0.65), (0.32, hh * 0.92), (0.4, hh)], 12, 0)
+        lathe(bm, uvl, [(0.36, hh - 0.01), (0.28, hh * 0.92), (0.38, hh * 0.65), (0.3, hh * 0.3), (0.1, hh * 0.15)], 12, 0)   # (its inside, wound in)
         for v in list(bm.verts)[n0:]: v.co.x += c[0]; v.co.y += c[1]
         sphere(bm, uvl, (c[0] + 0.2, c[1], hh + 0.18), 0.35, 1, 1.0, 1.0, 0.35, 8, 0.1, rng)
     for k in range(7):
@@ -1173,8 +1176,8 @@ def eel_trap():
     me, ob, bm, uvl = new_mesh("SM_N13_EelTrap")
     n0 = len(bm.verts)
     lathe(bm, uvl, [(0.3, 0.0), (0.32, 0.4), (0.25, 1.0), (0.08, 1.6)], 12, 0)
-    for v in list(bm.verts)[n0:]:                                 # (laid on its side along +X, 0.35 m up)
-        x, z = v.co.z, v.co.x; v.co.x, v.co.z = x - 0.8, 0.35 + z
+    for v in list(bm.verts)[n0:]:                                 # (laid on its side along +X, 0.35 m up: a quarter turn about Y)
+        x, z = v.co.z, -v.co.x; v.co.x, v.co.z = x - 0.8, 0.35 + z
     for x in (-0.6, 0.6):
         tube(bm, uvl, [Vector((x, 0.38, 0.0)), Vector((x, 0.38, 1.1))], [0.04, 0.03], 5, 1)
     finish(me, ob, bm, ["EelTrapWicker", "EelTrapStake"])

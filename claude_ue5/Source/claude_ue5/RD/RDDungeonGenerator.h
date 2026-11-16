@@ -2680,7 +2680,7 @@ public:
 	float WildTideForce = -1.f;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild13") void ForceWildTide(float Level) { WildTideForce = Level; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild13") float GetWildTide() const;
-	struct FTideSkin { TWeakObjectPtr<class UPrimitiveComponent> Comp; float Amp = 0.f; FVector Base = FVector::ZeroVector; };
+	struct FTideSkin { TWeakObjectPtr<class UPrimitiveComponent> Comp; float Amp = 0.f; FVector Base = FVector::ZeroVector; float LastZ = -1e9f; };
 	TArray<FTideSkin> WildTideSkins;
 	/** tests: "on|x|y|z" (cm) or "off" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild13") FString GetWildAurora() const;
@@ -2704,6 +2704,8 @@ public:
 		TArray<TWeakObjectPtr<UPrimitiveComponent>> Cands;
 		/** (the seventh phase) a geyser's cycle, seconds (PR #71's review: kept in Length, a hidden piece's height overwrote it) */
 		float Every = 0.f;
+		/** (the ninth phase) when she was last in it: an entry is one after 2 s out (the tide, the surge) */
+		float LastIn = 0.f;
 	};
 	struct FSceneryFx { TWeakObjectPtr<class UNiagaraComponent> Comp; FString Hours; };
 	struct FSceneryHerd { int32 Id = 0; TArray<TWeakObjectPtr<ARDWildAnimal>> Animals; FVector2D Home = FVector2D::ZeroVector; FVector2D Way = FVector2D(1, 0); float Phase = 0.f, Pen = 0.f; bool bMigrate = false, bStampede = false; float StampedeUntil = -1.f, NextHit = 0.f; int32 Stampedes = 0, Hits = 0; };
