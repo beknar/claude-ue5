@@ -11,20 +11,30 @@
 #include "Engine/World.h"
 DEFINE_LOG_CATEGORY_STATIC(LogRDFarmAnimal14, Log, All);
 
-// (a range of WildKilled's own: (10 << 40) + the farm's place among the farms (its id less FarmIdBase) x 256 + its place in the
-// farm's plan; the ranges below are the farms' containers (1), houses' (2), ruins' (3), lairs' (4), sites' (5, 6), scenery's (7, 8),
-// herds' (9))
+// (a range of WildKilled's own: (10 << 40) + the farm's place among the farms (its id less FarmIdBase) x 131072 + its pen's place
+// in the farm (a yard pen's 0-2047, a stall's 2048 on) x 32 + its index in the pen; the ranges below are the farms' containers (1),
+// houses' (2), ruins' (3), lairs' (4), sites' (5, 6), scenery's (7, 8), herds' (9))
 static constexpr int64 RDFarmAnimalKeys14 = 10LL << 40;
 
-int64 ARDDungeonGenerator::FarmAnimalKey14(const FRDWildFarmRec& Rec) const
+int64 ARDDungeonGenerator::FarmAnimalKey14(const FRDWildFarmRec& Rec, int32 Slot, int32 K) const
 {
-	return RDFarmAnimalKeys14 + (int64)(uint32)(Rec.Id - FRDWildWorld::FarmIdBase) * 256 + (Rec.AnimalSerial14 & 255);
+	return RDFarmAnimalKeys14 + (int64)(uint32)(Rec.Id - FRDWildWorld::FarmIdBase) * 131072 + (int64)(Slot & 4095) * 32 + (K & 31);
+}
+
+void ARDDungeonGenerator::ReadFarmKilled14(int32 FarmId)
+{
+	// (one pass over the game's kept kills for a farm about to be laid, its own range only (PR #85's review: a search of the whole
+	// list for each animal))
+	FarmKilled14.Reset(); FarmKilledFor14 = FarmId;
+	const URDGameInstance* GI = URDGameInstance::Of(this);
+	if (!GI) return;
+	const int64 Lo = RDFarmAnimalKeys14 + (int64)(uint32)(FarmId - FRDWildWorld::FarmIdBase) * 131072, Hi = Lo + 131072;
+	for (const int64 K : GI->WildKilled) if (K >= Lo && K < Hi) FarmKilled14.Add(K);
 }
 
 bool ARDDungeonGenerator::IsFarmAnimalKilled14(int64 Key) const
 {
-	const URDGameInstance* GI = URDGameInstance::Of(this);
-	return GI && GI->WildKilled.Contains(Key);
+	return FarmKilled14.Contains(Key);
 }
 
 bool ARDTownAnimal::CanBeHurt14() const
@@ -54,7 +64,10 @@ bool ARDTownAnimal::TakeHit14(float Dmg, FVector From)
 		SetState(2, Now);
 		const FVector L = GetActorLocation();
 		const FVector Lp = FRotator(0.f, -PenYaw, 0.f).RotateVector((L + Aw.GetSafeNormal() * 180.f) - PenAt);
-		const FVector Cl(FMath::Clamp(Lp.X, -PenHalf.X, PenHalf.X), FMath::Clamp(Lp.Y, -PenHalf.Y, PenHalf.Y), 0.f);
+		// (kept its body's half length off the fence, as its walks (SetState): PR #85's review, clamped to the pen's own half it ran into the fence)
+		const float Hb = Gen->TownAnimals.IsValidIndex(Def) ? Gen->TownAnimals[Def].HalfSize.X : 40.f;
+		const FVector2D Hm = (PenHalf - FVector2D(Hb, Hb)).ComponentMax(FVector2D(5.f, 5.f));
+		const FVector Cl(FMath::Clamp(Lp.X, -Hm.X, Hm.X), FMath::Clamp(Lp.Y, -Hm.Y, Hm.Y), 0.f);
 		To = PenAt + FRotator(0.f, PenYaw, 0.f).RotateVector(Cl); To.Z = L.Z;
 		Until = Now + 3.f; FleeUntil = Now + 1.2f; ++Flees;
 		Body->SetPlayRate(2.5f);
@@ -90,20 +103,8 @@ void ARDDungeonGenerator::OnFarmAnimalKilled14(ARDTownAnimal* A)
 	if (URDGameInstance* GI = URDGameInstance::Of(this); GI && A->FarmKey14 >= 0) GI->WildKilled.AddUnique(A->FarmKey14);
 	// (its things: each "Item|min|max|chance", drawn from a hash of its key (no stream of the play's): the same farm's same animal
 	// leaves the same)
-	TArray<FName> Got;
 	TArray<FString> Lines; D.Drops.ParseIntoArray(Lines, TEXT(";"), true);
-	const uint32 H0 = HashCombine(GetTypeHash(A->FarmKey14), 0xFA4Du ^ (uint32)(IsWildReady() ? Wild->Seed : 0u));
-	for (int32 K = 0; K < Lines.Num(); ++K)
-	{
-		TArray<FString> P; Lines[K].ParseIntoArray(P, TEXT("|"), false);
-		if (P.Num() < 1 || P[0].IsEmpty() || FindItem(FName(*P[0])) < 0) continue;
-		const int32 Lo = P.Num() > 1 ? FCString::Atoi(*P[1]) : 1, Hi = P.Num() > 2 ? FCString::Atoi(*P[2]) : Lo;
-		const float Ch = P.Num() > 3 ? FCString::Atof(*P[3]) : 1.f;
-		const float U = (HashCombine(H0, (uint32)K * 7919u + 1u) % 100003u) / 100003.f;
-		if (U >= Ch) continue;
-		const int32 N = Lo + (int32)(HashCombine(H0, (uint32)K * 104729u + 2u) % (uint32)FMath::Max(Hi - Lo + 1, 1));
-		for (int32 I = 0; I < N; ++I) Got.Add(FName(*P[0]));
-	}
+	const TArray<FName> Got = RollDropLines(Lines, HashCombine(GetTypeHash(A->FarmKey14), 0xFA4Du ^ (uint32)(IsWildReady() ? Wild->Seed : 0u)));
 	LastFarmAnimalDrops14 = Got;
 	if (Got.Num() > 0) DropHarvest(A->GetActorLocation() + FVector(0, 0, 10.f), Got, 1);
 	UE_LOG(LogRDFarmAnimal14, Log, TEXT("RDFARMANIMAL %s killed (%lld): %s"), *D.Name.ToString(), A->FarmKey14,
@@ -149,4 +150,23 @@ ARDTownAnimal* ARDDungeonGenerator::FarmAnimalOnSegment14(const FVector& A, cons
 			OutT = T; Best = An; OutAt = P;
 		}
 	return Best;
+}
+
+TArray<FName> ARDDungeonGenerator::RollDropLines(const TArray<FString>& Lines, uint32 H0) const
+{
+	// ("Item|min|max|chance" each, drawn from a hash (no stream of the play's): one roll for the wild animals' and the farms' things
+	// (PR #85's review))
+	TArray<FName> Got;
+	for (int32 K = 0; K < Lines.Num(); ++K)
+	{
+		TArray<FString> P; Lines[K].ParseIntoArray(P, TEXT("|"), false);
+		if (P.Num() < 1 || P[0].IsEmpty() || FindItem(FName(*P[0])) < 0) continue;
+		const int32 Lo = P.Num() > 1 ? FCString::Atoi(*P[1]) : 1, Hi = P.Num() > 2 ? FCString::Atoi(*P[2]) : Lo;
+		const float Ch = P.Num() > 3 ? FCString::Atof(*P[3]) : 1.f;
+		const float U = (HashCombine(H0, (uint32)K * 7919u + 1u) % 100003u) / 100003.f;
+		if (U >= Ch) continue;
+		const int32 N = Lo + (int32)(HashCombine(H0, (uint32)K * 104729u + 2u) % (uint32)FMath::Max(Hi - Lo + 1, 1));
+		for (int32 I = 0; I < N; ++I) Got.Add(FName(*P[0]));
+	}
+	return Got;
 }

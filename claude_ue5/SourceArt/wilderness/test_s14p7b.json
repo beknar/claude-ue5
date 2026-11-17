@@ -1,7 +1,8 @@
 {
  "tag": "s14p7b",
  "plan": [
-  "farmanimals14"
+  "farmanimals14",
+  "animals8"
  ],
  "level": "brokenspire",
  "steps": [
@@ -20,7 +21,7 @@
    "pig": {
     "kind": "Cow",
     "hp0": 70.0,
-    "key": 10995116539392,
+    "key": 10995250299136,
     "hits": [
      55.7,
      41.4,
@@ -34,23 +35,22 @@
     "drops": [
      "Raw Meat",
      "Raw Meat",
-     "Raw Meat",
      "Coarse Hide",
      "Coarse Hide"
     ],
     "kept": true
    },
    "picture_from_yaw": 90.0,
-   "pile_says": "harvest the parts (5)",
+   "pile_says": "harvest the parts (4)",
    "pile_f": "loot",
    "taken": {
-    "Raw Meat": 3,
-    "Coarse Hide": 2
+    "Coarse Hide": 2,
+    "Raw Meat": 2
    },
    "hen": {
     "kind": "Cow",
     "hp0": 70.0,
-    "key": 10995116539393,
+    "key": 10995250299137,
     "hits": [
      45.0,
      20.0,
@@ -62,6 +62,8 @@
     "drops": [
      "Raw Meat",
      "Raw Meat",
+     "Raw Meat",
+     "Coarse Hide",
      "Coarse Hide"
     ],
     "kept": true
@@ -71,11 +73,107 @@
     "first_count": 10,
     "dead_keys_back": []
    }
+  },
+  {
+   "step": "animals8",
+   "ok": true,
+   "kills": {
+    "Deer": {
+     "hp0": 40.0,
+     "hp_after_first_blow": 25.700000762939453,
+     "blows": 3,
+     "dead": true,
+     "drops": [
+      "Coarse Hide",
+      "Coarse Hide"
+     ],
+     "lying_roll": 0.0,
+     "length_z": 0.0,
+     "up_z": 0.0,
+     "f_names": "harvest the parts (2)",
+     "taken": {
+      "Coarse Hide": 2
+     }
+    },
+    "Wolf": {
+     "hp0": 55.0,
+     "hp_after_first_blow": 40.70000076293945,
+     "blows": 4,
+     "dead": true,
+     "drops": [
+      "Coarse Hide",
+      "Coarse Hide"
+     ],
+     "lying_roll": 0.0,
+     "length_z": 0.0,
+     "up_z": 0.0,
+     "f_names": "harvest the parts (2)",
+     "taken": {
+      "Coarse Hide": 2
+     }
+    },
+    "Hare": {
+     "hp0": 10.0,
+     "hp_after_first_blow": 0.0,
+     "blows": 1,
+     "dead": true,
+     "drops": [
+      "Light Leather",
+      "Coarse Hide"
+     ],
+     "lying_roll": 90.0,
+     "length_z": 0.0,
+     "up_z": 0.0,
+     "f_names": "harvest the parts (2)",
+     "taken": {
+      "Coarse Hide": 1,
+      "Light Leather": 1
+     }
+    }
+   },
+   "alive_at_kill": {
+    "Deer": 1,
+    "Wolf": 0,
+    "Hare": 3
+   },
+   "killed": 3,
+   "respawn_wait_s": 45.0,
+   "pending_after_kills": [
+    [
+     "Deer",
+     24
+    ],
+    [
+     "Wolf",
+     34
+    ],
+    [
+     "Hare",
+     40
+    ]
+   ],
+   "places_freed_after_s": 40.5,
+   "wild_deer": {
+    "killed": true,
+    "casts": 3,
+    "deer_after_kill": 1,
+    "waiting": [
+     [
+      "Deer",
+      45
+     ]
+    ],
+    "deer_at_20s": 1,
+    "another_came_after_s": 46.2
+   }
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
  "shots": [
-  "wd_s14p7b_farmanimals14_dead.png"
+  "wd_s14p7b_farmanimals14_dead.png",
+  "wd_s14p7b_animals8_deer_dead.png",
+  "wd_s14p7b_animals8_wolf_dead.png",
+  "wd_s14p7b_animals8_hare_dead.png"
  ],
  "error": null,
  "saves_put_back": 1,

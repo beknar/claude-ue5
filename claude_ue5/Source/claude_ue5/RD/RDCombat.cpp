@@ -505,8 +505,10 @@ void URDCombatComponent::Strike()
 		Generator->HitTownDummiesInArc(L, Fw, W->Reach, MinCos, 1.f, HitSound, GetDamageOf(AttackIndex));
 	// (the list of 2026-11-07: the wilderness's animals in its reach and arc are hurt by it)
 	if (Generator->bWild)
+	{
 		Generator->HitWildAnimalsInArc(L, Fw, W->Reach, MinCos, GetDamageOf(AttackIndex), HitSound);
 		Generator->HitFarmAnimalsInArc14(L, Fw, W->Reach, MinCos, GetDamageOf(AttackIndex), HitSound);          // (the list of 2026-11-16: the farms' animals)
+	}
 }
 
 void URDCombatComponent::EndAttack()
@@ -2735,6 +2737,9 @@ void URDCombatComponent::TickBolts(float Dt)
 		{
 			float FaT = 2.f; FVector FaAt = Next;
 			ARDTownAnimal* Fa = (Generator->bWild && !B.bWisp && !B.bGoal) ? Generator->FarmAnimalOnSegment14(B.At, Next, 10.f, FaT, FaAt) : nullptr;
+			// (only when nearer than a wild animal on the same way (PR #85's review: a cow behind a hare took the bolt through it))
+			float WaT = 2.f; FVector WaAt = Next;
+			if (Fa && Generator->WildAnimalOnSegment(B.At, Next, 10.f, WaT, WaAt) && WaT <= FaT) Fa = nullptr;
 			if (Fa && FaT < HitT && (!bWallHit || FaT < H.Time))
 			{
 				const float Dmg = B.Dmg > 0.f ? B.Dmg : GetDamageOf(B.Weapon);

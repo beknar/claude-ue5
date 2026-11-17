@@ -617,8 +617,10 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 			}
 			const FVector2D Ctr = (SMin + SMax) * 0.5f, Half = (SMax - SMin) * 0.5f;
 			const FVector PenAt = At(Ctr.X, Ctr.Y, 2.f);
+			int32 Ai = -1;
 			for (const TPair<FString, int32>& A : In)
 			{
+				++Ai;
 				int32 Kd = -1;
 				for (int32 K = 0; K < TownAnimals.Num(); ++K) if (TownAnimals[K].Mesh && TownAnimals[K].Name.ToString().Equals(A.Key, ESearchCase::IgnoreCase)) { Kd = K; break; }
 				if (Kd < 0) continue;
@@ -628,7 +630,8 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 				{
 					const FVector Av = PenAt + Rot.RotateVector(FVector(R.FRandRange(-H.X, H.X), R.FRandRange(-H.Y, H.Y), 0.f));
 					const FRotator Yr(0.f, R.FRandRange(0.f, 360.f), 0.f);
-					const int64 Key = FarmAnimalKey14(Rec); ++Rec.AnimalSerial14;
+					// (a stall's place: past the yard's (2048), its building's part and its kind's place in the stall)
+					const int64 Key = FarmAnimalKey14(Rec, 2048 + PartIx * 8 + Ai, K);
 					if (IsFarmAnimalKilled14(Key)) continue;          // (the list of 2026-11-16: killed in this game)
 					ARDTownAnimal* An = GetWorld()->SpawnActor<ARDTownAnimal>(ARDTownAnimal::StaticClass(), FTransform(Yr, Av), Sp);
 					if (!An) continue;
@@ -656,6 +659,7 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 // ================================================================================================ a farmstead of a design
 void ARDDungeonGenerator::SpawnWildFarm11(ARDWildChunk* C, const FRDWildPlace& P, int32 Design)
 {
+	ReadFarmKilled14(P.Id);          // (the list of 2026-11-16: its animals killed in this game, read once)
 	if (!C || !IsWildReady()) return;
 	// (no designs on the level: the default, the one layout every farm had)
 	static const FRDFarmDesign Fallback = RDWF11Default();
@@ -779,9 +783,10 @@ void ARDDungeonGenerator::SpawnWildFarm11(ARDWildChunk* C, const FRDWildPlace& P
 			FVector At = PenAt + FRotator(0.f, P.Yaw, 0.f).RotateVector(FVector(R.FRandRange(-H.X, H.X), R.FRandRange(-H.Y, H.Y), 0.f));
 			At.Z = WildGroundZ(At);
 			// (its yaw drawn as before, after its place; then, killed in this game, it is not laid (the list of 2026-11-16: its draws made,
-			// so the others keep their places))
+			// so the others keep their places); its key from its pen's place in the farm (the pen's salt) and its index in the pen, so that
+			// no other pen's or kind's absence moves it (PR #85's review: a running count did))
 			const FRotator Yr(0.f, R.FRandRange(0.f, 360.f), 0.f);
-			const int64 Key = FarmAnimalKey14(Rec); ++Rec.AnimalSerial14;
+			const int64 Key = FarmAnimalKey14(Rec, (int32)(Salt - 11u), K);
 			if (IsFarmAnimalKilled14(Key)) continue;
 			ARDTownAnimal* A = GetWorld()->SpawnActor<ARDTownAnimal>(ARDTownAnimal::StaticClass(), FTransform(Yr, At), Sp);
 			if (!A) continue;

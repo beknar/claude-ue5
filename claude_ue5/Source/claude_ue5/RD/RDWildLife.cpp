@@ -221,19 +221,7 @@ void ARDDungeonGenerator::OnWildAnimalKilled(ARDWildAnimal* A)
 	if (A->HerdId >= 0) { if (URDGameInstance* GI = URDGameInstance::Of(this); GI && A->HerdIndex >= 0) GI->WildKilled.AddUnique((9LL << 40) + (int64)(uint32)A->HerdId * 32 + A->HerdIndex); }
 	else AnimalRespawns.Add(TPair<int32, float>(A->Def, Now + WildAnimalRespawnSeconds));
 	// (its things: each "Item|min|max|chance", drawn from a hash of the session and the kill (no stream of the play's))
-	TArray<FName> Got;
-	const uint32 H0 = HashCombine((uint32)SessionSeed ^ 0xA41Du, (uint32)AnimalsKilled * 2654435761u);
-	for (int32 K = 0; K < F.Drops.Num(); ++K)
-	{
-		TArray<FString> P; F.Drops[K].ParseIntoArray(P, TEXT("|"), false);
-		if (P.Num() < 1 || P[0].IsEmpty() || FindItem(FName(*P[0])) < 0) continue;
-		const int32 Lo = P.Num() > 1 ? FCString::Atoi(*P[1]) : 1, Hi = P.Num() > 2 ? FCString::Atoi(*P[2]) : Lo;
-		const float Ch = P.Num() > 3 ? FCString::Atof(*P[3]) : 1.f;
-		const float U = (HashCombine(H0, (uint32)K * 7919u + 1u) % 100003u) / 100003.f;
-		if (U >= Ch) continue;
-		const int32 N = Lo + (int32)(HashCombine(H0, (uint32)K * 104729u + 2u) % (uint32)FMath::Max(Hi - Lo + 1, 1));
-		for (int32 I = 0; I < N; ++I) Got.Add(FName(*P[0]));
-	}
+	const TArray<FName> Got = RollDropLines(F.Drops, HashCombine((uint32)SessionSeed ^ 0xA41Du, (uint32)AnimalsKilled * 2654435761u));
 	LastAnimalDrops = Got;
 	if (Got.Num() > 0) DropHarvest(A->GetActorLocation() + FVector(0, 0, 10.f), Got, 1);
 	UE_LOG(LogRDWildLife, Log, TEXT("RDWILDLIFE %s killed: %s"), *F.Name.ToString(), Got.Num() ? *FString::JoinBy(Got, TEXT(", "), [](const FName& N) { return N.ToString(); }) : TEXT("nothing"));

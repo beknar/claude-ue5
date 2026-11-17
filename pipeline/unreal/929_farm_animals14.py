@@ -5,7 +5,8 @@ Parts (args):
   items         SourceArt/wilderness/farm_animals14.json's things (Raw Meat, Feathers, Eggs) on every map of the game (its "maps"),
                 each copied from its "like", found only from the animals (no weight, no tiers); the oven's recipe for meat (raw meat
                 roasted into the Well Done Steak); raw meat among the meats of the recipes whose part is "meat" (928's stew and pie).
-                Idempotent: its own items and recipes taken out first. Run after 928 (whose items it adds to).
+                Idempotent: its own items and recipes taken out first. Run after 928 (whose items it adds to), and after 890 and
+                914 oven (890 makes brokenspire's oven recipes anew, 914 copies them to every map: either drops the steak's).
   animals       brokenspire: the farm animals' hit points and things (TownAnimals' Health and Drops: RD/RDList14g.cpp).
   icons <dir>   their pictures (rdm4_ui_gen.py / rdm4_ui_cut.py --export <dir>) on every map's UIArt.
 """

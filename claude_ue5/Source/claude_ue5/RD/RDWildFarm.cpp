@@ -92,7 +92,7 @@ TArray<FString> ARDDungeonGenerator::GetWildFarmLines() const
 	{
 		if (!F.Chunk.IsValid()) continue;
 		int32 Na = 0, Nf = 0;
-		for (const TWeakObjectPtr<ARDTownAnimal>& A : F.Animals) if (A.IsValid()) ++Na;
+		for (const TWeakObjectPtr<ARDTownAnimal>& A : F.Animals) if (A.IsValid() && !A->IsDead14()) ++Na;          // (the living: PR #85's review)
 		for (const TWeakObjectPtr<ARDTownsfolk>& T : F.Folk) if (T.IsValid()) ++Nf;
 		Out.Add(FString::Printf(TEXT("farm|%d|%s|%.1f|%.1f|%.0f|%.1f|%d|%d|%d|%.0f|%.0f|%.0f|%.0f|%.1f"), F.Id, *F.Name, F.At.X, F.At.Y,
 			WildGroundZ(FVector(F.At.X * 100.0, F.At.Y * 100.0, 0.0)), F.Yaw, F.Props, Na, Nf, F.PenAt.X, F.PenAt.Y, F.PenHalf.X, F.PenHalf.Y, F.PenYaw));

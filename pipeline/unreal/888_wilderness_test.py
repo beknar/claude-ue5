@@ -3508,6 +3508,7 @@ def step_farmanimals14():
     g = G["gen"]; res = {}; quiet(True)
     yield from wait_ready(90)
     w = G["w"]; gi = G["gi"]
+    hero0 = str(g.get_editor_property("current_hero")); hour0 = g.get_town_hour()
     try:
         g.set_town_hour(11.0)
         fs = [str(x).split("|") for x in g.find_wild_farmsteads(0.0, 0.0, 6000.0)]
@@ -3567,13 +3568,14 @@ def step_farmanimals14():
         if hen:
             r_, tgt = yield from kill(hen, "Mage"); res["hen"] = r_
         # ---- laid again: the dead stay dead
-        n_before = len(farm_animals14(fid))
         g.wild_drop_all(); g.wild_put_her(fx - 40.0, fy); yield from wait_chunks(30, 50); yield from rwait(3.0)
         an2 = farm_animals14(fid)
         res["again"] = {"animals": len(an2), "first_count": res["animals"], "dead_keys_back": [a["key"] for a in an2 if a["key"] in (res.get("pig", {}).get("key"), res.get("hen", {}).get("key"))]}
     finally:
-        g.switch_hero("Warrior"); yield from rwait(0.8); refresh()
-        g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+        # (the hero and the hour it found put back for the steps after it (PR #85's review))
+        if str(G["gen"].get_editor_property("current_hero")) != hero0: G["gen"].switch_hero(hero0); yield from rwait(0.8); refresh()
+        G["gen"].set_town_hour(hour0)
+        G["gen"].wild_drop_all(); G["gen"].wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
         quiet(False)
     pg = res.get("pig", {}); hn = res.get("hen", {}); ag = res.get("again", {})
     ok = (pg.get("dead") and pg.get("hits") and pg["hits"][0] < pg["hp0"] and pg.get("flees", 0) >= 1 and pg.get("lying_up_z") is not None and abs(pg["lying_up_z"]) < 0.5
