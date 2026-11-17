@@ -123,6 +123,23 @@ def make_clips(arm, scene, clips):
     res["shield_hand_off_cm"] = round(ik_to(arm, "hand_l", tgt, P["upperarm_l"].head + Vector((0.3 * L, 0.05 * L, -0.25 * L))) * 165.0 / 0.9, 2)
     la = P["lowerarm_l"]; la.matrix = Matrix.Translation(la.head) @ low0.to_4x4(); bpy.context.view_layer.update()
     hb = P["hand_l"]; hb.matrix = Matrix.Translation(hb.head) @ hand0.to_4x4(); bpy.context.view_layer.update()
+    # (the list of 2026-11-16, item 5: "the shield position when it's used to block by the warrior is perpendicular to the enemy. it
+    # should be facing the front". The grip (862) lays the shield's face along the back of her forearm (world +Z at rest, the palms
+    # down); Box_03's guard holds the forearm upright with its back turned out to her left, so the face looked left and its rim
+    # met the foe. The forearm turned about its own length until its back faces her front (-Y); the hand goes with it)
+    def face_now():
+        fa_ = (P["hand_l"].head - la.head).normalized()
+        d_local = B["lowerarm_l"].matrix_local.to_3x3().inverted() @ Vector((0, 0, 1))
+        return fa_, (la.matrix.to_3x3() @ d_local).normalized()
+    fa, dn = face_now()
+    res["shield_face_vs_front_deg_before"] = round(math.degrees(dn.angle(Vector((0, -1, 0)))), 1)
+    want = Vector((0, -1, 0)); want = (want - fa * want.dot(fa)).normalized()
+    dp = (dn - fa * dn.dot(fa)).normalized()
+    ang = dp.angle(want); sgn = 1.0 if fa.dot(dp.cross(want)) > 0 else -1.0
+    rot_world(arm, la, fa, math.degrees(ang * sgn))
+    fa, dn = face_now()
+    res["shield_face_vs_front_deg"] = round(math.degrees(dn.angle(Vector((0, -1, 0)))), 1)
+    res["forearm_roll_deg"] = round(math.degrees(ang * sgn), 1)
     # (the sword hand down by her right hip, the elbow out and back)
     sh = Vector((SWORD_HAND[0] * L, SWORD_HAND[1] * L + P["pelvis"].head.y, P["pelvis"].head.z + 0.02 * L))
     elbow = P["upperarm_r"].head + Vector((-0.25 * L, 0.2 * L, -0.25 * L))

@@ -5970,7 +5970,48 @@ def step_horsecall14():
     gi.set_editor_property("horse_owned", False)
     step_result("horsecall14", res["calls"] == 0 and "down here" in res["said"], **res)
 
-STEPS = {"horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
+
+def step_block14():
+    """item 5 of the list of 2026-11-16: "the shield position when it's used to block by the warrior is perpendicular to the enemy.
+    it should be facing the front": the Warrior with a kite shield blocks (the right mouse button held, the stance blended in); the
+    shield's face (its +Y in the grip: 862, 865) against her front, standing and blocking, each sampled over a second; pictures from
+    in front of her"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    put(g.get_start_room_center(), 0.0); yield from wait(0.3)
+    c.add_item("Kite Shield", 1); c.wear_shield("Kite Shield"); yield from wait(0.5)
+    res = {"shield": str(c.get_worn_shield())}
+    def face_deg():
+        sc = c.get_left_hand_mesh()
+        if not sc: return None
+        r = sc.get_world_rotation(); n = unreal.MathLibrary.get_right_vector(r)
+        f = G["pawn"].get_actor_forward_vector()
+        d = max(-1.0, min(1.0, n.x * f.x + n.y * f.y + n.z * f.z))
+        return round(math.degrees(math.acos(d)), 1)
+    def sample(secs):
+        out = []; t0 = time.time()
+        while time.time() - t0 < secs:
+            v = face_deg()
+            if v is not None: out.append(v)
+            yield
+        return out
+    res["standing"] = yield from sample(1.0)
+    why = str(g.slate_key(key("RightMouseButton"), True)); yield from rwait(1.0)
+    res["refused"] = why
+    res["blocking"] = c.is_blocking()
+    res["blocking_face_deg"] = yield from sample(1.0)
+    yw = G["pawn"].get_actor_rotation().yaw
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=yw + 180.0)); yield from rwait(0.8)
+    shot("block14_front", "1280x720"); yield from rwait(0.8)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=yw + 135.0)); yield from rwait(0.8)
+    shot("block14_three_quarter", "1280x720"); yield from rwait(0.8)
+    g.slate_key(key("RightMouseButton"), False); yield from rwait(0.5)
+    quiet(False)
+    bf = res["blocking_face_deg"]
+    res["blocking_face_max"] = max(bf) if bf else None
+    ok = res["blocking"] and bf and max(bf) < 30.0
+    step_result("block14", ok, **res)
+
+STEPS = {"block14": step_block14, "horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
          "spells11_spells": lambda: step_spells11(("spells",)), "spells11_curses": lambda: step_spells11(("curses",)), "spells11_slashes": lambda: step_spells11(("slashes",)), "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
          "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "menulook": step_menulook, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,

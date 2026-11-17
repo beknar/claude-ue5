@@ -2,6 +2,9 @@
  "foot_l_off_cm": 0.0,
  "foot_r_off_cm": 3.3,
  "shield_hand_off_cm": 0.0,
+ "shield_face_vs_front_deg_before": 117.0,
+ "shield_face_vs_front_deg": 10.0,
+ "forearm_roll_deg": -118.9,
  "sword_hand_off_cm": 11.15,
  "pelvis": [
   0.003,
@@ -34,8 +37,8 @@
   1.302
  ],
  "previews": [
-  "D:\\claude-scratch\\claude\\8c37119093eaee83\\72180577-22ed-4688-bb54-c390e9b1fac7\\scratchpad\\w3block\\block_preview_side.png",
-  "D:\\claude-scratch\\claude\\8c37119093eaee83\\72180577-22ed-4688-bb54-c390e9b1fac7\\scratchpad\\w3block\\block_preview_front.png",
-  "D:\\claude-scratch\\claude\\8c37119093eaee83\\72180577-22ed-4688-bb54-c390e9b1fac7\\scratchpad\\w3block\\block_preview_three_quarter.png"
+  "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\list10\\warrior3_block\\block_preview_side.png",
+  "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\list10\\warrior3_block\\block_preview_front.png",
+  "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\list10\\warrior3_block\\block_preview_three_quarter.png"
  ]
 }
