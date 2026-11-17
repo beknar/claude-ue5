@@ -2590,6 +2590,14 @@ public:
 	/** the world's static and dynamic pieces between A and B (a line, or a ball of Radius swept), people, animals, pawns and piles
 	 *  passed over: the wilds' sight lines and the people's steps */
 	bool WildWayBlocked14(const FVector& A, const FVector& B, float Radius, const AActor* Skip) const;
+	mutable TArray<AActor*> WildPass14; mutable uint64 WildPassFrame14 = MAX_uint64;
+	/** the floor under a person's step at At (its feet at FeetZ): a farmhouse's over the ground, else the ground */
+	float WildFloorZ14(const FVector& At, float FeetZ) const;
+	/** the heroes who pick a wild lock and who break one (931 from locks14.json); a hostile person calms down after she has been
+	 *  hidden this long */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") TArray<FName> LockPickers;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") TArray<FName> LockBreakers;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float WildLostCalmSeconds14 = 6.f;
 	/** tests: every person calmed, a pick under way dropped */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") void CalmWildFolk14();
 	TWeakObjectPtr<class ARDWildChunk> WildPickChunk14; int32 WildPickIndex14 = -1; int64 WildPickKey14 = -1; float WildPickUntil14 = -1.f; FVector WildPickAt14 = FVector::ZeroVector;

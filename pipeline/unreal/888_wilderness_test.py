@@ -3914,7 +3914,9 @@ def step_locks14():
                 if not ok_at(math.hypot(q.x - box_at.x, q.y - box_at.y) / 100.0, math.hypot(q.x - her.x, q.y - her.y) / 100.0): continue
                 q.z = g.wild_ground_z(q) + 92.0
                 if abs(q.z - her.z) > 600.0: continue
-                if want_line is None or seen_line14(q, her) == want_line: return q
+                # (by the game's own rule (it passes over people, animals, pawns and piles: PR #87's review); the test's own trace is
+                # recorded beside it)
+                if want_line is None or bool(g.wild_sees_her14(V(q.x, q.y, q.z + 70.0))) == want_line: return q
             return None
         plan = [("heard", lambda db, dh: 15.0 <= db <= 27.0, False), ("seen", lambda db, dh: db >= 32.0 and dh <= 38.0, True),
                 ("hidden", lambda db, dh: db >= 32.0 and dh <= 38.0, False), ("far", lambda db, dh: dh >= 55.0 and dh <= 65.0, None)]
@@ -3926,7 +3928,8 @@ def step_locks14():
             f = cands.pop(0); t_ = g.get_wild_person14(f["i"])
             t_.set_actor_location(q, False, True)
             placed[role] = {"title": f["title"], "i": f["i"], "d_box_m": round(math.hypot(q.x - box_at.x, q.y - box_at.y) / 100.0, 1),
-                            "d_her_m": round(math.hypot(q.x - her.x, q.y - her.y) / 100.0, 1), "line": seen_line14(q, her)}
+                            "d_her_m": round(math.hypot(q.x - her.x, q.y - her.y) / 100.0, 1), "line": bool(g.wild_sees_her14(V(q.x, q.y, q.z + 70.0))),
+                            "test_line": seen_line14(q, her)}
         r["placed"] = placed
         hp0 = cb().get_health(); blows0 = g.get_editor_property("wild_folk_blows_on_her14"); p0 = g.get_editor_property("wild_locks_picked14")
         r["f"] = str(g.interact_nearest(G["pawn"].get_actor_location()))

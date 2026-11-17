@@ -4,7 +4,8 @@ picked or broken turn on her. C++: RD/RDList14i.cpp.
 
 Parts (args):
   data    brokenspire: bWildLocks14 on, and SourceArt/wilderness/locks14.json's share, pick time, hearing and seeing distances, a
-          hostile person's blow and how far she must go for them to calm down. Idempotent (set anew).
+          hostile person's blow, how far she must go and how long she must hide for them to calm down, and who picks and who
+          breaks (LockPickers, LockBreakers). Idempotent (set anew).
 """
 import json, os, sys, gc
 import unreal
@@ -37,6 +38,9 @@ def data_fn(g):
     g.set_editor_property("wild_see_cm14", float(J["see_m"]) * 100.0)
     g.set_editor_property("wild_folk_blow14", float(J["blow"]))
     g.set_editor_property("wild_calm_cm14", float(J["calm_m"]) * 100.0)
+    g.set_editor_property("wild_lost_calm_seconds14", float(J["lost_calm_s"]))
+    g.set_editor_property("lock_pickers", [unreal.Name(x) for x in J["pickers"]])
+    g.set_editor_property("lock_breakers", [unreal.Name(x) for x in J["breakers"]])
     return f"locks on ({J['share']:.0%}), heard {J['hear_m']} m, seen {J['see_m']} m"
 
 

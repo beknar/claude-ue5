@@ -44,8 +44,9 @@ bool ARDDungeonGenerator::IsWildBoxLocked14(FName Kind, int64 Key) const
 
 FString ARDDungeonGenerator::WildLockDescribe14(FName Kind) const
 {
-	if (CurrentHero == TEXT("Rogue")) return FString::Printf(TEXT("pick the lock of the %s"), *Kind.ToString());
-	if (CurrentHero == TEXT("Warrior")) return FString::Printf(TEXT("break the lock of the %s"), *Kind.ToString());
+	// (who picks and who breaks are the heroes named in LockPickers / LockBreakers (931 from locks14.json): PR #87's review)
+	if (LockPickers.Contains(CurrentHero)) return FString::Printf(TEXT("pick the lock of the %s"), *Kind.ToString());
+	if (LockBreakers.Contains(CurrentHero)) return FString::Printf(TEXT("break the lock of the %s"), *Kind.ToString());
 	return FString::Printf(TEXT("the %s is locked"), *Kind.ToString());
 }
 
@@ -54,7 +55,7 @@ FString ARDDungeonGenerator::WildLockInteract14(ARDWildChunk* C, int32 Index)
 	if (!C || !C->Doors.IsValidIndex(Index) || !PlayerCombat || !GetWorld()) return FString();
 	const ARDWildChunk::FDoor& D = C->Doors[Index];
 	const FString What = D.Kind.ToString();
-	if (CurrentHero == TEXT("Rogue"))
+	if (LockPickers.Contains(CurrentHero))
 	{
 		// (a pick: she stays by it WildPickSeconds14, then it opens (TickWildPick14))
 		if (WildPickKey14 == D.Key && WildPickUntil14 > 0.f) return TEXT("picking");
@@ -65,7 +66,7 @@ FString ARDDungeonGenerator::WildLockInteract14(ARDWildChunk* C, int32 Index)
 		PlaySoundAt(TEXT("Env.ChestOpen"), D.At);
 		return TEXT("pick");
 	}
-	if (CurrentHero == TEXT("Warrior"))
+	if (LockBreakers.Contains(CurrentHero))
 	{
 		++WildLocksBroken14;
 		PlaySoundAt(TEXT("Player.Hit.Axe"), D.At);
@@ -76,7 +77,8 @@ FString ARDDungeonGenerator::WildLockInteract14(ARDWildChunk* C, int32 Index)
 		return TEXT("break");
 	}
 	++WildLocksRefused14;
-	PlayerCombat->ShowMessage(FString::Printf(TEXT("The %s is locked: a Rogue could pick it, a Warrior break it"), *What));
+	auto Names = [](const TArray<FName>& L) { return L.Num() ? FString::JoinBy(L, TEXT(" or "), [](const FName& N) { return FString(TEXT("a ")) + N.ToString(); }) : FString(TEXT("no one")); };
+	PlayerCombat->ShowMessage(FString::Printf(TEXT("The %s is locked: %s could pick it, %s break it"), *What, *Names(LockPickers), *Names(LockBreakers)));
 	return TEXT("locked");
 }
 
@@ -109,7 +111,7 @@ int32 ARDDungeonGenerator::AlertWildFolk14(const FVector& At)
 	if (!Her || !GetWorld()) return 0;
 	const FVector Hc = Her->GetActorLocation() + FVector(0, 0, 40.f);
 	const bool bHerHidden = PlayerCombat->IsStealthed();
-	int32 Heard = 0, Seen = 0;
+	int32 Heard = 0, Seen = 0, Fled = 0;
 	for (ARDTownsfolk* T : WildPeople14())
 	{
 		if (!IsValid(T) || T->IsWildDead14() || T->IsWildHostile14() || (T->WildSiteCage.IsValid() && !T->bWildGiven)) continue;
@@ -118,11 +120,15 @@ int32 ARDDungeonGenerator::AlertWildFolk14(const FVector& At)
 		const bool bHeard = D <= WildHearCm14;
 		const bool bSeen = !bHeard && !bHerHidden && Dh <= WildSeeCm14 && !T->IsWildIndoors() && !T->IsInBed() && WildSeesHer14(T->GetActorLocation() + FVector(0, 0, 70.f));
 		if (!bHeard && !bSeen) continue;
-		T->MakeWildHostile14(Her, bSeen);
+		// (counted only when it turned (PR #87's review: one refused was told and counted); a child or a quest's people run instead)
+		if (!T->MakeWildHostile14(Her, bSeen)) continue;
 		bSeen ? ++Seen : ++Heard;
+		if (T->IsWildProtected14()) ++Fled;
 	}
 	LastWildAlertHeard14 = Heard; LastWildAlertSeen14 = Seen;
-	if (Heard + Seen > 0) PlayerCombat->ShowMessage(Heard + Seen == 1 ? FString(TEXT("Someone noticed you: they turn on you")) : FString::Printf(TEXT("%d people noticed you: they turn on you"), Heard + Seen));
+	const int32 Turned = Heard + Seen - Fled;
+	if (Turned > 0) PlayerCombat->ShowMessage(Turned == 1 ? FString(TEXT("Someone noticed you: they turn on you")) : FString::Printf(TEXT("%d people noticed you: they turn on you"), Turned));
+	else if (Fled > 0) PlayerCombat->ShowMessage(TEXT("Someone noticed you and runs"));
 	UE_LOG(LogRDLocks14, Log, TEXT("RDWILDALERT at (%.0f, %.0f): %d heard, %d saw%s"), At.X, At.Y, Heard, Seen, bHerHidden ? TEXT(" (she was hidden)") : TEXT(""));
 	return Heard + Seen;
 }
@@ -133,19 +139,25 @@ bool ARDDungeonGenerator::WildWayBlocked14(const FVector& A, const FVector& B, f
 	// objects (888 locks14's probe: 46 of 46 pieces round a farmstead; a line by the static objects alone met none of their walls, and
 	// no spot round a farmhouse was hidden from her inside it). People, animals and pawns are dynamic too and pass over: they hide
 	// nothing and stop no one's way)
+	// (a test that stops at its first hit (PR #87's review: a multi trace sorted every hit, per monster and per step): the people, the
+	// animals and the piles (dynamic objects too) ignored by a list made once a frame; her and the monsters are pawns, not queried)
 	if (!GetWorld()) return false;
-	FCollisionQueryParams Q(SCENE_QUERY_STAT(RDWildWay14), false, Skip);
-	FCollisionObjectQueryParams O; O.AddObjectTypesToQuery(ECC_WorldStatic); O.AddObjectTypesToQuery(ECC_WorldDynamic);
-	TArray<FHitResult> Hits;
-	if (Radius > 0.f) GetWorld()->SweepMultiByObjectType(Hits, A, B, FQuat::Identity, O, FCollisionShape::MakeSphere(Radius), Q);
-	else GetWorld()->LineTraceMultiByObjectType(Hits, A, B, O, Q);
-	for (const FHitResult& H : Hits)
+	if (WildPassFrame14 != GFrameCounter)
 	{
-		const AActor* Ac = H.GetActor();
-		if (Ac && (Ac->IsA<ARDTownsfolk>() || Ac->IsA<ARDTownAnimal>() || Ac->IsA<APawn>() || Ac->GetClass()->GetName().Contains(TEXT("WildAnimal")) || Ac->IsA<ARDLootPile>())) continue;
-		return true;
+		WildPassFrame14 = GFrameCounter;
+		WildPass14.Reset();
+		for (ARDTownsfolk* T : WildPeople14()) if (IsValid(T)) WildPass14.Add(T);
+		for (const FRDWildFarmRec& F : WildFarms) for (const TWeakObjectPtr<ARDTownAnimal>& An : F.Animals) if (An.IsValid()) WildPass14.Add(An.Get());
+		for (const TObjectPtr<ARDWildAnimal>& An : WildAnimals) if (IsValid(An)) WildPass14.Add(An.Get());
+		for (const TWeakObjectPtr<ARDWildAnimal>& An : WildRoamHerd) if (An.IsValid()) WildPass14.Add(An.Get());
+		for (const FSceneryHerd& Hd : WildSceneryHerds) for (const TWeakObjectPtr<ARDWildAnimal>& An : Hd.Animals) if (An.IsValid()) WildPass14.Add(An.Get());
+		for (const TObjectPtr<ARDLootPile>& Lp : LootPiles) if (IsValid(Lp)) WildPass14.Add(Lp.Get());
 	}
-	return false;
+	FCollisionQueryParams Q(SCENE_QUERY_STAT(RDWildWay14), false, Skip);
+	Q.AddIgnoredActors(WildPass14);
+	FCollisionObjectQueryParams O; O.AddObjectTypesToQuery(ECC_WorldStatic); O.AddObjectTypesToQuery(ECC_WorldDynamic);
+	return Radius > 0.f ? GetWorld()->SweepTestByObjectType(A, B, FQuat::Identity, O, FCollisionShape::MakeSphere(Radius), Q)
+		: GetWorld()->LineTraceTestByObjectType(A, B, O, Q);
 }
 
 bool ARDDungeonGenerator::WildSeesHer14(FVector Eye) const
@@ -156,6 +168,22 @@ bool ARDDungeonGenerator::WildSeesHer14(FVector Eye) const
 	return !WildWayBlocked14(Eye, Her->GetActorLocation() + FVector(0, 0, 40.f), 0.f, Her);
 }
 
+float ARDDungeonGenerator::WildFloorZ14(const FVector& At, float FeetZ) const
+{
+	// (the floor under a step: the first piece under it from a little over its feet (a farmhouse's floor stands over the ground: PR
+	// #87's review), never under the wilds' ground)
+	const float Gz = WildGroundZ(At);
+	if (!GetWorld()) return Gz;
+	FCollisionQueryParams Q(SCENE_QUERY_STAT(RDWildFloor14), false);
+	if (WildPassFrame14 == GFrameCounter) Q.AddIgnoredActors(WildPass14);
+	FCollisionObjectQueryParams O; O.AddObjectTypesToQuery(ECC_WorldStatic); O.AddObjectTypesToQuery(ECC_WorldDynamic);
+	FHitResult H;
+	const float Top = FMath::Max(FeetZ, Gz) + 60.f;
+	if (GetWorld()->LineTraceSingleByObjectType(H, FVector(At.X, At.Y, Top), FVector(At.X, At.Y, Gz - 20.f), O, Q) && !Cast<ARDTownsfolk>(H.GetActor()))
+		return FMath::Max((float)H.ImpactPoint.Z, Gz);
+	return Gz;
+}
+
 void ARDDungeonGenerator::CalmWildFolk14()
 {
 	for (ARDTownsfolk* T : WildPeople14()) if (IsValid(T)) T->CalmWild14();
@@ -164,10 +192,14 @@ void ARDDungeonGenerator::CalmWildFolk14()
 
 // ================================================================================================ the person turned
 
-void ARDTownsfolk::MakeWildHostile14(AActor* Her, bool bSeen)
+bool ARDTownsfolk::MakeWildHostile14(AActor* Her, bool bSeen)
 {
-	if (!Gen || !CanBeHurt14() || bWildHostile14) return;
+	if (!Gen || !CanBeHurt14() || bWildHostile14) return false;
 	bWildHostile14 = true; WildFoe14 = Her; WildTurnedBy14 = bSeen ? TEXT("seen") : TEXT("heard");
+	WildHiddenSince14 = -1.f;
+	// (a traveller's way and work kept for when it calms down: back to its seat at the fire, or its way along the road (PR #87's review:
+	// it sat down where the chase ended))
+	WildPreRoad14 = RoadPath; WildPreStand14 = StandWork; WildPreAt14 = GetActorLocation();
 	WildSwingT14 = -1.f; WildNextSwing14 = GetWorld() ? GetWorld()->GetTimeSeconds() + 0.6f : 0.f;
 	// (its blow grown with the wilds' tier where it stands, as its hit points)
 	WildBlow14 = Gen->WildFolkBlow14 * FMath::Max((float)Gen->WildGoldAt(1000, GetActorLocation()) / 1000.f, 1.f);
@@ -175,14 +207,20 @@ void ARDTownsfolk::MakeWildHostile14(AActor* Her, bool bSeen)
 	// (out of its house at once, at its door (a farm's family indoors at night: it heard)
 	if (bWildIndoors) { bWildIndoors = false; bWentHome = false; SetActorLocation(WildDoorOut); }
 	// (out of a traveller's way and work)
-	RoadPath.Reset(); SetProp(NAME_None);
+	RoadPath.Reset(); SetProp(NAME_None); StandWork = NAME_None;
+	return true;
 }
 
 void ARDTownsfolk::CalmWild14()
 {
 	if (!bWildHostile14) return;
-	bWildHostile14 = false; WildFoe14 = nullptr; WildSwingT14 = -1.f;
+	bWildHostile14 = false; WildFoe14 = nullptr; WildSwingT14 = -1.f; WildHiddenSince14 = -1.f;
 	if (Body && CurAnim) { CurAnim = nullptr; }
+	if (bRoadWalker)
+	{
+		RoadPath = WildPreRoad14.Num() > 0 ? WildPreRoad14 : TArray<FVector>{ WildPreAt14 };
+		StandWork = WildPreStand14;
+	}
 	SetClip(false);
 }
 
@@ -196,7 +234,7 @@ bool ARDTownsfolk::StepOnGround14(const FVector& Dir, float Sp, float Dt)
 		const float Off = K == 0 ? 0.f : (K % 2 ? 1.f : -1.f) * 30.f * ((K + 1) / 2);
 		const FVector Dd = FRotator(0.f, Off, 0.f).RotateVector(Dir);
 		FVector N = L + Dd * Sp * Dt;
-		N.Z = Gen->WildGroundZ(N) + HalfHeight + 2.f;
+		N.Z = Gen->WildFloorZ14(N, L.Z - HalfHeight) + HalfHeight + 2.f;
 		if (Gen->WildWayBlocked14(L + FVector(0, 0, 40.f), N + Dd * 40.f + FVector(0, 0, 40.f), 28.f, this)) continue;
 		SetActorLocation(N, false);
 		SetActorRotation(FRotator(0.f, FMath::RInterpConstantTo(GetActorRotation(), Dd.Rotation(), Dt, 540.f).Yaw, 0.f));
@@ -210,6 +248,16 @@ bool ARDTownsfolk::TickHostile14(float Dt, float Now)
 	URDCombatComponent* Pc = Gen ? Gen->GetPlayerCombat() : nullptr;
 	AActor* Her = WildFoe14.Get();
 	if (!Her || !Pc || Pc->IsDead() || FVector::Dist2D(Her->GetActorLocation(), GetActorLocation()) > Gen->WildCalmCm14) { CalmWild14(); return false; }
+	// (she hides (stealth, a veil): it has lost her: it stands and looks about, and calms down after WildLostCalmSeconds14, as the
+	// monsters lose a hidden hero (PR #87's review: it hunted her unseen until she was 80 m off))
+	if (Pc->IsHidden())
+	{
+		if (WildHiddenSince14 < 0.f) WildHiddenSince14 = Now;
+		if (Now - WildHiddenSince14 >= Gen->WildLostCalmSeconds14) { CalmWild14(); return false; }
+		if (WildSwingT14 < 0.f) { SetClip(false); SetActorRotation(FRotator(0.f, GetActorRotation().Yaw + 60.f * Dt, 0.f)); }
+		return true;
+	}
+	WildHiddenSince14 = -1.f;
 	FVector D = Her->GetActorLocation() - GetActorLocation(); const float Dz = FMath::Abs(D.Z); D.Z = 0.f;
 	const float Dist = D.Size();
 	auto Face = [&]() { if (!D.IsNearlyZero(1.f)) SetActorRotation(FRotator(0.f, FMath::RInterpConstantTo(GetActorRotation(), D.Rotation(), Dt, 540.f).Yaw, 0.f)); };
@@ -222,9 +270,14 @@ bool ARDTownsfolk::TickHostile14(float Dt, float Now)
 			bWildSwingHit14 = true;
 			if (Dist < 200.f && Dz < 200.f)
 			{
+				// (counted and heard only when it hurt her: a roll, stealth, a veil or a shield takes it whole (PR #87's review))
+				const float Hp0 = Pc->GetHealth();
 				Pc->ApplyDamage(WildBlow14, this);
-				++WildBlowsLanded14; ++Gen->WildFolkBlowsOnHer14;
-				Gen->PlaySoundAt(TEXT("Player.Hit.Daggers"), Her->GetActorLocation());
+				if (Pc->GetHealth() < Hp0)
+				{
+					++WildBlowsLanded14; ++Gen->WildFolkBlowsOnHer14;
+					Gen->PlaySoundAt(TEXT("Player.Hit.Daggers"), Her->GetActorLocation());
+				}
 			}
 		}
 		if (WildSwingT14 >= WildSwingLen14) { WildSwingT14 = -1.f; WildNextSwing14 = Now + 1.2f; CurAnim = nullptr; }

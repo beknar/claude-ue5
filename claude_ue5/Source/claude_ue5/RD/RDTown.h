@@ -175,7 +175,7 @@ public:
 	/** laid again dead with its chunk */
 	void LayWildDead14();
 	/** the ninth phase (RDList14i.cpp): turned on her by a lock picked or broken (heard, or seen: bSeen) */
-	void MakeWildHostile14(AActor* Her, bool bSeen);
+	bool MakeWildHostile14(AActor* Her, bool bSeen);
 	void CalmWild14();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool IsWildHostile14() const { return bWildHostile14; }
 	/** tests: "heard" or "seen", its swings and the blows that reached her */
@@ -202,6 +202,8 @@ private:
 	bool bWildHostile14 = false, bWildSwingHit14 = false;
 	float WildSwingT14 = -1.f, WildSwingLen14 = 1.f, WildSwingHit14 = 0.5f, WildNextSwing14 = 0.f, WildBlow14 = 6.f;
 	TWeakObjectPtr<AActor> WildFoe14;
+	float WildHiddenSince14 = -1.f;
+	TArray<FVector> WildPreRoad14; FName WildPreStand14; FVector WildPreAt14 = FVector::ZeroVector;
 	void PlayDie14(bool bAtEnd);
 	bool bWildDead14 = false, bWildDieClip14 = false, bWildLaidDead14 = false;
 	float WildHealth14 = -1.f, WildDeadAt14 = -100.f, WildFleeUntil14 = -100.f, WildHitUntil14 = -100.f, WildCowerUntil14 = -100.f;
