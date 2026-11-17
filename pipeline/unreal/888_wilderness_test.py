@@ -3482,6 +3482,116 @@ def step_recipes14():
     step_result("recipes14", ok, **res)
 
 
+def farm_folk14(fid):
+    out = []
+    for l in G["gen"].get_wild_farm_lines():
+        p = str(l).split("|")
+        if p[0] != "folk" or int(p[1]) != fid: continue
+        out.append({"title": p[2], "x": float(p[3]), "y": float(p[4]), "z": float(p[5]), "clip": p[6], "asleep": p[9] == "1", "inbed": p[10] == "1",
+                    "indoors": p[11] == "1", "hasbed": p[12] == "1", "bed": V(float(p[13]), float(p[14]), float(p[15]))})
+    return out
+
+def step_sleep14():
+    """the list of 2026-11-16's seventh phase (item 16: "the NPCs at farms should sleep at night"): at the first farmstead near
+    Brokenspire, its family at 20:00 walk home (time sped up) and go into their farmhouse; at 23:00 each is asleep indoors, those with
+    a bed lying in it on its Sleep clip (the pose read with her looking at it: the hips over the bed's top, the clip moving); F names a
+    sleeper asleep and leaves it in bed; at 6:00 they come out and are back at their work's places; every one of the farm designs
+    built in turn: how many of its family have a bed. Pictures of a sleeper in bed and of the yard by night and morning."""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    w = G["w"]
+    try:
+        fs = [str(x).split("|") for x in g.find_wild_farmsteads(0.0, 0.0, 6000.0)]
+        res["farmsteads"] = len(fs)
+        fid, fx, fy = int(fs[0][0]), float(fs[0][2]), float(fs[0][3])
+        g.wild_drop_all(); g.wild_put_her(fx - 40.0, fy); yield from wait_chunks(30, 50)
+        g.set_town_hour(12.0); yield from rwait(3.0)
+        day = farm_folk14(fid); res["folk"] = len(day); res["day_places"] = [(round(f["x"]), round(f["y"])) for f in day]
+        res["has_bed"] = sum(1 for f in day if f["hasbed"])
+        # ---- evening: home
+        g.set_town_hour(20.0); GS.set_global_time_dilation(w, 4.0)
+        t0 = time.time()
+        while time.time() - t0 < 40.0:
+            yield from rwait(1.0)
+            if all(f["indoors"] for f in farm_folk14(fid)): break
+        GS.set_global_time_dilation(w, 1.0)
+        ev = farm_folk14(fid); res["home_s"] = round(time.time() - t0, 1); res["indoors_at_evening"] = sum(1 for f in ev if f["indoors"])
+        # ---- night
+        g.set_town_hour(23.0); yield from rwait(2.0)
+        nt = farm_folk14(fid)
+        res["night"] = [{"title": f["title"], "asleep": f["asleep"], "inbed": f["inbed"], "indoors": f["indoors"], "hasbed": f["hasbed"], "clip": f["clip"]} for f in nt]
+        bp = [f["bed"] for f in nt if f["inbed"]]
+        res["night_beds_apart_cm"] = round(min((math.hypot(a.x - b_.x, a.y - b_.y) for i_, a in enumerate(bp) for b_ in bp[i_ + 1:]), default=9999.0))
+        sl = next((f for f in nt if f["inbed"]), None)
+        if sl:
+            # (her looking at it from the room, so its pose is ticked (a body not drawn is not posed: the town's lesson))
+            b = sl["bed"]; boxes, farms, blds = box_lines()
+            hb = next((x for x in blds if x["farm"] == fid and x["kind"] == "house"), None)
+            st = V(hb["x"], hb["y"], 0) if hb else V(b.x + 150, b.y, 0)
+            d_ = V(b.x - st.x, b.y - st.y, 0); n_ = math.hypot(d_.x, d_.y) or 1.0
+            st = V(b.x - d_.x / n_ * 200.0, b.y - d_.y / n_ * 200.0, 0)
+            put(st, yaw=math.degrees(math.atan2(d_.y, d_.x)), z=(hb["floor"] if hb else b.z - 50.0)); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-30, yaw=math.degrees(math.atan2(d_.y, d_.x))))
+            yield from rwait(1.2)
+            act = min((a for a in GS.get_all_actors_of_class(w, unreal.RDTownsfolk)), key=lambda a: math.hypot(a.get_actor_location().x - sl["x"], a.get_actor_location().y - sl["y"]))
+            m = act.get_component_by_class(unreal.SkeletalMeshComponent)
+            p0 = m.get_position(); yield from rwait(1.0); p1 = m.get_position()
+            hips = m.get_socket_location("pelvis")
+            res["sleeper"] = {"title": sl["title"], "hips_over_top_cm": round(hips.z - b.z, 1), "hips_from_bed_cm": round(math.hypot(hips.x - b.x, hips.y - b.y), 1),
+                              "clip": sl["clip"], "plays": abs(p1 - p0) > 0.01}
+            shot("sleep14_bed", "1280x720"); yield from rwait(1.2)
+            # (F names it asleep and leaves it in bed: from beside the bed where it is the nearest thing (at its foot the chest is
+            # nearer, the first run's "open the chest"))
+            by = act.get_actor_rotation().yaw; fw_ = V(math.cos(math.radians(by)), math.sin(math.radians(by)), 0); rt_ = V(-fw_.y, fw_.x, 0)
+            for off in (rt_ * 110.0, rt_ * -110.0, rt_ * 130.0, rt_ * -130.0, fw_ * 170.0):
+                q_ = V(b.x + off.x, b.y + off.y, 0)
+                put(q_, yaw=math.degrees(math.atan2(b.y - q_.y, b.x - q_.x)), z=(hb["floor"] if hb else b.z - 50.0)); yield from rwait(0.5)
+                res["sleeper"]["says"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+                if "asleep" in res["sleeper"]["says"]: break
+            res["sleeper"]["f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.6)
+            res["sleeper"]["still_in_bed"] = next((f["inbed"] for f in farm_folk14(fid) if f["title"] == sl["title"]), False)
+        # ---- morning: out to work
+        g.wild_put_her(fx - 40.0, fy); yield from rwait(1.0)
+        g.set_town_hour(6.1); GS.set_global_time_dilation(w, 4.0)
+        t0 = time.time()
+        while time.time() - t0 < 40.0:
+            yield from rwait(1.0)
+            mo = farm_folk14(fid)
+            if not any(f["indoors"] for f in mo) and all(min(math.hypot(f["x"] - x * 1.0, f["y"] - y * 1.0) for x, y in res["day_places"]) < 250 for f in mo): break
+        GS.set_global_time_dilation(w, 1.0)
+        mo = farm_folk14(fid)
+        res["morning"] = {"asleep": sum(1 for f in mo if f["asleep"]), "inbed": sum(1 for f in mo if f["inbed"]), "indoors": sum(1 for f in mo if f["indoors"]),
+                          "off_post_cm": [round(min(math.hypot(f["x"] - x, f["y"] - y) for x, y in res["day_places"])) for f in mo], "s": round(time.time() - t0, 1)}
+        # ---- every design's beds for its family
+        g.set_town_hour(12.0)
+        nd = len(g.get_editor_property("farm_designs")); res["designs"] = nd; beds = {}
+        sx, sy = fx + 90.0, fy
+        g.wild_drop_all(); g.wild_put_her(sx - 45.0, sy); yield from wait_chunks(30, 50); yield from rwait(2.0)
+        for d in range(nd):
+            fid2 = g.spawn_farm_design_at(d, sx, sy, 0.0); yield from rwait(0.15)
+            ff = farm_folk14(fid2)
+            # (the beds measured, not counted (PR #84's review: four beds laid in one place passed a count): the least distance
+            # between two of the family's beds)
+            bp = [f["bed"] for f in ff if f["hasbed"]]
+            md = min((math.hypot(a.x - b_.x, a.y - b_.y) for i_, a in enumerate(bp) for b_ in bp[i_ + 1:]), default=9999.0)
+            beds[d] = [len(ff), len(bp), round(md)]
+            g.remove_wild_farm(fid2); yield
+        res["design_beds"] = beds
+    finally:
+        GS.set_global_time_dilation(w, 1.0)
+        g.set_town_hour(12.0)
+        g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+        quiet(False)
+    nt = res.get("night", []); s = res.get("sleeper", {}); mo = res.get("morning", {})
+    db = res.get("design_beds", {})
+    ok = (res.get("folk", 0) >= 2 and res.get("indoors_at_evening") == res["folk"] and nt and all(f["asleep"] and f["indoors"] for f in nt)
+          and all(f["inbed"] == f["hasbed"] for f in nt) and all("Sleep" in f["clip"] for f in nt if f["inbed"]) and res.get("has_bed", 0) >= min(2, res["folk"])
+          and s and 3 <= s["hips_over_top_cm"] <= 45 and s["hips_from_bed_cm"] <= 60 and s["plays"] and "asleep" in s.get("says", "") and s.get("f") == "asleep" and s.get("still_in_bed")
+          and mo.get("asleep") == 0 and mo.get("inbed") == 0 and mo.get("indoors") == 0 and max(mo.get("off_post_cm", [999])) < 250
+          and res.get("night_beds_apart_cm", 0) >= 80
+          and len(db) == res.get("designs", -1) and all(v[1] == v[0] and v[2] >= 80 for v in db.values()))
+    step_result("sleep14", ok, **res)
+
+
 def stations14():
     out = []
     for l in G["gen"].get_wild_stations14():
@@ -5057,7 +5167,7 @@ def step_horse14():
           and res["called_town_m"] is not None and res["called_town_m"] < 4.0)
     step_result("horse14", ok, **res)
 
-STEPS = {"recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "spires14": step_spires14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "spires14": step_spires14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)

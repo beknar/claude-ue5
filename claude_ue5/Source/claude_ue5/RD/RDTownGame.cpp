@@ -263,7 +263,9 @@ void ARDTownsfolk::Tick(float Dt)
 			if (Door == 1) { Path.Reset(); SetClip(false); NextTrip = Now + R.FRandRange(1.f, 3.f); if (Act == 1) { EndWork(); NextTrip = Now + 2.f; } return; }
 			if (Door == 0) { SetClip(false); return; }
 		}
-		const FVector Step = D.GetSafeNormal() * FMath::Min(Speed * Dt, D.Size());
+		FVector Step = D.GetSafeNormal() * FMath::Min(Speed * Dt, D.Size());
+		// (the list of 2026-11-16: a farmstead's family walks over the wilds' ground, at its height under each step)
+		if (bWildFarm && Gen && !bWildIndoors) Step.Z = Gen->WildGroundZ(L + Step) + 94.f - L.Z;
 		FHitResult Hit;
 		SetActorLocation(L + Step, true, &Hit);
 		if (Hit.bBlockingHit)
@@ -321,6 +323,7 @@ void ARDTownsfolk::Tick(float Dt)
 bool ARDTownsfolk::TickDay(float Now)
 {
 	bSleeping = false;
+	if (bWildFarm) return TickWildFarmDay(Now);          // (the list of 2026-11-16: a farmstead's family, RDList14f.cpp)
 	if (!Gen || !Gen->bDayNight || HomeBld < 0 || !Section) return false;
 	const float H = Gen->GetTownHour();
 	const bool bNight = H >= 22.f || H < 6.f;
@@ -1361,6 +1364,8 @@ FString ARDDungeonGenerator::TownDescribe(const FVector& From) const
 		const ARDTownsfolk* Wf = WildFolkForF(From);
 		if (Dc && (!Wf || FVector::Dist2D(Dc->Doors[Di].At, From) < FVector::Dist2D(Wf->GetActorLocation(), From))) return WildDoorDescribe(From);
 		if (Wf) return FString::Printf(TEXT("talk to %s"), *RDTTheTitle(Wf->Title, false));
+		// (the list of 2026-11-16: a farm's sleeper, when nothing else is in reach)
+		if (!Dc) if (const ARDTownsfolk* Sl = WildSleeperNear14(From)) return FString::Printf(TEXT("%s (asleep)"), *RDTTheTitle(Sl->Title, false));
 	}
 	// (someone near: talk)
 	int32 Who = -1; float Best = 240.f;
@@ -1432,6 +1437,16 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 		// (the list of 2026-11-11: one met on the way gives her what they have, the first time she speaks to them)
 		if ((!Wf->WildGift.IsEmpty() || Wf->WildGiftGold > 0) && GiveWildGift(Wf)) return TEXT("gift");
 		return TEXT("bark");
+	}
+	// (the list of 2026-11-16's seventh phase: a farm's sleeper, when F reaches nothing else, is left asleep)
+	if (bWild)
+	{
+		int32 Di2 = -1;
+		if (const ARDTownsfolk* Sl = WildSleeperNear14(From); Sl && !(bWildHouseInsides && WildDoorNear(From, 190.f, Di2)))
+		{
+			if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("%s is asleep"), *RDTTheTitle(Sl->Title, true)));
+			return TEXT("asleep");
+		}
 	}
 	int32 Who = -1; float Best = 240.f;
 	for (int32 I = 0; I < TownPeople.Num(); ++I)

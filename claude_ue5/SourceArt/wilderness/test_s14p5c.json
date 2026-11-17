@@ -8,7 +8,7 @@
   {
    "step": "tables14",
    "ok": true,
-   "farmsteads": 48,
+   "farmsteads": 49,
    "farm_ovens": 1,
    "oven": {
     "kind": "Oven",
