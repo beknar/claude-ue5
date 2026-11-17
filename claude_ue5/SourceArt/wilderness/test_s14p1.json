@@ -1,0 +1,181 @@
+{
+ "tag": "s14p1",
+ "plan": [
+  "spires14",
+  "collide14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "spires14",
+   "ok": true,
+   "load": true,
+   "at_km": [
+    4.15,
+    -1.44
+   ],
+   "biome": "farms",
+   "landmark": "on|417713|-144985|-1090",
+   "far_sight": "none|0|0|4.40|0",
+   "tall": [
+    {
+     "mesh": "SM_N13_LandmarkTower",
+     "path": "/Game/RandomDungeon/Wild13/Kit/SM_N13_LandmarkTower.SM_N13_LandmarkTower",
+     "owner": "RDDungeonGenerator_1",
+     "comp": "StaticMeshComponent_21",
+     "inst": -1,
+     "x": 4177.5,
+     "y": -1448.0,
+     "z": -10.9,
+     "h_m": 182.0,
+     "foot_m": [
+      43.9,
+      45.7
+     ],
+     "dist_m": 24.4,
+     "collision": "<CollisionEnabled.QUERY_AND_PHYSICS: 3>",
+     "pawn": "<CollisionResponseType.ECR_BLOCK: 2>"
+    }
+   ],
+   "tall_count": 1,
+   "walks": {
+    "SM_N13_LandmarkTower": {
+     "nearest_m": 23.72,
+     "half_m": 21.9,
+     "through": false,
+     "owner": "RDDungeonGenerator_1",
+     "h_m": 182.0,
+     "collision": "<CollisionEnabled.QUERY_AND_PHYSICS: 3>",
+     "pawn": "<CollisionResponseType.ECR_BLOCK: 2>"
+    }
+   }
+  },
+  {
+   "step": "collide14",
+   "ok": true,
+   "visits": {
+    "village": {
+     "name": "Briarmere",
+     "at_km": [
+      -6.74,
+      7.83
+     ],
+     "solid_traced": 16,
+     "solid_bad": 0,
+     "checked_open": 0,
+     "open": 0
+    },
+    "camp": {
+     "name": "Wolf Camp",
+     "at_km": [
+      6.38,
+      -8.8
+     ],
+     "solid_traced": 3,
+     "solid_bad": 0,
+     "checked_open": 0,
+     "open": 0
+    },
+    "house": {
+     "name": "Wynne's Farmstead",
+     "at_km": [
+      1.47,
+      3.68
+     ],
+     "solid_traced": 4,
+     "solid_bad": 0,
+     "checked_open": 0,
+     "open": 0
+    },
+    "ruins": {
+     "name": "The Old Watchtower",
+     "at_km": [
+      -2.45,
+      1.71
+     ],
+     "solid_traced": 3,
+     "solid_bad": 0,
+     "checked_open": 4,
+     "open": 0
+    },
+    "ritual": {
+     "name": "Oak Circle",
+     "at_km": [
+      -2.84,
+      -7.77
+     ],
+     "solid_traced": 8,
+     "solid_bad": 0,
+     "checked_open": 0,
+     "open": 0
+    },
+    "cave": {
+     "name": "Elm Cave",
+     "at_km": [
+      -10.99,
+      11.87
+     ],
+     "solid_traced": 94,
+     "solid_bad": 0,
+     "checked_open": 0,
+     "open": 0
+    },
+    "lair": {
+     "name": "The Mill Road Den",
+     "at_km": [
+      1.71,
+      -0.67
+     ],
+     "solid_traced": 0,
+     "solid_bad": 0,
+     "checked_open": 0,
+     "open": 0
+    },
+    "spawn": {
+     "name": "Oak Hollow",
+     "at_km": [
+      5.33,
+      -12.16
+     ],
+     "solid_traced": 7,
+     "solid_bad": 0,
+     "checked_open": 0,
+     "open": 0
+    },
+    "structure": {
+     "name": "village",
+     "at_km": [
+      0.64,
+      2.92
+     ],
+     "solid_traced": 4,
+     "solid_bad": 0,
+     "checked_open": 0,
+     "open": 0
+    },
+    "farmstead": {
+     "name": "Ilse's Farm",
+     "at_km": [
+      1.36,
+      2.43
+     ],
+     "solid_traced": 99,
+     "solid_bad": 0,
+     "checked_open": 0,
+     "open": 0
+    }
+   },
+   "open": [],
+   "bad": [],
+   "open_meshes": {},
+   "solid_traced_all": 238
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s14p1_spires14_SM_N13_LandmarkTower.png"
+ ],
+ "error": null,
+ "saves_put_back": 2,
+ "windows_shown_again": 1
+}

@@ -1,0 +1,2396 @@
+{
+ "meshes": {
+  "/Game/Hive_Sherwood/Meshes/SM_Tent_A.SM_Tent_A": {
+   "rays": 15,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 5.0,
+   "convex": 0,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "tent1"
+  },
+  "/Game/Hive_Sherwood/Meshes/SM_Tent_B.SM_Tent_B": {
+   "rays": 33,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 6.4,
+   "convex": 24,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "tent2"
+  },
+  "/Game/Wildlands/MESH/SM_tent_1.SM_tent_1": {
+   "rays": 41,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.5,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "tent3"
+  },
+  "/Game/Wildlands/MESH/SM_tent_2.SM_tent_2": {
+   "rays": 3,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "tent4"
+  },
+  "/Game/Wildlands/MESH/SM_fence_1.SM_fence_1": {
+   "rays": 6,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.2,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "fence1"
+  },
+  "/Game/Wildlands/MESH/SM_fence_2.SM_fence_2": {
+   "rays": 6,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.2,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "fence2"
+  },
+  "/Game/Hivemind/Medieval_Docks/Static_Meshes/Props/SM_Well.SM_Well": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 0.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "well1"
+  },
+  "/Game/Wildlands/MESH/SM_Wagon.SM_Wagon": {
+   "rays": 20,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 0.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "cart1"
+  },
+  "/Game/Relics/VOL2_ForgottenRelics/Meshes/LP/SM_Totem_01a.SM_Totem_01a": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.01,
+   "h_m": 2.7,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "totem1"
+  },
+  "/Game/Boneyard/VOL2_Human/Meshes/LowPoly/SM_Human_Skeleton_01a.SM_Human_Skeleton_01a": {
+   "rays": 16,
+   "misses": 0,
+   "inside_m": 0.02,
+   "h_m": 1.7,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "bones1"
+  },
+  "/Game/Dragon_graveyard/Meshes/Skeleton/SM_Skeleton_01.SM_Skeleton_01": {
+   "rays": 12,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.9,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "skeleton1"
+  },
+  "/Game/Dragon_graveyard/Meshes/Skeleton/SM_Skeleton_02.SM_Skeleton_02": {
+   "rays": 5,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 6.9,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "skeleton2"
+  },
+  "/Game/TheMessenger/Meshes/Ruins/SM_Ruin_01.SM_Ruin_01": {
+   "rays": 28,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 8.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "ruin1"
+  },
+  "/Game/TheMessenger/Meshes/Ruins/SM_Ruin_02.SM_Ruin_02": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.4,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "ruin2"
+  },
+  "/Game/TheMessenger/Meshes/Ruins/SM_Ruin_03.SM_Ruin_03": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.2,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "ruin3"
+  },
+  "/Game/TheMessenger/Meshes/Ruins/SM_Ruin_04.SM_Ruin_04": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "ruin4"
+  },
+  "/Game/TheMessenger/Meshes/Ruins/SM_Ruin_05.SM_Ruin_05": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.6,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "ruin5"
+  },
+  "/Game/TheMessenger/Meshes/Ruins/SM_Ruin_06.SM_Ruin_06": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.7,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "ruin6"
+  },
+  "/Game/Hyper/ResourcePack/Epic/ParagonProps/Monolith/Ruins/Meshes/SM_JungleWall_01B.SM_JungleWall_01B": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.5,
+   "convex": 0,
+   "simple": 1,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "ruin7"
+  },
+  "/Game/Relics/VOL2_ForgottenRelics/Meshes/LP/SM_Rune_01a.SM_Rune_01a": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.2,
+   "h_m": 2.3,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "stone1"
+  },
+  "/Game/Relics/VOL2_ForgottenRelics/Meshes/LP/SM_Rune_01b.SM_Rune_01b": {
+   "rays": 48,
+   "misses": 10,
+   "inside_m": 0.14,
+   "h_m": 2.4,
+   "convex": 2,
+   "simple": 0,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "stone2"
+  },
+  "/Game/Relics/VOL2_ForgottenRelics/Meshes/LP/SM_Altar_01a.SM_Altar_01a": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.07,
+   "h_m": 2.7,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "altar1"
+  },
+  "/Game/Scene_OldMine/Assets/Custom/Ind_Min_Cave/SM_Ind_Min_Cave.SM_Ind_Min_Cave": {
+   "rays": 4,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.8,
+   "convex": 0,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "cave1"
+  },
+  "/Game/FrozenNorseEnvironment/Meshes/SM_Boulder_01.SM_Boulder_01": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.1,
+   "h_m": 2.4,
+   "convex": 8,
+   "simple": 0,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "rock1"
+  },
+  "/Game/Hivemind/Medieval_Docks/Static_Meshes/Rock_Kit/Large/SM_Large_Rock_C.SM_Large_Rock_C": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 6.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "rock3"
+  },
+  "/Game/Medieval_Lake_Village/Meshs/SM_StorageSet.SM_StorageSet": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 6.1,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "barn1"
+  },
+  "/Game/Medieval_Lake_Village/Meshs/SM_Fence01.SM_Fence01": {
+   "rays": 7,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.6,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "paddock1"
+  },
+  "/Game/StylizedVillage/Meshes/SM_Scarecrow.SM_Scarecrow": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.0,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "scarecrow1"
+  },
+  "/Game/Castle/Interactive/Meshes/SM_house_01_open.SM_house_01_open": {
+   "rays": 46,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 13.6,
+   "convex": 0,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "house1"
+  },
+  "/Game/Castle/Interactive/Meshes/SM_house_02_open.SM_house_02_open": {
+   "rays": 47,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 13.6,
+   "convex": 0,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "house2"
+  },
+  "/Game/Castle/Interactive/Meshes/SM_house_03_open.SM_house_03_open": {
+   "rays": 47,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 13.6,
+   "convex": 0,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "house3"
+  },
+  "/Game/Castle/Interactive/Meshes/SM_house_04_open.SM_house_04_open": {
+   "rays": 46,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 13.6,
+   "convex": 0,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "house4"
+  },
+  "/Game/Castle/Interactive/Meshes/SM_house_05_open.SM_house_05_open": {
+   "rays": 47,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 13.6,
+   "convex": 0,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "house5"
+  },
+  "/Game/SilentZonePack/Assets/SM/SM_ElectricPole_Base.SM_ElectricPole_Base": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 7.5,
+   "convex": 0,
+   "simple": 1,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "r12_pole#1"
+  },
+  "/Game/SilentZonePack/Assets/SM/SM_AmusementWheelSupports.SM_AmusementWheelSupports": {
+   "rays": 18,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 21.6,
+   "convex": 0,
+   "simple": 108,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "r12_wheelsup#1"
+  },
+  "/Game/SilentZonePack/Assets/SM/SM_AmusementWheel.SM_AmusementWheel": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 31.7,
+   "convex": 0,
+   "simple": 439,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "r12_wheel#1"
+  },
+  "/Game/SilentZonePack/Assets/SM/SM_ConcreateWall_LineDoors_v1.SM_ConcreateWall_LineDoors_v1": {
+   "rays": 20,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.8,
+   "convex": 0,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_concdebris#1"
+  },
+  "/Game/SilentZonePack/Assets/SM/SM_OrangeBrickWall_LineDoorsWide_v1.SM_OrangeBrickWall_LineDoorsWide_v1": {
+   "rays": 20,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.8,
+   "convex": 0,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_brickdoor#1"
+  },
+  "/Game/SilentZonePack/Assets/SM/SM_SolidConcreteWall_Decorated_v1_BrokenRight.SM_SolidConcreteWall_Decorated_v1_BrokenRight": {
+   "rays": 38,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.8,
+   "convex": 0,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_concrete#2"
+  },
+  "/Game/SilentZonePack/Assets/SM/SM_ConcreateWall_LineHalfDamaged_v1.SM_ConcreateWall_LineHalfDamaged_v1": {
+   "rays": 40,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.8,
+   "convex": 0,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_concrete#1"
+  },
+  "/Game/FantasyCastle/Mesh/SM_Spear_low.SM_Spear_low": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.2,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_spear#1"
+  },
+  "/Game/TheMessenger/Meshes/HeroProps/SM_Sword_01.SM_Sword_01": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 10.4,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_sword#1"
+  },
+  "/Game/Crownfall/Assets/KnightSet/SM_S_KnightStatue_DestroyedV1_B050BE1F.SM_S_KnightStatue_DestroyedV1_B050BE1F": {
+   "rays": 40,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.1,
+   "convex": 6,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_knight#1"
+  },
+  "/Game/SilentZonePack/Assets/SM/SM_Machinery_MainBlock.SM_Machinery_MainBlock": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.2,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_machine#1"
+  },
+  "/Game/SilentZonePack/Assets/SM/SM_Industrial_Tank_01.SM_Industrial_Tank_01": {
+   "rays": 36,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.7,
+   "convex": 0,
+   "simple": 10,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "r12_tank#1"
+  },
+  "/Game/SilentZonePack/Assets/SM/SM_CraneHuge_Base.SM_CraneHuge_Base": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.5,
+   "convex": 0,
+   "simple": 80,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "r12_crane#1"
+  },
+  "/Game/SilentZonePack/Assets/SM/SM_Machinery_Hopper.SM_Machinery_Hopper": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_hopper#1"
+  },
+  "/Game/BefourStudios/RiversideEuropeanVillage/Meshes/HouseKit/Deco/SM_ChimneyTop.SM_ChimneyTop": {
+   "rays": 47,
+   "misses": 0,
+   "inside_m": 0.02,
+   "h_m": 4.2,
+   "convex": 0,
+   "simple": 2,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "r12_chimney#1"
+  },
+  "/Game/Flower_meadows/meshes/SM_mill_body_01.SM_mill_body_01": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 30.2,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_mill#1"
+  },
+  "/Game/Village_Collection/Props/SM_WoodenCart/Meshes/FBX/SM_WoodenCart.SM_WoodenCart": {
+   "rays": 31,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.2,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_cart#1"
+  },
+  "/Game/Village_Collection/Props/SM_OldWell/Meshes/FBX/SM_OldWell_SM_OldWell_Stone.SM_OldWell_SM_OldWell_Stone": {
+   "rays": 26,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_well#1"
+  },
+  "/Game/CastleofEternalMist/Meshes/Bridge/SM_ArchBridge_A_Ruined.SM_ArchBridge_A_Ruined": {
+   "rays": 20,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 12.4,
+   "convex": 2,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_aqueductruin#1"
+  },
+  "/Game/CastleofEternalMist/Meshes/Bridge/SM_ArchBridge_A.SM_ArchBridge_A": {
+   "rays": 18,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 12.5,
+   "convex": 16,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_aqueduct#1"
+  },
+  "/Game/Desert_Outpost/Meshs/SM_sand_2.SM_sand_2": {
+   "rays": 39,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.3,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_sand#2"
+  },
+  "/Game/Desert_Outpost/Meshs/SM_sand_1.SM_sand_1": {
+   "rays": 36,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 0.9,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_sand#1"
+  },
+  "/Game/RandomDungeon/Wild/Solid/SM_RockFormation01_Solid.SM_RockFormation01_Solid": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 6.7,
+   "convex": 454,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_lavarock#2"
+  },
+  "/Game/Village_Collection/Props/SM_WoodenVerticalStairs/Meshes/FBX/SM_WoodenVerticalStairs.SM_WoodenVerticalStairs": {
+   "rays": 7,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_ladder#1"
+  },
+  "/Game/FantasyCastle/Mesh/SM_TempleDoor.SM_TempleDoor": {
+   "rays": 6,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.7,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_templedoor#1"
+  },
+  "/Game/Hivemind/Medieval_Docks/Static_Meshes/Rock_Kit/SM_RockCliff_02.SM_RockCliff_02": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.9,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_cliff#2"
+  },
+  "/Game/RandomDungeon/Wild/Solid/SM_RockCliff_01_Solid.SM_RockCliff_01_Solid": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 5.4,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_cliff#1"
+  },
+  "/Game/RandomDungeon/Wild/Solid/SM_Large_Rock_C_Solid.SM_Large_Rock_C_Solid": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 6.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_slab#1"
+  },
+  "/Game/Statues/Meshes/SM_Stone_02.SM_Stone_02": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_holed#1"
+  },
+  "/Game/Relics/VOL2_ForgottenRelics/Meshes/LP/SM_Rune_01c.SM_Rune_01c": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.3,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_standing#2"
+  },
+  "/Game/Statues/Meshes/SM_Stone_01.SM_Stone_01": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.2,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_standing#1"
+  },
+  "/Game/FantasyCastle/Mesh/SM_StonesStackLong.SM_StonesStackLong": {
+   "rays": 26,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 0.7,
+   "convex": 6,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_stoneslong#1"
+  },
+  "/Game/Hyper/ResourcePack/Epic/ParagonProps/Monolith/Ruins/Meshes/SM_JunglePillarBlock_01A.SM_JunglePillarBlock_01A": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.5,
+   "convex": 0,
+   "simple": 1,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "r12_jblock#1"
+  },
+  "/Game/Hyper/ResourcePack/Epic/ParagonProps/Monolith/Ruins/Meshes/SM_JungleWall_02A.SM_JungleWall_02A": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_jwall#2"
+  },
+  "/Game/Crownfall/Assets/NaveAssets/SM_S_Tomb.SM_S_Tomb": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_tomb#1"
+  },
+  "/Game/FantasyCemetery/Assets/SM_ChurchA.SM_ChurchA": {
+   "rays": 34,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 9.4,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_chapel#1"
+  },
+  "/Game/DarkHalls/StaticMeshes/Architecture/SM_PillarTriBroken.SM_PillarTriBroken": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 11.6,
+   "convex": 12,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_gothpillar#1"
+  },
+  "/Game/CastleofEternalMist/Meshes/Arch/Window/SM_ArchWall_Window_Bricks_4x6_A.SM_ArchWall_Window_Bricks_4x6_A": {
+   "rays": 37,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 6.0,
+   "convex": 7,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_winwall#1"
+  },
+  "/Game/Crownfall/Assets/NaveAssets/SM_S_ArchSecondFloorNave.SM_S_ArchSecondFloorNave": {
+   "rays": 36,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.9,
+   "convex": 12,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_navearch#1"
+  },
+  "/Game/Crownfall/Assets/AltarAssets/SM_S_Altar_Window_Curved_Destroyed.SM_S_Altar_Window_Curved_Destroyed": {
+   "rays": 35,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 13.0,
+   "convex": 14,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_gothicwin#1"
+  },
+  "/Game/Crownfall/Assets/BrokenWallSet/SM_S_BrokenWallPart.SM_S_BrokenWallPart": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.2,
+   "convex": 6,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_brokenwall#1"
+  },
+  "/Game/Hive_Sherwood/Mesh/SM_StoneWall_Damaged.SM_StoneWall_Damaged": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.4,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_wallbroken#1"
+  },
+  "/Game/FantasyCastle/Mesh/SM_CatleRuins.SM_CatleRuins": {
+   "rays": 19,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 10.8,
+   "convex": 32,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_castleruin#1"
+  },
+  "/Game/CastleofEternalMist/Meshes/Tower/Damage/SM_TowerRound_4m_A_Damage_A.SM_TowerRound_4m_A_Damage_A": {
+   "rays": 42,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.2,
+   "convex": 14,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_towerruin#1"
+  },
+  "/Game/Hyper/ResourcePack/Epic/ParagonProps/Monolith/Ruins/Meshes/SM_JungleRubblePile_A.SM_JungleRubblePile_A": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.5,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_rubble#2"
+  },
+  "/Game/Crownfall/Assets/BrokenWallSet/SM_S_BrickRubbleV1.SM_S_BrickRubbleV1": {
+   "rays": 37,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 0.9,
+   "convex": 16,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_rubble#1"
+  },
+  "/Game/MysticDungeon/Meshes/Arch/SM_Arch_Blocks_A_DMG_A.SM_Arch_Blocks_A_DMG_A": {
+   "rays": 5,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.6,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_archbroken#1"
+  },
+  "/Game/Relics/VOL2_ForgottenRelics/Meshes/LP/SM_Stone_Altar_12a.SM_Stone_Altar_12a": {
+   "rays": 46,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 0.9,
+   "convex": 2,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_altar#1"
+  },
+  "/Game/Statues/Meshes/SM_Statue_God_Stone1.SM_Statue_God_Stone1": {
+   "rays": 39,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_statue#4"
+  },
+  "/Game/Statues/Meshes/SM_Statue_Women_Stone.SM_Statue_Women_Stone": {
+   "rays": 13,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_statue#3"
+  },
+  "/Game/AncientRuins/VOL1/Meshes/SM_Statue_NN_01a.SM_Statue_NN_01a": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.9,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_statue#1"
+  },
+  "/Game/AncientRuins/VOL1/Meshes/SM_Temple_Trim_NN_01a.SM_Temple_Trim_NN_01a": {
+   "rays": 35,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 0.6,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_templetrim#1"
+  },
+  "/Game/AncientRuins/VOL1/Meshes/SM_Temple_Front_NN_03a.SM_Temple_Front_NN_03a": {
+   "rays": 6,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 5.4,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_templearch#3"
+  },
+  "/Game/AncientRuins/VOL1/Meshes/SM_Temple_Front_NN_02a.SM_Temple_Front_NN_02a": {
+   "rays": 6,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 5.4,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_templearch#2"
+  },
+  "/Game/AncientRuins/VOL1/Meshes/SM_Temple_Front_NN_01a.SM_Temple_Front_NN_01a": {
+   "rays": 6,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 5.5,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_templearch#1"
+  },
+  "/Game/Crownfall/Assets/ColumnsSet/SM_S_ColumnWideV1.SM_S_ColumnWideV1": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.5,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_colbroken#1"
+  },
+  "/Game/ArtemisTemple/Mesh/SM_Pillar01.SM_Pillar01": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.9,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "r12_col#1"
+  },
+  "/Game/RandomDungeon/Wild/Solid/SM_Boulder_01_Solid.SM_Boulder_01_Solid": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.4,
+   "convex": 8,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "l12_boulder#1"
+  },
+  "/Game/CastleofEternalMist/Scanned_Foliage/Objects/Foliage/EuropeanBeech/SM_EuropeanBeech_Log_01.SM_EuropeanBeech_Log_01": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 0.8,
+   "convex": 0,
+   "simple": 3,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "l12_fallen#2"
+  },
+  "/Game/RandomDungeon/Wild/Solid/SM_Pine_Fallen_Solid.SM_Pine_Fallen_Solid": {
+   "rays": 7,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.7,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "l12_fallen#1"
+  },
+  "/Game/RandomDungeon/Wild/Solid/SM_Pine_Big_1__Solid.SM_Pine_Big_1__Solid": {
+   "rays": 24,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 19.3,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "l12_pine#3"
+  },
+  "/Game/RandomDungeon/Wild/Solid/SM_Pine_Medium_2__Solid.SM_Pine_Medium_2__Solid": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 10.9,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "l12_pine#2"
+  },
+  "/Game/RandomDungeon/Wild/Solid/SM_Pine_Medium_1__Solid.SM_Pine_Medium_1__Solid": {
+   "rays": 30,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 9.3,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "l12_pine#1"
+  },
+  "/Game/CastleofEternalMist/Scanned_Foliage/Objects/Foliage/EuropeanBeech/SM_EuropeanBeech_M_01.SM_EuropeanBeech_M_01": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 6.4,
+   "convex": 0,
+   "simple": 1,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "l12_broadleaf#1"
+  },
+  "/Game/Harbour_Collection/Props/SM_BigFishNet/Meshes/FBX/SM_BigFishNet.SM_BigFishNet": {
+   "rays": 13,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.1,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_net#1"
+  },
+  "/Game/Village_Collection/Props/SM_WoodDirectionPlaque/Meshes/FBX/SM_WoodDirectionPlaque_Base_SM_WoodDirectionPlaque_Base.SM_WoodDirectionPlaque_Base_SM_WoodDirectionPlaque_Base": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.1,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_signpost#2"
+  },
+  "/Game/StylizedVillage/Meshes/SM_Road_Sign_01.SM_Road_Sign_01": {
+   "rays": 39,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_signpost#1"
+  },
+  "/Game/WarCamp_Collection/Props/SM_PilloryStocks/Meshes/FBX/SM_PilloryStocks.SM_PilloryStocks": {
+   "rays": 32,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.7,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_stocks#1"
+  },
+  "/Game/MysticDungeon/Meshes/Details/SM_RockRift_A.SM_RockRift_A": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 8.9,
+   "convex": 16,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_rift#1"
+  },
+  "/Game/Red_Echo/Meshes/Portal/SM_portal_base.SM_portal_base": {
+   "rays": 40,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.1,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "s12_portalbase#1"
+  },
+  "/Game/BoneTemple/Meshes/SM_BoneColumns_Prefab01_Light.SM_BoneColumns_Prefab01_Light": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 9.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_bonecolumn#1"
+  },
+  "/Game/FrozenNorseEnvironment/Meshes/SM_Viking_Statue.SM_Viking_Statue": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 18.9,
+   "convex": 27,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_giant#1"
+  },
+  "/Game/Dragon_graveyard/Meshes/Horn/SM_horn_01.SM_horn_01": {
+   "rays": 20,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.5,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_horn#1"
+  },
+  "/Game/BefourStudios/RiversideEuropeanVillage/Meshes/GroundKit/RiverWall/SM_RiverWallSolo.SM_RiverWallSolo": {
+   "rays": 45,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.2,
+   "convex": 2,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_riverwall#1"
+  },
+  "/Game/FantasyCastle/Mesh/SM_House.SM_House": {
+   "rays": 43,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 9.3,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_stonehouse#1"
+  },
+  "/Game/CauldronFX_VDB/Meshes/SM_Cauldron.SM_Cauldron": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.1,
+   "convex": 64,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_cauldron#1"
+  },
+  "/Game/Docks/VOL5_Laguna/Meshes/SM_Boat_Wreck_01a.SM_Boat_Wreck_01a": {
+   "rays": 32,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.2,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_boat#2"
+  },
+  "/Game/Medieval_Castle/CastleKit/Props/Meshes/Props/VikingBoat/SM_VikingBoat_01a.SM_VikingBoat_01a": {
+   "rays": 24,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.3,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_boat#1"
+  },
+  "/Game/Harbour_Collection/Props/SM_BrokenShip/Meshes/FBX/SM_BrokenShip.SM_BrokenShip": {
+   "rays": 30,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 5.7,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_ship#1"
+  },
+  "/Game/Hivemind/Medieval_Docks/Static_Meshes/Building_Kit/Logs/SM_Log_A.SM_Log_A": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.6,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_logpost#1"
+  },
+  "/Game/StylizedVillage/Meshes/SM_Trough_01.SM_Trough_01": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 0.6,
+   "convex": 0,
+   "simple": 1,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "s12_trough#1"
+  },
+  "/Game/Meshes/SM_COMP_Bridge_Stone_01.SM_COMP_Bridge_Stone_01": {
+   "rays": 14,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_stonebridge#1"
+  },
+  "/Game/DwarvenCitadel/Meshes/SM_BrokenWoodBridge.SM_BrokenWoodBridge": {
+   "rays": 20,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 6.4,
+   "convex": 0,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_planks#2"
+  },
+  "/Game/DwarvenCitadel/Meshes/SM_BridgeWood.SM_BridgeWood": {
+   "rays": 39,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 0.7,
+   "convex": 0,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_planks#1"
+  },
+  "/Game/Medieval_Fantasy_Village/Meshes/Bridge/SM_bridge.SM_bridge": {
+   "rays": 16,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.1,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_bridge#1"
+  },
+  "/Game/Statues/Meshes/SM_Statues_Moak.SM_Statues_Moak": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_prayer#2"
+  },
+  "/Game/Crownfall/Assets/PrayingWomanStatue/SM_S_FirekeeperPrayingStatue.SM_S_FirekeeperPrayingStatue": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.7,
+   "convex": 10,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_prayer#1"
+  },
+  "/Game/BoneTemple/Meshes/SM_Sanctuary01_Item01_Light.SM_Sanctuary01_Item01_Light": {
+   "rays": 22,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 22.0,
+   "convex": 64,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_totem#1"
+  },
+  "/Game/FrozenNorseEnvironment/Meshes/SM_Runestone_01.SM_Runestone_01": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.1,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_runestone#1"
+  },
+  "/Game/CHURCH/VOL1/Meshes/LP/SM_Coffin_01a.SM_Coffin_01a": {
+   "rays": 30,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.2,
+   "convex": 2,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_coffin#1"
+  },
+  "/Game/Crownfall/Assets/NaveAssets/SM_S_TombNieche.SM_S_TombNieche": {
+   "rays": 39,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 10.7,
+   "convex": 18,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_tombwall#1"
+  },
+  "/Game/Scene_OldMine/Assets/Megascans/3D_Assets/Ind_Min_Cart_Log_Wood_Old_01/SM_Ind_Min_Cart_Log_Wood_Old_01.SM_Ind_Min_Cart_Log_Wood_Old_01": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.1,
+   "convex": 0,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_logcart#1"
+  },
+  "/Game/Scene_OldMine/Assets/Megascans/3D_Assets/Ind_Min_Tunnel_Wall_Log_Modular_01/SM_Ind_Min_Tunnel_Wall_Log_Modular_01.SM_Ind_Min_Tunnel_Wall_Log_Modular_01": {
+   "rays": 16,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.4,
+   "convex": 0,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_mineframe#1"
+  },
+  "/Game/Hive_Sherwood/Meshes/SM_Tower.SM_Tower": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 22.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_stonetower#1"
+  },
+  "/Game/StylizedVillage/Meshes/SM_Watchtower.SM_Watchtower": {
+   "rays": 16,
+   "misses": 0,
+   "inside_m": 0.06,
+   "h_m": 6.9,
+   "convex": 0,
+   "simple": 1,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "s12_woodtower#1"
+  },
+  "/Game/ModularWoodenBuildings/StaticMeshes/WoodenShacks/SM_LookoutTower_01.SM_LookoutTower_01": {
+   "rays": 15,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 15.1,
+   "convex": 37,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_lookout#1"
+  },
+  "/Game/Hive_Sherwood/Meshes/SM_Wall_A.SM_Wall_A": {
+   "rays": 20,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.1,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_woodwall#1"
+  },
+  "/Game/Hive_Sherwood/Meshes/SM_bigwall.SM_bigwall": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_palisade#1"
+  },
+  "/Game/BoneTemple/Meshes/SM_SkullPile01_Item01_Light.SM_SkullPile01_Item01_Light": {
+   "rays": 35,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 7.2,
+   "convex": 50,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_skullpile#1"
+  },
+  "/Game/AlienPlanet/Meshes/SpikeRocks/SM_SpikeFormation01.SM_SpikeFormation01": {
+   "rays": 31,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 17.9,
+   "convex": 0,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_spire#1"
+  },
+  "/Game/VolcanoLand/Meshes/RockFormations/SM_RockFormation03.SM_RockFormation03": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 8.2,
+   "convex": 882,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_darkrock#1"
+  },
+  "/Game/FrozenNorseEnvironment/Meshes/SM_Ice_01.SM_Ice_01": {
+   "rays": 38,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.5,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "s12_icicle#1"
+  },
+  "/Game/RandomDungeon/Wild/Solid/SM_Ice_Formation_01_Solid.SM_Ice_Formation_01_Solid": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.6,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_glacier#2"
+  },
+  "/Game/RandomDungeon/Wild/Solid/SM_Glaciar_01_Solid.SM_Glaciar_01_Solid": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 11.3,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_glacier#1"
+  },
+  "/Game/Meshes/SM_RockBeach_01a.SM_RockBeach_01a": {
+   "rays": 34,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 0.7,
+   "convex": 64,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_beachrock#1"
+  },
+  "/Game/TheMessenger/VFX/Waterfall/SM_Waterfall_01.SM_Waterfall_01": {
+   "rays": 15,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 16.6,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_waterfall#1"
+  },
+  "/Game/Hive_Sherwood/Meshes/SM_maingate.SM_maingate": {
+   "rays": 6,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 5.8,
+   "convex": 8,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_woodgate#1"
+  },
+  "/Game/WarCamp_Collection/Props/SM_Camp_Barricade/Meshes/FBX/SM_Camp_Barricade_Var1_SM_Barricade_Var1.SM_Camp_Barricade_Var1_SM_Barricade_Var1": {
+   "rays": 31,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.2,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_barricade#1"
+  },
+  "/Game/FrozenNorseEnvironment/Meshes/SM_Gate.SM_Gate": {
+   "rays": 16,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 34.6,
+   "convex": 15,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_stonegate#1"
+  },
+  "/Game/Hyper/ResourcePack/Environments/Rocks/Mountain_RockFace_002/SM_MountainRock_Closed.SM_MountainRock_Closed": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.9,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_mossrock#2"
+  },
+  "/Game/FantasyCastle/Mesh/SM_ToothRockUpper.SM_ToothRockUpper": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.6,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_mossrock#1"
+  },
+  "/Game/Hyper/ResourcePack/Environments/Cliffs/Cliff01/SM_Cliff01.SM_Cliff01": {
+   "rays": 27,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 15.7,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_overhang#1"
+  },
+  "/Game/FantasyCastle/Mesh/SM_RockPillar01.SM_RockPillar01": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 10.1,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_spirerock#2"
+  },
+  "/Game/PureNature_AsianValley/Models/Cliffs/SM_ThinCliff_3.SM_ThinCliff_3": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 11.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_spirerock#1"
+  },
+  "/Game/RandomDungeon/Wild/Solid/SM_Cliff_01_Solid.SM_Cliff_01_Solid": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 5.4,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_snowrock#1"
+  },
+  "/Game/CastleofEternalMist/Meshes/Cliff/SM_Rock_E.SM_Rock_E": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 14.9,
+   "convex": 10,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_bigrock#3"
+  },
+  "/Game/PureNature_AsianValley/Models/Cliffs/SM_Cliff_4.SM_Cliff_4": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 7.4,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_bigrock#2"
+  },
+  "/Game/FrozenNorseEnvironment/Meshes/SM_Cliff_03.SM_Cliff_03": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 6.8,
+   "convex": 2,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_bigrock#1"
+  },
+  "/Game/MysticDungeon/Meshes/Rock/SM_Rock_Wall_Bend_A.SM_Rock_Wall_Bend_A": {
+   "rays": 39,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 8.4,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_rockarch#1"
+  },
+  "/Game/PiratesAge/VOL5_Prisioners/Meshes/LP/SM_Cage_Wooden_01a.SM_Cage_Wooden_01a": {
+   "rays": 26,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.4,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_cage#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_BogIdol.SM_N13_BogIdol": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_bogidol#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_SeaStack_B.SM_N13_SeaStack_B": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 13.5,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_seastack#2"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_SeaStack_A.SM_N13_SeaStack_A": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 14.4,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_seastack#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_DuckBlind.SM_N13_DuckBlind": {
+   "rays": 18,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.7,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_duckblind#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_EelTrap.SM_N13_EelTrap": {
+   "rays": 30,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.1,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_eeltrap#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Lighthouse.SM_N13_Lighthouse": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 14.6,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_lighthouse#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_StiltHut.SM_N13_StiltHut": {
+   "rays": 1,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 5.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_stilthut#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_AntlerPile.SM_N13_AntlerPile": {
+   "rays": 8,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.3,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_antlerpile#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Sledge.SM_N13_Sledge": {
+   "rays": 6,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 0.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_sledge#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Igloo.SM_N13_Igloo": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_igloo#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_ExpeditionHut.SM_N13_ExpeditionHut": {
+   "rays": 18,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.4,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_expeditionhut#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_MammothTusks.SM_N13_MammothTusks": {
+   "rays": 7,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.9,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_mammothtusks#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Inuksuk.SM_N13_Inuksuk": {
+   "rays": 10,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.2,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_inuksuk#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_LavaTube.SM_N13_LavaTube": {
+   "rays": 25,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.9,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_lavatube#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_ChurchSpire.SM_N13_ChurchSpire": {
+   "rays": 32,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 11.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_churchspire#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_GeyserCone.SM_N13_GeyserCone": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.4,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_geysercone#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_SodHut.SM_N13_SodHut": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.4,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_sodhut#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Bomb_B.SM_N13_Bomb_B": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.1,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_bomb#2"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Bomb_A.SM_N13_Bomb_A": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.1,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_bomb#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Fumarole.SM_N13_Fumarole": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 0.9,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_fumarole#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Obsidian.SM_N13_Obsidian": {
+   "rays": 12,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.4,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_obsidian#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Basalt_B.SM_N13_Basalt_B": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 6.9,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_basalt#2"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Basalt_A.SM_N13_Basalt_A": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 6.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_basalt#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Pueblo.SM_N13_Pueblo": {
+   "rays": 24,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 7.5,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_pueblo#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_SandRock_A.SM_N13_SandRock_A": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 0.7,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_sandrock#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_LogJam.SM_N13_LogJam": {
+   "rays": 30,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.6,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_logjam#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_SunDagger.SM_N13_SunDagger": {
+   "rays": 38,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.6,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_sundagger#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_CliffDwelling.SM_N13_CliffDwelling": {
+   "rays": 31,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 8.3,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_cliffdwelling#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Hoodoo_B.SM_N13_Hoodoo_B": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 5.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_hoodoo#2"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Hoodoo_A.SM_N13_Hoodoo_A": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 5.9,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_hoodoo#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_NaturalArch.SM_N13_NaturalArch": {
+   "rays": 15,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 10.6,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_naturalarch#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_IceBlock.SM_N13_IceBlock": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_iceblock#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_FrozenTent.SM_N13_FrozenTent": {
+   "rays": 30,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_frozentent#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_IceArch.SM_N13_IceArch": {
+   "rays": 22,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_icearch#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Serac_B.SM_N13_Serac_B": {
+   "rays": 8,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 8.1,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_serac#2"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Serac_A.SM_N13_Serac_A": {
+   "rays": 16,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 9.4,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_serac#1"
+  },
+  "/Game/Feather/Geometry/SM_Cliff_03.SM_Cliff_03": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 23.9,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_cliffface#2"
+  },
+  "/Game/Feather/Geometry/SM_Cliff_01.SM_Cliff_01": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 24.7,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_cliffface#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_TurfStack_B.SM_N13_TurfStack_B": {
+   "rays": 27,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_turfstack#2"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_TurfStack_A.SM_N13_TurfStack_A": {
+   "rays": 26,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_turfstack#1"
+  },
+  "/Game/CastleofEternalMist/Scanned_Foliage/Objects/Foliage/EuropeanBeech/SM_EuropeanBeech_Stump_01.SM_EuropeanBeech_Stump_01": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.6,
+   "convex": 0,
+   "simple": 2,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "n13_beechstump#1"
+  },
+  "/Game/RandomDungeon/Wild/Solid/SM_Pine_Fallen_1_Solid.SM_Pine_Fallen_1_Solid": {
+   "rays": 14,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.0,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_pinefallen#2"
+  },
+  "/Game/RandomDungeon/Wild/Solid/SM_Pine_Medium_2_Snow_Solid.SM_Pine_Medium_2_Snow_Solid": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 10.9,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_sprucesnow#2"
+  },
+  "/Game/RandomDungeon/Wild/Solid/SM_Pine_Big_2_Snow_Solid.SM_Pine_Big_2_Snow_Solid": {
+   "rays": 36,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 18.2,
+   "convex": 11,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_sprucesnow#1"
+  },
+  "/Game/RandomDungeon/Wild/Solid/SM_Pine_Big_2__Solid.SM_Pine_Big_2__Solid": {
+   "rays": 30,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 18.1,
+   "convex": 8,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_pinebig#2"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_ResinPine_B.SM_N13_ResinPine_B": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 17.3,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_resinpine#2"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_ResinPine_A.SM_N13_ResinPine_A": {
+   "rays": 44,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 14.1,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_resinpine#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_CarvedFace.SM_N13_CarvedFace": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.2,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_carvedface#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_FungusLog.SM_N13_FungusLog": {
+   "rays": 42,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 0.7,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_funguslog#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_CharcoalMound.SM_N13_CharcoalMound": {
+   "rays": 8,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.7,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_charcoalmound#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_StiltCache.SM_N13_StiltCache": {
+   "rays": 1,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_stiltcache#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_FurStretcher.SM_N13_FurStretcher": {
+   "rays": 32,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.1,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_furstretcher#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_BeaverDam.SM_N13_BeaverDam": {
+   "rays": 18,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.6,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_beaverdam#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_BeaverLodge.SM_N13_BeaverLodge": {
+   "rays": 12,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_beaverlodge#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Lavvu_B.SM_N13_Lavvu_B": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.3,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_lavvu#2"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Lavvu_A.SM_N13_Lavvu_A": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.3,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_lavvu#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_SeidStone.SM_N13_SeidStone": {
+   "rays": 7,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.7,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_seidstone#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Flume.SM_N13_Flume": {
+   "rays": 4,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.5,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_flume#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Granary.SM_N13_Granary": {
+   "rays": 22,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_granary#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Fireweed.SM_N13_Fireweed": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.4,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "n13_fireweed#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_FusedGlass.SM_N13_FusedGlass": {
+   "rays": 22,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.5,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "n13_fusedglass#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Petroglyph_B.SM_N13_Petroglyph_B": {
+   "rays": 10,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_petroglyph#2"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Petroglyph_A.SM_N13_Petroglyph_A": {
+   "rays": 10,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_petroglyph#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_PrayerCairn.SM_N13_PrayerCairn": {
+   "rays": 38,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.4,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_prayercairn#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Balbal_B.SM_N13_Balbal_B": {
+   "rays": 10,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.2,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_balbal#2"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Balbal_A.SM_N13_Balbal_A": {
+   "rays": 10,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.1,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_balbal#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Yurt_B.SM_N13_Yurt_B": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.3,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_yurt#2"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Yurt_A.SM_N13_Yurt_A": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.3,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_yurt#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Termite_B.SM_N13_Termite_B": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_termite#2"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Termite_A.SM_N13_Termite_A": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.2,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_termite#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Baobab_B.SM_N13_Baobab_B": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 16.8,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_baobab#2"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Baobab_A.SM_N13_Baobab_A": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 16.2,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_baobab#1"
+  },
+  "/Game/Medieval_Weapons/Meshes/VOL2/SM_Spear.SM_Spear": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.4,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "n13_rustspear#1"
+  },
+  "/Game/Castle/Furniture/Kit/SM_Kit_Cart.SM_Kit_Cart": {
+   "rays": 25,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.2,
+   "convex": 0,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_wagon#1"
+  },
+  "/Game/StylizedVillage/Meshes/SM_Quest_Board.SM_Quest_Board": {
+   "rays": 18,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.1,
+   "convex": 0,
+   "simple": 1,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "n13_noticeboard#1"
+  },
+  "/Game/MysticDungeon/Meshes/Cage/SM_Gibbet_B.SM_Gibbet_B": {
+   "rays": 7,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 4.2,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_gibbet#2"
+  },
+  "/Game/MysticDungeon/Meshes/Cage/SM_Gibbet_A.SM_Gibbet_A": {
+   "rays": 9,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 3.6,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_gibbet#1"
+  },
+  "/Game/Hive_Sherwood/Meshes/SM_EuropeanBeech_XL_01.SM_EuropeanBeech_XL_01": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 27.8,
+   "convex": 0,
+   "simple": 3,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "n13_lonebeech#1"
+  },
+  "/Game/Hyper/ResourcePack/Environments/Rocks/LargePlainsBoulder002/SM_LargePlainsBoulder002.SM_LargePlainsBoulder002": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2.7,
+   "convex": 4,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_erratic#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Drystone_B.SM_N13_Drystone_B": {
+   "rays": 24,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.3,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_drystone#2"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Drystone_A.SM_N13_Drystone_A": {
+   "rays": 18,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.3,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_drystone#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_Nest.SM_N13_Nest": {
+   "rays": 47,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 0.6,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "n13_nest#1"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_LandmarkTower.SM_N13_LandmarkTower": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 182.0,
+   "convex": 8,
+   "simple": 0,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "landmark"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_StormCell.SM_N13_StormCell": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2660.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "kit:SM_N13_StormCell"
+  }
+ },
+ "failed": [],
+ "fixed": [],
+ "still_failing": [],
+ "not_measured": [
+  "tent4",
+  "r12_wheel#1",
+  "r12_crane#1",
+  "r12_jwall#2",
+  "r12_rubble#2",
+  "l12_fallen#2",
+  "l12_broadleaf#1",
+  "s12_rift#1",
+  "s12_spirerock#2",
+  "n13_stilthut#1",
+  "n13_bomb#2",
+  "n13_bomb#1",
+  "n13_sandrock#1",
+  "n13_iceblock#1",
+  "n13_beechstump#1",
+  "n13_stiltcache#1",
+  "n13_lonebeech#1"
+ ]
+}

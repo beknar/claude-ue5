@@ -1,0 +1,30 @@
+the lettering on some of the signs for the buildings will sometimes fall outside of the sign's boundaries.  example: store house
+create a new crafting table: the alchemist's table, where potions can be crafted.  the alchemist's table should be available in town in an appropriate building, in dungeons and in various places in the wilderness
+create a new crafting table: the librarian's table, where scrolls be crafted.  the alchemist's table should be available in town in an appropriate building and in various places in the wilderness
+recipes can be found to make more advanced food, more advanced potions, more advanced scrolls
+the shield position when it's used to block by the warrior is perpendicular to the enemy.  it should be facing the front.
+the player's position on the horse is too far back, she should be in the middle of the saddle, and she should be holding the reigns instead of holding her weapons
+enable calling your horse from anywhere except the dungeon
+enable the ability to see the last 20 game messages
+if a random monster encounter comes across a wandering NPC before it reaches the player, it should attack the NPC instead, damaging and killing it if it attacks enough
+there should be a marker on the mini map and on the large map for the player horse if she owns one
+in the wilderness, enable the ability to kill NPCs and loot them - only mundane items and small amounts of gold should be found
+in the wilderness, enable the ability to kill farm animals and loot them - crafting items, food, can be found
+in the wilderness, containers should be locked.  rogues can pick the locks of these locked containers and warriors can break the locks, but if they do, it alerts any nearby NPCs and makes them hostile.
+in the wilderness, if someone breaks open a container or picks the lock within line of sight of an NPC, the NPC becomes hostile and starts attacking
+ovens to craft food should be available at farms in the wilderness
+the NPCs at farms should sleep at night
+there are some structures (very tall spires) in the wilderness located in the farm biomes that have no collision layers - check the game save labeled game3b
+ensure that any structures that get built by the procedural terrain generator have collision layers
+the medium and stronger storms should have varying degrees of lightning and thunder, and if lightning hits someone, that someone should get damaged
+when a potion or food is in a quick bar, the attack action should consume it
+there should be major roads that look significantly better (raised cobblestone) than dirt roads that lead to the major cities.  the major roads should have signs that say where they lead to and how far that city is at regular intervals.  they should look different on the mini map and the large map that differentiate them from minor roads
+there should also be minor roads that are dirt roads that lead to villages, farmsteads, etc, with signs on them at regular intervals showing where they lead to and how far
+reduce the size of the continent to 150km x 150km with 2.5 times the density, add more along the roads between the cities.  the current city placement rules will need to accommodate this change, shrinking the distances between them.
+remove the rule for villages to be refused placement if it's near a road.  a village can be near a road.  villages can now be within 1km - 3km of each other.  
+increase the radius of detection of a point of interest.  villages should be within 1km to 3km of each other.
+increase the discovery of a point of interest on the mini map and large map out to 500m
+Put Heaven in a volcano biome.
+Put Vel morrath in a mountain biome.
+Put Kethrys in glacial biome
+break up these changes into appropriate pieces, formulate a plan to implement it, write that plan to an MD file in the docs directory, review the plan, then create a PR for reasonably sized portion of the plan and execute each PR in order.  If there are opportunities to do parallel actions.

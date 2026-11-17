@@ -71,7 +71,20 @@ def step_kit(src):
         o.static_mesh_import_data.combine_meshes = True; o.static_mesh_import_data.auto_generate_collision = True; o.static_mesh_import_data.generate_lightmap_u_vs = False
         tk = unreal.AssetImportTask(); tk.filename = rec[name]["fbx"]; tk.destination_path = KIT
         tk.replace_existing = True; tk.automated = True; tk.save = True; tk.options = o; tasks.append(tk)
+    # (the list of 2026-11-16, item 17: an import over an existing piece keeps its old collision: the landmark tower made 1.7 times
+    # bigger kept its first build's hull, 5.5 m inside its new walls and 75 m short of its top, and she walked into it. The pieces'
+    # sizes before the import; a piece whose size changed gets its shape again from its new faces)
+    was = {}
+    for name in rec:
+        m0 = unreal.load_asset(f"{KIT}/{name}") if eal.does_asset_exist(f"{KIT}/{name}") else None
+        if m0: was[name] = wild_tables.mesh_sig(m0)
     at.import_asset_tasks(tasks)
+    reshaped = []
+    for name in rec:
+        m1 = unreal.load_asset(f"{KIT}/{name}")
+        if not m1 or name not in was: continue
+        if wild_tables.mesh_sig(m1) != was[name]: wild_tables.reshape(m1); reshaped.append(name)
+    if reshaped: REPORT.append(f"kit: {len(reshaped)} pieces changed by their import, their collision made again: {', '.join(reshaped)}")
     bark, leaves = unreal.load_asset("/Game/RandomDungeon/Wild/M_RD_WildBark"), unreal.load_asset("/Game/RandomDungeon/Wild/M_RD_WildLeaves")
     assert bark and leaves, "926 kit: the wilds' masters are missing (887 trees)"
     clear = translucent_master()
