@@ -25,6 +25,14 @@ Parts (args):
   hud             the second phase (items 8 and 20): the last 20 messages (bMessageLog14: L or the D-pad's down opens them) and a
                   potion or food on the quick bar used by the attack button, food allowed on the bar (bQuickUse14), on the game's
                   maps and martial_arts.
+  tablekit [<dir>] the fifth phase (items 2 and 3): the alchemist's table (the castle kit's small table, potions, jars, a candle) and
+                  the librarian's (books, a scroll, parchment, candles), each merged from its pieces into one mesh under
+                  /Game/RandomDungeon/List14 on the scratch level (the table's long side to +Y, its front +X, centred, its foot at
+                  z 0); with <dir>, pictures of each from the front and three quarters.
+  tables          the fifth phase: on every map with potion or scroll recipes, the two tables' pieces (Table14.Alchemist,
+                  Table14.Librarian) and bTables14 (potions made at the alchemist's table, scrolls at the librarian's: RDList14c.cpp);
+                  on the maps with no town the librarian's table goes by the dungeon's anvils too (bLibrarianInDungeon14); every
+                  map's start section built again so the saved one has its tables (brokenspire's is its town).
 """
 import json, math, os, sys, gc
 import unreal
@@ -377,11 +385,130 @@ def collide(fix):
     assert not still, f"927 collide: still failing after their new shapes: {still}"
 
 
+T14 = "/Game/RandomDungeon/List14"
+KITF = "/Game/Castle/Furniture/Kit/"
+# (each table: its table's mesh and its props: path, the largest side wanted (cm), where on the top (shares of the top's half
+# depth along X and half width along Y), yaw, and the index of a prop it stands on (or None))
+TABLES14 = {
+    "SM_RD_AlchemistTable": (KITF + "SM_Kit_TableSmall", [
+        ("/Game/Diner_Colection/Props/SM_Potions_Var/Meshes/FBX/SM_Potions_Var1", 26, 0.15, -0.55, 0, None),
+        ("/Game/Diner_Colection/Props/SM_Potions_Var/Meshes/FBX/SM_Potions_Var3", 24, -0.25, -0.15, 30, None),
+        ("/Game/Crownfall/Assets/SmallAssets/SM_S_Potion", 20, 0.3, 0.15, 0, None),
+        ("/Game/Crownfall/Assets/SmallAssets/SM_S_Potion", 15, 0.05, 0.38, 40, None),
+        ("/Game/Diner_Colection/Props/SM_WoodJar/Meshes/FBX/SM_WoodJar", 22, -0.35, 0.6, 0, None),
+        ("/Game/Diner_Colection/Props/SM_SilverJar/Meshes/FBX/SM_SilverJar", 16, 0.3, 0.72, 0, None),
+        ("/Game/Crownfall/Assets/SmallAssets/Candles/SM_S_CandleV2", 17, -0.45, -0.82, 0, None),
+    ]),
+    "SM_RD_LibrarianTable": (KITF + "SM_Kit_TableSmall", [
+        ("/Game/Crownfall/Assets/SmallAssets/SM_S_BookOfEddrick", 38, 0.1, -0.1, 0, None),
+        ("/Game/FantasyCemetery/Assets/SM_BookA", 32, -0.3, 0.55, 10, None),
+        ("/Game/FantasyCemetery/Assets/SM_BookB", 28, -0.3, 0.55, -15, 1),
+        ("/Game/Crownfall/Assets/SmallAssets/SM_S_Scroll", 30, 0.3, 0.55, 70, None),
+        ("/Game/VictorianOffice/Mesh/SM_parchment01", 28, 0.25, -0.62, 10, None),
+        (KITF + "SM_Kit_Candles", 19, -0.45, -0.8, 30, None),
+        (KITF + "SM_Kit_CandleStick", 30, -0.4, 0.88, 0, None),
+    ]),
+}
+MAPS14_TABLES = GAME_MAPS + ("martial_arts", "random_dungeonmagic_level5", "random_dungeonmagic_level4")
+
+
+def box_of(m, s=1.0, yaw=0.0):
+    """a mesh's bounds scaled and turned about z: (min, max) as tuples"""
+    b = m.get_bounding_box(); q = unreal.Rotator(roll=0.0, pitch=0.0, yaw=yaw)
+    ps = [unreal.MathLibrary.greater_greater_vector_rotator(unreal.Vector(x * s, y * s, z * s), q) for x in (b.min.x, b.max.x) for y in (b.min.y, b.max.y) for z in (b.min.z, b.max.z)]
+    return (min(p.x for p in ps), min(p.y for p in ps), min(p.z for p in ps)), (max(p.x for p in ps), max(p.y for p in ps), max(p.z for p in ps))
+
+
+def tablekit(shots):
+    les.load_level(SCRATCH); unreal.SystemLibrary.execute_console_command(None, "obj gc")
+    if not eal.does_directory_exist(T14): eal.make_directory(T14)
+    out = {}
+    for name, (tpath, props) in TABLES14.items():
+        tm = unreal.load_asset(tpath); assert tm, tpath
+        (x0, y0, z0), (x1, y1, z1) = box_of(tm)
+        tyaw = 90.0 if (x1 - x0) > (y1 - y0) else 0.0          # (its long side along +Y)
+        (x0, y0, z0), (x1, y1, z1) = box_of(tm, 1.0, tyaw)
+        tq = unreal.Rotator(roll=0.0, pitch=0.0, yaw=tyaw)
+        acts = [eas.spawn_actor_from_object(tm, unreal.Vector(-(x0 + x1) / 2, -(y0 + y1) / 2, -z0), tq)]
+        hx, hy, top = (x1 - x0) / 2, (y1 - y0) / 2, z1 - z0
+        tops = []; missing = []
+        for (pp, ext, fx, fy, yaw, on) in props:
+            m = unreal.load_asset(pp)
+            if not m: missing.append(pp); tops.append(top); continue
+            (a0, b0, c0), (a1, b1, c1) = box_of(m)
+            s = ext / max(a1 - a0, b1 - b0, c1 - c0)
+            (a0, b0, c0), (a1, b1, c1) = box_of(m, s, yaw)
+            base = tops[on] if on is not None else top
+            loc = unreal.Vector(fx * hx - (a0 + a1) / 2, fy * hy - (b0 + b1) / 2, base - c0)
+            a = eas.spawn_actor_from_object(m, loc, unreal.Rotator(roll=0.0, pitch=0.0, yaw=yaw)); a.set_actor_scale3d(unreal.Vector(s, s, s))
+            acts.append(a); tops.append(base + (c1 - c0))
+        path = f"{T14}/{name}"
+        if eal.does_asset_exist(path): eal.delete_asset(path)
+        o = unreal.MergeStaticMeshActorsOptions()
+        o.set_editor_property("base_package_name", f"{T14}/{name[3:]}"); o.set_editor_property("destroy_source_actors", True); o.set_editor_property("spawn_merged_actor", False)
+        ms = o.get_editor_property("mesh_merging_settings")
+        ms.set_editor_property("pivot_type", unreal.MeshMergePivotType.WORLD_ORIGIN); ms.set_editor_property("merge_physics_data", True)
+        ms.set_editor_property("merge_materials", False); ms.set_editor_property("generate_light_map_uv", False)
+        o.set_editor_property("mesh_merging_settings", ms)
+        sme.merge_static_mesh_actors(acts, o)
+        for a in acts:
+            try: a.destroy_actor()
+            except Exception: pass
+        m = unreal.load_asset(path); assert m, f"927 tablekit: the merge made no {path}"
+        eal.save_loaded_asset(m, False)
+        (a0, b0, c0), (a1, b1, c1) = box_of(m)
+        out[name] = {"size": [round(a1 - a0, 1), round(b1 - b0, 1), round(c1 - c0, 1)], "table_top": round(top, 1), "props": len(props) - len(missing), "missing": missing}
+        REPORT.append(f"927 tablekit {name}: {out[name]}")
+        if shots:
+            # (lit for the pictures: a sun from the front left and a lamp over it; the textures compile on a first build, which shows
+            # the engine's checker: look at a second run's)
+            a = eas.spawn_actor_from_object(m, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
+            sun = eas.spawn_actor_from_class(unreal.DirectionalLight, unreal.Vector(0, 0, 400), unreal.Rotator(pitch=-50, yaw=-150, roll=0))
+            sun.light_component.set_intensity(8.0)
+            lamp = eas.spawn_actor_from_class(unreal.PointLight, unreal.Vector(120, 60, 220), unreal.Rotator(0, 0, 0))
+            lamp.point_light_component.set_intensity(4000.0); lamp.point_light_component.set_attenuation_radius(800.0)
+            w = ues.get_editor_world()
+            for tag, (x, y, z, pitch, yaw) in {"front": (230, 0, 160, -22, 180), "three_quarter": (170, 170, 170, -28, -135)}.items():
+                cap = eas.spawn_actor_from_class(unreal.SceneCapture2D, unreal.Vector(x, y, z), unreal.Rotator(pitch=pitch, yaw=yaw, roll=0))
+                comp = cap.capture_component2d
+                rt = unreal.RenderingLibrary.create_render_target2d(w, 1024, 768, unreal.TextureRenderTargetFormat.RTF_RGBA8_SRGB)
+                comp.texture_target = rt; comp.capture_source = unreal.SceneCaptureSource.SCS_FINAL_COLOR_LDR; comp.fov_angle = 55
+                comp.show_only_actor_components(a); comp.show_only_actor_components(sun); comp.show_only_actor_components(lamp)
+                comp.primitive_render_mode = unreal.SceneCapturePrimitiveRenderMode.PRM_USE_SHOW_ONLY_LIST
+                for _ in range(3): comp.capture_scene()
+                unreal.RenderingLibrary.export_render_target(w, rt, shots, f"{name}_{tag}.png")
+                cap.destroy_actor()
+            a.destroy_actor(); sun.destroy_actor(); lamp.destroy_actor()
+    json.dump(out, open(os.path.join(SA, "list14", "tables14.json"), "w", encoding="utf-8"), indent=1)
+
+
+def tables_cfg(g):
+    items = {str(i.name): str(i.kind).split(".")[-1].split(":")[0] for i in g.get_editor_property("items")}
+    rec = [r for r in g.get_editor_property("recipes") if str(r.station) in ("None", "")]
+    pot = [str(r.item) for r in rec if items.get(str(r.item)) in ("HEALING", "MANA", "SPEED")]
+    scr = [str(r.item) for r in rec if items.get(str(r.item)) == "SCROLL"]
+    if not pot and not scr: return "no potion or scroll recipes: left as it is"
+    pcs = g.get_editor_property("pieces")
+    for key, mesh in (("Table14.Alchemist", "SM_RD_AlchemistTable"), ("Table14.Librarian", "SM_RD_LibrarianTable")):
+        m = unreal.load_asset(f"{T14}/{mesh}"); assert m, f"927 tables: no {mesh} (run tablekit)"
+        (a0, b0, c0), (a1, b1, c1) = box_of(m)
+        p = unreal.RDPiece(); p.mesh = m; p.adjust = unreal.Transform(); p.size = unreal.Vector(a1 - a0, b1 - b0, c1 - c0); p.collision = True
+        pcs[unreal.Name(key)] = p
+    g.set_editor_property("pieces", pcs)
+    town = bool(g.get_editor_property("town"))
+    lib = not town and str(g.get_world().get_name()) in ("martial_arts", "random_dungeonmagic_level5", "random_dungeonmagic_level4")
+    g.set_editor_property("tables14", True); g.set_editor_property("librarian_in_dungeon14", lib)
+    g.modify(); g.build_start_section()
+    return f"{len(pot)} potion and {len(scr)} scroll recipes to the tables; the librarian's in the dungeon: {lib}; the start section built again"
+
+
 args = sys.argv[1:]
 if args and args[0] == "collide": collide("fix" in args[1:])
 if args and args[0] == "signboard": signboard()
 if args and args[0] == "horse": each(GAME_MAPS, horse_cfg, "horse")
 if args and args[0] == "reins": reins()
 if args and args[0] == "hud": each(GAME_MAPS + ("martial_arts",), hud, "hud")
+if args and args[0] == "tablekit": tablekit(args[1] if len(args) > 1 else None)
+if args and args[0] == "tables": each(MAPS14_TABLES, tables_cfg, "tables")
 for line in REPORT: print(line)
 import gc; gc.collect()

@@ -125,6 +125,8 @@ FString ARDDungeonGenerator::StationDescribe(const FVector& From, float DoorD) c
 	if (Recipes.Num() == 0) return FString();
 	const float Lim = FMath::Min(DoorD, AnvilReach);
 	FVector An, At; const bool bAnvil = FindNearestAnvil(From, Lim, An); const float Ad = bAnvil ? FVector::Dist2D(An, From) : 1e9f;
+	// (the list of 2026-11-16: the alchemist's or librarian's table nearer than the anvil)
+	if (const FName Tb = NearestTable14(From, Lim, Ad); !Tb.IsNone()) return Tb == TEXT("Alchemist") ? TEXT("use the alchemist's table") : TEXT("use the librarian's table");
 	// (a hero who does not work the forge, with an anvil in reach: the anvil is what F does (PR #40's review))
 	if (bForge && FindNearestForge(From, Lim, At) && FVector::Dist2D(At, From) < Ad && (ForgeRefusal().IsEmpty() || !bAnvil))
 		return ForgeRefusal().IsEmpty() ? FString(TEXT("use the forge")) : FString::Printf(TEXT("the forge (only %s works it)"), *HeroesInWords(ForgeHeroes));
@@ -138,6 +140,12 @@ FString ARDDungeonGenerator::StationInteract(const FVector& From, float DoorD)
 	if (!PlayerCombat || Recipes.Num() == 0) return FString();
 	const float Lim = FMath::Min(DoorD, AnvilReach);
 	FVector An, At; const bool bAnvil = FindNearestAnvil(From, Lim, An); const float Ad = bAnvil ? FVector::Dist2D(An, From) : 1e9f;
+	if (const FName Tb = NearestTable14(From, Lim, Ad); !Tb.IsNone())
+	{
+		PlayerCombat->SetCraftStation(Tb);
+		PlayerCombat->SetCraftingOpen(true);
+		return Tb == TEXT("Alchemist") ? TEXT("alchemist") : TEXT("librarian");
+	}
 	if (bForge && FindNearestForge(From, Lim, At) && FVector::Dist2D(At, From) < Ad && (ForgeRefusal().IsEmpty() || !bAnvil))
 	{
 		if (const FString Fr = ForgeRefusal(); !Fr.IsEmpty()) { PlayerCombat->ShowMessage(Fr); return TEXT("forge refused"); }

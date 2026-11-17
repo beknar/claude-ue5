@@ -1794,6 +1794,8 @@ void ARDSection::TownFurnish(FRandomStream& R, int32 BI)
 	}
 	default: break;
 	}
+	// (the list of 2026-11-16's fifth phase: the alchemist's and librarian's tables, after everything else of the building)
+	TownTables14(BI);
 }
 
 // ------------------------------------------------------------------------------------------------ outdoors

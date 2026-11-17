@@ -1396,7 +1396,8 @@ TArray<FString> URDCombatComponent::GetCraftLines() const
 		// (mistward, the list of 2026-10-30: a recipe of a tier not yet open, or a scroll her hero does not read, is not offered)
 		if (!Generator->RecipeRefusal(Rc).IsEmpty()) continue;
 		// (the list of 2026-11-04: an oven bakes, an anvil makes the rest)
-		if (Rc.Station != CraftStation) continue;
+		// (the list of 2026-11-16: potions at the alchemist's table, scrolls at the librarian's: RecipeStation)
+		if (Generator->RecipeStation(Rc) != CraftStation) continue;
 		TArray<FString> Ps;
 		for (const FRDRecipePart& Pt : Rc.Parts) Ps.Add(FString::Printf(TEXT("%s:%d:%d"), *Pt.Label, PartHave(Pt), Pt.Count));
 		TMap<FName, int32> Take;          // (the recipe as it is, not looked up again by name: the PR review's find, every frame)
@@ -1418,7 +1419,7 @@ TArray<FString> URDCombatComponent::GetCraftLines() const
 		return Ga != Gb ? Ga < Gb : (bAlpha && ByName(A, B));
 	});
 	const int32 NumRecipes = Out.Num();
-	if (!CraftStation.IsNone()) return Out;          // (an oven breaks nothing down)
+	if (!CraftStation.IsNone()) return Out;          // (an oven or a table breaks nothing down)
 	// (the list of 2026-11-10: gear she carries that is worn, mended to full at the anvil for half of what it breaks down into:
 	// "mend|<name>|w<weapon index> or g<item>|<1 she has it all>|<part>:<has>:<needs>;...|<left>|<full>", before the breakdowns)
 	{
@@ -1659,7 +1660,11 @@ bool URDCombatComponent::Craft(FName Item)
 	for (const TPair<FName, int32>& T : Take) RemoveCarried(T.Key, T.Value);
 	AddItem(Item, 1);
 	++ItemsCrafted;
-	SetMessage(FString::Printf(TEXT("You %s %s at the %s"), Rc.Station == TEXT("Oven") ? TEXT("bake") : TEXT("make"), *One, Rc.Station == TEXT("Oven") ? TEXT("oven") : TEXT("anvil")));
+	{
+		const FName St = Generator->RecipeStation(Rc);
+		SetMessage(FString::Printf(TEXT("You %s %s at the %s"), St == TEXT("Oven") ? TEXT("bake") : St == TEXT("Alchemist") ? TEXT("brew") : TEXT("make"), *One,
+			St == TEXT("Oven") ? TEXT("oven") : St == TEXT("Forge") ? TEXT("forge") : St == TEXT("Alchemist") ? TEXT("alchemist's table") : St == TEXT("Librarian") ? TEXT("librarian's table") : TEXT("anvil")));
+	}
 	PlayUiSound(TEXT("Player.Craft"), TEXT("Player.Loot"));
 	UE_LOG(LogTemp, Log, TEXT("RDCRAFT %s made (%d crafted)"), *Item.ToString(), ItemsCrafted);
 	return true;

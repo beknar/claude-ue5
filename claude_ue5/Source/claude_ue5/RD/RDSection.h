@@ -382,6 +382,12 @@ public:
 	/** the forges of the set (the list of 2026-11-10: the generator's ForgePieces where they stand) and the one put by the anvil */
 	TArray<FVector> ForgePoints;
 	void EnsureForge();
+	/** the list of 2026-11-16's fifth phase: the alchemist's and librarian's tables where they stand (recorded by AddPiece, in play
+	 *  too for the saved start section); a dungeon's put by its anvil; a town building's after its furnishing */
+	TArray<FVector> AlchemistPoints;
+	TArray<FVector> LibrarianPoints;
+	void EnsureTables14();
+	void TownTables14(int32 BI);
 	/** the list of 2026-11-10's fourth phase: the town's beds (where each stands, its yaw (its foot toward +X), its building, who
 	 *  has it); the ones put in play for sleepers who had none (their meshes); the households' extra people planned */
 	/** a made bed's tiles it blocked (freed with it: the townsfolk spawned again lay theirs afresh) */

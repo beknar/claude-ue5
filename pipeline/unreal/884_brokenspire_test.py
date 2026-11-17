@@ -1271,6 +1271,82 @@ def sign_extents():
                         "world": [round(c.get_world_location().x), round(c.get_world_location().y), round(c.get_world_location().z)]})
     return signs, out
 
+def step_tables14():
+    """the list of 2026-11-16's fifth phase (items 2 and 3) in the town: the alchemist's table in the healer's house, the
+    librarian's in the temple (each in a building of its kinds: the healer, laboratory or witch's; the temple, library or study);
+    the Mage at each: F names and opens it, it offers only its own (potions; scrolls she reads), she makes one of each from its
+    parts; the anvil (the smithy's) offers neither. Pictures of both tables."""
+    g = G["gen"]; res = {}; quiet(True)
+    if str(g.get_editor_property("current_hero")) != "Mage": g.switch_hero("Mage"); yield from wait(0.8); refresh(); g = G["gen"]
+    c = cb(); S = section()
+    kinds = {str(i.name): str(i.kind) for i in g.get_editor_property("items")}
+    def is_pot(n): return any(k in kinds.get(n, "") for k in ("HEALING", "MANA", "SPEED"))
+    def is_scr(n): return "SCROLL" in kinds.get(n, "")
+    B = {b["i"]: b for b in blds()}
+    OWN = {"Alchemist": ("HEALER", "LABORA", "WITCH"), "Librarian": ("TEMPLE", "LIBRARY", "STUDY")}
+    res["buildings"] = {k: sum(1 for b in B.values() if b["state"] == 0 and any(b["kind"].upper().startswith(o) or o in b["label"].upper() for o in OWN[k])) for k in OWN}
+    def stand(at_, word):
+        for r_ in (140, 170, 115, 200):
+            for a_ in range(0, 360, 45):
+                p_ = V(at_.x + math.cos(math.radians(a_)) * r_, at_.y + math.sin(math.radians(a_)) * r_, at_.z)
+                put(p_, math.degrees(math.atan2(at_.y - p_.y, at_.x - p_.x)))
+                yield
+                d_ = str(g.describe_nearest(G["pawn"].get_actor_location()))
+                if word in d_: return d_
+        return ""
+    try:
+        for st, want, word in (("Alchemist", is_pot, "alchemist"), ("Librarian", is_scr, "librarian")):
+            pts = list(g.get_all_tables14(st)); r = {"tables": len(pts)}; res[st] = r
+            r["in"] = []
+            for p_ in pts:
+                bi = S.town_building_at(p_); b = B.get(bi)
+                r["in"].append(f"{b['kind']}|{b['label']}" if b else f"none ({bi})")
+            r["all_in_own"] = all(any(o in x.upper() for o in OWN[st]) for x in r["in"])
+            offers = [str(n) for n in g.get_station_recipes14(st)]; r["offers"] = offers[:10]
+            if not pts: continue
+            at = pts[0]; tb = S.town_building_at(at)
+            # (from the street round its building, within F's reach of it, the table is not used: through a wall (the first run's
+            # picture: the healer's answered from outside))
+            outs = []
+            for r_ in (150, 200, 250):
+                for a_ in range(0, 360, 30):
+                    p_ = V(at.x + math.cos(math.radians(a_)) * r_, at.y + math.sin(math.radians(a_)) * r_, at.z)
+                    if S.town_building_at(p_) == tb: continue
+                    put(p_); yield
+                    h_ = G["pawn"].get_actor_location()
+                    if S.town_building_at(h_) == tb or dist2(h_, at) > 260: continue
+                    outs.append(str(g.describe_nearest(h_)))
+            r["outside_tries"] = len(outs); r["outside_named_it"] = [o for o in outs if word in o]
+            r["says"] = yield from stand(at, word)
+            r["her_building_is_its"] = S.town_building_at(G["pawn"].get_actor_location()) == tb
+            shot(f"tables14_{word}", "1280x720"); yield from rwait(1.0)
+            item = next((n for n in offers if want(n)), None)
+            rc = next((x for x in g.get_editor_property("recipes") if str(x.item) == item), None) if item else None
+            if rc:
+                for pt in rc.get_editor_property("parts"): c.add_item(pt.get_editor_property("any_of")[0], pt.get_editor_property("count"))
+            r["f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.3)
+            r["station"] = str(c.get_craft_station())
+            r["panel"] = [l.split("|")[1] for l in (str(x) for x in c.get_craft_lines()) if l.startswith("recipe|")]
+            r["panel_all_own"] = bool(r["panel"]) and all(want(n) for n in r["panel"])
+            if item:
+                n0 = c.get_item_count(item); r["made"] = c.craft(item); r["item"] = [item, n0, c.get_item_count(item)]
+            c.set_crafting_open(False); c.set_craft_station("None"); yield from rwait(0.2)
+        nr = [str(n) for n in g.get_station_recipes14("None")]
+        res["anvil_potions"] = [n for n in nr if is_pot(n)]; res["anvil_scrolls"] = [n for n in nr if is_scr(n)]
+    finally:
+        try: c.set_crafting_open(False)
+        except Exception: pass
+        quiet(False)
+    def good(st, word):
+        r = res.get(st, {}); it = r.get("item") or [None, 0, 0]
+        return (r.get("tables", 0) >= 1 and r.get("all_in_own") and word in r.get("says", "") and r.get("f") == word and r.get("station") == st
+                and r.get("her_building_is_its") and r.get("outside_tries", 0) >= 1 and not r.get("outside_named_it")
+                and r.get("panel_all_own") and r.get("made") and it[2] == it[1] + 1)
+    ok = (good("Alchemist", "alchemist") and good("Librarian", "librarian") and not res.get("anvil_potions") and not res.get("anvil_scrolls")
+          and res["Alchemist"]["tables"] >= res["buildings"]["Alchemist"] * 0.8 and res["Librarian"]["tables"] >= res["buildings"]["Librarian"] * 0.8)
+    step_result("tables14", ok, **res)
+
+
 def step_signs14():
     """item 1 of the list of 2026-11-16: "the lettering on some of the signs for the buildings will sometimes fall outside of the
     sign's boundaries. example: store house": in Brokenspire, Kethrys Spire and Graymourne (their libraries, laboratories, studies,
@@ -1442,7 +1518,7 @@ def step_walkers():
     ok = len(ws) >= 3 and all(v["foot_slow_cm_s"] < v["body_cm_s"] / 3 and 0.75 < v["rate"] < 1.25 for v in ws) and heads and all(any("_Head" in m for m in ms) for ms in heads.values())
     step_result("walkers", ok, **res)
 
-STEPS = {"town": step_town, "doors": step_doors, "talk": step_talk, "services": step_services, "guards": step_guards, "castle": step_castle,
+STEPS = {"tables14": step_tables14, "town": step_town, "doors": step_doors, "talk": step_talk, "services": step_services, "guards": step_guards, "castle": step_castle,
          "map": step_map, "folk": step_folk, "gate": step_gate, "pictures": step_pictures, "tour": step_tour, "trip": step_trip,
          "castlewalls": step_castlewalls, "daynight": step_daynight, "shape": step_shape, "watch": step_watch, "lights": step_lights,
          "signs": step_signs, "signs14": step_signs14, "circle": step_circle, "burned": step_burned, "windows": step_windows, "walkers": step_walkers}

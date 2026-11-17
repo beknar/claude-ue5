@@ -21,7 +21,7 @@ Where the list's wording leaves a choice, this plan reads it so (the report says
 - **Item 12**: the farm animals of the wilds (the farmsteads' pens and runs), not the towns'.
 - **Item 13**: picking or breaking a lock alerts every person within 30 m, seen or not, and they turn hostile. **Item 14** adds: a person who sees it happen (a clear line within 40 m) turns hostile too.
 - **Item 19**: lightning never strikes anyone under a roof; towns are not excepted.
-- **Dungeon-only maps** (random_dungeonmagic_level5, martial_arts and the older levels) have no town and no wilds: with potions and scrolls moved off the anvil, those maps get the alchemist's and the librarian's tables in their dungeons, or they could make neither (item 3 names no dungeons; this keeps scrolls makeable there).
+- **Dungeon-only maps** (random_dungeonmagic_level5, martial_arts and the older levels) have no town and no wilds: with potions and scrolls moved off the anvil, those maps get the alchemist's and the librarian's tables in their dungeons, or they could make neither (item 3 names no dungeons; this keeps scrolls makeable there). Measured when the phase ran (`927 tables`): none of them has a potion or scroll recipe (level 5's anvil makes repair items only), so nothing moves there and the switch (`bLibrarianInDungeon14`) is left off on every map.
 
 ## The phases
 
@@ -70,6 +70,8 @@ Phase 1 comes first: the spires must be found in the world the user's save was m
 - The block clip (`warrior3_block.py`, built on a boxing guard) keeps the guard's forearm turn, so the shield's face (the back of the forearm in the grip) points to her left. Solve the shield arm so the face points along her front; measure it in Blender (the face's normal within 20 degrees of her front) and in the game (`868 block14`: the face against her facing and the foe's way while blocking; pictures).
 
 ## Phase 5: the tables and the farms' ovens (items 2, 3, 15)
+
+Done in two PRs: **5a** the stations, the two tables' pieces, the towns and the dungeons (`927 tablekit,tables`, `RD/RDList14c.cpp`, `868 tables14`, `884 tables14`); **5b** the wilderness's tables and the farmsteads' ovens (`888 tables14`).
 
 - Two new stations (`FRDRecipe::Station` "Alchemist" and "Librarian", as "Oven" and "Forge" are): the potion recipes move to the alchemist's table, the scroll recipes to the librarian's; the anvil keeps repairs, food and the rest; who brews and who reads a school stay as they are.
 - Their pieces: an alchemist's table (a table, a cauldron or alembic, bottles) and a librarian's table (a desk, books, a candle, an inkwell), from the packs (Kethrys Spire's laboratory pieces), screened in pictures first.

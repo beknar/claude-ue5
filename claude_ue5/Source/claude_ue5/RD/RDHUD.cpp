@@ -2422,9 +2422,11 @@ void ARDHUD::DrawCrafting(float Sc)
 	const bool bDivider = UI.Has(TEXT("divider")), bPlate = UI.Has(TEXT("button"));
 	const float Tin = UI.Has(TEXT("panel_wide")) ? 24.f * Sc : 0.f;
 	const bool bOven = Cb->GetCraftStation() == TEXT("Oven"), bForge = Cb->GetCraftStation() == TEXT("Forge");
-	UI.Text(bOven ? TEXT("THE OVEN") : bForge ? TEXT("THE FORGE") : TEXT("THE ANVIL"), RDInk, A.X + Pd + Tin, A.Y + 16.f * Sc, Medium, Sc * 1.5f, ERDType::Title);
+	const bool bAlch = Cb->GetCraftStation() == TEXT("Alchemist"), bLib = Cb->GetCraftStation() == TEXT("Librarian");
+	UI.Text(bOven ? TEXT("THE OVEN") : bForge ? TEXT("THE FORGE") : bAlch ? TEXT("THE ALCHEMIST'S TABLE") : bLib ? TEXT("THE LIBRARIAN'S TABLE") : TEXT("THE ANVIL"), RDInk, A.X + Pd + Tin, A.Y + 16.f * Sc, Medium, Sc * 1.5f, ERDType::Title);
 	float Tw, Th;
 	const FString Sub = bOven ? TEXT("bake food from its ingredients") : bForge ? TEXT("forge again the plain arms and armour you have found")
+	                  : bAlch ? TEXT("brew potions from what you have gathered") : bLib ? TEXT("write scrolls of the spells you know")
 	                          : TEXT("make repair items  ·  mend what is worn  ·  break down the weapons you found");
 	UI.TextSize(Sub, Tw, Th, Small, Sc * 1.05f);
 	UI.Text(Sub, Gold, B.X - Pd - Tin - Tw, A.Y + 22.f * Sc, Small, Sc * 1.05f);
@@ -2642,7 +2644,23 @@ void ARDHUD::DrawCrafting(float Sc)
 		}
 		else { UI.Text(P[1].ToUpper(), FLinearColor::White, Rx, Ry, Medium, Sc * 1.15f, ERDType::Title); Ry += 40.f * Sc; }
 		const int32 Ix = Gen->FindItem(Item);
-		if (Ix >= 0) { UI.Text(FString::Printf(TEXT("Mends %.0f%% of a set of armour's or a found weapon's durability"), Gen->Items[Ix].Amount * 100.f), RDInk, Rx, Ry, Small, Sc * 1.05f); Ry += 30.f * Sc; }
+		// (what it is: a repair item's mending, anything else the inventory's own words, wrapped at the column (the list of
+		// 2026-11-16's fifth phase: every recipe had read "Mends ...", level 5's when its recipes were all repair items))
+		if (Ix >= 0)
+		{
+			const FRDItemDef& It = Gen->Items[Ix];
+			const FString What = It.Kind == ERDItemKind::Repair ? FString::Printf(TEXT("Mends %.0f%% of a set of armour's or a found weapon's durability"), It.Amount * 100.f) : DescribeItem(It);
+			TArray<FString> Words; What.ParseIntoArray(Words, TEXT(" "));
+			FString Ln;
+			for (const FString& Wd : Words)
+			{
+				const FString Try = Ln.IsEmpty() ? Wd : Ln + TEXT(" ") + Wd;
+				UI.TextSize(Try, Tw, Th, Small, Sc * 1.05f);
+				if (Tw > Rw && !Ln.IsEmpty()) { UI.Text(Ln, RDInk, Rx, Ry, Small, Sc * 1.05f); Ry += Th + 4.f * Sc; Ln = Wd; }
+				else Ln = Try;
+			}
+			if (!Ln.IsEmpty()) { UI.Text(Ln, RDInk, Rx, Ry, Small, Sc * 1.05f); Ry += 30.f * Sc; }
+		}
 		UI.Text(TEXT("IT TAKES"), Dim, Rx, Ry, Small, Sc, ERDType::Label); Ry += 24.f * Sc;
 		TArray<FString> Parts; if (P.Num() >= 4) P[3].ParseIntoArray(Parts, TEXT(";"));
 		// (two columns of parts: label, what she has / what it takes, green when she has enough)

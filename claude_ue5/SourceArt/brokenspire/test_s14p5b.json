@@ -1,0 +1,92 @@
+{
+ "tag": "s14p5b",
+ "plan": [
+  "tables14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "tables14",
+   "ok": true,
+   "buildings": {
+    "Alchemist": 2,
+    "Librarian": 1
+   },
+   "Alchemist": {
+    "tables": 2,
+    "in": [
+     "healer|healer",
+     "witch's hut|witch's hut"
+    ],
+    "all_in_own": true,
+    "offers": [
+     "Small Healing Potion",
+     "Medium Healing Potion",
+     "Small Mana Potion",
+     "Medium Mana Potion"
+    ],
+    "outside_tries": 13,
+    "outside_named_it": [],
+    "says": "use the alchemist's table",
+    "her_building_is_its": true,
+    "f": "alchemist",
+    "station": "Alchemist",
+    "panel": [
+     "Medium Healing Potion",
+     "Medium Mana Potion",
+     "Small Healing Potion",
+     "Small Mana Potion"
+    ],
+    "panel_all_own": true,
+    "made": true,
+    "item": [
+     "Small Healing Potion",
+     0,
+     1
+    ]
+   },
+   "Librarian": {
+    "tables": 1,
+    "in": [
+     "temple|temple"
+    ],
+    "all_in_own": true,
+    "offers": [
+     "Scroll of Fire Bolt",
+     "Scroll of Dark Fire",
+     "Scroll of Ash Ward",
+     "Scroll of Frost Shard"
+    ],
+    "outside_tries": 12,
+    "outside_named_it": [],
+    "says": "use the librarian's table",
+    "her_building_is_its": true,
+    "f": "librarian",
+    "station": "Librarian",
+    "panel": [
+     "Scroll of Ash Ward",
+     "Scroll of Dark Fire",
+     "Scroll of Fire Bolt",
+     "Scroll of Frost Shard"
+    ],
+    "panel_all_own": true,
+    "made": true,
+    "item": [
+     "Scroll of Fire Bolt",
+     0,
+     1
+    ]
+   },
+   "anvil_potions": [],
+   "anvil_scrolls": []
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "bs_s14p5b_tables14_alchemist.png",
+  "bs_s14p5b_tables14_librarian.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}
