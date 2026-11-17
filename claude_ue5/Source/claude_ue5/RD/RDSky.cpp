@@ -162,14 +162,21 @@ void ARDDungeonGenerator::SetWeather(int32 Kind, bool bAtOnce)
 	Weather = FMath::Clamp(Kind, 0, RDWeatherCloudless);
 	const FRDWeatherLook& Lk = RDWeatherLooks[Weather];
 	SkyCoverWant = Lk.Cover; SkyRainWant = Lk.Rain; SkyWindWant = Lk.Wind; SkyFogWant = Lk.Fog; SkyFogTintWant = Lk.Tint;
-	// (the list of 2026-11-16's tenth phase: by its strength; a storm is moderate or stronger)
-	if (Weather == 5) WeatherStrength14 = FMath::Max(WeatherStrength14, 1);
+	// (the list of 2026-11-16's tenth phase: a strength drawn for it by the land, as the turn draws one (PR #88's review: it kept the last
+	// weather's); rd.Weather's strength word sets one after)
+	WeatherStrength14 = PickStrength14(Weather, HashCombine(HashCombine((uint32)SessionSeed ^ 0x5EA7u, (uint32)(WeatherChanges + 1) * 2654435761u), 0x57A0u), SkyDryLand);
 	ApplyStrength14();
 	if (bAtOnce) { SkyCover = SkyCoverWant; SkyRain = SkyRainWant; SkyWind = SkyWindWant; SkyFog = SkyFogWant; SkyFogTint = SkyFogTintWant; }
 	if (const UWorld* W = GetWorld()) WeatherUntil = W->GetTimeSeconds() + WeatherSeconds.Y;
 	++WeatherChanges;
 	ApplySky7();
 	UE_LOG(LogRDSky, Log, TEXT("RDSKY the weather: %s%s"), *WeatherName(Weather), bAtOnce ? TEXT(" (at once)") : TEXT(""));
+}
+
+void ARDDungeonGenerator::WeatherLookOf(int32 W, float& Cover, float& Rain, float& Wind, float& Fog, FLinearColor& Tint)
+{
+	const FRDWeatherLook& Lk = RDWeatherLooks[FMath::Clamp(W, 0, RDWeatherCloudless)];
+	Cover = Lk.Cover; Rain = Lk.Rain; Wind = Lk.Wind; Fog = Lk.Fog; Tint = Lk.Tint;
 }
 
 void ARDDungeonGenerator::WeatherWeights(bool bDry, bool bWhiteLand, bool bDustLand, bool bMoorLand, float* Wt) const

@@ -15,6 +15,8 @@
 #include "RD/RDWild.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/PointLightComponent.h"
+#include "Components/AudioComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 DEFINE_LOG_CATEGORY_STATIC(LogRDStorm14, Log, All);
@@ -40,27 +42,41 @@ int32 ARDDungeonGenerator::PickStrength14(int32 W, uint32 H, bool bDry) const
 	float Pick = ((H >> 5) % 10000u) / 10000.f * Sum;
 	int32 K = 0;
 	for (; K < 3; ++K) { if (Pick < Wt[K]) break; Pick -= Wt[K]; }
-	return K;
+	// (a storm is moderate or stronger, whatever the weights say: the one place a strength is picked (PR #88's review))
+	return W == 5 ? FMath::Max(K, 1) : K;
 }
 
 void ARDDungeonGenerator::ApplyStrength14()
 {
 	// (rain, wind and cloud by the strength: the look's own times StrengthScale14's)
 	if (!RDStormHasStrength(Weather)) return;
-	const float F = RDStormAt(StrengthScale14, WeatherStrength14, 1.f);
-	SkyRainWant = FMath::Min(SkyRainWant * F, 1.2f);
-	SkyWindWant = FMath::Min(SkyWindWant * F, 1.2f);
-	SkyCoverWant = FMath::Min(SkyCoverWant * FMath::Sqrt(F), 1.f);
+	// (a share of the look's own, 1 at most (PR #88's review: a violent storm's 1.15 was cut back to 1 by the drops, the clouds and the
+	// rain's loop, and looked and sounded as a strong one))
+	const float F = FMath::Clamp(RDStormAt(StrengthScale14, WeatherStrength14, 1.f), 0.f, 1.f);
+	SkyRainWant *= F; SkyWindWant *= F;
+	SkyCoverWant *= FMath::Sqrt(F);
 }
 
 void ARDDungeonGenerator::SetWeatherStrength14(int32 S)
 {
+	// (the strength alone: the look again with it on, at once; no new weather (PR #88's review: through SetWeather it counted a change,
+	// moved the weather's hashes and the lightning's stream, and stretched the weather to its longest))
 	WeatherStrength14 = FMath::Clamp(S, 0, 3);
 	if (Weather == 5) WeatherStrength14 = FMath::Max(WeatherStrength14, 1);          // (a storm is moderate or stronger)
-	const bool bHeld = bWeatherHeld;
-	SetWeather(Weather, true);          // (the look again, its strength on it, at once)
-	bWeatherHeld = bHeld;
+	SetWeatherWants14(true);
 	NextStrikeAt14 = -1.f;
+}
+
+void ARDDungeonGenerator::SetWeatherWants14(bool bAtOnce)
+{
+	// (the weather's look, its strength on it; at once or eased to)
+	const int32 Wk = FMath::Clamp(Weather, 0, NumWeathers - 1);
+	float Cover = 0.f, Rain = 0.f, Wind = 0.f, Fog = 0.f; FLinearColor Tint;
+	WeatherLookOf(Wk, Cover, Rain, Wind, Fog, Tint);
+	SkyCoverWant = Cover; SkyRainWant = Rain; SkyWindWant = Wind; SkyFogWant = Fog; SkyFogTintWant = Tint;
+	ApplyStrength14();
+	if (bAtOnce) { SkyCover = SkyCoverWant; SkyRain = SkyRainWant; SkyWind = SkyWindWant; SkyFog = SkyFogWant; SkyFogTint = SkyFogTintWant; }
+	ApplySky7();
 }
 
 FString ARDDungeonGenerator::CountWeatherStrengths14(int32 W, int32 N, bool bDry) const
@@ -166,7 +182,11 @@ int32 ARDDungeonGenerator::Strike14(const FVector& Aim)
 	}
 	for (ARDMonster* Mo : GetMonsters())
 		if (IsValid(Mo) && !Mo->IsDead() && Mo->bOpenGround && Near(Mo->GetActorLocation()) && !IsSheltered14(Mo->GetActorLocation(), Mo))
-		{ Mo->ApplyDamageEx(Dmg, nullptr, &At, true, false); AddHitText(Mo->GetActorLocation() + FVector(0, 0, 100.f), Dmg, false); ++LightningOnOthers14; ++Hit; }
+		{
+			// (no kill of hers, nor a blow that wakes it (PR #88's review: it was sent after her and its death paid her))
+			bNotHerKill14 = true; Mo->ApplyDamageEx(Dmg, nullptr, &At, true, false); bNotHerKill14 = false;
+			AddHitText(Mo->GetActorLocation() + FVector(0, 0, 100.f), Dmg, false); ++LightningOnOthers14; ++Hit;
+		}
 	for (ARDTownsfolk* T : WildPeople14())
 		if (IsValid(T) && T->CanBeHurt14() && Near(T->GetActorLocation()) && !T->IsWildIndoors() && !IsSheltered14(T->GetActorLocation(), T))
 		{ T->TakeWildHit14(Dmg, nullptr); ++LightningOnOthers14; ++Hit; }
@@ -177,13 +197,16 @@ int32 ARDDungeonGenerator::Strike14(const FVector& Aim)
 		bWildPredatorKill = true; An->TakeHit(Dmg, At); bWildPredatorKill = false;
 		++LightningOnOthers14; ++Hit;
 	};
+	// (every wild animal is in WildAnimals, the herds' too: struck once (PR #88's review: the herds' lists struck them again))
 	for (const TObjectPtr<ARDWildAnimal>& An : WildAnimals) HitAnimal(An.Get());
-	for (const TWeakObjectPtr<ARDWildAnimal>& An : WildRoamHerd) HitAnimal(An.Get());
-	for (FSceneryHerd& Hd : WildSceneryHerds) for (const TWeakObjectPtr<ARDWildAnimal>& An : Hd.Animals) HitAnimal(An.Get());
 	for (const FRDWildFarmRec& F : WildFarms)
 		for (const TWeakObjectPtr<ARDTownAnimal>& An : F.Animals)
 			if (ARDTownAnimal* A = An.Get(); IsValid(A) && A->CanBeHurt14() && Near(A->GetActorLocation()) && !IsSheltered14(A->GetActorLocation(), A))
-			{ A->TakeHit14(Dmg, At); ++LightningOnOthers14; ++Hit; }
+			{
+				// (a farm animal killed so is no kill of hers either: not kept, no things (as the wild animals'))
+				bWildPredatorKill = true; A->TakeHit14(Dmg, At); bWildPredatorKill = false;
+				++LightningOnOthers14; ++Hit;
+			}
 	UE_LOG(LogRDStorm14, Log, TEXT("RDLIGHTNING %s storm: a strike at (%.0f, %.0f, %.0f), %.0f m from her, %d struck"), *StrengthName14(S), At.X, At.Y, At.Z, Dist / 100.f, Hit);
 	return Hit;
 }
@@ -221,8 +244,8 @@ void ARDDungeonGenerator::TickLightning14(float Dt)
 		const float D = Thunders14[I].Dist;
 		const float Far = FMath::Clamp(D / FMath::Max(StrikeFarCm14, 1.f), 0.f, 1.f);
 		const AActor* Her = PlayerCombat ? PlayerCombat->GetOwner() : nullptr;
-		PlaySoundAt(D < ThunderNearCm14 ? FName(TEXT("Weather.Thunder")) : FName(TEXT("Weather.ThunderFar")), Her ? Her->GetActorLocation() : FVector::ZeroVector,
-			FMath::Lerp(1.f, 0.35f, Far), FMath::Lerp(1.f, 0.85f, Far));
+		LastThunderSet14 = D < ThunderNearCm14 ? FName(TEXT("Weather.Thunder")) : FName(TEXT("Weather.ThunderFar"));
+		PlaySoundAt(LastThunderSet14, Her ? Her->GetActorLocation() : FVector::ZeroVector, FMath::Lerp(1.f, 0.35f, Far), FMath::Lerp(1.f, 0.85f, Far));
 		++LightningThunders14; LastThunderTime14 = Now;
 		Thunders14.RemoveAt(I);
 	}
@@ -256,9 +279,12 @@ void ARDDungeonGenerator::TickLightning14(float Dt)
 
 TArray<FString> ARDDungeonGenerator::GetStormLines14() const
 {
-	// "storm|weather|strength|strikes|on her|on others|thunders|last strike x|y|z|its time|last thunder's time|next strike in|flash"
+	// "storm|weather|strength|strikes|on her|on others|thunders|last strike x|y|z|its time|last thunder's time|next strike in|flash|the
+	// drops' amount as drawn|the rain loop's volume|the last thunder's set"
 	const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
-	return { FString::Printf(TEXT("storm|%s|%s|%d|%d|%d|%d|%.0f|%.0f|%.0f|%.3f|%.3f|%.1f|%.2f"), *WeatherName(Weather), *StrengthName14(WeatherStrength14), LightningStrikes14,
+	const float Drops = RainDropMID ? RainDropMID->K2_GetScalarParameterValue(TEXT("Amount")) : -1.f;
+	const float Loop = WeatherRainSound ? WeatherRainSound->VolumeMultiplier : -1.f;
+	return { FString::Printf(TEXT("storm|%s|%s|%d|%d|%d|%d|%.0f|%.0f|%.0f|%.3f|%.3f|%.1f|%.2f|%.3f|%.3f|%s"), *WeatherName(Weather), *StrengthName14(WeatherStrength14), LightningStrikes14,
 		LightningOnHer14, LightningOnOthers14, LightningThunders14, LastStrikeAt14.X, LastStrikeAt14.Y, LastStrikeAt14.Z, LastStrikeTime14, LastThunderTime14,
-		NextStrikeAt14 < 0.f ? -1.f : NextStrikeAt14 - Now, LightningFlash14) };
+		NextStrikeAt14 < 0.f ? -1.f : NextStrikeAt14 - Now, LightningFlash14, Drops, Loop, *LastThunderSet14.ToString()) };
 }

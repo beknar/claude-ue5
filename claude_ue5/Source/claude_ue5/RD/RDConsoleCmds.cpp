@@ -1,6 +1,6 @@
 // Console commands of the list of 2026-11-10 (docs/improvements10.txt): the weather set by hand, and a jump to each major city for
 // testing. Typed at the editor's console or the game's own (RDConsole.cpp passes any line to the player controller).
-//   rd.Weather <clear|fair|cloudy|overcast|rain|storm|snow|fog|whiteout|dust|cloudless|0-10>   the weather at once, held there; rd.Weather auto: it
+//   rd.Weather <clear|fair|cloudy|overcast|rain|storm|snow|fog|whiteout|dust|cloudless|0-10> [light|moderate|strong|violent|0-3]   the weather at once, held there; rd.Weather auto: it
 //   changes again (cloudless, 2026-11-10: no cloud layer at all; the rotation never picks it)
 //   rd.GoTo <brokenspire|ashenreach|graymourne|velmorrath|kethrys|heaven> out to that city, by the map's fast travel (from a dungeon
 //   back to Brokenspire first); for testing: found or not, enemies near or not
@@ -43,7 +43,7 @@ namespace
 		if (!G) { UE_LOG(LogRDConsoleCmds, Warning, TEXT("rd.Weather: no generator in this world")); return; }
 		if (Args.Num() == 0)
 		{
-			RDCmdSay(G, FString::Printf(TEXT("rd.Weather: %s%s (clear, fair, cloudy, overcast, rain, storm, snow, fog, whiteout, dust, cloudless, or auto)"), *ARDDungeonGenerator::WeatherName(G->GetWeather()), G->bWeatherHeld ? TEXT(", held") : TEXT("")));
+			RDCmdSay(G, FString::Printf(TEXT("rd.Weather: %s%s (clear, fair, cloudy, overcast, rain, storm, snow, fog, whiteout, dust, cloudless, or auto; then a strength: light, moderate, strong, violent)"), *ARDDungeonGenerator::WeatherName(G->GetWeather()), G->bWeatherHeld ? TEXT(", held") : TEXT("")));
 			return;
 		}
 		const FString A = Args[0].ToLower();
@@ -60,7 +60,9 @@ namespace
 		{
 			const FString Sw = Args[1].ToLower(); int32 Sn = Sw.IsNumeric() ? FCString::Atoi(*Sw) : -1;
 			for (int32 I = 0; I < 4 && Sn < 0; ++I) if (ARDDungeonGenerator::StrengthName14(I) == Sw) Sn = I;
-			if (Sn >= 0) G->SetWeatherStrength14(Sn);
+			// (a word it does not know says so (PR #88's review))
+			if (Sn < 0 || Sn > 3) RDCmdSay(G, FString::Printf(TEXT("rd.Weather: no strength named %s (light, moderate, strong, violent, or 0-3): the weather's own kept"), *Args[1]));
+			else G->SetWeatherStrength14(Sn);
 		}
 		RDCmdSay(G, FString::Printf(TEXT("rd.Weather: %s %s (held: rd.Weather auto lets it change)"), *ARDDungeonGenerator::StrengthName14(G->GetWeatherStrength14()), *ARDDungeonGenerator::WeatherName(K)));
 	}
@@ -178,7 +180,7 @@ namespace
 		FConsoleCommandWithWorldAndArgsDelegate::CreateStatic(&RDMapTeleportCommand));
 
 	FAutoConsoleCommandWithWorldAndArgs GRDWeatherCmd(TEXT("rd.Weather"),
-		TEXT("The weather at once, held: rd.Weather <clear|fair|cloudy|overcast|rain|storm|snow|fog|whiteout|dust|cloudless|0-10>; whiteout and dust: the cold lands' and the dry lands' own; cloudless: no clouds at all, not even on the horizon (never chosen by itself); rd.Weather auto lets it change again"),
+		TEXT("The weather at once, held: rd.Weather <clear|fair|cloudy|overcast|rain|storm|snow|fog|whiteout|dust|cloudless|0-10> [light|moderate|strong|violent|0-3]; whiteout and dust: the cold lands' and the dry lands' own; cloudless: no clouds at all, not even on the horizon (never chosen by itself); rd.Weather auto lets it change again"),
 		FConsoleCommandWithWorldAndArgsDelegate::CreateStatic(&RDWeatherCommand));
 	FAutoConsoleCommandWithWorldAndArgs GRDGoToCmd(TEXT("rd.GoTo"),
 		TEXT("For testing: out to a major city by fast travel (found or not): rd.GoTo <brokenspire|velmorrath|ashenreach|graymourne|kethrys|heaven>"),

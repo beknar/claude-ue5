@@ -3986,8 +3986,8 @@ def step_locks14():
 
 def storm14_line():
     p = str(G["gen"].get_storm_lines14()[0]).split("|")
-    k = ["kind", "weather", "strength", "strikes", "on_her", "on_others", "thunders", "x", "y", "z", "strike_t", "thunder_t", "next_in", "flash"]
-    return {a: (float(b) if a in ("x", "y", "z", "strike_t", "thunder_t", "next_in", "flash") else (int(b) if a in ("strikes", "on_her", "on_others", "thunders") else b)) for a, b in zip(k, p)}
+    k = ["kind", "weather", "strength", "strikes", "on_her", "on_others", "thunders", "x", "y", "z", "strike_t", "thunder_t", "next_in", "flash", "drops", "rain_loop", "thunder_set"]
+    return {a: (float(b) if a in ("x", "y", "z", "strike_t", "thunder_t", "next_in", "flash", "drops", "rain_loop") else (int(b) if a in ("strikes", "on_her", "on_others", "thunders") else b)) for a, b in zip(k, p)}
 
 def step_storm14():
     """the list of 2026-11-16's tenth phase (item 19, RD/RDList14j.cpp, 932): (a) the strengths the game's own pick draws: a storm never
@@ -4022,8 +4022,11 @@ def step_storm14():
              "rain": counts(g.count_weather_strengths14(4, 4000, False)), "clear": counts(g.count_weather_strengths14(0, 400, False))}
         sky = {}
         for s_ in (1, 3):
-            g.set_weather(5, True); g.set_editor_property("weather_held", True); g.set_weather_strength14(s_); yield from rwait(0.5)
-            st = sky_state(); sky[s_] = {"rain": st.get("rain"), "wind": st.get("wind"), "cover": st.get("cover")}
+            g.set_weather(5, True); g.set_editor_property("weather_held", True); g.set_weather_strength14(s_); yield from rwait(1.5)
+            # (what the rain does, as drawn and heard: the drops' amount and the rain loop's volume (PR #88's review: the raw number
+            # over 1 was cut back to 1 downstream)); the weather's changes must not move with a strength set alone
+            st = sky_state(); ln = storm14_line()
+            sky[s_] = {"rain": st.get("rain"), "wind": st.get("wind"), "cover": st.get("cover"), "drops": ln["drops"], "rain_loop": ln["rain_loop"], "changes": st.get("changes")}
         a["sky_by_strength"] = sky
         res["strengths"] = a
         # ---- (b) strikes a game minute at each storm strength (sped up; none aimed at her, the rate is what is measured)
@@ -4084,8 +4087,10 @@ def step_storm14():
                 seg = data[i:i + n]; db.append(20 * math.log10(max(math.sqrt(sum(float(v) * v for v in seg) / len(seg)) / 32768.0, 1e-6)))
             # (the quiet before the strike by its median; the thunder where the level first rises 12 dB over it)
             k0 = max(1, int(t_strike / 0.02)); pre = sorted(db[:k0]); base = pre[len(pre) // 2] if pre else -120.0
-            for k_ in range(k0, len(db)):
-                if db[k_] > max(base + 12.0, -60.0): return round(k_ * 0.02 - t_strike, 3), round(base, 1), round(max(db), 1)
+            # (its arrival is the sharp rise: 6 dB over (offline on the second run's recordings: 4 dB caught the slow rise, 5 dB was at its edge, 6 and 7 dB the thunder; a rumble swells over 0.15 s and 7 dB came late in it) the lowest of the 0.1 s before it, and 6 dB over the quiet before the strike (a slow
+            # rise of the game's other sounds 0.8 s after a strike crossed a level-only threshold and read the 700 m thunder 0.3 s early))
+            for k_ in range(max(k0, 5), len(db)):
+                if db[k_] - min(db[k_ - 5:k_]) >= 6.0 and db[k_] > max(base + 6.0, -60.0): return round(k_ * 0.02 - t_strike, 3), round(base, 1), round(max(db), 1)
             return None, round(base, 1), round(max(db) if db else -120.0, 1)
         def silence():
             # (no thunder still sounding or on its way: 5 s after the last strike (1.5 km is 4.4 s of travel) and 9.5 s after the last
@@ -4114,6 +4119,8 @@ def step_storm14():
                     with open(path, "rb"): break
                 except OSError: yield
             dl, base, peak = onset(path, ts)
+            # (which set it was: near (the crack) within 600 m, a rumble beyond: 300 m near, 700 m far, both heard (PR #88's review))
+            d.setdefault("sets", {})[int(dist_m)] = storm14_line()["thunder_set"]
             d[int(dist_m)] = {"strike_m": round(real, 1), "expect_s": round(real / 343.0, 3), "heard_after_real_s": dl, "game_rate": round(rate, 3),
                               "heard_after_s": round(dl * rate, 3) if dl is not None else None, "before_db": base, "peak_db": peak}
         # (a bolt held lit for its picture, 250 m before her)
@@ -4137,13 +4144,15 @@ def step_storm14():
     ok_a = (st.get("light", 1) == 0 and st.get("moderate", 0) > st.get("strong", 0) > st.get("violent", 0) > 0
             and (dr.get("strong", 0) + dr.get("violent", 0)) < (st.get("strong", 0) + st.get("violent", 0)) * 0.8
             and a.get("rain", {}).get("light", 0) > 0 and sum(a.get("clear", {}).values()) == a.get("clear", {}).get("light", -1)
-            and sk.get(3, {}).get("rain", 0) > sk.get(1, {}).get("rain", 9) and sk.get(3, {}).get("wind", 0) > sk.get(1, {}).get("wind", 9))
+            and sk.get(3, {}).get("drops", 0) > sk.get(1, {}).get("drops", 9) * 1.2 and sk.get(3, {}).get("rain_loop", 0) > sk.get(1, {}).get("rain_loop", 9)
+            and sk.get(3, {}).get("wind", 0) > sk.get(1, {}).get("wind", 9))
     want = {1: 2.0, 2: 5.0, 3: 10.0}
     ok_b = all(b.get(s_, {}).get("per_minute", -1) >= want[s_] * 0.35 and b.get(s_, {}).get("per_minute", 99) <= want[s_] * 2.2 for s_ in want) and b.get(1, {}).get("per_minute", 9) < b.get(3, {}).get("per_minute", 0)
     ok_c = (not c.get("open_sheltered") and c.get("open_struck", 0) >= 1 and abs(c.get("open_share", 0) - 0.25) < 0.03
             and c.get("roof_sheltered") is True and c.get("roof_lost", 1) == 0 and c.get("monster_struck", 0) >= 1 and c.get("monster_lost", 0) > 0)
-    dd = {k_: v_ for k_, v_ in d.items() if k_ != "quiet_first"}
-    ok_d = all(v_.get("heard_after_s") is not None and abs(v_["heard_after_s"] - v_["expect_s"]) <= 0.25 for v_ in dd.values()) and len(dd) == 2
+    dd = {k_: v_ for k_, v_ in d.items() if k_ not in ("quiet_first", "sets")}
+    ok_d = (all(v_.get("heard_after_s") is not None and abs(v_["heard_after_s"] - v_["expect_s"]) <= 0.25 for v_ in dd.values()) and len(dd) == 2
+            and d.get("sets", {}).get(300) == "Weather.Thunder" and d.get("sets", {}).get(700) == "Weather.ThunderFar")
     res["parts_ok"] = {"strengths": ok_a, "rates": ok_b, "hits": ok_c, "thunder": ok_d}
     step_result("storm14", ok_a and ok_b and ok_c and ok_d, **res)
 

@@ -2643,6 +2643,12 @@ public:
 	static FString StrengthName14(int32 S);
 	int32 PickStrength14(int32 W, uint32 H, bool bDry) const;
 	void ApplyStrength14();
+	void SetWeatherWants14(bool bAtOnce);
+	/** the look of weather W (RDSky.cpp's table) */
+	static void WeatherLookOf(int32 W, float& Cover, float& Rain, float& Wind, float& Fog, FLinearColor& Tint);
+	/** a blow or death that is no doing of hers (lightning): it wakes no monster and pays her nothing */
+	bool bNotHerKill14 = false;
+	FName LastThunderSet14;
 	int32 Strike14(const FVector& Aim);
 	void TickLightning14(float Dt);
 	struct FBolt14 { TArray<TWeakObjectPtr<UStaticMeshComponent>> Segs; TWeakObjectPtr<class UPointLightComponent> Light; float Born = 0.f; };

@@ -1378,11 +1378,14 @@ void ARDDungeonGenerator::MeanMonsterFactors(float& Health, float& Damage, FIntP
 
 void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 {
-	++MonstersKilled;
-	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDCOMBAT %s killed (%d)"), Monster ? *Monster->MonsterName.ToString() : TEXT("?"), MonstersKilled);
-	if (Secondaries.Num() > 0) SecondaryOnKill(Monster);          // (the sixth phase: the wilds' feathers, the soul harvest)
+	// (the list of 2026-11-16's tenth phase: a death that is no doing of hers (lightning) pays her nothing: no kill, gold, counters,
+	// quest, harvest or drop; it stays dead all the same)
+	const bool bHers = !bNotHerKill14;
+	if (bHers) ++MonstersKilled;
+	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDCOMBAT %s killed (%d)%s"), Monster ? *Monster->MonsterName.ToString() : TEXT("?"), MonstersKilled, bHers ? TEXT("") : TEXT(" (not by her)"));
+	if (bHers && Secondaries.Num() > 0) SecondaryOnKill(Monster);          // (the sixth phase: the wilds' feathers, the soul harvest)
 	// (Brokenspire: its gold, the quests' counters)
-	if (bTown || bTownLink)
+	if (bHers && (bTown || bTownLink))
 	{
 		bool bBossOf = false;
 		for (const FEncounter& E : Encounters)
@@ -1398,7 +1401,7 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 	if (Monster && Monster->WildKey >= 0)
 	{
 		if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->WildKilled.AddUnique(Monster->WildKey);
-		WildQuestOnKill(Monster);
+		if (bHers) WildQuestOnKill(Monster);
 	}
 	// (mistward: one of a boss's band or a ring's guards stays dead)
 	bool bBossKill = false;
@@ -1442,8 +1445,8 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 	// (the final boss: its loot, the gold, the castle conquered, the door to Brokenspire open)
 	if (Monster && Monster->bFinalBoss) OnFinalBossKilled(Monster);
 	// (the list of 2026-10-30: its parts float over it until she takes them; a boss's or a usurper's are more)
-	if (bHarvest && Monster) HarvestKill(Monster, bBossKill);
-	if (Monster) AnkhDropFor(Monster);          // (the list of 2026-11-10: tier 2's monsters may drop the ankh)
+	if (bHers && bHarvest && Monster) HarvestKill(Monster, bBossKill);
+	if (bHers && Monster) AnkhDropFor(Monster);          // (the list of 2026-11-10: tier 2's monsters may drop the ankh)
 	// (the tiers: it stays dead, also when its section is generated again)
 	if (Monster && Monster->Section && Monster->SpawnIndex >= 0)
 		if (FRDSectionProgress* P = Progress.Find(Monster->Section->Coord))

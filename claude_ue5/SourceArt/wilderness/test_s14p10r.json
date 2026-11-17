@@ -1,5 +1,5 @@
 {
- "tag": "s14p10",
+ "tag": "s14p10r",
  "plan": [
   "storm14"
  ],
@@ -11,21 +11,21 @@
    "strengths": {
     "storm": {
      "light": 0,
-     "moderate": 1791,
-     "strong": 1433,
-     "violent": 776
+     "moderate": 1826,
+     "strong": 1356,
+     "violent": 818
     },
     "storm_dry": {
      "light": 0,
-     "moderate": 2461,
-     "strong": 1016,
-     "violent": 523
+     "moderate": 2465,
+     "strong": 964,
+     "violent": 571
     },
     "rain": {
-     "light": 1616,
-     "moderate": 1403,
-     "strong": 690,
-     "violent": 291
+     "light": 1635,
+     "moderate": 1362,
+     "strong": 723,
+     "violent": 280
     },
     "clear": {
      "light": 400,
@@ -35,32 +35,38 @@
     },
     "sky_by_strength": {
      "1": {
-      "rain": 0.85,
-      "wind": 0.85,
-      "cover": 0.92
+      "rain": 0.7,
+      "wind": 0.7,
+      "cover": 0.84,
+      "drops": 0.7,
+      "rain_loop": 0.56,
+      "changes": 1.0
      },
      "3": {
-      "rain": 1.15,
-      "wind": 1.15,
-      "cover": 1.0
+      "rain": 1.0,
+      "wind": 1.0,
+      "cover": 1.0,
+      "drops": 1.0,
+      "rain_loop": 0.8,
+      "changes": 2.0
      }
     }
    },
    "rates": {
     "1": {
-     "strikes": 2,
-     "game_minutes": 2.49,
-     "per_minute": 0.8
+     "strikes": 10,
+     "game_minutes": 2.5,
+     "per_minute": 4.0
     },
     "2": {
-     "strikes": 12,
+     "strikes": 6,
      "game_minutes": 2.5,
-     "per_minute": 4.8
+     "per_minute": 2.4
     },
     "3": {
-     "strikes": 21,
+     "strikes": 30,
      "game_minutes": 2.5,
-     "per_minute": 8.4
+     "per_minute": 12.0
     }
    },
    "hits": {
@@ -80,23 +86,27 @@
      true,
      true
     ],
+    "sets": {
+     "300": "Weather.Thunder",
+     "700": "Weather.ThunderFar"
+    },
     "300": {
      "strike_m": 300.0,
      "expect_s": 0.875,
-     "heard_after_real_s": 0.909,
-     "game_rate": 1.001,
-     "heard_after_s": 0.91,
-     "before_db": -38.4,
-     "peak_db": -13.3
+     "heard_after_real_s": 0.933,
+     "game_rate": 1.0,
+     "heard_after_s": 0.933,
+     "before_db": -34.6,
+     "peak_db": -16.4
     },
     "700": {
      "strike_m": 700.1,
      "expect_s": 2.041,
-     "heard_after_real_s": 2.197,
+     "heard_after_real_s": 2.119,
      "game_rate": 1.0,
-     "heard_after_s": 2.196,
-     "before_db": -30.0,
-     "peak_db": -17.7
+     "heard_after_s": 2.119,
+     "before_db": -31.1,
+     "peak_db": -17.1
     }
    },
    "parts_ok": {
@@ -109,7 +119,7 @@
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
  "shots": [
-  "wd_s14p10_storm14_bolt.png"
+  "wd_s14p10r_storm14_bolt.png"
  ],
  "error": null,
  "saves_put_back": 1,
