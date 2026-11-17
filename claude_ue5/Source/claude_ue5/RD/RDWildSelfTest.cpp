@@ -238,9 +238,42 @@ void ARDDungeonGenerator::TickWildSelfTest(APawn* P)
 				bOut = PutAhead(From, 300000.f);
 			}
 			if (!bOut) { Pass(TEXT("walk"), false, TEXT("no dry ground 3 km out of the town on eight ways")); break; }
-			WildSelfTestLine(FString::Printf(TEXT("note|walk|put 3 km out of the town on the %d. way tried"), Tries));
+			WildSelfTestLine(FString::Printf(TEXT("note|walk|put 3 km out of the town on the %d. way tried; the monsters do not notice her until the walk's end"), Tries));
+			WildTest.AggroWas = AggroDistance; WildTest.LoseWas = LoseDistance; AggroDistance = 0.f; LoseDistance = 0.f;
 			WildTest.Sub = 1; WildTest.T0 = Now;
 			break;
+		}
+		auto Unquiet = [&]() { if (WildTest.AggroWas >= 0.f) { AggroDistance = WildTest.AggroWas; LoseDistance = WildTest.LoseWas; WildTest.AggroWas = -1.f; } };
+		// (from her put on: what the HUD said (each new line, by its time) and the damage she took (the combat's own count), and a
+		// death ends the walk: it would measure the town she comes back in)
+		if (PlayerCombat)
+		{
+			if (PlayerCombat->MessageTime > WildTest.LastMsgAt && !PlayerCombat->Message.IsEmpty())
+			{
+				WildTest.LastMsgAt = PlayerCombat->MessageTime;
+				WildTest.Said.Add(FString::Printf(TEXT("%.0f s: %s"), PlayerCombat->MessageTime, *PlayerCombat->Message)); if (WildTest.Said.Num() > 4) WildTest.Said.RemoveAt(0);
+			}
+			const double Dmg = PlayerCombat->DamageTaken;
+			if (WildTest.DamageSeen >= 0.0 && Dmg > WildTest.DamageSeen + 0.01)
+			{
+				WildTest.HurtTotal += (float)(Dmg - WildTest.DamageSeen);
+				WildTest.Hurts += FString::Printf(TEXT("%.0f s -%.0f; "), Now, Dmg - WildTest.DamageSeen);
+				if (WildTest.Hurts.Len() > 400) WildTest.Hurts.RightChopInline(WildTest.Hurts.Len() - 400);
+			}
+			WildTest.DamageSeen = Dmg;
+			if (PlayerCombat->IsDead())
+			{
+				++WildTest.Deaths;
+				int32 Near = 0;
+				for (TActorIterator<ARDMonster> It(GetWorld()); It; ++It) if (!It->IsDead() && FVector::Dist(It->GetActorLocation(), L) < 3000.f) ++Near;
+				FRDWSample Ds; Wild->Sample(L.X / 100.0, L.Y / 100.0, Ds, true);
+				WildSelfTestLine(FString::Printf(TEXT("death|%.0f|%.2f, %.2f km|%s|water %d|monsters within 30 m %d|said: %s|hurt: %s"), Now, L.X / 100000.0, L.Y / 100000.0,
+					*Wild->BiomeName(Ds.Biome), Ds.WaterKind, Near, *FString::Join(WildTest.Said, TEXT(" / ")), *WildTest.Hurts));
+				Unquiet();
+				Pass(TEXT("walk"), false, FString::Printf(TEXT("she died %.0f s into its %s (the death line): the walk would measure the town she comes back in"),
+					Now - WildTest.T0, WildTest.Sub == 1 ? TEXT("wait before the walk") : TEXT("walk")));
+				break;
+			}
 		}
 		if (WildTest.Sub == 1)
 		{
@@ -258,39 +291,6 @@ void ARDDungeonGenerator::TickWildSelfTest(APawn* P)
 		}
 		if (WildTest.Sub == 3) { WildTest.Sub = 2; WildTest.LastAt = L; WildTest.LastMoveAt = Now; }
 		{
-			const bool bDead = PlayerCombat && PlayerCombat->IsDead();
-			if (PlayerCombat)
-			{
-				const FString& Ms = PlayerCombat->Message;
-				if (!Ms.IsEmpty() && (WildTest.Said.Num() == 0 || WildTest.Said.Last() != Ms)) { WildTest.Said.Add(Ms); if (WildTest.Said.Num() > 4) WildTest.Said.RemoveAt(0); }
-				const float Hp = PlayerCombat->GetHealth();
-				if (WildTest.LastHp >= 0.f && Hp < WildTest.LastHp - 0.5f)
-				{
-					WildTest.HurtTotal += WildTest.LastHp - Hp;
-					WildTest.Hurts += FString::Printf(TEXT("%.0f s -%.0f; "), Now - WildTest.T0, WildTest.LastHp - Hp);
-					if (WildTest.Hurts.Len() > 400) WildTest.Hurts.RightChopInline(WildTest.Hurts.Len() - 400);
-				}
-				WildTest.LastHp = Hp;
-				if (!bDead && Hp > 0.f && Hp < 0.6f * PlayerCombat->GetMaxHealth())
-				{
-					PlayerCombat->SetHealth(PlayerCombat->GetMaxHealth()); WildTest.LastHp = PlayerCombat->GetHealth(); ++WildTest.Heals;
-					WildSelfTestLine(FString::Printf(TEXT("heal|%.0f|said: %s|hurt: %s"), Now - WildTest.T0, *FString::Join(WildTest.Said, TEXT(" / ")), *WildTest.Hurts));
-					WildTest.Hurts.Reset();
-				}
-			}
-			if (bDead && !WildTest.bWasDead)
-			{
-				++WildTest.Deaths;
-				int32 Near = 0;
-				for (TActorIterator<ARDMonster> It(GetWorld()); It; ++It) if (!It->IsDead() && FVector::Dist(It->GetActorLocation(), L) < 3000.f) ++Near;
-				FRDWSample Ds; Wild->Sample(L.X / 100.0, L.Y / 100.0, Ds, true);
-				WildSelfTestLine(FString::Printf(TEXT("death|%.0f|%.2f, %.2f km|%s|water %d|monsters within 30 m %d|said: %s|hurt: %s"), Now - WildTest.T0, L.X / 100000.0, L.Y / 100000.0,
-					*Wild->BiomeName(Ds.Biome), Ds.WaterKind, Near, *FString::Join(WildTest.Said, TEXT(" / ")), *WildTest.Hurts));
-				WildTest.Hurts.Reset();
-			}
-			if (!bDead && WildTest.bWasDead) { WildTest.LastAt = L; WildTest.LastMoveAt = Now; }      // (back in a town: not walked)
-			WildTest.bWasDead = bDead;
-			if (bDead) break;
 		}
 		P->AddMovementInput(WildTest.Heading, 1.f);
 		++WildTest.Frames;
@@ -323,9 +323,10 @@ void ARDDungeonGenerator::TickWildSelfTest(APawn* P)
 			// than 1.5 GB from the start taken after the garbage was collected)
 			const double M1 = RDWSTMemMB(), C1 = RDWSTCommitMB();
 			Pass(TEXT("walk"), M1 - WildTest.Mem0 < 1500.0 && C1 - WildTest.Commit0 < 1500.0 && WildTest.PathCm >= 100000.0,
-				FString::Printf(TEXT("%.1f min, %.2f km walked, %.2f km from its start, in use %.0f -> %.0f MB (most %.0f), committed %.0f -> %.0f MB (most %.0f), %d turns, %d steps on, %d deaths, %d heals (%.0f hit points taken)"),
+				FString::Printf(TEXT("%.1f min, %.2f km walked, %.2f km from its start, in use %.0f -> %.0f MB (most %.0f), committed %.0f -> %.0f MB (most %.0f), %d turns, %d steps on, %.0f hit points taken"),
 				(Now - WildTest.T0) / 60.f, WildTest.PathCm / 100000.0, FVector::Dist2D(L, WildTest.WalkFrom) / 100000.f, WildTest.Mem0, M1, WildTest.MemMax,
-				WildTest.Commit0, C1, WildTest.CommitMax, WildTest.Turns, WildTest.Puts, WildTest.Deaths, WildTest.Heals, WildTest.HurtTotal));
+				WildTest.Commit0, C1, WildTest.CommitMax, WildTest.Turns, WildTest.Puts, WildTest.HurtTotal));
+			Unquiet();
 		}
 		break;
 	}
