@@ -3307,7 +3307,8 @@ def box_lines():
     boxes, farms, blds = [], {}, []
     for l in G["gen"].get_wild_box_lines():
         p = str(l).split("|")
-        if p[0] == "box": boxes.append({"kind": p[1], "x": float(p[2]), "y": float(p[3]), "z": float(p[4]), "alpha": float(p[5]), "looted": p[6] == "1", "key": int(p[7])})
+        if p[0] == "box": boxes.append({"kind": p[1], "x": float(p[2]), "y": float(p[3]), "z": float(p[4]), "alpha": float(p[5]), "looted": p[6] == "1", "key": int(p[7]),
+                                        "locked": len(p) > 8 and p[8] == "1"})
         elif p[0] == "farm11": farms[int(p[1])] = {"design": int(p[2]), "buildings": int(p[3]), "boxes": int(p[4])}
         elif p[0] == "fbld": blds.append({"farm": int(p[1]), "kind": p[2], "x": float(p[3]), "y": float(p[4]), "floor": float(p[5]), "nx": int(p[6]), "ny": int(p[7]),
                                           "yaw": float(p[8]), "dx": float(p[9]), "dy": float(p[10]), "furniture": int(p[11]), "boxes": int(p[12])})
@@ -3656,13 +3657,14 @@ def step_npc14():
                     a["her_struck_near"] = round(hp_her - cb().get_health(), 1)
                     put(her_at, yaw=90.0, z=g.wild_ground_z(her_at)); shot_done = True
                 dead = next((f for f in cur if f["dead"]), None)
-                if dead: break
+                # (the body held by its actor as it is found: a group can have two of one title (two refugees), and the first by title
+                # was the living one (the head 159 cm up))
+                if dead: dead_actor = g.get_wild_person14(dead["i"]); break
             a["hp_track"] = hp_track[-12:]; a["trace"] = a.get("trace", [])[:40]
             if dead:
                 a["dead"] = dead["title"]; a["killed_by"] = dead["by"]; a["flees"] = dead["flees"]; a["hits"] = dead["hits"]
                 yield from rwait(2.5)
-                t_ = g.get_wild_person14(next(f["i"] for f in wild_folk14() if f["title"] == dead["title"]))
-                a["head_over_ground"] = body_low14(t_) if t_ else None
+                a["head_over_ground"] = body_low14(dead_actor) if dead_actor and dead_actor.is_wild_dead14() else None
                 a["drops"] = [str(x) for x in g.get_editor_property("last_wild_folk_drops14")]; a["gold"] = g.get_editor_property("last_wild_folk_gold14")
             a["her_struck"] = round(hp_her0 - cb().get_health(), 1)
             quiet(True)
@@ -3784,6 +3786,199 @@ def step_npc14():
     ok_c = c_.get("hits_landed", 0) >= 1 and c_.get("killed_by_million") is False and not c_.get("dead") and c_.get("hp", 0) >= 1.0
     res["parts_ok"] = {"road": ok_a, "farm": ok_b, "giver": ok_c}
     step_result("npc14", ok_a and ok_b and ok_c, **res)
+
+
+def stand_at_box14(bx, want):
+    """put her in front of a wild container, at a point from which F names it (the prompt holds `want`); the prompt, or None"""
+    g = G["gen"]
+    for d_ in (110.0, 140.0, 90.0):
+        for a_ in range(0, 360, 45):
+            at = V(bx["x"] + math.cos(math.radians(a_)) * d_, bx["y"] + math.sin(math.radians(a_)) * d_, 0)
+            put(at, yaw=(a_ + 180.0) % 360.0, z=max(g.wild_ground_z(at), bx["z"])); yield from rwait(0.35)
+            pr = str(g.describe_nearest(G["pawn"].get_actor_location()))
+            if bx["kind"] in pr and want in pr: return pr
+    return None
+
+def seen_line14(at, her):
+    """a clear line from a person standing at `at` (its eyes) to her chest: the static and dynamic pieces (the wilds' farms are dynamic
+    objects), the people passed over, as the game"""
+    ign = [G["pawn"]] + [G["gen"].get_wild_person14(f["i"]) for f in wild_folk14()]
+    hit = unreal.SystemLibrary.line_trace_single_for_objects(G["w"], V(at.x, at.y, at.z + 70.0), V(her.x, her.y, her.z + 40.0), [unreal.ObjectTypeQuery.OBJECT_TYPE_QUERY1, unreal.ObjectTypeQuery.OBJECT_TYPE_QUERY2], False, ign, unreal.DrawDebugTrace.NONE, True)
+    ht = hit.to_tuple() if hit else None
+    return not (ht and ht[0])
+
+def step_locks14():
+    """the list of 2026-11-16's ninth phase (items 13 and 14, RD/RDList14i.cpp, 931): at the farmsteads near Brokenspire about half
+    the containers (not the gardens) are locked; the Mage opens an unlocked one and is refused at a locked one (no one turns); the Rogue
+    picks a lock (she stays by it 2 s), with four people placed round her: one 20 m off with no line to her (it hears and turns), one
+    35 m off with a clear line (it sees and turns), one 35 m off behind something (it stays), one 60 m off (it stays); those turned run
+    at her and strike (her hit points fall by their blows); the Warrior breaks a lock at once. Pictures of the people coming at her."""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    w = G["w"]
+    hero0 = str(g.get_editor_property("current_hero")); hour0 = g.get_town_hour()
+    def hero(h):
+        if str(g.get_editor_property("current_hero")) != h: g.switch_hero(h); yield from rwait(1.0); refresh()
+    def box_now(key):
+        return next((b for b in box_lines()[0] if b["key"] == key), None)
+    try:
+        g.set_town_hour(11.0)
+        fs = [str(x).split("|") for x in g.find_wild_farmsteads(0.0, 0.0, 8000.0)]
+        all_boxes = []; pick = None
+        for f_ in fs[:10]:
+            fid, fx, fy = int(f_[0]), float(f_[2]), float(f_[3])
+            g.wild_drop_all(); g.wild_put_her(fx - 40.0, fy); yield from wait_chunks(30, 50); yield from rwait(2.0)
+            mine = [b for b in box_lines()[0] if math.hypot(b["x"] / 100.0 - fx, b["y"] / 100.0 - fy) < 60.0 and b["kind"] != "garden" and not b["looted"]]
+            all_boxes += [b for b in mine if b["key"] not in {x["key"] for x in all_boxes}]
+            lk = [b for b in mine if b["locked"]]; ul = [b for b in mine if not b["locked"]]
+            if len(lk) >= 3 and ul: pick = (fid, fx, fy, lk, ul); break
+        res["boxes_seen"] = len(all_boxes); res["locked_share"] = round(sum(1 for b in all_boxes if b["locked"]) / max(len(all_boxes), 1), 2)
+        res["gardens_locked"] = sum(1 for b in box_lines()[0] if b["kind"] == "garden" and b["locked"])
+        if not pick: step_result("locks14", False, **res); return
+        fid, fx, fy, lk, ul = pick; res["farm"] = fid
+        # (the Rogue's lock: one inside a building first, its walls round her (the first runs' wardrobe stood in the open yard))
+        ins = [b for b in lk if b["z"] > g.wild_ground_z(V(b["x"], b["y"], 0)) + 8.0]
+        if ins: lk = ins[:1] + [b for b in lk if b is not ins[0]]
+        res["rogue_box_raised"] = bool(ins)
+        # ---- the Mage: an unlocked one opens, a locked one is refused
+        yield from hero("Mage"); m = {}
+        m["open_prompt"] = yield from stand_at_box14(ul[0], "open the")
+        m["open_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(1.2)
+        b_ = box_now(ul[0]["key"]); m["opened"] = bool(b_ and b_["looted"])
+        r0 = g.get_editor_property("wild_locks_refused14")
+        lkm = lk[-1]          # (the Mage's locked one: the last, the Rogue's is the first)
+        m["locked_prompt"] = yield from stand_at_box14(lkm, "locked")
+        m["locked_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(1.2)
+        b_ = box_now(lkm["key"]); m["locked_stayed_shut"] = bool(b_ and not b_["looted"] and b_["alpha"] < 0.1)
+        m["refused"] = g.get_editor_property("wild_locks_refused14") - r0
+        m["hostile_after"] = sum(1 for f in wild_folk14() if f["hurt"] and g.get_wild_person14(f["i"]).is_wild_hostile14())
+        res["mage"] = m
+        # ---- the Rogue picks it, with people round her
+        yield from hero("Rogue"); r = {}
+        r["prompt"] = yield from stand_at_box14(lk[0] if lk[0] is not lkm else lk[1], "pick the lock")
+        her = G["pawn"].get_actor_location(); box_at = V(lk[0]["x"], lk[0]["y"], lk[0]["z"])
+        # (people: the farm's adults and those the director sends near her)
+        for k_ in ("roam_pedlar", "roam_hunter", "roam_courier", "roam_refugee"):
+            try: g.force_wild_encounter(k_); yield from rwait(0.4)
+            except Exception: pass
+        cands = [f for f in wild_folk14() if f["hurt"] and not f["prot"] and not f["dead"]]
+        r["people_found"] = len(cands)
+        # (a spot by its distance from the box (hearing) and from her (seeing), with or without a line to her: on rings round her, and
+        # in the shadow of the farm's buildings from her (the first run found no spot on a ring where a wall hid her: the box stood
+        # in the open yard))
+        blds = [b_ for b_ in box_lines()[2] if math.hypot(b_["x"] / 100.0 - fx, b_["y"] / 100.0 - fy) < 60.0]
+        r["buildings"] = len(blds)
+        # (how many spots on rings round her the game and the test each find hidden from her: they must agree)
+        hid_g = hid_t = n_ = 0
+        for r_ in range(1200, 4000, 400):
+            for k_ in range(0, 36, 3):
+                a_ = math.radians(10.0 * k_); q = V(her.x + math.cos(a_) * r_, her.y + math.sin(a_) * r_, 0); q.z = g.wild_ground_z(q) + 92.0
+                n_ += 1; hid_g += 0 if g.wild_sees_her14(V(q.x, q.y, q.z + 70.0)) else 1; hid_t += 0 if seen_line14(q, her) else 1
+        r["hidden_spots"] = {"of": n_, "game": hid_g, "test": hid_t}
+        # (what stops a line out of her building: by the static objects, by static and dynamic, by the visibility channel; the chunk's
+        # pieces' object types)
+        ign = [G["pawn"]] + [g.get_wild_person14(f["i"]) for f in wild_folk14()]
+        def first_hit(a, b, kind):
+            if kind == "vis": h_ = unreal.SystemLibrary.line_trace_single(w, a, b, unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, ign, unreal.DrawDebugTrace.NONE, True)
+            else: h_ = unreal.SystemLibrary.line_trace_single_for_objects(w, a, b, [unreal.ObjectTypeQuery.OBJECT_TYPE_QUERY1] + ([unreal.ObjectTypeQuery.OBJECT_TYPE_QUERY2] if kind == "sd" else []), False, ign, unreal.DrawDebugTrace.NONE, True)
+            ht = h_.to_tuple() if h_ else None
+            if not ht or not ht[0]: return None
+            c_ = next((x for x in ht if isinstance(x, unreal.PrimitiveComponent)), None)
+            return [round(math.hypot(ht[4].x - a.x, ht[4].y - a.y) / 100.0, 1), c_.get_class().get_name() if c_ else None, str(c_.get_collision_object_type()) if c_ else None]
+        a0 = V(her.x, her.y, her.z + 40.0); outs = {"s": 0, "sd": 0, "vis": 0}; ex = {}
+        for k_ in range(0, 36, 3):
+            b0 = V(a0.x + math.cos(math.radians(10.0 * k_)) * 3000.0, a0.y + math.sin(math.radians(10.0 * k_)) * 3000.0, a0.z)
+            for kind in outs:
+                h_ = first_hit(a0, b0, kind)
+                if h_: outs[kind] += 1; ex.setdefault(kind, h_)
+        r["lines_out_stopped"] = {"of": 12, **outs, "examples": ex}
+        types = {}
+        for ch in GS.get_all_actors_of_class(w, unreal.RDWildChunk):
+            if math.hypot(ch.get_actor_location().x - her.x, ch.get_actor_location().y - her.y) > 30000.0: continue
+            for c_ in ch.get_components_by_class(unreal.StaticMeshComponent):
+                if math.hypot(c_.get_world_location().x - her.x, c_.get_world_location().y - her.y) > 6000.0: continue
+                k_ = f"{c_.get_class().get_name()}|{c_.get_collision_object_type()}|{c_.get_collision_enabled()}"
+                types[k_] = types.get(k_, 0) + 1
+        r["piece_types"] = types
+        def spot(ok_at, want_line):
+            pts = []
+            for r_ in range(1200, 6800, 200):
+                for k_ in range(36):
+                    a_ = math.radians(10.0 * k_); pts.append(V(her.x + math.cos(a_) * r_, her.y + math.sin(a_) * r_, 0))
+            for b_ in blds:
+                c_ = V(b_["x"], b_["y"], 0); dv = V(c_.x - her.x, c_.y - her.y, 0); n_ = math.hypot(dv.x, dv.y) or 1.0
+                for e_ in range(200, 2400, 100):
+                    for s_ in (-300.0, 0.0, 300.0):
+                        pts.append(V(c_.x + dv.x / n_ * e_ - dv.y / n_ * s_, c_.y + dv.y / n_ * e_ + dv.x / n_ * s_, 0))
+            for q in pts:
+                if not ok_at(math.hypot(q.x - box_at.x, q.y - box_at.y) / 100.0, math.hypot(q.x - her.x, q.y - her.y) / 100.0): continue
+                q.z = g.wild_ground_z(q) + 92.0
+                if abs(q.z - her.z) > 600.0: continue
+                if want_line is None or seen_line14(q, her) == want_line: return q
+            return None
+        plan = [("heard", lambda db, dh: 15.0 <= db <= 27.0, False), ("seen", lambda db, dh: db >= 32.0 and dh <= 38.0, True),
+                ("hidden", lambda db, dh: db >= 32.0 and dh <= 38.0, False), ("far", lambda db, dh: dh >= 55.0 and dh <= 65.0, None)]
+        placed = {}
+        for role, ok_at, line in plan:
+            if not cands: break
+            q = spot(ok_at, line)
+            if q is None: placed[role] = None; continue
+            f = cands.pop(0); t_ = g.get_wild_person14(f["i"])
+            t_.set_actor_location(q, False, True)
+            placed[role] = {"title": f["title"], "i": f["i"], "d_box_m": round(math.hypot(q.x - box_at.x, q.y - box_at.y) / 100.0, 1),
+                            "d_her_m": round(math.hypot(q.x - her.x, q.y - her.y) / 100.0, 1), "line": seen_line14(q, her)}
+        r["placed"] = placed
+        hp0 = cb().get_health(); blows0 = g.get_editor_property("wild_folk_blows_on_her14"); p0 = g.get_editor_property("wild_locks_picked14")
+        r["f"] = str(g.interact_nearest(G["pawn"].get_actor_location()))
+        yield from rwait(0.8)
+        r["opened_early"] = bool(box_now(lk[0]["key"])["looted"])
+        yield from rwait(2.0)
+        b_ = box_now(lk[0]["key"]); r["opened"] = bool(b_ and b_["looted"]); r["picked"] = g.get_editor_property("wild_locks_picked14") - p0
+        r["heard"] = g.get_editor_property("last_wild_alert_heard14"); r["seen"] = g.get_editor_property("last_wild_alert_seen14")
+        titles = {f["title"]: f for f in wild_folk14()}
+        for role, v_ in placed.items():
+            if not v_: continue
+            t_ = g.get_wild_person14(titles[v_["title"]]["i"]) if v_["title"] in titles else None
+            v_["hostile"] = bool(t_ and t_.is_wild_hostile14()); v_["by"] = str(t_.get_editor_property("wild_turned_by14")) if t_ else None
+        # (those turned run at her and strike: she stands; pictured as they come)
+        t1 = time.time(); shot_done = False
+        while time.time() - t1 < 20.0:
+            yield from rwait(0.5)
+            if not shot_done and time.time() - t1 > 3.0:
+                # (toward the nearest of those coming at her)
+                hl = [g.get_wild_person14(f["i"]).get_actor_location() for f in wild_folk14() if f["hurt"] and g.get_wild_person14(f["i"]).is_wild_hostile14()]
+                hp_ = G["pawn"].get_actor_location()
+                yw = math.degrees(math.atan2(min(hl, key=lambda x: math.hypot(x.x - hp_.x, x.y - hp_.y)).y - hp_.y, min(hl, key=lambda x: math.hypot(x.x - hp_.x, x.y - hp_.y)).x - hp_.x)) if hl else 0.0
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-18, yaw=yw)); yield from rwait(0.4); shot("locks14_hostile", "1280x720"); shot_done = True
+            if g.get_editor_property("wild_folk_blows_on_her14") - blows0 >= 2: break
+        r["blows_on_her"] = g.get_editor_property("wild_folk_blows_on_her14") - blows0; r["her_hp_lost"] = round(hp0 - cb().get_health(), 1)
+        res["rogue"] = r
+        g.calm_wild_folk14(); cb().set_health(cb().get_max_health()) if hasattr(cb(), "set_health") else None
+        # ---- the Warrior breaks one at once
+        yield from hero("Warrior"); wr = {}
+        k0 = g.get_editor_property("wild_locks_broken14")
+        wr["prompt"] = yield from stand_at_box14(lk[1], "break the lock")
+        wr["f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.3)
+        b_ = box_now(lk[1]["key"]); wr["opened_at_once"] = bool(b_ and b_["looted"]); wr["broken"] = g.get_editor_property("wild_locks_broken14") - k0
+        res["warrior"] = wr
+    finally:
+        try: G["gen"].calm_wild_folk14()
+        except Exception: pass
+        if str(G["gen"].get_editor_property("current_hero")) != hero0: G["gen"].switch_hero(hero0); yield from rwait(0.8); refresh()
+        G["gen"].set_town_hour(hour0)
+        G["gen"].wild_drop_all(); G["gen"].wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+        quiet(False)
+    m = res.get("mage", {}); r = res.get("rogue", {}); wr = res.get("warrior", {}); pl = r.get("placed", {})
+    def is_(role, hostile, by=None):
+        v_ = pl.get(role)
+        return v_ is not None and v_.get("hostile") == hostile and (by is None or v_.get("by") == by)
+    ok = (res.get("boxes_seen", 0) >= 8 and 0.25 <= res.get("locked_share", 0) <= 0.75 and res.get("gardens_locked", 1) == 0
+          and m.get("opened") and m.get("locked_prompt") and m.get("locked_stayed_shut") and m.get("refused") == 1 and m.get("hostile_after") == 0
+          and r.get("prompt") and r.get("f") == "pick" and not r.get("opened_early") and r.get("opened") and r.get("picked") == 1
+          and is_("heard", True, "heard") and is_("seen", True, "seen") and is_("far", False) and is_("hidden", False)
+          and r.get("blows_on_her", 0) >= 1 and r.get("her_hp_lost", 0) > 0
+          and wr.get("prompt") and wr.get("f") == "break" and wr.get("opened_at_once") and wr.get("broken") == 1)
+    step_result("locks14", ok, **res)
 
 
 def step_sleep14():
@@ -5462,7 +5657,8 @@ def step_horse14():
           and res["called_town_m"] is not None and res["called_town_m"] < 4.0)
     step_result("horse14", ok, **res)
 
-STEPS = {"npc14": step_npc14, "farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "spires14": step_spires14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+LOCK_STEPS = ("locks14",)
+STEPS = {"locks14": step_locks14, "npc14": step_npc14, "farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "spires14": step_spires14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)
@@ -5492,14 +5688,23 @@ def run():
         # (a step's own list: "look=pine forests+glacial")
         name, _, arg = s.partition("=")
         if arg: G["look_only"] = [a_.replace("_", " ") for a_ in arg.split("+")]
+        # (the list of 2026-11-16's ninth phase: the older steps open the wilds' containers with the locks off (they test other things:
+        # a locked chest would answer "the chest is locked"); locks14 with them on; the people calmed after every step)
+        locks0 = None
         try:
             refresh()
+            locks0 = G["gen"].get_editor_property("wild_locks14")
+            if name not in LOCK_STEPS: G["gen"].set_editor_property("wild_locks14", False)
             yield from STEPS[name]()
         except Exception as e:
             import traceback
             step_result(name, False, error=str(e), trace=traceback.format_exc()[-1500:])
             try: quiet(False)
             except Exception: pass
+        try:
+            if locks0 is not None: G["gen"].set_editor_property("wild_locks14", locks0)
+            G["gen"].calm_wild_folk14()
+        except Exception: pass
         yield from rwait(0.3)
 def finish(err=None):
     unreal.unregister_slate_post_tick_callback(G["h"])

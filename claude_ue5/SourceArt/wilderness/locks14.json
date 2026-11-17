@@ -1,0 +1,10 @@
+{
+  "_doc": "The list of 2026-11-16's ninth phase (931): locked wild containers and who notices. share: the containers (not the gardens) locked, by a hash of each one's key; pick_s: how long the Rogue stays by a lock to pick it; hear_m: a lock picked or broken is heard within this; see_m: seen within this by one with a clear line to her (not while she is in stealth); blow: a hostile person's blow (grown with the wilds' tier); calm_m: how far she must go for them to calm down.",
+  "maps": ["brokenspire"],
+  "share": 0.5,
+  "pick_s": 2.0,
+  "hear_m": 30,
+  "see_m": 40,
+  "blow": 6,
+  "calm_m": 80
+}
