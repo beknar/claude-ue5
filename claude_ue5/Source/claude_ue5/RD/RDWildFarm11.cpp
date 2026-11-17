@@ -456,6 +456,7 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 	};
 	if (Kind == TEXT("house"))
 	{
+		Rec.HouseFloor14 = Base + 2.f;          // (the list of 2026-11-16: the family's place inside, at evening (PR #84's review: set only with a bed piece))
 		if (const FRDPiece* Fp = Piece(TEXT("Fireplace")))
 		{
 			PutAt(TEXT("Fireplace"), Mn.X + Fp->Size.X * 0.5f + 2.f, 0.f, 0.f);
@@ -468,7 +469,6 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 		{
 			BedY = Mx.Y - Bp->Size.Y * 0.5f - 20.f;
 			if (PutAt(TEXT("Bed"), Mn.X + Bp->Size.X * 0.5f + 6.f, BedY, 0.f)) Rec.Beds14.Add(FTransform(FRotator(0.f, Yaw, 0.f), At(Mn.X + Bp->Size.X * 0.5f + 6.f, BedY, 2.f)));
-			Rec.HouseFloor14 = Base + 2.f;
 			if (const FRDPiece* Cp = Piece(TEXT("Chest"))) PutBox(TEXT("Chest"), Mn.X + Bp->Size.X + 14.f + Cp->Size.X * 0.5f, BedY, 0.f, TEXT("chest"));
 		}
 		const float TableY = Mn.Y + (Mx.Y - Mn.Y) * 0.3f;
@@ -515,7 +515,7 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 					break;
 				}
 				if (!bOven) UE_LOG(LogRDWildFarm11, Warning, TEXT("RDWILDTABLES14 no room for a farmhouse's oven (farm %d)"), Rec.Id);
-					}
+				}
 				// (the list of 2026-11-16's seventh phase: "the NPCs at farms should sleep at night": a bed for each of the family where the room
 				// has one free (after everything else of the house, an overlap test), its head to a wall, its foot to the room)
 				if (bTables14)
@@ -525,17 +525,24 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 						struct FBd { float X, Y, YawL; };
 						// (every place along the four walls, 30 cm apart, its head to the wall: the back wall's first, then the sides', then the door's
 						// wall away from the door (the first run's six places left 10 of the 60 designs a bed short))
+						// (from the walls' own inner faces: the thatch kit's walls are 72 cm thick (the timber's 35), so 30 cm in from the wall's line
+						// a bed stood in the wall, every try was refused, and the six thatched designs had one bed)
+						const FRDPiece* Wp = Piece(Pn(TEXT("Wall")));
+						const float In = FMath::Max(30.f, Wp ? (float)Wp->Size.X * 0.5f : 30.f) + 8.f;
+						const float X0 = -Hx + In, X1 = Hx - In, Y0r = -Hy + In, Y1r = Hy - In;
 						TArray<FBd> Tries;
-						for (float Y = Mx.Y - By * 0.5f - 10.f; Y >= Mn.Y + By * 0.5f + 10.f; Y -= 30.f) Tries.Add({ float(Mn.X + Bx * 0.5f + 6.f), Y, 0.f });
-						for (float X = Mn.X + By * 0.5f + 10.f; X <= Mx.X - By * 0.5f - 10.f; X += 30.f) { Tries.Add({ X, float(Mx.Y - Bx * 0.5f - 6.f), -90.f }); Tries.Add({ X, float(Mn.Y + Bx * 0.5f + 6.f), 90.f }); }
-						for (float Y = Mx.Y - By * 0.5f - 10.f; Y >= Mn.Y + By * 0.5f + 10.f; Y -= 30.f) Tries.Add({ float(Mx.X - Bx * 0.5f - 6.f), Y, 180.f });
+						for (float Y = Y1r - By * 0.5f - 4.f; Y >= Y0r + By * 0.5f + 4.f; Y -= 30.f) Tries.Add({ X0 + Bx * 0.5f, Y, 0.f });
+						for (float X = X0 + By * 0.5f + 4.f; X <= X1 - By * 0.5f - 4.f; X += 30.f) { Tries.Add({ X, Y1r - Bx * 0.5f, -90.f }); Tries.Add({ X, Y0r + Bx * 0.5f, 90.f }); }
+						for (float Y = Y1r - By * 0.5f - 4.f; Y >= Y0r + By * 0.5f + 4.f; Y -= 30.f) Tries.Add({ X1 - Bx * 0.5f, Y, 180.f });
 						for (const FBd& T : Tries)
 						{
 							if (Rec.Beds14.Num() >= 4) break;
 							if (T.X > Mx.X - Bx - 60.f && FMath::Abs(T.Y - DoorY) < By * 0.5f + 170.f) continue;          // (not in the doorway's way or its leaf's swing)
 							const float Y2 = Yaw + T.YawL;
 							const FVector L = At(T.X, T.Y, 2.f);
-							// (the box from 30 cm over the floor's line: a stone floor stands thicker than the timber's, and a box from 15 cm met it in six of the 60 designs)
+							// (clear of everything of the house and of the beds laid before it: the box from 30 cm over the floor's line (a stone floor stands
+							// thicker than the timber's, and a box from 15 cm met it in six of the 60 designs))
+							if (!WildSpotFree14(C, L + FVector(0, 0, 30.f + (Bz - 40.f) * 0.5f), Y2, FVector(Bx * 0.5f - 3.f, By * 0.5f - 3.f, (Bz - 40.f) * 0.5f))) continue;
 							if (!WildFarmInstance(C, Rec, Bp->Mesh, Bp->Adjust * FTransform(FRotator(0.f, Y2, 0.f), L), Bp->bCollision, Bp->Material)) continue;
 							Rec.Beds14.Add(FTransform(FRotator(0.f, Y2, 0.f), L));
 							++Furniture;

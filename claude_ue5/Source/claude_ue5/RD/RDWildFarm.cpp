@@ -40,19 +40,21 @@ ARDTownsfolk* ARDDungeonGenerator::WildFolkForF(const FVector& From) const
 	// (as the town's people: within 2 m, and a door or a container of a loaded town nearer than them takes F (PR #30's review:
 	// the farm folk took F before Brokenspire's rule))
 	if (!bWild) return nullptr;
-	ARDTownsfolk* T = NearestWildFolk(From, 200.f);
+	// (the list of 2026-11-16: a farm's sleeper only talks: passed over for everything else F reaches (the town's PR #41 rule); alone,
+	// WildSleeperNear14 names it)
+	ARDTownsfolk* T = NearestWildFolk(From, 200.f, true);
 	if (!T) return nullptr;
 	const float D = FVector::Dist2D(T->GetActorLocation(), From);
 	if (const ARDSection* S0 = GetSection(FIntPoint::ZeroValue)) { bool bD0 = false; int32 I0 = -1; if (S0->FindNearestInteractive(From, D, bD0, I0) < D - 30.f) return nullptr; }
 	return T;
 }
 
-ARDTownsfolk* ARDDungeonGenerator::NearestWildFolk(const FVector& From, float Reach) const
+ARDTownsfolk* ARDDungeonGenerator::NearestWildFolk(const FVector& From, float Reach, bool bAwake) const
 {
 	ARDTownsfolk* Best = nullptr; float Bd = Reach;
 	for (const FRDWildFarmRec& F : WildFarms)
 		for (const TWeakObjectPtr<ARDTownsfolk>& W : F.Folk)
-			if (ARDTownsfolk* T = W.Get(); IsValid(T))
+			if (ARDTownsfolk* T = W.Get(); IsValid(T) && !(bAwake && T->IsSleeping()))
 			{
 				const float D = FVector::Dist2D(T->GetActorLocation(), From);
 				if (D < Bd && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Bd = D; Best = T; }

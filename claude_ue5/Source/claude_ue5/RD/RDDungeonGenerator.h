@@ -2553,13 +2553,15 @@ public:
 	/** the farm buildings' lines (GetWildBoxLines' "fbld"), kept as they are built */
 	TArray<FString> WildFarmBldLines;
 	/** the farm folk within reach of a point (cm), nearest first (null: none) */
-	ARDTownsfolk* NearestWildFolk(const FVector& From, float Reach = 240.f) const;
+	ARDTownsfolk* NearestWildFolk(const FVector& From, float Reach = 240.f, bool bAwake = false) const;
+	/** the list of 2026-11-16's seventh phase: a farm's sleeper within F's reach (named asleep when nothing else is there) */
+	ARDTownsfolk* WildSleeperNear14(const FVector& From) const;
 	/** the farm folk F talks to: within 2 m, unless a door or container of a loaded town is nearer (as the town's people) */
 	ARDTownsfolk* WildFolkForF(const FVector& From) const;
 	/** the farmsteads of the chunks made: "farm|<id>|<name>|<x m>|<y m>|<z cm>|<yaw>|<props>|<animals>|<folk>|<pen x cm>|<pen y
 	 *  cm>|<pen half x>|<pen half y>|<pen yaw>", then each of its "animal|<id>|<kind>|<x>|<y>|<z cm>|<in the pen 0/1>|<state>|
 	 *  <ground z cm>" and "folk|<id>|<title>|<x>|<y>|<z cm>|<clip>|<ground z cm>|<def name>" (tests) */
-	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") TArray<FString> GetWildFarmLines() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") TArray<FString> GetWildFarmLines() const;          // ("folk|<farm>|<title>|x|y|z|<clip>|<ground z>|<def>|<asleep>|<in bed>|<indoors>|<has a bed>|<bed x>|<bed y>|<bed top>")
 	/** the farms' layout at a point (metres): "<kind>|<great x>,<great y>|<plot x>,<plot y>|<crop>|<field>|<ang>|<strip w>|
 	 *  <strip off>|<strip>|<furrow>|<ridge m>|<height m>|<the height with no farm m>" (kind: 0 none, 1 open field, 2 crofts, 3 pasture, 4 yard) (tests) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") FString GetWildFarmAt(float Xm, float Ym) const;

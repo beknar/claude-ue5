@@ -137,7 +137,7 @@ public:
 	 *  door (DoorOut, on the ground) and its own place inside (In, on the floor): home at evening (it walks to the door and goes in),
 	 *  asleep at night (in its bed if it has one), out to its work in the morning */
 	void SetWildFarmHome(const FVector& DoorOut, const FVector& In) { WildDoorOut = DoorOut; WildIn = In; bWildFarm = true; }
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool IsWildIndoors() const { return bWildIndoors; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool IsWildIndoors() const { return bWildIndoors; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") bool IsInBed() const { return bInBed; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") bool HasBed() const { return bHasBed; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") FVector GetBedAt() const { return BedAt; }

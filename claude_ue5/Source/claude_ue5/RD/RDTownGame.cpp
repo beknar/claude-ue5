@@ -1363,8 +1363,9 @@ FString ARDDungeonGenerator::TownDescribe(const FVector& From) const
 		int32 Di = -1; const ARDWildChunk* Dc = bWild && bWildHouseInsides ? WildDoorNear(From, 190.f, Di) : nullptr;
 		const ARDTownsfolk* Wf = WildFolkForF(From);
 		if (Dc && (!Wf || FVector::Dist2D(Dc->Doors[Di].At, From) < FVector::Dist2D(Wf->GetActorLocation(), From))) return WildDoorDescribe(From);
-		if (Wf && Wf->IsSleeping()) return FString::Printf(TEXT("%s (asleep)"), *RDTTheTitle(Wf->Title, false));          // (the list of 2026-11-16)
 		if (Wf) return FString::Printf(TEXT("talk to %s"), *RDTTheTitle(Wf->Title, false));
+		// (the list of 2026-11-16: a farm's sleeper, when nothing else is in reach)
+		if (!Dc) if (const ARDTownsfolk* Sl = WildSleeperNear14(From)) return FString::Printf(TEXT("%s (asleep)"), *RDTTheTitle(Sl->Title, false));
 	}
 	// (someone near: talk)
 	int32 Who = -1; float Best = 240.f;
@@ -1425,12 +1426,6 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 	}
 	if (ARDTownsfolk* Wf = WildFolkForF(From))
 	{
-		// (the list of 2026-11-16's seventh phase: a farm's sleeper is left asleep)
-		if (Wf->IsSleeping())
-		{
-			if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("%s is asleep"), *RDTTheTitle(Wf->Title, true)));
-			return TEXT("asleep");
-		}
 		Wf->FaceToward(From, 8.f);
 		// (the list of 2026-11-12: a structure's prisoner freed, a quest's person spoken to)
 		if (const FString Did = WildSiteTalk(Wf); !Did.IsEmpty()) return Did;
@@ -1442,6 +1437,16 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 		// (the list of 2026-11-11: one met on the way gives her what they have, the first time she speaks to them)
 		if ((!Wf->WildGift.IsEmpty() || Wf->WildGiftGold > 0) && GiveWildGift(Wf)) return TEXT("gift");
 		return TEXT("bark");
+	}
+	// (the list of 2026-11-16's seventh phase: a farm's sleeper, when F reaches nothing else, is left asleep)
+	if (bWild)
+	{
+		int32 Di2 = -1;
+		if (const ARDTownsfolk* Sl = WildSleeperNear14(From); Sl && !(bWildHouseInsides && WildDoorNear(From, 190.f, Di2)))
+		{
+			if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("%s is asleep"), *RDTTheTitle(Sl->Title, true)));
+			return TEXT("asleep");
+		}
 	}
 	int32 Who = -1; float Best = 240.f;
 	for (int32 I = 0; I < TownPeople.Num(); ++I)

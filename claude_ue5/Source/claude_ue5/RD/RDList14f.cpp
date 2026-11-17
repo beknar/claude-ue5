@@ -24,14 +24,38 @@ void ARDDungeonGenerator::SetWildFarmFolkHome14(ARDTownsfolk* T, const FRDWildFa
 	T->SetBed(FVector(Lie.X, Lie.Y, Top), B.Rotator().Yaw);
 }
 
+// (a farm's hours, earlier than the town's resident's (19 home, 22 asleep, 6 up, 6.5 out): home from half past eight, asleep from
+// nine to half past five, out at six)
+static constexpr float RDFarmHomeFrom = 20.5f, RDFarmHomeTo = 6.f, RDFarmSleepFrom = 21.f, RDFarmSleepTo = 5.5f;
+
+ARDTownsfolk* ARDDungeonGenerator::WildSleeperNear14(const FVector& From) const
+{
+	ARDTownsfolk* Best = nullptr; float Bd = 200.f;
+	for (const FRDWildFarmRec& F : WildFarms)
+		for (const TWeakObjectPtr<ARDTownsfolk>& W : F.Folk)
+			if (ARDTownsfolk* T = W.Get(); IsValid(T) && T->IsSleeping())
+			{
+				const float D = FVector::Dist2D(T->GetActorLocation(), From);
+				if (D < Bd && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Bd = D; Best = T; }
+			}
+	return Best;
+}
+
 bool ARDTownsfolk::TickWildFarmDay(float Now)
 {
 	// (the town's hours, a farm's earlier: home from half past eight, asleep from nine to half past five, out at six; the way to the
 	// door straight over the ground (no tiles out here), tried again every 3 s, then put inside at the door as the town puts a
 	// sleeper in who could not get home)
-	if (!Gen || !Gen->bDayNight) return false;
+	if (!Gen) return false;
+	// (no day and night: out of the house and at its work (PR #84's review: switched off at night they stayed inside for good))
+	if (!Gen->bDayNight)
+	{
+		if (bInBed) { bInBed = false; SetClip(false); }
+		if (bWildIndoors) { bWildIndoors = false; bWentHome = false; SetActorLocation(WildDoorOut); Path.Reset(); Path.Add(FVector(Post.X, Post.Y, Gen->WildGroundZ(Post) + 94.f)); }
+		return Path.Num() > 0;
+	}
 	const float H = Gen->GetTownHour();
-	const bool bHome = H >= 20.5f || H < 6.f, bNight = H >= 21.f || H < 5.5f;
+	const bool bHome = H >= RDFarmHomeFrom || H < RDFarmHomeTo, bNight = H >= RDFarmSleepFrom || H < RDFarmSleepTo;
 	const FVector L = bInBed ? PreBed : GetActorLocation();
 	if (bHome != bWentHome)
 	{
@@ -41,7 +65,9 @@ bool ARDTownsfolk::TickWildFarmDay(float Now)
 		if (bHome) Path.Add(WildDoorOut);
 		else
 		{
-			// (the morning: out of its door, then to its work)
+			// (the morning: out of bed (not back to where it lay down from: the tick's way out of bed would have put it inside again,
+			// PR #84's review), out of its door, then to its work)
+			if (bInBed) { bInBed = false; SetClip(false); }
 			if (bWildIndoors) { bWildIndoors = false; SetActorLocation(WildDoorOut); }
 			Path.Add(FVector(Post.X, Post.Y, Gen->WildGroundZ(Post) + 94.f));
 		}

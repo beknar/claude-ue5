@@ -3520,6 +3520,8 @@ def step_sleep14():
         g.set_town_hour(23.0); yield from rwait(2.0)
         nt = farm_folk14(fid)
         res["night"] = [{"title": f["title"], "asleep": f["asleep"], "inbed": f["inbed"], "indoors": f["indoors"], "hasbed": f["hasbed"], "clip": f["clip"]} for f in nt]
+        bp = [f["bed"] for f in nt if f["inbed"]]
+        res["night_beds_apart_cm"] = round(min((math.hypot(a.x - b_.x, a.y - b_.y) for i_, a in enumerate(bp) for b_ in bp[i_ + 1:]), default=9999.0))
         sl = next((f for f in nt if f["inbed"]), None)
         if sl:
             # (her looking at it from the room, so its pose is ticked (a body not drawn is not posed: the town's lesson))
@@ -3567,7 +3569,11 @@ def step_sleep14():
         for d in range(nd):
             fid2 = g.spawn_farm_design_at(d, sx, sy, 0.0); yield from rwait(0.15)
             ff = farm_folk14(fid2)
-            beds[d] = [len(ff), sum(1 for f in ff if f["hasbed"])]
+            # (the beds measured, not counted (PR #84's review: four beds laid in one place passed a count): the least distance
+            # between two of the family's beds)
+            bp = [f["bed"] for f in ff if f["hasbed"]]
+            md = min((math.hypot(a.x - b_.x, a.y - b_.y) for i_, a in enumerate(bp) for b_ in bp[i_ + 1:]), default=9999.0)
+            beds[d] = [len(ff), len(bp), round(md)]
             g.remove_wild_farm(fid2); yield
         res["design_beds"] = beds
     finally:
@@ -3581,7 +3587,8 @@ def step_sleep14():
           and all(f["inbed"] == f["hasbed"] for f in nt) and all("Sleep" in f["clip"] for f in nt if f["inbed"]) and res.get("has_bed", 0) >= min(2, res["folk"])
           and s and 3 <= s["hips_over_top_cm"] <= 45 and s["hips_from_bed_cm"] <= 60 and s["plays"] and "asleep" in s.get("says", "") and s.get("f") == "asleep" and s.get("still_in_bed")
           and mo.get("asleep") == 0 and mo.get("inbed") == 0 and mo.get("indoors") == 0 and max(mo.get("off_post_cm", [999])) < 250
-          and len(db) == res.get("designs", -1) and all(v[1] >= min(v[0], 2) for v in db.values()))
+          and res.get("night_beds_apart_cm", 0) >= 80
+          and len(db) == res.get("designs", -1) and all(v[1] == v[0] and v[2] >= 80 for v in db.values()))
     step_result("sleep14", ok, **res)
 
 
