@@ -2,7 +2,7 @@
 
 [README](../README.md) · [The wilderness](levels/wilderness.md) · [TODO](../TODO.md)
 
-These are suggestions for making the wilderness more engaging, taken from other open-world RPGs. They were written on 2026-11-14 after the TODO sweep, for later consideration. Since then the biomes' scenery ([docs/improvements13.txt](improvements13.txt), merged 2026-11-16) built parts of ideas 1 and 7, noted under each; the rest is not planned.
+These are suggestions for making the wilderness more engaging, taken from other open-world RPGs. They were written on 2026-11-14 after the TODO sweep, for later consideration. Since then the biomes' scenery ([docs/improvements13.txt](improvements13.txt), merged 2026-11-16) built parts of ideas 1 and 7. Several others are partly in the game already, in the 25 structure quests (`SourceArt/wilderness/quests12.json`) and the encounter director's kinds (`SourceArt/wilderness/events11.json`). Each idea says what is in the game and what is still open; nothing more is planned.
 
 ## Why it may feel flat
 
@@ -14,10 +14,12 @@ The wilds already have a lot in them:
 - hunting, swimming and the horse;
 - the weather and day and night.
 
+Some of it already lasts: freed prisoners, cleared lairs and used points of interest stay done in the save (`WildKilled`), the lair clearing's choice reopens its road, and the frontier outpost and the legendary hunt give named rewards.
+
 So the amount is probably not what is missing. Judged from what is built, not from play, three things may be:
 - **Nothing pulls from afar:** from a hilltop little stands out as worth walking to.
-- **Finds pay generic loot:** gold, a tier's items and materials. Few rewards are lasting or remembered.
-- **Nothing changes:** a cleared camp or a killed beast leaves the world as it was.
+- **Most finds pay generic loot:** gold, a tier's items and materials. Outside a few quests' rewards, little is lasting or remembered.
+- **Little changes:** a cleared lair stays cleared, but the world round it does not change (no trader moves in, nothing is reclaimed).
 
 ## The ideas
 
@@ -30,7 +32,7 @@ Roughly in order of payoff for the work. Each notes what in the game it would bu
 - **The goal:** from any hilltop, three or four things worth walking to.
 - **Builds on:** the far land (`RD/RDSkyFar.cpp`, drawn out to 80 km), the ruins' pieces (`RD/RDWildRuin12.cpp`), the camps (`RD/RDWild10.cpp`).
 - **How to measure:** from sample hilltops in each region, count the landmarks within view in pictures.
-- **Built since (2026-11-16):** a broken tower 182 m high at a fixed place in each 6 km square of the open lands, the nearest within 8 km standing (`WildLandmarkBiomes`), and the far storms and grass fires' smoke ([the wilderness](levels/wilderness.md), the biomes' scenery). Still open: a silhouette of each region's own, and the camps' smoke and lit windows at night.
+- **Built since (2026-11-16):** a broken tower 182 m high at a fixed place in each 6 km square of the open lands, the nearest within 8 km standing (`WildLandmarkBiomes`), and the far storms and grass fires' smoke ([the wilderness](levels/wilderness.md), the biomes' scenery). Also in the game: the scenery's far pieces, never culled (a lone tree, a butte), and the places' landmarks (an ancient ruin, a giant's bones) in one cell in nine. Still open: a tall silhouette of each region's own, seen from its hilltops, and the camps' smoke and lit windows at night.
 
 ### 2. Lookout towers that reveal the map (Ubisoft's towers, Breath of the Wild)
 
@@ -53,13 +55,14 @@ Roughly in order of payoff for the work. Each notes what in the game it would bu
 ### 4. Rewards that last
 
 - **Region collectibles:** small finds scattered through each region, traded for something permanent: more carrying space, hit points or a skill point (Breath of the Wild's Korok seeds).
-- **Treasure maps:** found in ruins, each a picture of a spot that leads to a buried chest, recognised by its landmark (Red Dead Redemption 2, The Witcher 3).
+- **Treasure maps:** found in ruins, each a picture of a spot that leads to a buried chest, recognised by its landmark (Red Dead Redemption 2, The Witcher 3). Two quests already work this way: "The lost ruin" (a half-burned map that leads to a ruin) and "The buried cache" (a riddle that leads to a crate dug up); the open part is maps found loose in ruins, as pictures, in any number.
 - **Unique named items tied to places**, so "the sword from the drowned tower" is remembered.
-- **Builds on:** the wild containers and their keys in the save (`RD/RDWildFarm11.cpp`), the items table and its tiers (`910`), the ruins' kinds.
+- **Builds on:** the wild containers and their keys in the save (`RD/RDWildFarm11.cpp`), the items table and its tiers (`910`), the ruins' kinds, the quests' stages (`do=collect`, `do=goto` with `at=trail`, `RD/RDWildQuest12.cpp`).
 
 ### 5. Monster contracts you investigate (The Witcher 3)
 
 - A town's board posts a named beast. She follows its tracks, signs and kills across the wilds to its lair, then fights it with a weakness learned on the way.
+- **Already in the game:** the "Monster bounty" quest (a bounty hunter posts a named beast, the Grey Ravager; she follows its kills along a trail to it, with a twist after) and "The legendary hunt" (bait gathered, a trap set, rival hunters). Still open: the weakness learned on the way, and contracts posted on the towns' boards, more than one beast.
 - **Builds on:** the quest boards and quest stages (`RD/RDWildQuest12.cpp`), the lairs (`RD/RDWildLair12.cpp`), the hunted animals (`RD/RDWild8.cpp`).
 
 ### 6. Camps cleared that change the world (Far Cry's outposts, The Witcher 3's resettled villages)
@@ -79,20 +82,20 @@ Roughly in order of payoff for the work. Each notes what in the game it would bu
 
 ### 8. Encounters on the road with a story (Skyrim, Red Dead Redemption 2)
 
-- Fewer random fights and more short scenes, for example:
-  - a courier with a letter for her;
+- More short scenes among the fights. The director already sends talking travellers (a courier, a pilgrim, a pedlar, a lost hunter, a refugee: `roam_courier` and the others in `events11.json`), and the legendary hunt has rival hunters. Still open, for example:
+  - a courier with a letter for her by name, from someone she has met;
   - someone being chased;
   - a merchant whose cart has broken down;
-  - a rival adventurer who keeps reaching places first.
+  - a rival adventurer who keeps reaching places first, across the wilds, not one quest.
 - **Builds on:** the encounter director and its kinds (`912`, `920 events`, `SourceArt/wilderness/events11.json`), the road travellers (`916`).
 
 ### 9. Getting about
 
-- **Waystones** she finds and lights, as the only fast travel.
-- **Signposts** at road crossings naming the towns.
+- **Waystones** she finds and lights, travelled to beside the towns (the map's travel to found towns stays: `888`'s travel step, the respawn in the nearest found town and the long quests rely on it).
+- **Signposts** at road crossings naming the towns: the crossroads are found already (`MakeCrossroads`, 155 in a world), and kinds stand at them (`crossroads_notice`, which names the nearest structure; `crossroads_shrine`; `crossroads_gibbet`), with a signpost piece (`s12_signpost`): the open part is a post at each naming the towns down each road.
 - **Danger shown on the map:** the roads coloured by tier, a skull near a roaming monster.
 - **Climbing or gliding** (Breath of the Wild): it would change the most, but needs new animations. The most expensive item here.
-- **Builds on:** the roads and their tiers (`FRDWildWorld::TierAt`), the map's travel (`WildTravelToTown`), the signs (`blender_numpy/bs_signs.py`).
+- **Builds on:** the roads and their tiers (`FRDWildWorld::TierAt`), the crossroads and `place=crossroads` (`RD/RDWildWorld.cpp`), the map's travel (`WildTravelToTown`), the signs (`blender_numpy/bs_signs.py`).
 
 ## A first round, if chosen
 
