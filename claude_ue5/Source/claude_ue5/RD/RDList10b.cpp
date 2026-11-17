@@ -136,6 +136,8 @@ TArray<FName> ARDDungeonGenerator::ShelfLootOf(FIntPoint Section, int32 Index) c
 	auto KindOf = [&](const FRDItemDef& It) -> int32
 	{
 		if (!Low(It)) return -1;
+		// (the list of 2026-11-16's sixth phase: what only a found recipe makes is never on a shelf made; recipes are drawn apart, below)
+		if (bRecipes14 && IsLockedRecipe14(It.Name)) return -1;
 		if (It.Kind == ERDItemKind::Scroll) return 0;
 		if (It.Kind == ERDItemKind::Component && Parts.Contains(It.Name)) return 1;
 		if (It.Kind == ERDItemKind::Tome) return 2;
@@ -167,6 +169,13 @@ TArray<FName> ARDDungeonGenerator::ShelfLootOf(FIntPoint Section, int32 Index) c
 			continue;
 		}
 		Out.Add(Got->Name);
+	}
+	// (the list of 2026-11-16's sixth phase: a recipe now and then, on a stream of its own (the shelf's draws above unchanged))
+	if (bRecipes14)
+	{
+		FRandomStream Rr((int32)HashCombine(HashCombine((uint32)SessionSeed ^ 0x4EC15u, GetTypeHash(Section)), GetTypeHash(Index * 131 + 7)));
+		if (Rr.FRand() < RecipeShelfChance14)
+			if (const FName Rc = RecipeOfTier14(T, Rr); !Rc.IsNone()) Out.Add(Rc);
 	}
 	return Out;
 }

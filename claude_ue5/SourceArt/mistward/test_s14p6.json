@@ -1,0 +1,88 @@
+{
+ "tag": "s14p6",
+ "plan": [
+  "recipes14"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "recipes14",
+   "ok": true,
+   "tiers_open": 3,
+   "switch": true,
+   "locked": {
+    "Elixir of Iron Hide": true,
+    "Hunter's Stew": true,
+    "Scroll of Starfall": true,
+    "Small Healing Potion": false
+   },
+   "offered_before": false,
+   "oven_offers_stew_before": false,
+   "craft_refused": true,
+   "refusal": "You have not learned to make the elixir of iron hide: find its recipe",
+   "inv_line": [
+    "recipe|Elixir of Iron Hide Recipe|1|0"
+   ],
+   "read": true,
+   "read_message": "You learn to make the elixir of iron hide (at an alchemist's table)",
+   "known": [
+    "Elixir of Iron Hide"
+   ],
+   "recipe_left": 0,
+   "read_again": false,
+   "again_message": "You know how to make the elixir of iron hide already",
+   "offered_after": true,
+   "f": "alchemist",
+   "panel": [
+    "Elixir of Iron Hide",
+    "Large Healing Potion",
+    "Large Mana Potion",
+    "Medium Healing Potion",
+    "Medium Mana Potion",
+    "Rare Healing Potion",
+    "Rare Mana Potion",
+    "Small Healing Potion",
+    "Small Mana Potion",
+    "Uncommon Healing Potion",
+    "Uncommon Mana Potion",
+    "Wondrous Healing Potion",
+    "Wondrous Mana Potion"
+   ],
+   "brewed": true,
+   "elixir": [
+    0,
+    1
+   ],
+   "blow_without": 20.0,
+   "drunk": true,
+   "drink_message": "Drank the elixir of iron hide,  blows on you 25% less for 60 s",
+   "resist": 0.25,
+   "blow_with": 15.0,
+   "might_drunk": true,
+   "damage": [
+    31.0,
+    38.75
+   ],
+   "census": {
+    "things": 1251,
+    "recipes": 13,
+    "kinds": [
+     "Draught of Swiftness Recipe",
+     "Elixir of Iron Hide Recipe",
+     "Honey Cake Recipe",
+     "Hunter's Stew Recipe"
+    ],
+    "locked_found_made": []
+   },
+   "blow_expected_with": 15.0
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_s14p6_recipes14_panel.png",
+  "mw_s14p6_recipes14_buff.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

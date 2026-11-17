@@ -121,6 +121,9 @@ bool ARDDungeonGenerator::HeroReadsScroll(ERDSpellType Type) const
 FString ARDDungeonGenerator::RecipeRefusal(const FRDRecipe& Rc) const
 {
 	const int32 Ix = FindItem(Rc.Item);
+	// (the list of 2026-11-16's sixth phase: an advanced recipe she has not found)
+	if (bRecipes14 && IsLockedRecipe14(Rc.Item) && !KnowsRecipe14(Rc.Item))
+		return FString::Printf(TEXT("You have not learned to make the %s: find its recipe"), *Rc.Item.ToString().ToLower());
 	// (the list of 2026-11-10: the forge's recipes, the Warrior's alone and only for what she has looted)
 	if (Rc.Station == TEXT("Forge"))
 	{

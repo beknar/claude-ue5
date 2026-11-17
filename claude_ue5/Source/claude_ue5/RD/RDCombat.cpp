@@ -320,7 +320,8 @@ float URDCombatComponent::GetDamageOf(int32 Index) const
 	// dexterity ring adds to the ranged bonus, a monster's weakening takes off)
 	// (mistward6: her spells, chi and fists grow with the tiers opened; her first blow out of stealth an ambush)
 	return W.Damage * (1.f + GetBonusOf(Index)) * WeakMul() * (1.f + GetBlessDamage())        // (the third list: a shrine's blessing of might)
-		* Generator->TierPowerOf(W) * AmbushMul(Index) * SpellBoostMul(W);          // (the sixth phase: the Mage's spell boosts)
+		* Generator->TierPowerOf(W) * AmbushMul(Index) * SpellBoostMul(W)          // (the sixth phase: the Mage's spell boosts)
+		* (1.f + GetMightBuff14());          // (the list of 2026-11-16's sixth phase: an elixir's or a meal's might)
 }
 
 float URDCombatComponent::GetBonusOf(int32 Index) const
@@ -572,7 +573,7 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 	if (O && Now < RuneUntil && FVector::Dist2D(O->GetActorLocation(), RuneAt) <= RuneRadius) { Amount *= 1.f - RuneShare; ++ZoneBlocks; }
 	// (her armour takes its share off; Iron Skin adds to it)
 	LastBlowBefore = Amount;
-	Amount *= 1.f - FMath::Clamp(GetArmour() + GetSkinBonus() + GetBlessArmour(), 0.f, 0.95f);
+	Amount *= 1.f - FMath::Clamp(GetArmour() + GetSkinBonus() + GetBlessArmour() + GetResistBuff14(), 0.f, 0.95f);          // (the list of 2026-11-16: an elixir's or a meal's resistance)
 	// (mistward: her shield takes its share of what is left, and wears by what it took; the third list: blocking with it, a
 	// share more, and it wears BlockWear times as fast)
 	LastShieldTook = 0.f;
@@ -1058,9 +1059,25 @@ bool URDCombatComponent::UseItem(FName Name)
 		RemoveCarried(Name, 1);
 		return true;
 	}
+	// (the list of 2026-11-16's sixth phase: a recipe read teaches its recipe, used up)
+	if (It.Kind == ERDItemKind::Recipe)
+	{
+		const FString What = It.Teaches.ToString().ToLower();
+		if (!Generator->bRecipes14 || It.Teaches.IsNone()) return false;
+		if (Generator->KnowsRecipe14(It.Teaches)) { SetMessage(FString::Printf(TEXT("You know how to make the %s already"), *What)); return false; }
+		if (!Generator->LearnRecipe14(It.Teaches)) return false;          // (not used up unless it was learned: PR #83's review)
+		RemoveCarried(Name, 1);
+		const int32 Ti = Generator->FindItem(It.Teaches); int32 Ri = -1;
+		for (int32 K = 0; K < Generator->Recipes.Num(); ++K) if (Generator->Recipes[K].Item == It.Teaches) { Ri = K; break; }
+		const FName St = Ri >= 0 ? Generator->RecipeStation(Generator->Recipes[Ri]) : NAME_None;
+		SetMessage(FString::Printf(TEXT("You learn to make the %s (at %s)"), *What, *ARDDungeonGenerator::StationPlace14(St)));
+		(void)Ti;
+		return true;
+	}
 	if (It.Kind == ERDItemKind::Component)
 	{
-		SetMessage(Generator->bHarvest ? FString::Printf(TEXT("The %s is a crafting material: an anvil makes potions, scrolls and repair items from it (F at an anvil)"), *Lb)
+		SetMessage(Generator->bTables14 ? FString::Printf(TEXT("The %s is a crafting material: what it goes into is in its description"), *Lb)
+		         : Generator->bHarvest ? FString::Printf(TEXT("The %s is a crafting material: an anvil makes potions, scrolls and repair items from it (F at an anvil)"), *Lb)
 		                               : FString::Printf(TEXT("The %s is a crafting material: an anvil makes repair items from it (F at an anvil)"), *Lb));
 		return false;
 	}
@@ -1076,10 +1093,12 @@ bool URDCombatComponent::UseItem(FName Name)
 	{
 	case ERDItemKind::Healing:
 	{
-		if (Health >= MaxHealth) { SetMessage(TEXT("Your hit points are full")); return false; }
+		// (an elixir with a buff is drunk for its buff whatever her hit points)
+		if (Health >= MaxHealth && It.BuffKind.IsNone()) { SetMessage(TEXT("Your hit points are full")); return false; }
 		const float Before = Health;
 		Health = FMath::Min(MaxHealth, Health + MaxHealth * It.Amount);
-		SetMessage(FString::Printf(TEXT("Drank the %s:  +%.0f HP"), *Lb, Health - Before));
+		// (an elixir drunk at full health for its buff says no "+0 HP")
+		SetMessage(Health > Before ? FString::Printf(TEXT("Drank the %s:  +%.0f HP"), *Lb, Health - Before) : FString::Printf(TEXT("Drank the %s"), *Lb));
 		break;
 	}
 	case ERDItemKind::Mana:
@@ -1099,10 +1118,18 @@ bool URDCombatComponent::UseItem(FName Name)
 		if (MaxDexEnergy > 0.f && DexEnergy < MaxDexEnergy) { DexEnergy = MaxDexEnergy; SetMessage(FString::Printf(TEXT("Drank the %s:  +%.0f%% speed for %.0f s, your dexterity energy full"), *Lb, It.Amount * 100.f, It.Seconds)); }
 		break;
 	case ERDItemKind::Food:
-		if (Health >= MaxHealth) { SetMessage(TEXT("Your hit points are full")); return false; }
+		if (Health >= MaxHealth && It.BuffKind.IsNone()) { SetMessage(TEXT("Your hit points are full")); return false; }
 		Effects.Add({ It.Kind, It.Amount, It.Seconds, Name });
 		SetMessage(FString::Printf(TEXT("Ate the %s:  +%.0f HP a second for %.0f s"), *Lb, MaxHealth * It.Amount, It.Seconds));
 		break;
+	}
+	// (the list of 2026-11-16's sixth phase: an advanced potion's or meal's buff besides)
+	if (AddBuff14(It))
+	{
+		const float P = It.BuffAmount * 100.f;
+		const FString Bw = It.BuffKind == TEXT("resist") ? FString::Printf(TEXT("blows on you %.0f%% less"), P) : It.BuffKind == TEXT("might") ? FString::Printf(TEXT("your blows %.0f%% more"), P)
+			: It.BuffKind == TEXT("speed") ? FString::Printf(TEXT("%.0f%% faster"), P) : FString::Printf(TEXT("%.0f%% of your hit points a second"), P);
+		SetMessage(Message + TEXT(",  ") + Bw + FString::Printf(TEXT(" for %.0f s"), It.BuffSeconds));
 	}
 	int32& N = Carried.FindOrAdd(Name);
 	if (--N <= 0) { Carried.Remove(Name); CarriedOrder.Remove(Name); }
@@ -1208,6 +1235,13 @@ TArray<FString> URDCombatComponent::GetAllInventoryLines() const
 	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Slash) Out.Add(FString::Printf(TEXT("slash|%s|%d"), *N.ToString(), GetItemCount(N)));
 	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Key) Out.Add(FString::Printf(TEXT("key|%s|%d"), *N.ToString(), GetItemCount(N)));
 	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Token) Out.Add(FString::Printf(TEXT("token|%s|%d"), *N.ToString(), GetItemCount(N)));
+	// (the list of 2026-11-16's sixth phase: recipes found "recipe|<name>|<count>|<1 she knows it already>")
+	for (const FName& N : CarriedOrder)
+		if (KindOf(N) == ERDItemKind::Recipe)
+		{
+			const int32 Ix = Generator->FindItem(N);
+			Out.Add(FString::Printf(TEXT("recipe|%s|%d|%d"), *N.ToString(), GetItemCount(N), Ix >= 0 && Generator->KnowsRecipe14(Generator->Items[Ix].Teaches) ? 1 : 0));
+		}
 	if (Generator && Generator->bHelmetToggle && HasHelmet()) Out.Add(FString::Printf(TEXT("helmet|%d|%s"), bHelmetHidden ? 1 : 0, *WornArmour.ToString()));
 	return Out;
 }
@@ -1929,7 +1963,7 @@ bool URDCombatComponent::UseInventoryEntry()
 		return true;
 	}
 	if (P.Num() >= 2 && (P[0] == TEXT("item") || P[0] == TEXT("armour") || P[0] == TEXT("carried") || P[0] == TEXT("repair") || P[0] == TEXT("component")
-		|| P[0] == TEXT("ring") || P[0] == TEXT("tome") || P[0] == TEXT("shield") || P[0] == TEXT("torch") || P[0] == TEXT("teleport") || P[0] == TEXT("scroll") || P[0] == TEXT("token")))
+		|| P[0] == TEXT("ring") || P[0] == TEXT("tome") || P[0] == TEXT("shield") || P[0] == TEXT("torch") || P[0] == TEXT("teleport") || P[0] == TEXT("scroll") || P[0] == TEXT("token") || P[0] == TEXT("recipe")))
 	{
 		const bool bOk = UseItem(FName(*P[1]));
 		InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));

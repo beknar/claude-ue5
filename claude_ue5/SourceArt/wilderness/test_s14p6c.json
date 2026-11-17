@@ -1,0 +1,47 @@
+{
+ "tag": "s14p6c",
+ "plan": [
+  "recipes14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "recipes14",
+   "ok": true,
+   "kinds_with_token": 54,
+   "kinds": 54,
+   "visits": [
+    {
+     "name": "Ruins of Hollowholt",
+     "boxes": 1,
+     "tier": 2,
+     "loot": "Iron Ingot|1|3|0.8;Small Healing Potion|1|2|0.7;Coarse Hide|1|2|0.5;@recipe|1|1|0.3",
+     "resolved": [
+      "Hunter's Stew Recipe"
+     ],
+     "names": [
+      "Iron Ingot",
+      "Small Healing Potion",
+      "Coarse Hide",
+      "Hunter's Stew Recipe"
+     ],
+     "recipe_tiers": [
+      2,
+      7,
+      12
+     ],
+     "f": "container",
+     "found": [
+      "Iron Ingot",
+      "Small Healing Potion",
+      "Hunter's Stew Recipe"
+     ]
+    }
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

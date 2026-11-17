@@ -362,6 +362,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool IsCraftingOpen() const { return bCraftOpen; }
 	/** the list of 2026-11-04: where the panel is opened: none an anvil, "Oven" a town kitchen's oven (its recipes only) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void SetCraftStation(FName Station) { CraftStation = Station; CraftCursor = 0; }
+	/** the list of 2026-11-16's sixth phase (RDList14e.cpp): an item's buff put on her; the strongest blows-taken-less and blows-more
+	 *  buffs on her now (shares) */
+	bool AddBuff14(const FRDItemDef& It);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetResistBuff14() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetMightBuff14() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") FName GetCraftStation() const { return CraftStation; }
 	FName CraftStation;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") int32 GetCraftCursor() const { return CraftCursor; }

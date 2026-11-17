@@ -173,6 +173,7 @@ void ARDDungeonGenerator::OpenWildBox(ARDWildChunk* C, int32 Index)
 	++WildBoxesOpened;
 	// (its things: a roll of its kind's list by its key, never a stream the play draws from; one at least)
 	TArray<FString> Lines; D.Loot.ParseIntoArray(Lines, TEXT(";"), true);
+	ResolveWildLoot14(Lines, D.At, D.Key);          // (the list of 2026-11-16's sixth phase: "@recipe")
 	FRandomStream R((int32)HashCombine(GetTypeHash(D.Key), 0xF00Du ^ (uint32)(IsWildReady() ? Wild->Seed : 0u)));
 	TArray<FName> Got = RollWildThings(Lines, R);
 	if (Got.Num() == 0)
@@ -180,7 +181,8 @@ void ARDDungeonGenerator::OpenWildBox(ARDWildChunk* C, int32 Index)
 		{
 			FString Nm, Rest;
 			if (!L.Split(TEXT("|"), &Nm, &Rest)) Nm = L;
-			if (FindItem(FName(*Nm)) >= 0) { Got.Add(FName(*Nm)); break; }
+			// (its "one at least" is never the recipe: that comes only by its chance (PR #83's review))
+			if (const int32 Fi = FindItem(FName(*Nm)); Fi >= 0 && Items[Fi].Kind != ERDItemKind::Recipe) { Got.Add(FName(*Nm)); break; }
 		}
 	if (Got.Num() == 0) { PlayerCombat->ShowMessage(TEXT("Empty: nothing inside")); return; }
 	TArray<FName> Order; TMap<FName, int32> N;

@@ -821,6 +821,10 @@ Potions are made at the alchemist's table and scrolls at the librarian's (the ca
 - **F** takes a table or an oven when it is the nearest of everything F reaches in the wilds (a scenery's use, a point of interest, a door or container, a person), within 2.3 m and seen from her: the line from her chest meets nothing before the station's own mesh (not through a wall).
 - **Measured** (`888 tables14 -Light`, `test_s14p5c.json`): the Mage at the first farmstead near Brokenspire: its oven in the farmhouse named and opened by F, two wheat baked into a bread through the panel's Enter, and from behind it (1.7 m off, past its wall) nothing named; each of the 60 farm designs built in turn: one oven each, gone with its farm when it is taken away; the nearest village with both tables (Sundale, 19.6 km): both laid, each named and opened by F from in front, a Small Healing Potion and a Scroll of Fire Bolt made through the panel. Pictures of the oven and both tables.
 
+### Recipes in the ruins' and structures' chests (item 4)
+
+Every kind of ruin and structure (54) holds "@recipe|1|1|0.3" in its chest's things (`928 wild`): when the chest is opened, a recipe of the land's tier where it stands (the recipes are of tiers 2 to 5 and their bands: the tier-1 land round Brokenspire gives none), drawn from a stream of its own by the chest's key so its other things keep their draws (`ResolveWildLoot14`). Measured (`888 recipes14 -Light`, `test_s14p6c.json`): every kind holds the line; at the nearest ruins on land of tier 2 or more, the Ruins of Hollowholt, its chest's own loot holds it and resolves to the Hunter's Stew Recipe (its tiers 2, 7, 12...); opened by F, the chest gave an Iron Ingot, a Small Healing Potion and the Hunter's Stew Recipe, all named by its resolved lines.
+
 ## Limits
 
 What is not there yet, and what has not been tested, is listed in [TODO.md](../../TODO.md). In short:

@@ -554,7 +554,9 @@ TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) co
 	// (level 5: an item may be found only in some tiers of rooms; level 4's items have no tiers: everywhere)
 	// (the rebalance to tier 25: an item's tiers are the game's: this level's tier through GlobalTier)
 	const int32 Tier = TierOf(Section);
-	auto InTier = [this, Tier](const FRDItemDef& It) { return ItemOfTier(It, Tier); };
+	// (the list of 2026-11-16's sixth phase: recipes are drawn apart, below, so the draw's sums and every pick stay what they were
+	// (PR #83's review); what only a found recipe makes is never found made)
+	auto InTier = [this, Tier](const FRDItemDef& It) { return ItemOfTier(It, Tier) && It.Kind != ERDItemKind::Recipe && !(bRecipes14 && IsLockedRecipe14(It.Name)); };
 	// what is put in the start room's containers: one to each in turn
 	if (StartRoomItems.Num() > 0 && IsStartSection(Section))
 	{
@@ -600,9 +602,16 @@ TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) co
 			continue;
 		}
 		Out.Add(Picked[K]);
-	}
-	return Out;
-}
+		}
+		// (a recipe now and then, on a stream of its own (the container's draws above unchanged))
+		if (bRecipes14 && Out.Num() < Max)
+		{
+		FRandomStream Rr((int32)HashCombine(HashCombine((uint32)SessionSeed ^ 0x4EC14u, GetTypeHash(Section)), GetTypeHash(Index * 7907 + 11)));
+		if (Rr.FRand() < RecipeLootChance14)
+			if (const FName Rc = RecipeOfTier14(GlobalTier(Tier), Rr); !Rc.IsNone()) Out.Add(Rc);
+		}
+		return Out;
+		}
 
 bool ARDDungeonGenerator::ContainerHoldsLoot(FIntPoint Section, int32 Index) const
 {
