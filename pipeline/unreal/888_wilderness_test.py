@@ -4777,6 +4777,8 @@ def step_horse14():
     down, her weapons back; pictures from her side"""
     g = G["gen"]; res = {}; quiet(True)
     yield from wait_ready(90)
+    # (her owning a horse put back as it was at the end: a later step (horse9) buys one at the stable)
+    owned0 = G["gi"].get_editor_property("horse_owned")
     G["gi"].set_editor_property("horse_owned", True)
     def near_her():
         # (a bool UFUNCTION with an out parameter: its out value when true, None when false)
@@ -4802,6 +4804,9 @@ def step_horse14():
     yield from press("M"); yield from rwait(0.6)
     # ---- riding
     yield from press("J"); yield from rwait(1.0)
+    torch_ = next((str(i) for i in ("Torch",) if G["gen"].find_item(i) >= 0), None)
+    if torch_: cb().add_item(torch_, 1); cb().use_item(torch_); yield from rwait(0.5)
+    res["torch_lit_before"] = bool(torch_) and not cb().are_ride_hands_empty()
     weapons_before = not cb().are_ride_hands_empty()
     yield from press("F"); yield from rwait(1.5)
     res["mounted"] = str(g.get_horse_state()).split("|")[2] == "1"
@@ -4811,6 +4816,28 @@ def step_horse14():
         return {"seat_along_cm": float(q[0]), "seat_across_cm": float(q[1]), "seat_up_cm": float(q[2]), "hand_l_cm": float(q[3]), "hand_r_cm": float(q[4]),
                 "hands_empty": q[5] == "1", "reins": int(q[6])}
     res["standing"] = rider()
+    # (measured on their own (PR #79's review: the line reads the point the game put her on, and its own hidden flags)): her pelvis
+    # against the seat worked out here from the saddle bone and horse_seat.json's measure; every mesh, light and effect of hers at her
+    # hands, shown or not
+    hz = g.get_editor_property("horse"); J14 = json.load(open(os.path.join(SA, "brokenspire", "horse_seat.json"), encoding="utf-8"))
+    def seat_from_json():
+        sad = hz.get_saddle_location(); yw_ = math.radians(hz.get_actor_rotation().yaw); lift = g.get_editor_property("horse_def").get_editor_property("rider_lift")
+        a_, u_ = J14["seat"]["ahead_cm"], J14["seat"]["up_cm"]
+        want = V(sad.x + math.cos(yw_) * a_, sad.y + math.sin(yw_) * a_, sad.z + u_ + lift)
+        pv = G["pawn"].get_editor_property("mesh").get_socket_location("pelvis")
+        return round(math.hypot(pv.x - want.x, pv.y - want.y), 1), round(pv.z - want.z, 1)
+    def shown_at_hands():
+        n_ = 0; names_ = []
+        for cls in (unreal.StaticMeshComponent, unreal.PointLightComponent, unreal.NiagaraComponent):
+            for c_ in G["pawn"].get_components_by_class(cls):
+                if not c_.is_visible(): continue
+                par = c_.get_attach_parent(); sock = str(c_.get_attach_socket_name()).lower()
+                at_hand = "hand" in sock or "weapon" in sock
+                if par and not at_hand and isinstance(par, unreal.StaticMeshComponent):
+                    at_hand = "hand" in str(par.get_attach_socket_name()).lower()
+                if at_hand: n_ += 1; names_.append(c_.get_name())
+        return n_, names_
+    res["seat_from_json"] = seat_from_json(); res["shown_at_hands"] = shown_at_hands()
     # (from her side, her body shown)
     yw = G["pawn"].get_actor_rotation().yaw
     G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=yw + 90.0)); yield from rwait(1.0); shot("horse14_side_still", "1280x720"); yield from rwait(1.0)
@@ -4827,6 +4854,7 @@ def step_horse14():
             worst[gait]["reins_min"] = min(r["reins"] for r in rs); worst[gait]["hands_empty_all"] = all(r["hands_empty"] for r in rs)
         G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=yw + 90.0)); shot(f"horse14_side_{gait}", "1280x720"); yield from rwait(1.0)
     res["moving"] = worst
+    res["seat_from_json_gallop"] = seat_from_json()
     yield from press("F"); yield from rwait(1.5)
     res["after_down"] = {"mounted": str(g.get_horse_state()).split("|")[2] == "1", "weapons_back": (not cb().are_ride_hands_empty()) == weapons_before,
                          "reins": str(g.get_rider_line())}
@@ -4834,12 +4862,18 @@ def step_horse14():
     yield from to_brokenspire(); yield from rwait(2.0)
     yield from press("J"); yield from rwait(1.0)
     res["called_town_m"] = near_her()
+    G["gi"].set_editor_property("horse_owned", owned0)
+    hz_ = g.get_editor_property("horse")
+    if hz_ and not owned0:
+        try: hz_.destroy_actor(); g.set_editor_property("horse", None)
+        except Exception: pass
     quiet(False)
     st_ = res["standing"]
     ok = (res["called_wilds_m"] is not None and res["called_wilds_m"] < 4.0 and res["left_behind_m"] and res["left_behind_m"] > 100.0
           and res["called_far_m"] is not None and res["called_far_m"] < 4.0 and res["calls"] == 2 and res["mark_minimap"] and res["mark_bigmap"]
           and res["mounted"] and "hand_l_cm" in st_ and abs(st_["seat_along_cm"]) < 4.0 and abs(st_["seat_up_cm"]) < 4.0
           and st_["hand_l_cm"] < 6.0 and st_["hand_r_cm"] < 6.0 and st_["hands_empty"] and st_["reins"] == 2
+          and res["seat_from_json"][0] < 3.0 and abs(res["seat_from_json"][1]) < 3.0 and res["shown_at_hands"][0] == 0
           and all(w and w["seat_along_cm"] < 6.0 and w["hand_l_cm"] < 8.0 and w["hand_r_cm"] < 8.0 and w["reins_min"] == 2 and w["hands_empty_all"] for w in worst.values())
           and not res["after_down"]["mounted"] and res["after_down"]["weapons_back"]
           and res["called_town_m"] is not None and res["called_town_m"] < 4.0)

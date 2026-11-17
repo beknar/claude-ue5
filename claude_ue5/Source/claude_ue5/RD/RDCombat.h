@@ -925,7 +925,6 @@ public:
 	void SetRideHands(bool bRiding);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool AreRideHandsEmpty() const;
 	bool bRideHands = false;
-	TArray<TWeakObjectPtr<UStaticMeshComponent>> RideHidden;
 private:
 	/** the inventory's lines of one tab (bInventoryTabs) */
 	TArray<FString> TabLines(int32 Tab) const;

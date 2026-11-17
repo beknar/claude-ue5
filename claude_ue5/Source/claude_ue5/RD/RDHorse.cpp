@@ -247,6 +247,7 @@ bool ARDDungeonGenerator::DismountHorse()
 	if (Horse) Horse->SetBlocking(false);          // (on again once she is clear of it: TickHorse)
 	if (PlayerCombat) { PlayerCombat->MountFactor = 1.f; PlayerCombat->RefreshWalkSpeed(); if (PlayerCombat->bRideHands) PlayerCombat->SetRideHands(false); }
 	RiderClipNow = NAME_None; RiderClipAsset = nullptr;
+	TickReins14();          // (the reins hidden once she is down)
 	UE_LOG(LogRDHorse, Log, TEXT("RDHORSE dismounted"));
 	return true;
 }
@@ -276,7 +277,7 @@ void ARDDungeonGenerator::TickHorse(float Dt)
 	}
 	// (the list of 2026-11-10: unridden, its box on once she stands clear of it (2 m from its middle))
 	if (!bMounted && Horse && !Horse->IsBlocking() && FVector::Dist2D(C->GetActorLocation(), Horse->GetActorLocation()) > 200.f) Horse->SetBlocking(true);
-	if (!bMounted || !Horse) { if (Reins14[0].IsValid() || Reins14[1].IsValid()) TickReins14(); return; }
+	if (!bMounted || !Horse) return;
 	// ---- riding: the horse under her, its clip by her speed; her root on its saddle, her rider clip by its gait
 	const float Hh = C->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 	const FVector Feet = C->GetActorLocation() - FVector(0, 0, Hh);
@@ -322,7 +323,7 @@ FString ARDDungeonGenerator::GetHorseState() const
 {
 	const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
 	const FVector H = Horse ? Horse->GetActorLocation() : FVector::ZeroVector;
-	const FVector Sd = Horse ? Horse->GetSaddleLocation() : FVector::ZeroVector;
+	const FVector Sd = Horse ? HorseSeatPoint() : FVector::ZeroVector;          // (the seat (PR #79's review: the bone, 30 cm behind it, read 30 cm))
 	const FVector Pv = Her ? Cast<ACharacter>(Her)->GetMesh()->GetSocketLocation(TEXT("pelvis")) : FVector::ZeroVector;
 	return FString::Printf(TEXT("%d|%d|%d|%.0f|%.0f|%.0f|%s|%.2f|%.0f|%.1f|%.1f|%s|%d|%.1f"), HasHorse() ? 1 : 0, Horse ? 1 : 0, bMounted ? 1 : 0, H.X, H.Y, H.Z,
 		Horse ? *Horse->ClipNow.ToString() : TEXT("none"), Horse ? Horse->RateNow : 0.f, Her ? Her->GetVelocity().Size2D() : 0.f, Sd.Z, Pv.Z,

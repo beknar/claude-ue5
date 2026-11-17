@@ -36,8 +36,9 @@ L = 0 if ext[0] >= ext[1] else 1; Wd = 1 - L
 mid = float(np.median(P[:, Wd]))
 hb = next((b for b in arm.data.bones if b.name.lower().startswith("head")), None)
 head_way = 1 if (arm.matrix_world @ hb.head_local)[L] > sad[L] else -1
-# (the slices along the length, toward the head positive)
-step = 0.1 * (1 if ext[L] < 20 else 10)          # (10 cm in metres or in centimetres, as the file's units)
+# (the slices along the length, toward the head positive; the file's units found by the horse's length: metres under 20)
+M = 1.0 if ext[L] < 20 else 100.0                 # (a metre in the file's units)
+step = 0.1 * M                                    # (10 cm)
 slices = []
 x = float(P[:, L].min())
 while x < float(P[:, L].max()):
@@ -62,14 +63,14 @@ ci = max(range(0, max(1, half)), key=lambda i: run[i][1]); pi = max(range(half, 
 between = run[ci + 1:pi] or [run[(ci + pi) // 2]]
 seat = min(between, key=lambda t: t[1])
 front = run[-1]
-u = 100.0 if ext[L] < 20 else 1.0               # (to centimetres)
+u = 100.0 / M                                     # (to centimetres)
 # (the bit: the mouth's corner, 12 cm behind the nose's tip at the lower third of the head there; from the head bone's place, which
 # the game reads each frame (the head bobs in a gallop), along the horse and up. The reins run from it to her hands)
 hd = [float(c) for c in (arm.matrix_world @ hb.head_local)]
 tip = float(P[:, L].max()) if head_way > 0 else float(P[:, L].min())
-nose = P[np.abs(P[:, L] - tip) < 0.15 * (step / 0.1 if step < 1 else step / 10)]
+nose = P[np.abs(P[:, L] - tip) < 0.15 * M]
 zlo, zhi = float(nose[:, 2].min()), float(nose[:, 2].max())
-bit_l = tip - head_way * 0.12 * (1 if step < 1 else 100); bit_z = zlo + (zhi - zlo) * 0.33
+bit_l = tip - head_way * 0.12 * M; bit_z = zlo + (zhi - zlo) * 0.33
 res = {"fbx": os.path.basename(FBX), "length_axis": "XY"[L], "head_way": head_way,
        "saddle_bone_cm": [round(float(c) * u, 1) for c in sad],
        "saddle_run_cm": [round(run[0][0] * u, 1), round(run[-1][0] * u, 1)],

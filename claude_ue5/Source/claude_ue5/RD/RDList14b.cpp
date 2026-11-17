@@ -13,6 +13,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/Canvas.h"
 #include "Engine/StaticMesh.h"
+#include "Components/PointLightComponent.h"
+#include "NiagaraComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
 bool ARDDungeonGenerator::CallHorseByKey()
@@ -25,6 +27,16 @@ bool ARDDungeonGenerator::CallHorseByKey()
 	if (bMounted) { PlayerCombat->ShowMessage(TEXT("You are on your horse")); return false; }
 	if (bSwimming) { PlayerCombat->ShowMessage(TEXT("Not while swimming")); return false; }
 	if (bWild && !IsWildReady()) return false;
+	// (PR #79's review: not indoors (a roof over her: the house's, the cathedral's), nor where no spot beside her is clear (the
+	// call would set it down on her feet, inside the room))
+	if (ACharacter* Her = Cast<ACharacter>(UGameplayStatics::GetPlayerPawn(this, 0)))
+	{
+		FCollisionQueryParams Q(SCENE_QUERY_STAT(RDHorseCall), false, Her); if (Horse) Q.AddIgnoredActor(Horse);
+		FHitResult Up;
+		const FVector Head = Her->GetActorLocation() + FVector(0, 0, Her->GetSimpleCollisionHalfHeight());
+		if (GetWorld()->LineTraceSingleByChannel(Up, Head, Head + FVector(0, 0, 2000.f), ECC_Visibility, Q)) { PlayerCombat->ShowMessage(TEXT("Your horse cannot come in here")); return false; }
+		if (FVector::Dist2D(HorseSpotBeside(Her), Her->GetActorLocation()) < 60.f) { PlayerCombat->ShowMessage(TEXT("No room for your horse here")); return false; }
+	}
 	if (!CallHorse()) return false;
 	++HorseCalls14;
 	PlayerCombat->ShowMessage(TEXT("You whistle: your horse comes to your side"));
@@ -73,8 +85,9 @@ void ARDDungeonGenerator::TickReins14()
 	// between them; hidden when she is down)
 	ACharacter* C = Cast<ACharacter>(UGameplayStatics::GetPlayerPawn(this, 0));
 	const bool bOn = bHorseCall14 && bMounted && Horse && C;
-	static UStaticMesh* Cyl = nullptr;
-	if (!Cyl) Cyl = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
+	// (the reins' mesh and material are the generator's, set by 927 horse: referenced by the level, so cooked and kept (PR #79's
+	// review: a function-static raw pointer loaded by its path dangled after a level change and was never cooked))
+	UStaticMesh* Cyl = ReinsMesh;
 	for (int32 K = 0; K < 2; ++K)
 	{
 		UStaticMeshComponent* R = Reins14[K].Get();
@@ -84,7 +97,7 @@ void ARDDungeonGenerator::TickReins14()
 			R = NewObject<UStaticMeshComponent>(this);
 			R->SetStaticMesh(Cyl); R->SetMobility(EComponentMobility::Movable);
 			R->SetCollisionEnabled(ECollisionEnabled::NoCollision); R->SetCastShadow(false);
-			if (UMaterialInterface* Lm = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"))) R->SetMaterial(0, Lm);
+			if (ReinsMaterial) R->SetMaterial(0, ReinsMaterial);
 			R->RegisterComponent();
 			if (UMaterialInstanceDynamic* Md = R->CreateDynamicMaterialInstance(0)) Md->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.12f, 0.06f, 0.03f));
 			Reins14[K] = R;
@@ -119,18 +132,21 @@ void URDCombatComponent::SetRideHands(bool bRiding)
 {
 	// (item 6: "she should be holding the reigns instead of holding her weapons": what she holds is hidden while she rides, each
 	// shown again when she gets down only if it was showing; hidden again each tick (a weapon changed on the way would show))
+	// (PR #79's review: hidden with their children (the torch's flame and light are the left hand's children); on getting down her
+	// hands are made again from what she holds then, not shown as they were (a shield taken off on the way came back))
 	UStaticMeshComponent* Held[] = { WeaponComp, OffHandComp, LeftComp, LoadedBoltComp };
 	if (bRiding)
 	{
-		for (UStaticMeshComponent* H : Held)
-			if (H && H->IsVisible()) { RideHidden.AddUnique(H); H->SetVisibility(false); }
+		for (UStaticMeshComponent* H : Held) if (H) H->SetVisibility(false, true);
 		bRideHands = true;
 	}
 	else
 	{
-		for (const TWeakObjectPtr<UStaticMeshComponent>& W : RideHidden) if (UStaticMeshComponent* H = W.Get()) H->SetVisibility(true);
-		RideHidden.Reset();
 		bRideHands = false;
+		if (LeftComp) LeftComp->SetVisibility(true, true);
+		if (WeaponIndex >= 0) { const int32 I = WeaponIndex; WeaponIndex = -1; SelectWeapon(I); }
+		UpdateLeftHand();
+		ShowLoadedBolt(true);
 	}
 }
 
@@ -138,6 +154,7 @@ bool URDCombatComponent::AreRideHandsEmpty() const
 {
 	const UStaticMeshComponent* Held[] = { WeaponComp, OffHandComp, LeftComp, LoadedBoltComp };
 	for (const UStaticMeshComponent* H : Held) if (H && H->IsVisible()) return false;
+	if ((TorchLight && TorchLight->IsVisible()) || (TorchFlame && TorchFlame->IsVisible())) return false;
 	return true;
 }
 

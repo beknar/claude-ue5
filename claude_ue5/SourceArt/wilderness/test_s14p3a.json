@@ -1,7 +1,8 @@
 {
  "tag": "s14p3a",
  "plan": [
-  "horse14"
+  "horse14",
+  "horse9"
  ],
  "level": "brokenspire",
  "steps": [
@@ -15,6 +16,7 @@
    "calls": 2,
    "mark_minimap": true,
    "mark_bigmap": true,
+   "torch_lit_before": true,
    "mounted": true,
    "standing": {
     "seat_along_cm": 0.0,
@@ -25,6 +27,14 @@
     "hands_empty": true,
     "reins": 2
    },
+   "seat_from_json": [
+    0.0,
+    -0.0
+   ],
+   "shown_at_hands": [
+    0,
+    []
+   ],
    "moving": {
     "walk": {
      "seat_along_cm": 0.0,
@@ -45,12 +55,131 @@
      "hands_empty_all": true
     }
    },
+   "seat_from_json_gallop": [
+    0.0,
+    -0.0
+   ],
    "after_down": {
     "mounted": false,
     "weapons_back": true,
     "reins": "not riding"
    },
    "called_town_m": 2.2
+  },
+  {
+   "step": "horse9",
+   "ok": true,
+   "stable_spots": 1,
+   "stable_at": [
+    -19650,
+    2050
+   ],
+   "before": {
+    "owned": 0.0,
+    "spawned": 0.0,
+    "mounted": 0.0,
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0,
+    "clip": "none",
+    "rate": 0.0,
+    "speed": 0.0,
+    "saddle_z": 0.0,
+    "pelvis_z": 94.7,
+    "rider": "None",
+    "stable_horse": 1.0,
+    "pelvis_off_xy": -1.0
+   },
+   "prompt": "the stable: a horse for 60 gold",
+   "bought": true,
+   "gold_taken": 60,
+   "price": 60,
+   "after_buy": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": -19401.0,
+    "y": 2244.0,
+    "z": 0.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": 164.0,
+    "pelvis_z": 94.8,
+    "rider": "None",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 220.3
+   },
+   "gi_owned": true,
+   "blocking_before_mount": true,
+   "walk_into_horse": {
+    "start_cm": 220,
+    "nearest_cm": 70
+   },
+   "horse_at_cm": 220,
+   "mount_prompt": "ride your horse",
+   "mounted": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 1.0,
+    "x": 140575.0,
+    "y": -1591988.0,
+    "z": -1787.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -1623.6,
+    "pelvis_z": -1609.6,
+    "rider": "idle",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 0.0
+   },
+   "attack_refused": true,
+   "blocking_mounted": false,
+   "riding": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 1.0,
+    "x": 142999.0,
+    "y": -1591260.0,
+    "z": -1836.0,
+    "clip": "run",
+    "rate": 1.14,
+    "speed": 1944.0,
+    "saddle_z": -1701.5,
+    "pelvis_z": -1687.5,
+    "rider": "run",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 0.0
+   },
+   "speed_m_s": {
+    "foot": 3.53,
+    "mounted": 19.47,
+    "ratio": 5.51,
+    "want": 5.5,
+    "after": 3.01
+   },
+   "after_dismount": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": 155041.0,
+    "y": -1587995.0,
+    "z": -2127.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -1963.7,
+    "pelvis_z": -2032.7,
+    "rider": "None",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 219.7
+   },
+   "death": {
+    "dead": true,
+    "mounted": 0.0,
+    "montage": true
+   }
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor",
@@ -59,7 +188,10 @@
   "wd_s14p3a_horse14_bigmap.png",
   "wd_s14p3a_horse14_side_still.png",
   "wd_s14p3a_horse14_side_walk.png",
-  "wd_s14p3a_horse14_side_gallop.png"
+  "wd_s14p3a_horse14_side_gallop.png",
+  "wd_s14p3a_horse_idle.png",
+  "wd_s14p3a_horse_side.png",
+  "wd_s14p3a_horse_back.png"
  ],
  "error": null,
  "saves_put_back": 1,

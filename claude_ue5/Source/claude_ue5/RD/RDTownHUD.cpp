@@ -399,7 +399,7 @@ void ARDHUD::DrawTownMap(float Sc, const FVector& L, float Yaw)
 	}
 	PlaceTownMapLabels(Pending, Taken, Sc, FLinearColor(0.93f, 0.86f, 0.70f, 0.55f));
 	if (!S->MistgateAt.IsZero()) MistMark(10, ToM(FVector2D(S->MistgateAt.X, S->MistgateAt.Y)), 7.f * Sc);
-	{ FVector Ha; if (Gen->GetHorseMapAt(Ha)) DrawHorseMark(ToM(FVector2D(Ha.X, Ha.Y)), Sc * 1.2f); }
+	{ FVector Ha; if (Gen->GetHorseMapAt(Ha) && Gen->IsInTownWalls(Ha)) DrawHorseMark(ToM(FVector2D(Ha.X, Ha.Y)), Sc * 1.2f); }          // (inside the town's walls: the map's sheet)
 	{
 		const FVector2D P = ToM(FVector2D(L.X, L.Y));
 		SoftDot(P, 16.f * Sc, FLinearColor(0.8f, 0.05f, 0.03f, 0.35f));
@@ -797,7 +797,7 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 	// the labels: each where it covers no picture of a trade and no label before it, on a halo of the parchment's colour
 	PlaceTownMapLabels(Pending, Taken, Sc, bSat ? FLinearColor(0.02f, 0.02f, 0.025f, 0.62f) : FLinearColor(0.95f, 0.89f, 0.74f, 0.62f));
 	if (!S->MistgateAt.IsZero()) MistMark(10, ToM(W2(S->MistgateAt)), 7.f * Sc);
-	{ FVector Ha; if (Gen->GetHorseMapAt(Ha)) DrawHorseMark(ToM(W2(Ha)), Sc * 1.2f); }
+	{ FVector Ha; if (Gen->GetHorseMapAt(Ha) && Gen->IsInTownWalls(Ha)) DrawHorseMark(ToM(W2(Ha)), Sc * 1.2f); }
 	{
 		const FVector2D P = ToM(FVector2D(L.X, L.Y));
 		SoftDot(P, 16.f * Sc, FLinearColor(0.8f, 0.05f, 0.03f, 0.4f));

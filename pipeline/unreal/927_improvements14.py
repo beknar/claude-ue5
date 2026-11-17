@@ -99,6 +99,8 @@ def signboard():
 
 def horse_cfg(g):
     g.set_editor_property("horse_call14", True)
+    g.set_editor_property("reins_mesh", unreal.load_asset("/Engine/BasicShapes/Cylinder"))
+    g.set_editor_property("reins_material", unreal.load_asset("/Engine/BasicShapes/BasicShapeMaterial"))
     hs = os.path.join(SA, "brokenspire", "horse_seat.json")
     if not g.get_editor_property("horse_def").get_editor_property("mesh") or not os.path.isfile(hs): return "the call key (no horse here)"
     J = json.load(open(hs, encoding="utf-8"))
@@ -166,15 +168,26 @@ def reins():
         done.add(path)
         clip = unreal.load_asset(path)
         sk = clip.get_editor_property("skeleton")
-        refs = [r for r in eal.find_package_referencers_for_asset(sk.get_path_name().split(".")[0], False)]
-        mesh = next((m for m in (unreal.load_asset(r) for r in refs) if isinstance(m, unreal.SkeletalMesh)), None)
-        if not mesh: REPORT.append(f"927 reins {hero} {k}: no mesh on its skeleton"); continue
-        a = eas.spawn_actor_from_object(mesh, unreal.Vector(0, 0, 0))
-        comp = a.get_editor_property("skeletal_mesh_component")
-        names = [str(comp.get_bone_name(i)) for i in range(comp.get_num_bones())]
-        parent = {n: str(comp.get_parent_bone(n)) for n in names}
-        ref = {n: comp.get_ref_pose_transform(i) for i, n in enumerate(names)}
-        eas.destroy_actor(a)
+        # (her mesh among the skeleton's users: skeletal meshes only (the registry's class, nothing else loaded), the one with the
+        # most bones (an armour piece carries only the bones it is skinned to) (PR #79's review))
+        AR = unreal.AssetRegistryHelpers.get_asset_registry()
+        cands = []
+        for r in eal.find_package_referencers_for_asset(sk.get_path_name().split(".")[0], False):
+            for ad in AR.get_assets_by_package_name(r):
+                if "SkeletalMesh" in str(ad.asset_class_path.asset_name): cands.append(r)
+        # (each placed once on the scratch level: its bones and their parents read from the component; the one with the most bones
+        # that has both arms)
+        best = None
+        for r in cands:
+            m_ = unreal.load_asset(r)
+            a = eas.spawn_actor_from_object(m_, unreal.Vector(0, 0, 0))
+            comp = a.get_editor_property("skeletal_mesh_component")
+            nm_ = [str(comp.get_bone_name(i_)) for i_ in range(comp.get_num_bones())]
+            if all(b in nm_ for b in ("pelvis", "upperarm_l", "lowerarm_l", "hand_l", "upperarm_r", "lowerarm_r", "hand_r")) and (best is None or len(nm_) > len(best[0])):
+                best = (nm_, {n: str(comp.get_parent_bone(n)) for n in nm_}, {n: comp.get_ref_pose_transform(i_) for i_, n in enumerate(nm_)}, m_.get_name())
+            eas.destroy_actor(a)
+        if not best: REPORT.append(f"927 reins {hero} {k}: no mesh on its skeleton with both arms"); continue
+        names, parent, ref, mesh_name = best
         tracks = [str(x) for x in AL.get_animation_track_names(clip)]
         n = AL.get_num_frames(clip)
         arms = {s: ("upperarm_" + s, "lowerarm_" + s, "hand_" + s) for s in ("l", "r")}

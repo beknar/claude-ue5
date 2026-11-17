@@ -2722,6 +2722,9 @@ public:
 	FVector HorseBitPoint(int32 Side) const;
 	void TickReins14();
 	TWeakObjectPtr<class UStaticMeshComponent> Reins14[2];
+	/** the reins' mesh and material (927 horse: the engine's cylinder and its tintable shape material) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") TObjectPtr<class UStaticMesh> ReinsMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") TObjectPtr<class UMaterialInterface> ReinsMaterial = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TObjectPtr<class UStaticMesh> WildLandmarkMesh = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildLandmarkKm = 8.f;
 	TWeakObjectPtr<class UStaticMeshComponent> WildLandmark;
