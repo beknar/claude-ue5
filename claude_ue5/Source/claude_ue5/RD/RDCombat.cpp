@@ -1363,7 +1363,9 @@ void URDCombatComponent::SetCraftingOpen(bool bOpen)
 	bCraftOpen = bOpen;
 	CraftHoldAt = -1.0; bCraftHoldDone = false; CraftHoldLine.Reset();          // (PR #38's review: a hold never outlives the panel)
 	if (bOpen) { if (AttackTime >= 0.f) EndAttack(); CraftCursor = FMath::Clamp(CraftCursor, 0, FMath::Max(0, GetCraftLines().Num() - 1)); }
-	else CraftClosedFrame = GFrameCounter;
+	// (shut, the panel forgets where it was opened: whatever opens it next says where (PR #81's review: the smith's anvil opened as
+	// the alchemist's table last used, potions only, no mending))
+	else { CraftClosedFrame = GFrameCounter; CraftStation = NAME_None; }
 	if (bInventoryPausesGame || !bOpen) UGameplayStatics::SetGamePaused(this, bOpen);
 	PlayUiSound(bOpen ? FName(TEXT("Player.Anvil")) : FName(TEXT("Player.Inventory")), TEXT("Player.Inventory"));
 }
@@ -1396,13 +1398,14 @@ TArray<FString> URDCombatComponent::GetCraftLines() const
 		// (mistward, the list of 2026-10-30: a recipe of a tier not yet open, or a scroll her hero does not read, is not offered)
 		if (!Generator->RecipeRefusal(Rc).IsEmpty()) continue;
 		// (the list of 2026-11-04: an oven bakes, an anvil makes the rest)
-		// (the list of 2026-11-16: potions at the alchemist's table, scrolls at the librarian's: RecipeStation)
-		if (Generator->RecipeStation(Rc) != CraftStation) continue;
+		// (the list of 2026-11-16: potions at the alchemist's table, scrolls at the librarian's: RecipeStation, from the item found
+		// once here (PR #81's review: a second search per recipe every frame))
+		const int32 Ri = Generator->FindItem(Rc.Item);
+		if (Generator->RecipeStationOf(Rc, Ri) != CraftStation) continue;
 		TArray<FString> Ps;
 		for (const FRDRecipePart& Pt : Rc.Parts) Ps.Add(FString::Printf(TEXT("%s:%d:%d"), *Pt.Label, PartHave(Pt), Pt.Count));
 		TMap<FName, int32> Take;          // (the recipe as it is, not looked up again by name: the PR review's find, every frame)
 		// (the list of 2026-11-10: each recipe's group, its own section on the anvil: repair items apart from the rest)
-		const int32 Ri = Generator->FindItem(Rc.Item);
 		const ERDItemKind Rk = Ri >= 0 ? Generator->Items[Ri].Kind : ERDItemKind::Component;
 		const TCHAR* Grp = Rk == ERDItemKind::Repair ? TEXT("1repair") : (Rk == ERDItemKind::Healing || Rk == ERDItemKind::Mana || Rk == ERDItemKind::Speed) ? TEXT("2potion")
 			: Rk == ERDItemKind::Scroll ? TEXT("3scroll") : Rk == ERDItemKind::Food ? TEXT("4food")

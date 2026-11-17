@@ -1329,10 +1329,29 @@ def step_tables14():
             r["panel"] = [l.split("|")[1] for l in (str(x) for x in c.get_craft_lines()) if l.startswith("recipe|")]
             r["panel_all_own"] = bool(r["panel"]) and all(want(n) for n in r["panel"])
             if item:
-                n0 = c.get_item_count(item); r["made"] = c.craft(item); r["item"] = [item, n0, c.get_item_count(item)]
-            c.set_crafting_open(False); c.set_craft_station("None"); yield from rwait(0.2)
-        nr = [str(n) for n in g.get_station_recipes14("None")]
-        res["anvil_potions"] = [n for n in nr if is_pot(n)]; res["anvil_scrolls"] = [n for n in nr if is_scr(n)]
+                # (made through the panel's own Enter on its row (PR #81's review: Craft never asks where she stands))
+                ls = [str(x) for x in c.get_craft_lines()]
+                row = next((i_ for i_, l in enumerate(ls) if l.startswith("recipe|") and l.split("|")[1] == item), -1)
+                n0 = c.get_item_count(item)
+                if row >= 0: c.move_craft_cursor(row - c.get_craft_cursor())
+                r["made"] = row >= 0 and c.get_craft_cursor() == row and c.craft_entry(); yield from rwait(0.2)
+                r["item"] = [item, n0, c.get_item_count(item)]
+            c.set_crafting_open(False); yield from rwait(0.2)
+            r["station_after_shut"] = str(c.get_craft_station())
+        # (the smith's anvil, opened from his panel after the tables (PR #81's review: it opened as the last table used): no potion,
+        # no scroll, its own lines (mending, breaking down))
+        sp = {p_["kind"]: p_ for p_ in spots()}
+        if "smith" in sp:
+            put(sp["smith"]["at"]); yield from wait(0.2)
+            g.open_town_panel("smith", -1); yield from rwait(0.2)
+            al = line_of("anvil"); res["anvil_line"] = al
+            if al >= 0: g.activate_town_entry(al); yield from rwait(0.3)
+            res["anvil_open"] = c.is_crafting_open(); res["anvil_station"] = str(c.get_craft_station())
+            pl = [str(x) for x in c.get_craft_lines()]
+            names = [l.split("|")[1] for l in pl if l.startswith("recipe|")]
+            res["anvil_potions"] = [n for n in names if is_pot(n)]; res["anvil_scrolls"] = [n for n in names if is_scr(n)]
+            res["anvil_recipes"] = len(names); res["anvil_other_lines"] = sorted({l.split("|")[0] for l in pl if not l.startswith("recipe|")})
+            c.set_crafting_open(False); yield from rwait(0.2)
     finally:
         try: c.set_crafting_open(False)
         except Exception: pass
@@ -1340,9 +1359,11 @@ def step_tables14():
     def good(st, word):
         r = res.get(st, {}); it = r.get("item") or [None, 0, 0]
         return (r.get("tables", 0) >= 1 and r.get("all_in_own") and word in r.get("says", "") and r.get("f") == word and r.get("station") == st
+                and r.get("station_after_shut") == "None"
                 and r.get("her_building_is_its") and r.get("outside_tries", 0) >= 1 and not r.get("outside_named_it")
                 and r.get("panel_all_own") and r.get("made") and it[2] == it[1] + 1)
     ok = (good("Alchemist", "alchemist") and good("Librarian", "librarian") and not res.get("anvil_potions") and not res.get("anvil_scrolls")
+          and res.get("anvil_open") and res.get("anvil_station") == "None" and res.get("anvil_recipes", 0) >= 1
           and res["Alchemist"]["tables"] >= res["buildings"]["Alchemist"] * 0.8 and res["Librarian"]["tables"] >= res["buildings"]["Librarian"] * 0.8)
     step_result("tables14", ok, **res)
 

@@ -442,10 +442,12 @@ def tablekit(shots):
             loc = unreal.Vector(fx * hx - (a0 + a1) / 2, fy * hy - (b0 + b1) / 2, base - c0)
             a = eas.spawn_actor_from_object(m, loc, unreal.Rotator(roll=0.0, pitch=0.0, yaw=yaw)); a.set_actor_scale3d(unreal.Vector(s, s, s))
             acts.append(a); tops.append(base + (c1 - c0))
-        path = f"{T14}/{name}"
-        if eal.does_asset_exist(path): eal.delete_asset(path)
+        # (merged under a name of its own, checked, and only then put in the old one's place: the maps' Table14 pieces point at it
+        # (PR #81's review: deleted first, a failed merge would have left them pointing at nothing))
+        path = f"{T14}/{name}"; tmp = f"{T14}/{name}_New"
+        if eal.does_asset_exist(tmp): eal.delete_asset(tmp)
         o = unreal.MergeStaticMeshActorsOptions()
-        o.set_editor_property("base_package_name", f"{T14}/{name[3:]}"); o.set_editor_property("destroy_source_actors", True); o.set_editor_property("spawn_merged_actor", False)
+        o.set_editor_property("base_package_name", f"{T14}/{name[3:]}_New"); o.set_editor_property("destroy_source_actors", True); o.set_editor_property("spawn_merged_actor", False)
         ms = o.get_editor_property("mesh_merging_settings")
         ms.set_editor_property("pivot_type", unreal.MeshMergePivotType.WORLD_ORIGIN); ms.set_editor_property("merge_physics_data", True)
         ms.set_editor_property("merge_materials", False); ms.set_editor_property("generate_light_map_uv", False)
@@ -454,7 +456,12 @@ def tablekit(shots):
         for a in acts:
             try: a.destroy_actor()
             except Exception: pass
-        m = unreal.load_asset(path); assert m, f"927 tablekit: the merge made no {path}"
+        m = unreal.load_asset(tmp); assert m, f"927 tablekit: the merge made no {tmp} (the old table left as it was)"
+        assert m.get_bounding_box().max.z > 70, f"927 tablekit: {tmp} is not a table (the old table left as it was)"
+        m = None
+        if eal.does_asset_exist(path): eal.delete_asset(path)
+        assert eal.rename_asset(tmp, path), f"927 tablekit: {tmp} not renamed to {path}"
+        m = unreal.load_asset(path); assert m, f"927 tablekit: no {path} after the rename"
         eal.save_loaded_asset(m, False)
         (a0, b0, c0), (a1, b1, c1) = box_of(m)
         out[name] = {"size": [round(a1 - a0, 1), round(b1 - b0, 1), round(c1 - c0, 1)], "table_top": round(top, 1), "props": len(props) - len(missing), "missing": missing}

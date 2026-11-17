@@ -1687,13 +1687,26 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 		TArray<FString> Uses;
 		const bool bHv = Gen && Gen->bHarvest;
 		bool bOven = false;
+		TSet<FName> Where;          // (the list of 2026-11-16: the stations that make what it goes into (PR #81's review))
 		if (Gen)
 			for (const FRDRecipe& Rc : Gen->Recipes)
-				if (Rc.Parts.ContainsByPredicate([&It](const FRDRecipePart& Pt) { return Pt.AnyOf.Contains(It.Name); }) && Gen->RecipeRefusal(Rc).IsEmpty()) { Uses.Add(Rc.Item.ToString().ToLower()); bOven |= Rc.Station == TEXT("Oven"); }
+				if (Rc.Parts.ContainsByPredicate([&It](const FRDRecipePart& Pt) { return Pt.AnyOf.Contains(It.Name); }) && Gen->RecipeRefusal(Rc).IsEmpty()) { Uses.Add(Rc.Item.ToString().ToLower()); Where.Add(Gen->RecipeStation(Rc)); bOven |= Rc.Station == TEXT("Oven"); }
 		// (the list of 2026-11-04: a garden's crops are baked at a kitchen's oven)
-		FString S = bOven ? TEXT("An ingredient from a garden: a kitchen's bread oven bakes food from it (F at an oven).")
-		          : bHv ? TEXT("A crafting material: an anvil makes potions, scrolls and repair items from it (F at an anvil; anvils are on the maps).")
-		                : TEXT("A crafting material: an anvil makes repair items from it (F at an anvil; anvils are on the maps).");
+		FString S;
+		if (bOven) S = TEXT("An ingredient from a garden: a kitchen's bread oven bakes food from it (F at an oven).");
+		else if (Gen && Gen->bTables14)
+		{
+			// (the list of 2026-11-16: the stations that make what it goes into, by name)
+			TArray<FString> W;
+			if (Where.Contains(NAME_None)) W.Add(TEXT("an anvil"));
+			if (Where.Contains(FName(TEXT("Alchemist")))) W.Add(TEXT("an alchemist's table (potions)"));
+			if (Where.Contains(FName(TEXT("Librarian")))) W.Add(TEXT("a librarian's table (scrolls)"));
+			if (Where.Contains(FName(TEXT("Forge")))) W.Add(TEXT("a forge"));
+			S = W.Num() == 0 ? FString(TEXT("A crafting material."))
+			    : FString::Printf(TEXT("A crafting material: made into things at %s (F there)."), *FString::Join(W, TEXT(", ")));
+		}
+		else S = bHv ? TEXT("A crafting material: an anvil makes potions, scrolls and repair items from it (F at an anvil; anvils are on the maps).")
+		             : TEXT("A crafting material: an anvil makes repair items from it (F at an anvil; anvils are on the maps).");
 		if (Uses.Num() > 8) { const int32 More = Uses.Num() - 8; Uses.SetNum(8); Uses.Add(FString::Printf(TEXT("%d more"), More)); }
 		if (Uses.Num() > 0) S += TEXT("  It goes into: ") + FString::Join(Uses, TEXT(", ")) + TEXT(".");
 		return S;
@@ -2648,18 +2661,32 @@ void ARDHUD::DrawCrafting(float Sc)
 		// 2026-11-16's fifth phase: every recipe had read "Mends ...", level 5's when its recipes were all repair items))
 		if (Ix >= 0)
 		{
-			const FRDItemDef& It = Gen->Items[Ix];
-			const FString What = It.Kind == ERDItemKind::Repair ? FString::Printf(TEXT("Mends %.0f%% of a set of armour's or a found weapon's durability"), It.Amount * 100.f) : DescribeItem(It);
-			TArray<FString> Words; What.ParseIntoArray(Words, TEXT(" "));
-			FString Ln;
-			for (const FString& Wd : Words)
+			// (wrapped once for each recipe and width, not every frame, and kept to four lines (PR #81's review): a scroll's words
+			// ran on past the parts)
+			const FString Key = FString::Printf(TEXT("%s|%.0f|%.3f"), *Item.ToString(), Rw, Sc);
+			if (Key != CraftWhatKey)
 			{
-				const FString Try = Ln.IsEmpty() ? Wd : Ln + TEXT(" ") + Wd;
-				UI.TextSize(Try, Tw, Th, Small, Sc * 1.05f);
-				if (Tw > Rw && !Ln.IsEmpty()) { UI.Text(Ln, RDInk, Rx, Ry, Small, Sc * 1.05f); Ry += Th + 4.f * Sc; Ln = Wd; }
-				else Ln = Try;
+				CraftWhatKey = Key; CraftWhatLines.Reset();
+				const FRDItemDef& It = Gen->Items[Ix];
+				const FString What = It.Kind == ERDItemKind::Repair ? FString::Printf(TEXT("Mends %.0f%% of a set of armour's or a found weapon's durability"), It.Amount * 100.f) : DescribeItem(It);
+				TArray<FString> Words; What.ParseIntoArray(Words, TEXT(" "));
+				FString Ln;
+				for (const FString& Wd : Words)
+				{
+					const FString Try = Ln.IsEmpty() ? Wd : Ln + TEXT(" ") + Wd;
+					UI.TextSize(Try, Tw, Th, Small, Sc * 1.05f);
+					if (Tw > Rw && !Ln.IsEmpty()) { CraftWhatLines.Add(Ln); Ln = Wd; }
+					else Ln = Try;
+				}
+				if (!Ln.IsEmpty()) CraftWhatLines.Add(Ln);
+				if (CraftWhatLines.Num() > 4) { CraftWhatLines.SetNum(4); CraftWhatLines[3] += TEXT(" ..."); }
 			}
-			if (!Ln.IsEmpty()) { UI.Text(Ln, RDInk, Rx, Ry, Small, Sc * 1.05f); Ry += 30.f * Sc; }
+			for (int32 K = 0; K < CraftWhatLines.Num(); ++K)
+			{
+				UI.TextSize(CraftWhatLines[K], Tw, Th, Small, Sc * 1.05f);
+				UI.Text(CraftWhatLines[K], RDInk, Rx, Ry, Small, Sc * 1.05f);
+				Ry += K + 1 < CraftWhatLines.Num() ? Th + 4.f * Sc : 30.f * Sc;
+			}
 		}
 		UI.Text(TEXT("IT TAKES"), Dim, Rx, Ry, Small, Sc, ERDType::Label); Ry += 24.f * Sc;
 		TArray<FString> Parts; if (P.Num() >= 4) P[3].ParseIntoArray(Parts, TEXT(";"));

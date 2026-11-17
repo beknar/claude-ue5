@@ -12,8 +12,13 @@ DEFINE_LOG_CATEGORY_STATIC(LogRDTables14, Log, All);
 FName ARDDungeonGenerator::RecipeStation(const FRDRecipe& Rc) const
 {
 	if (!Rc.Station.IsNone() || !bTables14) return Rc.Station;
-	const int32 Ix = FindItem(Rc.Item);
-	if (Ix < 0) return NAME_None;
+	return RecipeStationOf(Rc, FindItem(Rc.Item));
+}
+
+FName ARDDungeonGenerator::RecipeStationOf(const FRDRecipe& Rc, int32 Ix) const
+{
+	if (!Rc.Station.IsNone() || !bTables14) return Rc.Station;
+	if (!Items.IsValidIndex(Ix)) return NAME_None;
 	switch (Items[Ix].Kind)
 	{
 	case ERDItemKind::Healing: case ERDItemKind::Mana: case ERDItemKind::Speed: return FName(TEXT("Alchemist"));
@@ -68,7 +73,8 @@ void ARDSection::EnsureTables14()
 {
 	// (a dungeon set's anvil room gets the alchemist's table (and on a map with no town the librarian's), each on a free tile off
 	// the lanes whose four neighbours are free, the nearest such to the anvil, as the forge's (EnsureForge): no random stream is
-	// drawn, so nothing of the layout moves. A town's are its buildings' (TownTables14))
+	// drawn, so the rooms and their furniture stay; its tile is blocked, so in that one room a monster, trap or special thing placed
+	// after it may stand on another tile than before (PR #81's review). A town's are its buildings' (TownTables14))
 	if (!Generator || !Generator->bTables14 || TownBlds.Num() > 0 || AnvilRoom < 0 || !Rooms.IsValidIndex(AnvilRoom) || AnvilPoints.Num() == 0) return;
 	const FRoom& Rm = Rooms[AnvilRoom];
 	const int32 RI = AnvilRoom;
@@ -139,7 +145,13 @@ void ARDSection::TownTables14(int32 BI)
 	{
 		const FVector At = TownBldPoint(B, T.X, T.Y, 0.f);
 		if (RoomAt(At) != B.Rooms[0]) continue;
+		// (its footprint against the room's own, whether the town tidies its furniture or not (PR #81's review: AddPiece checks
+		// them only under bTidyFurniture), and added to them when AddPiece does not)
+		FVector Fc; FVector2D Sz; float Front;
+		FootOf(P, FTransform(FRotator(0.f, T.Yaw, 0.f), At), Fc, Sz, Front);
+		if (!FootFree(Fc, T.Yaw, Sz, false)) continue;
 		if (!AddPieceAt(Want, At, T.Yaw)) continue;
+		if (!Generator->bTidyFurniture) AddFoot(Fc, T.Yaw, Sz, false, Want);
 		MarkBlocked(At, T.Yaw, FVector2D((float)P->Size.X + 40.f, (float)P->Size.Y + 40.f), true);
 		return;
 	}

@@ -43,7 +43,8 @@
      "Small Healing Potion",
      0,
      1
-    ]
+    ],
+    "station_after_shut": "None"
    },
    "Librarian": {
     "tables": 1,
@@ -57,7 +58,7 @@
      "Scroll of Ash Ward",
      "Scroll of Frost Shard"
     ],
-    "outside_tries": 12,
+    "outside_tries": 11,
     "outside_named_it": [],
     "says": "use the librarian's table",
     "her_building_is_its": true,
@@ -75,10 +76,16 @@
      "Scroll of Fire Bolt",
      0,
      1
-    ]
+    ],
+    "station_after_shut": "None"
    },
+   "anvil_line": 1,
+   "anvil_open": true,
+   "anvil_station": "None",
    "anvil_potions": [],
-   "anvil_scrolls": []
+   "anvil_scrolls": [],
+   "anvil_recipes": 7,
+   "anvil_other_lines": []
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",

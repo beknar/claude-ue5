@@ -6006,9 +6006,29 @@ def step_tables14():
             res["panel"] = [l.split("|")[1] for l in (str(x) for x in c.get_craft_lines()) if l.startswith("recipe|")]
             shot("tables14_panel", "1280x720"); yield from rwait(1.0)
             if pot:
-                n0 = c.get_item_count(pot); res["brewed"] = c.craft(pot); res["potion"] = [pot, n0, c.get_item_count(pot)]
+                # (made through the panel's own Enter on its row (PR #81's review: Craft never asks where she stands))
+                ls = [str(x) for x in c.get_craft_lines()]
+                row = next((i_ for i_, l in enumerate(ls) if l.startswith("recipe|") and l.split("|")[1] == pot), -1)
+                n0 = c.get_item_count(pot)
+                if row >= 0: c.move_craft_cursor(row - c.get_craft_cursor())
+                res["brewed"] = row >= 0 and c.get_craft_cursor() == row and c.craft_entry(); yield from rwait(0.2)
+                res["potion"] = [pot, n0, c.get_item_count(pot)]
                 res["message"] = str(c.get_message()) if hasattr(c, "get_message") else None
             c.set_crafting_open(False); yield from rwait(0.2)
+        # (beside the forge, nearer it than the table, F names the forge (PR #81's review: a table beat every station but the anvil))
+        fs = list(g.get_all_forges()); fg = min(fs, key=lambda f_: dist2(f_, an)) if (fs and an) else None
+        res["by_forge_says"] = None
+        if fg and at:
+            for r_ in (110, 140, 170):
+                for a_ in range(0, 360, 30):
+                    p_ = V(fg.x + math.cos(math.radians(a_)) * r_, fg.y + math.sin(math.radians(a_)) * r_, fg.z)
+                    if dist2(p_, fg) > dist2(p_, at) - 40: continue
+                    put(p_, math.degrees(math.atan2(fg.y - p_.y, fg.x - p_.x))); yield
+                    h_ = G["pawn"].get_actor_location()
+                    if dist2(h_, fg) < dist2(h_, at) - 20 and dist2(h_, fg) < 240:
+                        res["by_forge_says"] = str(g.describe_nearest(h_, 260.0)); res["by_forge_m"] = [round(dist2(h_, fg) / 100, 2), round(dist2(h_, at) / 100, 2)]
+                        break
+                if res["by_forge_says"] is not None: break
         if an:
             res["anvil_says"] = yield from stand(an, "anvil")
             res["anvil_f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from rwait(0.3)
@@ -6027,7 +6047,8 @@ def step_tables14():
           and res.get("panel") and all(is_pot(n) for n in res["panel"]) and res.get("brewed") and pt_[2] == pt_[1] + 1
           and not res.get("anvil_potions") and not res.get("anvil_scrolls") and not res.get("alchemist_not_potions")
           and res.get("anvil_f") == "anvil" and res.get("anvil_station") == "None" and not res.get("anvil_panel_potions") and not res.get("anvil_panel_scrolls")
-          and (res.get("all_scroll_recipes", 0) == 0 or len(lr) > 0))
+          and (res.get("all_scroll_recipes", 0) == 0 or len(lr) > 0)
+          and (res.get("by_forge_says") is None or "forge" in res["by_forge_says"]))
     step_result("tables14", ok, **res)
 
 

@@ -2722,9 +2722,13 @@ public:
 	/** where a recipe is made: its Station ("Oven", "Forge"), or with bTables14 "Alchemist" for a potion and "Librarian" for a
 	 *  scroll; none: the anvil */
 	FName RecipeStation(const FRDRecipe& Rc) const;
+	/** the same with its item's index already found (FindItem; -1 none) */
+	FName RecipeStationOf(const FRDRecipe& Rc, int32 ItemIx) const;
 	bool FindNearestTable14(FName Station, const FVector& From, float MaxDistance, FVector& At) const;
 	/** "Alchemist" or "Librarian" when that table is within MaxDistance and nearer than Than (cm), else none */
 	FName NearestTable14(const FVector& From, float MaxDistance, float Than) const;
+	/** the distance to the nearest of the anvil (AnvilD), a forge that would take F and a dungeon's oven, within Lim */
+	float StationsNearest(const FVector& From, float Lim, float AnvilD, bool bAnvil) const;
 	/** tests: every table of the kind ("Alchemist", "Librarian") in the sections built */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") TArray<FVector> GetAllTables14(FName Station) const;
 	/** tests: the recipes the station offers her now ("Alchemist", "Librarian", "Oven", "Forge", none the anvil), refused ones left out */

@@ -44,6 +44,11 @@
     1
    ],
    "message": null,
+   "by_forge_says": "the forge (only the Warrior works it)",
+   "by_forge_m": [
+    1.1,
+    7.75
+   ],
    "anvil_says": "use the anvil",
    "anvil_f": "anvil",
    "anvil_station": "None",
