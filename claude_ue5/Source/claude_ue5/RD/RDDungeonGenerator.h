@@ -3233,6 +3233,12 @@ public:
 		double Mem0 = 0.0, MemMax = 0.0, FramesAt = 0.0;
 		int32 Frames = 0, Stuck = 0, Puts = 0, Pushes = 0;
 		double PathCm = 0.0, Commit0 = 0.0, CommitMax = 0.0;
+		/** the HUD's last lines and her hit points as they fell (a death's cause, written with it: the package of 2026-11-16 died once
+		 *  and nothing said why) */
+		TArray<FString> Said; float LastHp = -1.f; FString Hurts;
+		/** the walk keeps her alive (a memory walk, not a fight: a death put her back in a town, whose making read as the walk's
+		 *  growth; the package of 2026-11-16 met the roaming ambushers twice): healed under 0.6 of her hit points, each counted */
+		int32 Heals = 0; float HurtTotal = 0.f;
 		float NextCheckAt = 0.f, SubAt = 0.f;
 		FVector LeverAt = FVector::ZeroVector, LeverPos = FVector::ZeroVector;
 		FString GateWhat, GateOther;
