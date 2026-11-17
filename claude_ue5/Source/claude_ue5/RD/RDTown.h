@@ -259,6 +259,16 @@ public:
 	bool bLoose = false;
 	float FleeCm = 260.f;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 GetFlees() const { return Flees; }
+	/** the list of 2026-11-16's seventh phase (RDList14g.cpp): a farmstead's animal can be struck and killed (its def's Health),
+	 *  falls on its side and leaves its things; its key in the game's WildKilled keeps it dead when its farm is laid again */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") bool TakeHit14(float Dmg, FVector From);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") float GetHealth14() const { return Health14; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool IsDead14() const { return bDead14; }
+	FVector BodyCenter14() const;
+	float BodyRadius14() const;
+	bool CanBeHurt14() const;
+	int64 FarmKey14 = -1;
+	float Health14 = 0.f, DeadAt14 = 0.f, FallYaw14 = 90.f; bool bDead14 = false;
 protected:
 	virtual void Tick(float Dt) override;
 private:
@@ -272,4 +282,5 @@ private:
 	int32 State = 0, Changes = 0, Flees = 0;
 	float Until = 0.f, Speed = 40.f, NextFleeCheck = 0.f, FleeUntil = -1.f;
 	void SetState(int32 S, float Now);
-};
+	void TickDead14(float Now);
+	};

@@ -107,8 +107,9 @@ TArray<FString> ARDDungeonGenerator::GetWildFarmLines() const
 			const float PenYaw = F.AnimalPenYaws.IsValidIndex(Ai) ? F.AnimalPenYaws[Ai] : F.PenYaw;
 			const FVector Lp = FRotator(0.f, -PenYaw, 0.f).RotateVector(L - FVector(Pn.X, Pn.Y, L.Z));
 			const bool bIn = FMath::Abs(Lp.X) <= Pn.Z + 30.f && FMath::Abs(Lp.Y) <= Pn.W + 30.f;
-			Out.Add(FString::Printf(TEXT("animal|%d|%s|%.0f|%.0f|%.0f|%d|%d|%.0f"), F.Id, TownAnimals.IsValidIndex(A->Def) ? *TownAnimals[A->Def].Name.ToString() : TEXT("?"),
-				L.X, L.Y, L.Z, bIn ? 1 : 0, A->GetState(), WildGroundZ(L)));
+			// (the list of 2026-11-16's seventh phase: its hit points, dead, its kill key)
+			Out.Add(FString::Printf(TEXT("animal|%d|%s|%.0f|%.0f|%.0f|%d|%d|%.0f|%.1f|%d|%lld"), F.Id, TownAnimals.IsValidIndex(A->Def) ? *TownAnimals[A->Def].Name.ToString() : TEXT("?"),
+				L.X, L.Y, L.Z, bIn ? 1 : 0, A->GetState(), WildGroundZ(L), A->GetHealth14(), A->IsDead14() ? 1 : 0, A->FarmKey14));
 		}
 		for (const TWeakObjectPtr<ARDTownsfolk>& Tw : F.Folk)
 		{

@@ -627,8 +627,12 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 				for (int32 K = 0, Nn = FMath::Min(A.Value, WildFarmAnimalsMax); K < Nn; ++K)
 				{
 					const FVector Av = PenAt + Rot.RotateVector(FVector(R.FRandRange(-H.X, H.X), R.FRandRange(-H.Y, H.Y), 0.f));
-					ARDTownAnimal* An = GetWorld()->SpawnActor<ARDTownAnimal>(ARDTownAnimal::StaticClass(), FTransform(FRotator(0, R.FRandRange(0.f, 360.f), 0), Av), Sp);
+					const FRotator Yr(0.f, R.FRandRange(0.f, 360.f), 0.f);
+					const int64 Key = FarmAnimalKey14(Rec); ++Rec.AnimalSerial14;
+					if (IsFarmAnimalKilled14(Key)) continue;          // (the list of 2026-11-16: killed in this game)
+					ARDTownAnimal* An = GetWorld()->SpawnActor<ARDTownAnimal>(ARDTownAnimal::StaticClass(), FTransform(Yr, Av), Sp);
 					if (!An) continue;
+					An->FarmKey14 = Key;
 					// (its ground the floor's height: a flat grid)
 					An->bWildGround = true; An->PenYaw = Yaw;
 					An->GroundGrid.Init(Base + 2.f, 4); An->GroundO = FVector2D(PenAt.X - 1000.f, PenAt.Y - 1000.f); An->GroundStep = 2000.f; An->GroundN = 2;
@@ -774,8 +778,14 @@ void ARDDungeonGenerator::SpawnWildFarm11(ARDWildChunk* C, const FRDWildPlace& P
 		{
 			FVector At = PenAt + FRotator(0.f, P.Yaw, 0.f).RotateVector(FVector(R.FRandRange(-H.X, H.X), R.FRandRange(-H.Y, H.Y), 0.f));
 			At.Z = WildGroundZ(At);
-			ARDTownAnimal* A = GetWorld()->SpawnActor<ARDTownAnimal>(ARDTownAnimal::StaticClass(), FTransform(FRotator(0, R.FRandRange(0.f, 360.f), 0), At), Sp);
+			// (its yaw drawn as before, after its place; then, killed in this game, it is not laid (the list of 2026-11-16: its draws made,
+			// so the others keep their places))
+			const FRotator Yr(0.f, R.FRandRange(0.f, 360.f), 0.f);
+			const int64 Key = FarmAnimalKey14(Rec); ++Rec.AnimalSerial14;
+			if (IsFarmAnimalKilled14(Key)) continue;
+			ARDTownAnimal* A = GetWorld()->SpawnActor<ARDTownAnimal>(ARDTownAnimal::StaticClass(), FTransform(Yr, At), Sp);
 			if (!A) continue;
+			A->FarmKey14 = Key;
 			A->bWildGround = true; A->PenYaw = P.Yaw;
 			A->GroundGrid = Grid; A->GroundO = G0; A->GroundStep = Gs; A->GroundN = Gn;
 			A->Init(this, Kd, -1, PenAt, Half, HashCombine((uint32)P.Id, Salt + (uint32)K * 2654435761u));

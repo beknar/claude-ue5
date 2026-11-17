@@ -1,0 +1,18 @@
+{
+  "_note": "The list of 2026-11-16's seventh phase (docs/improvements14.txt item 12: kill farm animals and loot them, crafting items and food). 929 writes the items on every map of the game (found only from the animals: no weight, no tiers), the oven's recipe for meat, raw meat among the advanced recipes' meats, and the farm animals' hit points and things on brokenspire (TownAnimals' Health and Drops: 'Item|min|max|chance;...').",
+  "maps": ["brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress"],
+  "items": [
+    {"name": "Raw Meat", "like": "Coarse Hide", "kind": "COMPONENT", "icon": "raw_meat", "looks": "a cut of raw meat: the oven roasts it, and it goes into a stew or a pie"},
+    {"name": "Feathers", "like": "Coarse Hide", "kind": "COMPONENT", "icon": "feathers", "looks": "a few hen feathers"},
+    {"name": "Eggs", "like": "Bread", "kind": "FOOD", "amount": 0.015, "seconds": 10, "icon": "hen_eggs", "looks": "a few hen's eggs"}
+  ],
+  "oven": [{"item": "Well Done Steak", "parts": [["raw meat", ["Raw Meat"], 1]]}],
+  "meat_label": "meat",
+  "animals": {
+    "Cow": {"health": 70, "drops": "Raw Meat|2|3|1;Coarse Hide|1|2|1"},
+    "Pig": {"health": 50, "drops": "Raw Meat|2|3|1;Light Leather|1|1|0.5"},
+    "Goat": {"health": 40, "drops": "Raw Meat|1|2|1;Coarse Hide|1|1|0.8"},
+    "Chicken": {"health": 10, "drops": "Raw Meat|1|1|1;Feathers|1|3|1;Eggs|1|2|0.6"},
+    "Rabbit": {"health": 10, "drops": "Raw Meat|1|1|1;Light Leather|1|1|0.7"}
+  }
+}

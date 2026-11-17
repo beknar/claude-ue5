@@ -1470,6 +1470,10 @@ struct FRDTownAnimalDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector2D HalfSize = FVector2D(50.f, 25.f);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 PenMin = 2;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 PenMax = 4;
+	/** the list of 2026-11-16's seventh phase (929): out on the wilds' farmsteads, its hit points (0: it cannot be hurt) and what it
+	 *  leaves when killed ("Item|min|max|chance;...") */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Health = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Drops;
 };
 
 /** the wilderness's animals (the user's list of 2026-11-04: "more animals and insects that are appropriate for that biome.

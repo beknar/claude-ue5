@@ -248,6 +248,7 @@ void ARDTownAnimal::Init(ARDDungeonGenerator* InGenerator, int32 InDef, int32 In
 		// (never stepped up on: a hen's box is lower than her step, and the list of 2026-11-11's test stood her on one in a coop)
 		Collider->CanCharacterStepUpOn = ECB_No;
 	}
+	Health14 = D.Health;          // (the list of 2026-11-16: its hit points, 0 for one that cannot be hurt)
 	SetState(R.RandRange(0, 1), GetWorld()->GetTimeSeconds());
 	if (const UAnimSequenceBase* S = Cast<UAnimSequenceBase>(Body->AnimationData.AnimToPlay)) Body->SetPosition(R.FRandRange(0.f, S->GetPlayLength()));
 }
@@ -275,6 +276,8 @@ void ARDTownAnimal::Tick(float Dt)
 	Super::Tick(Dt);
 	if (!Gen) return;
 	const float Now = GetWorld()->GetTimeSeconds();
+	// (the list of 2026-11-16: killed, it falls on its side over half a second and lies there (as a hunted wild animal))
+	if (bDead14) { TickDead14(Now); return; }
 	const FVector L = GetActorLocation();
 	// (the list of 2026-11-10: a loose hen runs from her, a couple of metres, quick, within its round)
 	if (bLoose && Now >= NextFleeCheck)

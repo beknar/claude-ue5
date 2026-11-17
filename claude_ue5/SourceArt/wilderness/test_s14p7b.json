@@ -1,0 +1,83 @@
+{
+ "tag": "s14p7b",
+ "plan": [
+  "farmanimals14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "farmanimals14",
+   "ok": true,
+   "animals": 10,
+   "kinds": [
+    "Cow",
+    "Goat"
+   ],
+   "hp": {
+    "Cow": 70.0,
+    "Goat": 40.0
+   },
+   "pig": {
+    "kind": "Cow",
+    "hp0": 70.0,
+    "key": 10995116539392,
+    "hits": [
+     55.7,
+     41.4,
+     27.1,
+     12.8,
+     0.0
+    ],
+    "flees": 4,
+    "dead": true,
+    "lying_up_z": -0.0,
+    "drops": [
+     "Raw Meat",
+     "Raw Meat",
+     "Raw Meat",
+     "Coarse Hide",
+     "Coarse Hide"
+    ],
+    "kept": true
+   },
+   "picture_from_yaw": 90.0,
+   "pile_says": "harvest the parts (5)",
+   "pile_f": "loot",
+   "taken": {
+    "Raw Meat": 3,
+    "Coarse Hide": 2
+   },
+   "hen": {
+    "kind": "Cow",
+    "hp0": 70.0,
+    "key": 10995116539393,
+    "hits": [
+     45.0,
+     20.0,
+     0.0
+    ],
+    "flees": 2,
+    "dead": true,
+    "lying_up_z": -0.0,
+    "drops": [
+     "Raw Meat",
+     "Raw Meat",
+     "Coarse Hide"
+    ],
+    "kept": true
+   },
+   "again": {
+    "animals": 8,
+    "first_count": 10,
+    "dead_keys_back": []
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_s14p7b_farmanimals14_dead.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}
