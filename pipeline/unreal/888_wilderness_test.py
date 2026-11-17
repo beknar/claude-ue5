@@ -3491,6 +3491,100 @@ def farm_folk14(fid):
                     "indoors": p[11] == "1", "hasbed": p[12] == "1", "bed": V(float(p[13]), float(p[14]), float(p[15]))})
     return out
 
+def farm_animals14(fid):
+    out = []
+    for l in G["gen"].get_wild_farm_lines():
+        p = str(l).split("|")
+        if p[0] != "animal" or int(p[1]) != fid: continue
+        out.append({"kind": p[2], "x": float(p[3]), "y": float(p[4]), "z": float(p[5]), "hp": float(p[9]), "dead": p[10] == "1", "key": int(p[11])})
+    return out
+
+def step_farmanimals14():
+    """the list of 2026-11-16's seventh phase (item 12: "kill farm animals and loot them - crafting items, food"): at the first
+    farmstead near Brokenspire, the Warrior strikes a pig with her own attack (held before her, as the hunting test's): its hit points
+    fall and it starts away, struck down it falls on its side and leaves its things (Raw Meat, by 929's table), taken with F; the Mage's
+    bolt kills a hen (the bolt's own way to a farm animal); both kept dead in the game (WildKilled), and laid again (the chunk made
+    again) the farm has neither and the same number less two. Pictures of the pig lying and its things."""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    w = G["w"]; gi = G["gi"]
+    hero0 = str(g.get_editor_property("current_hero")); hour0 = g.get_town_hour()
+    try:
+        g.set_town_hour(11.0)
+        fs = [str(x).split("|") for x in g.find_wild_farmsteads(0.0, 0.0, 6000.0)]
+        fid, fx, fy = int(fs[0][0]), float(fs[0][2]), float(fs[0][3])
+        g.wild_drop_all(); g.wild_put_her(fx - 40.0, fy); yield from wait_chunks(30, 50); yield from rwait(3.0)
+        an = farm_animals14(fid); res["animals"] = len(an); res["kinds"] = sorted({a["kind"] for a in an}); res["hp"] = {a["kind"]: a["hp"] for a in an}
+        def actor_of(a):
+            return min(GS.get_all_actors_of_class(w, unreal.RDTownAnimal), key=lambda x: math.hypot(x.get_actor_location().x - a["x"], x.get_actor_location().y - a["y"]))
+        def kill(a, hero):
+            if str(g.get_editor_property("current_hero")) != hero: g.switch_hero(hero); yield from rwait(1.0); refresh()
+            tgt = actor_of(a); out = {"kind": a["kind"], "hp0": tgt.get_health14(), "key": a["key"]}
+            p = G["pawn"]; l0 = tgt.get_actor_location()
+            put(V(l0.x - 250.0, l0.y, 0), yaw=0.0, z=g.wild_ground_z(V(l0.x - 250.0, l0.y, 0))); yield from rwait(0.5)
+            f0 = tgt.get_flees(); hits = []
+            cm = 110.0 if hero == "Warrior" else 420.0
+            for n_ in range(16):
+                if tgt.is_dead14(): break
+                cb().set_mana(cb().get_max_mana())
+                t1 = time.time()
+                while time.time() - t1 < 0.25:
+                    l = p.get_actor_location(); fw = p.get_actor_forward_vector()
+                    tgt.set_actor_location(V(l.x + fw.x * cm, l.y + fw.y * cm, g.wild_ground_z(V(l.x + fw.x * cm, l.y + fw.y * cm, 0))), False, True); yield
+                cb().simulate_key(key("LeftMouseButton"), True); yield from rwait(0.12); cb().simulate_key(key("LeftMouseButton"), False)
+                yield from rwait(1.3); hits.append(round(tgt.get_health14(), 1))
+            out["hits"] = hits; out["flees"] = tgt.get_flees() - f0; out["dead"] = tgt.is_dead14()
+            yield from rwait(1.0)
+            body = tgt.get_component_by_class(unreal.SkeletalMeshComponent)
+            out["lying_up_z"] = round(body.get_up_vector().z, 2) if body else None
+            out["drops"] = [str(x) for x in g.get_editor_property("last_farm_animal_drops14")]
+            out["kept"] = a["key"] in [int(k) for k in gi.get_editor_property("wild_killed")]
+            return out, tgt
+        pig = next((a for a in an if a["kind"] == "Pig" and a["hp"] > 0), next((a for a in an if a["hp"] > 0), None))
+        if pig:
+            r_, tgt = yield from kill(pig, "Warrior"); res["pig"] = r_
+            l = tgt.get_actor_location()
+            # (from 3.5 m off, looking down at it, on a side with a clear line to it: from her place the camera pressed into her back
+            # (the first run's picture), and from the west a barn's wall stood between (the second's))
+            pick_yaw = 0.0
+            for yw in (0.0, 90.0, 180.0, 270.0, 45.0, 135.0, 225.0, 315.0):
+                d_ = V(math.cos(math.radians(yw)), math.sin(math.radians(yw)), 0)
+                sp_ = V(l.x - d_.x * 350.0, l.y - d_.y * 350.0, 0); ez = g.wild_ground_z(sp_) + 250.0
+                hit = unreal.SystemLibrary.line_trace_single(w, V(sp_.x, sp_.y, ez), V(l.x, l.y, l.z + 30.0), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+                ht = hit.to_tuple() if hit else None
+                if not ht or not ht[0] or math.hypot(ht[4].x - l.x, ht[4].y - l.y) < 120.0: pick_yaw = yw; break
+            d_ = V(math.cos(math.radians(pick_yaw)), math.sin(math.radians(pick_yaw)), 0)
+            put(V(l.x - d_.x * 350.0, l.y - d_.y * 350.0, 0), yaw=pick_yaw, z=g.wild_ground_z(V(l.x - d_.x * 350.0, l.y - d_.y * 350.0, 0)))
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-30, yaw=pick_yaw)); yield from rwait(1.0)
+            res["picture_from_yaw"] = pick_yaw
+            shot("farmanimals14_dead", "1280x720"); yield from rwait(1.2)
+            # (its things taken with F, from beside its pile)
+            c = cb(); before = {n: c.get_item_count(n) for n in set(r_["drops"])}
+            put(V(l.x - 90.0, l.y, 0), yaw=0.0, z=g.wild_ground_z(V(l.x - 90.0, l.y, 0))); yield from rwait(0.5)
+            res["pile_says"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+            res["pile_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.5)
+            res["taken"] = {n: c.get_item_count(n) - before[n] for n in before}
+        hen = next((a for a in farm_animals14(fid) if a["kind"] in ("Chicken", "Rabbit") and a["hp"] > 0 and not a["dead"]), next((a for a in farm_animals14(fid) if a["hp"] > 0 and not a["dead"] and a["key"] != res.get("pig", {}).get("key")), None))          # (the bolt's way: a hen, else any other (a farm of cows and goats))
+        if hen:
+            r_, tgt = yield from kill(hen, "Mage"); res["hen"] = r_
+        # ---- laid again: the dead stay dead
+        g.wild_drop_all(); g.wild_put_her(fx - 40.0, fy); yield from wait_chunks(30, 50); yield from rwait(3.0)
+        an2 = farm_animals14(fid)
+        res["again"] = {"animals": len(an2), "first_count": res["animals"], "dead_keys_back": [a["key"] for a in an2 if a["key"] in (res.get("pig", {}).get("key"), res.get("hen", {}).get("key"))]}
+    finally:
+        # (the hero and the hour it found put back for the steps after it (PR #85's review))
+        if str(G["gen"].get_editor_property("current_hero")) != hero0: G["gen"].switch_hero(hero0); yield from rwait(0.8); refresh()
+        G["gen"].set_town_hour(hour0)
+        G["gen"].wild_drop_all(); G["gen"].wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+        quiet(False)
+    pg = res.get("pig", {}); hn = res.get("hen", {}); ag = res.get("again", {})
+    ok = (pg.get("dead") and pg.get("hits") and pg["hits"][0] < pg["hp0"] and pg.get("flees", 0) >= 1 and pg.get("lying_up_z") is not None and abs(pg["lying_up_z"]) < 0.5
+          and "Raw Meat" in pg.get("drops", []) and pg.get("kept") and res.get("taken", {}).get("Raw Meat", 0) >= 1
+          and hn.get("dead") and hn.get("kept") and hn.get("drops")
+          and ag.get("animals") == ag.get("first_count", 0) - 2 and not ag.get("dead_keys_back"))
+    step_result("farmanimals14", ok, **res)
+
+
 def step_sleep14():
     """the list of 2026-11-16's seventh phase (item 16: "the NPCs at farms should sleep at night"): at the first farmstead near
     Brokenspire, its family at 20:00 walk home (time sped up) and go into their farmhouse; at 23:00 each is asleep indoors, those with
@@ -5167,7 +5261,7 @@ def step_horse14():
           and res["called_town_m"] is not None and res["called_town_m"] < 4.0)
     step_result("horse14", ok, **res)
 
-STEPS = {"sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "spires14": step_spires14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "spires14": step_spires14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)

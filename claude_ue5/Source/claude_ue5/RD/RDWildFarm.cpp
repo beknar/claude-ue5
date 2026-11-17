@@ -92,7 +92,7 @@ TArray<FString> ARDDungeonGenerator::GetWildFarmLines() const
 	{
 		if (!F.Chunk.IsValid()) continue;
 		int32 Na = 0, Nf = 0;
-		for (const TWeakObjectPtr<ARDTownAnimal>& A : F.Animals) if (A.IsValid()) ++Na;
+		for (const TWeakObjectPtr<ARDTownAnimal>& A : F.Animals) if (A.IsValid() && !A->IsDead14()) ++Na;          // (the living: PR #85's review)
 		for (const TWeakObjectPtr<ARDTownsfolk>& T : F.Folk) if (T.IsValid()) ++Nf;
 		Out.Add(FString::Printf(TEXT("farm|%d|%s|%.1f|%.1f|%.0f|%.1f|%d|%d|%d|%.0f|%.0f|%.0f|%.0f|%.1f"), F.Id, *F.Name, F.At.X, F.At.Y,
 			WildGroundZ(FVector(F.At.X * 100.0, F.At.Y * 100.0, 0.0)), F.Yaw, F.Props, Na, Nf, F.PenAt.X, F.PenAt.Y, F.PenHalf.X, F.PenHalf.Y, F.PenYaw));
@@ -107,8 +107,9 @@ TArray<FString> ARDDungeonGenerator::GetWildFarmLines() const
 			const float PenYaw = F.AnimalPenYaws.IsValidIndex(Ai) ? F.AnimalPenYaws[Ai] : F.PenYaw;
 			const FVector Lp = FRotator(0.f, -PenYaw, 0.f).RotateVector(L - FVector(Pn.X, Pn.Y, L.Z));
 			const bool bIn = FMath::Abs(Lp.X) <= Pn.Z + 30.f && FMath::Abs(Lp.Y) <= Pn.W + 30.f;
-			Out.Add(FString::Printf(TEXT("animal|%d|%s|%.0f|%.0f|%.0f|%d|%d|%.0f"), F.Id, TownAnimals.IsValidIndex(A->Def) ? *TownAnimals[A->Def].Name.ToString() : TEXT("?"),
-				L.X, L.Y, L.Z, bIn ? 1 : 0, A->GetState(), WildGroundZ(L)));
+			// (the list of 2026-11-16's seventh phase: its hit points, dead, its kill key)
+			Out.Add(FString::Printf(TEXT("animal|%d|%s|%.0f|%.0f|%.0f|%d|%d|%.0f|%.1f|%d|%lld"), F.Id, TownAnimals.IsValidIndex(A->Def) ? *TownAnimals[A->Def].Name.ToString() : TEXT("?"),
+				L.X, L.Y, L.Z, bIn ? 1 : 0, A->GetState(), WildGroundZ(L), A->GetHealth14(), A->IsDead14() ? 1 : 0, A->FarmKey14));
 		}
 		for (const TWeakObjectPtr<ARDTownsfolk>& Tw : F.Folk)
 		{

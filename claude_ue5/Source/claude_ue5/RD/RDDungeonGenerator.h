@@ -2511,6 +2511,7 @@ public:
 		/** the list of 2026-11-16's seventh phase: its farmhouse's beds (each bed's middle on the floor and its yaw: the foot +X) and the
 		 *  house's floor height */
 		TArray<FTransform> Beds14; float HouseFloor14 = 0.f;
+
 		/** each animal's pen's yaw (a barn's stall turns with its barn; AnimalPens' half sizes are along and across it) */
 		TArray<float> AnimalPenYaws;
 		/** its pieces as instances, one component a mesh, material and collision (PR #49's review: a component a piece was several
@@ -2522,6 +2523,20 @@ public:
 	TArray<FRDWildFarmRec> WildFarms;
 	/** the list of 2026-11-16's seventh phase (RDList14f.cpp): a farm's family member given its home in the farmhouse and its own bed (the K-th) if there is one */
 	void SetWildFarmFolkHome14(class ARDTownsfolk* T, const FRDWildFarmRec& Rec, const FVector& DoorOut, const FVector& HouseIn, int32 K);
+	/** the seventh phase's second part (RDList14g.cpp): a farm animal's kill key (from its farm's id and its place in the farm's
+	 *  plan), whether it was killed in this game, and the farm animals her blows and bolts reach */
+	int64 FarmAnimalKey14(const FRDWildFarmRec& Rec, int32 Slot, int32 K) const;
+	bool IsFarmAnimalKilled14(int64 Key) const;
+	/** the farm animals killed in this game, read once for each farm laid (WildKilled holds every kept kill, container and use) */
+	TSet<int64> FarmKilled14; int32 FarmKilledFor14 = MIN_int32;
+	void ReadFarmKilled14(int32 FarmId);
+	void OnFarmAnimalKilled14(class ARDTownAnimal* A);
+	/** "Item|min|max|chance" lines drawn from a hash: the wild animals' and the farms' things */
+	TArray<FName> RollDropLines(const TArray<FString>& Lines, uint32 H0) const;
+	int32 HitFarmAnimalsInArc14(const FVector& L, const FVector& Fw, float Reach, float MinCos, float Dmg, FName Sound);
+	class ARDTownAnimal* FarmAnimalOnSegment14(const FVector& A, const FVector& B, float Pad, float& OutT, FVector& OutAt) const;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 FarmAnimalsKilled14 = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") TArray<FName> LastFarmAnimalDrops14;
 	/** the list of 2026-11-11's fourth phase (RD/RDWildFarm11.cpp, 919 farms): the farmsteads' designs (SourceArt/wilderness/
 	 *  farm_designs.json), one picked by each farmstead's id; empty: the old fixed layout */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Farm11") TArray<FRDFarmDesign> FarmDesigns;

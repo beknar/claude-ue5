@@ -1,4 +1,5 @@
 #include "RD/RDCombat.h"
+#include "RD/RDTown.h"
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDMonster.h"
 #include "RD/RDBlood.h"
@@ -504,7 +505,10 @@ void URDCombatComponent::Strike()
 		Generator->HitTownDummiesInArc(L, Fw, W->Reach, MinCos, 1.f, HitSound, GetDamageOf(AttackIndex));
 	// (the list of 2026-11-07: the wilderness's animals in its reach and arc are hurt by it)
 	if (Generator->bWild)
+	{
 		Generator->HitWildAnimalsInArc(L, Fw, W->Reach, MinCos, GetDamageOf(AttackIndex), HitSound);
+		Generator->HitFarmAnimalsInArc14(L, Fw, W->Reach, MinCos, GetDamageOf(AttackIndex), HitSound);          // (the list of 2026-11-16: the farms' animals)
+	}
 }
 
 void URDCombatComponent::EndAttack()
@@ -2729,6 +2733,25 @@ void URDCombatComponent::TickBolts(float Dt)
 		}
 		FHitResult H;
 		const bool bWallHit = GetWorld()->LineTraceSingleByChannel(H, B.At, Next, ECC_Visibility, Q);
+		// (the list of 2026-11-16: a farm's animal on the way, nearer than the monster and the wall, takes the bolt)
+		{
+			float FaT = 2.f; FVector FaAt = Next;
+			ARDTownAnimal* Fa = (Generator->bWild && !B.bWisp && !B.bGoal) ? Generator->FarmAnimalOnSegment14(B.At, Next, 10.f, FaT, FaAt) : nullptr;
+			// (only when nearer than a wild animal on the same way (PR #85's review: a cow behind a hare took the bolt through it))
+			float WaT = 2.f; FVector WaAt = Next;
+			if (Fa && Generator->WildAnimalOnSegment(B.At, Next, 10.f, WaT, WaAt) && WaT <= FaT) Fa = nullptr;
+			if (Fa && FaT < HitT && (!bWallHit || FaT < H.Time))
+			{
+				const float Dmg = B.Dmg > 0.f ? B.Dmg : GetDamageOf(B.Weapon);
+				Generator->PlaySoundAt(HitSoundOf(W), FaAt);
+				Generator->AddHitText(Fa->BodyCenter14() + FVector(0, 0, 40.f), Dmg, false);
+				Fa->TakeHit14(Dmg, B.At);
+				B.Flown += (FaAt - B.At).Size();
+				Burst(B, FaAt, nullptr);
+				if (UStaticMeshComponent* C = B.Mesh.Get()) C->DestroyComponent();
+				Bolts.RemoveAt(I); continue;
+			}
+		}
 		// (the list of 2026-11-07: a wilderness animal on the way, nearer than the monster and the wall, takes the bolt)
 		{
 			float AnT = 2.f; FVector AnAt = Next;
