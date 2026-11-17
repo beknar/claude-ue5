@@ -1987,7 +1987,7 @@ bool ARDDungeonGenerator::ActivateTownEntry(int32 Line)
 	else if (E.Act == TEXT("sell")) bOk = TownSell(E.Arg);
 	else if (E.Act == TEXT("heal")) bOk = TownHeal();
 	else if (E.Act == TEXT("repair")) bOk = TownRepair(E.Arg);
-	else if (E.Act == TEXT("anvil")) { CloseTownPanel(); if (PlayerCombat) PlayerCombat->SetCraftingOpen(true); return true; }
+	else if (E.Act == TEXT("anvil")) { CloseTownPanel(); if (PlayerCombat) { PlayerCombat->SetCraftStation(NAME_None); PlayerCombat->SetCraftingOpen(true); } return true; }
 	else if (E.Act == TEXT("castle")) { CloseTownPanel(); TownCount(TEXT("circle_castle")); return EnterCastle(); }
 	else if (E.Act == TEXT("travel") && bWild && IsWildReady())
 	{

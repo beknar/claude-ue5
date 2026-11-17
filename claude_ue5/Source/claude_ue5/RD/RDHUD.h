@@ -184,6 +184,9 @@ private:
 	void DrawInventory(float Sc);
 	/** what an item does, for her (its share in her hit points or mana) */
 	FString DescribeItem(const FRDItemDef& It) const;
+	/** the crafting panel's words for the recipe chosen, wrapped for its column (item, width and scale as the key) */
+	mutable FString CraftWhatKey;
+	mutable TArray<FString> CraftWhatLines;
 	/** the third list: how many she has of what an anvil's break-down line names ("w<weapon index>", "g<gear>", "i<item>") */
 	int32 BreakdownCount(const FString& Ref) const;
 	/** level 5: the anvil's crafting panel (it pauses the game): the recipes, what each takes against what she carries */

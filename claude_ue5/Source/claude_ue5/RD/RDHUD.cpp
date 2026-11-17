@@ -1687,13 +1687,26 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 		TArray<FString> Uses;
 		const bool bHv = Gen && Gen->bHarvest;
 		bool bOven = false;
+		TSet<FName> Where;          // (the list of 2026-11-16: the stations that make what it goes into (PR #81's review))
 		if (Gen)
 			for (const FRDRecipe& Rc : Gen->Recipes)
-				if (Rc.Parts.ContainsByPredicate([&It](const FRDRecipePart& Pt) { return Pt.AnyOf.Contains(It.Name); }) && Gen->RecipeRefusal(Rc).IsEmpty()) { Uses.Add(Rc.Item.ToString().ToLower()); bOven |= Rc.Station == TEXT("Oven"); }
+				if (Rc.Parts.ContainsByPredicate([&It](const FRDRecipePart& Pt) { return Pt.AnyOf.Contains(It.Name); }) && Gen->RecipeRefusal(Rc).IsEmpty()) { Uses.Add(Rc.Item.ToString().ToLower()); Where.Add(Gen->RecipeStation(Rc)); bOven |= Rc.Station == TEXT("Oven"); }
 		// (the list of 2026-11-04: a garden's crops are baked at a kitchen's oven)
-		FString S = bOven ? TEXT("An ingredient from a garden: a kitchen's bread oven bakes food from it (F at an oven).")
-		          : bHv ? TEXT("A crafting material: an anvil makes potions, scrolls and repair items from it (F at an anvil; anvils are on the maps).")
-		                : TEXT("A crafting material: an anvil makes repair items from it (F at an anvil; anvils are on the maps).");
+		FString S;
+		if (bOven) S = TEXT("An ingredient from a garden: a kitchen's bread oven bakes food from it (F at an oven).");
+		else if (Gen && Gen->bTables14)
+		{
+			// (the list of 2026-11-16: the stations that make what it goes into, by name)
+			TArray<FString> W;
+			if (Where.Contains(NAME_None)) W.Add(TEXT("an anvil"));
+			if (Where.Contains(FName(TEXT("Alchemist")))) W.Add(TEXT("an alchemist's table (potions)"));
+			if (Where.Contains(FName(TEXT("Librarian")))) W.Add(TEXT("a librarian's table (scrolls)"));
+			if (Where.Contains(FName(TEXT("Forge")))) W.Add(TEXT("a forge"));
+			S = W.Num() == 0 ? FString(TEXT("A crafting material."))
+			    : FString::Printf(TEXT("A crafting material: made into things at %s (F there)."), *FString::Join(W, TEXT(", ")));
+		}
+		else S = bHv ? TEXT("A crafting material: an anvil makes potions, scrolls and repair items from it (F at an anvil; anvils are on the maps).")
+		             : TEXT("A crafting material: an anvil makes repair items from it (F at an anvil; anvils are on the maps).");
 		if (Uses.Num() > 8) { const int32 More = Uses.Num() - 8; Uses.SetNum(8); Uses.Add(FString::Printf(TEXT("%d more"), More)); }
 		if (Uses.Num() > 0) S += TEXT("  It goes into: ") + FString::Join(Uses, TEXT(", ")) + TEXT(".");
 		return S;
@@ -2422,9 +2435,11 @@ void ARDHUD::DrawCrafting(float Sc)
 	const bool bDivider = UI.Has(TEXT("divider")), bPlate = UI.Has(TEXT("button"));
 	const float Tin = UI.Has(TEXT("panel_wide")) ? 24.f * Sc : 0.f;
 	const bool bOven = Cb->GetCraftStation() == TEXT("Oven"), bForge = Cb->GetCraftStation() == TEXT("Forge");
-	UI.Text(bOven ? TEXT("THE OVEN") : bForge ? TEXT("THE FORGE") : TEXT("THE ANVIL"), RDInk, A.X + Pd + Tin, A.Y + 16.f * Sc, Medium, Sc * 1.5f, ERDType::Title);
+	const bool bAlch = Cb->GetCraftStation() == TEXT("Alchemist"), bLib = Cb->GetCraftStation() == TEXT("Librarian");
+	UI.Text(bOven ? TEXT("THE OVEN") : bForge ? TEXT("THE FORGE") : bAlch ? TEXT("THE ALCHEMIST'S TABLE") : bLib ? TEXT("THE LIBRARIAN'S TABLE") : TEXT("THE ANVIL"), RDInk, A.X + Pd + Tin, A.Y + 16.f * Sc, Medium, Sc * 1.5f, ERDType::Title);
 	float Tw, Th;
 	const FString Sub = bOven ? TEXT("bake food from its ingredients") : bForge ? TEXT("forge again the plain arms and armour you have found")
+	                  : bAlch ? TEXT("brew potions from what you have gathered") : bLib ? TEXT("write scrolls of the spells you know")
 	                          : TEXT("make repair items  ·  mend what is worn  ·  break down the weapons you found");
 	UI.TextSize(Sub, Tw, Th, Small, Sc * 1.05f);
 	UI.Text(Sub, Gold, B.X - Pd - Tin - Tw, A.Y + 22.f * Sc, Small, Sc * 1.05f);
@@ -2642,7 +2657,37 @@ void ARDHUD::DrawCrafting(float Sc)
 		}
 		else { UI.Text(P[1].ToUpper(), FLinearColor::White, Rx, Ry, Medium, Sc * 1.15f, ERDType::Title); Ry += 40.f * Sc; }
 		const int32 Ix = Gen->FindItem(Item);
-		if (Ix >= 0) { UI.Text(FString::Printf(TEXT("Mends %.0f%% of a set of armour's or a found weapon's durability"), Gen->Items[Ix].Amount * 100.f), RDInk, Rx, Ry, Small, Sc * 1.05f); Ry += 30.f * Sc; }
+		// (what it is: a repair item's mending, anything else the inventory's own words, wrapped at the column (the list of
+		// 2026-11-16's fifth phase: every recipe had read "Mends ...", level 5's when its recipes were all repair items))
+		if (Ix >= 0)
+		{
+			// (wrapped once for each recipe and width, not every frame, and kept to four lines (PR #81's review): a scroll's words
+			// ran on past the parts)
+			const FString Key = FString::Printf(TEXT("%s|%.0f|%.3f"), *Item.ToString(), Rw, Sc);
+			if (Key != CraftWhatKey)
+			{
+				CraftWhatKey = Key; CraftWhatLines.Reset();
+				const FRDItemDef& It = Gen->Items[Ix];
+				const FString What = It.Kind == ERDItemKind::Repair ? FString::Printf(TEXT("Mends %.0f%% of a set of armour's or a found weapon's durability"), It.Amount * 100.f) : DescribeItem(It);
+				TArray<FString> Words; What.ParseIntoArray(Words, TEXT(" "));
+				FString Ln;
+				for (const FString& Wd : Words)
+				{
+					const FString Try = Ln.IsEmpty() ? Wd : Ln + TEXT(" ") + Wd;
+					UI.TextSize(Try, Tw, Th, Small, Sc * 1.05f);
+					if (Tw > Rw && !Ln.IsEmpty()) { CraftWhatLines.Add(Ln); Ln = Wd; }
+					else Ln = Try;
+				}
+				if (!Ln.IsEmpty()) CraftWhatLines.Add(Ln);
+				if (CraftWhatLines.Num() > 4) { CraftWhatLines.SetNum(4); CraftWhatLines[3] += TEXT(" ..."); }
+			}
+			for (int32 K = 0; K < CraftWhatLines.Num(); ++K)
+			{
+				UI.TextSize(CraftWhatLines[K], Tw, Th, Small, Sc * 1.05f);
+				UI.Text(CraftWhatLines[K], RDInk, Rx, Ry, Small, Sc * 1.05f);
+				Ry += K + 1 < CraftWhatLines.Num() ? Th + 4.f * Sc : 30.f * Sc;
+			}
+		}
 		UI.Text(TEXT("IT TAKES"), Dim, Rx, Ry, Small, Sc, ERDType::Label); Ry += 24.f * Sc;
 		TArray<FString> Parts; if (P.Num() >= 4) P[3].ParseIntoArray(Parts, TEXT(";"));
 		// (two columns of parts: label, what she has / what it takes, green when she has enough)

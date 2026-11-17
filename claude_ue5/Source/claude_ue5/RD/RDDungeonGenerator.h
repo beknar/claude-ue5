@@ -2711,6 +2711,28 @@ public:
 	/** the list of 2026-11-16's third phase (927 horse): her horse called by a key (J, the D-pad up) from anywhere but a dungeon,
 	 *  shown on the maps, the rider seated by the horse's measured seat with the reins, her weapons put away (RDList14b.cpp) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bHorseCall14 = false;
+	/** the list of 2026-11-16's fifth phase (927 tables, RDList14c.cpp): potions are made at the alchemist's table, scrolls at the
+	 *  librarian's (the recipes' own Station when they have one, else by the item's kind: RecipeStation); the tables (AlchemistPiece,
+	 *  LibrarianPiece) stand in the towns' healers, laboratories and witches' huts and their temples, libraries and studies, and by
+	 *  the dungeons' anvils (the alchemist's; the librarian's too where bLibrarianInDungeon14: the maps with no town) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bTables14 = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bLibrarianInDungeon14 = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") FName AlchemistPiece = TEXT("Table14.Alchemist");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") FName LibrarianPiece = TEXT("Table14.Librarian");
+	/** where a recipe is made: its Station ("Oven", "Forge"), or with bTables14 "Alchemist" for a potion and "Librarian" for a
+	 *  scroll; none: the anvil */
+	FName RecipeStation(const FRDRecipe& Rc) const;
+	/** the same with its item's index already found (FindItem; -1 none) */
+	FName RecipeStationOf(const FRDRecipe& Rc, int32 ItemIx) const;
+	bool FindNearestTable14(FName Station, const FVector& From, float MaxDistance, FVector& At) const;
+	/** "Alchemist" or "Librarian" when that table is within MaxDistance and nearer than Than (cm), else none */
+	FName NearestTable14(const FVector& From, float MaxDistance, float Than) const;
+	/** the distance to the nearest of the anvil (AnvilD), a forge that would take F and a dungeon's oven, within Lim */
+	float StationsNearest(const FVector& From, float Lim, float AnvilD, bool bAnvil) const;
+	/** tests: every table of the kind ("Alchemist", "Librarian") in the sections built */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") TArray<FVector> GetAllTables14(FName Station) const;
+	/** tests: the recipes the station offers her now ("Alchemist", "Librarian", "Oven", "Forge", none the anvil), refused ones left out */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") TArray<FName> GetStationRecipes14(FName Station) const;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 HorseCalls14 = 0;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") bool CallHorseByKey();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool GetHorseMapAt(FVector& At) const;

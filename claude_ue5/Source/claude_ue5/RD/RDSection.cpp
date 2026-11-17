@@ -525,6 +525,8 @@ bool ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollisio
 	// the town's and table food's block they were recorded only where table food was on))
 	if (Generator && Name == TEXT("BreadOven") && (Generator->bTown || Generator->bDungeonOvens)) TownOvens.Add(T.GetLocation());
 	if (Generator && Generator->bForge && Generator->ForgePieces.Contains(Name)) ForgePoints.Add(T.GetLocation());
+	if (Generator && Generator->bTables14 && Name == Generator->AlchemistPiece) AlchemistPoints.Add(T.GetLocation());
+	if (Generator && Generator->bTables14 && Name == Generator->LibrarianPiece) LibrarianPoints.Add(T.GetLocation());
 	if (Generator && Generator->bTown && Name == TEXT("Bed")) { FTownBed Bd; Bd.At = T.GetLocation(); Bd.Yaw = T.Rotator().Yaw; Bd.Bld = TownBuildingAt(Bd.At); TownBeds.Add(Bd); }
 	// (improvements7, the town: its kitchens' ovens bake; what stands on the open ground (the trees, the grass) stands on its
 	// rise and fall; a prep table has food on it to take (in play too: the food is interactive))
@@ -2016,7 +2018,7 @@ void ARDSection::BeginGenerate(ARDDungeonGenerator* InGenerator, FIntPoint InCoo
 	GenStart = FPlatformTime::Seconds();
 	Generator = InGenerator; Coord = InCoord; Seed = InSeed; bEditorBuilt = bEditorBuild;
 	bBuildStatic = true; bBuildInteractive = true;
-	NumInstances = 0; NumLights = 0; NextRoom = 0; NextCorr = 0; GenTicks = 0; FurnishMs = 0.0; AnvilPoints.Reset(); AnvilRoom = -1; Shelves.Reset(); ForgePoints.Reset(); if (!Generator || !Generator->bTown) TownOvens.Reset();
+	NumInstances = 0; NumLights = 0; NextRoom = 0; NextCorr = 0; GenTicks = 0; FurnishMs = 0.0; AnvilPoints.Reset(); AnvilRoom = -1; Shelves.Reset(); ForgePoints.Reset(); AlchemistPoints.Reset(); LibrarianPoints.Reset(); if (!Generator || !Generator->bTown) TownOvens.Reset();
 	Theme = Generator->ThemeOf(Coord);
 	ThemeNames.Reset(); ThemeNamesOf = Theme;
 	GenR.Initialize(Seed);
@@ -2092,7 +2094,7 @@ bool ARDSection::ContinueGenerate(double Budget)
 	}
 	FurnishMs += (FPlatformTime::Seconds() - T0) * 1000.0;
 	if (NextRoom < Rooms.Num() || NextCorr < Corrs.Num()) return false;
-	EnsureAnvil(); EnsureForge();
+	EnsureAnvil(); EnsureForge(); EnsureTables14();
 	// the instanced furniture goes in at once (one rebuild per mesh instead of one per frame)
 	const double T1 = FPlatformTime::Seconds();
 	FlushInstances();
@@ -2163,7 +2165,7 @@ void ARDSection::ActivateForPlay()
 	// same plan as the editor build (same seed); only the interactive part is instantiated
 	bBuildStatic = false; bBuildInteractive = true;
 	ClearInteractive();
-	FirePoints.Reset(); AnvilPoints.Reset(); AnvilRoom = -1; Shelves.Reset(); ForgePoints.Reset();
+	FirePoints.Reset(); AnvilPoints.Reset(); AnvilRoom = -1; Shelves.Reset(); ForgePoints.Reset(); AlchemistPoints.Reset(); LibrarianPoints.Reset();
 	if (!Generator->bTown) TownOvens.Reset();          // (PR #40's review: a dungeon's ovens are made again with its furniture; the town's plan resets its own)
 	Theme = Generator->ThemeOf(Coord);
 	ThemeNames.Reset(); ThemeNamesOf = Theme;
@@ -2194,7 +2196,7 @@ void ARDSection::ActivateForPlay()
 	bNoBlock = true;
 	for (int32 CI = 0; CI < Corrs.Num(); ++CI) DecorateCorridor(R, CI);
 	bNoBlock = false;
-	EnsureAnvil(); EnsureForge();
+	EnsureAnvil(); EnsureForge(); EnsureTables14();
 	NumInstances = Inst; NumLights = Lights;
 	bBuildStatic = true;
 	// (mistward: the monsters it had go first: RestartPlay activates the kept start set again, and every planned monster

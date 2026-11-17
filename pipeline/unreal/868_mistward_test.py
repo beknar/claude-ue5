@@ -5961,6 +5961,97 @@ def step_quick14():
     step_result("quick14", ok, **res)
 
 
+def step_tables14():
+    """the list of 2026-11-16's fifth phase (items 2 and 3): potions made at the alchemist's table, scrolls at the librarian's. The
+    Mage (who brews) at the alchemist's table by the start hall's anvil: F names it and opens it, it offers potions and nothing else,
+    she brews one from its parts; at the anvil no potion and no scroll is offered; the librarian's table is in the dungeons of the
+    maps with no town only (none on the castle's, whose scrolls are the towns' librarians'). Pictures of the table and its panel."""
+    c = yield from restart("Mage"); g = G["gen"]; quiet(True)
+    res = {}
+    try:
+        kinds = {str(i.name): str(i.kind) for i in g.get_editor_property("items")}
+        def is_pot(n): return any(k in kinds.get(n, "") for k in ("HEALING", "MANA", "SPEED"))
+        def is_scr(n): return "SCROLL" in kinds.get(n, "")
+        al = list(g.get_all_tables14("Alchemist")); li = list(g.get_all_tables14("Librarian"))
+        res["switch"] = g.get_editor_property("tables14"); res["alchemist_tables"] = len(al); res["librarian_tables"] = len(li)
+        hall = g.get_start_room_center(); ans = list(g.get_all_anvils())
+        an = min(ans, key=lambda a_: dist2(a_, hall)) if ans else None
+        at = min(al, key=lambda a_: dist2(a_, an)) if (al and an) else None
+        res["table_from_anvil_m"] = round(dist2(at, an) / 100, 1) if at else None
+        ar = [str(n) for n in g.get_station_recipes14("Alchemist")]; lr = [str(n) for n in g.get_station_recipes14("Librarian")]
+        nr = [str(n) for n in g.get_station_recipes14("None")]
+        res["alchemist_offers"] = ar; res["librarian_offers"] = lr[:8]
+        res["anvil_potions"] = [n for n in nr if is_pot(n)]; res["anvil_scrolls"] = [n for n in nr if is_scr(n)]
+        res["alchemist_not_potions"] = [n for n in ar if not is_pot(n)]
+        res["all_scroll_recipes"] = len([r for r in g.get_editor_property("recipes") if is_scr(str(r.item))])
+        def stand(at_, word):
+            for r_ in (140, 170, 115, 200):
+                for a_ in range(0, 360, 45):
+                    p_ = V(at_.x + math.cos(math.radians(a_)) * r_, at_.y + math.sin(math.radians(a_)) * r_, at_.z)
+                    put(p_, math.degrees(math.atan2(at_.y - p_.y, at_.x - p_.x)))
+                    yield
+                    d_ = str(g.describe_nearest(G["pawn"].get_actor_location(), 260.0))
+                    if word in d_: return d_
+            return ""
+        if at:
+            res["says"] = yield from stand(at, "alchemist")
+            shot("tables14_table", "1280x720"); yield from rwait(1.0)
+            pot = next((n for n in ar if is_pot(n)), None)
+            rc = next((r for r in g.get_editor_property("recipes") if str(r.item) == pot), None) if pot else None
+            if rc:
+                for pt in rc.get_editor_property("parts"):
+                    c.add_item(pt.get_editor_property("any_of")[0], pt.get_editor_property("count"))
+            res["f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from rwait(0.3)
+            res["station"] = str(c.get_craft_station())
+            res["panel"] = [l.split("|")[1] for l in (str(x) for x in c.get_craft_lines()) if l.startswith("recipe|")]
+            shot("tables14_panel", "1280x720"); yield from rwait(1.0)
+            if pot:
+                # (made through the panel's own Enter on its row (PR #81's review: Craft never asks where she stands))
+                ls = [str(x) for x in c.get_craft_lines()]
+                row = next((i_ for i_, l in enumerate(ls) if l.startswith("recipe|") and l.split("|")[1] == pot), -1)
+                n0 = c.get_item_count(pot)
+                if row >= 0: c.move_craft_cursor(row - c.get_craft_cursor())
+                res["brewed"] = row >= 0 and c.get_craft_cursor() == row and c.craft_entry(); yield from rwait(0.2)
+                res["potion"] = [pot, n0, c.get_item_count(pot)]
+                res["message"] = str(c.get_message()) if hasattr(c, "get_message") else None
+            c.set_crafting_open(False); yield from rwait(0.2)
+        # (beside the forge, nearer it than the table, F names the forge (PR #81's review: a table beat every station but the anvil))
+        fs = list(g.get_all_forges()); fg = min(fs, key=lambda f_: dist2(f_, an)) if (fs and an) else None
+        res["by_forge_says"] = None
+        if fg and at:
+            for r_ in (110, 140, 170):
+                for a_ in range(0, 360, 30):
+                    p_ = V(fg.x + math.cos(math.radians(a_)) * r_, fg.y + math.sin(math.radians(a_)) * r_, fg.z)
+                    if dist2(p_, fg) > dist2(p_, at) - 40: continue
+                    put(p_, math.degrees(math.atan2(fg.y - p_.y, fg.x - p_.x))); yield
+                    h_ = G["pawn"].get_actor_location()
+                    if dist2(h_, fg) < dist2(h_, at) - 20 and dist2(h_, fg) < 240:
+                        res["by_forge_says"] = str(g.describe_nearest(h_, 260.0)); res["by_forge_m"] = [round(dist2(h_, fg) / 100, 2), round(dist2(h_, at) / 100, 2)]
+                        break
+                if res["by_forge_says"] is not None: break
+        if an:
+            res["anvil_says"] = yield from stand(an, "anvil")
+            res["anvil_f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from rwait(0.3)
+            res["anvil_station"] = str(c.get_craft_station())
+            pl = [l.split("|")[1] for l in (str(x) for x in c.get_craft_lines()) if l.startswith("recipe|")]
+            res["anvil_panel_potions"] = [n for n in pl if is_pot(n)]; res["anvil_panel_scrolls"] = [n for n in pl if is_scr(n)]
+            res["anvil_panel"] = len(pl)
+            c.set_crafting_open(False); yield from rwait(0.2)
+    finally:
+        try: c.set_crafting_open(False)
+        except Exception: pass
+        quiet(False)
+    pt_ = res.get("potion") or [None, 0, 0]
+    ok = (res.get("switch") and res.get("alchemist_tables", 0) >= 1 and res.get("librarian_tables") == 0 and res.get("table_from_anvil_m") is not None
+          and res["table_from_anvil_m"] < 25 and "alchemist" in res.get("says", "") and res.get("station") == "Alchemist" and res.get("f") == "alchemist"
+          and res.get("panel") and all(is_pot(n) for n in res["panel"]) and res.get("brewed") and pt_[2] == pt_[1] + 1
+          and not res.get("anvil_potions") and not res.get("anvil_scrolls") and not res.get("alchemist_not_potions")
+          and res.get("anvil_f") == "anvil" and res.get("anvil_station") == "None" and not res.get("anvil_panel_potions") and not res.get("anvil_panel_scrolls")
+          and (res.get("all_scroll_recipes", 0) == 0 or len(lr) > 0)
+          and (res.get("by_forge_says") is None or "forge" in res["by_forge_says"]))
+    step_result("tables14", ok, **res)
+
+
 def step_horsecall14():
     """item 7: "enable calling your horse from anywhere except the dungeon": in the castle her horse's key is refused, saying why"""
     yield from restart("Warrior"); c = cb(); g = G["gen"]; res = {}
@@ -6034,7 +6125,7 @@ def step_block14():
     step_result("block14", ok, **res)
 
 
-STEPS = {"block14": step_block14, "horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
+STEPS = {"tables14": step_tables14, "block14": step_block14, "horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
          "spells11_spells": lambda: step_spells11(("spells",)), "spells11_curses": lambda: step_spells11(("curses",)), "spells11_slashes": lambda: step_spells11(("slashes",)), "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
          "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "menulook": step_menulook, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,

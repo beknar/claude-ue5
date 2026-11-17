@@ -1,0 +1,22 @@
+{
+ "SM_RD_AlchemistTable": {
+  "size": [
+   75.0,
+   120.0,
+   102.0
+  ],
+  "table_top": 76.0,
+  "props": 7,
+  "missing": []
+ },
+ "SM_RD_LibrarianTable": {
+  "size": [
+   75.0,
+   120.0,
+   106.0
+  ],
+  "table_top": 76.0,
+  "props": 7,
+  "missing": []
+ }
+}

@@ -1363,7 +1363,9 @@ void URDCombatComponent::SetCraftingOpen(bool bOpen)
 	bCraftOpen = bOpen;
 	CraftHoldAt = -1.0; bCraftHoldDone = false; CraftHoldLine.Reset();          // (PR #38's review: a hold never outlives the panel)
 	if (bOpen) { if (AttackTime >= 0.f) EndAttack(); CraftCursor = FMath::Clamp(CraftCursor, 0, FMath::Max(0, GetCraftLines().Num() - 1)); }
-	else CraftClosedFrame = GFrameCounter;
+	// (shut, the panel forgets where it was opened: whatever opens it next says where (PR #81's review: the smith's anvil opened as
+	// the alchemist's table last used, potions only, no mending))
+	else { CraftClosedFrame = GFrameCounter; CraftStation = NAME_None; }
 	if (bInventoryPausesGame || !bOpen) UGameplayStatics::SetGamePaused(this, bOpen);
 	PlayUiSound(bOpen ? FName(TEXT("Player.Anvil")) : FName(TEXT("Player.Inventory")), TEXT("Player.Inventory"));
 }
@@ -1396,12 +1398,14 @@ TArray<FString> URDCombatComponent::GetCraftLines() const
 		// (mistward, the list of 2026-10-30: a recipe of a tier not yet open, or a scroll her hero does not read, is not offered)
 		if (!Generator->RecipeRefusal(Rc).IsEmpty()) continue;
 		// (the list of 2026-11-04: an oven bakes, an anvil makes the rest)
-		if (Rc.Station != CraftStation) continue;
+		// (the list of 2026-11-16: potions at the alchemist's table, scrolls at the librarian's: RecipeStation, from the item found
+		// once here (PR #81's review: a second search per recipe every frame))
+		const int32 Ri = Generator->FindItem(Rc.Item);
+		if (Generator->RecipeStationOf(Rc, Ri) != CraftStation) continue;
 		TArray<FString> Ps;
 		for (const FRDRecipePart& Pt : Rc.Parts) Ps.Add(FString::Printf(TEXT("%s:%d:%d"), *Pt.Label, PartHave(Pt), Pt.Count));
 		TMap<FName, int32> Take;          // (the recipe as it is, not looked up again by name: the PR review's find, every frame)
 		// (the list of 2026-11-10: each recipe's group, its own section on the anvil: repair items apart from the rest)
-		const int32 Ri = Generator->FindItem(Rc.Item);
 		const ERDItemKind Rk = Ri >= 0 ? Generator->Items[Ri].Kind : ERDItemKind::Component;
 		const TCHAR* Grp = Rk == ERDItemKind::Repair ? TEXT("1repair") : (Rk == ERDItemKind::Healing || Rk == ERDItemKind::Mana || Rk == ERDItemKind::Speed) ? TEXT("2potion")
 			: Rk == ERDItemKind::Scroll ? TEXT("3scroll") : Rk == ERDItemKind::Food ? TEXT("4food")
@@ -1418,7 +1422,7 @@ TArray<FString> URDCombatComponent::GetCraftLines() const
 		return Ga != Gb ? Ga < Gb : (bAlpha && ByName(A, B));
 	});
 	const int32 NumRecipes = Out.Num();
-	if (!CraftStation.IsNone()) return Out;          // (an oven breaks nothing down)
+	if (!CraftStation.IsNone()) return Out;          // (an oven or a table breaks nothing down)
 	// (the list of 2026-11-10: gear she carries that is worn, mended to full at the anvil for half of what it breaks down into:
 	// "mend|<name>|w<weapon index> or g<item>|<1 she has it all>|<part>:<has>:<needs>;...|<left>|<full>", before the breakdowns)
 	{
@@ -1659,7 +1663,11 @@ bool URDCombatComponent::Craft(FName Item)
 	for (const TPair<FName, int32>& T : Take) RemoveCarried(T.Key, T.Value);
 	AddItem(Item, 1);
 	++ItemsCrafted;
-	SetMessage(FString::Printf(TEXT("You %s %s at the %s"), Rc.Station == TEXT("Oven") ? TEXT("bake") : TEXT("make"), *One, Rc.Station == TEXT("Oven") ? TEXT("oven") : TEXT("anvil")));
+	{
+		const FName St = Generator->RecipeStation(Rc);
+		SetMessage(FString::Printf(TEXT("You %s %s at the %s"), St == TEXT("Oven") ? TEXT("bake") : St == TEXT("Alchemist") ? TEXT("brew") : TEXT("make"), *One,
+			St == TEXT("Oven") ? TEXT("oven") : St == TEXT("Forge") ? TEXT("forge") : St == TEXT("Alchemist") ? TEXT("alchemist's table") : St == TEXT("Librarian") ? TEXT("librarian's table") : TEXT("anvil")));
+	}
 	PlayUiSound(TEXT("Player.Craft"), TEXT("Player.Loot"));
 	UE_LOG(LogTemp, Log, TEXT("RDCRAFT %s made (%d crafted)"), *Item.ToString(), ItemsCrafted);
 	return true;

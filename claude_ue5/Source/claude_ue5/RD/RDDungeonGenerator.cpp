@@ -1565,7 +1565,7 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 	// (the list of 2026-11-10: a boss's teleporter; a library's shelf, when no door or container is nearer)
 	if (bBossPorts) { const FString Bp = BossPortUse(From); if (!Bp.IsEmpty()) return Bp; }
 	if (bLibraryShelves) { const FString Sh = ShelfSearch(From); if (!Sh.IsEmpty()) return Sh; }
-	if (bForge || bDungeonOvens) { const FString St = StationInteract(From, Best ? BestD : 1e9f); if (!St.IsEmpty()) return St; }          // (the list of 2026-11-10)
+	if (bForge || bDungeonOvens || bTables14) { const FString St = StationInteract(From, Best ? BestD : 1e9f); if (!St.IsEmpty()) return St; }          // (the list of 2026-11-10; 2026-11-16's tables)
 	if (Traps.Num() > 0 && BeginDisarmNear(From)) return TEXT("disarm");
 	// (level 5: an anvil nearer than any door or container opens her crafting panel)
 	FVector Anvil;
@@ -1677,7 +1677,7 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 	if (bTeleporters) { const FString Pd = DescribePadNear(From); if (!Pd.IsEmpty()) return Pd; }
 	if (bBossPorts) { const FString Bp = BossPortDescribe(From); if (!Bp.IsEmpty()) return Bp; }
 	if (bLibraryShelves) { const FString Sh = ShelfDescribe(From); if (!Sh.IsEmpty()) return Sh; }
-	if (bForge || bDungeonOvens) { const FString St = StationDescribe(From, Best ? BestD : 1e9f); if (!St.IsEmpty()) return St; }
+	if (bForge || bDungeonOvens || bTables14) { const FString St = StationDescribe(From, Best ? BestD : 1e9f); if (!St.IsEmpty()) return St; }
 	if (Traps.Num() > 0) { const FString Tr = DescribeTrapNear(From); if (!Tr.IsEmpty()) return Tr; }
 	FVector Anvil;
 	if (Recipes.Num() > 0 && FindNearestAnvil(From, FMath::Min(BestD, AnvilReach), Anvil)) return TEXT("use the anvil");
