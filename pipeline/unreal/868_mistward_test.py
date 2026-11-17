@@ -5960,7 +5960,17 @@ def step_quick14():
           and res["mage_ready"] and (res["mage_spell_key"]["attacks"] + res["mage_spell_key"]["bolts"]) >= 1 and res["mage_spell_key"]["potion_left"] == 1)
     step_result("quick14", ok, **res)
 
-STEPS = {"log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
+
+def step_horsecall14():
+    """item 7: "enable calling your horse from anywhere except the dungeon": in the castle her horse's key is refused, saying why"""
+    yield from restart("Warrior"); c = cb(); g = G["gen"]; res = {}
+    gi = unreal.GameplayStatics.get_game_instance(G["w"]); gi.set_editor_property("horse_owned", True)
+    yield from press("J"); yield from rwait(0.5)
+    res["said"] = str(c.message); res["calls"] = g.get_editor_property("horse_calls14")
+    gi.set_editor_property("horse_owned", False)
+    step_result("horsecall14", res["calls"] == 0 and "down here" in res["said"], **res)
+
+STEPS = {"horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
          "spells11_spells": lambda: step_spells11(("spells",)), "spells11_curses": lambda: step_spells11(("curses",)), "spells11_slashes": lambda: step_spells11(("slashes",)), "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
          "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "menulook": step_menulook, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,

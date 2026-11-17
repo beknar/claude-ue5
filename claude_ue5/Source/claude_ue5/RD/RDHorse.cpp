@@ -220,6 +220,7 @@ bool ARDDungeonGenerator::MountHorse()
 	if (USpringArmComponent* B = C->FindComponentByClass<USpringArmComponent>()) { BoomArmWas = B->TargetArmLength; BoomOffsetWas = B->TargetOffset; B->TargetArmLength += 140.f; B->TargetOffset.Z += 110.f; }
 	PlayerCombat->MountFactor = FMath::Max(HorseDef.SpeedMul, 1.f); PlayerCombat->RefreshWalkSpeed();
 	RiderClipNow = NAME_None; RiderClipAsset = nullptr;
+	if (bHorseCall14) PlayerCombat->SetRideHands(true);          // (the list of 2026-11-16: her weapons put away, the reins in her hands)
 	TickHorse(0.f);
 	PlayerCombat->ShowMessage(TEXT("You ride your horse  (F: get off)"));
 	UE_LOG(LogRDHorse, Log, TEXT("RDHORSE mounted"));
@@ -244,8 +245,9 @@ bool ARDDungeonGenerator::DismountHorse()
 		if (Horse) { Horse->SetActorLocation(HorseSpotBeside(C)); Horse->PlayFor(0.f); }
 	}
 	if (Horse) Horse->SetBlocking(false);          // (on again once she is clear of it: TickHorse)
-	if (PlayerCombat) { PlayerCombat->MountFactor = 1.f; PlayerCombat->RefreshWalkSpeed(); }
+	if (PlayerCombat) { PlayerCombat->MountFactor = 1.f; PlayerCombat->RefreshWalkSpeed(); if (PlayerCombat->bRideHands) PlayerCombat->SetRideHands(false); }
 	RiderClipNow = NAME_None; RiderClipAsset = nullptr;
+	TickReins14();          // (the reins hidden once she is down)
 	UE_LOG(LogRDHorse, Log, TEXT("RDHORSE dismounted"));
 	return true;
 }
@@ -286,9 +288,13 @@ void ARDDungeonGenerator::TickHorse(float Dt)
 	// (her pelvis on the saddle, RiderLift over it: the rider clips are a camel rider's, whose pelvis sits about 2 m over its root
 	// and forward of it (the first rides put her 2.1 m above the saddle, then on the withers); her pelvis's place against her
 	// mesh's origin read each frame, so every hero's rig sits right)
-	const FVector Sad = Horse->GetSaddleLocation();
+	// (the list of 2026-11-16, item 6: on the saddle's seat, the bone's place moved to it (HorseDef's SeatAhead / SeatUp, measured on
+	// the model): the bone stands on the cantle, and she rode on its back edge)
+	const FVector Sad = HorseSeatPoint();
 	const FVector PelvisOff = M->GetSocketLocation(TEXT("pelvis")) - M->GetComponentLocation();
 	M->SetWorldLocation(Sad + FVector(0, 0, HorseDef.RiderLift) - PelvisOff);
+	if (PlayerCombat->bRideHands) PlayerCombat->SetRideHands(true);
+	TickReins14();
 	const FRDRiderClips* RC = RiderClips.Find(CurrentHero);
 	// (the canter is ridden with the run's clip: a gait with a moment in the air, her seat rising and falling with it)
 	const bool bFast = Horse->ClipNow == TEXT("run") || Horse->ClipNow == TEXT("canter");
@@ -317,7 +323,7 @@ FString ARDDungeonGenerator::GetHorseState() const
 {
 	const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
 	const FVector H = Horse ? Horse->GetActorLocation() : FVector::ZeroVector;
-	const FVector Sd = Horse ? Horse->GetSaddleLocation() : FVector::ZeroVector;
+	const FVector Sd = Horse ? HorseSeatPoint() : FVector::ZeroVector;          // (the seat (PR #79's review: the bone, 30 cm behind it, read 30 cm))
 	const FVector Pv = Her ? Cast<ACharacter>(Her)->GetMesh()->GetSocketLocation(TEXT("pelvis")) : FVector::ZeroVector;
 	return FString::Printf(TEXT("%d|%d|%d|%.0f|%.0f|%.0f|%s|%.2f|%.0f|%.1f|%.1f|%s|%d|%.1f"), HasHorse() ? 1 : 0, Horse ? 1 : 0, bMounted ? 1 : 0, H.X, H.Y, H.Z,
 		Horse ? *Horse->ClipNow.ToString() : TEXT("none"), Horse ? Horse->RateNow : 0.f, Her ? Her->GetVelocity().Size2D() : 0.f, Sd.Z, Pv.Z,

@@ -178,6 +178,8 @@ private:
 	void DrawNotices(float Sc);
 	/** the list of 2026-11-16: the last 20 messages (RDList14.cpp) */
 	void DrawMessageLog(float Sc);
+	/** her horse on a map (RDList14b.cpp) */
+	void DrawHorseMark(const FVector2D& S, float Sc);
 	/** her inventory (it pauses the game): her weapons, then her potions and food; what the one under the cursor does */
 	void DrawInventory(float Sc);
 	/** what an item does, for her (its share in her hit points or mana) */

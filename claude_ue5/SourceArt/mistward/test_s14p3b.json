@@ -1,0 +1,19 @@
+{
+ "tag": "s14p3b",
+ "plan": [
+  "horsecall14"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "horsecall14",
+   "ok": true,
+   "said": "No horse can come to you down here",
+   "calls": 0
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 0
+}
