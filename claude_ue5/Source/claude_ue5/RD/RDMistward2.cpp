@@ -182,7 +182,9 @@ bool URDCombatComponent::IsQuickableItem(FName Item) const
 	const int32 Ix = Generator ? Generator->FindItem(Item) : -1;
 	if (Ix < 0) return false;
 	const ERDItemKind K = Generator->Items[Ix].Kind;
-	return K == ERDItemKind::Torch || K == ERDItemKind::Light || K == ERDItemKind::Shield || K == ERDItemKind::Healing || K == ERDItemKind::Mana || K == ERDItemKind::Speed;
+	// (the list of 2026-11-16, item 20: food too)
+	return K == ERDItemKind::Torch || K == ERDItemKind::Light || K == ERDItemKind::Shield || K == ERDItemKind::Healing || K == ERDItemKind::Mana || K == ERDItemKind::Speed
+		|| (K == ERDItemKind::Food && Generator->bQuickUse14);
 }
 
 bool URDCombatComponent::UseAbility(FName Ability)
@@ -598,6 +600,7 @@ void URDCombatComponent::TickThirdListInput(const APlayerController* PC)
 		}
 	}
 	if (Generator->bHelmetToggle && PC->WasInputKeyJustPressed(EKeys::H)) ToggleHelmet();
+	TickList14Input(PC);
 }
 
 // ================================================================================================ slashes

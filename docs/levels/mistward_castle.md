@@ -548,6 +548,13 @@ The open items of `TODO.md` that a test could settle, on the castle and the five
 
 What the fights showed: with her tier's kit the Warrior staggers a single monster at every blow until it dies, so a monster's own blows were measured before the fight, with her standing (`its_first`). The casters' bolts and the defenders' rounds land (counted, not pictured in flight). Heaven's defenders were fought at its tiers 26-30 with the castle's tier kits: each killed, 0 to 396 of her hit points taken. Every dungeon's tier bosses are still the castle's strongest kinds of each tier (an Orc Raider, a Zombie Tank, a War Raptor, a Broodmother): the dungeons' own bosses wait for the user.
 
+## The list of 2026-11-16 (`docs/improvements14.txt`, [its plan](../improvements14_plan.md))
+
+On every map of the game (`927 hud`: `bMessageLog14`, `bQuickUse14` on brokenspire, the castle, the five dungeons and martial_arts).
+
+- **The last 20 messages** (item 8): every line the HUD is given is kept with its game time, the last 20 (the same line again within a second is one line). L, or the pad's D-pad down (where the quick bar leaves it free, the map shut), opens a panel of them over the game, newest first, each with its age ("2 s ago"); a long line is cut to the panel with an ellipsis. Measured (`868 log14`, `test_s14p2c.json`): 24 lines given, 20 kept, newest first in the order given; opened and shut by L and by the D-pad; pictured.
+- **A potion or food used by the attack** (item 20): food may now go on the quick bar; with a potion or food made ready there (the D-pad), the attack button (the left mouse, RB) uses one, its press striking no blow, in every hero's controls (until now only the Rogue's layout used a readied slot by the attack). Measured (`868 quick14`): a healing potion and a bread on the bar, each made ready and used by the attack (one each, her health up 14 for the potion, no blow); with nothing ready the attack struck.
+
 ## The game's own console
 
 The user's of 2026-11-08: "create a console for the shipping game" (C++ `RD/RDConsole.cpp`, a game-instance subsystem, so it is in every level of the package: the menu, the castle, the town and the dungeons).

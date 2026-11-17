@@ -843,6 +843,7 @@ void ARDHUD::DrawHUD()
 		if (!bBigMap) DrawNotices(Sc);
 		if (Gen->GetPlayerCombat()->IsInventoryOpen()) DrawInventory(Sc);
 		if (Gen->GetPlayerCombat()->IsCraftingOpen()) DrawCrafting(Sc);
+		if (Gen->GetPlayerCombat()->IsMessageLogOpen() && !bBigMap) DrawMessageLog(Sc);
 	}
 	// ---- Brokenspire: the town's panel
 	if (Gen->IsTownPanelOpen()) DrawTownPanel(Sc);

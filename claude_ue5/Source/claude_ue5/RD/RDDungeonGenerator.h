@@ -2704,6 +2704,10 @@ public:
 	 *  place in each 6 km square of the open lands, on dry ground away from the roads and towns, solid; the nearest within WildLandmarkKm
 	 *  is laid and kept while she stays within that reach */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TArray<FString> WildLandmarkBiomes;
+	/** the list of 2026-11-16 (927): the last 20 messages kept and shown (L, D-pad down); a potion or food on the quick bar
+	 *  used by the attack button, food allowed on the bar */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bMessageLog14 = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bQuickUse14 = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TObjectPtr<class UStaticMesh> WildLandmarkMesh = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildLandmarkKm = 8.f;
 	TWeakObjectPtr<class UStaticMeshComponent> WildLandmark;

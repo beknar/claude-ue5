@@ -9,6 +9,13 @@ Parts (args):
                   own (the kit's) is given its shape again (a convex decomposition), a pack's mesh a solid copy of our own (the pack's
                   left alone: the towns and dungeons use it), the table pointed at the copy; then measured again. Writes
                   SourceArt/wilderness/collide14.json.
+  signboard       the second phase (item 1): the trades' sign board's own outline (brokenspire's Town.Sign piece, a shield that
+                  narrows to its point: the lettering fitted to a 58 x 42 cm rectangle stood past its sloping edges, the user's
+                  "store house"): its width at each height in the sign's frame from its mesh's vertices, written to
+                  SourceArt/brokenspire/sign_board.json for blender_numpy/bs_signs.py and 884 signs14.
+  hud             the second phase (items 8 and 20): the last 20 messages (bMessageLog14: L or the D-pad's down opens them) and a
+                  potion or food on the quick bar used by the attack button, food allowed on the bar (bQuickUse14), on the game's
+                  maps and martial_arts.
 """
 import json, math, os, sys, gc
 import unreal
@@ -26,6 +33,62 @@ KIT = "/Game/RandomDungeon/Wild13/Kit"
 SOLID = "/Game/RandomDungeon/Wild/Solid"
 SCRATCH = "/Game/RandomLevel/Test/rl_scratch"
 REPORT = []
+MAPS = "/Game/RandomDungeon/Maps/"
+GAME_MAPS = ("brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress")
+
+
+def open_map(m):
+    path = MAPS + m
+    if not ues.get_editor_world().get_path_name().startswith(path + "."):
+        les.load_level(path); unreal.SystemLibrary.execute_console_command(None, "obj gc")
+    w = ues.get_editor_world(); assert w.get_path_name().startswith(path + "."), w.get_path_name()
+    return next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
+
+
+def each(maps, fn, label):
+    for m in maps:
+        if not eal.does_asset_exist(MAPS + m): REPORT.append(f"{label}: no map {m}"); continue
+        g = open_map(m)
+        what = fn(g)
+        g.modify(); les.save_current_level()
+        unreal.SystemLibrary.execute_console_command(None, "obj gc")
+        REPORT.append(f"927 {label} {m}: {what}")
+
+
+def signboard():
+    g = open_map("brokenspire")
+    pc = g.get_editor_property("pieces")[unreal.Name("Town.Sign")]
+    m = pc.get_editor_property("mesh"); adj = pc.get_editor_property("adjust")
+    tris = []
+    for s in range(m.get_num_sections(0)):
+        sec = unreal.ProceduralMeshLibrary.get_section_from_static_mesh(m, 0, s)
+        vs = [adj.transform_location(v) for v in sec[0]]; ix = list(sec[1])
+        for k in range(0, len(ix) - 2, 3): tris.append((vs[ix[k]], vs[ix[k + 1]], vs[ix[k + 2]]))
+    del g
+    # (the board: past the bracket's arm (x 55 on), under its chains (z -63 down), within its thickness; its outline at each
+    # height from where its triangles' edges cross that height (165 vertices: sampled by vertices, heights between them read 0))
+    btris = [tr for tr in tris if all(q.x > 55.0 and q.z < -63.0 and abs(q.y) < 4.0 for q in tr)]
+    board = [q for tr in btris for q in tr]
+    z0, z1 = min(q.z for q in board), max(q.z for q in board)
+    bands = []
+    z = z0 + 0.5
+    while z <= z1 - 0.5:
+        xs = []
+        for tr in btris:
+            for a, b in ((tr[0], tr[1]), (tr[1], tr[2]), (tr[2], tr[0])):
+                if (a.z - z) * (b.z - z) <= 0 and a.z != b.z: xs.append(a.x + (b.x - a.x) * (z - a.z) / (b.z - a.z))
+        if xs: bands.append([round(z, 1), round(min(xs), 1), round(max(xs), 1)])
+        z += 1.0
+    out = {"mesh": m.get_name(), "z": [round(z0, 1), round(z1, 1)], "x": [round(min(q.x for q in board), 1), round(max(q.x for q in board), 1)],
+           "face_y": round(max(abs(q.y) for q in board), 2), "bands": bands, "vertices": len(board)}
+    json.dump(out, open(os.path.join(SA, "brokenspire", "sign_board.json"), "w", encoding="utf-8"), indent=1)
+    REPORT.append(f"927 signboard: {m.get_name()}: {len(board)} vertices, z {out['z']}, x {out['x']}, {len(bands)} bands; widest "
+                  f"{max(b[2] - b[1] for b in bands):.1f} cm, at the foot {bands[0][2] - bands[0][1]:.1f} cm")
+
+
+def hud(g):
+    g.set_editor_property("message_log14", True); g.set_editor_property("quick_use14", True)
+    return f"messages {g.get_editor_property('message_log14')}, quick use {g.get_editor_property('quick_use14')}"
 
 
 def generator():
@@ -160,5 +223,7 @@ def collide(fix):
 
 args = sys.argv[1:]
 if args and args[0] == "collide": collide("fix" in args[1:])
+if args and args[0] == "signboard": signboard()
+if args and args[0] == "hud": each(GAME_MAPS + ("martial_arts",), hud, "hud")
 for line in REPORT: print(line)
 import gc; gc.collect()

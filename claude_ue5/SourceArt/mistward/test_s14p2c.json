@@ -1,0 +1,47 @@
+{
+ "tag": "s14p2c",
+ "plan": [
+  "log14",
+  "quick14"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "log14",
+   "ok": true,
+   "count": 20,
+   "newest": "0|Dagger in quick slot 4",
+   "oldest": "1|Dagger in quick slot 5",
+   "order_ok": true,
+   "open_by_L": true,
+   "shut_by_L": true,
+   "open_by_pad": true,
+   "shut_by_pad": true
+  },
+  {
+   "step": "quick14",
+   "ok": true,
+   "potion_on_bar": true,
+   "bread_on_bar": true,
+   "potion_ready": true,
+   "potion": {
+    "used": 1,
+    "health_up": 14.0,
+    "blows": 0
+   },
+   "bread_ready": true,
+   "bread": {
+    "used": 1,
+    "blows": 0
+   },
+   "plain_attack_blows": 1
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_s14p2c_log14_panel.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 0
+}
