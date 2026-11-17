@@ -2600,6 +2600,57 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float WildLostCalmSeconds14 = 6.f;
 	/** tests: every person calmed, a pick under way dropped */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") void CalmWildFolk14();
+	/** the list of 2026-11-16's tenth phase (RDList14j.cpp, 932): storms by strength (0 light, 1 moderate, 2 strong, 3 violent), drawn
+	 *  with each weather that carries rain, snow or dust; lightning in a storm of moderate strength or more */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bLightning14 = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") TArray<float> StormStrengthWeights14 = { 0.f, 0.45f, 0.35f, 0.2f };
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") TArray<float> RainStrengthWeights14 = { 0.4f, 0.35f, 0.18f, 0.07f };
+	/** in dry land the strong and violent strengths weigh this share of theirs */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float DryStrongShare14 = 0.5f;
+	/** rain and wind times this by strength (the cover by its root) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") TArray<float> StrengthScale14 = { 0.65f, 0.85f, 1.f, 1.15f };
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") TArray<float> StrikesPerMinute14 = { 0.f, 2.f, 5.f, 10.f };
+	/** a strike on her: this share of her hit points; on anyone else this blow (grown with the wilds' tier) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") TArray<float> StrikeHurtShare14 = { 0.f, 0.15f, 0.25f, 0.35f };
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") TArray<float> LightningDamage14 = { 0.f, 40.f, 70.f, 110.f };
+	/** the share of strikes aimed at someone in the open within StrikeNearCm14 of her; the rest fall anywhere out to StrikeFarCm14; a
+	 *  strike hurts within StrikeRadiusCm14 of where it lands; its thunder is the near set within ThunderNearCm14 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float StrikeNearShare14 = 0.2f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float StrikeNearCm14 = 6000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float StrikeFarCm14 = 150000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float StrikeRadiusCm14 = 400.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float ThunderNearCm14 = 150000.f;
+	/** the sky light's flash: its intensity times 1 + this at a strike's full flash */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float LightningSkyBoost14 = 5.f;
+	/** tests: a bolt held lit this long for its picture (0: it flickers and is gone in 0.35 s) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float LightningHoldSeconds14 = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") TObjectPtr<UStaticMesh> LightningMesh14;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") TObjectPtr<UMaterialInterface> LightningMaterial14;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 WeatherStrength14 = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 LightningStrikes14 = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 LightningOnHer14 = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 LightningOnOthers14 = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 LightningThunders14 = 0;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") void SetWeatherStrength14(int32 S);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") int32 GetWeatherStrength14() const { return WeatherStrength14; }
+	/** tests: the game's own pick of a strength for weather W, N times: "light:n|moderate:n|strong:n|violent:n" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") FString CountWeatherStrengths14(int32 W, int32 N, bool bDry) const;
+	/** tests: a strike at At now (how many it struck) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") int32 ForceLightning14(FVector At);
+	/** under a roof: a house's box, a town's building, or anything over it */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") bool IsSheltered14(const FVector& At, const AActor* Skip) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") TArray<FString> GetStormLines14() const;
+	static FString StrengthName14(int32 S);
+	int32 PickStrength14(int32 W, uint32 H, bool bDry) const;
+	void ApplyStrength14();
+	int32 Strike14(const FVector& Aim);
+	void TickLightning14(float Dt);
+	struct FBolt14 { TArray<TWeakObjectPtr<UStaticMeshComponent>> Segs; TWeakObjectPtr<class UPointLightComponent> Light; float Born = 0.f; };
+	struct FThunder14 { float When = 0.f; float Dist = 0.f; };
+	TArray<FBolt14> Bolts14; TArray<FThunder14> Thunders14;
+	FRandomStream LightningR14;
+	float LightningFlash14 = 0.f, NextStrikeAt14 = -1.f, LastStrikeTime14 = -1.f, LastThunderTime14 = -1.f;
+	FVector LastStrikeAt14 = FVector::ZeroVector;
 	TWeakObjectPtr<class ARDWildChunk> WildPickChunk14; int32 WildPickIndex14 = -1; int64 WildPickKey14 = -1; float WildPickUntil14 = -1.f; FVector WildPickAt14 = FVector::ZeroVector;
 	/** tests: "i|title|role|x|y|z|health|dead|protected|fleeing|key|hits|flees|killed by|hurt", and the person of that index */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") TArray<FString> GetWildFolkLines14() const;

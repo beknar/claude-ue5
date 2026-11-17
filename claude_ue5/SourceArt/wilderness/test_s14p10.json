@@ -1,0 +1,117 @@
+{
+ "tag": "s14p10",
+ "plan": [
+  "storm14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "storm14",
+   "ok": true,
+   "strengths": {
+    "storm": {
+     "light": 0,
+     "moderate": 1791,
+     "strong": 1433,
+     "violent": 776
+    },
+    "storm_dry": {
+     "light": 0,
+     "moderate": 2461,
+     "strong": 1016,
+     "violent": 523
+    },
+    "rain": {
+     "light": 1616,
+     "moderate": 1403,
+     "strong": 690,
+     "violent": 291
+    },
+    "clear": {
+     "light": 400,
+     "moderate": 0,
+     "strong": 0,
+     "violent": 0
+    },
+    "sky_by_strength": {
+     "1": {
+      "rain": 0.85,
+      "wind": 0.85,
+      "cover": 0.92
+     },
+     "3": {
+      "rain": 1.15,
+      "wind": 1.15,
+      "cover": 1.0
+     }
+    }
+   },
+   "rates": {
+    "1": {
+     "strikes": 2,
+     "game_minutes": 2.49,
+     "per_minute": 0.8
+    },
+    "2": {
+     "strikes": 12,
+     "game_minutes": 2.5,
+     "per_minute": 4.8
+    },
+    "3": {
+     "strikes": 21,
+     "game_minutes": 2.5,
+     "per_minute": 8.4
+    }
+   },
+   "hits": {
+    "open_sheltered": false,
+    "open_struck": 1,
+    "open_lost": 35.0,
+    "open_share": 0.25,
+    "roof_building": "house",
+    "roof_sheltered": true,
+    "roof_struck": 0,
+    "roof_lost": 0.0,
+    "monster_struck": 1,
+    "monster_lost": 40.0
+   },
+   "thunder": {
+    "quiet_first": [
+     true,
+     true
+    ],
+    "300": {
+     "strike_m": 300.0,
+     "expect_s": 0.875,
+     "heard_after_real_s": 0.909,
+     "game_rate": 1.001,
+     "heard_after_s": 0.91,
+     "before_db": -38.4,
+     "peak_db": -13.3
+    },
+    "700": {
+     "strike_m": 700.1,
+     "expect_s": 2.041,
+     "heard_after_real_s": 2.197,
+     "game_rate": 1.0,
+     "heard_after_s": 2.196,
+     "before_db": -30.0,
+     "peak_db": -17.7
+    }
+   },
+   "parts_ok": {
+    "strengths": true,
+    "rates": true,
+    "hits": true,
+    "thunder": true
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_s14p10_storm14_bolt.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

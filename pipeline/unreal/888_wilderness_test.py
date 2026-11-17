@@ -3984,6 +3984,170 @@ def step_locks14():
     step_result("locks14", ok, **res)
 
 
+def storm14_line():
+    p = str(G["gen"].get_storm_lines14()[0]).split("|")
+    k = ["kind", "weather", "strength", "strikes", "on_her", "on_others", "thunders", "x", "y", "z", "strike_t", "thunder_t", "next_in", "flash"]
+    return {a: (float(b) if a in ("x", "y", "z", "strike_t", "thunder_t", "next_in", "flash") else (int(b) if a in ("strikes", "on_her", "on_others", "thunders") else b)) for a, b in zip(k, p)}
+
+def step_storm14():
+    """the list of 2026-11-16's tenth phase (item 19, RD/RDList14j.cpp, 932): (a) the strengths the game's own pick draws: a storm never
+    light, the strong and violent ones fewer in dry land; a violent storm's rain and wind over a moderate one's; (b) strikes counted per
+    game minute at each storm strength (the game sped up), more the stronger; (c) a strike on her in the open hurts her by its share, one
+    on her under a farm building's roof does not, one on a monster hurts it; (d) the thunder's delay in a recording of the game's output:
+    strikes 300 m and 700 m off, their thunder heard 0.87 s and 2.04 s after (343 m/s); a picture of a bolt."""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    w = G["w"]
+    hour0 = g.get_town_hour(); held0 = g.get_editor_property("weather_held"); near0 = g.get_editor_property("strike_near_share14")
+    def con(c): unreal.SystemLibrary.execute_console_command(w, c)
+    def counts(s):
+        return {a: int(b) for a, b in (x.split(":") for x in str(s).split("|"))}
+    lms = unreal.find_object(None, "/Script/UnrealEd.Default__LevelEditorMiscSettings"); bg0 = lms.get_editor_property("bAllowBackgroundAudio")
+    mv0 = g.get_editor_property("music_volume")
+    vols = {str(k_): v_.volume for k_, v_ in g.get_editor_property("sounds").items()}
+    def set_only(keys):
+        snd = g.get_editor_property("sounds")
+        for k_ in list(snd.keys()):
+            st = snd[k_]; st.volume = vols[str(k_)] if str(k_) in keys else 0.0; snd[k_] = st
+        g.set_editor_property("sounds", snd)
+    def restore_all():
+        snd = g.get_editor_property("sounds")
+        for k_ in list(snd.keys()):
+            st = snd[k_]; st.volume = vols[str(k_)]; snd[k_] = st
+        g.set_editor_property("sounds", snd)
+    try:
+        g.set_town_hour(13.0)
+        # ---- (a) the strengths drawn
+        a = {"storm": counts(g.count_weather_strengths14(5, 4000, False)), "storm_dry": counts(g.count_weather_strengths14(5, 4000, True)),
+             "rain": counts(g.count_weather_strengths14(4, 4000, False)), "clear": counts(g.count_weather_strengths14(0, 400, False))}
+        sky = {}
+        for s_ in (1, 3):
+            g.set_weather(5, True); g.set_editor_property("weather_held", True); g.set_weather_strength14(s_); yield from rwait(0.5)
+            st = sky_state(); sky[s_] = {"rain": st.get("rain"), "wind": st.get("wind"), "cover": st.get("cover")}
+        a["sky_by_strength"] = sky
+        res["strengths"] = a
+        # ---- (b) strikes a game minute at each storm strength (sped up; none aimed at her, the rate is what is measured)
+        sp = clear_spot("plains")
+        if sp: g.wild_drop_all(); g.wild_put_her(sp[0], sp[1]); yield from wait_chunks(30, 50); yield from rwait(1.0)
+        g.set_editor_property("strike_near_share14", 0.0)
+        b = {}
+        con("rd.GameSpeed 6")
+        for s_ in (1, 2, 3):
+            g.set_weather(5, True); g.set_editor_property("weather_held", True); g.set_weather_strength14(s_); yield from rwait(0.5)
+            n0 = storm14_line()["strikes"]; gt0 = GS.get_time_seconds(w)
+            yield from rwait(25.0)
+            mins = (GS.get_time_seconds(w) - gt0) / 60.0
+            b[s_] = {"strikes": storm14_line()["strikes"] - n0, "game_minutes": round(mins, 2)}
+            b[s_]["per_minute"] = round(b[s_]["strikes"] / max(mins, 0.01), 2)
+        con("rd.GameSpeed 1")
+        g.set_editor_property("strike_near_share14", near0)
+        res["rates"] = b
+        # ---- (c) strikes on her (open, then under a roof) and on a monster
+        c = {}
+        g.set_weather(5, True); g.set_editor_property("weather_held", True); g.set_weather_strength14(2); yield from rwait(0.5)
+        cb().set_health(cb().get_max_health()); hp0 = cb().get_health(); her = G["pawn"].get_actor_location()
+        c["open_sheltered"] = g.is_sheltered14(her, G["pawn"])
+        c["open_struck"] = g.force_lightning14(her); yield from rwait(0.6)
+        c["open_lost"] = round(hp0 - cb().get_health(), 1); c["open_share"] = round(c["open_lost"] / cb().get_max_health(), 3)
+        fs = [str(x).split("|") for x in g.find_wild_farmsteads(0.0, 0.0, 8000.0)]
+        if fs:
+            fx, fy = float(fs[0][2]), float(fs[0][3])
+            g.wild_drop_all(); g.wild_put_her(fx - 40.0, fy); yield from wait_chunks(30, 50); yield from rwait(2.0)
+            blds = [b_ for b_ in box_lines()[2] if math.hypot(b_["x"] / 100.0 - fx, b_["y"] / 100.0 - fy) < 60.0]
+            if blds:
+                hb = blds[0]; put(V(hb["x"], hb["y"], 0), z=hb["floor"]); yield from rwait(1.0)
+                cb().set_health(cb().get_max_health()); hp0 = cb().get_health(); her = G["pawn"].get_actor_location()
+                c["roof_building"] = hb["kind"]; c["roof_sheltered"] = g.is_sheltered14(her, G["pawn"])
+                c["roof_struck"] = g.force_lightning14(her); yield from rwait(0.6)
+                c["roof_lost"] = round(hp0 - cb().get_health(), 1)
+                put(V(hb["x"] + 4000.0, hb["y"], 0), z=g.wild_ground_z(V(hb["x"] + 4000.0, hb["y"], 0))); yield from rwait(0.8)
+        her = G["pawn"].get_actor_location()
+        m = g.spawn_test_ambusher(V(her.x + 1500.0, her.y, her.z), 1, False)
+        if m:
+            yield from rwait(0.8); mh0 = m.get_health()
+            c["monster_struck"] = g.force_lightning14(m.get_actor_location()); yield from rwait(0.6)
+            c["monster_lost"] = round(mh0 - (0.0 if m.is_dead() else m.get_health()), 1)
+            try: m.destroy_actor()
+            except Exception: pass
+        res["hits"] = c
+        # ---- (d) the thunder's delay, recorded; a picture of a bolt
+        d = {}
+        lms.set_editor_property("bAllowBackgroundAudio", True); unreal.RDDungeonGenerator.set_unfocused_volume(1.0)
+        g.set_editor_property("music_volume", 0.0); g.set_weather(10, True); g.set_editor_property("weather_held", True)
+        set_only(("Weather.Thunder", "Weather.ThunderFar")); yield from rwait(1.0)
+        out = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "Storm14", TAG); os.makedirs(out, exist_ok=True)
+        import wave, array
+        def onset(path, t_strike):
+            w_ = wave.open(path, "rb"); sr = w_.getframerate(); ch = w_.getnchannels(); data = array.array("h", w_.readframes(w_.getnframes())); w_.close()
+            n = int(sr * 0.02) * ch; db = []
+            for i in range(0, len(data) - n, n):
+                seg = data[i:i + n]; db.append(20 * math.log10(max(math.sqrt(sum(float(v) * v for v in seg) / len(seg)) / 32768.0, 1e-6)))
+            # (the quiet before the strike by its median; the thunder where the level first rises 12 dB over it)
+            k0 = max(1, int(t_strike / 0.02)); pre = sorted(db[:k0]); base = pre[len(pre) // 2] if pre else -120.0
+            for k_ in range(k0, len(db)):
+                if db[k_] > max(base + 12.0, -60.0): return round(k_ * 0.02 - t_strike, 3), round(base, 1), round(max(db), 1)
+            return None, round(base, 1), round(max(db) if db else -120.0, 1)
+        def silence():
+            # (no thunder still sounding or on its way: 5 s after the last strike (1.5 km is 4.4 s of travel) and 9.5 s after the last
+            # thunder (its files are 8.5 s): the first run's recordings began in the last strikes' thunder, 12 dB over the quiet)
+            t1 = time.time()
+            while time.time() - t1 < 30.0:
+                ln = storm14_line(); now = GS.get_time_seconds(w)
+                if now - ln["strike_t"] > 5.0 and now - ln["thunder_t"] > 9.5: return True
+                yield from rwait(0.5)
+            return False
+        fw = G["pawn"].get_actor_forward_vector(); her = G["pawn"].get_actor_location()
+        for dist_m in (300.0, 700.0):
+            d.setdefault("quiet_first", []).append((yield from silence()))
+            g.start_recording_output(9.0); t0 = time.time(); gt0 = GS.get_time_seconds(w); yield from rwait(0.8)
+            ts = time.time() - t0
+            g.force_lightning14(V(her.x + fw.x * dist_m * 100.0, her.y + fw.y * dist_m * 100.0, her.z))
+            line = storm14_line(); real = math.dist((line["x"], line["y"], line["z"]), (her.x, her.y, her.z)) / 100.0
+            yield from rwait(7.0); name = f"thunder_{int(dist_m)}"
+            # (the game's clock against the real one over the recording: the thunder waits in game time, and in this window the game ran
+            # at half the real rate (the second run: 1.75 s heard for 0.875 s): the delay heard is put into game seconds by it)
+            rate = (GS.get_time_seconds(w) - gt0) / max(time.time() - t0, 0.01)
+            g.stop_recording_output(out, name); yield from rwait(0.5)
+            path = os.path.join(out, name + ".wav"); t1 = time.time()
+            while time.time() - t1 < 5.0:
+                try:
+                    with open(path, "rb"): break
+                except OSError: yield
+            dl, base, peak = onset(path, ts)
+            d[int(dist_m)] = {"strike_m": round(real, 1), "expect_s": round(real / 343.0, 3), "heard_after_real_s": dl, "game_rate": round(rate, 3),
+                              "heard_after_s": round(dl * rate, 3) if dl is not None else None, "before_db": base, "peak_db": peak}
+        # (a bolt held lit for its picture, 250 m before her)
+        g.set_editor_property("lightning_hold_seconds14", 1.5); g.set_weather(5, True); g.set_weather_strength14(3); yield from rwait(1.0)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=8, yaw=math.degrees(math.atan2(fw.y, fw.x)))); yield from rwait(0.5)
+        g.force_lightning14(V(her.x + fw.x * 25000.0, her.y + fw.y * 25000.0, her.z)); yield from rwait(0.15)
+        shot("storm14_bolt", "1280x720"); yield from rwait(1.6)
+        res["thunder"] = d
+    finally:
+        try: con("rd.GameSpeed 1")
+        except Exception: pass
+        restore_all(); g.set_editor_property("lightning_hold_seconds14", 0.0)
+        g.set_editor_property("music_volume", mv0); lms.set_editor_property("bAllowBackgroundAudio", bg0)
+        g.set_editor_property("strike_near_share14", near0)
+        g.set_weather(1, True); g.set_weather_strength14(0); g.set_editor_property("weather_held", held0); g.set_town_hour(hour0)
+        g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+        quiet(False)
+    a = res.get("strengths", {}); b = res.get("rates", {}); c = res.get("hits", {}); d = res.get("thunder", {})
+    st, dr = a.get("storm", {}), a.get("storm_dry", {})
+    sk = a.get("sky_by_strength", {})
+    ok_a = (st.get("light", 1) == 0 and st.get("moderate", 0) > st.get("strong", 0) > st.get("violent", 0) > 0
+            and (dr.get("strong", 0) + dr.get("violent", 0)) < (st.get("strong", 0) + st.get("violent", 0)) * 0.8
+            and a.get("rain", {}).get("light", 0) > 0 and sum(a.get("clear", {}).values()) == a.get("clear", {}).get("light", -1)
+            and sk.get(3, {}).get("rain", 0) > sk.get(1, {}).get("rain", 9) and sk.get(3, {}).get("wind", 0) > sk.get(1, {}).get("wind", 9))
+    want = {1: 2.0, 2: 5.0, 3: 10.0}
+    ok_b = all(b.get(s_, {}).get("per_minute", -1) >= want[s_] * 0.35 and b.get(s_, {}).get("per_minute", 99) <= want[s_] * 2.2 for s_ in want) and b.get(1, {}).get("per_minute", 9) < b.get(3, {}).get("per_minute", 0)
+    ok_c = (not c.get("open_sheltered") and c.get("open_struck", 0) >= 1 and abs(c.get("open_share", 0) - 0.25) < 0.03
+            and c.get("roof_sheltered") is True and c.get("roof_lost", 1) == 0 and c.get("monster_struck", 0) >= 1 and c.get("monster_lost", 0) > 0)
+    dd = {k_: v_ for k_, v_ in d.items() if k_ != "quiet_first"}
+    ok_d = all(v_.get("heard_after_s") is not None and abs(v_["heard_after_s"] - v_["expect_s"]) <= 0.25 for v_ in dd.values()) and len(dd) == 2
+    res["parts_ok"] = {"strengths": ok_a, "rates": ok_b, "hits": ok_c, "thunder": ok_d}
+    step_result("storm14", ok_a and ok_b and ok_c and ok_d, **res)
+
+
 def step_sleep14():
     """the list of 2026-11-16's seventh phase (item 16: "the NPCs at farms should sleep at night"): at the first farmstead near
     Brokenspire, its family at 20:00 walk home (time sped up) and go into their farmhouse; at 23:00 each is asleep indoors, those with
@@ -5661,7 +5825,7 @@ def step_horse14():
     step_result("horse14", ok, **res)
 
 LOCK_STEPS = ("locks14",)
-STEPS = {"locks14": step_locks14, "npc14": step_npc14, "farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "spires14": step_spires14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"storm14": step_storm14, "locks14": step_locks14, "npc14": step_npc14, "farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "spires14": step_spires14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)

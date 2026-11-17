@@ -55,7 +55,14 @@ namespace
 		if (!G->bSky7 || !G->bTown) { RDCmdSay(G, TEXT("rd.Weather: this level has no sky of its own (the towns and the wilderness have)")); return; }
 		G->SetWeather(K, true);
 		G->bWeatherHeld = true;
-		RDCmdSay(G, FString::Printf(TEXT("rd.Weather: %s (held: rd.Weather auto lets it change)"), *ARDDungeonGenerator::WeatherName(K)));
+		// (the list of 2026-11-16's tenth phase: a strength after it: light, moderate, strong, violent, or 0-3)
+		if (Args.Num() > 1)
+		{
+			const FString Sw = Args[1].ToLower(); int32 Sn = Sw.IsNumeric() ? FCString::Atoi(*Sw) : -1;
+			for (int32 I = 0; I < 4 && Sn < 0; ++I) if (ARDDungeonGenerator::StrengthName14(I) == Sw) Sn = I;
+			if (Sn >= 0) G->SetWeatherStrength14(Sn);
+		}
+		RDCmdSay(G, FString::Printf(TEXT("rd.Weather: %s %s (held: rd.Weather auto lets it change)"), *ARDDungeonGenerator::StrengthName14(G->GetWeatherStrength14()), *ARDDungeonGenerator::WeatherName(K)));
 	}
 
 	void RDGoToCommand(const TArray<FString>& Args, UWorld* World)
