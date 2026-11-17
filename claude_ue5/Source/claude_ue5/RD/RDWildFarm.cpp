@@ -113,8 +113,10 @@ TArray<FString> ARDDungeonGenerator::GetWildFarmLines() const
 			const ARDTownsfolk* T = Tw.Get();
 			if (!T) continue;
 			const FVector L = T->GetActorLocation();
-			Out.Add(FString::Printf(TEXT("folk|%d|%s|%.0f|%.0f|%.0f|%s|%.0f|%s"), F.Id, *T->Title, L.X, L.Y, L.Z, *T->GetClipName(), WildGroundZ(L),
-				Townsfolk.IsValidIndex(T->Def) ? *Townsfolk[T->Def].Name.ToString() : TEXT("?")));
+			// (the list of 2026-11-16's seventh phase: asleep, in its bed, indoors, has a bed, its bed's top)
+			Out.Add(FString::Printf(TEXT("folk|%d|%s|%.0f|%.0f|%.0f|%s|%.0f|%s|%d|%d|%d|%d|%.0f|%.0f|%.0f"), F.Id, *T->Title, L.X, L.Y, L.Z, *T->GetClipName(), WildGroundZ(L),
+				Townsfolk.IsValidIndex(T->Def) ? *Townsfolk[T->Def].Name.ToString() : TEXT("?"), T->IsSleeping() ? 1 : 0, T->IsInBed() ? 1 : 0, T->IsWildIndoors() ? 1 : 0, T->HasBed() ? 1 : 0,
+				T->GetBedAt().X, T->GetBedAt().Y, T->GetBedAt().Z));
 		}
 	}
 	return Out;

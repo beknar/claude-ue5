@@ -263,7 +263,9 @@ void ARDTownsfolk::Tick(float Dt)
 			if (Door == 1) { Path.Reset(); SetClip(false); NextTrip = Now + R.FRandRange(1.f, 3.f); if (Act == 1) { EndWork(); NextTrip = Now + 2.f; } return; }
 			if (Door == 0) { SetClip(false); return; }
 		}
-		const FVector Step = D.GetSafeNormal() * FMath::Min(Speed * Dt, D.Size());
+		FVector Step = D.GetSafeNormal() * FMath::Min(Speed * Dt, D.Size());
+		// (the list of 2026-11-16: a farmstead's family walks over the wilds' ground, at its height under each step)
+		if (bWildFarm && Gen && !bWildIndoors) Step.Z = Gen->WildGroundZ(L + Step) + 94.f - L.Z;
 		FHitResult Hit;
 		SetActorLocation(L + Step, true, &Hit);
 		if (Hit.bBlockingHit)
@@ -321,6 +323,7 @@ void ARDTownsfolk::Tick(float Dt)
 bool ARDTownsfolk::TickDay(float Now)
 {
 	bSleeping = false;
+	if (bWildFarm) return TickWildFarmDay(Now);          // (the list of 2026-11-16: a farmstead's family, RDList14f.cpp)
 	if (!Gen || !Gen->bDayNight || HomeBld < 0 || !Section) return false;
 	const float H = Gen->GetTownHour();
 	const bool bNight = H >= 22.f || H < 6.f;
@@ -1360,6 +1363,7 @@ FString ARDDungeonGenerator::TownDescribe(const FVector& From) const
 		int32 Di = -1; const ARDWildChunk* Dc = bWild && bWildHouseInsides ? WildDoorNear(From, 190.f, Di) : nullptr;
 		const ARDTownsfolk* Wf = WildFolkForF(From);
 		if (Dc && (!Wf || FVector::Dist2D(Dc->Doors[Di].At, From) < FVector::Dist2D(Wf->GetActorLocation(), From))) return WildDoorDescribe(From);
+		if (Wf && Wf->IsSleeping()) return FString::Printf(TEXT("%s (asleep)"), *RDTTheTitle(Wf->Title, false));          // (the list of 2026-11-16)
 		if (Wf) return FString::Printf(TEXT("talk to %s"), *RDTTheTitle(Wf->Title, false));
 	}
 	// (someone near: talk)
@@ -1421,6 +1425,12 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 	}
 	if (ARDTownsfolk* Wf = WildFolkForF(From))
 	{
+		// (the list of 2026-11-16's seventh phase: a farm's sleeper is left asleep)
+		if (Wf->IsSleeping())
+		{
+			if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("%s is asleep"), *RDTTheTitle(Wf->Title, true)));
+			return TEXT("asleep");
+		}
 		Wf->FaceToward(From, 8.f);
 		// (the list of 2026-11-12: a structure's prisoner freed, a quest's person spoken to)
 		if (const FString Did = WildSiteTalk(Wf); !Did.IsEmpty()) return Did;

@@ -467,7 +467,8 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 		if (const FRDPiece* Bp = Piece(TEXT("Bed")))
 		{
 			BedY = Mx.Y - Bp->Size.Y * 0.5f - 20.f;
-			PutAt(TEXT("Bed"), Mn.X + Bp->Size.X * 0.5f + 6.f, BedY, 0.f);
+			if (PutAt(TEXT("Bed"), Mn.X + Bp->Size.X * 0.5f + 6.f, BedY, 0.f)) Rec.Beds14.Add(FTransform(FRotator(0.f, Yaw, 0.f), At(Mn.X + Bp->Size.X * 0.5f + 6.f, BedY, 2.f)));
+			Rec.HouseFloor14 = Base + 2.f;
 			if (const FRDPiece* Cp = Piece(TEXT("Chest"))) PutBox(TEXT("Chest"), Mn.X + Bp->Size.X + 14.f + Cp->Size.X * 0.5f, BedY, 0.f, TEXT("chest"));
 		}
 		const float TableY = Mn.Y + (Mx.Y - Mn.Y) * 0.3f;
@@ -503,7 +504,7 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 						if (!WildFootLevel14(L, Y2, Od * 0.5f, Ow * 0.5f, 25.f, Zl, Zh)) continue;
 						L.Z = (Zl + Zh) * 0.5f;
 					}
-					if (!WildSpotFree14(C, FVector(L.X, L.Y, Zl + 15.f + Oh * 0.5f), Y2, FVector(Od * 0.5f - 3.f, Ow * 0.5f - 3.f, Oh * 0.5f - 12.f))) continue;
+					if (!WildSpotFree14(C, FVector(L.X, L.Y, Zl + 30.f + (Oh - 40.f) * 0.5f), Y2, FVector(Od * 0.5f - 3.f, Ow * 0.5f - 3.f, (Oh - 40.f) * 0.5f))) continue;
 					UInstancedStaticMeshComponent* Oc = WildFarmInstance(C, Rec, Op->Mesh, Op->Adjust * FTransform(FRotator(0.f, Y2, 0.f), L, FVector(Os)), Op->bCollision, Op->Material);
 					if (!Oc) continue;
 					// (outside, no grass through it nor where she stands (PR #82's review: the house's clear stops at its walls))
@@ -514,7 +515,32 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 					break;
 				}
 				if (!bOven) UE_LOG(LogRDWildFarm11, Warning, TEXT("RDWILDTABLES14 no room for a farmhouse's oven (farm %d)"), Rec.Id);
-			}
+					}
+				// (the list of 2026-11-16's seventh phase: "the NPCs at farms should sleep at night": a bed for each of the family where the room
+				// has one free (after everything else of the house, an overlap test), its head to a wall, its foot to the room)
+				if (bTables14)
+					if (const FRDPiece* Bp = Piece(TEXT("Bed")); Bp && Bp->Mesh)
+					{
+						const float Bx = (float)Bp->Size.X, By = (float)Bp->Size.Y, Bz = (float)Bp->Size.Z;
+						struct FBd { float X, Y, YawL; };
+						// (every place along the four walls, 30 cm apart, its head to the wall: the back wall's first, then the sides', then the door's
+						// wall away from the door (the first run's six places left 10 of the 60 designs a bed short))
+						TArray<FBd> Tries;
+						for (float Y = Mx.Y - By * 0.5f - 10.f; Y >= Mn.Y + By * 0.5f + 10.f; Y -= 30.f) Tries.Add({ float(Mn.X + Bx * 0.5f + 6.f), Y, 0.f });
+						for (float X = Mn.X + By * 0.5f + 10.f; X <= Mx.X - By * 0.5f - 10.f; X += 30.f) { Tries.Add({ X, float(Mx.Y - Bx * 0.5f - 6.f), -90.f }); Tries.Add({ X, float(Mn.Y + Bx * 0.5f + 6.f), 90.f }); }
+						for (float Y = Mx.Y - By * 0.5f - 10.f; Y >= Mn.Y + By * 0.5f + 10.f; Y -= 30.f) Tries.Add({ float(Mx.X - Bx * 0.5f - 6.f), Y, 180.f });
+						for (const FBd& T : Tries)
+						{
+							if (Rec.Beds14.Num() >= 4) break;
+							if (T.X > Mx.X - Bx - 60.f && FMath::Abs(T.Y - DoorY) < By * 0.5f + 170.f) continue;          // (not in the doorway's way or its leaf's swing)
+							const float Y2 = Yaw + T.YawL;
+							const FVector L = At(T.X, T.Y, 2.f);
+							// (the box from 30 cm over the floor's line: a stone floor stands thicker than the timber's, and a box from 15 cm met it in six of the 60 designs)
+							if (!WildFarmInstance(C, Rec, Bp->Mesh, Bp->Adjust * FTransform(FRotator(0.f, Y2, 0.f), L), Bp->bCollision, Bp->Material)) continue;
+							Rec.Beds14.Add(FTransform(FRotator(0.f, Y2, 0.f), L));
+							++Furniture;
+						}
+					}
 		Lamp(30.f);
 	}
 	else
@@ -753,6 +779,7 @@ void ARDDungeonGenerator::SpawnWildFarm11(ARDWildChunk* C, const FRDWildPlace& P
 	};
 	// ---- the parts, in the design's order
 	FVector2D PenGate = FVector2D(1e9f, 1e9f), WellAt = PenGate, HouseDoor = PenGate, BarnDoor = PenGate;
+	FVector HouseDoorPt = FVector::ZeroVector, HouseInPt = FVector::ZeroVector, HouseOut14 = FVector::ForwardVector;
 	float PenGateYaw = 0.f;
 	for (int32 Pi = 0; Pi < Dz.Parts.Num(); ++Pi)
 	{
@@ -765,7 +792,15 @@ void ARDDungeonGenerator::SpawnWildFarm11(ARDWildChunk* C, const FRDWildPlace& P
 			const float Hx = FMath::Clamp(Pt.Nx, 2, 6) * TileSize * 0.5f / 100.f, Dy = RDWF11DoorY(Pt.Kind, Pt.Ny, TileSize) / 100.f;
 			const FVector2D Fw(FMath::Cos(FMath::DegreesToRadians(Pt.Yaw)), FMath::Sin(FMath::DegreesToRadians(Pt.Yaw))), Sd(-Fw.Y, Fw.X);
 			const FVector2D Door = FVector2D(Pt.U, Pt.V) + Fw * (Hx + 1.8f) + Sd * Dy;
-			if (K == TEXT("house") && HouseDoor.X > 1e8f) HouseDoor = Door;
+			if (K == TEXT("house") && HouseDoor.X > 1e8f)
+			{
+				HouseDoor = Door;
+				// (outside its door on the ground, and inside it on the floor (2 m in), for the family's evening)
+				const FVector2D Dw = RDWF11At(P, Door.X, Door.Y), Iw = RDWF11At(P, Door.X - Fw.X * 3.8f, Door.Y - Fw.Y * 3.8f);
+				HouseDoorPt = FVector(Dw.X * 100.0, Dw.Y * 100.0, WildGroundZ(FVector(Dw.X * 100.0, Dw.Y * 100.0, 0.0)));
+				HouseInPt = FVector(Iw.X * 100.0, Iw.Y * 100.0, Rec.HouseFloor14);
+				HouseOut14 = FVector(Fw.X, Fw.Y, 0.f);
+			}
 			if (K == TEXT("barn") && BarnDoor.X > 1e8f) BarnDoor = Door;
 		}
 		else if (K == TEXT("pen"))
@@ -910,6 +945,8 @@ void ARDDungeonGenerator::SpawnWildFarm11(ARDWildChunk* C, const FRDWildPlace& P
 		if (!T) continue;
 		T->Init(this, nullptr, D, At, Wh.Yaw, 0.f, HashCombine((uint32)P.Id, (uint32)K * 7919u));
 		T->SetTitle(FString::Printf(TEXT("%s of %s"), Wh.Role, *P.Name));
+		// (the list of 2026-11-16's seventh phase: home in the farmhouse at night, its own bed if there is one)
+		if (bTables14 && HouseDoor.X < 1e8f) SetWildFarmFolkHome14(T, Rec, HouseDoorPt, HouseInPt, Rec.Folk.Num());
 		if (Wh.Work) T->SetStandWork(Wh.Work, Wh.Prop ? FName(Wh.Prop) : NAME_None);
 		for (const FString& L : WildFarmLines)
 		{

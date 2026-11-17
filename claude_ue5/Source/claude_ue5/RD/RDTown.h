@@ -133,6 +133,11 @@ public:
 	bool HasLantern() const { return bLanternOn; }
 	/** the list of 2026-11-10: its bed (the top of it, its yaw: its foot toward the yaw's way), lain in while asleep */
 	void SetBed(const FVector& Top, float Yaw) { BedAt = Top; BedYaw = Yaw; bHasBed = true; }
+	/** the list of 2026-11-16's seventh phase (RDList14f.cpp): a farmstead's family member's home in the wilds: outside its farmhouse's
+	 *  door (DoorOut, on the ground) and its own place inside (In, on the floor): home at evening (it walks to the door and goes in),
+	 *  asleep at night (in its bed if it has one), out to its work in the morning */
+	void SetWildFarmHome(const FVector& DoorOut, const FVector& In) { WildDoorOut = DoorOut; WildIn = In; bWildFarm = true; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool IsWildIndoors() const { return bWildIndoors; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") bool IsInBed() const { return bInBed; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") bool HasBed() const { return bHasBed; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") FVector GetBedAt() const { return BedAt; }
@@ -211,6 +216,8 @@ private:
 	/** the list of 2026-11-10: a walk home stopped on the way (another at the door, a door) is tried again every 3 s, the
 	 *  fourth time it is put inside */
 	float HomeRetryAt = 0.f; int32 HomeFails = 0;
+	FVector WildDoorOut = FVector::ZeroVector, WildIn = FVector::ZeroVector; bool bWildFarm = false, bWildIndoors = false;
+	bool TickWildFarmDay(float Now);
 	FVector BedAt = FVector::ZeroVector, PreBed = FVector::ZeroVector; float BedYaw = 0.f; bool bHasBed = false, bInBed = false;
 	/** its lines' pool (made the first time) and the bag drawn from without a repeat until it is empty */
 	TArray<FString> LinePool; TArray<int32> LineBag; bool bPoolMade = false;

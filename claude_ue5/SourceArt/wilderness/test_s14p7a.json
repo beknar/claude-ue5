@@ -1,0 +1,329 @@
+{
+ "tag": "s14p7a",
+ "plan": [
+  "sleep14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "sleep14",
+   "ok": true,
+   "farmsteads": 48,
+   "folk": 3,
+   "day_places": [
+    [
+     18297,
+     -57065
+    ],
+    [
+     16020,
+     -56572
+    ],
+    [
+     14344,
+     -59197
+    ]
+   ],
+   "has_bed": 3,
+   "home_s": 23.3,
+   "indoors_at_evening": 3,
+   "night": [
+    {
+     "title": "farmer of Odric's Croft",
+     "asleep": true,
+     "inbed": true,
+     "indoors": true,
+     "hasbed": true,
+     "clip": "AS_Town_Sleep"
+    },
+    {
+     "title": "farmwife of Odric's Croft",
+     "asleep": true,
+     "inbed": true,
+     "indoors": true,
+     "hasbed": true,
+     "clip": "AS_Town_Sleep"
+    },
+    {
+     "title": "farmhand of Odric's Croft",
+     "asleep": true,
+     "inbed": true,
+     "indoors": true,
+     "hasbed": true,
+     "clip": "AS_Town_Sleep"
+    }
+   ],
+   "sleeper": {
+    "title": "farmer of Odric's Croft",
+    "hips_over_top_cm": 29.6,
+    "hips_from_bed_cm": 0.4,
+    "clip": "AS_Town_Sleep",
+    "plays": true,
+    "says": "the farmwife of Odric's Croft (asleep)",
+    "f": "asleep",
+    "still_in_bed": true
+   },
+   "morning": {
+    "asleep": 0,
+    "inbed": 0,
+    "indoors": 0,
+    "off_post_cm": [
+     0,
+     0,
+     0
+    ],
+    "s": 4.1
+   },
+   "designs": 60,
+   "design_beds": {
+    "0": [
+     3,
+     3
+    ],
+    "1": [
+     4,
+     4
+    ],
+    "2": [
+     2,
+     2
+    ],
+    "3": [
+     4,
+     4
+    ],
+    "4": [
+     3,
+     3
+    ],
+    "5": [
+     3,
+     3
+    ],
+    "6": [
+     3,
+     3
+    ],
+    "7": [
+     3,
+     3
+    ],
+    "8": [
+     2,
+     2
+    ],
+    "9": [
+     2,
+     2
+    ],
+    "10": [
+     2,
+     2
+    ],
+    "11": [
+     3,
+     3
+    ],
+    "12": [
+     3,
+     3
+    ],
+    "13": [
+     4,
+     4
+    ],
+    "14": [
+     4,
+     4
+    ],
+    "15": [
+     2,
+     2
+    ],
+    "16": [
+     4,
+     4
+    ],
+    "17": [
+     3,
+     3
+    ],
+    "18": [
+     3,
+     3
+    ],
+    "19": [
+     3,
+     3
+    ],
+    "20": [
+     3,
+     3
+    ],
+    "21": [
+     4,
+     4
+    ],
+    "22": [
+     4,
+     4
+    ],
+    "23": [
+     3,
+     3
+    ],
+    "24": [
+     3,
+     3
+    ],
+    "25": [
+     4,
+     4
+    ],
+    "26": [
+     3,
+     3
+    ],
+    "27": [
+     4,
+     4
+    ],
+    "28": [
+     4,
+     4
+    ],
+    "29": [
+     3,
+     3
+    ],
+    "30": [
+     3,
+     3
+    ],
+    "31": [
+     4,
+     4
+    ],
+    "32": [
+     3,
+     3
+    ],
+    "33": [
+     3,
+     3
+    ],
+    "34": [
+     3,
+     3
+    ],
+    "35": [
+     3,
+     3
+    ],
+    "36": [
+     3,
+     3
+    ],
+    "37": [
+     3,
+     3
+    ],
+    "38": [
+     3,
+     3
+    ],
+    "39": [
+     3,
+     3
+    ],
+    "40": [
+     3,
+     3
+    ],
+    "41": [
+     2,
+     2
+    ],
+    "42": [
+     3,
+     3
+    ],
+    "43": [
+     3,
+     3
+    ],
+    "44": [
+     3,
+     3
+    ],
+    "45": [
+     2,
+     2
+    ],
+    "46": [
+     3,
+     3
+    ],
+    "47": [
+     4,
+     4
+    ],
+    "48": [
+     2,
+     2
+    ],
+    "49": [
+     3,
+     3
+    ],
+    "50": [
+     4,
+     4
+    ],
+    "51": [
+     4,
+     4
+    ],
+    "52": [
+     4,
+     4
+    ],
+    "53": [
+     3,
+     3
+    ],
+    "54": [
+     3,
+     3
+    ],
+    "55": [
+     3,
+     3
+    ],
+    "56": [
+     4,
+     4
+    ],
+    "57": [
+     3,
+     3
+    ],
+    "58": [
+     3,
+     3
+    ],
+    "59": [
+     3,
+     3
+    ]
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_s14p7a_sleep14_bed.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

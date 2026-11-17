@@ -2508,6 +2508,9 @@ public:
 		int32 Design = -1, Buildings = 0, Boxes = 0;
 		TArray<TWeakObjectPtr<UActorComponent>> Comps;
 		int32 Door0 = 0, Door1 = 0, House0 = 0, House1 = 0, Clear0 = 0, Clear1 = 0;
+		/** the list of 2026-11-16's seventh phase: its farmhouse's beds (each bed's middle on the floor and its yaw: the foot +X) and the
+		 *  house's floor height */
+		TArray<FTransform> Beds14; float HouseFloor14 = 0.f;
 		/** each animal's pen's yaw (a barn's stall turns with its barn; AnimalPens' half sizes are along and across it) */
 		TArray<float> AnimalPenYaws;
 		/** its pieces as instances, one component a mesh, material and collision (PR #49's review: a component a piece was several
@@ -2517,6 +2520,8 @@ public:
 	/** one piece of a farm as an instance of its batch (world transform) */
 	class UInstancedStaticMeshComponent* WildFarmInstance(ARDWildChunk* C, FRDWildFarmRec& Rec, UStaticMesh* M, const FTransform& World, bool bCollide, UMaterialInterface* Mat, bool bUnseen = false);
 	TArray<FRDWildFarmRec> WildFarms;
+	/** the list of 2026-11-16's seventh phase (RDList14f.cpp): a farm's family member given its home in the farmhouse and its own bed (the K-th) if there is one */
+	void SetWildFarmFolkHome14(class ARDTownsfolk* T, const FRDWildFarmRec& Rec, const FVector& DoorOut, const FVector& HouseIn, int32 K);
 	/** the list of 2026-11-11's fourth phase (RD/RDWildFarm11.cpp, 919 farms): the farmsteads' designs (SourceArt/wilderness/
 	 *  farm_designs.json), one picked by each farmstead's id; empty: the old fixed layout */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Farm11") TArray<FRDFarmDesign> FarmDesigns;
