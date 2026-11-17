@@ -1,0 +1,16 @@
+{
+  "comment": "The list of 2026-11-16's tenth phase (932): storms by strength and lightning on brokenspire. strengths: the weights of light, moderate, strong, violent for a storm and for rain (rain, snow, whiteout, dust), the share the strong and violent keep in dry land, and rain and wind times scale by strength (1 at most: the drops, clouds and rain loop are drawn up to the look's own); lightning: strikes a minute by strength, a strike's share of her hit points and its blow on anyone else (grown with the wilds' tier), the share aimed at someone in the open within near_m of her, how far strikes fall, the radius a strike hurts in, the sky light's flash. sets: the thunder (rdc_sound_prep.py's manifest: the Quest Game pack, the one strike-with-thunder file cut at its two strikes' cracks (1.6 s and 11.6 s: a near strike's thunder begins with its crack; cut at the strikes' onsets, 1.1 s and 10.1 s, the second file had 1.6 s of rumble before its crack and the recorded delay read 1.9 s late), and the two distant rumbles cut at their swell (0.85 s and 1.0 s: from their start the swell sat under the game's other sounds and the 700 m thunder was heard 1 s late) (bass: 3 % and 19 % of their power over 2 kHz at their peaks); the thunder claps are designed stone impacts, not used). Converted into SourceArt/wilderness/audio_storm/ (ignored), imported by 932 sounds.",
+  "maps": ["brokenspire"],
+  "strengths": {"storm": [0, 0.45, 0.35, 0.2], "rain": [0.4, 0.35, 0.18, 0.07], "dry_strong_share": 0.5, "scale": [0.55, 0.7, 0.85, 1.0]},
+  "lightning": {"per_minute": [0, 2, 5, 10], "hurt_share": [0, 0.15, 0.25, 0.35], "damage": [0, 40, 70, 110], "near_share": 0.2, "near_m": 60,
+                "far_m": 1500, "radius_m": 4, "thunder_near_m": 600, "sky_boost": 5},
+  "root": "I:/game assets",
+  "packs": {"quest": "humble bundle - 2d game creation mega bundle/gdm-quest-game/Quest_Game_16bit/Quest_Game_16bit"},
+  "sets": {
+    "Weather.Thunder": {"from": [["quest", "Bonus Long Format/Quest_Game_Ambience_Nature_Lightning_Strike_with_Thunder\\.wav$", 1.6],
+                                 ["quest", "Bonus Long Format/Quest_Game_Ambience_Nature_Lightning_Strike_with_Thunder\\.wav$", 11.6]],
+                        "max_len": 8.0, "level": -12, "volume": 1.0, "pitch_var": 0.04, "flat": true},
+    "Weather.ThunderFar": {"from": [["quest", "Bonus Long Format/Quest_Game_Nature_Distant_Thunder_Rumble_Bass_1\\.wav$", 0.85], ["quest", "Bonus Long Format/Quest_Game_Nature_Distant_Thunder_Rumble_Bass_2\\.wav$", 1.0]],
+                           "max_len": 9.0, "level": -17, "volume": 0.9, "pitch_var": 0.05, "flat": true}
+  }
+}

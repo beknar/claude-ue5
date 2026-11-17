@@ -162,11 +162,21 @@ void ARDDungeonGenerator::SetWeather(int32 Kind, bool bAtOnce)
 	Weather = FMath::Clamp(Kind, 0, RDWeatherCloudless);
 	const FRDWeatherLook& Lk = RDWeatherLooks[Weather];
 	SkyCoverWant = Lk.Cover; SkyRainWant = Lk.Rain; SkyWindWant = Lk.Wind; SkyFogWant = Lk.Fog; SkyFogTintWant = Lk.Tint;
+	// (the list of 2026-11-16's tenth phase: a strength drawn for it by the land, as the turn draws one (PR #88's review: it kept the last
+	// weather's); rd.Weather's strength word sets one after)
+	WeatherStrength14 = PickStrength14(Weather, HashCombine(HashCombine((uint32)SessionSeed ^ 0x5EA7u, (uint32)(WeatherChanges + 1) * 2654435761u), 0x57A0u), SkyDryLand);
+	ApplyStrength14();
 	if (bAtOnce) { SkyCover = SkyCoverWant; SkyRain = SkyRainWant; SkyWind = SkyWindWant; SkyFog = SkyFogWant; SkyFogTint = SkyFogTintWant; }
 	if (const UWorld* W = GetWorld()) WeatherUntil = W->GetTimeSeconds() + WeatherSeconds.Y;
 	++WeatherChanges;
 	ApplySky7();
 	UE_LOG(LogRDSky, Log, TEXT("RDSKY the weather: %s%s"), *WeatherName(Weather), bAtOnce ? TEXT(" (at once)") : TEXT(""));
+}
+
+void ARDDungeonGenerator::WeatherLookOf(int32 W, float& Cover, float& Rain, float& Wind, float& Fog, FLinearColor& Tint)
+{
+	const FRDWeatherLook& Lk = RDWeatherLooks[FMath::Clamp(W, 0, RDWeatherCloudless)];
+	Cover = Lk.Cover; Rain = Lk.Rain; Wind = Lk.Wind; Fog = Lk.Fog; Tint = Lk.Tint;
 }
 
 void ARDDungeonGenerator::WeatherWeights(bool bDry, bool bWhiteLand, bool bDustLand, bool bMoorLand, float* Wt) const
@@ -245,8 +255,11 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 		Weather = PickWeather(H, Weather, bDry, bWhiteLand, bDustLand, bMoorLand);
 		const FRDWeatherLook& Lk = RDWeatherLooks[Weather];
 		SkyCoverWant = Lk.Cover; SkyRainWant = Lk.Rain; SkyWindWant = Lk.Wind; SkyFogWant = Lk.Fog; SkyFogTintWant = Lk.Tint;
+		// (the list of 2026-11-16's tenth phase: its strength drawn with it, from the same hash, by the land (dry or not))
+		WeatherStrength14 = PickStrength14(Weather, HashCombine(H, 0x57A0u), bDry);
+		ApplyStrength14();
 		WeatherUntil = Now + FMath::Lerp(WeatherSeconds.X, WeatherSeconds.Y, (H % 1000u) / 999.f);
-		UE_LOG(LogRDSky, Log, TEXT("RDSKY the weather turns %s (for %.0f s)%s"), *WeatherName(Weather), WeatherUntil - Now, bSkyCold ? TEXT(", cold") : TEXT(""));
+		UE_LOG(LogRDSky, Log, TEXT("RDSKY the weather turns %s %s (for %.0f s)%s"), *StrengthName14(WeatherStrength14), *WeatherName(Weather), WeatherUntil - Now, bSkyCold ? TEXT(", cold") : TEXT(""));
 	}
 	// ---- easing toward it: the clouds over a minute and a half, the rain in twenty seconds
 	SkyCover = FMath::FInterpConstantTo(SkyCover, SkyCoverWant, Dt, 1.f / 90.f);
@@ -351,6 +364,7 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 	Fx(WeatherWind, WindFx, SkyWind > 0.42f && !bSkySnowing && !bInside, L + FVector(0, 0, 150.f));
 	SkyApplyT += Dt;
 	if (SkyApplyT >= 0.25f) { SkyApplyT = 0.f; ApplySky7(); }
+	TickLightning14(Dt);          // (the list of 2026-11-16's tenth phase: a storm's lightning and thunder)
 }
 
 void ARDDungeonGenerator::ApplySky7()

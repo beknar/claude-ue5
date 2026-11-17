@@ -136,7 +136,8 @@ void ARDDungeonGenerator::ApplyDayNight()
 		DayMoon->SetWorldRotation(RDTDLightFrom(FMath::Max(Me, -10.f), Azim + 180.f));
 		DayMoon->SetIntensity(MoonLux * RDTDSmooth(-2.f, 8.f, Me) * FMath::Lerp(1.f, 0.35f, Cv * Cv));
 	}
-	if (DaySky) DaySky->SetIntensity(DaySkyLight * FMath::Lerp(NightSkyShare, 1.f, DayLight) * FMath::Lerp(1.f, 0.7f, Cv));
+	// (the list of 2026-11-16's tenth phase: a lightning strike's flash on top)
+	if (DaySky) DaySky->SetIntensity(DaySkyLight * FMath::Lerp(NightSkyShare, 1.f, DayLight) * FMath::Lerp(1.f, 0.7f, Cv) * (1.f + LightningSkyBoost14 * LightningFlash14));
 	if (DayFog)
 	{
 		// (in the wilds the fog by the low sun dims and warms toward FogLowSunShare of the sun's low colour, as the sky by the

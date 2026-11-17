@@ -100,6 +100,8 @@ void ARDDungeonGenerator::OnFarmAnimalKilled14(ARDTownAnimal* A)
 	if (!A || !TownAnimals.IsValidIndex(A->Def)) return;
 	const FRDTownAnimalDef& D = TownAnimals[A->Def];
 	++FarmAnimalsKilled14;
+	// (killed by no doing of hers (lightning: bWildPredatorKill, as the wild animals'): not kept, no things)
+	if (bWildPredatorKill) { LastFarmAnimalDrops14.Reset(); return; }
 	if (URDGameInstance* GI = URDGameInstance::Of(this); GI && A->FarmKey14 >= 0) GI->WildKilled.AddUnique(A->FarmKey14);
 	// (its things: each "Item|min|max|chance", drawn from a hash of its key (no stream of the play's): the same farm's same animal
 	// leaves the same)
