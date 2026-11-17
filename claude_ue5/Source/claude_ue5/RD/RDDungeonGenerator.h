@@ -2737,6 +2737,13 @@ public:
 	 *  she has read one (KnownRecipes, kept for the game); recipes are found in the dungeons' chests and shelves by tier, in the wilds'
 	 *  ruins' and structures' chests ("@recipe" in their loot: one of the box's tier), and sold by the traders */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bRecipes14 = false;
+	/** the chance a dungeon's container and a library's shelf hold a recipe besides (of its tier or below; a stream of its own) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float RecipeLootChance14 = 0.04f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float RecipeShelfChance14 = 0.12f;
+	/** where a station's things are made, in words ("an oven", "an alchemist's table", ..., "an anvil") */
+	static FString StationPlace14(const FName& Station);
+	/** tests: a wild container's loot line by its key (empty if none is laid) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") FString GetWildBoxLoot14(int64 Key) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool IsLockedRecipe14(FName Item) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool KnowsRecipe14(FName Item) const;
 	bool LearnRecipe14(FName Item);

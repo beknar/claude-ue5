@@ -6114,7 +6114,7 @@ def step_recipes14():
         d0 = c.get_damage_of(0); res["might_drunk"] = c.use_item("Elixir of Might"); res["damage"] = [round(d0, 2), round(c.get_damage_of(0), 2)]
         # ---- the census of the tier-2 sets' containers
         g.debug_open_tiers(2, False); yield from rwait(0.3)
-        n_rec = 0; n_all = 0; got = set()
+        n_rec = 0; n_all = 0; got = set(); made = []
         for s_ in (I2(1, 0), I2(-1, 0), I2(0, 1), I2(0, -1)):
             if not g.is_section_generated(s_): g.generate_section_now(s_); yield from built(s_)
             S = g.get_section(s_)
@@ -6123,7 +6123,9 @@ def step_recipes14():
                 for n_ in g.loot_list_of(s_, i_):
                     n_all += 1
                     if str(n_).endswith(" Recipe"): n_rec += 1; got.add(str(n_))
-        res["census"] = {"things": n_all, "recipes": n_rec, "kinds": sorted(got)}
+                    # (what only a found recipe makes is never found made (PR #83's review))
+                    if g.is_locked_recipe14(str(n_)): made.append(str(n_))
+        res["census"] = {"things": n_all, "recipes": n_rec, "kinds": sorted(got), "locked_found_made": made[:6]}
     finally:
         try: c.set_crafting_open(False)
         except Exception: pass
@@ -6140,7 +6142,8 @@ def step_recipes14():
         res["blow_expected_with"] = round(20.0 * max(0.05, 1.0 - a_ - 0.25), 2)
         ok = ok and abs(res["blow_with"] - res["blow_expected_with"]) <= 0.6
     else: ok = False
-    ok = bool(ok and res.get("damage") and res["damage"][1] >= res["damage"][0] * 1.24 and res.get("census", {}).get("recipes", 0) >= 1)
+    ok = bool(ok and res.get("damage") and res["damage"][1] >= res["damage"][0] * 1.24 and res.get("census", {}).get("recipes", 0) >= 1
+              and not res["census"].get("locked_found_made"))
     step_result("recipes14", ok, **res)
 
 

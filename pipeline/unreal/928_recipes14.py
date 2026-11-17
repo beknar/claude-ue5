@@ -67,8 +67,8 @@ def items_fn(g):
             if k in X: it.set_editor_property(k, float(X[k]))
         if X.get("spell"): it.set_editor_property("spell", unreal.Name(X["spell"]))
         it.set_editor_property("icon", unreal.Name(X["icon"])); it.set_editor_property("tiers", band(X["tier"]))
-        # (rarer than the plain ones in a container's draw: a quarter of its like's weight)
-        it.set_editor_property("weight", float(like.get_editor_property("weight")) * 0.25)
+        # (never found made: only its recipe makes it (PR #83's review); the containers' and shelves' draws pass it by)
+        it.set_editor_property("weight", 0.0)
         if X.get("buff"):
             it.set_editor_property("buff_kind", unreal.Name(X["buff"][0])); it.set_editor_property("buff_amount", float(X["buff"][1])); it.set_editor_property("buff_seconds", float(X["buff"][2]))
         items.append(it)
@@ -83,6 +83,7 @@ def items_fn(g):
         r = unreal.RDItemDef()
         for k in ("found_max",): r.set_editor_property(k, like.get_editor_property(k))
         r.set_editor_property("name", X["name"] + RI["suffix"]); r.set_editor_property("kind", unreal.RDItemKind.RECIPE)
+        # (its weight among the recipes when one is drawn: the containers draw recipes apart, on a stream of their own)
         r.set_editor_property("amount", 0.0); r.set_editor_property("seconds", 0.0); r.set_editor_property("weight", float(RI["weight"]))
         where = st if st else ("Librarian" if X["kind"] == "SCROLL" else "Alchemist")
         r.set_editor_property("icon", unreal.Name(RI["icons"][where])); r.set_editor_property("tiers", band(X["tier"]))

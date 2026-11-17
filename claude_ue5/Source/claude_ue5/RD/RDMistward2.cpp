@@ -743,7 +743,7 @@ void URDCombatComponent::SlashHit(const FRDSlashDef& S, ARDMonster* Mo, float Dm
 	};
 	auto Near = [&](const FVector& C, float R, ARDMonster* Not) { TArray<ARDMonster*> Out; for (ARDMonster* M : Generator->GetMonsters()) if (IsValid(M) && M != Not && !M->IsDead() && !M->IsAlly() && FVector::Dist2D(M->GetActorLocation(), C) <= R && FMath::Abs(M->GetActorLocation().Z - C.Z) < 300.f) Out.Add(M); return Out; };
 	Impact(At);
-	if (bPrimary) Hurt(Mo, S.Bonus * WeakMul() * (1.f + GetBlessDamage()), At);
+	if (bPrimary) Hurt(Mo, S.Bonus * WeakMul() * (1.f + GetBlessDamage()) * (1.f + GetMightBuff14()), At);          // (and an elixir's or meal's might: PR #83's review)
 	ERDSlashEffect E = S.Effect;
 	float Amount = S.Amount, Secs = S.Seconds;
 	// (prismatic: one of four at random, by a hash of her hits; each with its own tier-1 numbers)
@@ -1051,7 +1051,7 @@ static TArray<FName> RDM2TierItems(const ARDDungeonGenerator* G, int32 Tier, uin
 	TArray<FName> Pool;
 	for (const FRDItemDef& It : G->Items)
 		if (It.Weight > 0.f && G->ItemOfTier(It, Tier) && It.Kind != ERDItemKind::Slash && It.Kind != ERDItemKind::Key && It.Kind != ERDItemKind::Teleport
-			&& It.Kind != ERDItemKind::Component && It.Kind != ERDItemKind::Tome) Pool.Add(It.Name);
+			&& It.Kind != ERDItemKind::Component && It.Kind != ERDItemKind::Tome && It.Kind != ERDItemKind::Recipe) Pool.Add(It.Name);          // (recipes: the list of 2026-11-16, drawn apart)
 	// (distinct things: a draw that repeats one is drawn again (a gauntlet's chest held two of its three once))
 	TArray<FName> Out;
 	for (int32 K = 0; Out.Num() < FMath::Min(Count, Pool.Num()) && K < Count * 16; ++K) Out.AddUnique(Pool[HashCombine(Salt, (uint32)K * 7919u + 13u) % (uint32)Pool.Num()]);

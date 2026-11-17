@@ -331,7 +331,7 @@ void ARDHUD::DrawCombat(float Sc)
 				                : E.Kind == ERDItemKind::Armour ? FString::Printf(TEXT("RESIST +%.0f%%  %.0fs"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
 				                : E.Kind == ERDItemKind::Weapon ? FString::Printf(TEXT("MIGHT +%.0f%%  %.0fs"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
 				                         : FString::Printf(TEXT("REGEN +%.1f/s  %.0fs"), E.Amount * Cb->GetMaxHealth(), FMath::CeilToFloat(E.Left));
-				const FName Ic = bSpeed ? FName(TEXT("chip_speed")) : FName(TEXT("chip_regen"));
+				const FName Ic = bSpeed ? FName(TEXT("chip_speed")) : E.Kind == ERDItemKind::Armour ? FName(TEXT("elixir_ironhide")) : E.Kind == ERDItemKind::Weapon ? FName(TEXT("elixir_might")) : FName(TEXT("chip_regen"));
 				float Tw, Th; UI.TextSize(T, Tw, Th, Small, Sc, ERDType::Label);
 				const float Iw = UI.Has(Ic) ? Th + 14.f * Sc : 0.f;           // (its picture before the text)
 				const float Up = Ext * 1.6f;
@@ -1674,8 +1674,7 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 		const FRDRecipe* Rc = Gen->Recipes.FindByPredicate([&It](const FRDRecipe& R) { return R.Item == It.Teaches; });
 		const FName St = Rc ? Gen->RecipeStation(*Rc) : NAME_None;
 		TArray<FString> Ps; if (Rc) for (const FRDRecipePart& Pt : Rc->Parts) Ps.Add(FString::Printf(TEXT("%d %s"), Pt.Count, *Pt.Label));
-		FString S = FString::Printf(TEXT("A recipe: read it (use it) to learn to make the %s at %s"), *It.Teaches.ToString().ToLower(), St == TEXT("Oven") ? TEXT("an oven")
-			: St == TEXT("Alchemist") ? TEXT("an alchemist's table") : St == TEXT("Librarian") ? TEXT("a librarian's table") : St == TEXT("Forge") ? TEXT("a forge") : TEXT("an anvil"));
+		FString S = FString::Printf(TEXT("A recipe: read it (use it) to learn to make the %s at %s"), *It.Teaches.ToString().ToLower(), *ARDDungeonGenerator::StationPlace14(St));
 		if (Ps.Num() > 0) S += TEXT(" from ") + FString::Join(Ps, TEXT(", "));
 		S += TEXT(".  The recipe is used up.");
 		if (Gen->KnowsRecipe14(It.Teaches)) S += TEXT("  You know it already.");

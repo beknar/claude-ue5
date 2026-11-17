@@ -126,3 +126,17 @@ FString ARDDungeonGenerator::GetWildLootResolved14(const FString& Loot, FVector 
 	ResolveWildLoot14(Lines, At, Key);
 	return FString::Join(Lines, TEXT(";"));
 }
+
+FString ARDDungeonGenerator::StationPlace14(const FName& St)
+{
+	return St == TEXT("Oven") ? FString(TEXT("an oven")) : St == TEXT("Alchemist") ? FString(TEXT("an alchemist's table"))
+	     : St == TEXT("Librarian") ? FString(TEXT("a librarian's table")) : St == TEXT("Forge") ? FString(TEXT("a forge")) : FString(TEXT("an anvil"));
+}
+
+FString ARDDungeonGenerator::GetWildBoxLoot14(int64 Key) const
+{
+	for (const auto& Kv : WildChunks)
+		if (const ARDWildChunk* C = Kv.Value; IsValid(C))
+			for (const ARDWildChunk::FDoor& D : C->Doors) if (D.bBox && D.Key == Key) return D.Loot;
+	return FString();
+}

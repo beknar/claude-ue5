@@ -469,7 +469,7 @@ int32 ARDDungeonGenerator::PriceOf(FName Item) const
 	case ERDItemKind::Torch: Base = 6.f; break;
 	case ERDItemKind::Slash: Base = 100.f; break;
 	case ERDItemKind::Scroll: Base = 25.f; break;
-	case ERDItemKind::Recipe: Base = 90.f; break;          // (the list of 2026-11-16's sixth phase: kept, not used up)
+	case ERDItemKind::Recipe: Base = 90.f; break;          // (the list of 2026-11-16's sixth phase: read once, its price not grown as the used-up things')
 	default: return 0;                   // (teleport rings, keys: not for sale)
 	}
 	return FMath::Max(1, FMath::RoundToInt(Base * RDTierPrice(T) * (RDUsedUp(It.Kind) ? RDUsedUpScale(GetGameTier()) : 1.f)));
@@ -496,7 +496,14 @@ TArray<FName> ARDDungeonGenerator::TownStock() const
 			Out.Add(It.Name);
 		}
 		// (a recipe of the tiers she has opened that she does not know yet)
-		else if (It.Kind == ERDItemKind::Recipe && bRecipes14 && !KnowsRecipe14(It.Teaches)) Out.Add(It.Name);
+		// (a scroll's recipe only for a hero who reads that scroll (PR #83's review))
+		else if (It.Kind == ERDItemKind::Recipe && bRecipes14 && !KnowsRecipe14(It.Teaches))
+		{
+			const int32 Tt = FindItem(It.Teaches);
+			const int32 Si = Tt >= 0 && Items[Tt].Kind == ERDItemKind::Scroll ? FindSpell(Items[Tt].Spell) : -1;
+			if (Tt >= 0 && Items[Tt].Kind == ERDItemKind::Scroll && (Si < 0 || !HeroReadsScroll(Spells[Si].Type))) continue;
+			Out.Add(It.Name);
+		}
 	}
 	return Out;
 }

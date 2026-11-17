@@ -136,28 +136,27 @@ TArray<FName> ARDDungeonGenerator::ShelfLootOf(FIntPoint Section, int32 Index) c
 	auto KindOf = [&](const FRDItemDef& It) -> int32
 	{
 		if (!Low(It)) return -1;
+		// (the list of 2026-11-16's sixth phase: what only a found recipe makes is never on a shelf made; recipes are drawn apart, below)
+		if (bRecipes14 && IsLockedRecipe14(It.Name)) return -1;
 		if (It.Kind == ERDItemKind::Scroll) return 0;
 		if (It.Kind == ERDItemKind::Component && Parts.Contains(It.Name)) return 1;
 		if (It.Kind == ERDItemKind::Tome) return 2;
-		if (It.Kind == ERDItemKind::Recipe) return 3;          // (the list of 2026-11-16's sixth phase: a recipe)
 		return -1;
 	};
 	// (a stream of its own for each shelf: what it holds does not depend on the order she searches them in)
 	FRandomStream R((int32)HashCombine(HashCombine((uint32)SessionSeed ^ 0x5E1Fu, GetTypeHash(Section)), GetTypeHash(Index * 131 + 7)));
 	if (R.FRand() >= ShelfLootChance) return Out;
-	float Sum[4] = { 0.f, 0.f, 0.f, 0.f };
+	float Sum[3] = { 0.f, 0.f, 0.f };
 	for (const FRDItemDef& It : Items) if (const int32 Kd = KindOf(It); Kd >= 0) Sum[Kd] += FMath::Max(It.Weight, 0.1f);
-	// (scrolls 40 %, their parts 35 %, a tome 13 %, a recipe 12 % (the list of 2026-11-16: "recipes can be found"); the shares of the
-	// kinds a table has none of go to the others)
-	static const float RDShelfShare[4] = { 0.40f, 0.35f, 0.13f, 0.12f };
-	float Total = 0.f; for (int32 Kd = 0; Kd < 4; ++Kd) if (Sum[Kd] > 0.f) Total += RDShelfShare[Kd];
+	static const float RDShelfShare[3] = { 0.45f, 0.40f, 0.15f };
+	float Total = 0.f; for (int32 Kd = 0; Kd < 3; ++Kd) if (Sum[Kd] > 0.f) Total += RDShelfShare[Kd];
 	if (Total <= 0.f) return Out;
 	const int32 N = R.FRand() < 0.3f ? 2 : 1;
 	for (int32 K = 0; K < N; ++K)
 	{
 		float Uk = R.FRand() * Total; int32 Kd = 0;
-		for (; Kd < 4; ++Kd) { if (Sum[Kd] <= 0.f) continue; Uk -= RDShelfShare[Kd]; if (Uk < 0.f) break; }
-		if (Kd >= 4) for (Kd = 3; Kd > 0 && Sum[Kd] <= 0.f; --Kd) {}
+		for (; Kd < 3; ++Kd) { if (Sum[Kd] <= 0.f) continue; Uk -= RDShelfShare[Kd]; if (Uk < 0.f) break; }
+		if (Kd >= 3) for (Kd = 2; Kd > 0 && Sum[Kd] <= 0.f; --Kd) {}
 		float U = R.FRand() * Sum[Kd];
 		const FRDItemDef* Got = nullptr;
 		for (const FRDItemDef& It : Items) { if (KindOf(It) != Kd) continue; Got = &It; U -= FMath::Max(It.Weight, 0.1f); if (U < 0.f) break; }
@@ -170,6 +169,13 @@ TArray<FName> ARDDungeonGenerator::ShelfLootOf(FIntPoint Section, int32 Index) c
 			continue;
 		}
 		Out.Add(Got->Name);
+	}
+	// (the list of 2026-11-16's sixth phase: a recipe now and then, on a stream of its own (the shelf's draws above unchanged))
+	if (bRecipes14)
+	{
+		FRandomStream Rr((int32)HashCombine(HashCombine((uint32)SessionSeed ^ 0x4EC15u, GetTypeHash(Section)), GetTypeHash(Index * 131 + 7)));
+		if (Rr.FRand() < RecipeShelfChance14)
+			if (const FName Rc = RecipeOfTier14(T, Rr); !Rc.IsNone()) Out.Add(Rc);
 	}
 	return Out;
 }

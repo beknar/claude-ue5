@@ -90,7 +90,7 @@ Potions are made at the alchemist's table and scrolls at the librarian's, no lon
 
 ## Recipes at the store (the list of 2026-11-16, item 4)
 
-The advanced things that only a found recipe makes (the castle's document has them) are not sold; their recipes are, at the store, those of the tiers opened that she does not know (90 gold times its lowest tier's price step: 180 for a tier-2 recipe). Measured (`884 recipes14 -Light`, `test_s14p6b.json`): with the castle's tiers 1 to 3 opened (the game's tier 3), the store sells 8 recipes (the 6 potions' and meals' and the Leech Hex scroll's of tiers 2 and 3, the Draught of Swiftness's) and none of the locked things; the Elixir of Iron Hide Recipe bought for 180 gold and read: learned, and no longer sold. A picture of the store.
+The advanced things that only a found recipe makes (the castle's document has them) are not sold; their recipes are, at the store, those of the tiers opened that she does not know (90 gold times its lowest tier's price step: 180 for a tier-2 recipe). Measured (`884 recipes14 -Light`, `test_s14p6b.json`): with the castle's tiers 1 to 3 opened (the game's tier 3), the store sells the 7 potions' and meals' recipes of tiers 2 and 3 to the Warrior (the Leech Hex scroll's recipe only to a hero who reads curses) and none of the locked things; the Elixir of Iron Hide Recipe bought for 180 gold and read: learned, and no longer sold. A picture of the store.
 
 ## The signs fitted to their boards (the list of 2026-11-16, item 1)
 

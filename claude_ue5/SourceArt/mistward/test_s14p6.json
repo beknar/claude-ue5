@@ -64,14 +64,15 @@
     38.75
    ],
    "census": {
-    "things": 1313,
-    "recipes": 9,
+    "things": 1251,
+    "recipes": 13,
     "kinds": [
-     "Elixir of Might Recipe",
-     "Elixir of Regeneration Recipe",
-     "Feast Pie Recipe",
-     "Scroll of Leech Hex Recipe"
-    ]
+     "Draught of Swiftness Recipe",
+     "Elixir of Iron Hide Recipe",
+     "Honey Cake Recipe",
+     "Hunter's Stew Recipe"
+    ],
+    "locked_found_made": []
    },
    "blow_expected_with": 15.0
   }

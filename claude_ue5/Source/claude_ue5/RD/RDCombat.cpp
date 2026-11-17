@@ -1065,13 +1065,12 @@ bool URDCombatComponent::UseItem(FName Name)
 		const FString What = It.Teaches.ToString().ToLower();
 		if (!Generator->bRecipes14 || It.Teaches.IsNone()) return false;
 		if (Generator->KnowsRecipe14(It.Teaches)) { SetMessage(FString::Printf(TEXT("You know how to make the %s already"), *What)); return false; }
-		Generator->LearnRecipe14(It.Teaches);
+		if (!Generator->LearnRecipe14(It.Teaches)) return false;          // (not used up unless it was learned: PR #83's review)
 		RemoveCarried(Name, 1);
 		const int32 Ti = Generator->FindItem(It.Teaches); int32 Ri = -1;
 		for (int32 K = 0; K < Generator->Recipes.Num(); ++K) if (Generator->Recipes[K].Item == It.Teaches) { Ri = K; break; }
 		const FName St = Ri >= 0 ? Generator->RecipeStation(Generator->Recipes[Ri]) : NAME_None;
-		SetMessage(FString::Printf(TEXT("You learn to make the %s (at %s)"), *What, St == TEXT("Oven") ? TEXT("an oven") : St == TEXT("Alchemist") ? TEXT("an alchemist's table")
-			: St == TEXT("Librarian") ? TEXT("a librarian's table") : St == TEXT("Forge") ? TEXT("a forge") : TEXT("an anvil")));
+		SetMessage(FString::Printf(TEXT("You learn to make the %s (at %s)"), *What, *ARDDungeonGenerator::StationPlace14(St)));
 		(void)Ti;
 		return true;
 	}

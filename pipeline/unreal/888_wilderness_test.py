@@ -3433,7 +3433,9 @@ def step_farms11():
 
 def step_recipes14():
     """the list of 2026-11-16's sixth phase in the wilds: the ruins' and structures' chests hold "@recipe" (928 wild): made a recipe of
-    the land's tier where the chest stands; at the nearest ruin with a chest, its chest's line resolved, and the chest opened"""
+    the land's tier where the chest stands. At the nearest ruins on land of tier 2 or more with a chest: the chest's own loot (its laid
+    line) holds the token and resolves to a recipe of that land's tier or below; the chest opened by F gives only what its resolved
+    lines name (PR #83's review: the first version resolved a line of its own and opened nothing)"""
     g = G["gen"]; res = {}; quiet(True)
     yield from wait_ready(90)
     try:
@@ -3441,22 +3443,32 @@ def step_recipes14():
         kinds = list(g.get_editor_property("wild_ruin_kinds")) + list(g.get_editor_property("wild_site_kinds"))
         res["kinds_with_token"] = sum(1 for k in kinds if "@recipe" in str(k.get_editor_property("loot")))
         res["kinds"] = len(kinds)
-        near = [p for p in places_near(0, 0, 30000) if p["kind"] == "ruins"]
+        near = [p for p in places_near(0, 0, 40000) if p["kind"] == "ruins" and g.get_wild_tier_at(p["x"], p["y"]) >= 2]
         near.sort(key=lambda p: math.hypot(p["x"], p["y"]))
         res["visits"] = []
         for p in near[:4]:
             g.wild_drop_all(); g.wild_put_her(p["x"] + 15.0, p["y"]); yield from wait_chunks(30, 50); yield from rwait(3.0)
             boxes, _f, _b = box_lines()
             mine = [x for x in boxes if math.hypot(x["x"] / 100.0 - p["x"], x["y"] / 100.0 - p["y"]) < 60.0 and x["kind"] not in ("garden",)]
-            v = {"name": p["name"], "tier": int(g.wild_tier_at(V(p["x"] * 100.0, p["y"] * 100.0, 0))) if hasattr(g, "wild_tier_at") else p["tier"], "boxes": len(mine)}
+            v = {"name": p["name"], "boxes": len(mine)}
             for x in mine:
-                # (every ruin's and structure's kind holds the line (kinds_with_token): what it becomes at this chest's place and key)
-                rs = str(g.get_wild_loot_resolved14("@recipe|1|1|0.3", V(x["x"], x["y"], 0), x["key"]))
-                rec = [l.split("|")[0] for l in rs.split(";") if l.split("|")[0].endswith(" Recipe")]
-                v["resolved"] = rec
+                v["tier"] = int(g.get_wild_tier_at(x["x"] / 100.0, x["y"] / 100.0))
+                loot = str(g.get_wild_box_loot14(x["key"])); v["loot"] = loot
+                rs = str(g.get_wild_loot_resolved14(loot, V(x["x"], x["y"], 0), x["key"]))
+                names = [l.split("|")[0] for l in rs.split(";") if l]
+                rec = [n for n in names if n.endswith(" Recipe")]
+                v["resolved"] = rec; v["names"] = names
                 if rec:
                     it = next((i for i in g.get_editor_property("items") if str(i.name) == rec[0]), None)
                     v["recipe_tiers"] = list(it.get_editor_property("tiers"))[:3] if it else None
+                # (the chest opened by F from in front of it)
+                to = V(p["x"] * 100.0 - x["x"], p["y"] * 100.0 - x["y"], 0); n_ = math.hypot(to.x, to.y) or 1.0
+                for d_ in (110.0, 140.0, 90.0):
+                    at = V(x["x"] + to.x / n_ * d_, x["y"] + to.y / n_ * d_, 0)
+                    put(at, yaw=math.degrees(math.atan2(-to.y, -to.x)), z=g.wild_ground_z(at)); yield from rwait(0.6)
+                    if "open the" in str(g.describe_nearest(G["pawn"].get_actor_location())): break
+                v["f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(1.0)
+                v["found"] = last_found()
                 break
             res["visits"].append(v)
             if v.get("resolved"): break
@@ -3465,7 +3477,8 @@ def step_recipes14():
         g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
         quiet(False)
     hit = next((v for v in res["visits"] if v.get("resolved")), None)
-    ok = (res.get("kinds_with_token") == res.get("kinds") and hit is not None and hit.get("recipe_tiers") and min(hit["recipe_tiers"]) <= max(1, hit["tier"]))
+    ok = (res.get("kinds_with_token") == res.get("kinds") and hit is not None and "@recipe" in hit.get("loot", "") and hit.get("recipe_tiers")
+          and min(hit["recipe_tiers"]) <= hit["tier"] and hit.get("f") == "container" and hit.get("found") and all(n in hit["names"] for n in hit["found"]))
     step_result("recipes14", ok, **res)
 
 

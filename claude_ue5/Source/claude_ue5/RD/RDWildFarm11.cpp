@@ -181,7 +181,8 @@ void ARDDungeonGenerator::OpenWildBox(ARDWildChunk* C, int32 Index)
 		{
 			FString Nm, Rest;
 			if (!L.Split(TEXT("|"), &Nm, &Rest)) Nm = L;
-			if (FindItem(FName(*Nm)) >= 0) { Got.Add(FName(*Nm)); break; }
+			// (its "one at least" is never the recipe: that comes only by its chance (PR #83's review))
+			if (const int32 Fi = FindItem(FName(*Nm)); Fi >= 0 && Items[Fi].Kind != ERDItemKind::Recipe) { Got.Add(FName(*Nm)); break; }
 		}
 	if (Got.Num() == 0) { PlayerCombat->ShowMessage(TEXT("Empty: nothing inside")); return; }
 	TArray<FName> Order; TMap<FName, int32> N;

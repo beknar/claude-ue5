@@ -823,7 +823,7 @@ Potions are made at the alchemist's table and scrolls at the librarian's (the ca
 
 ### Recipes in the ruins' and structures' chests (item 4)
 
-Every kind of ruin and structure (54) holds "@recipe|1|1|0.3" in its chest's things (`928 wild`): when the chest is opened, a recipe of the land's tier where it stands (the recipes are of tiers 2 to 5 and their bands: the tier-1 land round Brokenspire gives none), drawn from a stream of its own by the chest's key so its other things keep their draws (`ResolveWildLoot14`). Measured (`888 recipes14 -Light`, `test_s14p6c.json`): every kind holds the line; the nearest three ruins stand on tier-1 land and resolve to nothing; the fourth, the Ruins of Hollowholt on tier 2, resolves to the Hunter's Stew Recipe (its tiers 2, 7, 12...).
+Every kind of ruin and structure (54) holds "@recipe|1|1|0.3" in its chest's things (`928 wild`): when the chest is opened, a recipe of the land's tier where it stands (the recipes are of tiers 2 to 5 and their bands: the tier-1 land round Brokenspire gives none), drawn from a stream of its own by the chest's key so its other things keep their draws (`ResolveWildLoot14`). Measured (`888 recipes14 -Light`, `test_s14p6c.json`): every kind holds the line; at the nearest ruins on land of tier 2 or more, the Ruins of Hollowholt, its chest's own loot holds it and resolves to the Hunter's Stew Recipe (its tiers 2, 7, 12...); opened by F, the chest gave an Iron Ingot, a Small Healing Potion and the Hunter's Stew Recipe, all named by its resolved lines.
 
 ## Limits
 
