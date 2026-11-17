@@ -3624,6 +3624,13 @@ def step_npc14():
         a["travellers"] = len(trav)
         if trav:
             t0 = trav[0]; tl = t0["at"]
+            # (the monsters' noticing as in play: a test's quiet holds for the prey too (PR #86's review); she stands 45 m off, beyond
+            # the wilds' noticing distance (25 m), and the monsters near before the test are taken away)
+            for m0 in g.get_monsters():
+                try:
+                    if alive(m0) and math.hypot(m0.get_actor_location().x - tl.x, m0.get_actor_location().y - tl.y) < 8000.0: m0.destroy_actor()
+                except Exception: pass
+            quiet(False)
             hp_her0 = cb().get_health()
             # (her 45 m off, across the road from them)
             her_at = V(tl.x, tl.y - 4500.0, 0); put(her_at, yaw=90.0, z=g.wild_ground_z(her_at)); yield from rwait(0.5)
@@ -3658,6 +3665,7 @@ def step_npc14():
                 a["head_over_ground"] = body_low14(t_) if t_ else None
                 a["drops"] = [str(x) for x in g.get_editor_property("last_wild_folk_drops14")]; a["gold"] = g.get_editor_property("last_wild_folk_gold14")
             a["her_struck"] = round(hp_her0 - cb().get_health(), 1)
+            quiet(True)
             a["cowering_seen"] = sum(1 for x in a.get("trace", []) if x[0] in ("reach", "swing"))
             for m in mons:
                 try:

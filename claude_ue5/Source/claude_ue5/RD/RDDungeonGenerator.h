@@ -2542,11 +2542,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") TArray<FString> WildFolkLoot14;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float WildFolkPreyCm14 = 2000.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float WildFolkRunSpeed14 = 260.f;
+	/** a monster takes a person for its foe only within this of her (cm): what happens far from her is not played out */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float WildFolkNearHerCm14 = 15000.f;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 WildFolkKilled14 = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") TArray<FName> LastWildFolkDrops14;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 LastWildFolkGold14 = 0;
 	/** every person of the wilds' lists (the farms', the structures' and scenery's, the director's, the travellers') */
-	TArray<class ARDTownsfolk*> WildPeople14() const;
+	const TArray<class ARDTownsfolk*>& WildPeople14() const;
+	mutable TArray<class ARDTownsfolk*> WildPeopleCache14; mutable uint64 WildPeopleFrame14 = MAX_uint64;
+	/** a person a wild monster at From may take for its foe: it can die, it is out in the open, in sight, within WildFolkNearHerCm14 of her */
+	bool IsWildPrey14(const class ARDTownsfolk* T, const FVector& From) const;
 	FString WildFolkLootOf14(const class ARDTownsfolk* T, float& Health, int32& GoldLo, int32& GoldHi) const;
 	int32 HitWildFolkInArc14(const FVector& L, const FVector& Fw, float Reach, float MinCos, float Dmg, FName Sound, AActor* Her);
 	class ARDTownsfolk* WildFolkOnSegment14(const FVector& A, const FVector& B, float Pad, float& OutT, FVector& OutAt) const;

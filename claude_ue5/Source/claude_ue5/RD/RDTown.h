@@ -187,6 +187,7 @@ private:
 	/** the eighth phase: true when its death or its flight took the frame */
 	bool TickWild14(float Dt, float Now);
 	void RunFrom14(AActor* From, float Now, float Seconds);
+	void InterruptLife14();
 	void PlayDie14(bool bAtEnd);
 	bool bWildDead14 = false, bWildDieClip14 = false, bWildLaidDead14 = false;
 	float WildHealth14 = -1.f, WildDeadAt14 = -100.f, WildFleeUntil14 = -100.f, WildHitUntil14 = -100.f, WildCowerUntil14 = -100.f;

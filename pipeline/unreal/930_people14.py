@@ -49,8 +49,8 @@ def make_clips():
             a = unreal.load_asset(p.split(".")[0])
             if isinstance(a, unreal.SkeletalMesh) and a.skeleton.get_path_name().startswith(SKEL): tgt_mesh = a; break
     assert tgt_mesh, "no mesh on the NPC pack's Manny skeleton"
-    if eal.does_directory_exist(TD):
-        for p in eal.list_assets(TD, recursive=False): eal.delete_asset(p.split(".")[0])
+    # (checked before anything is touched, and made over the old ones in place (overwrite_existing_files): the saved defs keep
+    # pointing at them (PR #86's review: deleted first, a failed run left brokenspire's Die / Hit / Run pointing at nothing))
     names = list(J["clips"].values())
     for n in names: assert eal.does_asset_exist(SRC + n), "no " + SRC + n
     inp = unreal.IKRetargetBatchOperationInputs()

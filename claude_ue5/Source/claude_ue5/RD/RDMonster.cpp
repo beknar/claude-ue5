@@ -687,14 +687,15 @@ AActor* ARDMonster::PickFoe(URDCombatComponent* Pc, bool& bFoePlayer) const
 	}
 	// (the list of 2026-11-16's eighth phase: a person of the wilds near it and nearer than her ("a random monster encounter comes
 	// across a wandering NPC before it reaches the player: it attacks the NPC instead"))
-	if (bOpenGround && G->bWild && G->bWildFolkHurt14 && G->WildFolkPreyCm14 > 0.f)
+	// (a test's quiet (no noticing) holds for the prey too, as for a hunt (PR #86's review))
+	if (bOpenGround && G->bWild && G->bWildFolkHurt14 && G->WildFolkPreyCm14 > 0.f && G->AggroDistance > 0.f)
 		for (ARDTownsfolk* T : G->WildPeople14())
 		{
-			// (one that cannot die (a child, a quest's people) is no prey: a structure's guards would chase its quest's giver for ever)
-			if (!T->CanBeHurt14() || T->IsWildProtected14()) continue;
+			if (!IsValid(T)) continue;
 			const float D = FVector::Dist2D(T->GetActorLocation(), L);
 			if (D > G->WildFolkPreyCm14 || FMath::Abs(T->GetActorLocation().Z - L.Z) > 300.f) continue;
-			if (!Best || D < BestD * 0.85f) { Best = T; BestD = D; bFoePlayer = false; }
+			if ((Best && D >= BestD * 0.85f) || !G->IsWildPrey14(T, L)) continue;
+			Best = T; BestD = D; bFoePlayer = false;
 		}
 	return Best;
 }
@@ -922,7 +923,7 @@ bool ARDMonster::TickCombat(float Dt)
 		// her steps on a quiet floor are heard from less far)
 		// (a hunting monster never comes here: bHunt sets bAggro above)
 		if (bOpenGround) Aggro *= G->WildQuietScale;
-		if (PreyT) Aggro = G->WildFolkPreyCm14;
+		if (PreyT && G->AggroDistance > 0.f) Aggro = G->WildFolkPreyCm14;
 		if (NoticeCap >= 0.f) Aggro = FMath::Min(Aggro, NoticeCap);          // (lying low in an ambush, the list of 2026-11-14)
 		if (Dist > Aggro || Dz > (bOpenGround ? 700.f : 300.f) || ChaseTimer > 0.f) return false;
 		// (open ground: one past its leash walks home first and notices her again within 0.8 of it: it took her and dropped
@@ -940,7 +941,7 @@ bool ARDMonster::TickCombat(float Dt)
 	CurrentFoe = P;
 	float Lose = bOpenGround && G->LoseDistance > 1.f ? FMath::Max(G->LoseDistance, G->WildAggroDistance * 1.8f) : G->LoseDistance;
 	if (bFinalBoss && G->bFinalBandFighting) Lose = FMath::Max(Lose, 4500.f);
-	if (PreyT) { Lose = FMath::Max(Lose, G->WildFolkPreyCm14 * 1.6f); if (Dist < 1500.f) PreyT->ScareWild14(this); }
+	if (PreyT && G->AggroDistance > 0.f) { Lose = FMath::Max(Lose, G->WildFolkPreyCm14 * 1.6f); if (Dist < 1500.f) PreyT->ScareWild14(this); }
 	if (!bHunt && (Dist > Lose || Dz > (bOpenGround ? 900.f : 400.f) || (bOpenGround && FVector::Dist2D(L, HomeAt) > WildLeash)))
 	{
 		CombatBranch = TEXT("lost");

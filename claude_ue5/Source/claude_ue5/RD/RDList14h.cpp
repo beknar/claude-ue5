@@ -52,15 +52,33 @@ void ARDDungeonGenerator::KeepWildFolk14(ARDTownsfolk* T, int64 Key)
 	if (bWildFolkHurt14 && IsWildFolkDead14(Key)) T->LayWildDead14();
 }
 
-TArray<ARDTownsfolk*> ARDDungeonGenerator::WildPeople14() const
+const TArray<ARDTownsfolk*>& ARDDungeonGenerator::WildPeople14() const
 {
-	TArray<ARDTownsfolk*> Out;
-	auto Add = [&](const TWeakObjectPtr<ARDTownsfolk>& W) { if (ARDTownsfolk* T = W.Get(); IsValid(T)) Out.AddUnique(T); };
-	for (const FRDWildFarmRec& F : WildFarms) for (const TWeakObjectPtr<ARDTownsfolk>& W : F.Folk) Add(W);
-	for (const TWeakObjectPtr<ARDTownsfolk>& W : WildSiteFolk) Add(W);
-	for (const TWeakObjectPtr<ARDTownsfolk>& W : WildRoamFolk) Add(W);
-	for (const FTraveller& G : WildTravellers) for (const TWeakObjectPtr<ARDTownsfolk>& W : G.Folk) Add(W);
-	return Out;
+	// (gathered once a frame (PR #86's review: every monster's foe, every bolt and shot gathered it again); the four lists hold
+	// nobody twice; a caller checks IsValid, as one destroyed in the frame stays listed until the next)
+	if (WildPeopleFrame14 != GFrameCounter)
+	{
+		WildPeopleFrame14 = GFrameCounter;
+		WildPeopleCache14.Reset();
+		auto Add = [&](const TWeakObjectPtr<ARDTownsfolk>& W) { if (ARDTownsfolk* T = W.Get(); IsValid(T)) WildPeopleCache14.Add(T); };
+		for (const FRDWildFarmRec& F : WildFarms) for (const TWeakObjectPtr<ARDTownsfolk>& W : F.Folk) Add(W);
+		for (const TWeakObjectPtr<ARDTownsfolk>& W : WildSiteFolk) Add(W);
+		for (const TWeakObjectPtr<ARDTownsfolk>& W : WildRoamFolk) Add(W);
+		for (const FTraveller& G : WildTravellers) for (const TWeakObjectPtr<ARDTownsfolk>& W : G.Folk) Add(W);
+	}
+	return WildPeopleCache14;
+}
+
+bool ARDDungeonGenerator::IsWildPrey14(const ARDTownsfolk* T, const FVector& From) const
+{
+	// (a monster's prey: one that can die (a child or a quest's people is none: a structure's guards would chase its quest's giver
+	// for ever), out in the open (not indoors or in bed), in the monster's sight, and near her: what happens far from her is not
+	// played out (PR #86's review: a lair's monsters would have killed a farm's family 2 km before she came, and kept it dead)
+	if (!IsValid(T) || !T->CanBeHurt14() || T->IsWildProtected14() || T->IsWildIndoors() || T->IsInBed()) return false;
+	const AActor* Her = PlayerCombat ? PlayerCombat->GetOwner() : nullptr;
+	if (!Her || FVector::Dist2D(Her->GetActorLocation(), T->GetActorLocation()) > WildFolkNearHerCm14) return false;
+	FCollisionQueryParams Q(SCENE_QUERY_STAT(RDFolkPrey14), false);
+	return !GetWorld()->LineTraceTestByObjectType(From + FVector(0, 0, 40.f), T->GetActorLocation() + FVector(0, 0, 40.f), FCollisionObjectQueryParams(ECC_WorldStatic), Q);
 }
 
 FString ARDDungeonGenerator::WildFolkLootOf14(const ARDTownsfolk* T, float& Health, int32& GoldLo, int32& GoldHi) const
@@ -101,7 +119,7 @@ int32 ARDDungeonGenerator::HitWildFolkInArc14(const FVector& L, const FVector& F
 	int32 N = 0;
 	for (ARDTownsfolk* T : WildPeople14())
 	{
-		if (!T->CanBeHurt14()) continue;
+		if (!IsValid(T) || !T->CanBeHurt14()) continue;
 		const FVector C = T->GetActorLocation();
 		const FVector D = (C - L) * FVector(1, 1, 0);
 		const float Dist = D.Size() - 34.f;
@@ -123,7 +141,7 @@ ARDTownsfolk* ARDDungeonGenerator::WildFolkOnSegment14(const FVector& A, const F
 	const FVector Ab = B - A;
 	for (ARDTownsfolk* T : WildPeople14())
 	{
-		if (!T->CanBeHurt14()) continue;
+		if (!IsValid(T) || !T->CanBeHurt14()) continue;
 		const FVector C = T->GetActorLocation(), A0 = C - FVector(0, 0, 56.f), A1 = C + FVector(0, 0, 56.f);
 		FVector P, Q;
 		FMath::SegmentDistToSegmentSafe(A, B, A0, A1, P, Q);
@@ -153,12 +171,18 @@ void ARDDungeonGenerator::OnWildFolkKilled14(ARDTownsfolk* T, AActor* By)
 	int32 Gold = Hi > 0 ? Lo + (int32)(HashCombine(H0, 77u) % (uint32)FMath::Max(Hi - Lo + 1, 1)) : 0;
 	if (Gold > 0) Gold = FMath::Max(WildGoldAt(Gold, T->GetActorLocation()), 1);
 	LastWildFolkDrops14 = Got; LastWildFolkGold14 = Gold;
-	// (by the body, on its right: the death clip lays it on its back)
-	const FVector At = T->GetActorLocation() + T->GetActorRightVector() * 80.f;
+	// (by the body, on its right (the death clip lays it on its back), traced down from the body's own height (a farmhouse's floor
+	// stands over the ground: PR #86's review); where a wall or fence stands within that, at the body)
+	const FVector Bc = T->GetActorLocation();
+	FVector At = Bc + T->GetActorRightVector() * 80.f;
+	{
+		FCollisionQueryParams Q(SCENE_QUERY_STAT(RDFolkPile14), false, T);
+		if (GetWorld()->SweepTestByObjectType(Bc, At, FQuat::Identity, FCollisionObjectQueryParams(ECC_WorldStatic), FCollisionShape::MakeSphere(20.f), Q)) At = Bc;
+	}
 	if (Got.Num() > 0)
 	{
 		TArray<float> Wr; Wr.Init(-1.f, Got.Num());
-		if (ARDLootPile* Lp = DropLoot(FVector(At.X, At.Y, WildGroundZ(At) + 40.f), Got, Wr))
+		if (ARDLootPile* Lp = DropLoot(At, Got, Wr))
 		{
 			Lp->bHers = false; Lp->bHarvest = false; Lp->Gold = Gold; Lp->Owner14 = T->Title;
 			WildRoamPiles.Add(Lp);
@@ -176,7 +200,7 @@ TArray<FString> ARDDungeonGenerator::GetWildFolkLines14() const
 {
 	// "i|title|role|x|y|z|health|dead|protected|fleeing|key|hits|flees|killed by|hurt"
 	TArray<FString> Out;
-	const TArray<ARDTownsfolk*> All = WildPeople14();
+	const TArray<ARDTownsfolk*>& All = WildPeople14();
 	for (int32 I = 0; I < All.Num(); ++I)
 	{
 		const ARDTownsfolk* T = All[I]; const FVector L = T->GetActorLocation();
@@ -189,7 +213,7 @@ TArray<FString> ARDDungeonGenerator::GetWildFolkLines14() const
 
 ARDTownsfolk* ARDDungeonGenerator::GetWildPerson14(int32 I) const
 {
-	const TArray<ARDTownsfolk*> All = WildPeople14();
+	const TArray<ARDTownsfolk*>& All = WildPeople14();
 	return All.IsValidIndex(I) ? All[I] : nullptr;
 }
 
@@ -223,17 +247,22 @@ bool ARDTownsfolk::IsWildFleeing14() const
 	return GetWorld() && GetWorld()->GetTimeSeconds() < WildFleeUntil14 && !bWildDead14;
 }
 
+void ARDTownsfolk::InterruptLife14()
+{
+	// (out of its bed, its talk, its work and its way)
+	if (bInBed) { bInBed = false; SetActorLocationAndRotation(PreBed, FRotator(0.f, HomeYaw, 0.f)); }
+	bSleeping = false; FaceUntil = -100.f;
+	if (Act != 0) EndWork();
+	Path.Reset();
+}
+
 void ARDTownsfolk::RunFrom14(AActor* From, float Now, float Seconds)
 {
 	WildFleeFrom14 = From;
 	WildFleeAt14 = From ? From->GetActorLocation() : GetActorLocation() - GetActorForwardVector() * 100.f;
 	if (Now >= WildFleeUntil14) ++WildFlees14;
 	WildFleeUntil14 = FMath::Max(WildFleeUntil14, Now + Seconds);
-	// (out of its work, its talk and its bed)
-	if (bInBed) { bInBed = false; SetActorLocationAndRotation(PreBed, FRotator(0.f, HomeYaw, 0.f)); }
-	bSleeping = false; FaceUntil = -100.f;
-	if (Act != 0) EndWork();
-	Path.Reset();
+	InterruptLife14();
 }
 
 void ARDTownsfolk::ScareWild14(AActor* From)
@@ -243,13 +272,7 @@ void ARDTownsfolk::ScareWild14(AActor* From)
 	// caught (the first test: a monster chased three of them for a minute and landed nothing))
 	if (!CanBeHurt14() || !GetWorld()) return;
 	const float Now = GetWorld()->GetTimeSeconds();
-	if (Now >= WildCowerUntil14)
-	{
-		if (bInBed) { bInBed = false; SetActorLocationAndRotation(PreBed, FRotator(0.f, HomeYaw, 0.f)); }
-		bSleeping = false; FaceUntil = -100.f;
-		if (Act != 0) EndWork();
-		Path.Reset();
-	}
+	if (Now >= WildCowerUntil14) InterruptLife14();
 	WildCowerUntil14 = Now + 1.5f;
 	WildFleeFrom14 = From;
 	if (From) WildFleeAt14 = From->GetActorLocation();
@@ -269,8 +292,8 @@ bool ARDTownsfolk::TakeWildHit14(float Dmg, AActor* From)
 		RunFrom14(From, Now, 2.f);
 		return false;
 	}
-	// (killed: its body lies where it fell; nothing of it stops her or takes F)
-	RunFrom14(From, Now, 0.f);
+	// (killed: its body lies where it fell; nothing of it stops her or takes F (no flight counted: PR #86's review))
+	InterruptLife14();
 	bWildDead14 = true; WildDeadAt14 = Now; WildHealth14 = 0.f; WildFleeUntil14 = -100.f;
 	RoadPath.Reset(); SetProp(NAME_None); SetLantern(false);
 	WildKilledBy14 = !From ? FString() : (Gen && Gen->GetPlayerCombat() && From == Gen->GetPlayerCombat()->GetOwner()) ? TEXT("her") : From->GetName();

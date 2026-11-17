@@ -214,19 +214,14 @@ void ARDDungeonGenerator::TickMonsterShots(float Dt)
 					}
 			// (the list of 2026-11-16's eighth phase: a person of the wilds (no character: its capsule's axis); its capsule stopped
 			// the wall's trace, so the shot's end is on it)
+			float PeT = 2.f; FVector PeAt = B;
 			if (Ended.IsEmpty() && bWildFolkHurt14)
-				for (ARDTownsfolk* T : WildPeople14())
+				if (ARDTownsfolk* T = WildFolkOnSegment14(A, B, Pad, PeT, PeAt))
 				{
-					if (!T->CanBeHurt14()) continue;
-					const FVector C = T->GetActorLocation();
-					FVector P1, P2;
-					FMath::SegmentDistToSegmentSafe(A, B, C - FVector(0, 0, 56.f), C + FVector(0, 0, 56.f), P1, P2);
-					if (FVector::Dist(P1, P2) > 34.f + Pad + 2.f) continue;
-					AddHitText(C + FVector(0, 0, 80.f), S.Damage, false);
+					AddHitText(T->GetActorLocation() + FVector(0, 0, 80.f), S.Damage, false);
 					T->TakeWildHit14(S.Damage, S.From.Get());
 					ShotStats.FindOrAdd(TEXT("on_person"))++;
-					Ended = TEXT("person"); EndAt = C;
-					break;
+					Ended = TEXT("person"); EndAt = PeAt;
 				}
 		}
 		else

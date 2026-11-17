@@ -51,36 +51,15 @@ ARDTownsfolk* ARDDungeonGenerator::WildFolkForF(const FVector& From) const
 
 ARDTownsfolk* ARDDungeonGenerator::NearestWildFolk(const FVector& From, float Reach, bool bAwake) const
 {
+	// (every person of the wilds' lists (WildPeople14: the farms', the structures' and scenery's, the director's, the travellers'),
+	// the dead passed over, a farm's sleeper too when F wants one awake (the others never sleep out here))
 	ARDTownsfolk* Best = nullptr; float Bd = Reach;
-	for (const FRDWildFarmRec& F : WildFarms)
-		for (const TWeakObjectPtr<ARDTownsfolk>& W : F.Folk)
-			if (ARDTownsfolk* T = W.Get(); IsValid(T) && !T->IsWildDead14() && !(bAwake && T->IsSleeping()))
-			{
-				const float D = FVector::Dist2D(T->GetActorLocation(), From);
-				if (D < Bd && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Bd = D; Best = T; }
-			}
-	// (the list of 2026-11-12: the structures' prisoners and the quests' people)
-	for (const TWeakObjectPtr<ARDTownsfolk>& W : WildSiteFolk)
-		if (ARDTownsfolk* T = W.Get(); IsValid(T) && !T->IsWildDead14())
-		{
-			const float D = FVector::Dist2D(T->GetActorLocation(), From);
-			if (D < Bd && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Bd = D; Best = T; }
-		}
-	// (the list of 2026-11-11: the people the director met her with)
-	for (const TWeakObjectPtr<ARDTownsfolk>& W : WildRoamFolk)
-		if (ARDTownsfolk* T = W.Get(); IsValid(T) && !T->IsWildDead14())
-		{
-			const float D = FVector::Dist2D(T->GetActorLocation(), From);
-			if (D < Bd && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Bd = D; Best = T; }
-		}
-	// (the list of 2026-11-10's sixth phase: the travellers on the roads)
-	for (const FTraveller& G : WildTravellers)
-		for (const TWeakObjectPtr<ARDTownsfolk>& W : G.Folk)
-			if (ARDTownsfolk* T = W.Get(); IsValid(T) && !T->IsWildDead14())
-			{
-				const float D = FVector::Dist2D(T->GetActorLocation(), From);
-				if (D < Bd && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Bd = D; Best = T; }
-			}
+	for (ARDTownsfolk* T : WildPeople14())
+	{
+		if (!IsValid(T) || T->IsWildDead14() || (bAwake && T->IsSleeping())) continue;
+		const float D = FVector::Dist2D(T->GetActorLocation(), From);
+		if (D < Bd && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Bd = D; Best = T; }
+	}
 	return Best;
 }
 
@@ -93,7 +72,7 @@ TArray<FString> ARDDungeonGenerator::GetWildFarmLines() const
 		if (!F.Chunk.IsValid()) continue;
 		int32 Na = 0, Nf = 0;
 		for (const TWeakObjectPtr<ARDTownAnimal>& A : F.Animals) if (A.IsValid() && !A->IsDead14()) ++Na;          // (the living: PR #85's review)
-		for (const TWeakObjectPtr<ARDTownsfolk>& T : F.Folk) if (T.IsValid()) ++Nf;
+		for (const TWeakObjectPtr<ARDTownsfolk>& T : F.Folk) if (T.IsValid() && !T->IsWildDead14()) ++Nf;          // (the living: PR #86's review)
 		Out.Add(FString::Printf(TEXT("farm|%d|%s|%.1f|%.1f|%.0f|%.1f|%d|%d|%d|%.0f|%.0f|%.0f|%.0f|%.1f"), F.Id, *F.Name, F.At.X, F.At.Y,
 			WildGroundZ(FVector(F.At.X * 100.0, F.At.Y * 100.0, 0.0)), F.Yaw, F.Props, Na, Nf, F.PenAt.X, F.PenAt.Y, F.PenHalf.X, F.PenHalf.Y, F.PenYaw));
 		for (int32 Ai = 0; Ai < F.Animals.Num(); ++Ai)
