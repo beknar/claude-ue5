@@ -1553,6 +1553,9 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 	// (the eighth phase: F off her horse; beside it, on it)
 	if (bMounted) { DismountHorse(); return TEXT("dismount"); }
 	if (LootPiles.Num() > 0 && TakeLootNear(From, 260.f)) return TEXT("loot");
+	// (the list of 2026-11-16: a wild table or a farmhouse's oven when it is the nearest of everything F reaches out there (PR #82's
+	// review: the scenery's uses and the points of interest, asked first, took F from a nearer table))
+	if (bWild) { FName Sk; if (WildStationFirst14(From, Sk)) { const FString St = OpenStation14(Sk); if (!St.IsEmpty()) return St; } }
 	// (the seventh phase's points of interest and the list of 2026-11-14's scenery: the nearer of the two takes F (a wayshrine beside a
 	// notice post took it from the notices))
 	if (bWild && WildSceneryFirst(From)) { const FString Ws = WildSceneryInteract(From); if (!Ws.IsEmpty()) return Ws; }
@@ -1663,6 +1666,7 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 	const ARDLootPile* Lp = nullptr; float LpD = 260.f;
 	for (const ARDLootPile* P : LootPiles) if (IsValid(P)) { const float D = FVector::Dist2D(P->GetActorLocation(), From); if (D < LpD) { LpD = D; Lp = P; } }
 	if (bMounted) return TEXT("get off your horse");          // (the eighth phase)
+	if (!Lp && bWild) { FName Sk; if (WildStationFirst14(From, Sk)) return StationWords14(Sk); }          // (the list of 2026-11-16)
 	if (!Lp && bWild && WildSceneryFirst(From)) { const FString Ws = WildSceneryDescribe(From); if (!Ws.IsEmpty()) return Ws; }          // (the list of 2026-11-14: the nearest)
 	if (!Lp && bWild) { const FString Wp = WildPoiDescribe(From); if (!Wp.IsEmpty()) return Wp; }          // (the seventh phase)
 	if (Lp)

@@ -91,6 +91,7 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 		if (P.Site >= 0)
 		{
 			LayWildSite(C, P);
+			LayWildTables14(C, P);          // (the list of 2026-11-16: a witch's hut's or a shrine's table, after its pieces)
 			if (WildSiteKinds.IsValidIndex(P.Site) && WildSiteKinds[P.Site].Guards > 0) SpawnWildMonsters(C, P);
 			continue;
 		}
@@ -241,6 +242,8 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 			// (the list of 2026-11-12's fourth phase: hidden behind something, RDWildLair12.cpp; after the den's draws, its own stream)
 			if (const int32 Lc = WildLairCoverOf(P); Lc >= 0) LayWildLair(C, P, WildLairCovers[Lc]);
 		}
+		// (the list of 2026-11-16's fifth phase: a village's, a camp's or a ruined abbey's tables, after its pieces, from its own hash)
+		LayWildTables14(C, P);
 		// (the caldera's hot springs steam: their places are the world's ponds of kind 6, laid by the chunk's water)
 		const int32 RuinK = P.Kind == TEXT("ruins") ? WildRuinKindOf(P) : -1;
 		if (P.Kind == TEXT("spawn") || P.Kind == TEXT("lair") || !P.Quest.IsEmpty() || (RuinK >= 0 && WildRuinKinds[RuinK].Guards > 0)) SpawnWildMonsters(C, P);

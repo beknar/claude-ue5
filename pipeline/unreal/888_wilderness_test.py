@@ -3431,6 +3431,133 @@ def step_farms11():
           and len(built) == nd and all(b["id"] and "house" in b["kinds"] and "barn" in b["kinds"] and b["furniture_min"] >= 5 and b["boxes"] >= 6 and b["gardens"] >= 1 and b["animals"] >= 1 and b["removed"] for b in built.values()))
     step_result("farms11", ok, **res)
 
+def stations14():
+    out = []
+    for l in G["gen"].get_wild_stations14():
+        p = str(l).split("|"); out.append({"kind": p[0], "x": float(p[1]), "y": float(p[2]), "z": float(p[3]), "yaw": float(p[4]), "owner": int(p[5])})
+    return out
+
+def step_tables14():
+    """the list of 2026-11-16's fifth phase's second part (items 2, 3 and 15): the farmsteads' ovens and the wilds' tables. The Mage at
+    the first farmstead near Brokenspire: its oven (in or behind the farmhouse) named and opened by F from in front of it, two wheat
+    baked into a bread through the panel; from the far side of the oven's wall it is not used; then every one of the farm designs
+    built in turn and its oven counted. A village the rule gives both tables: each laid, named and opened by F from in front, a
+    potion and a scroll made through the panel. Pictures of the oven and the tables."""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    if str(g.get_editor_property("current_hero")) != "Mage": g.switch_hero("Mage"); yield from rwait(1.0); refresh(); g = G["gen"]
+    c = cb()
+    def use_at(st, word, item=None, tag=None):
+        """she stands 1.3 m in front of the station facing it; its prompt, F, its panel and (an item) made through the panel's Enter"""
+        a = math.radians(st["yaw"]); f = V(math.cos(a), math.sin(a), 0)
+        out = {"kind": st["kind"]}
+        for d in (130.0, 110.0, 160.0):
+            at = V(st["x"] + f.x * d, st["y"] + f.y * d, 0)
+            put(at, yaw=math.degrees(math.atan2(-f.y, -f.x)), z=st["z"]); yield from rwait(0.6)
+            out["says"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+            if word in out["says"]: break
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-20, yaw=math.degrees(math.atan2(-f.y, -f.x)))); yield from rwait(0.6)
+        out["shot"] = f"tables14_{tag or word}"; shot(out["shot"], "1280x720"); yield from rwait(1.2)
+        if item:
+            rc = next((x for x in g.get_editor_property("recipes") if str(x.item) == item), None)
+            if rc:
+                for pt in rc.get_editor_property("parts"): c.add_item(pt.get_editor_property("any_of")[0], pt.get_editor_property("count"))
+        out["f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.3)
+        out["station"] = str(c.get_craft_station())
+        ls = [str(x) for x in c.get_craft_lines()]
+        out["panel"] = [l.split("|")[1] for l in ls if l.startswith("recipe|")][:8]
+        if item:
+            row = next((i_ for i_, l in enumerate(ls) if l.startswith("recipe|") and l.split("|")[1] == item), -1)
+            n0 = c.get_item_count(item)
+            if row >= 0: c.move_craft_cursor(row - c.get_craft_cursor())
+            out["made"] = row >= 0 and c.get_craft_cursor() == row and c.craft_entry(); yield from rwait(0.2)
+            out["item"] = [item, n0, c.get_item_count(item)]
+        c.set_crafting_open(False); yield from rwait(0.3)
+        return out
+    try:
+        # ---- the first farmstead's oven
+        fs = [str(x).split("|") for x in g.find_wild_farmsteads(0.0, 0.0, 6000.0)]
+        res["farmsteads"] = len(fs)
+        if fs:
+            fid, fx, fy = int(fs[0][0]), float(fs[0][2]), float(fs[0][3])
+            g.wild_drop_all(); g.wild_put_her(fx - 30.0, fy); yield from wait_chunks(30, 50); yield from rwait(3.0)
+            ov = [s for s in stations14() if s["kind"] == "Oven" and s["owner"] == fid]
+            res["farm_ovens"] = len(ov)
+            if ov:
+                st = ov[0]
+                bread = "Bread"
+                res["oven"] = yield from use_at(st, "oven", bread)
+                # (from behind the oven, past its wall or its back: not used through a wall)
+                a = math.radians(st["yaw"]); f = V(math.cos(a), math.sin(a), 0)
+                back = V(st["x"] - f.x * 170, st["y"] - f.y * 170, 0)
+                put(back, yaw=st["yaw"], z=g.wild_ground_z(back)); yield from rwait(0.6)
+                h_ = G["pawn"].get_actor_location()
+                res["behind"] = {"m": round(math.hypot(h_.x - st["x"], h_.y - st["y"]) / 100.0, 2), "says": str(g.describe_nearest(h_))}
+        # ---- every design's farmhouse oven
+        nd = len(g.get_editor_property("farm_designs")); res["designs"] = nd; res["design_ovens"] = {}
+        if fs:
+            sx, sy = float(fs[0][2]) + 90.0, float(fs[0][3])
+            g.wild_drop_all(); g.wild_put_her(sx - 45.0, sy); yield from wait_chunks(30, 50); yield from rwait(2.0)
+            for d in range(nd):
+                fid2 = g.spawn_farm_design_at(d, sx, sy, 0.0); yield from rwait(0.15)
+                os_ = [s for s in stations14() if s["kind"] == "Oven" and s["owner"] == fid2]
+                res["design_ovens"][d] = len(os_)
+                g.remove_wild_farm(fid2)
+                res.setdefault("left_after_removal", 0)
+                res["left_after_removal"] += sum(1 for s in stations14() if s["owner"] == fid2)
+                yield
+        # ---- a village with both tables
+        tp = [str(x).split("|") for x in g.get_wild_table_places14(V(0, 0, 0), 30000.0)]
+        res["places_with_tables"] = {}
+        for p in tp: res["places_with_tables"][p[1]] = res["places_with_tables"].get(p[1], 0) + 1
+        vs = sorted([p for p in tp if p[1] == "village" and "Librarian" in p[5]], key=lambda p: math.hypot(float(p[3]), float(p[4])))
+        if vs:
+            vid, vx, vy = int(vs[0][0]), float(vs[0][3]), float(vs[0][4])
+            res["village"] = {"name": vs[0][2], "km": round(math.hypot(vx, vy) / 1000.0, 1)}
+            g.wild_drop_all(); g.wild_put_her(vx + 12.0, vy); yield from wait_chunks(30, 50); yield from rwait(3.0)
+            mine = [s for s in stations14() if s["owner"] == vid]
+            res["village"]["tables"] = sorted(s["kind"] for s in mine)
+            for s in mine:
+                if s["kind"] == "Alchemist": res["village"]["alchemist"] = yield from use_at(s, "alchemist", "Small Healing Potion")
+                if s["kind"] == "Librarian": res["village"]["librarian"] = yield from use_at(s, "librarian", "Scroll of Fire Bolt")
+        # ---- the nearest camp, ruin and structure the rule gives a table (PR #82's review: only a village was tried): laid as the
+        # rule says, named and opened by F
+        res["others"] = {}
+        # (a place with no room for its table round its middle has none (logged): the nearest three of each are tried, and every one
+        # with no room is listed)
+        for cat in ("camp", "ruins", "site"):
+            cs = sorted([p for p in tp if p[1].split(":")[0] == cat], key=lambda p: math.hypot(float(p[3]), float(p[4])))
+            if not cs: res["others"][cat] = {"none": True}; continue
+            o_ = {"no_room": []}
+            for p in cs[:3]:
+                pid, px, py = int(p[0]), float(p[3]), float(p[4])
+                g.wild_drop_all(); g.wild_put_her(px + 20.0, py); yield from wait_chunks(30, 50); yield from rwait(3.0)
+                mine = [s for s in stations14() if s["owner"] == pid]
+                want = sorted(p[5].split(",")); laid = sorted(s["kind"] for s in mine)
+                if laid != want: o_["no_room"].append({"name": p[2], "kind": p[1], "want": want, "laid": laid}); continue
+                o_.update({"kind": p[1], "name": p[2], "km": round(math.hypot(px, py) / 1000.0, 1), "want": want, "laid": laid})
+                u = yield from use_at(mine[0], mine[0]["kind"].lower(), None, cat)
+                o_.update({"says": u["says"], "f": u["f"], "station": u["station"], "word": mine[0]["kind"].lower()})
+                break
+            res["others"][cat] = o_
+        g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    finally:
+        try: c.set_crafting_open(False)
+        except Exception: pass
+        quiet(False)
+    o = res.get("oven", {}); vl = res.get("village", {})
+    def used(u, word, st):
+        it = u.get("item") or [None, 0, 0]
+        return word in u.get("says", "") and u.get("f") == word and u.get("station") == st and u.get("made") and it[2] == it[1] + 1
+    dov = res.get("design_ovens", {})
+    ok = (res.get("farm_ovens", 0) >= 1 and used(o, "oven", "Oven") and "oven" not in res.get("behind", {}).get("says", "oven")
+          and len(dov) == res.get("designs", -1) and all(n == 1 for n in dov.values()) and res.get("left_after_removal", 1) == 0
+          and vl.get("tables") == ["Alchemist", "Librarian"] and used(vl.get("alchemist", {}), "alchemist", "Alchemist") and used(vl.get("librarian", {}), "librarian", "Librarian")
+          and res["others"].get("camp", {}).get("laid") and res["others"].get("ruins", {}).get("laid")
+          and all(o_.get("none") or (o_.get("laid") == o_.get("want") and o_.get("word", "?") in o_.get("says", "") and o_.get("f") == o_.get("word")) for o_ in res["others"].values()))
+    step_result("tables14", ok, **res)
+
+
 def w11_lines():
     out = {"folk": [], "herd": 0}
     for l in G["gen"].get_wild11_lines():
@@ -4879,7 +5006,7 @@ def step_horse14():
           and res["called_town_m"] is not None and res["called_town_m"] < 4.0)
     step_result("horse14", ok, **res)
 
-STEPS = {"horse14": step_horse14, "spires14": step_spires14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"tables14": step_tables14, "horse14": step_horse14, "spires14": step_spires14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)
