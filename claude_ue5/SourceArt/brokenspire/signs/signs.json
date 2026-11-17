@@ -1,0 +1,142 @@
+{
+ "plane_cm": [
+  63.0,
+  47.25
+ ],
+ "middle": [
+  90.4,
+  -89.5
+ ],
+ "inset_cm": 3.0,
+ "signs": {
+  "SMITHY": {
+   "lines": [
+    "Smithy"
+   ],
+   "size": 103
+  },
+  "GENERALGOODS": {
+   "lines": [
+    "General",
+    "Goods"
+   ],
+   "size": 102
+  },
+  "HEALER": {
+   "lines": [
+    "Healer"
+   ],
+   "size": 113
+  },
+  "TEMPLE": {
+   "lines": [
+    "Temple"
+   ],
+   "size": 102
+  },
+  "STOREHOUSE": {
+   "lines": [
+    "Store",
+    "House"
+   ],
+   "size": 100
+  },
+  "TAVERN": {
+   "lines": [
+    "Tavern"
+   ],
+   "size": 110
+  },
+  "CHAPEL": {
+   "lines": [
+    "Chapel"
+   ],
+   "size": 108
+  },
+  "BARRACKS": {
+   "lines": [
+    "Barracks"
+   ],
+   "size": 88
+  },
+  "HEDGEWITCH": {
+   "lines": [
+    "Hedge",
+    "Witch"
+   ],
+   "size": 93
+  },
+  "MONASTERY": {
+   "lines": [
+    "Monas-",
+    "tery"
+   ],
+   "size": 108
+  },
+  "WORKSHOP": {
+   "lines": [
+    "Work-",
+    "shop"
+   ],
+   "size": 105
+  },
+  "WAREHOUSE": {
+   "lines": [
+    "Ware",
+    "House"
+   ],
+   "size": 100
+  },
+  "SLUICEHOUSE": {
+   "lines": [
+    "Sluice",
+    "House"
+   ],
+   "size": 98
+  },
+  "LIBRARY": {
+   "lines": [
+    "Library"
+   ],
+   "size": 100
+  },
+  "LABORATORY": {
+   "lines": [
+    "Labora-",
+    "tory"
+   ],
+   "size": 103
+  },
+  "STUDY": {
+   "lines": [
+    "Study"
+   ],
+   "size": 122
+  },
+  "MEDITATION": {
+   "lines": [
+    "Medita-",
+    "tion"
+   ],
+   "size": 102
+  },
+  "TOWER": {
+   "lines": [
+    "Tower"
+   ],
+   "size": 120
+  },
+  "OFFICES": {
+   "lines": [
+    "Offices"
+   ],
+   "size": 108
+  },
+  "SHOP": {
+   "lines": [
+    "Shop"
+   ],
+   "size": 139
+  }
+ }
+}

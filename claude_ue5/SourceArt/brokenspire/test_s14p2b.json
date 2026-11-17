@@ -1,0 +1,97 @@
+{
+ "tag": "s14p2b",
+ "plan": [
+  "signs14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "signs14",
+   "ok": true,
+   "towns": {
+    "Brokenspire": {
+     "signs": 9,
+     "trades": 9,
+     "faces": 18,
+     "texts": 0,
+     "faces_off": [],
+     "words": [
+      "BARRACKS",
+      "CHAPEL",
+      "GENERALGOODS",
+      "HEALER",
+      "HEDGEWITCH",
+      "SMITHY",
+      "STOREHOUSE",
+      "TAVERN",
+      "TEMPLE"
+     ]
+    },
+    "Kethrys Spire": {
+     "signs": 16,
+     "trades": 17,
+     "faces": 32,
+     "texts": 0,
+     "faces_off": [],
+     "words": [
+      "BARRACKS",
+      "CHAPEL",
+      "GENERALGOODS",
+      "HEALER",
+      "LABORATORY",
+      "LIBRARY",
+      "MEDITATION",
+      "SMITHY",
+      "STOREHOUSE",
+      "STUDY",
+      "TAVERN",
+      "TEMPLE"
+     ]
+    },
+    "Graymourne": {
+     "signs": 13,
+     "trades": 13,
+     "faces": 26,
+     "texts": 0,
+     "faces_off": [],
+     "words": [
+      "BARRACKS",
+      "CHAPEL",
+      "GENERALGOODS",
+      "HEALER",
+      "SLUICEHOUSE",
+      "SMITHY",
+      "STOREHOUSE",
+      "TAVERN",
+      "TEMPLE",
+      "WAREHOUSE"
+     ]
+    }
+   },
+   "pictured": [
+    "GENERALGOODS",
+    "LABORATORY",
+    "LIBRARY",
+    "MEDITATION",
+    "SLUICEHOUSE",
+    "STOREHOUSE",
+    "STUDY",
+    "WAREHOUSE"
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "bs_s14p2b_signs14_generalgoods.png",
+  "bs_s14p2b_signs14_storehouse.png",
+  "bs_s14p2b_signs14_library.png",
+  "bs_s14p2b_signs14_laboratory.png",
+  "bs_s14p2b_signs14_study.png",
+  "bs_s14p2b_signs14_meditation.png",
+  "bs_s14p2b_signs14_warehouse.png",
+  "bs_s14p2b_signs14_sluicehouse.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

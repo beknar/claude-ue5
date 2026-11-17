@@ -5885,7 +5885,82 @@ def step_rogue12(only=None):
     step_result("rogue12", ok, manuals_ok=manuals_ok, arts_ok=arts_ok, failed=[n for n in want if not A.get(n, {}).get("ok")], **res)
 
 
-STEPS = {"rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
+
+# ---------------------------------------------------------------------------------------------- the list of 2026-11-16 (improvements14)
+def step_log14():
+    """item 8: "enable the ability to see the last 20 game messages": 24 lines given (her weapon put into the quick slots in turn,
+    each saying where), the log keeping the last 20, newest first, each with its age; L opens and shuts the panel, the pad's D-pad
+    down too; a picture of it"""
+    yield from restart("Warrior"); c = cb(); res = {}
+    w0 = str(c.get_quick_slots()[0])
+    said = []
+    for i in range(24):
+        c.assign_quick_entry(i % 10, w0); said.append(str(c.message)); yield from rwait(0.05)
+    log = [str(l) for l in c.get_message_log()]
+    res["count"] = len(log); res["newest"] = log[0] if log else None; res["oldest"] = log[-1] if log else None
+    texts = [l.split("|", 1)[1] for l in log]
+    # (the last 20 lines said, newest first: the 24 said, less the first 4, in reverse; same lines in a row are one)
+    want = []
+    for s_ in reversed(said):
+        if not want or want[-1] != s_: want.append(s_)
+    res["order_ok"] = texts == want[:len(texts)]
+    # (a line said three times in a row, seconds apart: one line with its count (PR #78's review: a gate's line every 5 s filled it))
+    for k_ in range(3): c.assign_quick_item(3, "Iron Ingot"); yield from rwait(1.3)
+    log2 = [str(l) for l in c.get_message_log()]
+    res["repeat_line"] = log2[0] if log2 else None; res["repeat_ok"] = bool(log2) and log2[0].endswith("(x3)") and not log2[1].split("|", 1)[1].startswith(log2[0].split("|", 1)[1].split(" (x")[0])
+    yield from press("L"); res["open_by_L"] = c.is_message_log_open()
+    yield from rwait(0.5); shot("log14_panel", "1280x720"); yield from rwait(1.2)
+    yield from press("L"); res["shut_by_L"] = not c.is_message_log_open()
+    yield from press("Gamepad_DPad_Down"); res["open_by_pad"] = c.is_message_log_open()
+    yield from press("Gamepad_DPad_Down"); res["shut_by_pad"] = not c.is_message_log_open()
+    ok = res["count"] == 20 and res["order_ok"] and res["repeat_ok"] and res["open_by_L"] and res["shut_by_L"] and res["open_by_pad"] and res["shut_by_pad"]
+    step_result("log14", ok, **res)
+
+def step_quick14():
+    """item 20: "when a potion or food is in a quick bar, the attack action should consume it": a healing potion and a bread put on
+    the bar (food allowed now); each made ready with the D-pad, the attack button (the left mouse) uses one: its count down by one,
+    her health up for the potion, no blow struck; with nothing ready the attack strikes"""
+    yield from restart("Warrior"); c = cb(); res = {}
+    c.add_item("Small Healing Potion", 2); c.add_item("Bread", 2)
+    res["potion_on_bar"] = c.assign_quick_item(6, "Small Healing Potion"); res["bread_on_bar"] = c.assign_quick_item(7, "Bread")
+    def ready(item):
+        for _ in range(14):
+            if str(c.get_ready_ability()) == "#" + item: return True
+            yield from press("Gamepad_DPad_Right")
+        return str(c.get_ready_ability()) == "#" + item
+    def attack():
+        c.simulate_key(key("LeftMouseButton"), True); yield from rwait(0.15); c.simulate_key(key("LeftMouseButton"), False); yield from rwait(0.6)
+    c.set_health(c.get_max_health() * 0.4); yield from rwait(0.3)
+    res["potion_ready"] = yield from ready("Small Healing Potion")
+    n0 = c.get_item_count("Small Healing Potion"); h0 = c.get_health(); a0 = c.attacks_made
+    yield from attack()
+    res["potion"] = {"used": n0 - c.get_item_count("Small Healing Potion"), "health_up": round(c.get_health() - h0, 1), "blows": c.attacks_made - a0}
+    res["bread_ready"] = yield from ready("Bread")
+    n0 = c.get_item_count("Bread"); a0 = c.attacks_made
+    yield from attack()
+    res["bread"] = {"used": n0 - c.get_item_count("Bread"), "blows": c.attacks_made - a0}
+    # (nothing ready: the weapon in her hand)
+    yield from press("1"); yield from rwait(0.3); a0 = c.attacks_made
+    yield from attack()
+    res["plain_attack_blows"] = c.attacks_made - a0
+    # (the last potion ready, then drunk from the inventory: none left, it is no longer ready and the attack strikes (PR #78's review))
+    res["last_ready"] = yield from ready("Small Healing Potion")
+    c.use_item("Small Healing Potion"); yield from rwait(0.3); a0 = c.attacks_made
+    yield from attack(); yield from rwait(0.3)
+    res["after_none_left"] = {"count": c.get_item_count("Small Healing Potion"), "ready": str(c.get_ready_ability()), "blows": c.attacks_made - a0}
+    # (the Mage with a potion ready: her spell key still casts (PR #78's review: the casters' spells were held too))
+    yield from restart("Mage"); c = cb(); c.add_item("Small Healing Potion", 1); c.assign_quick_item(6, "Small Healing Potion")
+    res["mage_ready"] = yield from ready("Small Healing Potion")
+    a0 = c.attacks_made; s0 = c.bolts_cast
+    c.simulate_key(key("RightMouseButton"), True); yield from rwait(0.2); c.simulate_key(key("RightMouseButton"), False); yield from rwait(1.0)
+    res["mage_spell_key"] = {"attacks": c.attacks_made - a0, "bolts": c.bolts_cast - s0, "potion_left": c.get_item_count("Small Healing Potion")}
+    ok = (res["potion_on_bar"] and res["bread_on_bar"] and res["potion_ready"] and res["potion"]["used"] == 1 and res["potion"]["health_up"] > 0
+          and res["potion"]["blows"] == 0 and res["bread_ready"] and res["bread"]["used"] == 1 and res["bread"]["blows"] == 0 and res["plain_attack_blows"] >= 1
+          and res["last_ready"] and res["after_none_left"]["count"] == 0 and res["after_none_left"]["blows"] >= 1
+          and res["mage_ready"] and (res["mage_spell_key"]["attacks"] + res["mage_spell_key"]["bolts"]) >= 1 and res["mage_spell_key"]["potion_left"] == 1)
+    step_result("quick14", ok, **res)
+
+STEPS = {"log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
          "spells11_spells": lambda: step_spells11(("spells",)), "spells11_curses": lambda: step_spells11(("curses",)), "spells11_slashes": lambda: step_spells11(("slashes",)), "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
          "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "menulook": step_menulook, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,

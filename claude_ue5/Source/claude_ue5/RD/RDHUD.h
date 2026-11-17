@@ -176,6 +176,8 @@ private:
 	// ---- random_dungeonmagic_level4 (generator Heroes)
 	/** "FOUND  <item>" a moment after a container gave it, and what the inventory last did */
 	void DrawNotices(float Sc);
+	/** the list of 2026-11-16: the last 20 messages (RDList14.cpp) */
+	void DrawMessageLog(float Sc);
 	/** her inventory (it pauses the game): her weapons, then her potions and food; what the one under the cursor does */
 	void DrawInventory(float Sc);
 	/** what an item does, for her (its share in her hit points or mana) */

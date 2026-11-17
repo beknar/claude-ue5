@@ -3282,8 +3282,10 @@ void ARDSection::AddSignText(const FTransform& SignT, const FString& Text)
 			AddPiece(Face, FTransform(FRotator(0, Side > 0 ? 0.f : 180.f, 0), FVector(90.4f, Side * 3.35f, -89.5f)) * SignT, true);
 		return;
 	}
-	// (the tavern sign's board hangs under its bracket: about x 30-146, z -115 to -20 in the piece's frame, 6 cm thick along y;
-	// the letters on each face, gold paint on the dark wood)
+	// (no painted face for these words (890 paints every word of RDTSignText): the engine's text on each face, gold paint on the
+	// dark wood, in the board's wide upper part (the board is a shield narrowing to its point: x 58.5 to 122.3, z -64.3 down to
+	// its point at -114.7) and sized to fit 40 x 22 cm there (the list of 2026-11-16: at a fixed size, z -66, it stood past the
+	// board's top and its sloping edges))
 	for (int32 Side = -1; Side <= 1; Side += 2)
 	{
 		UTextRenderComponent* Tx = NewObject<UTextRenderComponent>(this, NAME_None, RF_Transactional);
@@ -3292,12 +3294,14 @@ void ARDSection::AddSignText(const FTransform& SignT, const FString& Text)
 		Tx->SetText(FText::FromString(Text));
 		Tx->SetHorizontalAlignment(EHTA_Center);
 		Tx->SetVerticalAlignment(EVRTA_TextCenter);
-		Tx->SetWorldSize(Text.Contains(TEXT("\n")) ? 17.f : 19.f);
+		Tx->SetWorldSize(10.f);
+		const FVector Ls = Tx->GetTextLocalSize();
+		Tx->SetWorldSize(10.f * FMath::Min(40.f / FMath::Max(Ls.Y, 1.f), 22.f / FMath::Max(Ls.Z, 1.f)));
 		Tx->SetTextRenderColor(FColor(255, 214, 120));
 		Tx->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		Tx->ComponentTags.Add(TEXT("TownSign"));
 		// (a text faces its +X: turned to face the board's side)
-		const FTransform Local(FRotator(0, Side * 90.f, 0), FVector(88.f, Side * 4.2f, -66.f));
+		const FTransform Local(FRotator(0, Side * 90.f, 0), FVector(90.4f, Side * 3.6f, -82.f));
 		Tx->SetWorldTransform(Local * SignT);
 		Tx->RegisterComponent();
 		AddInstanceComponent(Tx);

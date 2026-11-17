@@ -23,6 +23,8 @@ The game is the packaged one (`pipeline/package_mistward.ps1`): the hero menu, B
 | Jump | Space | A |
 | Run | Shift held; R switches walk / run | LT switches walk / run |
 | Quick bar | 1 to 0 use the first ten slots (an ability goes off at once) | D-pad left / right: the next or previous filled slot (an ability is made ready, the attack button makes it) |
+| A potion or food made ready on the quick bar | the left mouse button uses one (2026-11-16: every hero; food may go on the bar) | RB uses one |
+| The last 20 messages | L opens and shuts them (2026-11-16) | D-pad down |
 | Next weapon or spell | the mouse wheel | Y |
 | Act on what is near (below) | F | X |
 | Inventory | I or Tab | Start (a short press) |

@@ -843,6 +843,10 @@ void ARDHUD::DrawHUD()
 		if (!bBigMap) DrawNotices(Sc);
 		if (Gen->GetPlayerCombat()->IsInventoryOpen()) DrawInventory(Sc);
 		if (Gen->GetPlayerCombat()->IsCraftingOpen()) DrawCrafting(Sc);
+		// (not over the inventory or the crafting panel, where its keys do not reach; shut at a death (PR #78's review))
+		URDCombatComponent* Cl = Gen->GetPlayerCombat();
+		if (Cl->IsMessageLogOpen() && Cl->IsDead()) Cl->SetMessageLogOpen(false);
+		if (Cl->IsMessageLogOpen() && !bBigMap && !Cl->IsInventoryOpen() && !Cl->IsCraftingOpen()) DrawMessageLog(Sc);
 	}
 	// ---- Brokenspire: the town's panel
 	if (Gen->IsTownPanelOpen()) DrawTownPanel(Sc);

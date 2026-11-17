@@ -2,7 +2,7 @@
 RDSky.cpp, RDWildLife.cpp and the rest named there). Run on the open brokenspire level, play stopped. Parts (argv[1], default
 all but icons, in this order):
   signs   the trades' signs' words (blender_numpy/bs_signs.py's pictures, Almendra): T_BS_Sign_<WORDS>, a masked gold-leaf
-          material each, pieces Town.SignFace_<WORDS> (a plane standing facing +Y, 58 x 42 cm)
+          material each, pieces Town.SignFace_<WORDS> (a plane standing facing +Y, 63 x 47.25 cm: the board's own)
   town    the mill's house (Old Windmill's packed level actor; its sails are Town.Mill, put on it by RDTownPlan.cpp), the gate's
           levers (a post and an arm), the food set out on tables (the kit's bread, cheese, apples), the prep table without
           its food (a copy with the triangles over its top taken out: the town sets its food as things to take), what each
@@ -146,9 +146,11 @@ def signs():
         t = import_tex(os.path.join(src, f), D7, "T_BS_Sign_" + key)
         m = mi(f"{D7}/MI_BS_Sign_{key}", base, textures={"Tex": t})
         p = unreal.RDPiece(); p.mesh = plane; p.collision = False; p.material = m
-        # (the plane's +Z turned to +Y, its X along the board (her right as she faces it), its height down -Z: 0.58 x 0.42 m)
+        # (the plane's +Z turned to +Y, its X along the board (her right as she faces it), its height down -Z: the board's whole
+        # 63 x 47.25 cm (the list of 2026-11-16: bs_signs.py fits the words inside the board's own outline, a shield narrowing to
+        # its point; fitted to 58 x 42 cm low on it, "Store House" stood past its sloping edges))
         r = unreal.MathLibrary.make_rot_from_zx(V(0, 1, 0), V(1, 0, 0))
-        p.adjust = unreal.Transform(V(0, 0, 0), r, V(0.58, 0.42, 1.0)); p.size = V(58, 2, 42)
+        p.adjust = unreal.Transform(V(0, 0, 0), r, V(0.63, 0.4725, 1.0)); p.size = V(63, 2, 47.25)
         add[f"Town.SignFace_{key}"] = p
     set_pieces(g, add)
     REPORT.append(f"signs: {len(add)} sign faces")

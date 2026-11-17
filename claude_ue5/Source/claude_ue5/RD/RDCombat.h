@@ -909,6 +909,19 @@ private:
 	void SlashHit(const FRDSlashDef& S, ARDMonster* Mo, float Dmg, const FVector& At, bool bPrimary = true);
 	void TickBlocking(const class APlayerController* PC);
 	void TickThirdListInput(const class APlayerController* PC);
+	// ---- the list of 2026-11-16 (RDList14.cpp): the last 20 messages, a quick-bar item used by the attack
+	TArray<FString> MessageLogText; TArray<double> MessageLogAt; TArray<int32> MessageLogTimes;
+	bool bMessageLogOpen = false;
+	void PushMessageLog(const FString& Text);
+	void TickList14Input(const class APlayerController* PC);
+public:
+	/** the last 20 lines the HUD was given, newest first: "<seconds ago>|<text>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") TArray<FString> GetMessageLog() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") void SetMessageLogOpen(bool bOpen);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool IsMessageLogOpen() const { return bMessageLogOpen; }
+	/** the attack button's use of an item made ready on the quick bar: true when it took the press (no blow then) */
+	bool QuickItemAttack(const class APlayerController* PC);
+private:
 	/** the inventory's lines of one tab (bInventoryTabs) */
 	TArray<FString> TabLines(int32 Tab) const;
 	/** the weapon lines with stacks: "weapon|<name>|<left>|<full>|<index>|<count>|<slash>" */

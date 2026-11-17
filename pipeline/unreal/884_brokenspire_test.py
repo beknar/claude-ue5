@@ -1228,6 +1228,91 @@ def step_signs():
     ok = res["signs"] == res["trades"] and res["faces"] == 2 * res["trades"] and "GENERALGOODS" in res["words"] and res["face_off_board_cm"] < 2.0 and res["notices"] == 8
     step_result("signs", ok, **res)
 
+BOARD14 = (58.5, 122.3, -114.7, -64.3)      # (the sign piece's board in its own frame: x along the bracket, z down from it, cm)
+
+def sign_extents():
+    """every trade sign of the town with its lettering measured in the sign's own frame against its board: the painted faces
+    (a plane of 100 cm scaled) and the engine's text (its local size about its middle), each how far past the board it reaches"""
+    S = section(); signs = []
+    for c in isms(S):
+        m = c.get_editor_property("static_mesh")
+        if m and "TavernSign" in m.get_name():
+            for i in range(c.get_instance_count()):
+                tr = c.get_instance_transform(i, True); tr = tr[-1] if isinstance(tr, tuple) else tr; signs.append(tr)
+    def nearest(loc):
+        return min(signs, key=lambda s_: (s_.translation - loc).length()) if signs else None
+    out = []
+    def past(x0, x1, z0, z1):
+        b = BOARD14
+        return round(max(0.0, b[0] - x0, x1 - b[1], b[2] - z0, z1 - b[3]), 1)
+    for c in isms(S):
+        mt = c.get_material(0)
+        if not mt or not mt.get_name().startswith("MI_BS_Sign_"): continue
+        for i in range(c.get_instance_count()):
+            tr = c.get_instance_transform(i, True); tr = tr[-1] if isinstance(tr, tuple) else tr
+            sg = nearest(tr.translation)
+            if not sg: continue
+            # (sizes in the sign's frame: the inverse transform takes off the sign's scale, so the face's size is divided by it too
+            # (PR #78's review))
+            lc = sg.inverse_transform_location(tr.translation); s = tr.scale3d; ss = sg.scale3d
+            hw, hh = 50.0 * s.x / max(ss.x, 1e-3), 50.0 * s.y / max(ss.z, 1e-3)
+            out.append({"kind": "painted", "words": mt.get_name()[11:], "at": [round(lc.x, 1), round(lc.y, 1), round(lc.z, 1)],
+                        "size_cm": [round(2 * hw, 1), round(2 * hh, 1)], "past_board_cm": past(lc.x - hw, lc.x + hw, lc.z - hh, lc.z + hh)})
+    for a in [S]:
+        for c in a.get_components_by_class(unreal.TextRenderComponent):
+            if "TownSign" not in [str(x) for x in c.component_tags]: continue
+            sg = nearest(c.get_world_location())
+            if not sg: continue
+            lc = sg.inverse_transform_location(c.get_world_location())
+            sz = c.get_text_local_size(); ss = sg.scale3d
+            w_, h_ = sz.y * c.get_world_scale().y / max(ss.x, 1e-3), sz.z * c.get_world_scale().z / max(ss.z, 1e-3)
+            out.append({"kind": "text", "words": str(c.text).replace("\n", "/"), "at": [round(lc.x, 1), round(lc.y, 1), round(lc.z, 1)],
+                        "size_cm": [round(w_, 1), round(h_, 1)], "past_board_cm": past(lc.x - w_ / 2, lc.x + w_ / 2, lc.z - h_ / 2, lc.z + h_ / 2),
+                        "world": [round(c.get_world_location().x), round(c.get_world_location().y), round(c.get_world_location().z)]})
+    return signs, out
+
+def step_signs14():
+    """item 1 of the list of 2026-11-16: "the lettering on some of the signs for the buildings will sometimes fall outside of the
+    sign's boundaries. example: store house": in Brokenspire, Kethrys Spire and Graymourne (their libraries, laboratories, studies,
+    meditation chambers, warehouses and sluice house had the engine's text), every trade's sign has its two painted faces (its
+    words fitted inside the board's own outline by bs_signs.py, every pixel checked there), each at the board's middle and its
+    whole 63 x 47.25 cm, and no sign the engine's text; pictures of the storehouse's and of words that had the engine's text"""
+    res = {"towns": {}}
+    words_seen = set()
+    def town_signs(name):
+        signs, ext = sign_extents()
+        faces = [e for e in ext if e["kind"] == "painted"]; texts = [e for e in ext if e["kind"] == "text"]
+        off = [e for e in faces if abs(e["at"][0] - 90.4) > 0.6 or abs(e["at"][2] + 89.5) > 0.6 or abs(e["size_cm"][0] - 63.0) > 0.6 or abs(e["size_cm"][1] - 47.25) > 0.6]
+        trades = [b for b in blds() if b["kind"] not in ("home", "castle")]
+        res["towns"][name] = {"signs": len(signs), "trades": len(trades), "faces": len(faces), "texts": len(texts), "faces_off": off[:4],
+                              "words": sorted(set(e["words"] for e in faces))}
+        return signs, faces
+    def picture(signs, faces, want):
+        S = section(); shot_n = 0
+        for c in isms(S):
+            mt = c.get_material(0)
+            if not mt or not mt.get_name().startswith("MI_BS_Sign_"): continue
+            w = mt.get_name()[11:]
+            if w not in want or w in words_seen: continue
+            tr = c.get_instance_transform(0, True); tr = tr[-1] if isinstance(tr, tuple) else tr
+            words_seen.add(w)
+            nrm = unreal.MathLibrary.get_up_vector(tr.rotation.rotator())
+            # (square to the face, 2.2 m out, her body hidden: from behind her at 3.3 m she stood between the camera and the board)
+            p = tr.translation; cam = V(p.x + nrm.x * 220, p.y + nrm.y * 220, 0)
+            yaw = math.degrees(math.atan2(p.y - cam.y, p.x - cam.x))
+            put(cam, yaw=yaw, z=0); G["pawn"].set_actor_hidden_in_game(True)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=16, yaw=yaw)); yield from wait(1.0); shot(f"signs14_{w.lower()}"); yield from rwait(1.5)
+            G["pawn"].set_actor_hidden_in_game(False)
+    s_, f_ = town_signs("Brokenspire")
+    yield from picture(s_, f_, ("STOREHOUSE", "GENERALGOODS"))
+    for name, want in (("Kethrys Spire", ("LIBRARY", "LABORATORY", "MEDITATION", "STUDY")), ("Graymourne", ("WAREHOUSE", "SLUICEHOUSE"))):
+        ti, x, y = yield from to_town(name); yield from rwait(3.0)
+        s_, f_ = town_signs(name)
+        yield from picture(s_, f_, want)
+    ok = all(v["signs"] > 0 and v["faces"] == 2 * v["signs"] and v["texts"] == 0 and not v["faces_off"] for v in res["towns"].values())
+    res["pictured"] = sorted(words_seen)
+    step_result("signs14", ok, **res)
+
 def step_circle():
     """the teleport circle (the user's: "even after killing all of the enemies in the castle, player was not able to use the
     teleport circle to get to the Mistward Castle dungeon"): Mistward Castle on its list, shut while the Mistward Hall's guards
@@ -1360,7 +1445,7 @@ def step_walkers():
 STEPS = {"town": step_town, "doors": step_doors, "talk": step_talk, "services": step_services, "guards": step_guards, "castle": step_castle,
          "map": step_map, "folk": step_folk, "gate": step_gate, "pictures": step_pictures, "tour": step_tour, "trip": step_trip,
          "castlewalls": step_castlewalls, "daynight": step_daynight, "shape": step_shape, "watch": step_watch, "lights": step_lights,
-         "signs": step_signs, "circle": step_circle, "burned": step_burned, "windows": step_windows, "walkers": step_walkers}
+         "signs": step_signs, "signs14": step_signs14, "circle": step_circle, "burned": step_burned, "windows": step_windows, "walkers": step_walkers}
 # ------------------------------------------------------------------------------------------------ the third list of 2026-11-02
 def map_state():
     p = str(G["pc"].get_hud().get_town_map_state()).split("|")

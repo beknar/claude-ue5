@@ -1,0 +1,61 @@
+{
+ "tag": "s14p2c",
+ "plan": [
+  "log14",
+  "quick14"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "log14",
+   "ok": true,
+   "count": 20,
+   "newest": "0|Dagger in quick slot 4",
+   "oldest": "1|Dagger in quick slot 5",
+   "order_ok": true,
+   "repeat_line": "1|The iron ingot cannot go on the quick bar (x3)",
+   "repeat_ok": true,
+   "open_by_L": true,
+   "shut_by_L": true,
+   "open_by_pad": true,
+   "shut_by_pad": true
+  },
+  {
+   "step": "quick14",
+   "ok": true,
+   "potion_on_bar": true,
+   "bread_on_bar": true,
+   "potion_ready": true,
+   "potion": {
+    "used": 1,
+    "health_up": 14.0,
+    "blows": 0
+   },
+   "bread_ready": true,
+   "bread": {
+    "used": 1,
+    "blows": 0
+   },
+   "plain_attack_blows": 1,
+   "last_ready": true,
+   "after_none_left": {
+    "count": 0,
+    "ready": "None",
+    "blows": 1
+   },
+   "mage_ready": true,
+   "mage_spell_key": {
+    "attacks": 1,
+    "bolts": 1,
+    "potion_left": 1
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_s14p2c_log14_panel.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 0
+}
