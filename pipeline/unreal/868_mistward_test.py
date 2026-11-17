@@ -5904,12 +5904,16 @@ def step_log14():
     for s_ in reversed(said):
         if not want or want[-1] != s_: want.append(s_)
     res["order_ok"] = texts == want[:len(texts)]
+    # (a line said three times in a row, seconds apart: one line with its count (PR #78's review: a gate's line every 5 s filled it))
+    for k_ in range(3): c.assign_quick_item(3, "Iron Ingot"); yield from rwait(1.3)
+    log2 = [str(l) for l in c.get_message_log()]
+    res["repeat_line"] = log2[0] if log2 else None; res["repeat_ok"] = bool(log2) and log2[0].endswith("(x3)") and not log2[1].split("|", 1)[1].startswith(log2[0].split("|", 1)[1].split(" (x")[0])
     yield from press("L"); res["open_by_L"] = c.is_message_log_open()
     yield from rwait(0.5); shot("log14_panel", "1280x720"); yield from rwait(1.2)
     yield from press("L"); res["shut_by_L"] = not c.is_message_log_open()
     yield from press("Gamepad_DPad_Down"); res["open_by_pad"] = c.is_message_log_open()
     yield from press("Gamepad_DPad_Down"); res["shut_by_pad"] = not c.is_message_log_open()
-    ok = res["count"] == 20 and res["order_ok"] and res["open_by_L"] and res["shut_by_L"] and res["open_by_pad"] and res["shut_by_pad"]
+    ok = res["count"] == 20 and res["order_ok"] and res["repeat_ok"] and res["open_by_L"] and res["shut_by_L"] and res["open_by_pad"] and res["shut_by_pad"]
     step_result("log14", ok, **res)
 
 def step_quick14():
@@ -5939,8 +5943,21 @@ def step_quick14():
     yield from press("1"); yield from rwait(0.3); a0 = c.attacks_made
     yield from attack()
     res["plain_attack_blows"] = c.attacks_made - a0
+    # (the last potion ready, then drunk from the inventory: none left, it is no longer ready and the attack strikes (PR #78's review))
+    res["last_ready"] = yield from ready("Small Healing Potion")
+    c.use_item("Small Healing Potion"); yield from rwait(0.3); a0 = c.attacks_made
+    yield from attack(); yield from rwait(0.3)
+    res["after_none_left"] = {"count": c.get_item_count("Small Healing Potion"), "ready": str(c.get_ready_ability()), "blows": c.attacks_made - a0}
+    # (the Mage with a potion ready: her spell key still casts (PR #78's review: the casters' spells were held too))
+    yield from restart("Mage"); c = cb(); c.add_item("Small Healing Potion", 1); c.assign_quick_item(6, "Small Healing Potion")
+    res["mage_ready"] = yield from ready("Small Healing Potion")
+    a0 = c.attacks_made; s0 = c.bolts_cast
+    c.simulate_key(key("RightMouseButton"), True); yield from rwait(0.2); c.simulate_key(key("RightMouseButton"), False); yield from rwait(1.0)
+    res["mage_spell_key"] = {"attacks": c.attacks_made - a0, "bolts": c.bolts_cast - s0, "potion_left": c.get_item_count("Small Healing Potion")}
     ok = (res["potion_on_bar"] and res["bread_on_bar"] and res["potion_ready"] and res["potion"]["used"] == 1 and res["potion"]["health_up"] > 0
-          and res["potion"]["blows"] == 0 and res["bread_ready"] and res["bread"]["used"] == 1 and res["bread"]["blows"] == 0 and res["plain_attack_blows"] >= 1)
+          and res["potion"]["blows"] == 0 and res["bread_ready"] and res["bread"]["used"] == 1 and res["bread"]["blows"] == 0 and res["plain_attack_blows"] >= 1
+          and res["last_ready"] and res["after_none_left"]["count"] == 0 and res["after_none_left"]["blows"] >= 1
+          and res["mage_ready"] and (res["mage_spell_key"]["attacks"] + res["mage_spell_key"]["bolts"]) >= 1 and res["mage_spell_key"]["potion_left"] == 1)
     step_result("quick14", ok, **res)
 
 STEPS = {"log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),

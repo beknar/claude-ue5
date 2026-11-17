@@ -51,7 +51,8 @@ def each(maps, fn, label):
         g = open_map(m)
         what = fn(g)
         g.modify(); les.save_current_level()
-        unreal.SystemLibrary.execute_console_command(None, "obj gc")
+        # (the generator let go before the next map loads: one left in a variable made a load fatal (PR #78's review))
+        g = None; gc.collect(); unreal.SystemLibrary.execute_console_command(None, "obj gc")
         REPORT.append(f"927 {label} {m}: {what}")
 
 

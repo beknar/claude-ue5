@@ -86,9 +86,11 @@ def fit(options):
     for size in range(200, 20, -2):
         for lines in options:
             if layout(lines, size):
-                # (85 % of the largest: room round it, so it can sit in the middle of the board's room)
-                s2 = int(size * 0.85)
-                return lines, s2, layout(lines, s2)
+                # (85 % of the largest: room round it, so it can sit in the middle of the board's room; searched down from there
+                # if that size finds no place (PR #78's review: the rule's fixed size))
+                for s2 in range(int(size * 0.85), 20, -2):
+                    L = layout(lines, s2)
+                    if L: return lines, s2, L
     raise RuntimeError("no size fits")
 
 

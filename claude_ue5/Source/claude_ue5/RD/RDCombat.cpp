@@ -2257,8 +2257,8 @@ void URDCombatComponent::TickCasterInput(const APlayerController* PC)
 	const bool bBlocker = Generator && Generator->HeroBlocks();
 	const bool bSpellKey = PC->IsInputKeyDown(EKeys::RightMouseButton) || PC->IsInputKeyDown(EKeys::E) || (!bBlocker && PC->IsInputKeyDown(EKeys::Gamepad_LeftShoulder));
 	// (the list of 2026-11-16, item 20: a potion or food made ready on the bar is used by the attack, its press no blow)
-	if (QuickItemAttack(PC)) {}
-	else if (PC->IsInputKeyDown(EKeys::LeftMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_RightShoulder) || (bDrawnSpell && !bAlongside && bSpellKey)) StartAttack();
+	const bool bQuickTook = QuickItemAttack(PC);
+	if ((!bQuickTook && (PC->IsInputKeyDown(EKeys::LeftMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_RightShoulder))) || (bDrawnSpell && !bAlongside && bSpellKey)) StartAttack();
 	else if (bAlongside && bSpellKey) StartSpell();
 	// walking / running: R, or the left trigger pulled (its button, or the axis past half way for a pad that sends none)
 	// (every hero's run switch is LT; the Warrior blocks with LB, the user's of 2026-11-02: until then she blocked with LT and

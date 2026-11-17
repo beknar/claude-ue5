@@ -910,7 +910,7 @@ private:
 	void TickBlocking(const class APlayerController* PC);
 	void TickThirdListInput(const class APlayerController* PC);
 	// ---- the list of 2026-11-16 (RDList14.cpp): the last 20 messages, a quick-bar item used by the attack
-	TArray<FString> MessageLogText; TArray<float> MessageLogAt;
+	TArray<FString> MessageLogText; TArray<double> MessageLogAt; TArray<int32> MessageLogTimes;
 	bool bMessageLogOpen = false;
 	void PushMessageLog(const FString& Text);
 	void TickList14Input(const class APlayerController* PC);

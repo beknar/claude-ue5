@@ -14,19 +14,22 @@ void URDCombatComponent::PushMessageLog(const FString& Text)
 {
 	// (item 8: "enable the ability to see the last 20 game messages": every line the HUD is given, kept with its game time; the
 	// same line given again within a second is one line (a hazard's line renewed each look))
+	// (PR #78's review: a line said again right after itself is one line with its count, however long between (a locked gate's
+	// line every 5 s filled the log); its age the real time the player lived, not the game's (sped up, or stopped in a panel))
 	if (Text.IsEmpty()) return;
-	const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
-	if (MessageLogText.Num() > 0 && MessageLogText.Last() == Text && Now - MessageLogAt.Last() < 1.f) { MessageLogAt.Last() = Now; return; }
-	MessageLogText.Add(Text); MessageLogAt.Add(Now);
-	while (MessageLogText.Num() > RDL14LogMax) { MessageLogText.RemoveAt(0); MessageLogAt.RemoveAt(0); }
+	const double Now = FPlatformTime::Seconds();
+	if (MessageLogText.Num() > 0 && MessageLogText.Last() == Text) { MessageLogAt.Last() = Now; ++MessageLogTimes.Last(); return; }
+	MessageLogText.Add(Text); MessageLogAt.Add(Now); MessageLogTimes.Add(1);
+	while (MessageLogText.Num() > RDL14LogMax) { MessageLogText.RemoveAt(0); MessageLogAt.RemoveAt(0); MessageLogTimes.RemoveAt(0); }
 }
 
 TArray<FString> URDCombatComponent::GetMessageLog() const
 {
-	// (newest first: "<seconds ago>|<text>")
+	// (newest first: "<seconds ago>|<text>", the text with " (x<n>)" when said n times in a row)
 	TArray<FString> Out;
-	const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
-	for (int32 I = MessageLogText.Num() - 1; I >= 0; --I) Out.Add(FString::Printf(TEXT("%.0f|%s"), Now - MessageLogAt[I], *MessageLogText[I]));
+	const double Now = FPlatformTime::Seconds();
+	for (int32 I = MessageLogText.Num() - 1; I >= 0; --I)
+		Out.Add(FString::Printf(TEXT("%.0f|%s%s"), Now - MessageLogAt[I], *MessageLogText[I], MessageLogTimes[I] > 1 ? *FString::Printf(TEXT(" (x%d)"), MessageLogTimes[I]) : TEXT("")));
 	return Out;
 }
 
@@ -39,7 +42,8 @@ void URDCombatComponent::TickList14Input(const APlayerController* PC)
 {
 	// (L, or the pad's D-pad down where the quick bar leaves it free and the map is shut, opens and shuts the messages)
 	if (!PC || !Generator || !Generator->bMessageLog14) return;
-	const bool bPad = Generator->bQuickSlots && !Generator->bMapOpen && PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Down);
+	// (the D-pad down is no one else's in play, quick bar or not (PR #78's review))
+	const bool bPad = !Generator->bMapOpen && PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Down);
 	if (PC->WasInputKeyJustPressed(EKeys::L) || bPad) SetMessageLogOpen(!bMessageLogOpen);
 }
 
@@ -47,12 +51,19 @@ bool URDCombatComponent::QuickItemAttack(const APlayerController* PC)
 {
 	// (item 20: "when a potion or food is in a quick bar, the attack action should consume it": an item made ready on the bar
 	// (the D-pad) is used by the attack button, in every hero's controls; the press that used it makes no blow until let go)
+	// (the attack keys only: a spell key still casts with an item ready (PR #78's review: the casters' spells were held too); an
+	// item ready with none left, or whose use is refused, is no longer ready, so the attack strikes again)
 	if (!PC || !Generator || !Generator->bQuickUse14) return false;
 	const bool bAtkDown = PC->IsInputKeyDown(EKeys::LeftMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_RightShoulder);
 	if (!bAtkDown) bAbilityPressHeld = false;
 	if (!ReadyAbility.IsNone() && IsQuickItem(ReadyAbility))
 	{
-		if (PC->WasInputKeyJustPressed(EKeys::LeftMouseButton) || PC->WasInputKeyJustPressed(EKeys::Gamepad_RightShoulder)) { UseAbility(ReadyAbility); bAbilityPressHeld = true; }
+		if (GetItemCount(QuickItemOf(ReadyAbility)) <= 0) { ReadyAbility = NAME_None; return bAbilityPressHeld; }
+		if (PC->WasInputKeyJustPressed(EKeys::LeftMouseButton) || PC->WasInputKeyJustPressed(EKeys::Gamepad_RightShoulder))
+		{
+			if (!UseAbility(ReadyAbility)) ReadyAbility = NAME_None;
+			bAbilityPressHeld = true;
+		}
 		return true;
 	}
 	return bAbilityPressHeld;
@@ -88,10 +99,20 @@ void ARDHUD::DrawMessageLog(float Sc)
 		const int32 S = FCString::Atoi(*Ago);
 		const FString When = S < 60 ? FString::Printf(TEXT("%d s ago"), S) : S < 3600 ? FString::Printf(TEXT("%d min ago"), S / 60) : FString::Printf(TEXT("%d h ago"), S / 3600);
 		UI.Text(When, FLinearColor(0.68f, 0.64f, 0.56f), A.X + Pad, Y, Small, Sc * 0.95f);
-		// (a long line cut to the panel's width with an ellipsis)
+		// (a long line cut to the panel's width with an ellipsis: the longest that fits found by halving, a few measures a line
+		// (PR #78's review: two letters a measure was hundreds a frame))
 		FString Shown = Text; float Lw, Lh; UI.TextSize(Shown, Lw, Lh, Small, Sc * 1.05f);
-		while (Lw > Wd - AgeW && Shown.Len() > 4) { Shown = Shown.LeftChop(2); UI.TextSize(Shown + TEXT("..."), Lw, Lh, Small, Sc * 1.05f); }
-		if (Shown != Text) Shown += TEXT("...");
+		if (Lw > Wd - AgeW)
+		{
+			int32 Lo = 0, Hi = Text.Len();
+			while (Lo < Hi)
+			{
+				const int32 Mid = (Lo + Hi + 1) / 2; float Mw, Mh;
+				UI.TextSize(Text.Left(Mid) + TEXT("..."), Mw, Mh, Small, Sc * 1.05f);
+				if (Mw <= Wd - AgeW) Lo = Mid; else Hi = Mid - 1;
+			}
+			Shown = Text.Left(Lo) + TEXT("...");
+		}
 		UI.Text(Shown, FLinearColor(0.96f, 0.93f, 0.84f), A.X + Pad + AgeW, Y, Small, Sc * 1.05f);
 		Y += FMath::Max(Lh, Th * 0.8f) + 7.f * Sc;
 	}

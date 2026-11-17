@@ -1252,8 +1252,10 @@ def sign_extents():
             tr = c.get_instance_transform(i, True); tr = tr[-1] if isinstance(tr, tuple) else tr
             sg = nearest(tr.translation)
             if not sg: continue
-            lc = sg.inverse_transform_location(tr.translation); s = tr.scale3d
-            hw, hh = 50.0 * s.x, 50.0 * s.y
+            # (sizes in the sign's frame: the inverse transform takes off the sign's scale, so the face's size is divided by it too
+            # (PR #78's review))
+            lc = sg.inverse_transform_location(tr.translation); s = tr.scale3d; ss = sg.scale3d
+            hw, hh = 50.0 * s.x / max(ss.x, 1e-3), 50.0 * s.y / max(ss.z, 1e-3)
             out.append({"kind": "painted", "words": mt.get_name()[11:], "at": [round(lc.x, 1), round(lc.y, 1), round(lc.z, 1)],
                         "size_cm": [round(2 * hw, 1), round(2 * hh, 1)], "past_board_cm": past(lc.x - hw, lc.x + hw, lc.z - hh, lc.z + hh)})
     for a in [S]:
@@ -1262,7 +1264,8 @@ def sign_extents():
             sg = nearest(c.get_world_location())
             if not sg: continue
             lc = sg.inverse_transform_location(c.get_world_location())
-            sz = c.get_text_local_size(); w_, h_ = sz.y * c.get_world_scale().y, sz.z * c.get_world_scale().z
+            sz = c.get_text_local_size(); ss = sg.scale3d
+            w_, h_ = sz.y * c.get_world_scale().y / max(ss.x, 1e-3), sz.z * c.get_world_scale().z / max(ss.z, 1e-3)
             out.append({"kind": "text", "words": str(c.text).replace("\n", "/"), "at": [round(lc.x, 1), round(lc.y, 1), round(lc.z, 1)],
                         "size_cm": [round(w_, 1), round(h_, 1)], "past_board_cm": past(lc.x - w_ / 2, lc.x + w_ / 2, lc.z - h_ / 2, lc.z + h_ / 2),
                         "world": [round(c.get_world_location().x), round(c.get_world_location().y), round(c.get_world_location().z)]})

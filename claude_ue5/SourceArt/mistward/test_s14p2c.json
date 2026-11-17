@@ -13,6 +13,8 @@
    "newest": "0|Dagger in quick slot 4",
    "oldest": "1|Dagger in quick slot 5",
    "order_ok": true,
+   "repeat_line": "1|The iron ingot cannot go on the quick bar (x3)",
+   "repeat_ok": true,
    "open_by_L": true,
    "shut_by_L": true,
    "open_by_pad": true,
@@ -34,7 +36,19 @@
     "used": 1,
     "blows": 0
    },
-   "plain_attack_blows": 1
+   "plain_attack_blows": 1,
+   "last_ready": true,
+   "after_none_left": {
+    "count": 0,
+    "ready": "None",
+    "blows": 1
+   },
+   "mage_ready": true,
+   "mage_spell_key": {
+    "attacks": 1,
+    "bolts": 1,
+    "potion_left": 1
+   }
   }
  ],
  "windows_hidden": "",
