@@ -1345,6 +1345,10 @@ FString ARDDungeonGenerator::TownDescribe(const FVector& From) const
 	{
 		int32 Di = -1; const ARDWildChunk* Dc = bWild && bWildHouseInsides ? WildDoorNear(From, 190.f, Di) : nullptr;
 		const ARDTownsfolk* Wf = WildFolkForF(From);
+		// (the list of 2026-11-16: a wild table or a farmhouse's oven when it is the nearest of the three)
+		FVector Sa; FName Sk;
+		if (bWild && WildStationNear14(From, Sa, Sk) && (!Dc || FVector::Dist2D(Sa, From) < FVector::Dist2D(Dc->Doors[Di].At, From))
+		    && (!Wf || FVector::Dist2D(Sa, From) < FVector::Dist2D(Wf->GetActorLocation(), From))) return WildStationDescribe14(Sk);
 		if (Dc && (!Wf || FVector::Dist2D(Dc->Doors[Di].At, From) < FVector::Dist2D(Wf->GetActorLocation(), From))) return WildDoorDescribe(From);
 		if (Wf) return FString::Printf(TEXT("talk to %s"), *RDTTheTitle(Wf->Title, false));
 	}
@@ -1403,6 +1407,9 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 	{
 		int32 Di = -1; const ARDWildChunk* Dc = bWild && bWildHouseInsides ? WildDoorNear(From, 190.f, Di) : nullptr;
 		const ARDTownsfolk* Wf0 = WildFolkForF(From);
+		FVector Sa; FName Sk;
+		if (bWild && WildStationNear14(From, Sa, Sk) && (!Dc || FVector::Dist2D(Sa, From) < FVector::Dist2D(Dc->Doors[Di].At, From))
+		    && (!Wf0 || FVector::Dist2D(Sa, From) < FVector::Dist2D(Wf0->GetActorLocation(), From))) return WildStationUse14(Sk);
 		if (Dc && (!Wf0 || FVector::Dist2D(Dc->Doors[Di].At, From) < FVector::Dist2D(Wf0->GetActorLocation(), From))) return WildDoorInteract(From);
 	}
 	if (ARDTownsfolk* Wf = WildFolkForF(From))

@@ -555,5 +555,10 @@ public:
 	};
 	TArray<FClear> Clears;
 	bool IsClear(const FVector& Local) const;
+	/** the list of 2026-11-16's fifth phase: its stations (the alchemist's and librarian's tables, a farmhouse's oven): where each
+	 *  stands (world cm), its yaw, its kind ("Alchemist", "Librarian", "Oven") and its place's or farm's id (a farm taken away takes
+	 *  its own) */
+	struct FStation14 { FVector At = FVector::ZeroVector; float Yaw = 0.f; FName Kind; int32 Owner = -1; };
+	TArray<FStation14> Stations14;
 	virtual void Destroyed() override;
 };

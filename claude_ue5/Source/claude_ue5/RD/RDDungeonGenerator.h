@@ -2733,6 +2733,18 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") TArray<FVector> GetAllTables14(FName Station) const;
 	/** tests: the recipes the station offers her now ("Alchemist", "Librarian", "Oven", "Forge", none the anvil), refused ones left out */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") TArray<FName> GetStationRecipes14(FName Station) const;
+	/** the fifth phase's second part (RDList14d.cpp): the tables of the wilds' places (a village one in two, a camp one in three, a
+	 *  witch's hut, a shrine, the abbey's and temple's ruins) and the farmsteads' ovens, used by F as the towns' are */
+	TArray<FName> WildTablesOf14(const struct FRDWildPlace& P) const;
+	void LayWildTables14(class ARDWildChunk* C, const struct FRDWildPlace& P);
+	bool WildBoxFree14(const FVector& Center, float Yaw, const FVector& Half) const;
+	bool WildStationNear14(const FVector& From, FVector& At, FName& Kind) const;
+	FString WildStationDescribe14(const FName& Kind) const;
+	FString WildStationUse14(const FName& Kind);
+	/** tests: "<kind>|<x>|<y>|<z>|<yaw>|<owner>" for every station of the chunks made */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") TArray<FString> GetWildStations14() const;
+	/** tests: "<id>|<kind>|<name>|<x m>|<y m>|<tables>" for the places within RadiusM (metres) the rule gives tables */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") TArray<FString> GetWildTablePlaces14(FVector Near, float RadiusM) const;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 HorseCalls14 = 0;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") bool CallHorseByKey();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool GetHorseMapAt(FVector& At) const;

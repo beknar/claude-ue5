@@ -474,6 +474,46 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 		PutBox(TEXT("Barrel"), Mn.X + 45.f, Mn.Y + 45.f, R.FRandRange(0.f, 360.f), TEXT("barrel"));
 		PutBox(TEXT("Crate"), Mn.X + 45.f, Mn.Y + 125.f, 0.f, TEXT("crate"));
 		if (Hy >= 450.f) PutBox(TEXT("Wardrobe"), Mn.X + Wd * 0.62f, Mx.Y - 32.f, -90.f, TEXT("wardrobe"));
+		// (the list of 2026-11-16's fifth phase, item 15: "ovens to craft food should be available at farms": the kit's bread oven
+		// (the towns' kitchens') at 0.65, against a wall clear of the furniture (an overlap test) and of the door's swing, its front to
+		// the room; else outside behind the back wall, its front away from the house. F bakes there as at a town's oven)
+		if (bTables14)
+			if (const FRDPiece* Op = Piece(TEXT("BreadOven")); Op && Op->Mesh)
+			{
+				const float Os = 0.65f, Od = (float)Op->Size.X * Os, Ow = (float)Op->Size.Y * Os, Oh = (float)Op->Size.Z * Os;
+				struct FOv { float X, Y, YawL; bool bOut; };
+				const FOv Tries[] = { { Mx.X - Ow * 0.5f - 15.f, Mn.Y + Od * 0.5f + 8.f, 90.f, false }, { (Mn.X + Mx.X) * 0.5f, Mn.Y + Od * 0.5f + 8.f, 90.f, false },
+				                      { Mn.X + Ow * 0.5f + 150.f, Mn.Y + Od * 0.5f + 8.f, 90.f, false }, { (Mn.X + Mx.X) * 0.5f, Mx.Y - Od * 0.5f - 8.f, -90.f, false },
+				                      { Mx.X - Ow * 0.5f - 15.f, Mx.Y - Od * 0.5f - 8.f, -90.f, false }, { -Hx - Od * 0.5f - 70.f, 0.f, 180.f, true },
+				                      { -Hx - Od * 0.5f - 70.f, Hy * 0.5f, 180.f, true }, { -Hx - Od * 0.5f - 70.f, -Hy * 0.5f, 180.f, true } };
+				bool bOven = false;
+				for (const FOv& T : Tries)
+				{
+					// (not in the doorway's swing: within 2.5 m of the door's wall and the door's width and a half of its middle)
+					if (!T.bOut && T.X > Mx.X - 260.f && FMath::Abs(T.Y - DoorY) < 250.f) continue;
+					const float Y2 = Yaw + T.YawL;
+					FVector L = At(T.X, T.Y, 0.f);
+					if (T.bOut)
+					{
+						// (outside: on the ground there, level enough, not over the plinth's step)
+						float Zl = 1e9f, Zh = -1e9f;
+						for (const FVector2D& Cn : { FVector2D(0, 0), FVector2D(Od, Ow) * 0.5f, FVector2D(-Od, Ow) * 0.5f, FVector2D(Od, -Ow) * 0.5f, FVector2D(-Od, -Ow) * 0.5f })
+						{
+							const float Z = WildGroundZ(L + FRotator(0.f, Y2, 0.f).RotateVector(FVector(Cn.X, Cn.Y, 0.f)));
+							Zl = FMath::Min(Zl, Z); Zh = FMath::Max(Zh, Z);
+						}
+						if (Zh - Zl > 30.f) continue;
+						L.Z = (Zl + Zh) * 0.5f;
+					}
+					if (!WildBoxFree14(L + FVector(0, 0, 15.f + Oh * 0.5f), Y2, FVector(Od * 0.5f - 3.f, Ow * 0.5f - 3.f, Oh * 0.5f - 12.f))) continue;
+					if (!Mesh(Op->Mesh, Op->Adjust * FTransform(FRotator(0.f, Y2, 0.f), L, FVector(Os)), true, Op->Material)) continue;
+					ARDWildChunk::FStation14 Ov; Ov.At = L; Ov.Yaw = Y2; Ov.Kind = FName(TEXT("Oven")); Ov.Owner = Rec.Id;
+					C->Stations14.Add(Ov);
+					++Furniture; bOven = true;
+					break;
+				}
+				if (!bOven) UE_LOG(LogTemp, Warning, TEXT("RDWILDTABLES14 no room for a farmhouse's oven (farm %d)"), Rec.Id);
+			}
 		Lamp(30.f);
 	}
 	else
@@ -926,6 +966,7 @@ bool ARDDungeonGenerator::RemoveWildFarm(int32 Id)
 			Shift(O.Clear0, O.Clear1, F.Clear0, F.Clear1); Shift(O.House0, O.House1, F.House0, F.House1); Shift(O.Door0, O.Door1, F.Door0, F.Door1);
 		}
 		for (const TWeakObjectPtr<UActorComponent>& W : F.Comps) if (UActorComponent* X = W.Get()) X->DestroyComponent();
+		C->Stations14.RemoveAll([&F](const ARDWildChunk::FStation14& S) { return S.Owner == F.Id; });          // (its oven)
 		C->PlaceProps.RemoveAll([](const TObjectPtr<UStaticMeshComponent>& S) { return !IsValid(S) || S->IsBeingDestroyed(); });
 		for (const TWeakObjectPtr<ARDTownAnimal>& A : F.Animals) if (A.IsValid()) { C->Props.Remove(A.Get()); A->Destroy(); }
 		for (const TWeakObjectPtr<ARDTownsfolk>& T : F.Folk) if (T.IsValid()) { C->Props.Remove(T.Get()); T->Destroy(); }
