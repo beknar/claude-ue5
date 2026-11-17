@@ -4583,7 +4583,183 @@ def step_quests12b():
 STEPS13 = {"quests12b": step_quests12b, "animals13": step_animals13, "hunt13": step_hunt13, "questsave13": step_questsave13, "tamesave13": step_tamesave13,
            "swim13": step_swim13, "caldera13": step_caldera13, "weather13": step_weather13, "farms1x13": step_farms1x13}
 
-STEPS = {"scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+
+# ---------------------------------------------------------------------------------------------- the list of 2026-11-16 (improvements14)
+def tall_pieces(at, reach_m=6000.0, min_h_m=30.0):
+    """every static mesh piece taller than min_h_m within reach_m of at (cm): the components' own and, for instanced ones, each
+    instance of a tall mesh; each with its mesh, owner, place, height, footprint and collision as the game has it"""
+    out = []
+    w = G["w"]
+    for a in unreal.GameplayStatics.get_all_actors_of_class(w, unreal.Actor):
+        try: comps = a.get_components_by_class(unreal.StaticMeshComponent)
+        except Exception: continue
+        for c in comps:
+            m = c.get_editor_property("static_mesh")
+            if m is None: continue
+            bb = m.get_bounding_box(); mh = (bb.max.z - bb.min.z) / 100.0
+            items = []
+            if isinstance(c, unreal.InstancedStaticMeshComponent):
+                n = c.get_instance_count()
+                if n == 0 or mh * 3.0 < min_h_m: continue
+                for i in range(min(n, 4000)):
+                    tr = c.get_instance_transform(i, True)
+                    s = tr.scale3d; h = mh * s.z
+                    if h < min_h_m: continue
+                    items.append((tr.transform_location(V((bb.min.x + bb.max.x) * 0.5, (bb.min.y + bb.max.y) * 0.5, bb.min.z)), h, (bb.max.x - bb.min.x) * s.x / 100.0, (bb.max.y - bb.min.y) * s.y / 100.0, i))
+            else:
+                s = c.get_world_scale(); h = mh * s.z
+                if h < min_h_m: continue
+                mid = c.get_world_transform().transform_location(V((bb.min.x + bb.max.x) * 0.5, (bb.min.y + bb.max.y) * 0.5, bb.min.z))
+                items.append((mid, h, (bb.max.x - bb.min.x) * s.x / 100.0, (bb.max.y - bb.min.y) * s.y / 100.0, -1))
+            for (loc, h, fx, fy, i) in items:
+                d = math.hypot(loc.x - at.x, loc.y - at.y) / 100.0
+                if d > reach_m: continue
+                try: simple = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem).get_simple_collision_count(m)
+                except Exception: simple = -1
+                try: cplx = str(unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem).get_collision_complexity(m))
+                except Exception: cplx = "?"
+                out.append({"mesh": m.get_name(), "path": m.get_path_name(), "owner": a.get_name(), "comp": c.get_name(), "inst": i,
+                            "x": round(loc.x / 100.0, 1), "y": round(loc.y / 100.0, 1), "z": round(loc.z / 100.0, 1), "h_m": round(h, 1),
+                            "foot_m": [round(fx, 1), round(fy, 1)], "dist_m": round(d, 1),
+                            "collision": str(c.get_collision_enabled()), "pawn": str(c.get_collision_response_to_channel(unreal.CollisionChannel.ECC_PAWN)),
+                            "simple_shapes": simple, "complexity": cplx})
+    out.sort(key=lambda r: r["dist_m"])
+    return out
+
+def walk_into(x_m, y_m, foot_m, secs=5.0):
+    """put her 8 m (plus the footprint's half) off a piece's middle on the ground and push her at it: her nearest to its middle,
+    against the footprint's half (inside when nearer than 0.35 of the smaller side: she walked through)"""
+    half = max(1.0, min(foot_m) * 0.5)
+    for k in range(8):
+        a_ = k * math.pi / 4.0
+        sx, sy = x_m + math.cos(a_) * (half + 8.0), y_m + math.sin(a_) * (half + 8.0)
+        if not sample(sx, sy)["water"]: break
+    g = G["gen"]; g.wild_put_her(sx, sy); yield from wait_chunks(30, 50); ground_put(sx, sy); yield from rwait(1.0)
+    best = 1e9; t0 = time.time()
+    while time.time() - t0 < secs:
+        p = G["pawn"].get_actor_location()
+        d = math.hypot(x_m * 100.0 - p.x, y_m * 100.0 - p.y) / 100.0
+        best = min(best, d)
+        G["pawn"].add_movement_input(V(x_m * 100.0 - p.x, y_m * 100.0 - p.y, 0), 1.0, True)
+        yield
+    return {"nearest_m": round(best, 2), "half_m": round(half, 1), "through": best < 0.35 * min(foot_m)}
+
+def step_spires14():
+    """item 17 of the list of 2026-11-16: "very tall spires in the farm biomes with no collision layers - check the game save labeled
+    game3b": the user's save (the packaged game's, copied in for the step and taken out after) loaded, every piece over 30 m within
+    6 km of her listed with its collision, the nearest of each mesh walked into, and pictured"""
+    g = G["gen"]; res = {}
+    src = os.path.join(os.environ.get("LOCALAPPDATA", ""), "claude_ue5", "Saved", "SaveGames", "save_game3b_f17369.sav")
+    if not os.path.isfile(src): step_result("spires14", False, error="no save game3b at " + src); return
+    os.makedirs(SAVES, exist_ok=True); open(os.path.join(SAVES, "save_game3b_f17369.sav"), "wb").write(open(src, "rb").read())
+    res["load"] = g.load_game_from("save_game3b_f17369"); yield from until_loaded13(); g = G["gen"]
+    yield from wait_chunks(30, 50); yield from rwait(4.0)
+    p = G["pawn"].get_actor_location(); res["at_km"] = [round(p.x / 100000.0, 2), round(p.y / 100000.0, 2)]
+    res["biome"] = sample(p.x / 100.0, p.y / 100.0)["biome"]; res["landmark"] = str(g.get_wild_landmark()); res["far_sight"] = str(g.get_wild_storm_line())
+    tall = tall_pieces(p); res["tall"] = tall[:40]; res["tall_count"] = len(tall)
+    # (each mesh's nearest walked into and pictured)
+    res["walks"] = {}; seen = set()
+    for r in tall:
+        if r["mesh"] in seen or len(seen) >= 6: continue
+        seen.add(r["mesh"])
+        w_ = yield from walk_into(r["x"], r["y"], r["foot_m"])
+        res["walks"][r["mesh"]] = dict(w_, owner=r["owner"], h_m=r["h_m"], collision=r["collision"], pawn=r["pawn"], simple=r["simple_shapes"])
+        if "SkySphere" in r["mesh"]: res["walks"][r["mesh"]]["sky"] = True
+        q = G["pawn"].get_actor_location()
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=12, yaw=math.degrees(math.atan2(r["y"] * 100.0 - q.y, r["x"] * 100.0 - q.x)) + 180.0))
+        g.wild_put_her(r["x"] + 40.0, r["y"]); yield from wait_chunks(30, 50); ground_put(r["x"] + 40.0, r["y"]); yield from rwait(1.0)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=18, yaw=180.0)); yield from rwait(1.5)
+        shot("spires14_" + r["mesh"], "1280x720"); yield from rwait(1.0)
+    # (the fix: the landmark's shape made again from its faces (926 kit, 927 collide): it must stop her at its walls)
+    lm = res["walks"].get("SM_N13_LandmarkTower")
+    ok = bool(lm) and not lm["through"] and not any(v["through"] for k_, v in res["walks"].items() if not v.get("sky"))
+    step_result("spires14", ok, **res)
+
+SOFT14 = ("tree", "bush", "grass", "plant", "foliage", "flower", "fern", "leaf", "leaves", "reed", "crop", "wheat", "corn", "stormcell", "aurora",
+          "smoke", "plume", "rain", "water", "mist", "fog", "decal", "cloud", "ivy", "vine", "moss", "noose", "rope", "chain", "sky", "far", "ground",
+          "collider", "rdw", "land", "berm", "road", "drops", "hay", "straw", "carpet", "rug", "cloth", "banner", "flag",
+          "sm_wild_", "root", "roof")      # (SM_Wild_* are the wilds' own plants (crops, trees); roots are plants, laid to be walked through; roofs carry no collision by design, the towns' and the farms' alike: the camera's boom passes them; the walls stop her)
+
+def laid_open(at, reach_m):
+    """the pieces laid within reach_m of at (cm) taller than 2 m that are not of a soft kind but have no collision of their own: each
+    traced through at a metre up from 3 m outside (a hidden collider round it counts): those nothing stops"""
+    w = G["w"]; out = []; seen = 0; solid = 0
+    for a in unreal.GameplayStatics.get_all_actors_of_class(w, unreal.Actor):
+        try: comps = a.get_components_by_class(unreal.StaticMeshComponent)
+        except Exception: continue
+        for c in comps:
+            m = c.get_editor_property("static_mesh")
+            if m is None: continue
+            if str(c.get_collision_enabled()).find("NO_COLLISION") < 0:
+                # (the solid ones counted where they stand: the visit looked at something)
+                try:
+                    if isinstance(c, unreal.InstancedStaticMeshComponent):
+                        for i in range(min(c.get_instance_count(), 400)):
+                            q_ = c.get_instance_transform(i, True).translation
+                            if math.hypot(q_.x - at.x, q_.y - at.y) <= reach_m * 100.0: solid += 1
+                    elif math.hypot(c.get_world_location().x - at.x, c.get_world_location().y - at.y) <= reach_m * 100.0: solid += 1
+                except Exception: pass
+                continue
+            if any(s_ in (m.get_name() + " " + c.get_name()).lower() for s_ in SOFT14) or not c.is_visible(): continue
+            bb = m.get_bounding_box()
+            locs = []
+            if isinstance(c, unreal.InstancedStaticMeshComponent):
+                for i in range(min(c.get_instance_count(), 400)):
+                    tr = c.get_instance_transform(i, True)
+                    if (bb.max.z - bb.min.z) * tr.scale3d.z >= 200.0: locs.append((tr.transform_location(V((bb.min.x + bb.max.x) * 0.5, (bb.min.y + bb.max.y) * 0.5, bb.min.z)), (bb.max.x - bb.min.x) * tr.scale3d.x))
+            else:
+                s = c.get_world_scale()
+                if (bb.max.z - bb.min.z) * s.z >= 200.0: locs.append((c.get_world_transform().transform_location(V((bb.min.x + bb.max.x) * 0.5, (bb.min.y + bb.max.y) * 0.5, bb.min.z)), (bb.max.x - bb.min.x) * s.x))
+            for loc, wid in locs:
+                if math.hypot(loc.x - at.x, loc.y - at.y) > reach_m * 100.0: continue
+                # (only what she can walk into: a piece whose foot is over 2 m above the ground under it (a gable's triangle on a
+                # farmhouse's walls, a roof) is out of her reach)
+                if loc.z - sample(loc.x / 100.0, loc.y / 100.0)["z"] > 200.0: continue
+                seen += 1
+                st = V(loc.x - wid * 0.5 - 300.0, loc.y, loc.z + 100.0); en = V(loc.x, loc.y, loc.z + 100.0)
+                h = unreal.SystemLibrary.line_trace_single(w, st, en, unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+                tt = h.to_tuple() if h else None
+                if not tt or not tt[0]: out.append({"mesh": m.get_name(), "owner": a.get_name(), "comp": c.get_name(), "x": round(loc.x / 100.0, 1), "y": round(loc.y / 100.0, 1)})
+    return solid, seen, out
+
+def step_collide14():
+    """item 18 of the list of 2026-11-16: "ensure that any structures that get built by the procedural terrain generator have collision
+    layers": at the nearest place of each kind round Brokenspire (a village, camp, house, ruins, ritual site, cave, lair, spawn point,
+    structure, farmstead), every piece over 2 m laid without collision and not of a soft kind (plants, cloth, water, effects) traced
+    through at a metre up: nothing may let her through"""
+    g = G["gen"]; res = {"visits": {}, "open": []}; quiet(True)
+    yield from wait_ready(90)
+    want = ("village", "camp", "house", "ruins", "ritual", "cave", "lair", "spawn")
+    near = places_near(0, 0, 40000)
+    sites = {}; farms = {}
+    def visit(kind, name, x, y, reach):
+        g.wild_put_her(x + 30.0, y); yield from wait_chunks(30, 50); ground_put(x + 30.0, y); yield from rwait(3.0)
+        solid, seen, opn = laid_open(V(x * 100.0, y * 100.0, 0), reach)
+        res["visits"][kind] = {"name": name, "at_km": [round(x / 1000.0, 2), round(y / 1000.0, 2)], "solid": solid, "checked_open": seen, "open": len(opn)}
+        res["open"] += opn[:10]
+        om = res.setdefault("open_meshes", {})
+        for o_ in opn: om[o_["mesh"]] = om.get(o_["mesh"], 0) + 1
+        # (the structures and farmsteads laid round her, met on the way: they are not in the places' list)
+        for l in g.get_wild_site_lines():
+            q = str(l).split("|"); sites.setdefault(int(q[1]), (q[2], float(q[4]), float(q[5])))
+        for l in g.get_wild_farm_lines():
+            q = str(l).split("|")
+            if q[0] == "farm": farms.setdefault(int(q[1]), (q[2], float(q[3]), float(q[4])))
+    for kind in want:
+        ps = sorted([p_ for p_ in near if p_["kind"] == kind], key=lambda p_: math.hypot(p_["x"], p_["y"]))
+        if not ps: res["visits"][kind] = None; continue
+        yield from visit(kind, ps[0]["name"], ps[0]["x"], ps[0]["y"], 120.0)
+    if not farms: yield from visit("farms (the user's save's ground)", "game3b's farms", 4150.0, -1440.0, 120.0)
+    for kind, pool in (("structure", sites), ("farmstead", farms)):
+        if not pool: res["visits"][kind] = None; continue
+        nm, x, y = sorted(pool.values(), key=lambda v: math.hypot(v[1], v[2]))[0]
+        yield from visit(kind, nm, x, y, 80.0)
+    quiet(False)
+    ok = all(v is not None and v["solid"] > 0 for v in res["visits"].values()) and not res["open"]
+    step_result("collide14", ok, **res)
+
+
+STEPS = {"spires14": step_spires14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)

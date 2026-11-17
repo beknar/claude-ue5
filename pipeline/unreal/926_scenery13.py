@@ -71,7 +71,23 @@ def step_kit(src):
         o.static_mesh_import_data.combine_meshes = True; o.static_mesh_import_data.auto_generate_collision = True; o.static_mesh_import_data.generate_lightmap_u_vs = False
         tk = unreal.AssetImportTask(); tk.filename = rec[name]["fbx"]; tk.destination_path = KIT
         tk.replace_existing = True; tk.automated = True; tk.save = True; tk.options = o; tasks.append(tk)
+    # (the list of 2026-11-16, item 17: an import over an existing piece keeps its old collision: the landmark tower made 1.7 times
+    # bigger kept its first build's hull, 5.5 m inside its new walls and 75 m short of its top, and she walked into it. The pieces'
+    # sizes before the import; a piece whose size changed gets its shape again from its new faces)
+    was = {}
+    for name in rec:
+        m0 = unreal.load_asset(f"{KIT}/{name}") if eal.does_asset_exist(f"{KIT}/{name}") else None
+        if m0: b0 = m0.get_bounding_box(); was[name] = (b0.min.x, b0.min.y, b0.min.z, b0.max.x, b0.max.y, b0.max.z)
     at.import_asset_tasks(tasks)
+    sme_ = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem); reshaped = []
+    for name in rec:
+        m1 = unreal.load_asset(f"{KIT}/{name}")
+        if not m1 or name not in was: continue
+        b1 = m1.get_bounding_box(); now = (b1.min.x, b1.min.y, b1.min.z, b1.max.x, b1.max.y, b1.max.z)
+        if max(abs(a - b) for a, b in zip(was[name], now)) > 1.0:
+            m1.modify(); sme_.remove_collisions(m1); sme_.set_convex_decomposition_collisions(m1, 8, 32, 200000)
+            eal.save_loaded_asset(m1, only_if_is_dirty=False); reshaped.append(name)
+    if reshaped: REPORT.append(f"kit: {len(reshaped)} pieces changed size, their collision made again: {', '.join(reshaped)}")
     bark, leaves = unreal.load_asset("/Game/RandomDungeon/Wild/M_RD_WildBark"), unreal.load_asset("/Game/RandomDungeon/Wild/M_RD_WildLeaves")
     assert bark and leaves, "926 kit: the wilds' masters are missing (887 trees)"
     clear = translucent_master()

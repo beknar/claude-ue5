@@ -802,6 +802,16 @@ The open items of `TODO.md` that a test could settle in the wilds (`888 ... -Lig
 
 The older steps the TODO asked to run again (the ground changed by the sheer walls' fix, the thirteen crops, PR #27's review) all pass: `ground7,ground8` (`test_t13o1`), `quests,places` (`test_t13o2`), `rain8,speed8` (`test_t13o3`), `fields8,perf8` (`test_t13o4`), `animals8` (`test_t13o6`: its wild deer now held within a sword's reach; at 300 cm the Warrior's swings had struck nothing).
 
+## The list of 2026-11-16 (`docs/improvements14.txt`)
+
+The user's list of 2026-11-16, in phases with a PR each ([its plan](../improvements14_plan.md)).
+
+### The spires and collision (items 17 and 18)
+
+- **The spires** ("very tall spires ... in the farm biomes that have no collision layers - check the game save labeled game3b"): the user's save (the packaged game's `save_game3b`, a Warrior on the farms 4.2 km from Brokenspire) loaded in play: the one piece over 30 m within 6 km of her was the tenth phase's landmark tower, 182 m high, 24 m off. Walked into, she reached 14.2 m from its middle, inside its 18.7 m shaft. Its collision was its first build's (107 m, before the tenth phase's review made it 1.7 times bigger): the kit's reimport (`926 kit`) kept a piece's old shapes. Measured on its own (`927 collide`): its shape stood 5.5 m inside its walls, and 16 of 48 rays passed through it (the upper third: the old hull's top was 75 m under the new one's).
+- **The fix**: the landmark's shape made again from its own faces (a convex decomposition: `927 collide fix`), and `926 kit` makes a piece's collision again whenever its size changes on an import. After it: no ray through, none inside (0.0 m); in the user's save she stops 23.6 m from its middle (its half-width 21.9 m and her capsule).
+- **Every structure the generator builds** (item 18): `927 collide` measures every mesh the wilds lay (brokenspire's `WildPieces`, the landmark, the 90 kit pieces): 241 solid meshes over 1.5 m, each traced from 16 ways at three heights against its faces and against its collision; a mesh whose shapes stand a metre inside its faces or let a third of the rays through fails (a pack's mesh would get a solid copy of our own; a kit piece is fixed in place). Only the landmark failed. In play (`888 collide14`), at the nearest place of each kind round Brokenspire (village, camp, lone house, ruins, ritual site, cave, lair, spawn point, a structure, a farmstead), every piece over 2 m laid without collision is traced through at a metre up from where she could walk: none let her through, among 8 to 290 solid pieces a place (`test_s14p1.json`: the village 290, the farmstead 193, the cave 100, the ruins 82, the lone house 65, the camp and the structure 22, the ritual site 11, the spawn point 9, the lair 8). What is meant to be walked or seen through is left out by name (plants, crops, cloth, water, effects, the far sights), and so are roofs and the gables on the walls (out of her reach: the walls stop her; the camera's boom passes them, as in the towns).
+
 ## Limits
 
 What is not there yet, and what has not been tested, is listed in [TODO.md](../../TODO.md). In short:
