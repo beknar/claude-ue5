@@ -420,6 +420,7 @@ FString ARDDungeonGenerator::WildDoorDescribe(const FVector& From) const
 	if (const ARDWildChunk* C = WildDoorNear(From, 190.f, I))
 	{
 		const ARDWildChunk::FDoor& D = C->Doors[I];
+		if (D.bBox && IsWildBoxLocked14(D.Kind, D.Key)) return WildLockDescribe14(D.Kind);          // (the list of 2026-11-16's ninth phase)
 		if (D.bBox) return D.Kind == TEXT("garden") ? FString(TEXT("harvest the garden")) : FString::Printf(TEXT("open the %s"), *D.Kind.ToString());
 		return D.Target > 0.5f ? TEXT("close the door") : TEXT("open the door");
 	}
@@ -433,6 +434,7 @@ FString ARDDungeonGenerator::WildDoorInteract(const FVector& From)
 	if (ARDWildChunk* C = WildDoorNear(From, 190.f, I))
 	{
 		ARDWildChunk::FDoor& D = C->Doors[I];
+		if (D.bBox && IsWildBoxLocked14(D.Kind, D.Key)) return WildLockInteract14(C, I);          // (the list of 2026-11-16's ninth phase)
 		if (D.bBox) { OpenWildBox(C, I); return TEXT("container"); }
 		// (opened, it swings away from her: in from outside, out from inside (888 houses10: swung out at her 1.1 m before it, the leaf
 		// shut her out); the way is chosen while it is shut)
@@ -533,6 +535,7 @@ void ARDTownsfolk::SetLantern(bool bOn)
 void ARDDungeonGenerator::TickWild10(float Dt, const FVector& Her)
 {
 	TickWildDoors(Dt);
+	TickWildPick14();          // (the list of 2026-11-16's ninth phase: a lock being picked)
 	TravellerClock += Dt; LanternClock += Dt;
 	if (bWild && bWildTravellers && TravellerClock >= 1.f) { TravellerClock = 0.f; TickWildTravellers(Her); }
 	if (bNightLanterns && LanternClock >= 2.f) { LanternClock = 0.f; TickNightLanterns(); }

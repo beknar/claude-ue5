@@ -2557,10 +2557,50 @@ public:
 	class ARDTownsfolk* WildFolkOnSegment14(const FVector& A, const FVector& B, float Pad, float& OutT, FVector& OutAt) const;
 	void OnWildFolkKilled14(class ARDTownsfolk* T, AActor* By);
 	static int64 WildFolkKey14(int32 Kind, int64 Id, int32 N);
-	bool IsWildFolkDead14(int64 Key);
+	bool IsWildFolkDead14(int64 Key) const;
 	/** a person laid with its chunk given its key, and laid dead when it was killed in this game */
 	void KeepWildFolk14(class ARDTownsfolk* T, int64 Key);
-	TSet<int64> WildFolkDead14; int32 WildFolkDeadRead14 = -1; int64 WildFolkDeadLast14 = 0;
+	/** the ninth phase (RDList14i.cpp): locks and who notices; WildKilled as a set (read again when it changes) */
+	bool IsWildKeyKept14(int64 Key) const;
+	mutable TSet<int64> WildKept14; mutable int32 WildKeptRead14 = -1; mutable int64 WildKeptLast14 = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bWildLocks14 = false;
+	/** the share of the wild containers (not the gardens) locked, by a hash of each one's key */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float WildLockShare14 = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float WildPickSeconds14 = 2.f;
+	/** a lock picked or broken: heard within this (cm), seen within that with a clear line to her */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float WildHearCm14 = 3000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float WildSeeCm14 = 4000.f;
+	/** a hostile person's blow (grown with the wilds' tier) and how far she must go for it to calm down (cm) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float WildFolkBlow14 = 6.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float WildCalmCm14 = 8000.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 WildLocksPicked14 = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 WildLocksBroken14 = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 WildLocksRefused14 = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 LastWildAlertHeard14 = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 LastWildAlertSeen14 = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 WildFolkBlowsOnHer14 = 0;
+	bool IsWildBoxLocked14(FName Kind, int64 Key) const;
+	FString WildLockDescribe14(FName Kind) const;
+	FString WildLockInteract14(class ARDWildChunk* C, int32 Index);
+	void TickWildPick14();
+	/** everyone who hears or sees a lock picked or broken at At turns on her; how many */
+	int32 AlertWildFolk14(const FVector& At);
+	/** whether one with its eyes at Eye sees her (the rule a lock's witnesses are taken by; tests) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") bool WildSeesHer14(FVector Eye) const;
+	/** the world's static and dynamic pieces between A and B (a line, or a ball of Radius swept), people, animals, pawns and piles
+	 *  passed over: the wilds' sight lines and the people's steps */
+	bool WildWayBlocked14(const FVector& A, const FVector& B, float Radius, const AActor* Skip) const;
+	mutable TArray<AActor*> WildPass14; mutable uint64 WildPassFrame14 = MAX_uint64;
+	/** the floor under a person's step at At (its feet at FeetZ): a farmhouse's over the ground, else the ground */
+	float WildFloorZ14(const FVector& At, float FeetZ) const;
+	/** the heroes who pick a wild lock and who break one (931 from locks14.json); a hostile person calms down after she has been
+	 *  hidden this long */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") TArray<FName> LockPickers;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") TArray<FName> LockBreakers;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float WildLostCalmSeconds14 = 6.f;
+	/** tests: every person calmed, a pick under way dropped */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") void CalmWildFolk14();
+	TWeakObjectPtr<class ARDWildChunk> WildPickChunk14; int32 WildPickIndex14 = -1; int64 WildPickKey14 = -1; float WildPickUntil14 = -1.f; FVector WildPickAt14 = FVector::ZeroVector;
 	/** tests: "i|title|role|x|y|z|health|dead|protected|fleeing|key|hits|flees|killed by|hurt", and the person of that index */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") TArray<FString> GetWildFolkLines14() const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") class ARDTownsfolk* GetWildPerson14(int32 I) const;

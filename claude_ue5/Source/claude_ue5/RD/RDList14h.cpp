@@ -29,20 +29,10 @@ int64 ARDDungeonGenerator::WildFolkKey14(int32 Kind, int64 Id, int32 N)
 	return RDFolkKeys14 + ((int64)(Kind & 7) << 37) + (Id & ((1LL << 33) - 1)) * 16 + (N & 15);
 }
 
-bool ARDDungeonGenerator::IsWildFolkDead14(int64 Key)
+bool ARDDungeonGenerator::IsWildFolkDead14(int64 Key) const
 {
-	if (Key < 0) return false;
-	const URDGameInstance* GI = URDGameInstance::Of(this);
-	if (!GI) return false;
-	// (the game's kills read into a set of the people's range once, again only when the list has changed (a load, a new game: its
-	// length and last key))
-	const int64 Last = GI->WildKilled.Num() > 0 ? GI->WildKilled.Last() : 0;
-	if (GI->WildKilled.Num() != WildFolkDeadRead14 || Last != WildFolkDeadLast14)
-	{
-		WildFolkDeadRead14 = GI->WildKilled.Num(); WildFolkDeadLast14 = Last; WildFolkDead14.Reset();
-		for (const int64 K : GI->WildKilled) if (K >= RDFolkKeys14 && K < RDFolkKeys14 + (1LL << 40)) WildFolkDead14.Add(K);
-	}
-	return WildFolkDead14.Contains(Key);
+	// (the game's kept keys as a set (IsWildKeyKept14, the ninth phase's: read again only when the list changes))
+	return Key >= RDFolkKeys14 && IsWildKeyKept14(Key);
 }
 
 void ARDDungeonGenerator::KeepWildFolk14(ARDTownsfolk* T, int64 Key)
@@ -77,8 +67,7 @@ bool ARDDungeonGenerator::IsWildPrey14(const ARDTownsfolk* T, const FVector& Fro
 	if (!IsValid(T) || !T->CanBeHurt14() || T->IsWildProtected14() || T->IsWildIndoors() || T->IsInBed()) return false;
 	const AActor* Her = PlayerCombat ? PlayerCombat->GetOwner() : nullptr;
 	if (!Her || FVector::Dist2D(Her->GetActorLocation(), T->GetActorLocation()) > WildFolkNearHerCm14) return false;
-	FCollisionQueryParams Q(SCENE_QUERY_STAT(RDFolkPrey14), false);
-	return !GetWorld()->LineTraceTestByObjectType(From + FVector(0, 0, 40.f), T->GetActorLocation() + FVector(0, 0, 40.f), FCollisionObjectQueryParams(ECC_WorldStatic), Q);
+	return !WildWayBlocked14(From + FVector(0, 0, 40.f), T->GetActorLocation() + FVector(0, 0, 40.f), 0.f, nullptr);
 }
 
 FString ARDDungeonGenerator::WildFolkLootOf14(const ARDTownsfolk* T, float& Health, int32& GoldLo, int32& GoldHi) const
@@ -160,7 +149,6 @@ void ARDDungeonGenerator::OnWildFolkKilled14(ARDTownsfolk* T, AActor* By)
 	if (GI && T->WildDeadKey14 >= 0)
 	{
 		GI->WildKilled.AddUnique(T->WildDeadKey14);
-		IsWildFolkDead14(T->WildDeadKey14);          // (the set read again with it)
 	}
 	// (what it carried, drawn from a hash (no stream of the play's): its key, or the actor's name for one never laid again)
 	float Hp = 0.f; int32 Lo = 0, Hi = 0;
@@ -175,10 +163,7 @@ void ARDDungeonGenerator::OnWildFolkKilled14(ARDTownsfolk* T, AActor* By)
 	// stands over the ground: PR #86's review); where a wall or fence stands within that, at the body)
 	const FVector Bc = T->GetActorLocation();
 	FVector At = Bc + T->GetActorRightVector() * 80.f;
-	{
-		FCollisionQueryParams Q(SCENE_QUERY_STAT(RDFolkPile14), false, T);
-		if (GetWorld()->SweepTestByObjectType(Bc, At, FQuat::Identity, FCollisionObjectQueryParams(ECC_WorldStatic), FCollisionShape::MakeSphere(20.f), Q)) At = Bc;
-	}
+	if (WildWayBlocked14(Bc, At, 20.f, T)) At = Bc;
 	if (Got.Num() > 0)
 	{
 		TArray<float> Wr; Wr.Init(-1.f, Got.Num());
@@ -289,7 +274,8 @@ bool ARDTownsfolk::TakeWildHit14(float Dmg, AActor* From)
 	if (WildHealth14 > 0.f)
 	{
 		WildHitUntil14 = Now + 0.45f;
-		RunFrom14(From, Now, 2.f);
+		// (turned on her, it fights on (the ninth phase); else it runs a short way)
+		if (!(bWildHostile14 && !IsWildProtected14())) RunFrom14(From, Now, 2.f);
 		return false;
 	}
 	// (killed: its body lies where it fell; nothing of it stops her or takes F (no flight counted: PR #86's review))
@@ -347,6 +333,23 @@ bool ARDTownsfolk::TickWild14(float Dt, float Now)
 		return true;
 	}
 	if (!Gen) return false;
+	// (the ninth phase (RDList14i.cpp): turned on her by a lock picked or broken: it runs at her and strikes, its flinch first; a child
+	// or a quest's people run from her instead)
+	if (bWildHostile14)
+	{
+		if (IsWildProtected14())
+		{
+			const AActor* Her = WildFoe14.Get();
+			if (!Her || FVector::Dist2D(Her->GetActorLocation(), GetActorLocation()) > Gen->WildCalmCm14) CalmWild14();
+			else { WildFleeFrom14 = WildFoe14; WildFleeUntil14 = FMath::Max(WildFleeUntil14, Now + 0.5f); }
+		}
+		else if (Now < WildHitUntil14 && WildSwingT14 < 0.f)
+		{
+			if (UAnimationAsset* H = WorkClip(TEXT("Hit")); H && CurAnim != H) { CurAnim = H; CurRate = 1.f; Body->PlayAnimation(H, false); Body->SetPlayRate(1.f); }
+			return true;
+		}
+		else if (TickHostile14(Dt, Now)) return true;
+	}
 	// (a monster after it, not struck just now: it stands and cowers, facing it)
 	if (Now >= WildFleeUntil14 && Now < WildCowerUntil14)
 	{
@@ -370,20 +373,8 @@ bool ARDTownsfolk::TickWild14(float Dt, float Now)
 	FVector Aw = L - From; Aw.Z = 0.f;
 	const FVector Dir = Aw.IsNearlyZero(1.f) ? -GetActorForwardVector() : Aw.GetSafeNormal();
 	const float Sp = FMath::Max(Gen->WildFolkRunSpeed14, 50.f);
-	// (away from it, or as near that as a wall lets it: a ball at its chest's height swept against the world's static pieces)
-	FCollisionQueryParams Qp(SCENE_QUERY_STAT(RDFolkFlee14), false, this);
-	const FCollisionShape Ball = FCollisionShape::MakeSphere(28.f);
-	for (int32 K = 0; K < 7; ++K)
-	{
-		const float Off = K == 0 ? 0.f : (K % 2 ? 1.f : -1.f) * 30.f * ((K + 1) / 2);
-		const FVector Dd = FRotator(0.f, Off, 0.f).RotateVector(Dir);
-		FVector N = L + Dd * Sp * Dt;
-		N.Z = Gen->WildGroundZ(N) + HalfHeight + 2.f;
-		if (GetWorld()->SweepTestByObjectType(L + FVector(0, 0, 40.f), N + Dd * 40.f + FVector(0, 0, 40.f), FQuat::Identity, FCollisionObjectQueryParams(ECC_WorldStatic), Ball, Qp)) continue;
-		SetActorLocation(N, false);
-		SetActorRotation(FRotator(0.f, FMath::RInterpConstantTo(GetActorRotation(), Dd.Rotation(), Dt, 540.f).Yaw, 0.f));
-		break;
-	}
+	// (away from it, or as near that as a wall lets it)
+	StepOnGround14(Dir, Sp, Dt);
 	UAnimationAsset* Run = WorkClip(TEXT("Run"));
 	if (Run) PlayAnim(Run, 1.f); else { bWalkClip = true; PlayAnim(WalkAnim, Sp / FMath::Max(ClipSpeed, 1.f)); }
 	return true;

@@ -1047,7 +1047,8 @@ TArray<FString> ARDDungeonGenerator::GetWildBoxLines() const
 		const ARDWildChunk* C = Kv.Value;
 		if (!IsValid(C)) continue;
 		for (const ARDWildChunk::FDoor& D : C->Doors)
-			if (D.bBox) Out.Add(FString::Printf(TEXT("box|%s|%.0f|%.0f|%.0f|%.2f|%d|%lld"), *D.Kind.ToString(), D.At.X, D.At.Y, D.At.Z, D.Alpha, GI && GI->WildKilled.Contains(D.Key) ? 1 : 0, D.Key));
+			if (D.bBox) Out.Add(FString::Printf(TEXT("box|%s|%.0f|%.0f|%.0f|%.2f|%d|%lld|%d"), *D.Kind.ToString(), D.At.X, D.At.Y, D.At.Z, D.Alpha, IsWildKeyKept14(D.Key) ? 1 : 0, D.Key,
+				IsWildBoxLocked14(D.Kind, D.Key) ? 1 : 0));          // (the ninth phase: locked)
 	}
 	for (const FRDWildFarmRec& F : WildFarms) if (F.Chunk.IsValid()) Out.Add(FString::Printf(TEXT("farm11|%d|%d|%d|%d"), F.Id, F.Design, F.Buildings, F.Boxes));
 	for (const FString& L : WildFarmBldLines) Out.Add(L);

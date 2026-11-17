@@ -1,0 +1,369 @@
+{
+ "tag": "s14p9",
+ "plan": [
+  "locks14",
+  "npc14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "locks14",
+   "ok": true,
+   "boxes_seen": 20,
+   "locked_share": 0.55,
+   "gardens_locked": 0,
+   "farm": 268436478,
+   "rogue_box_raised": true,
+   "mage": {
+    "open_prompt": "open the chest",
+    "open_f": "container",
+    "opened": true,
+    "locked_prompt": "the barrel is locked",
+    "locked_f": "locked",
+    "locked_stayed_shut": true,
+    "refused": 1,
+    "hostile_after": 0
+   },
+   "rogue": {
+    "prompt": "pick the lock of the wardrobe",
+    "people_found": 10,
+    "buildings": 5,
+    "hidden_spots": {
+     "of": 84,
+     "game": 51,
+     "test": 51
+    },
+    "lines_out_stopped": {
+     "of": 12,
+     "s": 0,
+     "sd": 9,
+     "vis": 9,
+     "examples": {
+      "sd": [
+       0.5,
+       "InstancedStaticMeshComponent",
+       "<CollisionChannel.ECC_WORLD_DYNAMIC: 1>"
+      ],
+      "vis": [
+       0.5,
+       "InstancedStaticMeshComponent",
+       "<CollisionChannel.ECC_WORLD_DYNAMIC: 1>"
+      ]
+     }
+    },
+    "piece_types": {
+     "StaticMeshComponent|<CollisionChannel.ECC_WORLD_DYNAMIC: 1>|<CollisionEnabled.QUERY_AND_PHYSICS: 3>": 46
+    },
+    "placed": {
+     "heard": {
+      "title": "farmer of Elsa's Holding",
+      "i": 0,
+      "d_box_m": 16.2,
+      "d_her_m": 16.0,
+      "line": false,
+      "hostile": true,
+      "by": "heard"
+     },
+     "seen": {
+      "title": "farmwife of Elsa's Holding",
+      "i": 1,
+      "d_box_m": 33.1,
+      "d_her_m": 32.0,
+      "line": true,
+      "hostile": true,
+      "by": "seen"
+     },
+     "hidden": {
+      "title": "farmhand of Elsa's Holding",
+      "i": 2,
+      "d_box_m": 32.2,
+      "d_her_m": 32.0,
+      "line": false,
+      "hostile": false,
+      "by": ""
+     },
+     "far": {
+      "title": "farmer of Odric's Croft",
+      "i": 4,
+      "d_box_m": 57.1,
+      "d_her_m": 56.0,
+      "line": true,
+      "hostile": false,
+      "by": ""
+     }
+    },
+    "f": "pick",
+    "opened_early": false,
+    "opened": true,
+    "picked": 1,
+    "heard": 3,
+    "seen": 1,
+    "blows_on_her": 2,
+    "her_hp_lost": 12.0
+   },
+   "warrior": {
+    "prompt": "break the lock of the crate",
+    "f": "break",
+    "opened_at_once": true,
+    "broken": 1
+   }
+  },
+  {
+   "step": "npc14",
+   "ok": false,
+   "road": {
+    "forced": true,
+    "travellers": 3,
+    "monster": "RDMonster_234",
+    "trace": [
+     [
+      "reach",
+      1.3
+     ],
+     [
+      "swing",
+      1.3
+     ],
+     [
+      "chase",
+      2.0
+     ],
+     [
+      "chase",
+      2.3
+     ],
+     [
+      "chase",
+      2.4
+     ],
+     [
+      "chase",
+      1.7
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "chase",
+      2.0
+     ],
+     [
+      "chase",
+      2.2
+     ],
+     [
+      "chase",
+      2.5
+     ],
+     [
+      "chase",
+      1.9
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "chase",
+      1.8
+     ],
+     [
+      "chase",
+      2.1
+     ],
+     [
+      "chase",
+      2.4
+     ],
+     [
+      "chase",
+      2.2
+     ],
+     [
+      "chase",
+      1.5
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "chase",
+      1.6
+     ],
+     [
+      "chase",
+      2.0
+     ],
+     [
+      "chase",
+      2.3
+     ],
+     [
+      "chase",
+      2.4
+     ],
+     [
+      "chase",
+      1.7
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "unseen",
+      1.4
+     ]
+    ],
+    "her_struck_near": 0.0,
+    "hp_track": [
+     [
+      55.0,
+      18.0,
+      45.0
+     ],
+     [
+      55.0,
+      18.0,
+      45.0
+     ],
+     [
+      55.0,
+      18.0,
+      45.0
+     ],
+     [
+      55.0,
+      18.0,
+      45.0
+     ],
+     [
+      55.0,
+      9.0,
+      45.0
+     ],
+     [
+      55.0,
+      9.0,
+      45.0
+     ],
+     [
+      55.0,
+      9.0,
+      45.0
+     ],
+     [
+      55.0,
+      9.0,
+      45.0
+     ],
+     [
+      55.0,
+      9.0,
+      45.0
+     ],
+     [
+      55.0,
+      9.0,
+      45.0
+     ],
+     [
+      55.0,
+      9.0,
+      45.0
+     ],
+     [
+      55.0,
+      0.0,
+      45.0
+     ]
+    ],
+    "dead": "a refugee on the road to Ashenreach",
+    "killed_by": "RDMonster_234",
+    "flees": 4,
+    "hits": 5,
+    "head_over_ground": 159.4,
+    "drops": [
+     "Hardtack"
+    ],
+    "gold": 1,
+    "her_struck": 0.0,
+    "cowering_seen": 8
+   },
+   "farm": {
+    "farm": 268436478,
+    "title": "farmhand of Elsa's Holding",
+    "key": 12098939650018,
+    "hp0": 65.0,
+    "hits": [
+     50.7,
+     36.4,
+     22.1,
+     7.8,
+     0.0
+    ],
+    "dead": true,
+    "flees": 1,
+    "by": "her",
+    "head_over_ground": 22.0,
+    "drops": [
+     "Straw Rope",
+     "Straw Rope",
+     "Wood Log",
+     "Bread"
+    ],
+    "gold": 3,
+    "kept": true,
+    "piles": 1,
+    "pile_says": "search the body of farmhand of Elsa's Holding (4, 3 gold)",
+    "pile_f": "loot",
+    "taken": {
+     "Straw Rope": 2,
+     "Bread": 1,
+     "Wood Log": 1
+    },
+    "gold_got": 3,
+    "body_says": "open the door",
+    "again": {
+     "found": true,
+     "dead": true,
+     "picture_from_yaw": 105.0,
+     "head_over_ground": 22.1
+    }
+   },
+   "giver": {
+    "quest": "bounty",
+    "title": "a wounded soldier",
+    "hits_landed": 6,
+    "killed_by_million": false,
+    "hp": 1.0,
+    "dead": false
+   },
+   "parts_ok": {
+    "road": false,
+    "farm": true,
+    "giver": true
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_s14p9_locks14_hostile.png",
+  "wd_s14p9_npc14_road.png",
+  "wd_s14p9_npc14_farmhand.png",
+  "wd_s14p9_npc14_farmhand_again.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}
