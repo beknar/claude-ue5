@@ -2515,7 +2515,7 @@ public:
 		TMap<FString, TWeakObjectPtr<class UInstancedStaticMeshComponent>> Batch;
 	};
 	/** one piece of a farm as an instance of its batch (world transform) */
-	void WildFarmInstance(ARDWildChunk* C, FRDWildFarmRec& Rec, UStaticMesh* M, const FTransform& World, bool bCollide, UMaterialInterface* Mat, bool bUnseen = false);
+	class UInstancedStaticMeshComponent* WildFarmInstance(ARDWildChunk* C, FRDWildFarmRec& Rec, UStaticMesh* M, const FTransform& World, bool bCollide, UMaterialInterface* Mat, bool bUnseen = false);
 	TArray<FRDWildFarmRec> WildFarms;
 	/** the list of 2026-11-11's fourth phase (RD/RDWildFarm11.cpp, 919 farms): the farmsteads' designs (SourceArt/wilderness/
 	 *  farm_designs.json), one picked by each farmstead's id; empty: the old fixed layout */
@@ -2737,10 +2737,15 @@ public:
 	 *  witch's hut, a shrine, the abbey's and temple's ruins) and the farmsteads' ovens, used by F as the towns' are */
 	TArray<FName> WildTablesOf14(const struct FRDWildPlace& P) const;
 	void LayWildTables14(class ARDWildChunk* C, const struct FRDWildPlace& P);
-	bool WildBoxFree14(const FVector& Center, float Yaw, const FVector& Half) const;
+	bool WildFootLevel14(const FVector& Mid, float Yaw, float Hx, float Hy, float MaxStep, float& Zmin, float& Zmax) const;
+	bool WildSpotFree14(const class ARDWildChunk* C, const FVector& Center, float Yaw, const FVector& Half) const;
 	bool WildStationNear14(const FVector& From, FVector& At, FName& Kind) const;
-	FString WildStationDescribe14(const FName& Kind) const;
-	FString WildStationUse14(const FName& Kind);
+	/** a wild station within reach and nearer than every other thing F reaches out there (a scenery's use, a point of interest, a
+	 *  door or container, a person) */
+	bool WildStationFirst14(const FVector& From, FName& Kind) const;
+	/** a station's prompt, and its panel opened (the towns', dungeons' and wilds' alike) */
+	static FString StationWords14(const FName& Kind);
+	FString OpenStation14(const FName& Kind);
 	/** tests: "<kind>|<x>|<y>|<z>|<yaw>|<owner>" for every station of the chunks made */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") TArray<FString> GetWildStations14() const;
 	/** tests: "<id>|<kind>|<name>|<x m>|<y m>|<tables>" for the places within RadiusM (metres) the rule gives tables */

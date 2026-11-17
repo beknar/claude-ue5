@@ -102,7 +102,9 @@
    "places_with_tables": {
     "village": 6,
     "camp": 3,
-    "ruins": 2
+    "ruins:temple": 2,
+    "site:village": 3,
+    "site:shrine": 7
    },
    "village": {
     "name": "Sundale",
@@ -149,6 +151,58 @@
       1
      ]
     }
+   },
+   "others": {
+    "camp": {
+     "no_room": [],
+     "kind": "camp",
+     "name": "Fen Camp",
+     "km": 22.5,
+     "want": [
+      "Alchemist"
+     ],
+     "laid": [
+      "Alchemist"
+     ],
+     "says": "use the alchemist's table",
+     "f": "alchemist",
+     "station": "Alchemist",
+     "word": "alchemist"
+    },
+    "ruins": {
+     "no_room": [],
+     "kind": "ruins:temple",
+     "name": "Ruins of Fenholt",
+     "km": 26.7,
+     "want": [
+      "Librarian"
+     ],
+     "laid": [
+      "Librarian"
+     ],
+     "says": "use the librarian's table",
+     "f": "librarian",
+     "station": "Librarian",
+     "word": "librarian"
+    },
+    "site": {
+     "no_room": [],
+     "kind": "site:village",
+     "name": "An abandoned village",
+     "km": 3.0,
+     "want": [
+      "Alchemist",
+      "Librarian"
+     ],
+     "laid": [
+      "Alchemist",
+      "Librarian"
+     ],
+     "says": "use the alchemist's table",
+     "f": "alchemist",
+     "station": "Alchemist",
+     "word": "alchemist"
+    }
    }
   }
  ],
@@ -156,7 +210,10 @@
  "shots": [
   "wd_s14p5c_tables14_oven.png",
   "wd_s14p5c_tables14_alchemist.png",
-  "wd_s14p5c_tables14_librarian.png"
+  "wd_s14p5c_tables14_librarian.png",
+  "wd_s14p5c_tables14_camp.png",
+  "wd_s14p5c_tables14_ruins.png",
+  "wd_s14p5c_tables14_site.png"
  ],
  "error": null,
  "saves_put_back": 1,

@@ -3447,7 +3447,7 @@ def step_tables14():
     yield from wait_ready(90)
     if str(g.get_editor_property("current_hero")) != "Mage": g.switch_hero("Mage"); yield from rwait(1.0); refresh(); g = G["gen"]
     c = cb()
-    def use_at(st, word, item=None):
+    def use_at(st, word, item=None, tag=None):
         """she stands 1.3 m in front of the station facing it; its prompt, F, its panel and (an item) made through the panel's Enter"""
         a = math.radians(st["yaw"]); f = V(math.cos(a), math.sin(a), 0)
         out = {"kind": st["kind"]}
@@ -3457,7 +3457,7 @@ def step_tables14():
             out["says"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
             if word in out["says"]: break
         G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-20, yaw=math.degrees(math.atan2(-f.y, -f.x)))); yield from rwait(0.6)
-        out["shot"] = f"tables14_{word}"; shot(out["shot"], "1280x720"); yield from rwait(1.2)
+        out["shot"] = f"tables14_{tag or word}"; shot(out["shot"], "1280x720"); yield from rwait(1.2)
         if item:
             rc = next((x for x in g.get_editor_property("recipes") if str(x.item) == item), None)
             if rc:
@@ -3520,6 +3520,26 @@ def step_tables14():
             for s in mine:
                 if s["kind"] == "Alchemist": res["village"]["alchemist"] = yield from use_at(s, "alchemist", "Small Healing Potion")
                 if s["kind"] == "Librarian": res["village"]["librarian"] = yield from use_at(s, "librarian", "Scroll of Fire Bolt")
+        # ---- the nearest camp, ruin and structure the rule gives a table (PR #82's review: only a village was tried): laid as the
+        # rule says, named and opened by F
+        res["others"] = {}
+        # (a place with no room for its table round its middle has none (logged): the nearest three of each are tried, and every one
+        # with no room is listed)
+        for cat in ("camp", "ruins", "site"):
+            cs = sorted([p for p in tp if p[1].split(":")[0] == cat], key=lambda p: math.hypot(float(p[3]), float(p[4])))
+            if not cs: res["others"][cat] = {"none": True}; continue
+            o_ = {"no_room": []}
+            for p in cs[:3]:
+                pid, px, py = int(p[0]), float(p[3]), float(p[4])
+                g.wild_drop_all(); g.wild_put_her(px + 20.0, py); yield from wait_chunks(30, 50); yield from rwait(3.0)
+                mine = [s for s in stations14() if s["owner"] == pid]
+                want = sorted(p[5].split(",")); laid = sorted(s["kind"] for s in mine)
+                if laid != want: o_["no_room"].append({"name": p[2], "kind": p[1], "want": want, "laid": laid}); continue
+                o_.update({"kind": p[1], "name": p[2], "km": round(math.hypot(px, py) / 1000.0, 1), "want": want, "laid": laid})
+                u = yield from use_at(mine[0], mine[0]["kind"].lower(), None, cat)
+                o_.update({"says": u["says"], "f": u["f"], "station": u["station"], "word": mine[0]["kind"].lower()})
+                break
+            res["others"][cat] = o_
         g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
     finally:
         try: c.set_crafting_open(False)
@@ -3532,7 +3552,9 @@ def step_tables14():
     dov = res.get("design_ovens", {})
     ok = (res.get("farm_ovens", 0) >= 1 and used(o, "oven", "Oven") and "oven" not in res.get("behind", {}).get("says", "oven")
           and len(dov) == res.get("designs", -1) and all(n == 1 for n in dov.values()) and res.get("left_after_removal", 1) == 0
-          and vl.get("tables") == ["Alchemist", "Librarian"] and used(vl.get("alchemist", {}), "alchemist", "Alchemist") and used(vl.get("librarian", {}), "librarian", "Librarian"))
+          and vl.get("tables") == ["Alchemist", "Librarian"] and used(vl.get("alchemist", {}), "alchemist", "Alchemist") and used(vl.get("librarian", {}), "librarian", "Librarian")
+          and res["others"].get("camp", {}).get("laid") and res["others"].get("ruins", {}).get("laid")
+          and all(o_.get("none") or (o_.get("laid") == o_.get("want") and o_.get("word", "?") in o_.get("says", "") and o_.get("f") == o_.get("word")) for o_ in res["others"].values()))
     step_result("tables14", ok, **res)
 
 

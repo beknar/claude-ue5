@@ -192,9 +192,9 @@ void ARDDungeonGenerator::OpenWildBox(ARDWildChunk* C, int32 Index)
 	UE_LOG(LogRDWildFarm11, Log, TEXT("RDWILDBOX %s (%lld): %s"), *D.Kind.ToString(), D.Key, *FString::JoinBy(Got, TEXT(", "), [](const FName& X) { return X.ToString(); }));
 }
 
-void ARDDungeonGenerator::WildFarmInstance(ARDWildChunk* C, FRDWildFarmRec& Rec, UStaticMesh* M, const FTransform& World, bool bCollide, UMaterialInterface* Mat, bool bUnseen)
+UInstancedStaticMeshComponent* ARDDungeonGenerator::WildFarmInstance(ARDWildChunk* C, FRDWildFarmRec& Rec, UStaticMesh* M, const FTransform& World, bool bCollide, UMaterialInterface* Mat, bool bUnseen)
 {
-	if (!C || !C->Ground || !M) return;
+	if (!C || !C->Ground || !M) return nullptr;
 	const FString Key = FString::Printf(TEXT("%s|%s|%d|%d"), *M->GetPathName(), Mat ? *Mat->GetPathName() : TEXT("-"), bCollide ? 1 : 0, bUnseen ? 1 : 0);
 	UInstancedStaticMeshComponent* Is = Rec.Batch.FindRef(Key).Get();
 	if (!Is)
@@ -211,6 +211,7 @@ void ARDDungeonGenerator::WildFarmInstance(ARDWildChunk* C, FRDWildFarmRec& Rec,
 	}
 	Is->AddInstance(World, true);
 	++Rec.Props;
+	return Is;
 }
 
 void ARDDungeonGenerator::WildClearRect(ARDWildChunk* C, const FVector& Mid, float Yaw, const FVector2D& Half, FRDWildFarmRec* Rec)
@@ -493,26 +494,24 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 					if (!T.bOut && T.X > Mx.X - 260.f && FMath::Abs(T.Y - DoorY) < 250.f) continue;
 					const float Y2 = Yaw + T.YawL;
 					FVector L = At(T.X, T.Y, 0.f);
+					float Zl = L.Z, Zh = L.Z;
 					if (T.bOut)
 					{
-						// (outside: on the ground there, level enough, not over the plinth's step)
-						float Zl = 1e9f, Zh = -1e9f;
-						for (const FVector2D& Cn : { FVector2D(0, 0), FVector2D(Od, Ow) * 0.5f, FVector2D(-Od, Ow) * 0.5f, FVector2D(Od, -Ow) * 0.5f, FVector2D(-Od, -Ow) * 0.5f })
-						{
-							const float Z = WildGroundZ(L + FRotator(0.f, Y2, 0.f).RotateVector(FVector(Cn.X, Cn.Y, 0.f)));
-							Zl = FMath::Min(Zl, Z); Zh = FMath::Max(Zh, Z);
-						}
-						if (Zh - Zl > 30.f) continue;
+						// (outside: on the ground there, level enough (one rule with the tables')
+						if (!WildFootLevel14(L, Y2, Od * 0.5f, Ow * 0.5f, 25.f, Zl, Zh)) continue;
 						L.Z = (Zl + Zh) * 0.5f;
 					}
-					if (!WildBoxFree14(L + FVector(0, 0, 15.f + Oh * 0.5f), Y2, FVector(Od * 0.5f - 3.f, Ow * 0.5f - 3.f, Oh * 0.5f - 12.f))) continue;
-					if (!Mesh(Op->Mesh, Op->Adjust * FTransform(FRotator(0.f, Y2, 0.f), L, FVector(Os)), true, Op->Material)) continue;
-					ARDWildChunk::FStation14 Ov; Ov.At = L; Ov.Yaw = Y2; Ov.Kind = FName(TEXT("Oven")); Ov.Owner = Rec.Id;
+					if (!WildSpotFree14(C, FVector(L.X, L.Y, Zl + 15.f + Oh * 0.5f), Y2, FVector(Od * 0.5f - 3.f, Ow * 0.5f - 3.f, Oh * 0.5f - 12.f))) continue;
+					UInstancedStaticMeshComponent* Oc = WildFarmInstance(C, Rec, Op->Mesh, Op->Adjust * FTransform(FRotator(0.f, Y2, 0.f), L, FVector(Os)), Op->bCollision, Op->Material);
+					if (!Oc) continue;
+					// (outside, no grass through it nor where she stands (PR #82's review: the house's clear stops at its walls))
+					if (T.bOut) WildClearRect(C, L, Y2, FVector2D(Od * 0.5f + 110.f, Ow * 0.5f + 30.f), &Rec);
+					ARDWildChunk::FStation14 Ov; Ov.At = L; Ov.Yaw = Y2; Ov.Kind = FName(TEXT("Oven")); Ov.Owner = Rec.Id; Ov.Comp = Oc;
 					C->Stations14.Add(Ov);
 					++Furniture; bOven = true;
 					break;
 				}
-				if (!bOven) UE_LOG(LogTemp, Warning, TEXT("RDWILDTABLES14 no room for a farmhouse's oven (farm %d)"), Rec.Id);
+				if (!bOven) UE_LOG(LogRDWildFarm11, Warning, TEXT("RDWILDTABLES14 no room for a farmhouse's oven (farm %d)"), Rec.Id);
 			}
 		Lamp(30.f);
 	}
