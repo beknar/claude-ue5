@@ -60,16 +60,6 @@
    "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
    "name": "fence2"
   },
-  "/Game/Medieval_Lake_Village/Meshs/SM_Hay.SM_Hay": {
-   "rays": 0,
-   "misses": 0,
-   "inside_m": 0.0,
-   "h_m": 4.5,
-   "convex": 453,
-   "simple": 0,
-   "trace": "CTF_USE_DEFAULT",
-   "name": "hay1"
-  },
   "/Game/Hivemind/Medieval_Docks/Static_Meshes/Props/SM_Well.SM_Well": {
    "rays": 48,
    "misses": 0,
@@ -361,13 +351,13 @@
    "name": "r12_wheelsup#1"
   },
   "/Game/SilentZonePack/Assets/SM/SM_AmusementWheel.SM_AmusementWheel": {
-   "rays": 16,
+   "rays": 0,
    "misses": 0,
    "inside_m": 0.0,
    "h_m": 31.7,
    "convex": 0,
    "simple": 439,
-   "trace": "CTF_USE_SIMPLE_AS_COMPLEX",
+   "trace": "CTF_USE_DEFAULT",
    "name": "r12_wheel#1"
   },
   "/Game/SilentZonePack/Assets/SM/SM_ConcreateWall_LineDoors_v1.SM_ConcreateWall_LineDoors_v1": {
@@ -461,13 +451,13 @@
    "name": "r12_tank#1"
   },
   "/Game/SilentZonePack/Assets/SM/SM_CraneHuge_Base.SM_CraneHuge_Base": {
-   "rays": 38,
+   "rays": 0,
    "misses": 0,
    "inside_m": 0.0,
    "h_m": 4.5,
    "convex": 0,
    "simple": 80,
-   "trace": "CTF_USE_SIMPLE_AS_COMPLEX",
+   "trace": "CTF_USE_DEFAULT",
    "name": "r12_crane#1"
   },
   "/Game/SilentZonePack/Assets/SM/SM_Machinery_Hopper.SM_Machinery_Hopper": {
@@ -920,6 +910,16 @@
    "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
    "name": "l12_boulder#1"
   },
+  "/Game/CastleofEternalMist/Scanned_Foliage/Objects/Foliage/EuropeanBeech/SM_EuropeanBeech_Log_01.SM_EuropeanBeech_Log_01": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 0.8,
+   "convex": 0,
+   "simple": 3,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "l12_fallen#2"
+  },
   "/Game/RandomDungeon/Wild/Solid/SM_Pine_Fallen_Solid.SM_Pine_Fallen_Solid": {
    "rays": 7,
    "misses": 0,
@@ -959,6 +959,16 @@
    "simple": 0,
    "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
    "name": "l12_pine#1"
+  },
+  "/Game/CastleofEternalMist/Scanned_Foliage/Objects/Foliage/EuropeanBeech/SM_EuropeanBeech_M_01.SM_EuropeanBeech_M_01": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 6.4,
+   "convex": 0,
+   "simple": 1,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "l12_broadleaf#1"
   },
   "/Game/Harbour_Collection/Props/SM_BigFishNet/Meshes/FBX/SM_BigFishNet.SM_BigFishNet": {
    "rays": 13,
@@ -1129,16 +1139,6 @@
    "simple": 1,
    "trace": "CTF_USE_DEFAULT",
    "name": "s12_trough#1"
-  },
-  "/Game/Hivemind/Medieval_Docks/Static_Meshes/Props/SM_Well_Roof.SM_Well_Roof": {
-   "rays": 16,
-   "misses": 0,
-   "inside_m": 0.0,
-   "h_m": 2.7,
-   "convex": 1,
-   "simple": 0,
-   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
-   "name": "s12_wellroof#1"
   },
   "/Game/Meshes/SM_COMP_Bridge_Stone_01.SM_COMP_Bridge_Stone_01": {
    "rays": 14,
@@ -1370,26 +1370,6 @@
    "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
    "name": "s12_glacier#1"
   },
-  "/Game/Medieval_Lake_Village/Meshs/SM_Roots.SM_Roots": {
-   "rays": 3,
-   "misses": 0,
-   "inside_m": 0.0,
-   "h_m": 2.7,
-   "convex": 0,
-   "simple": 0,
-   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
-   "name": "s12_roots#2"
-  },
-  "/Game/AlienPlanet/Meshes/Foliage/SM_RootsLarge01.SM_RootsLarge01": {
-   "rays": 11,
-   "misses": 0,
-   "inside_m": 0.0,
-   "h_m": 0.6,
-   "convex": 0,
-   "simple": 0,
-   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
-   "name": "s12_roots#1"
-  },
   "/Game/Meshes/SM_RockBeach_01a.SM_RockBeach_01a": {
    "rays": 34,
    "misses": 0,
@@ -1399,6 +1379,16 @@
    "simple": 0,
    "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
    "name": "s12_beachrock#1"
+  },
+  "/Game/TheMessenger/VFX/Waterfall/SM_Waterfall_01.SM_Waterfall_01": {
+   "rays": 15,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 16.6,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
+   "name": "s12_waterfall#1"
   },
   "/Game/Hive_Sherwood/Meshes/SM_maingate.SM_maingate": {
    "rays": 6,
@@ -1940,6 +1930,16 @@
    "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
    "name": "n13_turfstack#1"
   },
+  "/Game/CastleofEternalMist/Scanned_Foliage/Objects/Foliage/EuropeanBeech/SM_EuropeanBeech_Stump_01.SM_EuropeanBeech_Stump_01": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 1.6,
+   "convex": 0,
+   "simple": 2,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "n13_beechstump#1"
+  },
   "/Game/RandomDungeon/Wild/Solid/SM_Pine_Fallen_1_Solid.SM_Pine_Fallen_1_Solid": {
    "rays": 14,
    "misses": 0,
@@ -1949,46 +1949,6 @@
    "simple": 0,
    "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
    "name": "n13_pinefallen#2"
-  },
-  "/Game/RandomDungeon/Wild/Solid/SM_Wild_Birch_B_Solid.SM_Wild_Birch_B_Solid": {
-   "rays": 23,
-   "misses": 0,
-   "inside_m": 0.0,
-   "h_m": 1542.7,
-   "convex": 1,
-   "simple": 0,
-   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
-   "name": "n13_birch#2"
-  },
-  "/Game/RandomDungeon/Wild/Solid/SM_Wild_Birch_A_Solid.SM_Wild_Birch_A_Solid": {
-   "rays": 24,
-   "misses": 0,
-   "inside_m": 0.0,
-   "h_m": 1653.3,
-   "convex": 1,
-   "simple": 0,
-   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
-   "name": "n13_birch#1"
-  },
-  "/Game/RandomDungeon/Wild/Solid/SM_Wild_Aspen_B_Solid.SM_Wild_Aspen_B_Solid": {
-   "rays": 24,
-   "misses": 0,
-   "inside_m": 0.0,
-   "h_m": 1770.7,
-   "convex": 1,
-   "simple": 0,
-   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
-   "name": "n13_aspen#2"
-  },
-  "/Game/RandomDungeon/Wild/Solid/SM_Wild_Aspen_A_Solid.SM_Wild_Aspen_A_Solid": {
-   "rays": 30,
-   "misses": 0,
-   "inside_m": 0.0,
-   "h_m": 1875.6,
-   "convex": 1,
-   "simple": 0,
-   "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
-   "name": "n13_aspen#1"
   },
   "/Game/RandomDungeon/Wild/Solid/SM_Pine_Medium_2_Snow_Solid.SM_Pine_Medium_2_Snow_Solid": {
    "rays": 48,
@@ -2290,26 +2250,6 @@
    "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
    "name": "n13_baobab#1"
   },
-  "/Game/RandomDungeon/Wild/Trees/SM_Wild_Acacia_B.SM_Wild_Acacia_B": {
-   "rays": 12,
-   "misses": 0,
-   "inside_m": 0.0,
-   "h_m": 828.7,
-   "convex": 1,
-   "simple": 0,
-   "trace": "CTF_USE_DEFAULT",
-   "name": "n13_acacia#2"
-  },
-  "/Game/RandomDungeon/Wild/Trees/SM_Wild_Acacia_A.SM_Wild_Acacia_A": {
-   "rays": 11,
-   "misses": 0,
-   "inside_m": 0.0,
-   "h_m": 938.6,
-   "convex": 1,
-   "simple": 0,
-   "trace": "CTF_USE_DEFAULT",
-   "name": "n13_acacia#1"
-  },
   "/Game/Medieval_Weapons/Meshes/VOL2/SM_Spear.SM_Spear": {
    "rays": 48,
    "misses": 0,
@@ -2360,6 +2300,16 @@
    "trace": "CTF_USE_COMPLEX_AS_SIMPLE",
    "name": "n13_gibbet#1"
   },
+  "/Game/Hive_Sherwood/Meshes/SM_EuropeanBeech_XL_01.SM_EuropeanBeech_XL_01": {
+   "rays": 0,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 27.8,
+   "convex": 0,
+   "simple": 3,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "n13_lonebeech#1"
+  },
   "/Game/Hyper/ResourcePack/Environments/Rocks/LargePlainsBoulder002/SM_LargePlainsBoulder002.SM_LargePlainsBoulder002": {
    "rays": 48,
    "misses": 0,
@@ -2408,14 +2358,39 @@
    "convex": 8,
    "simple": 0,
    "trace": "CTF_USE_DEFAULT",
-   "name": "landmark",
-   "after_fix": true
+   "name": "landmark"
+  },
+  "/Game/RandomDungeon/Wild13/Kit/SM_N13_StormCell.SM_N13_StormCell": {
+   "rays": 48,
+   "misses": 0,
+   "inside_m": 0.0,
+   "h_m": 2660.0,
+   "convex": 1,
+   "simple": 0,
+   "trace": "CTF_USE_DEFAULT",
+   "name": "kit:SM_N13_StormCell"
   }
  },
- "failed": [
-  "landmark"
- ],
- "fixed": [
-  "landmark"
+ "failed": [],
+ "fixed": [],
+ "still_failing": [],
+ "not_measured": [
+  "tent4",
+  "r12_wheel#1",
+  "r12_crane#1",
+  "r12_jwall#2",
+  "r12_rubble#2",
+  "l12_fallen#2",
+  "l12_broadleaf#1",
+  "s12_rift#1",
+  "s12_spirerock#2",
+  "n13_stilthut#1",
+  "n13_bomb#2",
+  "n13_bomb#1",
+  "n13_sandrock#1",
+  "n13_iceblock#1",
+  "n13_beechstump#1",
+  "n13_stiltcache#1",
+  "n13_lonebeech#1"
  ]
 }

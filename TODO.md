@@ -57,7 +57,7 @@ The biomes' scenery, in phases with a PR each (the user's choices: every item to
   - Sound ("creaking trunks, birdsong that suddenly stops", "waves, bird cries") is not built for the scenery: nobody hears a test, and no sound was chosen for it.
   - The cold has no food side (hunger is not in the game), and the warmth of a fire is any fire effect or fire piece within 8 m. The landmark is one kind of tower (the kit's broken tower), the nearest one standing at a time.
 - [ ] **The list of 2026-11-16 (`docs/improvements14.txt`, its plan `docs/improvements14_plan.md`)**, phase by phase:
-  - Phase 1 (the spires, collision): the meshes the wilds lay are measured against their faces in an empty level; the check in play visits one place of each kind round Brokenspire, not every region. Roofs and gables carry no collision by design (out of her reach).
+  - Phase 1 (the spires, collision): 17 of the meshes the wilds lay could not be measured by `927 collide` (no faces met: `collide14.json`'s `not_measured`); they are checked only where `888 collide14` meets them in play. The check in play visits one place of each kind round Brokenspire, not every region. Roofs and gables carry no collision by design (out of her reach).
 - [ ] **Phase 1, what is not done or measured:**
   - The burrows' "collapsing tunnels" are a fall's harm and a slow where the ground gives way: the ground itself does not open (a chunk's ground is one mesh).
   - The herons stand still (a mesh of our own, no clips); the bees and the birds are the packs' effects (flies as bees, the flocks as crows); the frogs are not there (no frog in the project).

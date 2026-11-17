@@ -1,7 +1,7 @@
 """The wilderness's tables of placed things, shared by the stages that write them (924's ruins, lairs and structures, 926's scenery):
 a table's pieces into brokenspire's WildPieces under a prefix and its kinds into a generator property, its solid pieces given a
 collision they stop her with (PR #57's review: one helper for one rule). REPORT gathers what was done; the caller prints it."""
-import os, json, unreal
+import os, json, re, unreal
 les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); eal = unreal.EditorAssetLibrary
 SA = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "claude_ue5", "SourceArt", "wilderness"))
@@ -113,3 +113,41 @@ def lay_table(file, pre, prop, rows, cls=None, more=None):
     g.modify(); les.save_current_level()
     REPORT.append(f"{rows}: {len(kinds)}, {n} meshes in {len(J['pieces'])} pieces")
     return J, g
+
+
+# ---- the list of 2026-11-16 (927, 926, 888): what the wilds lay to be walked or seen through, matched by whole parts of a
+# mesh's or component's name (PR #77's review: fragments caught solid pieces: "far" in Farm, "corn" in Corner, "tree" in Street)
+SOFT_PARTS = {"tree", "trees", "bush", "bushes", "grass", "plant", "plants", "foliage", "flower", "flowers", "fern", "ferns", "leaf",
+              "leaves", "reed", "reeds", "crop", "crops", "wheat", "corn", "maize", "hemp", "flax", "oats", "rye", "barley", "beans",
+              "peas", "potato", "cabbage", "turnip", "stormcell", "aurora", "plume", "rain", "drops", "water", "mist", "fog", "decal",
+              "cloud", "clouds", "ivy", "vine", "vines", "moss", "noose", "rope", "ropes", "chain", "chains", "sky", "skysphere",
+              "root", "roots", "roof", "roofs", "hay", "straw", "carpet", "rug", "cloth", "banner", "flag", "collider"}
+
+
+def name_parts(name):
+    """a name's parts: split at _ # . - and at a capital after a small letter (SM_StoneRoof_02 -> sm, stone, roof, 02)"""
+    out = []
+    for w in re.split(r"[_#.\- ]+", name):
+        out += [p.lower() for p in re.findall(r"[A-Z]+(?![a-z])|[A-Z]?[a-z]+|\d+", w)]
+    return out
+
+
+def soft_name(*names):
+    """walked or seen through by design: a soft part in any of the names, or one of the wilds' own plants (SM_Wild_*: the crops
+    and trees, their _Solid copies being trees too)"""
+    return any(n.startswith("SM_Wild_") for n in names) or any(p in SOFT_PARTS for n in names for p in name_parts(n))
+
+
+def mesh_sig(m):
+    """what an import can change of a mesh: its box and its vertex count (PR #77's review: a new shape in the same box)"""
+    b = m.get_bounding_box()
+    try: nv = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem).get_number_verts(m, 0)
+    except Exception: nv = -1
+    return (round(b.min.x), round(b.min.y), round(b.min.z), round(b.max.x), round(b.max.y), round(b.max.z), nv)
+
+
+def reshape(m):
+    """a convex decomposition of a mesh's own faces as its collision (8 hulls: a tower's buttresses, an arch's two legs), saved"""
+    sme = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem)
+    m.modify(); sme.remove_collisions(m); sme.set_convex_decomposition_collisions(m, 8, 32, 200000)
+    eal.save_loaded_asset(m, only_if_is_dirty=False)

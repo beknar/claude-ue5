@@ -4598,9 +4598,10 @@ def tall_pieces(at, reach_m=6000.0, min_h_m=30.0):
             if m is None: continue
             bb = m.get_bounding_box(); mh = (bb.max.z - bb.min.z) / 100.0
             items = []
+            if "NO_COLLISION" in str(c.get_collision_enabled()): continue
             if isinstance(c, unreal.InstancedStaticMeshComponent):
                 n = c.get_instance_count()
-                if n == 0 or mh * 3.0 < min_h_m: continue
+                if n == 0 or mh * 20.0 < min_h_m: continue
                 for i in range(min(n, 4000)):
                     tr = c.get_instance_transform(i, True)
                     s = tr.scale3d; h = mh * s.z
@@ -4613,16 +4614,11 @@ def tall_pieces(at, reach_m=6000.0, min_h_m=30.0):
                 items.append((mid, h, (bb.max.x - bb.min.x) * s.x / 100.0, (bb.max.y - bb.min.y) * s.y / 100.0, -1))
             for (loc, h, fx, fy, i) in items:
                 d = math.hypot(loc.x - at.x, loc.y - at.y) / 100.0
-                if d > reach_m: continue
-                try: simple = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem).get_simple_collision_count(m)
-                except Exception: simple = -1
-                try: cplx = str(unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem).get_collision_complexity(m))
-                except Exception: cplx = "?"
+                if d > reach_m or max(fx, fy) > reach_m: continue
                 out.append({"mesh": m.get_name(), "path": m.get_path_name(), "owner": a.get_name(), "comp": c.get_name(), "inst": i,
                             "x": round(loc.x / 100.0, 1), "y": round(loc.y / 100.0, 1), "z": round(loc.z / 100.0, 1), "h_m": round(h, 1),
                             "foot_m": [round(fx, 1), round(fy, 1)], "dist_m": round(d, 1),
-                            "collision": str(c.get_collision_enabled()), "pawn": str(c.get_collision_response_to_channel(unreal.CollisionChannel.ECC_PAWN)),
-                            "simple_shapes": simple, "complexity": cplx})
+                            "collision": str(c.get_collision_enabled()), "pawn": str(c.get_collision_response_to_channel(unreal.CollisionChannel.ECC_PAWN))})
     out.sort(key=lambda r: r["dist_m"])
     return out
 
@@ -4635,11 +4631,16 @@ def walk_into(x_m, y_m, foot_m, secs=5.0):
         sx, sy = x_m + math.cos(a_) * (half + 8.0), y_m + math.sin(a_) * (half + 8.0)
         if not sample(sx, sy)["water"]: break
     g = G["gen"]; g.wild_put_her(sx, sy); yield from wait_chunks(30, 50); ground_put(sx, sy); yield from rwait(1.0)
-    best = 1e9; t0 = time.time()
-    while time.time() - t0 < secs:
+    # (she walks until she stops getting nearer for 1.5 s or reaches its middle, at most 40 s (PR #77's review: a fixed 5 s fell
+    # short of a wide piece's middle whatever its collision))
+    best = 1e9; t0 = time.time(); last_best = 1e9; last_t = time.time()
+    while time.time() - t0 < 40.0:
         p = G["pawn"].get_actor_location()
         d = math.hypot(x_m * 100.0 - p.x, y_m * 100.0 - p.y) / 100.0
         best = min(best, d)
+        if best < 0.5: break
+        if best < last_best - 0.3: last_best = best; last_t = time.time()
+        elif time.time() - last_t > 1.5: break
         G["pawn"].add_movement_input(V(x_m * 100.0 - p.x, y_m * 100.0 - p.y, 0), 1.0, True)
         yield
     return {"nearest_m": round(best, 2), "half_m": round(half, 1), "through": best < 0.35 * min(foot_m)}
@@ -4663,8 +4664,7 @@ def step_spires14():
         if r["mesh"] in seen or len(seen) >= 6: continue
         seen.add(r["mesh"])
         w_ = yield from walk_into(r["x"], r["y"], r["foot_m"])
-        res["walks"][r["mesh"]] = dict(w_, owner=r["owner"], h_m=r["h_m"], collision=r["collision"], pawn=r["pawn"], simple=r["simple_shapes"])
-        if "SkySphere" in r["mesh"]: res["walks"][r["mesh"]]["sky"] = True
+        res["walks"][r["mesh"]] = dict(w_, owner=r["owner"], h_m=r["h_m"], collision=r["collision"], pawn=r["pawn"])
         q = G["pawn"].get_actor_location()
         G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=12, yaw=math.degrees(math.atan2(r["y"] * 100.0 - q.y, r["x"] * 100.0 - q.x)) + 180.0))
         g.wild_put_her(r["x"] + 40.0, r["y"]); yield from wait_chunks(30, 50); ground_put(r["x"] + 40.0, r["y"]); yield from rwait(1.0)
@@ -4672,37 +4672,32 @@ def step_spires14():
         shot("spires14_" + r["mesh"], "1280x720"); yield from rwait(1.0)
     # (the fix: the landmark's shape made again from its faces (926 kit, 927 collide): it must stop her at its walls)
     lm = res["walks"].get("SM_N13_LandmarkTower")
-    ok = bool(lm) and not lm["through"] and not any(v["through"] for k_, v in res["walks"].items() if not v.get("sky"))
+    ok = bool(lm) and not lm["through"] and not any(v["through"] for v in res["walks"].values())
     step_result("spires14", ok, **res)
 
-SOFT14 = ("tree", "bush", "grass", "plant", "foliage", "flower", "fern", "leaf", "leaves", "reed", "crop", "wheat", "corn", "stormcell", "aurora",
-          "smoke", "plume", "rain", "water", "mist", "fog", "decal", "cloud", "ivy", "vine", "moss", "noose", "rope", "chain", "sky", "far", "ground",
-          "collider", "rdw", "land", "berm", "road", "drops", "hay", "straw", "carpet", "rug", "cloth", "banner", "flag",
-          "sm_wild_", "root", "roof")      # (SM_Wild_* are the wilds' own plants (crops, trees); roots are plants, laid to be walked through; roofs carry no collision by design, the towns' and the farms' alike: the camera's boom passes them; the walls stop her)
+def wt():
+    """wild_tables, the stages' shared helper (its list of what is walked through): loaded fresh each run"""
+    import importlib, sys as _s
+    d = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "..", "pipeline", "unreal")
+    if d not in _s.path: _s.path.insert(0, d)
+    import wild_tables
+    return importlib.reload(wild_tables)
 
-def laid_open(at, reach_m):
-    """the pieces laid within reach_m of at (cm) taller than 2 m that are not of a soft kind but have no collision of their own: each
-    traced through at a metre up from 3 m outside (a hidden collider round it counts): those nothing stops"""
-    w = G["w"]; out = []; seen = 0; solid = 0
+def laid_check(at, reach_m):
+    """the pieces laid within reach_m of at (cm) whose foot is within 2 m of the ground under them and that stand 2 m or more, not
+    walked through by design (wild_tables' soft parts): each traced at a metre over its foot from 3 m outside toward its middle,
+    against that piece alone (line_trace_component), its faces (complex) and its collision (simple, what stops her): one whose
+    shapes stand a metre inside its faces, that the faces stop and the shapes let through, or that does not block her channel,
+    lets her into it; a piece laid with no collision at all, traced through the world, is open where nothing stops the line
+    (PR #77's review: the solid ones were counted, never measured)"""
+    W_ = wt(); w = G["w"]; bad = []; opn = []; solid = 0; seen_open = 0
     for a in unreal.GameplayStatics.get_all_actors_of_class(w, unreal.Actor):
         try: comps = a.get_components_by_class(unreal.StaticMeshComponent)
         except Exception: continue
         for c in comps:
             m = c.get_editor_property("static_mesh")
-            if m is None: continue
-            if str(c.get_collision_enabled()).find("NO_COLLISION") < 0:
-                # (the solid ones counted where they stand: the visit looked at something)
-                try:
-                    if isinstance(c, unreal.InstancedStaticMeshComponent):
-                        for i in range(min(c.get_instance_count(), 400)):
-                            q_ = c.get_instance_transform(i, True).translation
-                            if math.hypot(q_.x - at.x, q_.y - at.y) <= reach_m * 100.0: solid += 1
-                    elif math.hypot(c.get_world_location().x - at.x, c.get_world_location().y - at.y) <= reach_m * 100.0: solid += 1
-                except Exception: pass
-                continue
-            if any(s_ in (m.get_name() + " " + c.get_name()).lower() for s_ in SOFT14) or not c.is_visible(): continue
-            bb = m.get_bounding_box()
-            locs = []
+            if m is None or not c.is_visible() or W_.soft_name(m.get_name(), c.get_name()): continue
+            bb = m.get_bounding_box(); locs = []
             if isinstance(c, unreal.InstancedStaticMeshComponent):
                 for i in range(min(c.get_instance_count(), 400)):
                     tr = c.get_instance_transform(i, True)
@@ -4710,17 +4705,29 @@ def laid_open(at, reach_m):
             else:
                 s = c.get_world_scale()
                 if (bb.max.z - bb.min.z) * s.z >= 200.0: locs.append((c.get_world_transform().transform_location(V((bb.min.x + bb.max.x) * 0.5, (bb.min.y + bb.max.y) * 0.5, bb.min.z)), (bb.max.x - bb.min.x) * s.x))
+            is_open = "NO_COLLISION" in str(c.get_collision_enabled())
             for loc, wid in locs:
                 if math.hypot(loc.x - at.x, loc.y - at.y) > reach_m * 100.0: continue
-                # (only what she can walk into: a piece whose foot is over 2 m above the ground under it (a gable's triangle on a
-                # farmhouse's walls, a roof) is out of her reach)
                 if loc.z - sample(loc.x / 100.0, loc.y / 100.0)["z"] > 200.0: continue
-                seen += 1
                 st = V(loc.x - wid * 0.5 - 300.0, loc.y, loc.z + 100.0); en = V(loc.x, loc.y, loc.z + 100.0)
-                h = unreal.SystemLibrary.line_trace_single(w, st, en, unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
-                tt = h.to_tuple() if h else None
-                if not tt or not tt[0]: out.append({"mesh": m.get_name(), "owner": a.get_name(), "comp": c.get_name(), "x": round(loc.x / 100.0, 1), "y": round(loc.y / 100.0, 1)})
-    return solid, seen, out
+                rec = {"mesh": m.get_name(), "owner": a.get_name(), "comp": c.get_name(), "x": round(loc.x / 100.0, 1), "y": round(loc.y / 100.0, 1)}
+                if is_open:
+                    seen_open += 1
+                    h = unreal.SystemLibrary.line_trace_single(w, st, en, unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+                    tt = h.to_tuple() if h else None
+                    if not tt or not tt[0]: opn.append(rec)
+                    continue
+                solid += 1
+                if "BLOCK" not in str(c.get_collision_response_to_channel(unreal.CollisionChannel.ECC_PAWN)): bad.append(dict(rec, why="does not block her")); continue
+                hc = c.line_trace_component(st, en, True, False, False); hs = c.line_trace_component(st, en, False, False, False)
+                def dist(h_):
+                    if not h_ or not h_[0]: return None
+                    L = h_[1]; return math.sqrt((L.x - st.x) ** 2 + (L.y - st.y) ** 2 + (L.z - st.z) ** 2) / 100.0
+                dc, ds = dist(hc), dist(hs)
+                if dc is None: continue
+                if ds is None: bad.append(dict(rec, why="its faces stop the line, its shapes let it through")); continue
+                if ds - dc >= 1.0: bad.append(dict(rec, why=f"its shapes {round(ds - dc, 2)} m inside its faces"))
+    return solid, bad, seen_open, opn
 
 def step_collide14():
     """item 18 of the list of 2026-11-16: "ensure that any structures that get built by the procedural terrain generator have collision
@@ -4734,9 +4741,9 @@ def step_collide14():
     sites = {}; farms = {}
     def visit(kind, name, x, y, reach):
         g.wild_put_her(x + 30.0, y); yield from wait_chunks(30, 50); ground_put(x + 30.0, y); yield from rwait(3.0)
-        solid, seen, opn = laid_open(V(x * 100.0, y * 100.0, 0), reach)
-        res["visits"][kind] = {"name": name, "at_km": [round(x / 1000.0, 2), round(y / 1000.0, 2)], "solid": solid, "checked_open": seen, "open": len(opn)}
-        res["open"] += opn[:10]
+        solid, bad, seen, opn = laid_check(V(x * 100.0, y * 100.0, 0), reach)
+        res["visits"][kind] = {"name": name, "at_km": [round(x / 1000.0, 2), round(y / 1000.0, 2)], "solid_traced": solid, "solid_bad": len(bad), "checked_open": seen, "open": len(opn)}
+        res["open"] += opn[:10]; res.setdefault("bad", []).extend(bad[:10])
         om = res.setdefault("open_meshes", {})
         for o_ in opn: om[o_["mesh"]] = om.get(o_["mesh"], 0) + 1
         # (the structures and farmsteads laid round her, met on the way: they are not in the places' list)
@@ -4755,7 +4762,9 @@ def step_collide14():
         nm, x, y = sorted(pool.values(), key=lambda v: math.hypot(v[1], v[2]))[0]
         yield from visit(kind, nm, x, y, 80.0)
     quiet(False)
-    ok = all(v is not None and v["solid"] > 0 for v in res["visits"].values()) and not res["open"]
+    # (a small place can hold nothing 2 m high (a lair's bones and nest): every place visited, 50 solid pieces traced in all)
+    res["solid_traced_all"] = sum(v["solid_traced"] for v in res["visits"].values() if v)
+    ok = all(v is not None for v in res["visits"].values()) and res["solid_traced_all"] >= 50 and not res["open"] and not res.get("bad")
     step_result("collide14", ok, **res)
 
 
