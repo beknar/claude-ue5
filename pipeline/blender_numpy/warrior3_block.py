@@ -3,10 +3,12 @@ animation shield block stance like in this picture: E:\\temp\\shield_block.jpg")
 forward with its knee bent over it, her right leg back, her hips low, her body leaning into the shield, her sword hand down by
 her hip. tripo_build.py's clip maker for Warrior3 (her own rig): it adds BlockLunge (two frames of the one pose) to her clips.
 
-Built from her own Box_03 (the block's pose until now, Tripo's boxing guard) at frame 30, its shield arm kept as it is (the shield
-on her forearm faces forward there): the pelvis lowered and moved forward, both feet set by IK (two-bone chains to targets on
-the floor, knees forward), the spine leant forward, the right hand brought down to her hip (IK). Previews (front, side, three
-quarter) and the pose's numbers go to <out_dir>/block_preview_*.png and block.json.
+Built from her own Box_03 (the block's pose until now, Tripo's boxing guard) at frame 30: the pelvis lowered and moved forward,
+both feet set by IK (two-bone chains to targets on the floor, knees forward), the spine leant forward, the right hand brought down
+to her hip (IK), the shield arm brought forward with her and its forearm then turned about its own length so its back (the
+shield's face in the grip: the shield is on lowerarm_l) faces her front (the list of 2026-11-16: in Box_03's guard it faced out to
+her left, and the shield's rim met the foe). The arm's skin is measured against rest before and after the turn (each edge's
+stretch). Previews (front, side, three quarter) and the pose's numbers go to <out_dir>/block_preview_*.png and block.json.
 Blender: tripo_build.py -- "ai models/Warrior3.glb" <out_dir> SK_JRPG_Warrior3 Warrior3 165 <this file>"""
 import json, math, os, sys
 import bpy
@@ -64,6 +66,28 @@ def ik_to(arm, tip, target, pole):
     return (end.head - target).length
 
 
+def arm_stretch(arm):
+    """the left arm's skin against its rest: each edge between two vertices both weighted over 0.2 to the left upper arm, forearm,
+    their twist bones or the hand, its length posed over its length at rest; the largest and the 99th percentile (a candy-wrapper
+    twist at the elbow would stretch its edges far)"""
+    me_obj = next(o for o in bpy.context.scene.objects if o.type == 'MESH' and o.vertex_groups)
+    names = [g.name for g in me_obj.vertex_groups if g.name.endswith("_l") and ("upperarm" in g.name or "lowerarm" in g.name or g.name == "hand_l")]
+    gi = {me_obj.vertex_groups[n].index for n in names}
+    sel = set()
+    for v in me_obj.data.vertices:
+        if any(g.group in gi and g.weight > 0.2 for g in v.groups): sel.add(v.index)
+    dg = bpy.context.evaluated_depsgraph_get(); ev = me_obj.evaluated_get(dg); m2 = ev.to_mesh()
+    rs = []
+    for e in me_obj.data.edges:
+        a, b = e.vertices
+        if a in sel and b in sel:
+            l0 = (me_obj.data.vertices[a].co - me_obj.data.vertices[b].co).length
+            if l0 > 1e-6: rs.append((m2.vertices[a].co - m2.vertices[b].co).length / l0)
+    ev.to_mesh_clear()
+    rs.sort()
+    return {"edges": len(rs), "max": round(rs[-1], 2) if rs else None, "p99": round(rs[int(len(rs) * 0.99)], 2) if rs else None}
+
+
 def frame_of(arm):
     return {pb.name: pb.matrix_basis.decompose() for pb in arm.pose.bones}
 
@@ -118,7 +142,8 @@ def make_clips(arm, scene, clips):
     if P["head"].head.y > B["head"].head_local.y - 0.02 * L:
         for n, deg in zip(("spine_01", "spine_02", "spine_03"), LEAN_DEG):
             if n in P: rot_world(arm, P[n], Vector((1, 0, 0)), -2 * deg)
-    # (the shield arm: the hand forward with her, then the forearm and hand turned back to Box_03's, so the shield stands upright)
+    # (the shield arm: the hand forward with her, then the forearm and hand turned back to Box_03's, so the shield stands upright;
+    # then the forearm turned about its length to face her front, below)
     tgt = hpos0 + Vector((0, -PELVIS_FWD * L + SHIELD_HAND[0] * L, SHIELD_HAND[1] * L))
     res["shield_hand_off_cm"] = round(ik_to(arm, "hand_l", tgt, P["upperarm_l"].head + Vector((0.3 * L, 0.05 * L, -0.25 * L))) * 165.0 / 0.9, 2)
     la = P["lowerarm_l"]; la.matrix = Matrix.Translation(la.head) @ low0.to_4x4(); bpy.context.view_layer.update()
@@ -133,13 +158,18 @@ def make_clips(arm, scene, clips):
         return fa_, (la.matrix.to_3x3() @ d_local).normalized()
     fa, dn = face_now()
     res["shield_face_vs_front_deg_before"] = round(math.degrees(dn.angle(Vector((0, -1, 0)))), 1)
-    want = Vector((0, -1, 0)); want = (want - fa * want.dot(fa)).normalized()
-    dp = (dn - fa * dn.dot(fa)).normalized()
+    stretch_before = arm_stretch(arm)
+    want = Vector((0, -1, 0)); want = want - fa * want.dot(fa)
+    dp = dn - fa * dn.dot(fa)
+    # (a forearm along her front, or a face along the forearm, leaves nothing to turn to: kept as it is (PR #80's review))
+    if want.length < 1e-4 or dp.length < 1e-4: want = dp = Vector((1, 0, 0))
+    want.normalize(); dp.normalize()
     ang = dp.angle(want); sgn = 1.0 if fa.dot(dp.cross(want)) > 0 else -1.0
     rot_world(arm, la, fa, math.degrees(ang * sgn))
     fa, dn = face_now()
     res["shield_face_vs_front_deg"] = round(math.degrees(dn.angle(Vector((0, -1, 0)))), 1)
     res["forearm_roll_deg"] = round(math.degrees(ang * sgn), 1)
+    res["arm_skin_stretch_before"] = stretch_before; res["arm_skin_stretch_after"] = arm_stretch(arm)
     # (the sword hand down by her right hip, the elbow out and back)
     sh = Vector((SWORD_HAND[0] * L, SWORD_HAND[1] * L + P["pelvis"].head.y, P["pelvis"].head.z + 0.02 * L))
     elbow = P["upperarm_r"].head + Vector((-0.25 * L, 0.2 * L, -0.25 * L))
@@ -148,7 +178,8 @@ def make_clips(arm, scene, clips):
     for n in ("pelvis", "foot_l", "foot_r", "hand_l", "hand_r", "head"):
         h = P[n].head; res[n] = [round(h.x / L, 3), round(h.y / L, 3), round(h.z / L, 3)]
     fr = frame_of(arm)
-    try: res["previews"] = preview(arm, out)
+    # (the previews' names only: the record holds no paths of this machine (PR #80's review))
+    try: res["previews"] = [os.path.basename(s) for s in preview(arm, out)]
     except Exception as e: res["preview_error"] = str(e)
     os.makedirs(out, exist_ok=True); json.dump(res, open(os.path.join(out, "block.json"), "w"), indent=1)
     print("WARRIOR3 BLOCK", json.dumps(res))

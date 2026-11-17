@@ -5,6 +5,16 @@
  "shield_face_vs_front_deg_before": 117.0,
  "shield_face_vs_front_deg": 10.0,
  "forearm_roll_deg": -118.9,
+ "arm_skin_stretch_before": {
+  "edges": 3739,
+  "max": 2.97,
+  "p99": 1.59
+ },
+ "arm_skin_stretch_after": {
+  "edges": 3739,
+  "max": 3.07,
+  "p99": 1.56
+ },
  "sword_hand_off_cm": 11.15,
  "pelvis": [
   0.003,
@@ -37,8 +47,8 @@
   1.302
  ],
  "previews": [
-  "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\list10\\warrior3_block\\block_preview_side.png",
-  "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\list10\\warrior3_block\\block_preview_front.png",
-  "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\list10\\warrior3_block\\block_preview_three_quarter.png"
+  "block_preview_side.png",
+  "block_preview_front.png",
+  "block_preview_three_quarter.png"
  ]
 }
