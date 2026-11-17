@@ -5970,7 +5970,71 @@ def step_horsecall14():
     gi.set_editor_property("horse_owned", False)
     step_result("horsecall14", res["calls"] == 0 and "down here" in res["said"], **res)
 
-STEPS = {"horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
+
+def step_block14():
+    """item 5 of the list of 2026-11-16: "the shield position when it's used to block by the warrior is perpendicular to the enemy.
+    it should be facing the front": the Warrior with a kite shield blocks (the right mouse button held, the stance blended in) with
+    a monster 3 m before her; the shield's face (its +Y in the grip: 862, 865; on her forearm) against her front and against the way
+    to the monster, standing and walking in the block, each sampled over a second; standing out of the block for comparison;
+    pictures from in front of her and three quarters"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    res = {}
+    held = False
+    try:
+        put(g.get_start_room_center(), 0.0); yield from wait(0.3)
+        c.add_item("Kite Shield", 1); c.wear_shield("Kite Shield"); yield from wait(0.5)
+        res["shield"] = str(c.get_worn_shield())
+        foe = None
+        try:
+            ms = [m for m in g.get_monsters() if m and not m.is_dead()]
+            if ms:
+                foe = ms[0]; p0 = G["pawn"].get_actor_location(); f0 = G["pawn"].get_actor_forward_vector()
+                foe.set_actor_location(V(p0.x + f0.x * 300, p0.y + f0.y * 300, p0.z), False, True)
+        except Exception: foe = None
+        def face_deg():
+            sc = c.get_left_hand_mesh()
+            if not sc: return None
+            n = unreal.MathLibrary.get_right_vector(sc.get_world_rotation())
+            f = G["pawn"].get_actor_forward_vector()
+            out = {"front": round(math.degrees(math.acos(max(-1.0, min(1.0, n.x * f.x + n.y * f.y + n.z * f.z)))), 1)}
+            if foe:
+                p = G["pawn"].get_actor_location(); q = foe.get_actor_location(); d = V(q.x - p.x, q.y - p.y, 0.0); dl = max(1.0, math.hypot(d.x, d.y))
+                nl = max(1e-6, math.hypot(n.x, n.y))
+                out["foe"] = round(math.degrees(math.acos(max(-1.0, min(1.0, (n.x * d.x + n.y * d.y) / (dl * nl))))), 1)
+            return out
+        def sample(secs, walk=False):
+            out = []; t0 = time.time()
+            while time.time() - t0 < secs:
+                if walk: G["pawn"].add_movement_input(G["pawn"].get_actor_forward_vector(), 1.0, True)
+                v = face_deg()
+                if v is not None: out.append(v)
+                yield
+            return out
+        res["standing"] = [v["front"] for v in (yield from sample(1.0))]
+        why = str(g.slate_key(key("RightMouseButton"), True)); held = True; yield from rwait(1.0)
+        res["refused"] = why; res["blocking"] = c.is_blocking()
+        bl = yield from sample(1.0)
+        res["blocking_front"] = [v["front"] for v in bl]; res["blocking_foe"] = [v["foe"] for v in bl if "foe" in v]
+        res["walking_front"] = [v["front"] for v in (yield from sample(1.2, walk=True))]
+        yw = G["pawn"].get_actor_rotation().yaw
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=yw + 180.0)); yield from rwait(0.8)
+        shot("block14_front", "1280x720"); yield from rwait(0.8)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=yw + 135.0)); yield from rwait(0.8)
+        shot("block14_three_quarter", "1280x720"); yield from rwait(0.8)
+    finally:
+        # (the button let go and the monsters' noticing put back whatever happened (PR #80's review))
+        if held: g.slate_key(key("RightMouseButton"), False)
+        quiet(False)
+    yield from rwait(0.5)
+    bf, bw, bo = res.get("blocking_front") or [], res.get("walking_front") or [], res.get("blocking_foe") or []
+    res["blocking_front_max"] = max(bf) if bf else None; res["walking_front_max"] = max(bw) if bw else None; res["blocking_foe_max"] = max(bo) if bo else None
+    res["standing_min"] = min(res["standing"]) if res.get("standing") else None
+    ok = (res.get("blocking") and bf and max(bf) < 30.0 and bw and max(bw) < 35.0 and (not bo or max(bo) < 35.0) and bo != []
+          and res["standing_min"] is not None and res["standing_min"] > 45.0)
+    step_result("block14", ok, **res)
+
+
+STEPS = {"block14": step_block14, "horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
          "spells11_spells": lambda: step_spells11(("spells",)), "spells11_curses": lambda: step_spells11(("curses",)), "spells11_slashes": lambda: step_spells11(("slashes",)), "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
          "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "menulook": step_menulook, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
@@ -5979,6 +6043,7 @@ STEPS = {"horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_q
          "martial": step_martial, "martialroom": step_martialroom, "harvest": step_harvest, "recipes": step_recipes, "scrolls": step_scrolls,
          "gearbreak": step_gearbreak, "summoner": step_summoner}
 # ------------------------------------------------------------------------------------------------ the TODO sweep (2026-11-14)
+
 def step_curses13():
     """the curses' parts the list of 2026-11-11's test left unmeasured: Lethargy's slower blows (a monster's blows landing on her
     over 12 s, without and with it), Brittle's knock-down (a doubled blow stuns the monster, counted), Silence breaking a shot's

@@ -1,0 +1,57 @@
+{
+ "tag": "s14p4b",
+ "plan": [
+  "block8"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "block8",
+   "ok": true,
+   "shield_given": "Broddi's Shield",
+   "block_move_speed": 90.0,
+   "blocking": true,
+   "ahead": {
+    "along_cm": 165,
+    "aside_cm": 0,
+    "turned_deg": 0.0,
+    "speed_cm_s": 82,
+    "filter": [
+     1.0,
+     0.0,
+     1.0
+    ]
+   },
+   "right": {
+    "along_cm": 0,
+    "aside_cm": 0,
+    "turned_deg": 243.0,
+    "speed_cm_s": 0,
+    "filter": [
+     0.0,
+     1.0,
+     0.0
+    ]
+   },
+   "back": {
+    "along_cm": -144,
+    "aside_cm": 0,
+    "turned_deg": 0.0,
+    "speed_cm_s": 72,
+    "filter": [
+     -1.0,
+     0.0,
+     -0.8
+    ]
+   },
+   "after_cm_s": 252
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "bs_s14p4b_block8.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}
