@@ -3233,6 +3233,13 @@ public:
 		double Mem0 = 0.0, MemMax = 0.0, FramesAt = 0.0;
 		int32 Frames = 0, Stuck = 0, Puts = 0, Pushes = 0;
 		double PathCm = 0.0, Commit0 = 0.0, CommitMax = 0.0;
+		/** the HUD's last lines and her hit points as they fell (a death's cause, written with it: the package of 2026-11-16 died once
+		 *  and nothing said why) */
+		TArray<FString> Said; float LastHp = -1.f; FString Hurts;
+		/** the walk is a memory walk, not a fight (the package of 2026-11-16: the roaming ambushers killed her twice and the respawn
+		 *  built a town into the walk's memory): from her put 3 km out to its end the monsters do not notice her (the generator's
+		 *  AggroDistance and LoseDistance 0, as 888's quiet; put back after), and a death ends the walk as a failure with its cause */
+		float AggroWas = -1.f, LoseWas = 0.f, LastMsgAt = -1000.f, HurtTotal = 0.f; double DamageSeen = -1.0;
 		float NextCheckAt = 0.f, SubAt = 0.f;
 		FVector LeverAt = FVector::ZeroVector, LeverPos = FVector::ZeroVector;
 		FString GateWhat, GateOther;
