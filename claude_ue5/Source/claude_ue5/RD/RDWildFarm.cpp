@@ -54,21 +54,21 @@ ARDTownsfolk* ARDDungeonGenerator::NearestWildFolk(const FVector& From, float Re
 	ARDTownsfolk* Best = nullptr; float Bd = Reach;
 	for (const FRDWildFarmRec& F : WildFarms)
 		for (const TWeakObjectPtr<ARDTownsfolk>& W : F.Folk)
-			if (ARDTownsfolk* T = W.Get(); IsValid(T) && !(bAwake && T->IsSleeping()))
+			if (ARDTownsfolk* T = W.Get(); IsValid(T) && !T->IsWildDead14() && !(bAwake && T->IsSleeping()))
 			{
 				const float D = FVector::Dist2D(T->GetActorLocation(), From);
 				if (D < Bd && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Bd = D; Best = T; }
 			}
 	// (the list of 2026-11-12: the structures' prisoners and the quests' people)
 	for (const TWeakObjectPtr<ARDTownsfolk>& W : WildSiteFolk)
-		if (ARDTownsfolk* T = W.Get(); IsValid(T))
+		if (ARDTownsfolk* T = W.Get(); IsValid(T) && !T->IsWildDead14())
 		{
 			const float D = FVector::Dist2D(T->GetActorLocation(), From);
 			if (D < Bd && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Bd = D; Best = T; }
 		}
 	// (the list of 2026-11-11: the people the director met her with)
 	for (const TWeakObjectPtr<ARDTownsfolk>& W : WildRoamFolk)
-		if (ARDTownsfolk* T = W.Get(); IsValid(T))
+		if (ARDTownsfolk* T = W.Get(); IsValid(T) && !T->IsWildDead14())
 		{
 			const float D = FVector::Dist2D(T->GetActorLocation(), From);
 			if (D < Bd && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Bd = D; Best = T; }
@@ -76,7 +76,7 @@ ARDTownsfolk* ARDDungeonGenerator::NearestWildFolk(const FVector& From, float Re
 	// (the list of 2026-11-10's sixth phase: the travellers on the roads)
 	for (const FTraveller& G : WildTravellers)
 		for (const TWeakObjectPtr<ARDTownsfolk>& W : G.Folk)
-			if (ARDTownsfolk* T = W.Get(); IsValid(T))
+			if (ARDTownsfolk* T = W.Get(); IsValid(T) && !T->IsWildDead14())
 			{
 				const float D = FVector::Dist2D(T->GetActorLocation(), From);
 				if (D < Bd && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Bd = D; Best = T; }

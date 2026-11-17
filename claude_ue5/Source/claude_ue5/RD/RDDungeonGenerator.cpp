@@ -1683,6 +1683,9 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 			// (hers, where she fell; or something the rules laid on the floor: the guarded ring; or a dead monster's parts)
 			if (Lp->bHers) return FString::Printf(TEXT("take up your things (%d)"), Lp->GetNumThings());
 			if (Lp->bHarvest) return FString::Printf(TEXT("harvest the parts (%d)"), Lp->GetNumThings());
+			// (the list of 2026-11-16's eighth phase: what a dead person carried)
+			if (!Lp->Owner14.IsEmpty()) return Lp->Gold > 0 ? FString::Printf(TEXT("search the body of %s (%d, %d gold)"), *Lp->Owner14, Lp->GetNumThings(), Lp->Gold)
+				: FString::Printf(TEXT("search the body of %s (%d)"), *Lp->Owner14, Lp->GetNumThings());
 			return Lp->GetNumThings() == 1 ? FString::Printf(TEXT("take the %s"), *Lp->Things[0].ToString().ToLower()) : FString::Printf(TEXT("take up what lies here (%d)"), Lp->GetNumThings());
 		}
 	if (bTown || bTownLink) { const FString Tw = TownDescribe(From); if (!Tw.IsEmpty()) return Tw; }

@@ -3585,6 +3585,199 @@ def step_farmanimals14():
     step_result("farmanimals14", ok, **res)
 
 
+def wild_folk14():
+    out = []
+    for l in G["gen"].get_wild_folk_lines14():
+        p = str(l).split("|")
+        out.append({"i": int(p[0]), "title": p[1], "role": p[2], "at": V(float(p[3]), float(p[4]), float(p[5])), "hp": float(p[6]), "dead": p[7] == "1",
+                    "prot": p[8] == "1", "flee": p[9] == "1", "key": int(p[10]), "hits": int(p[11]), "flees": int(p[12]), "by": p[13], "hurt": p[14] == "1"})
+    return out
+
+def body_low14(t_):
+    """how high the person's head is over the ground under it (cm): lying, under 60"""
+    body = t_.get_component_by_class(unreal.SkeletalMeshComponent)
+    if not body: return None
+    h = body.get_socket_location("head")
+    return round(h.z - G["gen"].wild_ground_z(h), 1)
+
+def step_npc14():
+    """the list of 2026-11-16's eighth phase (items 9 and 11, RD/RDList14h.cpp, 930): (a) a monster set 4 m from travellers on a
+    road with her 45 m off (the monsters quiet toward her) takes a traveller for its foe, strikes, and kills him: his hit points
+    fall, he runs, he lies dead (his head near the ground), his things and gold by him; she was never struck; (b) at a farmstead the
+    Warrior kills its farmhand with her own blows (held before her, as the animals' test): its hit points fall and it runs, dead it
+    lies on the ground and leaves a pile, which F names as the body's and takes, things and gold; kept in WildKilled, and laid again
+    (the chunk made again) the farmhand lies dead; (c) a quest's giver struck by her blows and a blow of a million keeps 1 hit point.
+    Pictures of the fight on the road and the farmhand lying by its pile."""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    w = G["w"]; gi = G["gi"]
+    hero0 = str(g.get_editor_property("current_hero")); hour0 = g.get_town_hour()
+    mons = []
+    try:
+        g.set_town_hour(10.0)
+        # ---- (a) a monster on the road meets travellers before her
+        den = wq().get("wild:wolves")
+        rd = (den["x"], den["y"]) if den else (900.0, 0.0)
+        g.wild_drop_all(); g.wild_put_her(rd[0], rd[1]); yield from wait_chunks(30, 50); yield from rwait(1.0)
+        a = {"forced": g.force_wild_travellers()}; yield from rwait(1.5)
+        trav = [f for f in wild_folk14() if "on the road to" in f["title"] and f["hurt"]]
+        a["travellers"] = len(trav)
+        if trav:
+            t0 = trav[0]; tl = t0["at"]
+            hp_her0 = cb().get_health()
+            # (her 45 m off, across the road from them)
+            her_at = V(tl.x, tl.y - 4500.0, 0); put(her_at, yaw=90.0, z=g.wild_ground_z(her_at)); yield from rwait(0.5)
+            sp = V(tl.x + 400.0, tl.y, 0); sp.z = g.wild_ground_z(sp) + 100.0
+            m = g.spawn_test_ambusher(sp, 1, False); mons.append(m)
+            a["monster"] = m.get_name() if m else None
+            keys = {f["key"]: f["title"] for f in trav}
+            idx = {f["title"]: f["i"] for f in trav}
+            hp_track = []; dead = None; t1 = time.time(); shot_done = False
+            while time.time() - t1 < 60.0:
+                yield from rwait(0.5)
+                cur = [f for f in wild_folk14() if f["title"] in idx]
+                if cur: hp_track.append([round(f["hp"], 1) for f in cur])
+                try:
+                    ml = m.get_actor_location()
+                    a.setdefault("trace", []).append([str(m.get_editor_property("combat_branch")), round(min(math.hypot(ml.x - f["at"].x, ml.y - f["at"].y) for f in cur) / 100.0, 1) if cur else None])
+                except Exception as e_: a["trace_err"] = str(e_)
+                if not shot_done and any(f["hits"] > 0 for f in cur):
+                    # (seen from 8 m (from 45 m the flax hid them), her health kept as it was read; then back out to 45 m)
+                    ml = m.get_actor_location(); hp_her = cb().get_health()
+                    vw = V(ml.x - 800.0, ml.y - 200.0, 0); put(vw, yaw=14.0, z=g.wild_ground_z(vw))
+                    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-14, yaw=14.0)); yield from rwait(0.6); shot("npc14_road", "1280x720"); yield from rwait(1.0)
+                    a["her_struck_near"] = round(hp_her - cb().get_health(), 1)
+                    put(her_at, yaw=90.0, z=g.wild_ground_z(her_at)); shot_done = True
+                dead = next((f for f in cur if f["dead"]), None)
+                if dead: break
+            a["hp_track"] = hp_track[-12:]; a["trace"] = a.get("trace", [])[:40]
+            if dead:
+                a["dead"] = dead["title"]; a["killed_by"] = dead["by"]; a["flees"] = dead["flees"]; a["hits"] = dead["hits"]
+                yield from rwait(2.5)
+                t_ = g.get_wild_person14(next(f["i"] for f in wild_folk14() if f["title"] == dead["title"]))
+                a["head_over_ground"] = body_low14(t_) if t_ else None
+                a["drops"] = [str(x) for x in g.get_editor_property("last_wild_folk_drops14")]; a["gold"] = g.get_editor_property("last_wild_folk_gold14")
+            a["her_struck"] = round(hp_her0 - cb().get_health(), 1)
+            a["cowering_seen"] = sum(1 for x in a.get("trace", []) if x[0] in ("reach", "swing"))
+            for m in mons:
+                try:
+                    if alive(m): m.destroy_actor()
+                except Exception: pass
+            mons = []
+        res["road"] = a
+        # ---- (b) she kills a farmhand
+        b = {}
+        fs = [str(x).split("|") for x in g.find_wild_farmsteads(0.0, 0.0, 8000.0)]
+        hand = None
+        for f_ in fs[:8]:
+            fid, fx, fy = int(f_[0]), float(f_[2]), float(f_[3])
+            g.wild_drop_all(); g.wild_put_her(fx - 40.0, fy); yield from wait_chunks(30, 50); yield from rwait(2.0)
+            hand = next((f for f in wild_folk14() if f["title"].lower().startswith("farmhand of") and f["hurt"]), None)
+            if hand: b["farm"] = fid; break
+        if hand:
+            if str(g.get_editor_property("current_hero")) != "Warrior": g.switch_hero("Warrior"); yield from rwait(1.0); refresh()
+            tgt = g.get_wild_person14(hand["i"]); b["title"] = hand["title"]; b["key"] = hand["key"]; b["hp0"] = round(tgt.get_wild_health14(), 1)
+            p = G["pawn"]; l0 = tgt.get_actor_location()
+            put(V(l0.x - 250.0, l0.y, 0), yaw=0.0, z=g.wild_ground_z(V(l0.x - 250.0, l0.y, 0))); yield from rwait(0.5)
+            hits = []
+            for n_ in range(24):
+                if tgt.is_wild_dead14(): break
+                t1 = time.time()
+                while time.time() - t1 < 0.25:
+                    l = p.get_actor_location(); fw = p.get_actor_forward_vector()
+                    q = V(l.x + fw.x * 110.0, l.y + fw.y * 110.0, 0); q.z = g.wild_ground_z(q) + 92.0
+                    tgt.set_actor_location(q, False, True); yield
+                cb().simulate_key(key("LeftMouseButton"), True); yield from rwait(0.12); cb().simulate_key(key("LeftMouseButton"), False)
+                yield from rwait(1.3); hits.append(round(tgt.get_wild_health14(), 1))
+            b["hits"] = hits; b["dead"] = tgt.is_wild_dead14(); b["flees"] = tgt.get_editor_property("wild_flees14"); b["by"] = str(tgt.get_editor_property("wild_killed_by14"))
+            yield from rwait(2.5)
+            b["head_over_ground"] = body_low14(tgt)
+            b["drops"] = [str(x) for x in g.get_editor_property("last_wild_folk_drops14")]; b["gold"] = g.get_editor_property("last_wild_folk_gold14")
+            b["kept"] = hand["key"] in [int(k) for k in gi.get_editor_property("wild_killed")]
+            l = tgt.get_actor_location()
+            sp = V(l.x - 380.0, l.y - 120.0, 0); put(sp, yaw=15.0, z=g.wild_ground_z(sp))
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-28, yaw=15.0)); yield from rwait(1.0)
+            shot("npc14_farmhand", "1280x720"); yield from rwait(1.2)
+            # (the pile: F names the body's and takes it, things and gold)
+            piles = [x for x in GS.get_all_actors_of_class(w, unreal.RDLootPile) if str(x.get_editor_property("owner14")) == hand["title"]]
+            b["piles"] = len(piles)
+            if piles:
+                pl = piles[0].get_actor_location(); c = cb()
+                before = {n: c.get_item_count(n) for n in set(b["drops"])}; gold0 = g.get_gold()
+                put(V(pl.x - 90.0, pl.y, 0), yaw=0.0, z=g.wild_ground_z(V(pl.x - 90.0, pl.y, 0))); yield from rwait(0.5)
+                b["pile_says"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+                b["pile_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.5)
+                b["taken"] = {n: c.get_item_count(n) - before[n] for n in before}; b["gold_got"] = g.get_gold() - gold0
+                # (the body itself takes no F: the prompt beside it names no one)
+                put(V(l.x - 120.0, l.y, 0), yaw=0.0, z=g.wild_ground_z(V(l.x - 120.0, l.y, 0))); yield from rwait(0.4)
+                b["body_says"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+            # (laid again: it lies dead)
+            g.wild_drop_all(); g.wild_put_her(fx - 40.0, fy); yield from wait_chunks(30, 50); yield from rwait(2.5)
+            again = next((f for f in wild_folk14() if f["key"] == hand["key"]), None)
+            b["again"] = {"found": again is not None, "dead": again["dead"] if again else None}
+            if again:
+                # (looked at from 4 m, as she would see it (a body out of view keeps its last pose), from a side with a clear line to it:
+                # laid again it lies at its own place by the barn's door, and the first view's side stood in the barn's wall)
+                al = again["at"]; pick_yaw = 15.0
+                for yw in (15.0, 105.0, 195.0, 285.0, 60.0, 150.0, 240.0, 330.0):
+                    d_ = V(math.cos(math.radians(yw)), math.sin(math.radians(yw)), 0)
+                    sp_ = V(al.x - d_.x * 400.0, al.y - d_.y * 400.0, 0); ez = g.wild_ground_z(sp_) + 250.0
+                    hit = unreal.SystemLibrary.line_trace_single(w, V(sp_.x, sp_.y, ez), V(al.x, al.y, al.z - 40.0), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+                    ht = hit.to_tuple() if hit else None
+                    if not ht or not ht[0] or math.hypot(ht[4].x - al.x, ht[4].y - al.y) < 120.0: pick_yaw = yw; break
+                d_ = V(math.cos(math.radians(pick_yaw)), math.sin(math.radians(pick_yaw)), 0)
+                sp = V(al.x - d_.x * 400.0, al.y - d_.y * 400.0, 0); put(sp, yaw=pick_yaw, z=g.wild_ground_z(sp))
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-28, yaw=pick_yaw)); yield from rwait(1.0)
+                b["again"]["picture_from_yaw"] = pick_yaw
+                b["again"]["head_over_ground"] = body_low14(g.get_wild_person14(again["i"]))
+                shot("npc14_farmhand_again", "1280x720"); yield from rwait(1.2)
+        res["farm"] = b
+        # ---- (c) a quest's giver does not die
+        c_ = {}
+        quests = [str(q.get_editor_property("name")) for q in g.get_editor_property("wild_quests")]
+        for qn in quests[:6]:
+            f = str(g.find_wild_site("None", qn, 0.0, 0.0, 150.0))
+            if not f: continue
+            sid, cx, cy, yw, nm = f.split("|", 4)
+            g.wild_drop_all(); g.wild_put_her(float(cx), float(cy)); yield from wait_chunks(30, 50); yield from rwait(2.0)
+            giver = next((x for x in wild_folk14() if x["prot"] and x["hurt"] and x["role"] != "Child"), None)
+            if not giver: continue
+            c_["quest"] = qn; c_["title"] = giver["title"]
+            tgt = g.get_wild_person14(giver["i"]); p = G["pawn"]; l0 = tgt.get_actor_location()
+            put(V(l0.x - 250.0, l0.y, 0), yaw=0.0, z=g.wild_ground_z(V(l0.x - 250.0, l0.y, 0))); yield from rwait(0.5)
+            for n_ in range(6):
+                t1 = time.time()
+                while time.time() - t1 < 0.25:
+                    l = p.get_actor_location(); fw = p.get_actor_forward_vector()
+                    q = V(l.x + fw.x * 110.0, l.y + fw.y * 110.0, 0); q.z = g.wild_ground_z(q) + 92.0
+                    tgt.set_actor_location(q, False, True); yield
+                cb().simulate_key(key("LeftMouseButton"), True); yield from rwait(0.12); cb().simulate_key(key("LeftMouseButton"), False); yield from rwait(1.3)
+            c_["hits_landed"] = tgt.get_editor_property("wild_hits_taken14")
+            c_["killed_by_million"] = tgt.take_wild_hit14(1e6, p)
+            c_["hp"] = round(tgt.get_wild_health14(), 1); c_["dead"] = tgt.is_wild_dead14()
+            break
+        res["giver"] = c_
+    finally:
+        for m in mons:
+            try:
+                if alive(m): m.destroy_actor()
+            except Exception: pass
+        if str(G["gen"].get_editor_property("current_hero")) != hero0: G["gen"].switch_hero(hero0); yield from rwait(0.8); refresh()
+        G["gen"].set_town_hour(hour0)
+        G["gen"].wild_drop_all(); G["gen"].wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+        quiet(False)
+    a = res.get("road", {}); b = res.get("farm", {}); c_ = res.get("giver", {})
+    ok_a = bool(a.get("dead")) and a.get("killed_by") == a.get("monster") and a.get("hits", 0) >= 1 and a.get("flees", 0) >= 1 and a.get("head_over_ground") is not None and a["head_over_ground"] < 60.0 and a.get("drops") and a.get("her_struck", 1) <= 0.0
+    ok_b = (bool(b.get("dead")) and b.get("by") == "her" and b.get("hits") and min(b["hits"]) < b.get("hp0", 0) and b.get("flees", 0) >= 1
+            and b.get("head_over_ground") is not None and b["head_over_ground"] < 60.0 and b.get("drops") and b.get("kept") and b.get("piles") == 1
+            and "search the body of" in b.get("pile_says", "") and sum(b.get("taken", {}).values()) == len(b.get("drops", [])) and b.get("gold_got") == b.get("gold")
+            and b.get("title", "?") not in b.get("body_says", "") and b.get("again", {}).get("dead") is True
+            and b["again"].get("head_over_ground") is not None and b["again"]["head_over_ground"] < 60.0)
+    ok_c = c_.get("hits_landed", 0) >= 1 and c_.get("killed_by_million") is False and not c_.get("dead") and c_.get("hp", 0) >= 1.0
+    res["parts_ok"] = {"road": ok_a, "farm": ok_b, "giver": ok_c}
+    step_result("npc14", ok_a and ok_b and ok_c, **res)
+
+
 def step_sleep14():
     """the list of 2026-11-16's seventh phase (item 16: "the NPCs at farms should sleep at night"): at the first farmstead near
     Brokenspire, its family at 20:00 walk home (time sped up) and go into their farmhouse; at 23:00 each is asleep indoors, those with
@@ -5261,7 +5454,7 @@ def step_horse14():
           and res["called_town_m"] is not None and res["called_town_m"] < 4.0)
     step_result("horse14", ok, **res)
 
-STEPS = {"farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "spires14": step_spires14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"npc14": step_npc14, "farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "spires14": step_spires14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)

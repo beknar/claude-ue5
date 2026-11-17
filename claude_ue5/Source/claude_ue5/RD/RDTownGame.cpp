@@ -176,6 +176,8 @@ void ARDTownsfolk::Tick(float Dt)
 {
 	Super::Tick(Dt);
 	const float Now = GetWorld()->GetTimeSeconds();
+	// (the list of 2026-11-16's eighth phase: a person of the wilds dead, or running from what struck it (RDList14h.cpp))
+	if (TickWild14(Dt, Now)) return;
 	// (the list of 2026-11-04: on the open ground's rise and fall, at its own height over it)
 	if (Section && Section->TownLiftW.Num() > 0 && !bInBed)          // (in bed it lies on the bed's top)
 	{

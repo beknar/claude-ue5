@@ -602,6 +602,12 @@ bool ARDDungeonGenerator::TakeLootNear(const FVector& From, float Reach)
 	if (!Best || !Pc) return false;
 	if (Best->bHarvest) Pc->TakeHarvest(Best->Things);
 	else Pc->TakeBack(Best->Things, Best->Wear, Best->bHers, Best->WornShield);
+	// (the list of 2026-11-16's eighth phase: a dead person's gold into her purse, said with what she took)
+	if (Best->Gold > 0)
+	{
+		AddGold(Best->Gold, TEXT("searched"));
+		Pc->ShowMessage(FString::Printf(TEXT("You take what %s carried (%d) and %d gold"), *Best->Owner14, Best->GetNumThings(), Best->Gold));
+	}
 	// (the sixth phase: a wild place's stone taken for good)
 	if (Best->WildKey != -1) if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->WildKilled.AddUnique(Best->WildKey);
 	LootPiles.Remove(Best);

@@ -70,6 +70,7 @@ void ARDDungeonGenerator::LayWildSite(ARDWildChunk* C, const FRDWildPlace& P)
 				: TArray<FString>{ TEXT("Please, get me out of this cage!"), TEXT("They'll be back soon, hurry!") };
 			T->WildSiteKey = Key; T->WildSiteCage = Cage; T->bWildGiven = bFreed;
 			WildSiteFolk.Add(T);
+			KeepWildFolk14(T, WildFolkKey14(1, P.Id, I));          // (the list of 2026-11-16's eighth phase)
 			C->Props.Add(T);
 		}
 	}

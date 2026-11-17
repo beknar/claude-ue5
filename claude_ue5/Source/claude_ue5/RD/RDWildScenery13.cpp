@@ -174,6 +174,7 @@ void ARDDungeonGenerator::LayWildScenery(ARDWildChunk* C, const FRDWildPlace& P)
 			T->SetTitle(F[1]);
 			F[2].ParseIntoArray(T->OwnLines, TEXT("/"), true);
 			WildSiteFolk.Add(T);
+			KeepWildFolk14(T, WildFolkKey14(2, P.Id, I));          // (the list of 2026-11-16's eighth phase)
 			C->Props.Add(T);
 		}
 	}

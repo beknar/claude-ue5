@@ -2534,6 +2534,31 @@ public:
 	/** "Item|min|max|chance" lines drawn from a hash: the wild animals' and the farms' things */
 	TArray<FName> RollDropLines(const TArray<FString>& Lines, uint32 H0) const;
 	int32 HitFarmAnimalsInArc14(const FVector& L, const FVector& Fw, float Reach, float MinCos, float Dmg, FName Sound);
+	/** the list of 2026-11-16's eighth phase (RDList14h.cpp, 930): the wilds' people struck, killed and looted; a wild monster takes a
+	 *  person nearer than her within WildFolkPreyCm14 for its foe */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bWildFolkHurt14 = false;
+	/** "who|health|gold min|gold max|Item|min|max|chance;..." by a whole word of a person's title, its role, or "default" (the table's
+	 *  order first); health and gold grow with the wilds' tier */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") TArray<FString> WildFolkLoot14;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float WildFolkPreyCm14 = 2000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float WildFolkRunSpeed14 = 260.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 WildFolkKilled14 = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") TArray<FName> LastWildFolkDrops14;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 LastWildFolkGold14 = 0;
+	/** every person of the wilds' lists (the farms', the structures' and scenery's, the director's, the travellers') */
+	TArray<class ARDTownsfolk*> WildPeople14() const;
+	FString WildFolkLootOf14(const class ARDTownsfolk* T, float& Health, int32& GoldLo, int32& GoldHi) const;
+	int32 HitWildFolkInArc14(const FVector& L, const FVector& Fw, float Reach, float MinCos, float Dmg, FName Sound, AActor* Her);
+	class ARDTownsfolk* WildFolkOnSegment14(const FVector& A, const FVector& B, float Pad, float& OutT, FVector& OutAt) const;
+	void OnWildFolkKilled14(class ARDTownsfolk* T, AActor* By);
+	static int64 WildFolkKey14(int32 Kind, int64 Id, int32 N);
+	bool IsWildFolkDead14(int64 Key);
+	/** a person laid with its chunk given its key, and laid dead when it was killed in this game */
+	void KeepWildFolk14(class ARDTownsfolk* T, int64 Key);
+	TSet<int64> WildFolkDead14; int32 WildFolkDeadRead14 = -1; int64 WildFolkDeadLast14 = 0;
+	/** tests: "i|title|role|x|y|z|health|dead|protected|fleeing|key|hits|flees|killed by|hurt", and the person of that index */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") TArray<FString> GetWildFolkLines14() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") class ARDTownsfolk* GetWildPerson14(int32 I) const;
 	class ARDTownAnimal* FarmAnimalOnSegment14(const FVector& A, const FVector& B, float Pad, float& OutT, FVector& OutAt) const;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 FarmAnimalsKilled14 = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") TArray<FName> LastFarmAnimalDrops14;

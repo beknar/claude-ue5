@@ -215,7 +215,7 @@ void ARDDungeonGenerator::TickWildEncounters(float Dt, const FVector& Her)
 	if (Near.IsEmpty()) for (const ARDWildAnimal* An : WildAnimals) if (IsValid(An) && !An->IsDead() && FVector::Dist2D(An->GetActorLocation(), Her) < WildEngageM) { Near = TEXT("animal"); break; }
 	if (Near.IsEmpty()) for (const TWeakObjectPtr<ARDMonster>& M : WildRoamers) if (M.IsValid() && !M->IsDead() && FVector::Dist2D(M->GetActorLocation(), Her) < WildEngageM) { Near = TEXT("roamer"); break; }
 	// (the list of 2026-11-11: one met on the way who has not given yet)
-	if (Near.IsEmpty()) for (const TWeakObjectPtr<ARDTownsfolk>& T : WildRoamFolk) if (T.IsValid() && !T->bWildGiven && FVector::Dist2D(T->GetActorLocation(), Her) < WildEngageM) { Near = TEXT("folk"); break; }
+	if (Near.IsEmpty()) for (const TWeakObjectPtr<ARDTownsfolk>& T : WildRoamFolk) if (T.IsValid() && !T->bWildGiven && !T->IsWildDead14() && FVector::Dist2D(T->GetActorLocation(), Her) < WildEngageM) { Near = TEXT("folk"); break; }
 	if (!Near.IsEmpty())
 	{
 		// (said again every 3 s while it lasts: the tests read the gaps between what met her)

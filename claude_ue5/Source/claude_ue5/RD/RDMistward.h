@@ -49,6 +49,9 @@ public:
 	int64 WildKey = -1;
 	/** mistward_castle (docs/improvements3.txt): parts harvested from a dead monster (its tier: the light's tint) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") bool bHarvest = false;
+	/** the list of 2026-11-16's eighth phase: a dead person's (its title) and the gold it carried, paid when taken */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 Gold = 0;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") FString Owner14;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 Tier = 0;
 	void Init(ARDDungeonGenerator* InGenerator, const TArray<FName>& InThings, const TArray<float>& InWear);
 	/** its light's colour (a harvest's tier) */
