@@ -578,13 +578,21 @@ void ARDDungeonGenerator::TickWildTravellers(const FVector& Her)
 	{
 		if (!Wild->Roads.IsValidIndex(T.Road)) continue;
 		const FRDWildWorld::FRoad& Rd = Wild->Roads[T.Road];
+		// (the list of 2026-11-16's eighth phase: the living first (the next leads), the dead last, lying where they fell and passed
+		// over (PR #86's review: a dead leader's empty way was topped up and held, and the group stood on the road for good))
+		T.Folk.StableSort([](const TWeakObjectPtr<ARDTownsfolk>& A, const TWeakObjectPtr<ARDTownsfolk>& B)
+		{
+			auto Up = [](const TWeakObjectPtr<ARDTownsfolk>& X) { return X.IsValid() && !X->IsWildDead14(); };
+			return Up(A) && !Up(B);
+		});
+		if (T.Folk.Num() == 0 || !T.Folk[0].IsValid() || T.Folk[0]->IsWildDead14()) continue;
 		if (bNight && !T.bCamped) { CampTravellers(T); continue; }
 		if (!bNight && T.bCamped)
 		{
 			T.bCamped = false;
 			for (auto& B : T.CampBits) if (B.IsValid()) B->DestroyComponent();
 			T.CampBits.Reset();
-			for (auto& F : T.Folk) if (F.IsValid()) { F->SetStandWork(NAME_None, NAME_None); F->Act = 0; }
+			for (auto& F : T.Folk) if (F.IsValid() && !F->IsWildDead14()) { F->SetStandWork(NAME_None, NAME_None); F->Act = 0; }
 		}
 		if (T.bCamped) continue;
 		ARDTownsfolk* Lead = T.Folk.Num() > 0 ? T.Folk[0].Get() : nullptr;
@@ -602,7 +610,7 @@ void ARDDungeonGenerator::TickWildTravellers(const FVector& Her)
 		for (int32 F = 0; F < T.Folk.Num(); ++F)
 		{
 			ARDTownsfolk* Fk = T.Folk[F].Get();
-			if (!Fk) continue;
+			if (!Fk || Fk->IsWildDead14()) continue;
 			// (side by side and a little behind each other, on the road's right)
 			for (int32 K = 0; K < Next.Num(); ++K)
 			{
@@ -721,12 +729,13 @@ void ARDDungeonGenerator::CampTravellers(FTraveller& T)
 		Lt->SetRelativeLocation(FVector(0, 0, 60.f));
 		T.CampBits.Add(Lt);
 	}
-	// (each sits on a log round the fire, facing it)
+	// (each sits on a log round the fire, facing it; the dead lie where they fell (the living are first in the group))
+	int32 Up = 0; for (const auto& F : T.Folk) if (F.IsValid() && !F->IsWildDead14()) ++Up;
 	for (int32 K = 0; K < T.Folk.Num(); ++K)
 	{
 		ARDTownsfolk* Fk = T.Folk[K].Get();
-		if (!Fk) continue;
-		const float A = 360.f * K / T.Folk.Num() + 20.f;
+		if (!Fk || Fk->IsWildDead14()) continue;
+		const float A = 360.f * K / FMath::Max(Up, 1) + 20.f;
 		const FVector Seat = Fire + FRotator(0.f, A, 0.f).RotateVector(FVector(210.f, 0.f, 0.f));
 		PutAt(TEXT("log"), Fire + FRotator(0.f, A, 0.f).RotateVector(FVector(250.f, 0.f, 0.f)), A + 90.f, 3.f);
 		Fk->RoadPath.Reset();

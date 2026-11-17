@@ -508,6 +508,7 @@ void URDCombatComponent::Strike()
 	{
 		Generator->HitWildAnimalsInArc(L, Fw, W->Reach, MinCos, GetDamageOf(AttackIndex), HitSound);
 		Generator->HitFarmAnimalsInArc14(L, Fw, W->Reach, MinCos, GetDamageOf(AttackIndex), HitSound);          // (the list of 2026-11-16: the farms' animals)
+		Generator->HitWildFolkInArc14(L, Fw, W->Reach, MinCos, GetDamageOf(AttackIndex), HitSound, GetOwner());          // (its eighth phase: the wilds' people)
 	}
 }
 
@@ -2733,6 +2734,27 @@ void URDCombatComponent::TickBolts(float Dt)
 		}
 		FHitResult H;
 		const bool bWallHit = GetWorld()->LineTraceSingleByChannel(H, B.At, Next, ECC_Visibility, Q);
+		// (the list of 2026-11-16's eighth phase: a person of the wilds on the way, nearer than the monster, the animals and the wall
+		// (its own capsule stops the wall's trace: that hit is the person's), takes the bolt)
+		if (Generator->bWild && !B.bWisp && !B.bGoal)
+		{
+			float PeT = 2.f; FVector PeAt = Next;
+			ARDTownsfolk* Pe = Generator->WildFolkOnSegment14(B.At, Next, 10.f, PeT, PeAt);
+			float OtT = 2.f; FVector OtAt = Next;
+			if (Pe && (Generator->FarmAnimalOnSegment14(B.At, Next, 10.f, OtT, OtAt) && OtT < PeT)) Pe = nullptr;
+			if (Pe && (Generator->WildAnimalOnSegment(B.At, Next, 10.f, OtT, OtAt) && OtT < PeT)) Pe = nullptr;
+			if (Pe && PeT < HitT && (!bWallHit || H.GetActor() == Pe || PeT < H.Time))
+			{
+				const float Dmg = B.Dmg > 0.f ? B.Dmg : GetDamageOf(B.Weapon);
+				Generator->PlaySoundAt(HitSoundOf(W), PeAt);
+				Generator->AddHitText(Pe->GetActorLocation() + FVector(0, 0, 80.f), Dmg, false);
+				Pe->TakeWildHit14(Dmg, GetOwner());
+				B.Flown += (PeAt - B.At).Size();
+				Burst(B, PeAt, nullptr);
+				if (UStaticMeshComponent* C = B.Mesh.Get()) C->DestroyComponent();
+				Bolts.RemoveAt(I); continue;
+			}
+		}
 		// (the list of 2026-11-16: a farm's animal on the way, nearer than the monster and the wall, takes the bolt)
 		{
 			float FaT = 2.f; FVector FaAt = Next;

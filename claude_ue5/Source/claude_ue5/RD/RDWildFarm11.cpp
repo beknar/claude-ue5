@@ -978,6 +978,7 @@ void ARDDungeonGenerator::SpawnWildFarm11(ARDWildChunk* C, const FRDWildPlace& P
 		}
 		C->Props.Add(T);
 		Rec.Folk.Add(T);
+		KeepWildFolk14(T, WildFolkKey14(0, P.Id, K));          // (the list of 2026-11-16's eighth phase: killed in this game, it lies dead)
 	}
 	WildFarms.RemoveAll([](const FRDWildFarmRec& F) { return !F.Chunk.IsValid(); });
 	WildFarms.RemoveAll([&](const FRDWildFarmRec& F) { return F.Id == P.Id; });

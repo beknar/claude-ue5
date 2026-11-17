@@ -160,11 +160,39 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 GuardHits = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") float GuardDamageDone = 0.f;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 GuardBlowsTaken = 0;
+	/** the list of 2026-11-16's eighth phase (RDList14h.cpp): a person of the wilds (no section) is struck by her and by the monsters,
+	 *  runs from what struck it, and dies (its body stays; laid again with its chunk it lies dead by its key in the game's
+	 *  WildKilled); a child and a quest's people are struck but never die; a caged captive is behind its bars */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool CanBeHurt14() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool IsWildDead14() const { return bWildDead14; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool IsWildProtected14() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") float GetWildHealth14() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool IsWildFleeing14() const;
+	/** a blow on it (true when it killed it) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") bool TakeWildHit14(float Dmg, AActor* From);
+	/** a monster after it, close: it stands and cowers while the monster is near */
+	void ScareWild14(AActor* From);
+	/** laid again dead with its chunk */
+	void LayWildDead14();
+	/** its key in WildKilled when it is laid again with its chunk (-1: never laid again) */
+	int64 WildDeadKey14 = -1;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 WildHitsTaken14 = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 WildFlees14 = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") FString WildKilledBy14;
 protected:
 	virtual void Tick(float Dt) override;
 private:
 	/** true when the fight took the frame */
 	bool TickGuardFight(float Dt, float Now);
+	/** the eighth phase: true when its death or its flight took the frame */
+	bool TickWild14(float Dt, float Now);
+	void RunFrom14(AActor* From, float Now, float Seconds);
+	void InterruptLife14();
+	void PlayDie14(bool bAtEnd);
+	bool bWildDead14 = false, bWildDieClip14 = false, bWildLaidDead14 = false;
+	float WildHealth14 = -1.f, WildDeadAt14 = -100.f, WildFleeUntil14 = -100.f, WildHitUntil14 = -100.f, WildCowerUntil14 = -100.f;
+	TWeakObjectPtr<AActor> WildFleeFrom14;
+	FVector WildFleeAt14 = FVector::ZeroVector;
 	void EndGuardFight(float Now, bool bBeaten);
 	class ARDMonster* FindGuardFoe() const;
 	TWeakObjectPtr<class ARDMonster> GuardFoe;
