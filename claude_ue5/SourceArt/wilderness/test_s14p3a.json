@@ -1,0 +1,67 @@
+{
+ "tag": "s14p3a",
+ "plan": [
+  "horse14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "horse14",
+   "ok": true,
+   "called_wilds_m": 2.2,
+   "said": "You whistle: your horse comes to your side",
+   "left_behind_m": 120.02,
+   "called_far_m": 2.2,
+   "calls": 2,
+   "mark_minimap": true,
+   "mark_bigmap": true,
+   "mounted": true,
+   "standing": {
+    "seat_along_cm": 0.0,
+    "seat_across_cm": 0.0,
+    "seat_up_cm": 0.0,
+    "hand_l_cm": 0.9,
+    "hand_r_cm": 0.9,
+    "hands_empty": true,
+    "reins": 2
+   },
+   "moving": {
+    "walk": {
+     "seat_along_cm": 0.0,
+     "seat_across_cm": 0.0,
+     "seat_up_cm": 0.0,
+     "hand_l_cm": 1.2,
+     "hand_r_cm": 1.2,
+     "reins_min": 2,
+     "hands_empty_all": true
+    },
+    "gallop": {
+     "seat_along_cm": 0.0,
+     "seat_across_cm": 0.0,
+     "seat_up_cm": 0.0,
+     "hand_l_cm": 1.2,
+     "hand_r_cm": 1.2,
+     "reins_min": 2,
+     "hands_empty_all": true
+    }
+   },
+   "after_down": {
+    "mounted": false,
+    "weapons_back": true,
+    "reins": "not riding"
+   },
+   "called_town_m": 2.2
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_s14p3a_horse14_minimap.png",
+  "wd_s14p3a_horse14_bigmap.png",
+  "wd_s14p3a_horse14_side_still.png",
+  "wd_s14p3a_horse14_side_walk.png",
+  "wd_s14p3a_horse14_side_gallop.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

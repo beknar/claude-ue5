@@ -220,6 +220,7 @@ bool ARDDungeonGenerator::MountHorse()
 	if (USpringArmComponent* B = C->FindComponentByClass<USpringArmComponent>()) { BoomArmWas = B->TargetArmLength; BoomOffsetWas = B->TargetOffset; B->TargetArmLength += 140.f; B->TargetOffset.Z += 110.f; }
 	PlayerCombat->MountFactor = FMath::Max(HorseDef.SpeedMul, 1.f); PlayerCombat->RefreshWalkSpeed();
 	RiderClipNow = NAME_None; RiderClipAsset = nullptr;
+	if (bHorseCall14) PlayerCombat->SetRideHands(true);          // (the list of 2026-11-16: her weapons put away, the reins in her hands)
 	TickHorse(0.f);
 	PlayerCombat->ShowMessage(TEXT("You ride your horse  (F: get off)"));
 	UE_LOG(LogRDHorse, Log, TEXT("RDHORSE mounted"));
@@ -244,7 +245,7 @@ bool ARDDungeonGenerator::DismountHorse()
 		if (Horse) { Horse->SetActorLocation(HorseSpotBeside(C)); Horse->PlayFor(0.f); }
 	}
 	if (Horse) Horse->SetBlocking(false);          // (on again once she is clear of it: TickHorse)
-	if (PlayerCombat) { PlayerCombat->MountFactor = 1.f; PlayerCombat->RefreshWalkSpeed(); }
+	if (PlayerCombat) { PlayerCombat->MountFactor = 1.f; PlayerCombat->RefreshWalkSpeed(); if (PlayerCombat->bRideHands) PlayerCombat->SetRideHands(false); }
 	RiderClipNow = NAME_None; RiderClipAsset = nullptr;
 	UE_LOG(LogRDHorse, Log, TEXT("RDHORSE dismounted"));
 	return true;
@@ -275,7 +276,7 @@ void ARDDungeonGenerator::TickHorse(float Dt)
 	}
 	// (the list of 2026-11-10: unridden, its box on once she stands clear of it (2 m from its middle))
 	if (!bMounted && Horse && !Horse->IsBlocking() && FVector::Dist2D(C->GetActorLocation(), Horse->GetActorLocation()) > 200.f) Horse->SetBlocking(true);
-	if (!bMounted || !Horse) return;
+	if (!bMounted || !Horse) { if (Reins14[0].IsValid() || Reins14[1].IsValid()) TickReins14(); return; }
 	// ---- riding: the horse under her, its clip by her speed; her root on its saddle, her rider clip by its gait
 	const float Hh = C->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 	const FVector Feet = C->GetActorLocation() - FVector(0, 0, Hh);
@@ -286,9 +287,13 @@ void ARDDungeonGenerator::TickHorse(float Dt)
 	// (her pelvis on the saddle, RiderLift over it: the rider clips are a camel rider's, whose pelvis sits about 2 m over its root
 	// and forward of it (the first rides put her 2.1 m above the saddle, then on the withers); her pelvis's place against her
 	// mesh's origin read each frame, so every hero's rig sits right)
-	const FVector Sad = Horse->GetSaddleLocation();
+	// (the list of 2026-11-16, item 6: on the saddle's seat, the bone's place moved to it (HorseDef's SeatAhead / SeatUp, measured on
+	// the model): the bone stands on the cantle, and she rode on its back edge)
+	const FVector Sad = HorseSeatPoint();
 	const FVector PelvisOff = M->GetSocketLocation(TEXT("pelvis")) - M->GetComponentLocation();
 	M->SetWorldLocation(Sad + FVector(0, 0, HorseDef.RiderLift) - PelvisOff);
+	if (PlayerCombat->bRideHands) PlayerCombat->SetRideHands(true);
+	TickReins14();
 	const FRDRiderClips* RC = RiderClips.Find(CurrentHero);
 	// (the canter is ridden with the run's clip: a gait with a moment in the air, her seat rising and falling with it)
 	const bool bFast = Horse->ClipNow == TEXT("run") || Horse->ClipNow == TEXT("canter");

@@ -842,6 +842,17 @@ struct FRDHorseDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float SpeedMul = 5.5f;          // (the list of 2026-11-10: at least five times her own; 2.2 until then)
 	/** her root this far over the saddle bone (cm) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RiderLift = 0.f;
+	/** the list of 2026-11-16 (item 6): the saddle's seat from its bone, along the horse toward its head and up (cm; the bone stands
+	 *  on the cantle: blender_numpy/horse_seat.py measures the seat on the model), and where the reins are held (her hands' grip,
+	 *  ReinApart between them) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float SeatAhead = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float SeatUp = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float ReinAhead = 25.f;          // (her hands' hold from her pelvis: ahead, up, apart)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float ReinUp = 25.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float ReinApart = 22.f;
+	/** the bit (the reins' other end) from the horse's head bone, along the horse and up (cm) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BitAhead = 30.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BitUp = -15.f;
 };
 
 /** the list of 2026-11-12's third phase ("have at least 20 kinds of ruins", "add these ruin types in the wilderness: temple ruins,

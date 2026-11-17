@@ -13,6 +13,15 @@ Parts (args):
                   narrows to its point: the lettering fitted to a 58 x 42 cm rectangle stood past its sloping edges, the user's
                   "store house"): its width at each height in the sign's frame from its mesh's vertices, written to
                   SourceArt/brokenspire/sign_board.json for blender_numpy/bs_signs.py and 884 signs14.
+  horse           the third phase (items 7, 10, 6): her horse called by a key (bHorseCall14: J or the D-pad up) on the game's maps
+                  (refused in the dungeons), and brokenspire's HorseDef seated by blender_numpy/horse_seat.py's measure of the
+                  saddle (SourceArt/brokenspire/horse_seat.json: the seat 30 cm ahead of the saddle bone, which stands on the
+                  cantle; the reins' grip over the withers).
+  reins           the third phase (item 6: "she should be holding the reins instead of holding her weapons"): every hero's rider
+                  clips (brokenspire's RiderClips: idle, walk, run) given arms that hold the reins: each frame, both arms solved
+                  (two bones, the elbow in its own plane, the hand's turn kept) so the hands reach the grip, placed from her pelvis
+                  as the seat and the grip stand on the horse; written into the clips through their data controller and read back
+                  (the hands' distance from their grips printed). Run after 913 rider and 927 horse.
   hud             the second phase (items 8 and 20): the last 20 messages (bMessageLog14: L or the D-pad's down opens them) and a
                   potion or food on the quick bar used by the attack button, food allowed on the bar (bQuickUse14), on the game's
                   maps and martial_arts.
@@ -33,6 +42,7 @@ KIT = "/Game/RandomDungeon/Wild13/Kit"
 SOLID = "/Game/RandomDungeon/Wild/Solid"
 SCRATCH = "/Game/RandomLevel/Test/rl_scratch"
 REPORT = []
+AL = unreal.AnimationLibrary
 MAPS = "/Game/RandomDungeon/Maps/"
 GAME_MAPS = ("brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress")
 
@@ -85,6 +95,138 @@ def signboard():
     json.dump(out, open(os.path.join(SA, "brokenspire", "sign_board.json"), "w", encoding="utf-8"), indent=1)
     REPORT.append(f"927 signboard: {m.get_name()}: {len(board)} vertices, z {out['z']}, x {out['x']}, {len(bands)} bands; widest "
                   f"{max(b[2] - b[1] for b in bands):.1f} cm, at the foot {bands[0][2] - bands[0][1]:.1f} cm")
+
+
+def horse_cfg(g):
+    g.set_editor_property("horse_call14", True)
+    hs = os.path.join(SA, "brokenspire", "horse_seat.json")
+    if not g.get_editor_property("horse_def").get_editor_property("mesh") or not os.path.isfile(hs): return "the call key (no horse here)"
+    J = json.load(open(hs, encoding="utf-8"))
+    hd = g.get_editor_property("horse_def")
+    hd.set_editor_property("seat_ahead", float(J["seat"]["ahead_cm"])); hd.set_editor_property("seat_up", float(J["seat"]["up_cm"]))
+    hd.set_editor_property("rein_ahead", float(J["rein_grip"]["ahead_cm"])); hd.set_editor_property("rein_up", float(J["rein_grip"]["up_cm"]))
+    hd.set_editor_property("rein_apart", float(J["rein_grip"]["apart_cm"]))
+    hd.set_editor_property("bit_ahead", float(J["bit_from_head_bone"]["ahead_cm"])); hd.set_editor_property("bit_up", float(J["bit_from_head_bone"]["up_cm"]))
+    g.set_editor_property("horse_def", hd)
+    h2 = g.get_editor_property("horse_def")
+    return (f"the call key; the seat {h2.get_editor_property('seat_ahead')} cm ahead, {h2.get_editor_property('seat_up')} up; the reins "
+            f"{h2.get_editor_property('rein_ahead')} ahead, {h2.get_editor_property('rein_up')} up, {h2.get_editor_property('rein_apart')} apart")
+
+
+# ---- the reins: two-bone arms solved on the rider clips (plain quaternion arithmetic: x, y, z, w tuples)
+def qmul(a, b):
+    ax, ay, az, aw = a; bx, by, bz, bw = b
+    return (aw * bx + ax * bw + ay * bz - az * by, aw * by - ax * bz + ay * bw + az * bx, aw * bz + ax * by - ay * bx + az * bw, aw * bw - ax * bx - ay * by - az * bz)
+def qinv(a): return (-a[0], -a[1], -a[2], a[3])
+def qrot(q, v):
+    p = qmul(qmul(q, (v[0], v[1], v[2], 0.0)), qinv(q)); return (p[0], p[1], p[2])
+def vsub(a, b): return (a[0] - b[0], a[1] - b[1], a[2] - b[2])
+def vadd(a, b): return (a[0] + b[0], a[1] + b[1], a[2] + b[2])
+def vmul(a, s): return (a[0] * s, a[1] * s, a[2] * s)
+def vdot(a, b): return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+def vcross(a, b): return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+def vlen(a): return math.sqrt(vdot(a, a))
+def vnorm(a): l = vlen(a) or 1.0; return (a[0] / l, a[1] / l, a[2] / l)
+def qbetween(a, b):
+    a = vnorm(a); b = vnorm(b); d = max(-1.0, min(1.0, vdot(a, b)))
+    if d > 0.99999: return (0.0, 0.0, 0.0, 1.0)
+    ax = vcross(a, b)
+    if vlen(ax) < 1e-6: ax = vcross(a, (0, 0, 1)) if abs(a[2]) < 0.9 else vcross(a, (1, 0, 0))
+    ax = vnorm(ax); h = math.acos(d) * 0.5; s = math.sin(h)
+    return (ax[0] * s, ax[1] * s, ax[2] * s, math.cos(h))
+def uq(q): return (q.x, q.y, q.z, q.w)
+def uv(v): return (v.x, v.y, v.z)
+
+
+def solve_two(S, E, Wr, T, pole):
+    """the elbow's new place: shoulder S, elbow E, wrist Wr, target T, the elbow bent toward pole (all component space)"""
+    a = vlen(vsub(E, S)); b = vlen(vsub(Wr, E))
+    d = vsub(T, S); dl = min(vlen(d), (a + b) * 0.995); dn = vnorm(d)
+    x = (a * a - b * b + dl * dl) / (2 * dl); h = math.sqrt(max(0.0, a * a - x * x))
+    pv = vsub(pole, S); pv = vsub(pv, vmul(dn, vdot(pv, dn))); pn = vnorm(pv)
+    return vadd(vadd(S, vmul(dn, x)), vmul(pn, h)), vadd(S, vmul(dn, dl))
+
+
+def reins():
+    g = open_map("brokenspire")
+    hd = g.get_editor_property("horse_def")
+    lift = hd.get_editor_property("rider_lift")
+    seat = (hd.get_editor_property("seat_ahead"), hd.get_editor_property("seat_up"))
+    rein = (hd.get_editor_property("rein_ahead"), hd.get_editor_property("rein_up"), hd.get_editor_property("rein_apart"))
+    jobs = []
+    for hero, rc in g.get_editor_property("rider_clips").items():
+        for k in ("idle", "walk", "run"):
+            c = rc.get_editor_property(k)
+            if c: jobs.append((str(hero), k, c.get_path_name()))
+    g = None; gc.collect(); unreal.SystemLibrary.execute_console_command(None, "obj gc")
+    les.load_level(SCRATCH)
+    done = set()
+    for hero, k, path in jobs:
+        if path in done: continue
+        done.add(path)
+        clip = unreal.load_asset(path)
+        sk = clip.get_editor_property("skeleton")
+        refs = [r for r in eal.find_package_referencers_for_asset(sk.get_path_name().split(".")[0], False)]
+        mesh = next((m for m in (unreal.load_asset(r) for r in refs) if isinstance(m, unreal.SkeletalMesh)), None)
+        if not mesh: REPORT.append(f"927 reins {hero} {k}: no mesh on its skeleton"); continue
+        a = eas.spawn_actor_from_object(mesh, unreal.Vector(0, 0, 0))
+        comp = a.get_editor_property("skeletal_mesh_component")
+        names = [str(comp.get_bone_name(i)) for i in range(comp.get_num_bones())]
+        parent = {n: str(comp.get_parent_bone(n)) for n in names}
+        ref = {n: comp.get_ref_pose_transform(i) for i, n in enumerate(names)}
+        eas.destroy_actor(a)
+        tracks = [str(x) for x in AL.get_animation_track_names(clip)]
+        n = AL.get_num_frames(clip)
+        arms = {s: ("upperarm_" + s, "lowerarm_" + s, "hand_" + s) for s in ("l", "r")}
+        if not all(b in names for s in arms for b in arms[s]) or "pelvis" not in names: REPORT.append(f"927 reins {hero} {k}: no mannequin arms"); continue
+        keys = {b: ([], [], []) for s in arms for b in arms[s]}
+        worst = 0.0
+        for f in range(n + 1):
+            loc = {nm: ref[nm] for nm in names}
+            for b, tr in zip(tracks, AL.get_bone_poses_for_frame(clip, tracks, f, False)): loc[b] = tr
+            cs = {}
+            def csof(b):
+                if b in cs: return cs[b]
+                tr = loc[b]; r, p = uq(tr.rotation), uv(tr.translation)
+                pb = parent.get(b, "None")
+                if pb in ("None", "") or pb not in loc: cs[b] = (r, p)
+                else:
+                    pr, pp = csof(pb); cs[b] = (qmul(pr, r), vadd(pp, qrot(pr, p)))
+                return cs[b]
+            for b in names: csof(b)
+            pel = cs["pelvis"][1]
+            knee = vmul(vadd(cs["calf_l"][1], cs["calf_r"][1]), 0.5) if "calf_l" in cs else vadd(pel, (0, 1, 0))
+            fwd = vnorm((knee[0] - pel[0], knee[1] - pel[1], 0.0)); up = (0.0, 0.0, 1.0)
+            left = vnorm(vcross(fwd, up))
+            if vdot(vsub(cs["upperarm_l"][1], pel), left) < 0: left = vmul(left, -1.0)
+            for s, sg in (("l", 1.0), ("r", -1.0)):
+                ua, la, ha = arms[s]
+                S, E, Wr = cs[ua][1], cs[la][1], cs[ha][1]
+                # (the hold from her pelvis: HorseDef's ReinAhead / ReinUp (927 horse), as the game draws the reins to it)
+                T = vadd(vadd(pel, vmul(fwd, rein[0])), vadd(vmul(up, rein[1]), vmul(left, sg * rein[2] * 0.5)))
+                pole = vadd(E, vadd(vmul(up, -20.0), vmul(left, sg * 15.0)))
+                E2, T2 = solve_two(S, E, Wr, T, pole)
+                # (the upper arm turned so its elbow is at E2; the forearm so its wrist is at the target; the hand's world turn kept)
+                q1 = qbetween(vsub(E, S), vsub(E2, S)); ua_r = qmul(q1, cs[ua][0])
+                la_r0 = qmul(ua_r, uq(loc[la].rotation)); W0 = vadd(E2, qrot(la_r0, (0, 0, 0)))
+                wr_old = vadd(E2, qrot(la_r0, uv(loc[ha].translation)))
+                q2 = qbetween(vsub(wr_old, E2), vsub(T2, E2)); la_r = qmul(q2, la_r0)
+                ha_r = cs[ha][0]
+                pr_ua = cs[parent[ua]][0]
+                l_ua = qmul(qinv(pr_ua), ua_r); l_la = qmul(qinv(ua_r), la_r); l_ha = qmul(qinv(la_r), ha_r)
+                for b, lr in ((ua, l_ua), (la, l_la), (ha, l_ha)):
+                    keys[b][0].append(loc[b].translation); keys[b][1].append(unreal.Quat(*lr)); keys[b][2].append(loc[b].scale3d)
+                hand_now = vadd(E2, qrot(la_r, uv(loc[ha].translation)))
+                worst = max(worst, vlen(vsub(hand_now, T)))
+        ctrl = clip.controller
+        ctrl.open_bracket(unreal.Text("reins"), True)
+        for b, kk in keys.items():
+            if b not in tracks: ctrl.add_bone_track(b, True)
+            ctrl.set_bone_track_keys(b, *kk, True)
+        ctrl.close_bracket(True)
+        eal.save_loaded_asset(clip, only_if_is_dirty=False)
+        REPORT.append(f"927 reins {hero} {k}: {n + 1} frames, the hands at most {worst:.1f} cm from their grips as solved")
+    les.save_current_level()
 
 
 def hud(g):
@@ -225,6 +367,8 @@ def collide(fix):
 args = sys.argv[1:]
 if args and args[0] == "collide": collide("fix" in args[1:])
 if args and args[0] == "signboard": signboard()
+if args and args[0] == "horse": each(GAME_MAPS, horse_cfg, "horse")
+if args and args[0] == "reins": reins()
 if args and args[0] == "hud": each(GAME_MAPS + ("martial_arts",), hud, "hud")
 for line in REPORT: print(line)
 import gc; gc.collect()

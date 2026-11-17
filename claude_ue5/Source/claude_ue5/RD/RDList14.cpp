@@ -41,10 +41,14 @@ void URDCombatComponent::SetMessageLogOpen(bool bOpen)
 void URDCombatComponent::TickList14Input(const APlayerController* PC)
 {
 	// (L, or the pad's D-pad down where the quick bar leaves it free and the map is shut, opens and shuts the messages)
-	if (!PC || !Generator || !Generator->bMessageLog14) return;
+	if (!PC || !Generator) return;
+	if (!Generator->bMessageLog14) { if (Generator->bHorseCall14 && (PC->WasInputKeyJustPressed(EKeys::J) || (Generator->bQuickSlots && !Generator->bMapOpen && PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Up)))) Generator->CallHorseByKey(); return; }
 	// (the D-pad down is no one else's in play, quick bar or not (PR #78's review))
 	const bool bPad = !Generator->bMapOpen && PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Down);
 	if (PC->WasInputKeyJustPressed(EKeys::L) || bPad) SetMessageLogOpen(!bMessageLogOpen);
+	// (the third phase, item 7: J, or the pad's D-pad up where the quick bar leaves it free, calls her horse)
+	if (Generator->bHorseCall14 && (PC->WasInputKeyJustPressed(EKeys::J) || (Generator->bQuickSlots && !Generator->bMapOpen && PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Up))))
+		Generator->CallHorseByKey();
 }
 
 bool URDCombatComponent::QuickItemAttack(const APlayerController* PC)

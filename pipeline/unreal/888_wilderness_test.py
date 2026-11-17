@@ -4768,7 +4768,84 @@ def step_collide14():
     step_result("collide14", ok, **res)
 
 
-STEPS = {"spires14": step_spires14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+
+def step_horse14():
+    """the list of 2026-11-16's third phase: her horse called by its key (item 7: J, the D-pad up) out in the wilds, 120 m on, and
+    in Brokenspire's streets, each time beside her; her horse's mark on the minimap and the big map (item 10: wmap_horse drawn,
+    the horse where the map says); riding (item 6): her pelvis on the saddle's seat (measured on the model: 30 cm ahead of the
+    bone), her hands at the reins' hold (cm) standing, walking and galloping, her weapons put away and the two reins drawn; got
+    down, her weapons back; pictures from her side"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    G["gi"].set_editor_property("horse_owned", True)
+    def near_her():
+        # (a bool UFUNCTION with an out parameter: its out value when true, None when false)
+        at = g.get_horse_map_at()
+        if at is None: return None
+        q = G["pawn"].get_actor_location(); return round(math.hypot(at.x - q.x, at.y - q.y) / 100.0, 2)
+    xy = clear_spot("plains"); g.wild_put_her(*xy); yield from wait_chunks(30, 50); yield from rwait(1.0)
+    c0 = g.get_editor_property("horse_calls14")
+    yield from press("J"); yield from rwait(1.0)
+    res["called_wilds_m"] = near_her(); res["said"] = str(cb().message)
+    # (120 m on: it stays where it was, then the key brings it)
+    g.wild_put_her(xy[0] + 120.0, xy[1]); yield from wait_chunks(30, 50); ground_put(xy[0] + 120.0, xy[1]); yield from rwait(1.0)
+    res["left_behind_m"] = near_her()
+    yield from press("Gamepad_DPad_Up"); yield from rwait(1.0)
+    res["called_far_m"] = near_her(); res["calls"] = g.get_editor_property("horse_calls14") - c0
+    # (its mark: 40 m off, the minimap and the big map)
+    g.wild_put_her(xy[0] + 160.0, xy[1]); yield from wait_chunks(30, 50); ground_put(xy[0] + 160.0, xy[1]); yield from rwait(1.0)
+    res["mark_minimap"] = "wmap_horse" in drawn()
+    shot("horse14_minimap", "1280x720"); yield from rwait(1.0)
+    yield from press("M"); yield from rwait(1.0)
+    res["mark_bigmap"] = "wmap_horse" in drawn()
+    shot("horse14_bigmap", "1280x720"); yield from rwait(1.0)
+    yield from press("M"); yield from rwait(0.6)
+    # ---- riding
+    yield from press("J"); yield from rwait(1.0)
+    weapons_before = not cb().are_ride_hands_empty()
+    yield from press("F"); yield from rwait(1.5)
+    res["mounted"] = str(g.get_horse_state()).split("|")[2] == "1"
+    def rider():
+        q = str(g.get_rider_line()).split("|")
+        if len(q) < 7: return {"line": str(g.get_rider_line())}
+        return {"seat_along_cm": float(q[0]), "seat_across_cm": float(q[1]), "seat_up_cm": float(q[2]), "hand_l_cm": float(q[3]), "hand_r_cm": float(q[4]),
+                "hands_empty": q[5] == "1", "reins": int(q[6])}
+    res["standing"] = rider()
+    # (from her side, her body shown)
+    yw = G["pawn"].get_actor_rotation().yaw
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=yw + 90.0)); yield from rwait(1.0); shot("horse14_side_still", "1280x720"); yield from rwait(1.0)
+    worst = {"walk": None, "gallop": None}
+    for gait, scale, secs in (("walk", 0.3, 3.0), ("gallop", 1.0, 4.0)):
+        t0 = time.time(); rs = []
+        while time.time() - t0 < secs:
+            G["pawn"].add_movement_input(V(math.cos(math.radians(yw)), math.sin(math.radians(yw)), 0), scale, True)
+            if time.time() - t0 > 1.2: rs.append(rider())
+            yield
+        rs = [r for r in rs if "hand_l_cm" in r]
+        if rs:
+            worst[gait] = {k: round(max(abs(r[k]) for r in rs), 1) for k in ("seat_along_cm", "seat_across_cm", "seat_up_cm", "hand_l_cm", "hand_r_cm")}
+            worst[gait]["reins_min"] = min(r["reins"] for r in rs); worst[gait]["hands_empty_all"] = all(r["hands_empty"] for r in rs)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=yw + 90.0)); shot(f"horse14_side_{gait}", "1280x720"); yield from rwait(1.0)
+    res["moving"] = worst
+    yield from press("F"); yield from rwait(1.5)
+    res["after_down"] = {"mounted": str(g.get_horse_state()).split("|")[2] == "1", "weapons_back": (not cb().are_ride_hands_empty()) == weapons_before,
+                         "reins": str(g.get_rider_line())}
+    # ---- in Brokenspire's streets
+    yield from to_brokenspire(); yield from rwait(2.0)
+    yield from press("J"); yield from rwait(1.0)
+    res["called_town_m"] = near_her()
+    quiet(False)
+    st_ = res["standing"]
+    ok = (res["called_wilds_m"] is not None and res["called_wilds_m"] < 4.0 and res["left_behind_m"] and res["left_behind_m"] > 100.0
+          and res["called_far_m"] is not None and res["called_far_m"] < 4.0 and res["calls"] == 2 and res["mark_minimap"] and res["mark_bigmap"]
+          and res["mounted"] and "hand_l_cm" in st_ and abs(st_["seat_along_cm"]) < 4.0 and abs(st_["seat_up_cm"]) < 4.0
+          and st_["hand_l_cm"] < 6.0 and st_["hand_r_cm"] < 6.0 and st_["hands_empty"] and st_["reins"] == 2
+          and all(w and w["seat_along_cm"] < 6.0 and w["hand_l_cm"] < 8.0 and w["hand_r_cm"] < 8.0 and w["reins_min"] == 2 and w["hands_empty_all"] for w in worst.values())
+          and not res["after_down"]["mounted"] and res["after_down"]["weapons_back"]
+          and res["called_town_m"] is not None and res["called_town_m"] < 4.0)
+    step_result("horse14", ok, **res)
+
+STEPS = {"horse14": step_horse14, "spires14": step_spires14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)

@@ -921,6 +921,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool IsMessageLogOpen() const { return bMessageLogOpen; }
 	/** the attack button's use of an item made ready on the quick bar: true when it took the press (no blow then) */
 	bool QuickItemAttack(const class APlayerController* PC);
+	/** the list of 2026-11-16 (item 6): her held weapons, shield, torch and loaded bolt hidden while she rides, shown again after */
+	void SetRideHands(bool bRiding);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool AreRideHandsEmpty() const;
+	bool bRideHands = false;
+	TArray<TWeakObjectPtr<UStaticMeshComponent>> RideHidden;
 private:
 	/** the inventory's lines of one tab (bInventoryTabs) */
 	TArray<FString> TabLines(int32 Tab) const;

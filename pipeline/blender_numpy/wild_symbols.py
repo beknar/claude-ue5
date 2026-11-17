@@ -153,6 +153,18 @@ def lair():
     return finish(f)
 
 
+def horse():
+    # (the list of 2026-11-16, item 10: "there should be a marker on the mini map and on the large map for the player horse"): a
+    # horse's head and neck in profile, its mane in a few locks, an eye
+    f = canvas(); d = ImageDraw.Draw(f)
+    poly(d, [(0.30, 0.92), (0.34, 0.58), (0.40, 0.36), (0.48, 0.22), (0.54, 0.12), (0.58, 0.22), (0.66, 0.24), (0.80, 0.40),
+             (0.92, 0.56), (0.90, 0.64), (0.80, 0.66), (0.66, 0.56), (0.60, 0.60), (0.62, 0.92)])
+    for k in range(4):                                                  # its mane
+        y = 0.30 + k * 0.14
+        poly(d, [(0.38 - 0.02 * k, y), (0.24 - 0.02 * k, y + 0.10), (0.36 - 0.02 * k, y + 0.12)])
+    return finish(cut(f, lambda m: m.ellipse([0.60 * S, 0.33 * S, 0.66 * S, 0.39 * S], fill=255)))
+
+
 def select():
     f = canvas(); d = ImageDraw.Draw(f)
     d.ellipse([0.08 * S, 0.08 * S, 0.92 * S, 0.92 * S], outline=(250, 214, 120, 255), width=int(0.06 * S))
@@ -174,11 +186,11 @@ if __name__ == "__main__":
     out = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else "wild_symbols")
     os.makedirs(out, exist_ok=True)
     for name, fn in (("town", town), ("city", city), ("village", village), ("house", house), ("camp", camp), ("spawn", spawn), ("ruins", ruins),
-                     ("ritual", ritual), ("cave", cave), ("lair", lair), ("farmstead", farmstead), ("select", select), ("fog", fog)):
+                     ("ritual", ritual), ("cave", cave), ("lair", lair), ("farmstead", farmstead), ("horse", horse), ("select", select), ("fog", fog)):
         fn().save(os.path.join(out, f"wmap_{name}.png"))
     # a contact sheet to look at
-    names = ["town", "city", "village", "house", "camp", "spawn", "ruins", "ritual", "cave", "lair", "farmstead"]
-    sheet = Image.new("RGBA", (256 * 5, 256 * 3), (120, 126, 110, 255))
+    names = ["town", "city", "village", "house", "camp", "spawn", "ruins", "ritual", "cave", "lair", "farmstead", "horse"]
+    sheet = Image.new("RGBA", (256 * 5, 256 * 3), (120, 126, 110, 255))          # (5 x 3: twelve symbols)
     for i, n in enumerate(names): sheet.alpha_composite(Image.open(os.path.join(out, f"wmap_{n}.png")), ((i % 5) * 256, (i // 5) * 256))
     sheet.save(os.path.join(out, "_sheet.png"))
     print("WILDSYM", out, len(names) + 2)

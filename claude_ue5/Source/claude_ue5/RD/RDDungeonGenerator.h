@@ -2708,6 +2708,20 @@ public:
 	 *  used by the attack button, food allowed on the bar */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bMessageLog14 = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bQuickUse14 = false;
+	/** the list of 2026-11-16's third phase (927 horse): her horse called by a key (J, the D-pad up) from anywhere but a dungeon,
+	 *  shown on the maps, the rider seated by the horse's measured seat with the reins, her weapons put away (RDList14b.cpp) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bHorseCall14 = false;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 HorseCalls14 = 0;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") bool CallHorseByKey();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool GetHorseMapAt(FVector& At) const;
+	/** "<pelvis from the seat along, across, up (cm)>|<left hand from its grip>|<right hand>|<hands empty 1/0>", or "not riding" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") FString GetRiderLine() const;
+	FTransform HorseSeatFrame() const;
+	FVector HorseSeatPoint() const;
+	FVector HorseReinPoint(int32 Side) const;
+	FVector HorseBitPoint(int32 Side) const;
+	void TickReins14();
+	TWeakObjectPtr<class UStaticMeshComponent> Reins14[2];
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") TObjectPtr<class UStaticMesh> WildLandmarkMesh = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild13") float WildLandmarkKm = 8.f;
 	TWeakObjectPtr<class UStaticMeshComponent> WildLandmark;

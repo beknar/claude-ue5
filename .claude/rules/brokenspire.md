@@ -181,3 +181,10 @@ The starting town: a Save As copy of mistward_castle whose generator has `bTown`
 - **One guard alone loses**: a militiawoman fought a tier-1 rat for 40 s (10 blows of 2.8) and was beaten back with it at 12 of 40; the others never saw it round a corner. Guards call the others within 40 m (`TownGuardCall`), and a blow is a share of the monster's whole health (0.12) so the town wins at any tier: four came and two soldiers killed it in 15.7 s.
 - **M in the town opens the town's own map**: a picture of the wilds' map (its fog, `rd.Pois`' places) is taken out in the wilds.
 - **A test picture of a fight needs a clear line**: her camera 12 m off faced a burned house's wall; the spot is picked by a trace to the guard.
+
+## The list of 2026-11-16's third phase (the horse: `927 horse,reins`, `RD/RDList14b.cpp`, `blender_numpy/horse_seat.py`, `888 horse14`)
+
+- **A bone placed by another model's proportions is not where this model's part is**: the Tripo horse's `saddle` bone came from farm_animals.py's Blender horse and stood on the saddle's cantle; she rode its back edge. Measure the part on the model (the back's top in slices, its leather by its texture's darkness) and keep the offset as data.
+- **A grip measured on the mount can be out of the rider's reach**: the withers' grip, 38 cm ahead of her pelvis and 5 cm up, left the Tripo heroes' hands 13 to 20 cm short in the gallop. A hold within every hero's reach, the reins drawn from the bit to the hands.
+- **A clip's arms are solved in component space by composing its local poses down the mesh's parents** (`get_parent_bone`, `get_ref_pose_transform` for the bones with no track), written back through the clip's controller; plain quaternion arithmetic, not the bindings.
+- **A bool UFUNCTION with an out parameter gives Python its out value, or None** (`get_horse_map_at`): the test unpacked a tuple and stopped.
