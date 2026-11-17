@@ -1,0 +1,45 @@
+{
+ "tag": "s14p6b",
+ "plan": [
+  "recipes14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "recipes14",
+   "ok": true,
+   "tier": 3,
+   "recipes_sold": [
+    "Draught of Swiftness Recipe",
+    "Elixir of Iron Hide Recipe",
+    "Elixir of Might Recipe",
+    "Elixir of Regeneration Recipe",
+    "Feast Pie Recipe",
+    "Honey Cake Recipe",
+    "Hunter's Stew Recipe",
+    "Scroll of Leech Hex Recipe"
+   ],
+   "locked_sold": [],
+   "plain_potions_sold": 6,
+   "bought": {
+    "item": "Elixir of Iron Hide Recipe",
+    "ok": true,
+    "gold": -180,
+    "count": 1
+   },
+   "read": true,
+   "message": "You learn to make the elixir of iron hide (at an alchemist's table)",
+   "known": [
+    "Elixir of Iron Hide"
+   ],
+   "still_sold": false
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "bs_s14p6b_recipes14_store.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}

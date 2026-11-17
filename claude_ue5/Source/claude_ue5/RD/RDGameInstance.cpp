@@ -21,7 +21,8 @@ void URDGameInstance::NewGame(FName Hero)
 	TownHour = -1.f; TownDay = 1;
 	GardensHarvested.Reset(); FoodTaken.Reset(); bPortcullisUp = false; bHorseOwned = false;
 	HorsesTamed = 0; bRideTamed = false; bTamedOnly = false;          // (the list of 2026-11-12's tamed horse goes with the game)
-	LootedItems.Reset();          // (the list of 2026-11-10: the forge makes what she has looted in this game (PR #40's review))
+	LootedItems.Reset();
+	KnownRecipes.Reset();          // (the list of 2026-11-16's sixth phase: a new game knows only the plain recipes)          // (the list of 2026-11-10: the forge makes what she has looted in this game (PR #40's review))
 	// (a new continent each game: the seed from the clock)
 	WildSeed = (int32)(FDateTime::Now().GetTicks() % 1999999999) + 1;
 	WildRevealKeys.Reset(); WildRevealBits.Reset(); WildFound.Reset(); WildKilled.Reset(); TownStore.Reset();

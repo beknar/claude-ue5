@@ -1271,6 +1271,46 @@ def sign_extents():
                         "world": [round(c.get_world_location().x), round(c.get_world_location().y), round(c.get_world_location().z)]})
     return signs, out
 
+def step_recipes14():
+    """the list of 2026-11-16's sixth phase in the town: with the castle's tiers 1 to 3 opened (the game instance's record, as the
+    game keeps it: rd.Tier sets the growth only) the store sells the recipes of the tiers open that she does not know, and none of what
+    only a found recipe makes; one bought (its price taken) and read: learned, gone from the store's list"""
+    g = G["gen"]; res = {}; quiet(True)
+    c = cb(); gi = G["gi"]; c0 = list(gi.get_editor_property("castle_tiers"))
+    try:
+        g.forget_recipes14()
+        gi.set_editor_property("castle_tiers", [1, 2, 3]); yield from rwait(0.3)
+        res["tier"] = g.get_game_tier() if hasattr(g, "get_game_tier") else None
+        g.add_gold(5000, "the test")
+        sp = {p["kind"]: p for p in spots()}
+        put(sp["counter"]["at"]); yield from wait(0.2)
+        g.open_town_panel("store", -1); yield from rwait(0.2)
+        buy = [p[1] for p in panel() if p[0] == "buy"]
+        res["recipes_sold"] = sorted(b for b in buy if b.endswith(" Recipe"))
+        res["locked_sold"] = sorted(b for b in buy if g.is_locked_recipe14(b))
+        res["plain_potions_sold"] = sum(1 for b in buy if "Healing Potion" in b)
+        pick = next((b for b in res["recipes_sold"] if b.startswith("Elixir")), res["recipes_sold"][0] if res["recipes_sold"] else None)
+        if pick:
+            g0 = gold(); n0 = c.get_item_count(pick)
+            res["bought"] = {"item": pick, "ok": g.activate_town_entry(line_of("buy", pick)), "gold": gold() - g0, "count": c.get_item_count(pick) - n0}
+            g.close_town_panel(); yield from rwait(0.2)
+            res["read"] = c.use_item(pick); res["message"] = str(c.get_editor_property("message"))
+            res["known"] = [str(n) for n in g.get_known_recipes14()]
+            g.open_town_panel("store", -1); yield from rwait(0.2)
+            res["still_sold"] = pick in [p[1] for p in panel() if p[0] == "buy"]
+            shot("recipes14_store", "1280x720"); yield from rwait(1.0)
+        g.close_town_panel(); yield from rwait(0.2)
+    finally:
+        try: g.close_town_panel()
+        except Exception: pass
+        gi.set_editor_property("castle_tiers", c0)
+        g.forget_recipes14(); quiet(False)
+    b = res.get("bought", {})
+    ok = (res.get("tier") == 3 and len(res.get("recipes_sold", [])) >= 3 and not res.get("locked_sold") and res.get("plain_potions_sold", 0) >= 1
+          and b.get("ok") and b.get("gold", 0) < 0 and b.get("count") == 1 and res.get("read") and res.get("known") and not res.get("still_sold"))
+    step_result("recipes14", ok, **res)
+
+
 def step_tables14():
     """the list of 2026-11-16's fifth phase (items 2 and 3) in the town: the alchemist's table in the healer's house, the
     librarian's in the temple (each in a building of its kinds: the healer, laboratory or witch's; the temple, library or study);
@@ -1539,7 +1579,7 @@ def step_walkers():
     ok = len(ws) >= 3 and all(v["foot_slow_cm_s"] < v["body_cm_s"] / 3 and 0.75 < v["rate"] < 1.25 for v in ws) and heads and all(any("_Head" in m for m in ms) for ms in heads.values())
     step_result("walkers", ok, **res)
 
-STEPS = {"tables14": step_tables14, "town": step_town, "doors": step_doors, "talk": step_talk, "services": step_services, "guards": step_guards, "castle": step_castle,
+STEPS = {"recipes14": step_recipes14, "tables14": step_tables14, "town": step_town, "doors": step_doors, "talk": step_talk, "services": step_services, "guards": step_guards, "castle": step_castle,
          "map": step_map, "folk": step_folk, "gate": step_gate, "pictures": step_pictures, "tour": step_tour, "trip": step_trip,
          "castlewalls": step_castlewalls, "daynight": step_daynight, "shape": step_shape, "watch": step_watch, "lights": step_lights,
          "signs": step_signs, "signs14": step_signs14, "circle": step_circle, "burned": step_burned, "windows": step_windows, "walkers": step_walkers}

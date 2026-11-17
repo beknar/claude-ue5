@@ -1,0 +1,93 @@
+{
+ "tag": "s14p5r",
+ "plan": [
+  "tables14",
+  "list10c_oven"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "tables14",
+   "ok": true,
+   "switch": true,
+   "alchemist_tables": 1,
+   "librarian_tables": 0,
+   "table_from_anvil_m": 4.2,
+   "alchemist_offers": [
+    "Small Healing Potion",
+    "Medium Healing Potion",
+    "Small Mana Potion",
+    "Medium Mana Potion"
+   ],
+   "librarian_offers": [
+    "Scroll of Fire Bolt",
+    "Scroll of Dark Fire",
+    "Scroll of Ash Ward",
+    "Scroll of Frost Shard"
+   ],
+   "anvil_potions": [],
+   "anvil_scrolls": [],
+   "alchemist_not_potions": [],
+   "all_scroll_recipes": 30,
+   "says": "use the alchemist's table",
+   "f": "alchemist",
+   "station": "Alchemist",
+   "panel": [
+    "Medium Healing Potion",
+    "Medium Mana Potion",
+    "Small Healing Potion",
+    "Small Mana Potion"
+   ],
+   "brewed": true,
+   "potion": [
+    "Small Healing Potion",
+    0,
+    1
+   ],
+   "message": null,
+   "by_forge_says": "the forge (only the Warrior works it)",
+   "by_forge_m": [
+    1.1,
+    7.75
+   ],
+   "anvil_says": "use the anvil",
+   "anvil_f": "anvil",
+   "anvil_station": "None",
+   "anvil_panel_potions": [],
+   "anvil_panel_scrolls": [],
+   "anvil_panel": 7
+  },
+  {
+   "step": "list10c_oven",
+   "ok": true,
+   "ovens": 5,
+   "oven_says": "bake at the oven",
+   "oven_f": "oven",
+   "oven_recipes": [
+    "Bread",
+    "Fruit",
+    "Hardtack",
+    "Nuts and Seeds",
+    "Sweet Roll",
+    "Travel Cake"
+   ],
+   "baked": true,
+   "bread": [
+    0,
+    1
+   ],
+   "parts_ok": {
+    "oven": true
+   }
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_s14p5r_tables14_table.png",
+  "mw_s14p5r_tables14_panel.png",
+  "mw_s14p5r_l10c_oven.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

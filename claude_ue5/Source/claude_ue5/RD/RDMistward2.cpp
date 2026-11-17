@@ -78,7 +78,7 @@ int32 URDCombatComponent::TabOfLine(const FString& Line)
 	if (Kind == TEXT("weapon") || Kind == TEXT("carried") || Kind == TEXT("ability")) return 0;
 	if (Kind == TEXT("armour") || Kind == TEXT("shield") || Kind == TEXT("torch") || Kind == TEXT("helmet")) return 1;
 	if (Kind == TEXT("item")) return 2;
-	if (Kind == TEXT("component") || Kind == TEXT("repair")) return 3;
+	if (Kind == TEXT("component") || Kind == TEXT("repair") || Kind == TEXT("recipe")) return 3;          // (the list of 2026-11-16: recipes found with the crafting)
 	if (Kind == TEXT("passive")) return 0;          // (the sixth phase: her passive abilities with the others)
 	return 4;          // (rings, tomes, teleport rings, slashes, keys)
 }

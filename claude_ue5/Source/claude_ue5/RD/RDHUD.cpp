@@ -326,7 +326,10 @@ void ARDHUD::DrawCombat(float Sc)
 			{
 				const URDCombatComponent::FEffect& E = Ef[I];
 				const bool bSpeed = E.Kind == ERDItemKind::Speed;
+				// (the list of 2026-11-16's sixth phase: an elixir's or a meal's resistance and might too)
 				const FString T = bSpeed ? FString::Printf(TEXT("SPEED +%.0f%%  %.0fs"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
+				                : E.Kind == ERDItemKind::Armour ? FString::Printf(TEXT("RESIST +%.0f%%  %.0fs"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
+				                : E.Kind == ERDItemKind::Weapon ? FString::Printf(TEXT("MIGHT +%.0f%%  %.0fs"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
 				                         : FString::Printf(TEXT("REGEN +%.1f/s  %.0fs"), E.Amount * Cb->GetMaxHealth(), FMath::CeilToFloat(E.Left));
 				const FName Ic = bSpeed ? FName(TEXT("chip_speed")) : FName(TEXT("chip_regen"));
 				float Tw, Th; UI.TextSize(T, Tw, Th, Small, Sc, ERDType::Label);
@@ -1652,12 +1655,34 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 {
 	const URDCombatComponent* Cb = Gen ? Gen->GetPlayerCombat() : nullptr;
 	const float Hp = Cb ? Cb->GetMaxHealth() : 100.f, Mp = Cb ? Cb->GetMaxMana() : 0.f;
+	// (the list of 2026-11-16's sixth phase: an advanced potion's or meal's buff besides)
+	const FString Buff = It.BuffKind.IsNone() || It.BuffAmount <= 0.f ? FString()
+		: FString::Printf(TEXT("  Then for %.0f s: %s."), It.BuffSeconds, *(It.BuffKind == TEXT("resist") ? FString::Printf(TEXT("blows on you %.0f%% less"), It.BuffAmount * 100.f)
+			: It.BuffKind == TEXT("might") ? FString::Printf(TEXT("your blows %.0f%% more"), It.BuffAmount * 100.f)
+			: It.BuffKind == TEXT("speed") ? FString::Printf(TEXT("you move %.0f%% faster"), It.BuffAmount * 100.f)
+			: FString::Printf(TEXT("%.1f HP a second"), It.BuffAmount * Hp)));
 	switch (It.Kind)
 	{
-	case ERDItemKind::Healing: return FString::Printf(TEXT("Restores %.0f%% of your hit points  (%.0f HP)"), It.Amount * 100.f, It.Amount * Hp);
+	case ERDItemKind::Healing: return FString::Printf(TEXT("Restores %.0f%% of your hit points  (%.0f HP)"), It.Amount * 100.f, It.Amount * Hp) + Buff;
 	case ERDItemKind::Mana: return Mp > 0.f ? FString::Printf(TEXT("Restores %.0f%% of your mana  (%.0f)"), It.Amount * 100.f, It.Amount * Mp) : FString(TEXT("No use to you: you have no mana"));
-	case ERDItemKind::Speed: return FString::Printf(TEXT("You move %.0f%% faster for %.0f seconds"), It.Amount * 100.f, It.Seconds);
-	case ERDItemKind::Food: return FString::Printf(TEXT("Restores %.0f%% of your hit points a second for %.0f s  (%.1f HP/s)"), It.Amount * 100.f, It.Seconds, It.Amount * Hp);
+	case ERDItemKind::Speed: return FString::Printf(TEXT("You move %.0f%% faster for %.0f seconds"), It.Amount * 100.f, It.Seconds) + Buff;
+	case ERDItemKind::Food: return FString::Printf(TEXT("Restores %.0f%% of your hit points a second for %.0f s  (%.1f HP/s)"), It.Amount * 100.f, It.Seconds, It.Amount * Hp) + Buff;
+	case ERDItemKind::Recipe:
+	{
+		// (a recipe found: what it teaches, where that is made and what it takes)
+		if (!Gen) return TEXT("A recipe");
+		const FRDRecipe* Rc = Gen->Recipes.FindByPredicate([&It](const FRDRecipe& R) { return R.Item == It.Teaches; });
+		const FName St = Rc ? Gen->RecipeStation(*Rc) : NAME_None;
+		TArray<FString> Ps; if (Rc) for (const FRDRecipePart& Pt : Rc->Parts) Ps.Add(FString::Printf(TEXT("%d %s"), Pt.Count, *Pt.Label));
+		FString S = FString::Printf(TEXT("A recipe: read it (use it) to learn to make the %s at %s"), *It.Teaches.ToString().ToLower(), St == TEXT("Oven") ? TEXT("an oven")
+			: St == TEXT("Alchemist") ? TEXT("an alchemist's table") : St == TEXT("Librarian") ? TEXT("a librarian's table") : St == TEXT("Forge") ? TEXT("a forge") : TEXT("an anvil"));
+		if (Ps.Num() > 0) S += TEXT(" from ") + FString::Join(Ps, TEXT(", "));
+		S += TEXT(".  The recipe is used up.");
+		if (Gen->KnowsRecipe14(It.Teaches)) S += TEXT("  You know it already.");
+		const int32 Ti = Gen->FindItem(It.Teaches);
+		if (Ti >= 0) S += TEXT("  The ") + It.Teaches.ToString().ToLower() + TEXT(": ") + DescribeItem(Gen->Items[Ti]);
+		return S;
+	}
 	case ERDItemKind::Armour:
 	{
 		static const TCHAR* WeightName[3] = { TEXT("Light"), TEXT("Medium"), TEXT("Heavy") };
@@ -1898,7 +1923,7 @@ void ARDHUD::DrawInventory(float Sc)
 		case 0: Secs.Add({ TEXT("weapon"), TEXT("WEAPONS AND SPELLS"), true }); Secs.Add({ TEXT("ability"), TEXT("ABILITIES  (ON THE QUICK BAR IF YOU PUT THEM THERE)"), false }); Secs.Add({ TEXT("passive"), TEXT("ABILITIES ALWAYS ON"), false }); Secs.Add({ TEXT("carried"),FString::Printf(TEXT("WEAPONS THE %s CANNOT WIELD"), *Gen->PlayerTitle.ToUpper()), false }); break;
 		case 1: Secs.Add({ TEXT("armour"), TEXT("ARMOUR"), true }); Secs.Add({ TEXT("helmet"), TEXT("HELMET"), false }); Secs.Add({ TEXT("shield"), TEXT("SHIELDS"), false }); Secs.Add({ TEXT("torch"), TEXT("TORCH"), false }); break;
 		case 2: Secs.Add({ TEXT("item"), TEXT("POTIONS AND FOOD"), true }); break;
-		case 3: Secs.Add({ TEXT("component"), TEXT("MATERIALS"), true }); Secs.Add({ TEXT("repair"), TEXT("REPAIR ITEMS"), false }); break;
+		case 3: Secs.Add({ TEXT("component"), TEXT("MATERIALS"), true }); Secs.Add({ TEXT("repair"), TEXT("REPAIR ITEMS"), false }); Secs.Add({ TEXT("recipe"), TEXT("RECIPES  (READ ONE TO LEARN IT)"), false }); break;
 		default: Secs.Add({ TEXT("slash"), TEXT("SLASHES"), true }); Secs.Add({ TEXT("scroll"), TEXT("SCROLLS  (CAST ONCE, NO MANA)"), false }); Secs.Add({ TEXT("ring"), TEXT("RINGS"), false }); Secs.Add({ TEXT("key"), TEXT("KEYS"), false }); Secs.Add({ TEXT("token"), TEXT("ANGEL TOKENS  (EACH RAISES AN ABILITY A RANK)"), false });
 			Secs.Add({ TEXT("teleport"), TEXT("TELEPORT RINGS"), false }); Secs.Add({ TEXT("tome"), FString::Printf(TEXT("TOMES THE %s CANNOT LEARN"), *Gen->PlayerTitle.ToUpper()), false }); break;
 		}
@@ -1919,6 +1944,7 @@ void ARDHUD::DrawInventory(float Sc)
 		Secs.Add({ TEXT("scroll"), TEXT("SCROLLS"), false });
 		Secs.Add({ TEXT("tome"), FString::Printf(TEXT("TOMES THE %s CANNOT LEARN"), *Gen->PlayerTitle.ToUpper()), false });
 		Secs.Add({ TEXT("component"), TEXT("MATERIALS"), false });
+		Secs.Add({ TEXT("recipe"), TEXT("RECIPES"), false });
 		Secs.Add({ TEXT("carried"), FString::Printf(TEXT("WEAPONS THE %s CANNOT WIELD"), *Gen->PlayerTitle.ToUpper()), false });
 	}
 	TArray<int32> SecOf; TArray<int32> SecCount; SecCount.Init(0, Secs.Num());
@@ -2382,6 +2408,8 @@ void ARDHUD::DrawInventory(float Sc)
 	}
 	for (const URDCombatComponent::FEffect& E : Cb->GetEffects())
 		Para(E.Kind == ERDItemKind::Speed ? FString::Printf(TEXT("Speed +%.0f%%: %.0f s left"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
+		     : E.Kind == ERDItemKind::Armour ? FString::Printf(TEXT("Blows on you %.0f%% less: %.0f s left"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
+		     : E.Kind == ERDItemKind::Weapon ? FString::Printf(TEXT("Your blows %.0f%% more: %.0f s left"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
 		                                 : FString::Printf(TEXT("Regenerating %.1f HP/s: %.0f s left"), E.Amount * Cb->GetMaxHealth(), FMath::CeilToFloat(E.Left)), RDCyan, Sc);
 	// ---- the keys, and what was done last
 	const float Fy = B.Y - 92.f * Sc;

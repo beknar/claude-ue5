@@ -2733,6 +2733,26 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") TArray<FVector> GetAllTables14(FName Station) const;
 	/** tests: the recipes the station offers her now ("Alchemist", "Librarian", "Oven", "Forge", none the anvil), refused ones left out */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") TArray<FName> GetStationRecipes14(FName Station) const;
+	/** the list of 2026-11-16's sixth phase (928, RDList14e.cpp): recipes found. A recipe that a recipe item teaches is refused until
+	 *  she has read one (KnownRecipes, kept for the game); recipes are found in the dungeons' chests and shelves by tier, in the wilds'
+	 *  ruins' and structures' chests ("@recipe" in their loot: one of the box's tier), and sold by the traders */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bRecipes14 = false;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool IsLockedRecipe14(FName Item) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool KnowsRecipe14(FName Item) const;
+	bool LearnRecipe14(FName Item);
+	/** tests: the recipes learned, and forgetting them (the game instance's list emptied) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") TArray<FName> GetKnownRecipes14() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") void ForgetRecipes14();
+	/** the recipe item that teaches Item (none if none does) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") FName RecipeItemFor14(FName Item) const;
+	/** a wild container's loot lines with "@recipe|min|max|chance" made a recipe of the land's tier where it stands, drawn from a stream
+	 *  of its own by its key (its other things keep their draws); and the same for a test ("<line>;<line>" given and returned) */
+	void ResolveWildLoot14(TArray<FString>& Lines, const FVector& At, int64 Key) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") FString GetWildLootResolved14(const FString& Loot, FVector At, int64 Key) const;
+	/** a recipe item of the game's tier or below (its lowest tier), drawn with R (none if none) */
+	FName RecipeOfTier14(int32 GameTier, FRandomStream& R) const;
+	/** the items the recipe items teach, made once for the table's size */
+	mutable TSet<FName> TaughtRecipes14; mutable int32 TaughtRecipesOf14 = -1;
 	/** the fifth phase's second part (RDList14d.cpp): the tables of the wilds' places (a village one in two, a camp one in three, a
 	 *  witch's hut, a shrine, the abbey's and temple's ruins) and the farmsteads' ovens, used by F as the towns' are */
 	TArray<FName> WildTablesOf14(const struct FRDWildPlace& P) const;

@@ -1,0 +1,51 @@
+{
+ "tag": "s14p6c",
+ "plan": [
+  "recipes14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "recipes14",
+   "ok": true,
+   "kinds_with_token": 54,
+   "kinds": 54,
+   "visits": [
+    {
+     "name": "The Old Watchtower",
+     "tier": 1,
+     "boxes": 0
+    },
+    {
+     "name": "Ruins of Windstead",
+     "tier": 1,
+     "boxes": 1,
+     "resolved": []
+    },
+    {
+     "name": "Ruins of Emberdale",
+     "tier": 1,
+     "boxes": 1,
+     "resolved": []
+    },
+    {
+     "name": "Ruins of Hollowholt",
+     "tier": 2,
+     "boxes": 1,
+     "resolved": [
+      "Hunter's Stew Recipe"
+     ],
+     "recipe_tiers": [
+      2,
+      7,
+      12
+     ]
+    }
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

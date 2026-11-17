@@ -813,7 +813,10 @@ enum class ERDItemKind : uint8
 	Token,
 	/** the list of 2026-11-10: the revealing light (the ankh), carried in the left hand as the torch: it lights her way and, within
 	 *  its Amount of metres, outlines traps, shows stealthed monsters and marks hidden caches */
-	Light
+	Light,
+	/** the list of 2026-11-16's sixth phase: a recipe found: read from the inventory, it teaches how to make its Teaches (kept for
+	 *  the game in URDGameInstance::KnownRecipes) and is used up */
+	Recipe
 };
 
 /** the list of 2026-11-08b's eighth phase (913): the ridable horse: its meshes (her bay, the stable's grey), its clips (made in
@@ -1140,6 +1143,13 @@ struct FRDItemDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString WeaponType;
 	/** mistward_castle: a teleport ring's tier (2 to 5) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 TeleportTier = 0;
+	/** the list of 2026-11-16's sixth phase: a recipe's item (ERDItemKind::Recipe): the item whose recipe it teaches */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Teaches = NAME_None;
+	/** the sixth phase: a potion's or food's buff besides its own effect: "resist" (blows on her take BuffAmount less), "might" (her
+	 *  blows BuffAmount more), "speed" (BuffAmount faster), "regen" (BuffAmount of her hit points a second), for BuffSeconds */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName BuffKind = NAME_None;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BuffAmount = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BuffSeconds = 0.f;
 };
 
 /** mistward_castle: the kinds of trap */

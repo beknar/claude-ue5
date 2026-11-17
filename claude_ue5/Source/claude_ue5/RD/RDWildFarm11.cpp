@@ -173,6 +173,7 @@ void ARDDungeonGenerator::OpenWildBox(ARDWildChunk* C, int32 Index)
 	++WildBoxesOpened;
 	// (its things: a roll of its kind's list by its key, never a stream the play draws from; one at least)
 	TArray<FString> Lines; D.Loot.ParseIntoArray(Lines, TEXT(";"), true);
+	ResolveWildLoot14(Lines, D.At, D.Key);          // (the list of 2026-11-16's sixth phase: "@recipe")
 	FRandomStream R((int32)HashCombine(GetTypeHash(D.Key), 0xF00Du ^ (uint32)(IsWildReady() ? Wild->Seed : 0u)));
 	TArray<FName> Got = RollWildThings(Lines, R);
 	if (Got.Num() == 0)

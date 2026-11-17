@@ -6052,6 +6052,98 @@ def step_tables14():
     step_result("tables14", ok, **res)
 
 
+def step_recipes14():
+    """the list of 2026-11-16's sixth phase (item 4: "recipes can be found to make more advanced food, more advanced potions, more
+    advanced scrolls"): the Mage, knowing no found recipe: the Elixir of Iron Hide is not offered at the alchemist's table and making it
+    is refused; its recipe (a found recipe item) read from the inventory: learned, used up, read again refused; then the table offers it
+    and she brews it through the panel; drunk at full health it gives its buff (blows on her a quarter less: a blow measured with it and
+    without), the Elixir of Might its (her weapon's damage up a quarter); the meals at the oven's and the scrolls at the librarian's are
+    locked too; the recipes are among the tier-2 sets' containers' loot (a census)"""
+    c = yield from restart("Mage"); g = G["gen"]; quiet(True)
+    res = {}
+    EL, RC = "Elixir of Iron Hide", "Elixir of Iron Hide Recipe"
+    try:
+        g.forget_recipes14(); yield
+        # (the castle offers only the recipes of tiers open (bRecipeTiers): the elixirs are tiers 2 and 3)
+        g.debug_open_tiers(3, False); yield from rwait(0.3); res["tiers_open"] = 3
+        res["switch"] = g.get_editor_property("recipes14")
+        res["locked"] = {n: g.is_locked_recipe14(n) for n in (EL, "Hunter's Stew", "Scroll of Starfall", "Small Healing Potion")}
+        res["offered_before"] = EL in [str(n) for n in g.get_station_recipes14("Alchemist")]
+        res["oven_offers_stew_before"] = "Hunter's Stew" in [str(n) for n in g.get_station_recipes14("Oven")]
+        rc = next((r for r in g.get_editor_property("recipes") if str(r.item) == EL), None)
+        if rc:
+            for pt in rc.get_editor_property("parts"): c.add_item(pt.get_editor_property("any_of")[0], pt.get_editor_property("count"))
+        res["craft_refused"] = not c.craft(EL); res["refusal"] = str(c.get_editor_property("message"))
+        # ---- the recipe read
+        c.add_item(RC, 1); yield
+        res["inv_line"] = [str(l) for l in c.get_all_inventory_lines() if str(l).startswith("recipe|")][:2]
+        res["read"] = c.use_item(RC); res["read_message"] = str(c.get_editor_property("message"))
+        res["known"] = [str(n) for n in g.get_known_recipes14()]; res["recipe_left"] = c.get_item_count(RC)
+        c.add_item(RC, 1); res["read_again"] = c.use_item(RC); res["again_message"] = str(c.get_editor_property("message"))
+        res["offered_after"] = EL in [str(n) for n in g.get_station_recipes14("Alchemist")]
+        # ---- brewed at the table through the panel
+        al = list(g.get_all_tables14("Alchemist")); hall = g.get_start_room_center()
+        at = min(al, key=lambda a_: dist2(a_, hall)) if al else None
+        if at:
+            for r_ in (140, 170, 115):
+                for a_ in range(0, 360, 45):
+                    p_ = V(at.x + math.cos(math.radians(a_)) * r_, at.y + math.sin(math.radians(a_)) * r_, at.z)
+                    put(p_, math.degrees(math.atan2(at.y - p_.y, at.x - p_.x))); yield
+                    if "alchemist" in str(g.describe_nearest(G["pawn"].get_actor_location(), 260.0)): break
+                else: continue
+                break
+            res["f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from rwait(0.3)
+            ls = [str(x) for x in c.get_craft_lines()]
+            res["panel"] = [l.split("|")[1] for l in ls if l.startswith("recipe|")]
+            row = next((i_ for i_, l in enumerate(ls) if l.startswith("recipe|") and l.split("|")[1] == EL), -1)
+            if row >= 0: c.move_craft_cursor(row - c.get_craft_cursor())
+            shot("recipes14_panel", "1280x720"); yield from rwait(1.0)
+            n0 = c.get_item_count(EL)
+            res["brewed"] = row >= 0 and c.craft_entry(); yield from rwait(0.2); res["elixir"] = [n0, c.get_item_count(EL)]
+            c.set_crafting_open(False); yield from rwait(0.2)
+        # ---- its buff: a blow of 20 without it and with it, at full health
+        c.set_health(c.get_max_health()); h0 = c.get_health(); c.apply_damage(20.0, None); yield; res["blow_without"] = round(h0 - c.get_health(), 2)
+        c.set_health(c.get_max_health())
+        res["drunk"] = c.use_item(EL); res["drink_message"] = str(c.get_editor_property("message"))
+        res["resist"] = round(c.get_resist_buff14(), 3)
+        h0 = c.get_health(); c.apply_damage(20.0, None); yield; res["blow_with"] = round(h0 - c.get_health(), 2)
+        shot("recipes14_buff", "1280x720"); yield from rwait(1.0)
+        # ---- the Elixir of Might: her weapon's damage
+        g.set_editor_property("recipes14", True)
+        c.add_item("Elixir of Might Recipe", 1); c.use_item("Elixir of Might Recipe"); c.add_item("Elixir of Might", 1)
+        d0 = c.get_damage_of(0); res["might_drunk"] = c.use_item("Elixir of Might"); res["damage"] = [round(d0, 2), round(c.get_damage_of(0), 2)]
+        # ---- the census of the tier-2 sets' containers
+        g.debug_open_tiers(2, False); yield from rwait(0.3)
+        n_rec = 0; n_all = 0; got = set()
+        for s_ in (I2(1, 0), I2(-1, 0), I2(0, 1), I2(0, -1)):
+            if not g.is_section_generated(s_): g.generate_section_now(s_); yield from built(s_)
+            S = g.get_section(s_)
+            if not S: continue
+            for i_ in range(S.get_num_containers()):
+                for n_ in g.loot_list_of(s_, i_):
+                    n_all += 1
+                    if str(n_).endswith(" Recipe"): n_rec += 1; got.add(str(n_))
+        res["census"] = {"things": n_all, "recipes": n_rec, "kinds": sorted(got)}
+    finally:
+        try: c.set_crafting_open(False)
+        except Exception: pass
+        g.forget_recipes14(); quiet(False)
+    ok = (res.get("switch") and res["locked"][EL] and res["locked"]["Hunter's Stew"] and res["locked"]["Scroll of Starfall"] and not res["locked"]["Small Healing Potion"]
+          and not res["offered_before"] and not res["oven_offers_stew_before"] and res.get("craft_refused") and "recipe" in res.get("refusal", "")
+          and res.get("inv_line") and res.get("read") and EL in res.get("known", []) and res.get("recipe_left") == 0 and not res.get("read_again")
+          and res.get("offered_after") and res.get("f") == "alchemist" and EL in res.get("panel", []) and res.get("brewed") and res["elixir"][1] == res["elixir"][0] + 1
+          and res.get("drunk") and abs(res.get("resist", 0) - 0.25) < 1e-3 and res.get("blow_without", 0) > 0)
+    # (a blow is taken less by her armour's share A and the buff's together: without it 20 (1 - A), with it 20 (1 - A - 0.25); her
+    # armour's share is read back from the blow without it; whole hit points allow half a point)
+    if res.get("blow_without") and res.get("blow_with") is not None:
+        a_ = 1.0 - res["blow_without"] / 20.0
+        res["blow_expected_with"] = round(20.0 * max(0.05, 1.0 - a_ - 0.25), 2)
+        ok = ok and abs(res["blow_with"] - res["blow_expected_with"]) <= 0.6
+    else: ok = False
+    ok = bool(ok and res.get("damage") and res["damage"][1] >= res["damage"][0] * 1.24 and res.get("census", {}).get("recipes", 0) >= 1)
+    step_result("recipes14", ok, **res)
+
+
 def step_horsecall14():
     """item 7: "enable calling your horse from anywhere except the dungeon": in the castle her horse's key is refused, saying why"""
     yield from restart("Warrior"); c = cb(); g = G["gen"]; res = {}
@@ -6125,7 +6217,7 @@ def step_block14():
     step_result("block14", ok, **res)
 
 
-STEPS = {"tables14": step_tables14, "block14": step_block14, "horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
+STEPS = {"recipes14": step_recipes14, "tables14": step_tables14, "block14": step_block14, "horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
          "spells11_spells": lambda: step_spells11(("spells",)), "spells11_curses": lambda: step_spells11(("curses",)), "spells11_slashes": lambda: step_spells11(("slashes",)), "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
          "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "menulook": step_menulook, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
