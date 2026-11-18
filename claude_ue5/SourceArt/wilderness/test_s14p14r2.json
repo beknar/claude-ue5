@@ -1,0 +1,336 @@
+{
+ "tag": "s14p14r2",
+ "plan": [
+  "roads14",
+  "stream"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "roads14",
+   "ok": true,
+   "stats": "villages 2957 (2796 ways, 161 without, 508 cut off, 75 of them joined on), places 614 (380 lanes), structures 2514 (1639 lanes), farmsteads 51 (25 lanes), roads 4921|major 6|minor 4915|signs 6220|init 1.50 s",
+   "roads": {
+    "major": 6,
+    "minor": 4915
+   },
+   "majors": [
+    {
+     "road": "Brokenspire-Ashenreach",
+     "km": 43.9,
+     "samples": 41,
+     "beside_another": 0,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.21,
+     "fails": [],
+     "rise_m_median": 0.22
+    },
+    {
+     "road": "Ashenreach-Graymourne",
+     "km": 100.7,
+     "samples": 97,
+     "beside_another": 0,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.21,
+     "fails": [],
+     "rise_m_median": 0.22
+    },
+    {
+     "road": "Brokenspire-Vel Morrath",
+     "km": 85.0,
+     "samples": 75,
+     "beside_another": 0,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.21,
+     "fails": [],
+     "rise_m_median": 0.22
+    },
+    {
+     "road": "Ashenreach-Vel Morrath",
+     "km": 44.8,
+     "samples": 36,
+     "beside_another": 0,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.215,
+     "fails": [],
+     "rise_m_median": 0.22
+    },
+    {
+     "road": "Graymourne-Kethrys Spire",
+     "km": 46.1,
+     "samples": 39,
+     "beside_another": 0,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.215,
+     "fails": [],
+     "rise_m_median": 0.22
+    },
+    {
+     "road": "Kethrys Spire-Heaven",
+     "km": 33.0,
+     "samples": 21,
+     "beside_another": 0,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.22,
+     "fails": [],
+     "rise_m_median": 0.22
+    }
+   ],
+   "villages": {
+    "near": 91,
+    "to_a_major_road": 90,
+    "share": 0.989,
+    "hops_max": 10,
+    "cut": {
+     "no_way": 1,
+     "broken": 0
+    }
+   },
+   "other_places": {
+    "ok": 13,
+    "none": 5
+   },
+   "minor_dirt_share": 1.0,
+   "signs_30km": {
+    "major": 25,
+    "minor": 688,
+    "fork": 469
+   },
+   "major_signs": [
+    {
+     "road": "Brokenspire-Ashenreach",
+     "signs": 21,
+     "on_its_line": 21,
+     "gap_max_m": 2000.0,
+     "wrong": 0,
+     "off_road_m_max": 12.1,
+     "expected": 21
+    },
+    {
+     "road": "Ashenreach-Graymourne",
+     "signs": 49,
+     "on_its_line": 49,
+     "gap_max_m": 2724.0,
+     "wrong": 0,
+     "off_road_m_max": 7.1,
+     "expected": 49
+    },
+    {
+     "road": "Brokenspire-Vel Morrath",
+     "signs": 27,
+     "on_its_line": 56,
+     "gap_max_m": 2000.0,
+     "wrong": 0,
+     "off_road_m_max": 12.0,
+     "expected": 42
+    },
+    {
+     "road": "Ashenreach-Vel Morrath",
+     "signs": 21,
+     "on_its_line": 35,
+     "gap_max_m": 2757.0,
+     "wrong": 0,
+     "off_road_m_max": 12.0,
+     "expected": 21
+    },
+    {
+     "road": "Graymourne-Kethrys Spire",
+     "signs": 22,
+     "on_its_line": 22,
+     "gap_max_m": 2136.0,
+     "wrong": 0,
+     "off_road_m_max": 7.1,
+     "expected": 22
+    },
+    {
+     "road": "Kethrys Spire-Heaven",
+     "signs": 15,
+     "on_its_line": 15,
+     "gap_max_m": 2976.0,
+     "wrong": 0,
+     "off_road_m_max": 7.0,
+     "expected": 15
+    }
+   ],
+   "minor_signs": {
+    "ok": 103,
+    "bad": 0,
+    "bad_first": [],
+    "forks": 30,
+    "forks_missing": 0
+   },
+   "laid": {
+    "near": 3,
+    "this": [
+     "0",
+     "89909",
+     "-200754",
+     "-1832",
+     "5",
+     "4",
+     "Ashenreach / 42 km;Ashenreach / 42 km;Brokenspire / 2.0 km;Brokenspire / 2.0 km;"
+    ],
+    "want": [
+     "Ashenreach / 42 km",
+     "Brokenspire / 2.0 km"
+    ],
+    "arms_ok": true
+   },
+   "minor_shot": {
+    "road": 389,
+    "dest": "Ashham"
+   }
+  },
+  {
+   "step": "stream",
+   "ok": true,
+   "mem_start": 21884.0,
+   "census_start": {
+    "actors": 601,
+    "top": {
+     "RDLootPile": 283,
+     "RDMonster": 205,
+     "RDWildChunk": 64,
+     "RDWildAnimal": 19,
+     "WorldSettings": 1,
+     "Brush": 1,
+     "PostProcessVolume": 1,
+     "ExponentialHeightFog": 1,
+     "RDDungeonGenerator": 1,
+     "PlayerStart": 1,
+     "SkeletalMeshActor": 1,
+     "SceneCapture2D": 1
+    },
+    "lists": {
+     "loot_piles": 283
+    }
+   },
+   "mem_far": 22596.0,
+   "census_far": {
+    "actors": 585,
+    "top": {
+     "RDLootPile": 285,
+     "RDMonster": 196,
+     "RDWildChunk": 64,
+     "RDWildAnimal": 9,
+     "Actor": 2,
+     "WorldSettings": 1,
+     "Brush": 1,
+     "PostProcessVolume": 1,
+     "ExponentialHeightFog": 1,
+     "RDDungeonGenerator": 1,
+     "PlayerStart": 1,
+     "SkeletalMeshActor": 1
+    },
+    "lists": {
+     "loot_piles": 317
+    }
+   },
+   "mem_back": 22564.0,
+   "census_back": {
+    "actors": 661,
+    "top": {
+     "RDLootPile": 320,
+     "RDMonster": 220,
+     "RDWildChunk": 72,
+     "RDWildAnimal": 19,
+     "WorldSettings": 1,
+     "Brush": 1,
+     "PostProcessVolume": 1,
+     "ExponentialHeightFog": 1,
+     "RDDungeonGenerator": 1,
+     "PlayerStart": 1,
+     "SkeletalMeshActor": 1,
+     "SceneCapture2D": 1
+    },
+    "lists": {
+     "loot_piles": 320
+    }
+   },
+   "max_chunks": 72,
+   "outside_square": 0,
+   "samples": [
+    {
+     "y": 2600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21900
+    },
+    {
+     "y": 4100.0,
+     "chunks": 63,
+     "near": 4,
+     "mem": 22210
+    },
+    {
+     "y": 5600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22308
+    },
+    {
+     "y": 7100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22548
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22596
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22596
+    },
+    {
+     "y": 7100.0,
+     "chunks": 68,
+     "near": 4,
+     "mem": 22565
+    },
+    {
+     "y": 5600.0,
+     "chunks": 68,
+     "near": 4,
+     "mem": 22544
+    },
+    {
+     "y": 4100.0,
+     "chunks": 67,
+     "near": 4,
+     "mem": 22635
+    },
+    {
+     "y": 2600.0,
+     "chunks": 67,
+     "near": 4,
+     "mem": 22564
+    }
+   ],
+   "dropped": 376,
+   "built": 426,
+   "active_km2_max": 4.5,
+   "compute_ms": 127.4,
+   "build_ms_max": 73.0,
+   "out_growth_mb": 712.0,
+   "back_growth_mb": -32.0
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_s14p14r2_roads14_sign.png",
+  "wd_s14p14r2_roads14_sign_back.png",
+  "wd_s14p14r2_roads14_major.png",
+  "wd_s14p14r2_roads14_map_near.png",
+  "wd_s14p14r2_roads14_map_far.png",
+  "wd_s14p14r2_roads14_minimap.png",
+  "wd_s14p14r2_roads14_minor.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

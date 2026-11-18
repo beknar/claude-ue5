@@ -668,7 +668,7 @@ float FRDWildWorld::LandRelief(double X, double Y, bool bDetail, const int32* Bi
 float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 {
 	const FVector2D P(X, Y);
-	float Water = -1e9f; int32 Kind = 0; float Road = 0.f;
+	float Water = -1e9f; int32 Kind = 0; float Road = 0.f; float Cobble = 0.f;
 	const FIntPoint Hc(FMath::FloorToInt(X / HashM), FMath::FloorToInt(Y / HashM));
 	// lakes made at Init
 	for (auto It = LakeHash.CreateConstKeyIterator(Hc); It; ++It)
@@ -729,14 +729,17 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 	}
 	// rivers and roads: the nearest segment of each
 	double Rd = 1e18, Rt = 0; int32 Ri = -1, Rs = -1;
+	// (the nearest minor road and the nearest major road apart (the fourteenth phase): where a minor road joins or runs by a major
+	// one, the major one's bed and cobbles are laid over the minor one's, not lost to whichever middle is nearer)
 	double Dd = 1e18, Dt = 0; int32 Di = -1, Ds = -1;
+	double Md = 1e18, Mt = 0; int32 Mi = -1, Ms = -1;
 	for (auto It = SegHash.CreateConstKeyIterator(Hc); It; ++It)
 	{
 		const uint32 V = It.Value();
 		const bool bRoad = (V >> 31) != 0; const int32 I = (V >> 16) & 0x7FFF, Sg = V & 0xFFFF;
 		const TArray<FVector2D>& Pts = bRoad ? Roads[I].P : Rivers[I].P;
 		double T; const double D = RDWSegDist(P, Pts[Sg], Pts[Sg + 1], T);
-		if (bRoad) { if (D < Dd) { Dd = D; Dt = T; Di = I; Ds = Sg; } }
+		if (bRoad) { if (Roads[I].bTrack) { if (D < Dd) { Dd = D; Dt = T; Di = I; Ds = Sg; } } else if (D < Md) { Md = D; Mt = T; Mi = I; Ms = Sg; } }
 		else if (D < Rd) { Rd = D; Rt = T; Ri = I; Rs = Sg; }
 	}
 	if (Ri >= 0)
@@ -753,27 +756,31 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 		}
 		if (D < Half + 1.5f && H < S) { Water = S; Kind = 3; }
 	}
-	if (Di >= 0)
+	for (int32 Pass = 0; Pass < 2; ++Pass)
 	{
-		const FRoad& R = Roads[Di];
-		const float Z = FMath::Lerp(R.Z[Ds], R.Z[Ds + 1], (float)Dt);
-		const float D = (float)Dd;
+		const int32 Ix = Pass == 0 ? Di : Mi, Sx = Pass == 0 ? Ds : Ms;
+		if (Ix < 0) continue;
+		const FRoad& R = Roads[Ix];
+		const float Z = FMath::Lerp(R.Z[Sx], R.Z[Sx + 1], (float)(Pass == 0 ? Dt : Mt));
+		const float D = (float)(Pass == 0 ? Dd : Md);
 		if (R.bTrack)
 		{
-			// (a track: a footpath 1.2 to 1.7 m from its middle, its bed eased over 6 m and the height it makes up, half a road's bank)
-			const float Wt = 1.f - RDWSmooth(1.6f, FMath::Min(6.f + 2.f * FMath::Abs(Z - H), (float)RDWRoadBankM * 0.5f), D);
+			// (a minor road (the list of 2026-11-16's fourteenth phase): dirt, a cart wide, 1.7 to 2.1 m from its middle, its edges
+			// ragged; its bed eased over 8 m and the height it makes up, to 45 m)
+			const float Wt = 1.f - RDWSmooth(2.2f, FMath::Min(8.f + 2.f * FMath::Abs(Z - H), (float)RDWRoadBankM * 0.75f), D);
 			H = FMath::Lerp(H, Z, Wt);
-			Road = 0.85f * (1.f - RDWSmooth(1.0f + 0.5f * Perlin(X / 7.0, Y / 7.0, Seed + 72u), 1.9f, D));
+			Road = FMath::Max(Road, 0.95f * (1.f - RDWSmooth(1.7f + 0.4f * Perlin(X / 7.0, Y / 7.0, Seed + 72u), 2.6f, D)));
 		}
 		else
 		{
-		// (the road a cart and a half wide, its edges ragged: 2.3 to 3 m from its middle (it was 1.5 to 2.9, under the 2 m
-		// mesh's spacing); its bed levelled out to 12 m. Over a dip or through a rise its bank widens with the height it makes
-		// up, 2.5 m a metre, to RDWRoadBankM: eased in over 9 m whatever the height, a bed 10 m over the ground stood on a bank
-		// of 60 degrees (the user's of 2026-11-08, found by RDWildProbe))
-		const float Wt = 1.f - RDWSmooth(3.2f, FMath::Min(12.f + 2.5f * FMath::Abs(Z - H), (float)RDWRoadBankM), D);
+		// (a major road (the list of 2026-11-16's fourteenth phase: "raised cobblestone"): cobbles 3.5 m either side of its middle
+		// within kerbs, raised 22 cm over its bed, a dirt shoulder to 4.3-4.9 m; its bed levelled out to 14 m. Over a dip or
+		// through a rise its bank widens with the height it makes up, 2.5 m a metre, to RDWRoadBankM (the user's of 2026-11-08))
+		const float Wt = 1.f - RDWSmooth(4.6f, FMath::Min(14.f + 2.5f * FMath::Abs(Z - H), (float)RDWRoadBankM), D);
 		H = FMath::Lerp(H, Z, Wt);
-		Road = 1.f - RDWSmooth(2.3f + 0.7f * Perlin(X / 9.0, Y / 9.0, Seed + 71u), 3.9f, D);
+		Road = FMath::Max(Road, 1.f - RDWSmooth(4.3f + 0.6f * Perlin(X / 9.0, Y / 9.0, Seed + 71u), 5.6f, D));
+		Cobble = 1.f - RDWSmooth(3.45f, 3.75f, D);
+		H += 0.22f * (1.f - RDWSmooth(3.55f, 4.15f, D));
 		}
 		if (Road > 0.4f && Kind == 3) { Water = -1e9f; Kind = 0; }           // a ford: the road crosses dry
 	}
@@ -811,9 +818,9 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 				if (H < -0.05f) { Water = 0.f; Kind = 1; }
 			}
 		}
-		if (D < 170.0) Road = 0.f;
+		if (D < 170.0) { Road = 0.f; Cobble = 0.f; }
 	}
-	if (Out) { Out->Water = Water; Out->WaterKind = Kind; Out->Road = Road; Out->Chan = Road > 0.3f ? 0.f : Chan; Out->ChanKind = ChanKind; }
+	if (Out) { Out->Water = Water; Out->WaterKind = Kind; Out->Road = Road; Out->Cobble = Cobble; Out->Chan = Road > 0.3f ? 0.f : Chan; Out->ChanKind = ChanKind; }
 	return H;
 }
 
@@ -1076,6 +1083,7 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 	if (Lava > 0.f) G = FMath::Lerp(G, FLinearColor(0.35f, 0.07f, 0.02f), FMath::Clamp(Lava, 0.f, 1.f));
 	if (Snow > 0.f) G = FMath::Lerp(G, FLinearColor(0.78f, 0.80f, 0.84f), FMath::Clamp(Snow, 0.f, 1.f));
 	if (Fs.Road > 0.f) G = FMath::Lerp(G, FLinearColor(0.31f, 0.25f, 0.17f), Fs.Road);
+	if (Fs.Cobble > 0.f) G = FMath::Lerp(G, FLinearColor(0.34f, 0.32f, 0.29f), Fs.Cobble);          // (the major roads' grey stone)
 	if (Kind != 0)
 	{
 		const float Dp = FMath::Clamp((Water - H) / 6.f, 0.f, 1.f);
@@ -1084,7 +1092,7 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 	}
 	O.H = H; O.Water = Water; O.WaterKind = Kind; O.Color = G; O.RockColor = RockCol;
 	O.Rock = FMath::Clamp(Rock, 0.f, 1.f); O.Snow = FMath::Clamp(Snow, 0.f, 1.f); O.Sand = FMath::Clamp(Sand, 0.f, 1.f); O.Mud = FMath::Clamp(Mud, 0.f, 1.f);
-	O.Road = Fs.Road; O.Field = Field; O.Lava = FMath::Clamp(Lava, 0.f, 1.f);
+	O.Road = Fs.Road; O.Cobble = Fs.Cobble; O.Field = Field; O.Lava = FMath::Clamp(Lava, 0.f, 1.f);
 	O.Canopy = (Kind == 0 && Fs.Road < 0.2f && Field < 0.2f) ? FMath::Clamp(Canopy, 0.f, 1.f) * (1.f - O.Snow * 0.4f) : 0.f;
 }
 
@@ -1501,11 +1509,14 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 	MakeChannels();
 	MakeRoads();
 	HashSegments();
-	MakeTracks();
+	MergeMajorRoads();
 	HashSegments();
-	MakeCrossroads();
 	BaseH = Towns[0].H;
+	// (the quests' places before the minor roads: the villages keep 600 m from them, and every place is made once for its way)
 	MakeQuestPlaces();
+	MakeMinorRoads();
+	MakeCrossroads();
+	MakeSigns();
 	bReady = true;
 	InitSeconds = FPlatformTime::Seconds() - T0;
 }
@@ -2111,6 +2122,7 @@ void FRDWildWorld::MakeCrossroads()
 	for (int32 Ri = 0; Ri < Roads.Num(); ++Ri)
 	{
 		const FRoad& R = Roads[Ri];
+		if (R.bTrack) continue;          // (the fourteenth phase: the crossroads stand on the major roads, where another road meets or leaves one)
 		for (int32 I = 1; I + 1 < R.P.Num(); ++I)
 		{
 			const FVector2D P = R.P[I];
@@ -2123,6 +2135,9 @@ void FRDWildWorld::MakeCrossroads()
 				if ((V >> 31) == 0) continue;
 				const int32 J = (V >> 16) & 0x7FFF, Sg = V & 0xFFFF;
 				if (J == Ri) continue;
+				// (PR #92's review: another major road, or a village's way that joins this one; the lanes to every place and farmstead
+				// would make a crossroads every 250 m)
+				if (Roads[J].bTrack && !(Roads[J].DestKind == TEXT("village") && Roads[J].Join == Ri)) continue;
 				double T; const double D = RDWSegDist(P, Roads[J].P[Sg], Roads[J].P[Sg + 1], T);
 				if (D > 12.0) continue;
 				const FVector2D Od = (Roads[J].P[Sg + 1] - Roads[J].P[Sg]).GetSafeNormal();
@@ -2136,84 +2151,12 @@ void FRDWildWorld::MakeCrossroads()
 			// kept from 1.1 km, past the town's level ground)
 			double Dt; NearestTown(P.X, P.Y, Dt);
 			if (Dt < 1100.0) continue;
-			if (Crossroads.ContainsByPredicate([&](const FVector2D& Q) { return FVector2D::DistSquared(Q, P) < 250.0 * 250.0; })) continue;
+			if (Crossroads.ContainsByPredicate([&](const FVector2D& Q) { return FVector2D::DistSquared(Q, P) < 1500.0 * 1500.0; })) continue;          // (1.5 km apart: the villages' ways join often)
 			Crossroads.Add(P);
 		}
 	}
 }
 
-void FRDWildWorld::MakeTracks()
-{
-	// (from points of each town road every ~2.5 km (none within 2 km of its ends), a track three times in five, leaving it at 55 to 90
-	// degrees to a side and wandering on 1.5 to 4 km in 25 m steps; a third of the tracks send one of their own off half way. A track
-	// stops at water, the sea's edge and a town's level ground; its bed is the land's height smoothed along it)
-	const int32 NRoads = Roads.Num();
-	auto Grow = [&](const FVector2D& From, double Ang, double Len, uint32 Sk) -> int32
-	{
-		FRoad T; T.bTrack = true;
-		FVector2D P = From;
-		for (double L = 0.0; L <= Len; L += 25.0)
-		{
-			if (L > 0.0)
-			{
-				if (Continent(P.X, P.Y) < 0.02f) break;
-				double Dt; NearestTown(P.X, P.Y, Dt);
-				if (Dt < 1200.0) break;
-				FRDWSample S; Sample(P.X, P.Y, S, false);
-				if (S.WaterKind != 0 || S.H < 2.f) break;
-			}
-			T.P.Add(P);
-			Ang += FMath::DegreesToRadians(10.0) * Perlin(L / 180.0 + Sk % 113, Sk % 41, Seed + 1501u) * 2.0;
-			P += FVector2D(FMath::Cos(Ang), FMath::Sin(Ang)) * 25.0;
-		}
-		if (T.P.Num() < 20) return -1;
-		for (const FVector2D& Q : T.P) T.Z.Add(LandHeight(Q.X, Q.Y, false));
-		for (int32 Pass = 0; Pass < 4; ++Pass)
-		{
-			TArray<float> Z = T.Z;
-			for (int32 I = 1; I + 1 < Z.Num(); ++I) T.Z[I] = (Z[I - 1] + Z[I] * 2.f + Z[I + 1]) * 0.25f;
-		}
-		// (its first point on the road's own bed: the road levels the ground there)
-		T.Box = FBox2D(T.P);
-		return Roads.Add(MoveTemp(T));
-	};
-	for (int32 Ri = 0; Ri < NRoads; ++Ri)
-	{
-		const TArray<FVector2D> Pts = Roads[Ri].P;
-		const TArray<float> Zs = Roads[Ri].Z;
-		double Along = 0.0, Total = 0.0;
-		for (int32 I = 0; I + 1 < Pts.Num(); ++I) Total += FVector2D::Distance(Pts[I], Pts[I + 1]);
-		double Next = 2000.0;
-		for (int32 I = 1; I + 1 < Pts.Num(); ++I)
-		{
-			Along += FVector2D::Distance(Pts[I - 1], Pts[I]);
-			if (Along < Next || Total - Along < 2000.0) continue;
-			Next = Along + 2500.0;
-			const uint32 Sk = Hash(Ri, I, Seed + 1502u);
-			if (Rand01(Ri, I, Seed + 1503u) > 0.6f) continue;
-			const FVector2D Dir = (Pts[I + 1] - Pts[I - 1]).GetSafeNormal();
-			const double Side = Rand01(Ri, I, Seed + 1504u) < 0.5f ? 1.0 : -1.0;
-			const double Ang = FMath::Atan2(Dir.Y, Dir.X) + Side * FMath::DegreesToRadians(55.0 + 35.0 * Rand01(Ri, I, Seed + 1505u));
-			// (it starts 3 m off the road's middle, inside its bed: the two meet there)
-			const FVector2D Start = Pts[I] + FVector2D(FMath::Cos(Ang), FMath::Sin(Ang)) * 3.0;
-			const int32 Ti = Grow(Start, Ang, 1500.0 + 2500.0 * Rand01(Ri, I, Seed + 1506u), Sk);
-			if (Ti < 0) continue;
-			Roads[Ti].Z[0] = Zs[I];
-			if (Rand01(Ri, I, Seed + 1507u) < 0.33f)
-			{
-				const FRoad& T = Roads[Ti];
-				const int32 M = T.P.Num() / 2;
-				const FVector2D Td = (T.P[M + 1] - T.P[M - 1]).GetSafeNormal();
-				const double S2 = Rand01(Ri, I, Seed + 1508u) < 0.5f ? 1.0 : -1.0;
-				const double A2 = FMath::Atan2(Td.Y, Td.X) + S2 * FMath::DegreesToRadians(60.0 + 30.0 * Rand01(Ri, I, Seed + 1509u));
-				const FVector2D From = T.P[M];
-				const float Z0 = T.Z[M];
-				const int32 T2 = Grow(From + FVector2D(FMath::Cos(A2), FMath::Sin(A2)) * 2.0, A2, 1000.0 + 1500.0 * Rand01(Ri, I, Seed + 1510u), Sk + 7u);
-				if (T2 >= 0) Roads[T2].Z[0] = Z0;
-			}
-		}
-	}
-}
 
 void FRDWildWorld::SceneryIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 {
@@ -2287,7 +2230,7 @@ void FRDWildWorld::SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) cons
 					for (auto It = SegHash.CreateConstKeyIterator(FIntPoint(I, J)); It; ++It)
 					{
 						const uint32 V = It.Value();
-						if ((V >> 31) == 0) continue;
+						if ((V >> 31) == 0 || Roads[(V >> 16) & 0x7FFF].bTrack) continue;          // (a major road's cell: the minor roads reach nearly every cell)
 						const FVector2D M = Roads[(V >> 16) & 0x7FFF].P[V & 0xFFFF];
 						if (M.X >= X0 && M.X < X0 + SceneryCellM && M.Y >= Y0 && M.Y < Y0 + SceneryCellM) { bRoad = true; break; }
 					}

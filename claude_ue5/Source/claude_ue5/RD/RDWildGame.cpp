@@ -127,6 +127,7 @@ void ARDDungeonGenerator::TickWild(float Dt, APlayerController* PC)
 	if (!WildOldWorldNotice.IsEmpty() && PlayerCombat && GetWorld() && GetWorld()->GetTimeSeconds() > 3.f) { PlayerCombat->ShowMessage(WildOldWorldNotice); WildOldWorldNotice.Reset(); }
 	TickWildLoad();
 	TickWildFarms();
+	TickWildSigns14();          // (the list of 2026-11-16's fourteenth phase: the roads' signs near her)
 	APawn* P = PC ? PC->GetPawn() : nullptr;
 	if (!P) return;
 	TickWildRunSpeed(P);          // (the list of 2026-11-07: rd.WildRunSpeed)
@@ -559,8 +560,8 @@ FString ARDDungeonGenerator::GetWildSampleAt(FVector At) const
 	// (the list of 2026-11-08b: and the field's crop, "" outside a field)
 	const FString Crop = Wild->CropName(S);
 	// (the tenth phase: and the mud's share at the end (the footing's rule reads it))
-	return FString::Printf(TEXT("%.2f|%.0f|%s|%s|%.2f|%d|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f|%d|%s|%.2f"), S.H, Wild->ToZ(S.H), *Wild->BiomeName(S.Biome), *Wild->BiomeName(S.Biome2), S.W1, S.WaterKind,
-		S.WaterKind ? S.Water : 0.f, S.Rock, S.Snow, S.Sand, S.Road, S.Field, S.Canopy, S.Lava, Wild->TierAt(At.X / 100.0, At.Y / 100.0), *Crop, S.Mud);
+	return FString::Printf(TEXT("%.2f|%.0f|%s|%s|%.2f|%d|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f|%d|%s|%.2f|%.2f"), S.H, Wild->ToZ(S.H), *Wild->BiomeName(S.Biome), *Wild->BiomeName(S.Biome2), S.W1, S.WaterKind,
+		S.WaterKind ? S.Water : 0.f, S.Rock, S.Snow, S.Sand, S.Road, S.Field, S.Canopy, S.Lava, Wild->TierAt(At.X / 100.0, At.Y / 100.0), *Crop, S.Mud, S.Cobble);          // (the fourteenth phase: and the cobbles)
 }
 
 TArray<FString> ARDDungeonGenerator::GetWildTownLines() const
@@ -598,8 +599,8 @@ TArray<FString> ARDDungeonGenerator::GetWildFeatureLines() const
 	for (const FRDWildWorld::FRoad& R : Wild->Roads)
 	{
 		double L = 0; for (int32 I = 0; I + 1 < R.P.Num(); ++I) L += FVector2D::Distance(R.P[I], R.P[I + 1]);
-		// (the list of 2026-11-14's tracks: no towns at their ends)
-		if (R.bTrack || !Wild->Towns.IsValidIndex(R.From) || !Wild->Towns.IsValidIndex(R.To)) { Out.Add(FString::Printf(TEXT("track|%.1f|%.0f|%.0f"), L / 1000.0, R.P[0].X, R.P[0].Y)); continue; }
+		// (the fourteenth phase's minor roads (the tracks before them): no towns at their ends)
+		if (R.bTrack || !Wild->Towns.IsValidIndex(R.From) || !Wild->Towns.IsValidIndex(R.To)) { Out.Add(FString::Printf(TEXT("minor|%.1f|%.0f|%.0f"), L / 1000.0, R.P[0].X, R.P[0].Y)); continue; }
 		Out.Add(FString::Printf(TEXT("road|%s|%s|%.1f|%.0f|%.0f"), *Wild->Towns[R.From].Name, *Wild->Towns[R.To].Name, L / 1000.0, R.P[0].X, R.P[0].Y));
 	}
 	return Out;
@@ -727,6 +728,7 @@ void ARDDungeonGenerator::WildDropAll()
 {
 	WildAskTrim();
 	for (auto& Kv : WildChunks) if (Kv.Value) Kv.Value->Destroy();
+	DropWildSigns14();
 	WildDropped += WildChunks.Num();
 	WildChunks.Reset(); WildKept.Reset(); WildBuilding.Reset();
 }
