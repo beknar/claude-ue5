@@ -19,7 +19,7 @@ public:
 	UPROPERTY() int32 WorldVer = 1;
 	/** the wilderness's version (the list of 2026-11-16's world phases: each that moves the wilds' places raises it); a save of an
 	 *  older one loads with its wild state dropped, in Brokenspire's square (DropOldWorld) */
-	static constexpr int32 WorldVersion = 2;
+	static constexpr int32 WorldVersion = 3;          // (2: the 150 km continent; 3: the cities' regions and easing, the list's twelfth phase)
 	/** an older world's save: what the wilds held dropped (her found places, her map's fog, her wild kills and quests' states, her
 	 *  place out there and a way back from a city's dungeon); her hero, things, gold and the towns kept */
 	static void DropOldWorld(class URDGameInstance* GI, int32 FromVersion);
