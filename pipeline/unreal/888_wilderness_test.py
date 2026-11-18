@@ -4217,6 +4217,51 @@ def step_save14():
     step_result("save14", ok, **res)
 
 
+def step_cities14():
+    """the list of 2026-11-16's twelfth phase (items 27-29: "Heaven in a volcano biome, Vel Morrath in a mountain biome, Kethrys in
+    glacial"): each city's own region that biome (at its middle and most of the ground within 2 km); its ground level; its edge a
+    slope (along 16 lines out to 3 km, the steepest step between samples 25 m apart, against what she can walk); no lava within its
+    easing; snow round Kethrys Spire; maps of each and a picture of Heaven with its cone beside it"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    T = towns()
+    want = {"Vel Morrath": "mountains", "Kethrys Spire": "glacial", "Heaven": "volcanoes"}
+    for name, bn in want.items():
+        c = T.get(name)
+        if not c: res[name] = {"found": False}; continue
+        r = {"biome_at": sample(c["x"], c["y"])["biome"]}
+        near = [sample(c["x"] + math.cos(a_) * d_, c["y"] + math.sin(a_) * d_) for d_ in (600, 1200, 1800) for a_ in [k_ * math.pi / 8 for k_ in range(16)]]
+        dry = [s_ for s_ in near if int(s_["water"]) == 0]
+        r["biome_share_2km"] = round(sum(1 for s_ in dry if s_["biome"] == bn) / max(len(dry), 1), 2)
+        hs = [sample(c["x"] + dx, c["y"] + dy)["h"] for dx in (-200, 0, 200) for dy in (-200, 0, 200)]
+        r["ground_range_m"] = round(max(hs) - min(hs), 2)
+        steep, lava = 0.0, 0.0
+        for k_ in range(16):
+            a_ = k_ * math.pi / 8; prev = None
+            for d_ in range(250, 3001, 25):
+                s_ = sample(c["x"] + math.cos(a_) * d_, c["y"] + math.sin(a_) * d_)
+                if int(s_["water"]) != 0: prev = None; continue
+                if prev is not None: steep = max(steep, math.degrees(math.atan(abs(s_["h"] - prev) / 25.0)))
+                prev = s_["h"]
+                if d_ <= 5000: lava = max(lava, s_["lava"])
+        r["steepest_deg_3km"] = round(steep, 1); r["lava_max"] = round(lava, 3)
+        if name == "Kethrys Spire": r["snow_2km"] = round(sum(s_["snow"] for s_ in dry) / max(len(dry), 1), 2)
+        p_ = os.path.join(SHOTS, f"wd_{TAG}_cities14_{name.replace(' ', '_')}.png")
+        r["map"] = bool(g.wild_debug_map(p_, 900, c["x"] - 7000, c["y"] - 7000, c["x"] + 7000, c["y"] + 7000, False)); yield
+        res[name] = r
+    # (Heaven and its cone: from 1.2 km south of the city, looking north past it to the cone 4.5 km beyond)
+    hv = T.get("Heaven")
+    if hv:
+        g.wild_drop_all(); g.wild_put_her(hv["x"] - 1500.0, hv["y"]); yield from wait_chunks(30, 50); yield from rwait(3.0)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=6, yaw=0.0)); yield from rwait(1.0)
+        shot("cities14_heaven_cone", "1280x720"); yield from rwait(1.5)
+        g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    quiet(False)
+    ok = all(res.get(n, {}).get("biome_at") == bn and res[n]["biome_share_2km"] >= 0.6 and res[n]["ground_range_m"] < 0.5
+             and res[n]["steepest_deg_3km"] < 45.0 and res[n]["lava_max"] == 0.0 for n, bn in want.items()) and res.get("Kethrys Spire", {}).get("snow_2km", 0) > 0.3
+    step_result("cities14", ok, **res)
+
+
 def step_sleep14():
     """the list of 2026-11-16's seventh phase (item 16: "the NPCs at farms should sleep at night"): at the first farmstead near
     Brokenspire, its family at 20:00 walk home (time sped up) and go into their farmhouse; at 23:00 each is asleep indoors, those with
@@ -5865,7 +5910,7 @@ def step_horse14():
     step_result("horse14", ok, **res)
 
 LOCK_STEPS = ("locks14",)
-STEPS = {"save14": step_save14, "storm14": step_storm14, "locks14": step_locks14, "npc14": step_npc14, "farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"cities14": step_cities14, "save14": step_save14, "storm14": step_storm14, "locks14": step_locks14, "npc14": step_npc14, "farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)

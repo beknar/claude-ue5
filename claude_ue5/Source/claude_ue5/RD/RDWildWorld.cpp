@@ -240,7 +240,8 @@ void FRDWildWorld::AssignBiomes()
 		if (!T.Biome.IsEmpty() && BiomeIndex.Contains(T.Biome))
 		{
 			CellBiome[K] = BiomeIndex[T.Biome];
-			CellSite[K] = T.Site + FVector2D(5000.0, 0.0) * WorldK();
+			// (a volcano's cone is its region's site: there, 4.5 km off, the city stands on its lower flank, not under it)
+			CellSite[K] = T.Site + FVector2D(T.BiomeSiteM > 0.f ? (double)T.BiomeSiteM : 5000.0 * WorldK(), 0.0);
 			if (I + 1 < CellsX) { CellBiome[(I + 1) * CellsY + J] = BiomeIndex[T.Biome]; CellSite[(I + 1) * CellsY + J] = T.Site + FVector2D(16000.0, 2000.0) * WorldK(); }
 		}
 		// (Brokenspire's neighbours: open lowlands, never mountains next door)
@@ -779,13 +780,13 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 		// (since the list of 2026-11-04 eased in over 400 to 1150 m, not 480 to 1700: the land before the gate was flat for
 		// more than a kilometre)
 		const double D = FVector2D::Distance(P, T.Site);
-		if (D > 1150.0) continue;
+		if (D > T.EaseM) continue;
 		// (the list of 2026-11-11: the port on its coast, its harbour open to the sea: its square (its section, 504 m across, and a
 		// little) flat and dry, the sea round it left as it is; the land eased as every town's. Its ground is lifted after the
 		// features with the sea (PortLift): here it is the town's height less the lift)
 		const bool bPortHere = bPortSea && FVector2D::Distance(T.Site, PortSite) < 1.0;
 		const float Dsq = (float)FMath::Max(FMath::Abs(X - T.Site.X), FMath::Abs(Y - T.Site.Y));
-		float F = 1.f - RDWSmooth(400.f, 1150.f, (float)D);
+		float F = 1.f - RDWSmooth(400.f, T.EaseM, (float)D);
 		if (bPortHere) { if (Dsq < 262.f) F = 1.f; else if (H < 2.f) F *= 1.f - RDWSmooth(262.f, 330.f, Dsq); }
 		else if (H < 2.f && D > 400.0) F *= 1.f - RDWSmooth(400.f, 470.f, (float)D);
 		H = FMath::Lerp(H, T.H - PortLift(X, Y), F);
@@ -1073,6 +1074,12 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 	}
 	O.H = H; O.Water = Water; O.WaterKind = Kind; O.Color = G; O.RockColor = RockCol;
 	O.Rock = FMath::Clamp(Rock, 0.f, 1.f); O.Snow = FMath::Clamp(Snow, 0.f, 1.f); O.Sand = FMath::Clamp(Sand, 0.f, 1.f); O.Mud = FMath::Clamp(Mud, 0.f, 1.f);
+	// (the list of 2026-11-16's twelfth phase: no lava on a city's ground, its slope or a road)
+	if (Lava > 0.f)
+	{
+		for (const FRDWildTown& Tw : Towns) Lava *= RDWSmooth(Tw.EaseM, Tw.EaseM + 800.f, (float)FVector2D::Distance(FVector2D(X, Y), Tw.Site));
+		Lava *= 1.f - RDWSmooth(0.02f, 0.1f, Fs.Road);
+	}
 	O.Road = Fs.Road; O.Field = Field; O.Lava = FMath::Clamp(Lava, 0.f, 1.f);
 	O.Canopy = (Kind == 0 && Fs.Road < 0.2f && Field < 0.2f) ? FMath::Clamp(Canopy, 0.f, 1.f) * (1.f - O.Snow * 0.4f) : 0.f;
 }
@@ -1093,6 +1100,9 @@ void FRDWildWorld::PlaceTowns()
 	// (the forge city (the user's of 2026-11-07, docs/ashenreach.txt): Brokenspire's size, the besieged foundry at its middle over
 	// The War Engine, at the edge of a burned plain)
 	A.Tiles = 168; A.Plan = 2; A.Biome = TEXT("burned plain");
+	// (the list of 2026-11-16's twelfth phase: "put Vel Morrath in a mountain biome", "Kethrys in glacial", "Heaven in a volcano
+	// biome": their regions named as Ashenreach's, their ground eased over 3.5 to 4 km so the edge is a slope)
+	V.Biome = TEXT("mountains"); V.EaseM = 5000.f; V.BiomeSiteM = 3500.f;
 	// (the coasts are found where the land measure falls below 0, walking out from inland)
 	auto Walk = [this](FVector2D From, FVector2D Dir) { FVector2D P = From; for (int32 I = 0; I < 3000; ++I) { if (Continent(P.X, P.Y) < 0.f) return P; P += Dir * 100.0; } return P; };
 	const double Wq = WorldK();          // (the list of 2026-11-16: the cities at the continent's scale (half their old distances))
@@ -1118,6 +1128,7 @@ void FRDWildWorld::PlaceTowns()
 	// 15 to 20: north-west, about 80 km from Graymourne and well inland; walked in from the coast until the land is solid)
 	FRDWildTown K; K.Name = TEXT("Kethrys Spire"); K.Seed = (int32)(Hash(4, 0, Seed) & 0x3FFFFFFF); K.Kind = TEXT("city");
 	K.Tiles = 168; K.Plan = 4;
+	K.Biome = TEXT("glacial"); K.EaseM = 5000.f; K.BiomeSiteM = 3500.f;
 	K.Site = FVector2D(GraySite0.X - 45000.0 * WorldK(), -70000.0 * WorldK());
 	{
 		const FVector2D Inland = (FVector2D(Mx, -20000.0 * WorldK()) - K.Site).GetSafeNormal();
@@ -1128,6 +1139,7 @@ void FRDWildWorld::PlaceTowns()
 	// Spire to the south-west, about 65 km on and well inland; walked in from the coast as Kethrys Spire)
 	FRDWildTown Hv; Hv.Name = TEXT("Heaven"); Hv.Seed = (int32)(Hash(5, 0, Seed) & 0x3FFFFFFF); Hv.Kind = TEXT("city");
 	Hv.Tiles = 168; Hv.Plan = 5;
+	Hv.Biome = TEXT("volcanoes"); Hv.EaseM = 5000.f; Hv.BiomeSiteM = 4500.f;
 	Hv.Site = FVector2D(K.Site.X - 30000.0 * WorldK(), K.Site.Y - 58000.0 * WorldK());
 	{
 		const FVector2D Inland = (FVector2D(Mx, -20000.0 * WorldK()) - Hv.Site).GetSafeNormal();

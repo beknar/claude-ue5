@@ -126,6 +126,10 @@ struct FRDWildTown
 	UPROPERTY(BlueprintReadOnly) FString Kind = TEXT("town");
 	/** its size in tiles (0: the generator's small town, WildSmallTownTiles) */
 	UPROPERTY(BlueprintReadOnly) int32 Tiles = 0;
+	/** the list of 2026-11-16's twelfth phase: how far its region is eased to its ground (m: a city among mountains, ice or a volcano
+	 *  wider, its edge a slope, not a cliff) and how far its named region's site stands from it (m; 0: 5 km at 300 km's scale) */
+	UPROPERTY(BlueprintReadOnly) float EaseM = 1150.f;
+	UPROPERTY(BlueprintReadOnly) float BiomeSiteM = 0.f;
 	/** its plan (the generator's TownPlan): 0 Brokenspire's (the gate, the square, a castle at the far wall), 1 a holy city
 	 *  (Vel Morrath, the user's of 2026-11-06: the cathedral at its middle over the catacombs) */
 	UPROPERTY(BlueprintReadOnly) int32 Plan = 0;
