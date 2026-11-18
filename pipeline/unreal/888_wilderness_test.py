@@ -112,7 +112,7 @@ def sample(x_m, y_m):
 def towns():
     out = {}
     for l in G["gen"].get_wild_town_lines():
-        p = str(l).split("|"); out[p[0]] = {"kind": p[1], "x": float(p[2]), "y": float(p[3]), "h": float(p[4]), "style": int(p[5])}
+        p = str(l).split("|"); out[p[0]] = {"kind": p[1], "x": float(p[2]), "y": float(p[3]), "h": float(p[4]), "style": int(p[5]), "ease_m": float(p[6]) if len(p) > 6 else 1150.0}
     return out
 def wait_ready(sec=60):
     t0 = time.time()
@@ -2801,9 +2801,10 @@ def step_ground7():
         q = str(l).split("|"); bl[q[0]] = (float(q[2]), float(q[3]))
     # (a region's nearest cell to Brokenspire can be a town's own, whose ground is levelled to 1.15 km on purpose: the line
     # is moved out until it is 1.4 km from every town and still in the region)
-    tl = [(t["x"], t["y"]) for t in towns().values()]
+    # (each town's own easing: the cities' 5 km since the list of 2026-11-16 (PR #90's review))
+    tl = [(t["x"], t["y"], t.get("ease_m", 1150.0) + 250.0) for t in towns().values()]
     def clear_of_towns(x, y):
-        return all(math.hypot(x - a, y - b) > 1400.0 and math.hypot(x + 300.0 - a, y - b) > 1400.0 for a, b in tl)
+        return all(math.hypot(x - a, y - b) > e_ and math.hypot(x + 300.0 - a, y - b) > e_ for a, b, e_ in tl)
     res["lines"] = {}
     for name in ("grasslands", "plains", "farms", "meadows", "temperate aspen", "tundras"):
         if name not in bl: continue
@@ -3147,11 +3148,12 @@ def clear_spot(name, rmin=1500, rmax=5000):
     """a point of the region 1.4 km or more from every town (a town's ground is level on purpose)"""
     bl = biome_lines()
     if name not in bl: return None
-    x, y = bl[name]; tl = [(t["x"], t["y"]) for t in towns().values()]
+    # (clear of each town's own easing: the cities' 5 km since the list of 2026-11-16 (PR #90's review))
+    x, y = bl[name]; tl = [(t["x"], t["y"], t.get("ease_m", 1150.0)) for t in towns().values()]
     for r in [0] + list(range(rmin, rmax + 1, 500)):
         for ang in range(0, 360, 45):
             px, py = x + math.cos(math.radians(ang)) * r, y + math.sin(math.radians(ang)) * r
-            if all(math.hypot(px - a, py - b) > 1400.0 for a, b in tl) and sample(px, py)["biome"] == name and sample(px, py)["water"] == 0:
+            if all(math.hypot(px - a, py - b) > e_ + 250.0 for a, b, e_ in tl) and sample(px, py)["biome"] == name and sample(px, py)["water"] == 0:
                 return (px, py)
     return None
 # ------------------------------------------------------------------------------------------------ the list of 2026-11-10's sixth phase
@@ -4235,21 +4237,27 @@ def step_cities14():
         r["biome_share_2km"] = round(sum(1 for s_ in dry if s_["biome"] == bn) / max(len(dry), 1), 2)
         hs = [sample(c["x"] + dx, c["y"] + dy)["h"] for dx in (-200, 0, 200) for dy in (-200, 0, 200)]
         r["ground_range_m"] = round(max(hs) - min(hs), 2)
-        steep, lava = 0.0, 0.0
+        steep, lava, cone_lava, steep_at = 0.0, 0.0, 0.0, None
         for k_ in range(16):
             a_ = k_ * math.pi / 8; prev = None
-            for d_ in range(250, 3001, 25):
+            for d_ in range(250, 6001, 25):
                 s_ = sample(c["x"] + math.cos(a_) * d_, c["y"] + math.sin(a_) * d_)
+                # (lava out to 2.5 km, where it is taken out; the slope out to 3 km; beside Heaven the cone's lava past it (PR #90's review))
+                if d_ <= 2500: lava = max(lava, s_["lava"])
+                elif name == "Heaven": cone_lava = max(cone_lava, s_["lava"])
+                if d_ > 3000: continue
                 if int(s_["water"]) != 0: prev = None; continue
-                if prev is not None: steep = max(steep, math.degrees(math.atan(abs(s_["h"] - prev) / 25.0)))
+                if prev is not None:
+                    dg = math.degrees(math.atan(abs(s_["h"] - prev) / 25.0))
+                    if dg > steep: steep = dg; steep_at = (round(c["x"] + math.cos(a_) * d_), round(c["y"] + math.sin(a_) * d_), d_, round(s_["h"], 1), round(prev, 1), s_["biome"], s_["road"], s_["water"])
                 prev = s_["h"]
-                if d_ <= 5000: lava = max(lava, s_["lava"])
-        r["steepest_deg_3km"] = round(steep, 1); r["lava_max"] = round(lava, 3)
+        r["steepest_deg_3km"] = round(steep, 1); r["steepest_at"] = steep_at; r["lava_max"] = round(lava, 3)
+        if name == "Heaven": r["cone_lava_max"] = round(cone_lava, 3)
         if name == "Kethrys Spire": r["snow_2km"] = round(sum(s_["snow"] for s_ in dry) / max(len(dry), 1), 2)
         p_ = os.path.join(SHOTS, f"wd_{TAG}_cities14_{name.replace(' ', '_')}.png")
         r["map"] = bool(g.wild_debug_map(p_, 900, c["x"] - 7000, c["y"] - 7000, c["x"] + 7000, c["y"] + 7000, False)); yield
         res[name] = r
-    # (Heaven and its cone: from 1.2 km south of the city, looking north past it to the cone 4.5 km beyond)
+    # (Heaven and its cone: from 1.5 km south of the city (along -X), looking north (+X) past it to the cone 4.5 km beyond)
     hv = T.get("Heaven")
     if hv:
         g.wild_drop_all(); g.wild_put_her(hv["x"] - 1500.0, hv["y"]); yield from wait_chunks(30, 50); yield from rwait(3.0)
@@ -4258,7 +4266,8 @@ def step_cities14():
         g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
     quiet(False)
     ok = all(res.get(n, {}).get("biome_at") == bn and res[n]["biome_share_2km"] >= 0.6 and res[n]["ground_range_m"] < 0.5
-             and res[n]["steepest_deg_3km"] < 45.0 and res[n]["lava_max"] == 0.0 for n, bn in want.items()) and res.get("Kethrys Spire", {}).get("snow_2km", 0) > 0.3
+             and res[n]["steepest_deg_3km"] < 45.0 and res[n]["lava_max"] == 0.0 for n, bn in want.items()) and res.get("Kethrys Spire", {}).get("snow_2km", 0) > 0.3 \
+        and res.get("Heaven", {}).get("cone_lava_max", 0) > 0.3
     step_result("cities14", ok, **res)
 
 

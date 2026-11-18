@@ -242,7 +242,9 @@ void FRDWildWorld::AssignBiomes()
 			CellBiome[K] = BiomeIndex[T.Biome];
 			// (a volcano's cone is its region's site: there, 4.5 km off, the city stands on its lower flank, not under it)
 			CellSite[K] = T.Site + FVector2D(T.BiomeSiteM > 0.f ? (double)T.BiomeSiteM : 5000.0 * WorldK(), 0.0);
-			if (I + 1 < CellsX) { CellBiome[(I + 1) * CellsY + J] = BiomeIndex[T.Biome]; CellSite[(I + 1) * CellsY + J] = T.Site + FVector2D(16000.0, 2000.0) * WorldK(); }
+			// (the cell north of it the same, but a volcano's: each volcano cell is a cone, and a second one 3.6 km from the first
+			// would merge with it (PR #90's review))
+			if (I + 1 < CellsX && T.Biome != TEXT("volcanoes")) { CellBiome[(I + 1) * CellsY + J] = BiomeIndex[T.Biome]; CellSite[(I + 1) * CellsY + J] = T.Site + FVector2D(16000.0, 2000.0) * WorldK(); }
 		}
 		// (Brokenspire's neighbours: open lowlands, never mountains next door)
 		if (T.Style == 0)
@@ -1063,6 +1065,13 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 	if (Sand > 0.f) G = FMath::Lerp(G, FLinearColor(0.56f, 0.50f, 0.37f), FMath::Clamp(Sand, 0.f, 1.f));
 	if (Mud > 0.f) G = FMath::Lerp(G, FLinearColor(0.16f, 0.15f, 0.10f), FMath::Clamp(Mud * 0.7f, 0.f, 1.f));
 	if (Rock > 0.f) G = FMath::Lerp(G, RockCol, FMath::Clamp(Rock, 0.f, 1.f));
+	// (the list of 2026-11-16's twelfth phase: no lava on a city's ground or its first slope (2.5 km), nor on a road; taken out before its
+	// colour is mixed (PR #90's review: the colour stayed), and no farther (a cone beside Heaven keeps its lava))
+	if (Lava > 0.f)
+	{
+		for (const FRDWildTown& Tw : Towns) if (Tw.EaseM > 1150.f) Lava *= RDWSmooth(2500.f, 3500.f, (float)FVector2D::Distance(FVector2D(X, Y), Tw.Site));
+		Lava *= 1.f - RDWSmooth(0.02f, 0.1f, Fs.Road);
+	}
 	if (Lava > 0.f) G = FMath::Lerp(G, FLinearColor(0.35f, 0.07f, 0.02f), FMath::Clamp(Lava, 0.f, 1.f));
 	if (Snow > 0.f) G = FMath::Lerp(G, FLinearColor(0.78f, 0.80f, 0.84f), FMath::Clamp(Snow, 0.f, 1.f));
 	if (Fs.Road > 0.f) G = FMath::Lerp(G, FLinearColor(0.31f, 0.25f, 0.17f), Fs.Road);
@@ -1074,12 +1083,6 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 	}
 	O.H = H; O.Water = Water; O.WaterKind = Kind; O.Color = G; O.RockColor = RockCol;
 	O.Rock = FMath::Clamp(Rock, 0.f, 1.f); O.Snow = FMath::Clamp(Snow, 0.f, 1.f); O.Sand = FMath::Clamp(Sand, 0.f, 1.f); O.Mud = FMath::Clamp(Mud, 0.f, 1.f);
-	// (the list of 2026-11-16's twelfth phase: no lava on a city's ground, its slope or a road)
-	if (Lava > 0.f)
-	{
-		for (const FRDWildTown& Tw : Towns) Lava *= RDWSmooth(Tw.EaseM, Tw.EaseM + 800.f, (float)FVector2D::Distance(FVector2D(X, Y), Tw.Site));
-		Lava *= 1.f - RDWSmooth(0.02f, 0.1f, Fs.Road);
-	}
 	O.Road = Fs.Road; O.Field = Field; O.Lava = FMath::Clamp(Lava, 0.f, 1.f);
 	O.Canopy = (Kind == 0 && Fs.Road < 0.2f && Field < 0.2f) ? FMath::Clamp(Canopy, 0.f, 1.f) * (1.f - O.Snow * 0.4f) : 0.f;
 }
@@ -1101,7 +1104,7 @@ void FRDWildWorld::PlaceTowns()
 	// The War Engine, at the edge of a burned plain)
 	A.Tiles = 168; A.Plan = 2; A.Biome = TEXT("burned plain");
 	// (the list of 2026-11-16's twelfth phase: "put Vel Morrath in a mountain biome", "Kethrys in glacial", "Heaven in a volcano
-	// biome": their regions named as Ashenreach's, their ground eased over 3.5 to 4 km so the edge is a slope)
+	// biome": their regions named as Ashenreach's, their ground eased over 5 km so the edge is a slope)
 	V.Biome = TEXT("mountains"); V.EaseM = 5000.f; V.BiomeSiteM = 3500.f;
 	// (the coasts are found where the land measure falls below 0, walking out from inland)
 	auto Walk = [this](FVector2D From, FVector2D Dir) { FVector2D P = From; for (int32 I = 0; I < 3000; ++I) { if (Continent(P.X, P.Y) < 0.f) return P; P += Dir * 100.0; } return P; };
@@ -1151,7 +1154,8 @@ void FRDWildWorld::PlaceTowns()
 void FRDWildWorld::MakeRivers()
 {
 	Rivers.Reset();
-	auto TownNear = [this](const FVector2D& P, double R) { for (const FRDWildTown& T : Towns) if (FVector2D::Distance(P, T.Site) < R) return true; return false; };
+	// (each town's own easing, or R: water inside a wide easing would stand over or under the ground eased round it (PR #90's review))
+	auto TownNear = [this](const FVector2D& P, double R) { for (const FRDWildTown& T : Towns) if (FVector2D::Distance(P, T.Site) < FMath::Max(R, (double)T.EaseM + 500.0)) return true; return false; };
 	// sources: high, wet regions' cells
 	TArray<FVector2D> Sources;
 	for (int32 K = 0; K < CellBiome.Num(); ++K)
@@ -1255,7 +1259,7 @@ void FRDWildWorld::MakeLakes()
 	for (FLake& L : Lakes)
 	{
 		bool bBad = Continent(L.C.X, L.C.Y) < 0.04f;
-		for (const FRDWildTown& T : Towns) if (FVector2D::Distance(T.Site, L.C) < L.R + 2600.0) bBad = true;
+		for (const FRDWildTown& T : Towns) if (FVector2D::Distance(T.Site, L.C) < L.R + FMath::Max(2600.0, (double)T.EaseM + 500.0)) bBad = true;
 		for (const FLake& O : Kept) if (FVector2D::Distance(O.C, L.C) < O.R + L.R + 300.0) bBad = true;
 		if (bBad) continue;
 		float Rim = 1e9f;
@@ -1288,7 +1292,7 @@ void FRDWildWorld::PondsIn(FIntPoint Cell, TArray<FLake>& Out) const
 		L.R = L.Kind == 6 ? 14.f + 26.f * Rand01(Cell.X + I, Cell.Y, Seed + 105u) : 22.f + 90.f * Rand01(Cell.X + I, Cell.Y, Seed + 105u);
 		L.Shape = Hash(Cell.X * 31 + I, Cell.Y, Seed + 106u);
 		bool bBad = Continent(L.C.X, L.C.Y) < 0.03f;
-		for (const FRDWildTown& T : Towns) if (FVector2D::Distance(T.Site, L.C) < 1900.0) bBad = true;
+		for (const FRDWildTown& T : Towns) if (FVector2D::Distance(T.Site, L.C) < FMath::Max(1900.0, (double)T.EaseM + 300.0)) bBad = true;
 		if (bBad) continue;
 		float Rim = 1e9f;
 		for (int32 A = 0; A < 8; ++A)

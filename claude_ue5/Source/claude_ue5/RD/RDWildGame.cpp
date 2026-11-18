@@ -567,7 +567,7 @@ TArray<FString> ARDDungeonGenerator::GetWildTownLines() const
 {
 	TArray<FString> Out;
 	if (!IsWildReady()) return Out;
-	for (const FRDWildTown& T : Wild->Towns) Out.Add(FString::Printf(TEXT("%s|%s|%.0f|%.0f|%.1f|%d"), *T.Name, *T.Kind, T.Site.X, T.Site.Y, T.H, T.Style));
+	for (const FRDWildTown& T : Wild->Towns) Out.Add(FString::Printf(TEXT("%s|%s|%.0f|%.0f|%.1f|%d|%.0f"), *T.Name, *T.Kind, T.Site.X, T.Site.Y, T.H, T.Style, T.EaseM));          // (its easing: the list of 2026-11-16)
 	return Out;
 }
 
