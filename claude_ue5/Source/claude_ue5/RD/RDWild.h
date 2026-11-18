@@ -332,6 +332,10 @@ public:
 	bool FindPlace(int32 Id, FRDWildPlace& Out) const;
 	/** the ponds (and hot springs) of a 4 km cell */
 	void PondsIn(FIntPoint Cell, TArray<FLake>& Out) const;
+	/** the ponds' cells: 4 km, their own (the places' became 2 km with the list of 2026-11-16's density: the ponds stay as they were) */
+	static constexpr double PondCellM = 4000.0;
+	/** the places of a cell as made (PlacesIn caches them: the denser points, scenery and farmsteads ask for them at every try) */
+	void PlacesInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) const;
 	/** the nearest town and its distance (metres) */
 	int32 NearestTown(double X, double Y, double& Dist) const;
 	/** the place's tier (the monsters' strength): along the chain of towns (TierChain), from the tier of the town a leg leaves to
@@ -373,6 +377,7 @@ public:
 	 *  shared by the worker threads behind a lock, emptied at Init */
 	struct FSiteCache { FCriticalSection Lock; TMap<FIntPoint, TArray<FRDWildPlace>> Cells; };
 	TSharedPtr<FSiteCache> SiteCache = MakeShared<FSiteCache>();
+	TSharedPtr<FSiteCache> PlaceCache2 = MakeShared<FSiteCache>();
 	void SitesInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) const;
 	/** the list of 2026-11-14 (docs/improvements13.txt, the biomes' scenery): a 600 m grid, one in SceneryFill of its cells, of the
 	 *  kinds of the region (SceneryKinds, set before Init from the generator's WildSceneryKinds), beside a road, at a crossroads, on a

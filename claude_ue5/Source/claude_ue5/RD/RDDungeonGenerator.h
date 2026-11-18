@@ -2607,6 +2607,8 @@ public:
 	int32 GiveBackWildQuests14();
 	/** tests: an older world's save's drop, here and now; the captain's wild quests given back */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") int32 DebugOldWorld14();
+	/** tests: whether a road between towns passes within Rm metres of (Xm, Ym) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") bool IsNearTownRoad14(float Xm, float Ym, float Rm) const;
 	/** the list of 2026-11-16's tenth phase (RDList14j.cpp, 932): storms by strength (0 light, 1 moderate, 2 strong, 3 violent), drawn
 	 *  with each weather that carries rain, snow or dust; lightning in a storm of moderate strength or more */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bLightning14 = false;

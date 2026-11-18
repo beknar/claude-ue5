@@ -184,6 +184,11 @@ float ARDDungeonGenerator::WildFloorZ14(const FVector& At, float FeetZ) const
 	return Gz;
 }
 
+bool ARDDungeonGenerator::IsNearTownRoad14(float Xm, float Ym, float Rm) const
+{
+	return IsWildReady() && Wild->NearTownRoad(FVector2D(Xm, Ym), Rm);
+}
+
 void ARDDungeonGenerator::CalmWildFolk14()
 {
 	for (ARDTownsfolk* T : WildPeople14()) if (IsValid(T)) T->CalmWild14();

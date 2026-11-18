@@ -1279,7 +1279,7 @@ void FRDWildWorld::MakeLakes()
 
 void FRDWildWorld::PondsIn(FIntPoint Cell, TArray<FLake>& Out) const
 {
-	const double Cx = Xs + (Cell.X + 0.5) * PlaceCellM, Cy = Yw + (Cell.Y + 0.5) * PlaceCellM;
+	const double Cx = Xs + (Cell.X + 0.5) * PondCellM, Cy = Yw + (Cell.Y + 0.5) * PondCellM;
 	if (Cx < Xs || Cx > Xn || Cy < Yw || Cy > Ye) return;
 	const int32 B = BiomeAt(Cx, Cy);
 	if (!Biomes.IsValidIndex(B)) return;
@@ -1289,7 +1289,7 @@ void FRDWildWorld::PondsIn(FIntPoint Cell, TArray<FLake>& Out) const
 	for (int32 I = 0; I < Nponds + Nsteam; ++I)
 	{
 		FLake L; L.Kind = I < Nponds ? 4 : 6;
-		L.C = FVector2D(Cx + (Rand01(Cell.X * 7 + I, Cell.Y, Seed + 103u) - 0.5) * PlaceCellM * 0.9, Cy + (Rand01(Cell.X, Cell.Y * 7 + I, Seed + 104u) - 0.5) * PlaceCellM * 0.9);
+		L.C = FVector2D(Cx + (Rand01(Cell.X * 7 + I, Cell.Y, Seed + 103u) - 0.5) * PondCellM * 0.9, Cy + (Rand01(Cell.X, Cell.Y * 7 + I, Seed + 104u) - 0.5) * PondCellM * 0.9);
 		L.R = L.Kind == 6 ? 14.f + 26.f * Rand01(Cell.X + I, Cell.Y, Seed + 105u) : 22.f + 90.f * Rand01(Cell.X + I, Cell.Y, Seed + 105u);
 		L.Shape = Hash(Cell.X * 31 + I, Cell.Y, Seed + 106u);
 		bool bBad = Continent(L.C.X, L.C.Y) < 0.03f;
@@ -1458,6 +1458,7 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 	const double T0 = FPlatformTime::Seconds();
 	Seed = InSeed; Biomes = InBiomes;
 	{ FScopeLock Lk(&SiteCache->Lock); SiteCache->Cells.Reset(); }
+	{ FScopeLock Lk(&PlaceCache2->Lock); PlaceCache2->Cells.Reset(); }
 	{ FScopeLock Lk(&SceneryCache->Lock); SceneryCache->Cells.Reset(); }
 	BiomeIndex.Reset();
 	for (int32 I = 0; I < Biomes.Num(); ++I) BiomeIndex.Add(Biomes[I].Name, I);
@@ -1486,8 +1487,8 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 	MakeLakes();
 	// the ponds and hot springs of every 4 km cell, once
 	Ponds.Reset(); PondHash.Reset();
-	for (int32 I = 0; I * PlaceCellM < Xn - Xs; ++I)
-		for (int32 J = 0; J * PlaceCellM < Ye - Yw; ++J) PondsIn(FIntPoint(I, J), Ponds);
+	for (int32 I = 0; I * PondCellM < Xn - Xs; ++I)
+		for (int32 J = 0; J * PondCellM < Ye - Yw; ++J) PondsIn(FIntPoint(I, J), Ponds);
 	for (int32 K = 0; K < Ponds.Num(); ++K)
 	{
 		const FLake& P = Ponds[K]; const double Pad = P.R * 1.3 + RDWPondBankM + 10.0;
@@ -1706,6 +1707,20 @@ FString FRDWildWorld::NameFor(const FString& Kind, uint32 H) const
 
 void FRDWildWorld::PlacesIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 {
+	// (made once a cell and kept (PR #91's review: every denser point, scenery and farmstead try made the cell's village and place again))
+	{
+		FScopeLock Lk(&PlaceCache2->Lock);
+		if (const TArray<FRDWildPlace>* Got = PlaceCache2->Cells.Find(Cell)) { Out.Append(*Got); return; }
+	}
+	TArray<FRDWildPlace> Mine;
+	PlacesInCell(Cell, Mine);
+	Out.Append(Mine);
+	FScopeLock Lk(&PlaceCache2->Lock);
+	PlaceCache2->Cells.Add(Cell, MoveTemp(Mine));
+}
+
+void FRDWildWorld::PlacesInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
+{
 	const double X0 = Xs + Cell.X * PlaceCellM, Y0 = Yw + Cell.Y * PlaceCellM;
 	for (int32 Ti = 0; Ti < Towns.Num(); ++Ti)
 	{
@@ -1726,14 +1741,27 @@ void FRDWildWorld::PlacesIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 	if (Rand01(Cell.X, Cell.Y, Seed + 131u) <= VillageChance)
 	{
 		FVector2D Va(X0 + (0.25 + 0.5 * Rand01(Cell.X, Cell.Y, Seed + 132u)) * PlaceCellM, Y0 + (0.25 + 0.5 * Rand01(Cell.X, Cell.Y, Seed + 133u)) * PlaceCellM);
+		// (its houses stand on a ring 23 to 34 m out: the ring clear of the road, not only its middle (PR #91's review))
+		auto RingOff = [this](const FVector2D& C) { for (int32 Q = 0; Q < 8; ++Q) { FRDWSample Sr; Sample(C.X + FMath::Cos(Q * PI / 4.0) * 36.0, C.Y + FMath::Sin(Q * PI / 4.0) * 36.0, Sr, false); if (Sr.Road > 0.05f) return false; } return true; };
+		FRDWSample Sv; Sample(Va.X, Va.Y, Sv, false);
+		if (Sv.Road > 0.1f || !RingOff(Va))
+			for (const double Dd : { 70.0, 120.0 })
+			{
+				bool bMoved = false;
+				for (int32 Tr = 0; Tr < 8 && !bMoved; ++Tr)
+				{
+					const FVector2D Q = Va + FVector2D(FMath::Cos(Tr * PI / 4.0), FMath::Sin(Tr * PI / 4.0)) * Dd;
+					FRDWSample Sq; Sample(Q.X, Q.Y, Sq, false);
+					if (Sq.Road <= 0.1f && RingOff(Q)) { Va = Q; Sv = Sq; bMoved = true; }
+				}
+				if (bMoved) break;
+			}
+		// (the towns and quests' distances after any step (PR #91's review))
 		double Dv; NearestTown(Va.X, Va.Y, Dv);
-		bool bOk = Dv >= 2600.0;
+		bool bOk = Dv >= 2600.0 && Sv.Road <= 0.1f && RingOff(Va);
 		for (const FRDWildPlace& Q : QuestPlaces) if (FVector2D::Distance(Q.At, Va) < 600.0) bOk = false;
-		FRDWSample Sv;
 		if (bOk)
 		{
-			Sample(Va.X, Va.Y, Sv, false);
-			for (int32 Tr = 0; Tr < 8 && Sv.Road > 0.1f; ++Tr) { const FVector2D Step = FVector2D(FMath::Cos(Tr * PI / 4.0), FMath::Sin(Tr * PI / 4.0)) * 60.0; FRDWSample Sq; Sample(Va.X + Step.X, Va.Y + Step.Y, Sq, false); if (Sq.Road <= 0.1f) { Va += Step; Sv = Sq; } }
 			const FString Vb = Biomes[Sv.Biome].Name;
 			bOk = Sv.WaterKind == 0 && Sv.H >= 2.f && Sv.Road <= 0.1f && Sv.Lava <= 0.3f && Vb != TEXT("arctic regions") && Vb != TEXT("glacial");
 		}
@@ -1761,17 +1789,15 @@ void FRDWildWorld::PlacesIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 	if (S.WaterKind != 0 || S.H < 2.f || S.Road > 0.1f) return;
 	const FString Bn = Biomes[S.Biome].Name;
 	// the kinds a region holds, weighted
-	float Wt[8] = { 1.f, 1.f, 1.2f, 1.f, 1.f, 0.7f, 0.6f, 0.8f };
+	float Wt[8] = { 0.f, 1.f, 1.2f, 1.f, 1.f, 0.7f, 0.6f, 0.8f };          // (no village: the villages have their own draw above)
 	const bool bOpen = Bn == TEXT("plains") || Bn == TEXT("grasslands") || Bn == TEXT("meadows") || Bn == TEXT("farms") || Bn == TEXT("coastal regions") || Bn == TEXT("savannahs");
 	const bool bHigh = Bn.Contains(TEXT("mountain")) || Bn == TEXT("hills") || Bn == TEXT("mesas") || Bn.Contains(TEXT("canyon")) || Bn == TEXT("rocky coastal") || Bn == TEXT("glacial");
 	const bool bWild = Bn.Contains(TEXT("forest")) || Bn == TEXT("taigas") || Bn == TEXT("marshes") || Bn == TEXT("wetlands") || Bn.Contains(TEXT("volcan")) || Bn == TEXT("geothermal caldera");
-	if (bOpen) { Wt[0] = 1.6f; Wt[2] = 2.f; Wt[6] = 0.1f; }
-	if (!bOpen) Wt[0] = 0.15f;
+	if (bOpen) { Wt[2] = 2.f; Wt[6] = 0.1f; }
 	if (bHigh) { Wt[6] = 2.5f; Wt[7] = 1.4f; Wt[2] = 0.4f; Wt[4] = 1.4f; }
 	if (bWild) { Wt[7] = 2.f; Wt[3] = 1.6f; Wt[1] = 1.4f; }
 	if (Bn == TEXT("highland moorland") || Bn == TEXT("tundras") || Bn == TEXT("cold steppes")) Wt[5] = 2.2f;
-	if (Bn == TEXT("arctic regions") || Bn == TEXT("glacial")) { Wt[0] = 0.f; Wt[2] = 0.2f; }
-	Wt[0] = 0.f;          // (the villages have their own draw above)
+	if (Bn == TEXT("arctic regions") || Bn == TEXT("glacial")) Wt[2] = 0.2f;
 	float Sum = 0.f; for (float W : Wt) Sum += W;
 	float Pick = Rand01(Cell.X, Cell.Y, Seed + 124u) * Sum;
 	int32 K = 0; for (; K < 7; ++K) { if (Pick < Wt[K]) break; Pick -= Wt[K]; }

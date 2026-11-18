@@ -333,7 +333,7 @@ def step_stream():
     # Measured as the return's growth; the first loads are reported (the packaged walk holds the whole to its limit))
     res["out_growth_mb"] = res["mem_far"] - res["mem_start"]; res["back_growth_mb"] = res["mem_back"] - res["mem_far"]
     ok = mx <= 81 and viol == 0 and res["dropped"] >= 60 and res["built"] >= 60 and res["back_growth_mb"] < 300 \
-        and abs(res["census_back"]["actors"] - res["census_start"]["actors"]) < 200
+        and res["mem_back"] - res["mem_start"] < 1800 and abs(res["census_back"]["actors"] - res["census_start"]["actors"]) < 120          # (the whole bounded too: PR #91's review)
     step_result("stream", ok, **res)
 
 
@@ -941,10 +941,11 @@ def step_poi7():
         c = cb()
         if use == "loot":
             piles = []
-            for p in loot_cands[:6]:
-                g.wild_drop_all(); g.wild_put_her(p["x"] - 6.0, p["y"]); yield from wait_chunks(30, 50); yield from rwait(1.0)
-                piles = [x for x in g.get_editor_property("loot_piles") if x and unreal.SystemLibrary.is_valid(x) and math.hypot(x.get_actor_location().x / 100 - p["x"], x.get_actor_location().y / 100 - p["y"]) < 6]
+            for lp in loot_cands[:6]:
+                g.wild_drop_all(); g.wild_put_her(lp["x"] - 6.0, lp["y"]); yield from wait_chunks(30, 50); yield from rwait(1.0)
+                piles = [x for x in g.get_editor_property("loot_piles") if x and unreal.SystemLibrary.is_valid(x) and math.hypot(x.get_actor_location().x / 100 - lp["x"], x.get_actor_location().y / 100 - lp["y"]) < 6]
                 if piles: break
+            p = lp
             if not piles: uses[use] = {"kind": p["kind"], "piles": 0, "tried": len(loot_cands[:6])}; continue
             at = piles[0].get_actor_location(); things = [str(t) for t in piles[0].things]
             G["pawn"].set_actor_location(V(at.x - 90.0, at.y, at.z + 100.0), False, True); yield from rwait(0.5)
@@ -4350,11 +4351,25 @@ def step_density14():
     res["villages_within_300m_of_a_road"] = near_road
     # (places by the roads between towns against away from them: places a square km within 1 km of the road out of Brokenspire's gate
     # toward Ashenreach, and 3 to 6 km off it)
-    res["by_road"] = None
-    if hasattr(g, "get_wild_road_lines"):
-        pass
+    # (the places other than villages a square km within 1 km of a road between towns, against those farther: 48 % of the cells by a road,
+    # 30 % elsewhere (PR #91's review: never measured))
+    near_n = far_n = near_c = far_c = 0
+    for cx in range(-20000, 60001, 2000):
+        for cy in range(-30000, 30001, 2000):
+            if not g.is_near_town_road14(float(cx) + 1000.0, float(cy) + 1000.0, 1000.0) and not g.is_near_town_road14(float(cx) + 1000.0, float(cy) + 1000.0, 4000.0):
+                far_c += 1; tgt_ = "far"
+            elif g.is_near_town_road14(float(cx) + 1000.0, float(cy) + 1000.0, 1000.0):
+                near_c += 1; tgt_ = "near"
+            else: continue
+            for l in g.get_wild_places_near(V((cx + 1000.0) * 100.0, (cy + 1000.0) * 100.0, 0), 1000.0):
+                q = str(l).split("|")
+                if q[1] in ("village", "town", "city") or int(q[0]) >= (1 << 24): continue
+                if tgt_ == "near": near_n += 1
+                else: far_n += 1
+        yield
+    res["by_road"] = {"near_cells": near_c, "near_places": near_n, "far_cells": far_c, "far_places": far_n,
+                      "near_per_cell": round(near_n / max(near_c, 1), 3), "far_per_cell": round(far_n / max(far_c, 1), 3)}
     base = None
-    bp = os.path.join(os.path.dirname(OUT), f"test_s14p13base.json") if "OUT" in globals() else None
     try:
         import json as _j
         bj = _j.load(open(os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "SourceArt", "wilderness", "test_s14p13d0.json"), encoding="utf-8"))
@@ -4362,13 +4377,14 @@ def step_density14():
     except Exception: base = None
     res["before"] = base
     if base:
-        tot = lambda c_: sum(c_["places"].values())
+        tot = lambda c_: sum(v_ for k_, v_ in c_["places"].items() if k_ != "village")          # (the villages apart: PR #91's review)
         res["ratios"] = {"places": round(tot(res["counts"]) / max(tot(base), 1), 2), "sites": round(res["counts"]["sites_12km"] / max(base["sites_12km"], 1), 2),
                          "scenery": round(res["counts"]["scenery_12km"] / max(base["scenery_12km"], 1), 2), "pois": round(res["counts"]["pois_4x1.5km"] / max(base["pois_4x1.5km"], 1), 2),
                          "farmsteads": round(res["counts"]["farmsteads_6km"] / max(base["farmsteads_6km"], 1), 2)}
     r_ = res.get("ratios") or {}
     ok = bool(r_) and all(1.8 <= r_.get(k_, 0) for k_ in ("places", "sites", "scenery", "pois", "farmsteads")) \
-        and res["nearest_m"]["share_1_3km"] >= 0.8 and res["villages"] >= 20 and near_road >= 1
+        and res["nearest_m"]["share_1_3km"] >= 0.8 and res["villages"] >= 20 and near_road >= 1 \
+        and res["by_road"]["near_per_cell"] > res["by_road"]["far_per_cell"] * 1.2
     step_result("density14", ok, **res)
 
 def step_discover14():
@@ -4392,7 +4408,7 @@ def step_discover14():
                 if int(sample(x_, y_)["water"]) == 0: break
             g.wild_put_her(x_, y_); yield from wait_chunks(30, 50); yield from rwait(2.0)
             res[key] = found()
-        res["revealed_480m"] = bool(g.wild_revealed_at(tgt[1] + 480.0 * math.cos(0.3), tgt[2] + 480.0 * math.sin(0.3))) if False else bool(g.wild_revealed_at(x_ + 480.0, y_))
+        res["revealed_480m"] = bool(g.wild_revealed_at(x_ + 480.0, y_))
         g.set_map_open(True); yield from rwait(1.5); shot("discover14_map", "1280x720"); g.set_map_open(False)
     finally:
         g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40); quiet(False)
