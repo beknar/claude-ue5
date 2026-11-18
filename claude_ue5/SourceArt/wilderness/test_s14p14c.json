@@ -1,0 +1,284 @@
+{
+ "tag": "s14p14c",
+ "plan": [
+  "quests",
+  "stream"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "quests",
+   "ok": true,
+   "places": {
+    "wild:wolves": {
+     "id": 536870912,
+     "name": "The Mill Road Den",
+     "x": 719.1,
+     "y": -1651.1,
+     "kind": "lair",
+     "n": 4,
+     "killed": 0,
+     "progress": 0,
+     "rx": 719.1,
+     "ry": -1651.1,
+     "yaw": -142.4,
+     "shown": 0
+    },
+    "wild:patrol": {
+     "id": 536870913,
+     "name": "The Old Watchtower",
+     "x": 872.9,
+     "y": -2884.0,
+     "kind": "ruins",
+     "n": 3,
+     "killed": 0,
+     "progress": 0,
+     "rx": 879.8,
+     "ry": -2883.8,
+     "yaw": 2.1,
+     "shown": 0
+    }
+   },
+   "den": {
+    "from_brokenspire_km": 1.8,
+    "water": 0.0,
+    "h": 74.5,
+    "biome": "farms",
+    "road_m": 45
+   },
+   "tower": {
+    "from_brokenspire_km": 3.01,
+    "water": 0.0,
+    "h": 84.2,
+    "biome": "farms",
+    "road_m": 65
+   },
+   "captain_panel": true,
+   "offered": [
+    "Quest: Thin the Horde",
+    "Quest: Cells Under the Keep",
+    "Quest: Wolves on the Mill Road",
+    "Quest: The Lost Patrol"
+   ],
+   "accept_wolves": true,
+   "accept_patrol": true,
+   "taken": {
+    "captain_wolves": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    },
+    "captain_patrol": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+    }
+   },
+   "on_map": {
+    "wild:wolves": 1,
+    "wild:patrol": 1
+   },
+   "travel_refused": true,
+   "refusal": "You have not found The Mill Road Den yet",
+   "den_pack": {
+    "alive": 4,
+    "kinds": [
+     "Ripper_dog"
+    ]
+   },
+   "after_three": {
+    "progress": 0,
+    "killed": 3,
+    "quest": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "again_alive": 1,
+   "after_all": {
+    "progress": 1,
+    "killed": 4,
+    "quest": {
+     "state": "ready",
+     "progress": 1,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "tower_guards": 3,
+   "tower_props": 95,
+   "patrol_at_10m": 0,
+   "patrol_at_2_5m": 1,
+   "patrol_quest": {
+    "state": "ready",
+    "progress": 1,
+    "count": 1,
+    "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+   },
+   "captain_again": true,
+   "turnin_lines": [
+    "Done: Wolves on the Mill Road",
+    "Done: The Lost Patrol"
+   ],
+   "gold": 320,
+   "done": {
+    "captain_wolves": "done",
+    "captain_patrol": "done"
+   },
+   "on_map_after": {
+    "wild:wolves": 0,
+    "wild:patrol": 0
+   }
+  },
+  {
+   "step": "stream",
+   "ok": false,
+   "mem_start": 21151.0,
+   "census_start": {
+    "actors": 611,
+    "top": {
+     "RDLootPile": 292,
+     "RDMonster": 207,
+     "RDWildChunk": 64,
+     "RDWildAnimal": 19,
+     "WorldSettings": 1,
+     "Brush": 1,
+     "PostProcessVolume": 1,
+     "ExponentialHeightFog": 1,
+     "RDDungeonGenerator": 1,
+     "PlayerStart": 1,
+     "SkeletalMeshActor": 1,
+     "SceneCapture2D": 1
+    },
+    "lists": {
+     "loot_piles": 292
+    }
+   },
+   "mem_far": 23525.0,
+   "census_far": {
+    "actors": 593,
+    "top": {
+     "RDLootPile": 294,
+     "RDMonster": 196,
+     "RDWildChunk": 64,
+     "RDWildAnimal": 9,
+     "Actor": 2,
+     "WorldSettings": 1,
+     "Brush": 1,
+     "PostProcessVolume": 1,
+     "ExponentialHeightFog": 1,
+     "RDDungeonGenerator": 1,
+     "PlayerStart": 1,
+     "SkeletalMeshActor": 1
+    },
+    "lists": {
+     "loot_piles": 294
+    }
+   },
+   "mem_back": 23464.0,
+   "census_back": {
+    "actors": 676,
+    "top": {
+     "RDLootPile": 329,
+     "RDMonster": 222,
+     "RDWildChunk": 72,
+     "RDWildAnimal": 24,
+     "WorldSettings": 1,
+     "Brush": 1,
+     "PostProcessVolume": 1,
+     "ExponentialHeightFog": 1,
+     "RDDungeonGenerator": 1,
+     "PlayerStart": 1,
+     "SkeletalMeshActor": 1,
+     "SceneCapture2D": 1
+    },
+    "lists": {
+     "loot_piles": 329
+    }
+   },
+   "max_chunks": 72,
+   "outside_square": 0,
+   "samples": [
+    {
+     "y": 2600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21151
+    },
+    {
+     "y": 4100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22201
+    },
+    {
+     "y": 5600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22483
+    },
+    {
+     "y": 7100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22873
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 23525
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 23529
+    },
+    {
+     "y": 7100.0,
+     "chunks": 68,
+     "near": 4,
+     "mem": 23404
+    },
+    {
+     "y": 5600.0,
+     "chunks": 68,
+     "near": 4,
+     "mem": 23336
+    },
+    {
+     "y": 4100.0,
+     "chunks": 67,
+     "near": 4,
+     "mem": 23344
+    },
+    {
+     "y": 2600.0,
+     "chunks": 67,
+     "near": 4,
+     "mem": 23450
+    }
+   ],
+   "dropped": 376,
+   "built": 384,
+   "active_km2_max": 4.5,
+   "compute_ms": 133.2,
+   "build_ms_max": 87.5,
+   "out_growth_mb": 2374.0,
+   "back_growth_mb": -61.0
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_s14p14c_quest_den.png",
+  "wd_s14p14c_quest_tower.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

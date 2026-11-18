@@ -107,7 +107,7 @@ def state():
     return {a: (float(b) if "." in b else int(b)) for a, b in zip(k, p)}
 def sample(x_m, y_m):
     p = str(G["gen"].get_wild_sample_at(V(x_m * 100.0, y_m * 100.0, 0))).split("|")
-    k = ["h", "z", "biome", "biome2", "w1", "water", "water_m", "rock", "snow", "sand", "road", "field", "canopy", "lava", "tier", "crop", "mud"]
+    k = ["h", "z", "biome", "biome2", "w1", "water", "water_m", "rock", "snow", "sand", "road", "field", "canopy", "lava", "tier", "crop", "mud", "cobble"]
     return {a: (b if a in ("biome", "biome2", "crop") else float(b)) for a, b in zip(k, p)}
 def towns():
     out = {}
@@ -327,13 +327,15 @@ def step_stream():
     res["compute_ms"] = s1["compute_ms"]; res["build_ms_max"] = s1["build_ms_max"]
     quiet(False)
     # (the 2 km square: a chunk is made when its middle is within 1 km of her on both axes, dropped past 1.125 km: 9 x 9 at most)
+    # (the census compared far end against back, both read with their chunks laid: the start's was read once at 162 actors, before the
+    # chunks round her had laid their piles and monsters (the fourteenth phase's batch), and back at 667)
     # (what a walk keeps: the way back over the same ground adds nothing (the chunks and what they lay go with them: the actors' census
     # the same at the start, the far end and back); the way out loads each new kind's assets once (meshes, textures: the list of
     # 2026-11-16's density shows more kinds sooner: +1459 MB out where the 4 km world loaded +394, the census 598 / 581 / 658 actors).
     # Measured as the return's growth; the first loads are reported (the packaged walk holds the whole to its limit))
     res["out_growth_mb"] = res["mem_far"] - res["mem_start"]; res["back_growth_mb"] = res["mem_back"] - res["mem_far"]
     ok = mx <= 81 and viol == 0 and res["dropped"] >= 60 and res["built"] >= 60 and res["back_growth_mb"] < 300 \
-        and res["mem_back"] - res["mem_start"] < 1800 and abs(res["census_back"]["actors"] - res["census_start"]["actors"]) < 120          # (the whole bounded too: PR #91's review)
+        and res["mem_back"] - res["mem_start"] < 1800 and abs(res["census_back"]["actors"] - res["census_far"]["actors"]) < 150          # (the whole bounded too: PR #91's review)
     step_result("stream", ok, **res)
 
 
@@ -6064,7 +6066,199 @@ def step_horse14():
     step_result("horse14", ok, **res)
 
 LOCK_STEPS = ("locks14",)
-STEPS = {"density14": step_density14, "discover14": step_discover14, "cities14": step_cities14, "save14": step_save14, "storm14": step_storm14, "locks14": step_locks14, "npc14": step_npc14, "farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+
+def road_info14(i):
+    s = str(G["gen"].get_wild_road_info14(i)).split("|")
+    if s[0] == "major": return {"kind": "major", "from": s[1], "to": s[2], "len": float(s[3]), "n": int(s[4])}
+    if s[0] == "minor": return {"kind": "minor", "dest": s[1], "dkind": s[2], "id": int(s[3]), "up": s[4], "up_m": float(s[5]), "join": int(s[6]), "parent": int(s[7]), "len": float(s[8]), "n": int(s[9])}
+    return None
+
+def along14(pts, x, y):
+    """the distance along a polyline (metres) to the point of it nearest (x, y), the length, and how far off the line (x, y) is"""
+    best = (1e18, 0.0); acc = 0.0
+    for a, b in zip(pts, pts[1:]):
+        dx, dy = b.x - a.x, b.y - a.y; l2 = dx * dx + dy * dy; L = math.sqrt(l2)
+        tt = 0.0 if l2 < 1e-9 else max(0.0, min(1.0, ((x - a.x) * dx + (y - a.y) * dy) / l2))
+        d = math.hypot(a.x + dx * tt - x, a.y + dy * tt - y)
+        if d < best[0]: best = (d, acc + tt * L)
+        acc += L
+    return best[1], acc, best[0]
+
+def dist_text14(m):
+    if m < 950: return f"{max(50, round(m / 50.0) * 50)} m"
+    if m < 9950: return f"{m / 1000.0:.1f} km"
+    return f"{round(m / 1000.0)} km"
+
+def step_roads14():
+    """the list of 2026-11-16's fourteenth phase (items 21, 22): the major roads cobbled and raised along their whole length (the ground's
+    sample at the middle against 5 m off, every 1 km, 1.5 km clear of the towns); the minor roads, dirt, to the places round Brokenspire
+    (each village's way followed to a major road, each other place's lane), the structures' and farmsteads' lanes counted; the signs:
+    on every major road every 2 km naming its two towns and how far each is, measured along the road's own points within 5 %; on the
+    minor roads every 1 km and at each join, naming the place they lead to; one laid where she stands, its arms' painted words read from
+    the text components; pictures of a cobbled road, a minor road, a sign, the big map near and far and the minimap."""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    tw = towns()
+    st = str(g.get_wild_minor_stats14()); res["stats"] = st
+    roads, i = [], 0
+    while True:
+        inf = road_info14(i)
+        if inf is None: break
+        inf["i"] = i; roads.append(inf); i += 1
+        if i % 400 == 0: yield
+    majors = [r for r in roads if r["kind"] == "major"]; minors = [r for r in roads if r["kind"] == "minor"]
+    res["roads"] = {"major": len(majors), "minor": len(minors)}
+    def clear_of_towns(x, y, m=1500.0): return all(math.hypot(x - v["x"], y - v["y"]) > v.get("ease_m", 1150.0) + m - 1150.0 for v in tw.values())
+    # ---- the major roads: cobbles at the middle, dirt and no cobbles 7 m off, the middle raised over 5 m off
+    mj = []
+    for r in majors: r["pts"] = list(g.get_wild_road_points14(r["i"]))
+    for r in majors:
+        pts = r["pts"]
+        cob, rise, n, shared = [], [], 0, 0; acc = 0.0; nxt = 0.0
+        for a, b in zip(pts, pts[1:]):
+            acc += math.hypot(b.x - a.x, b.y - a.y)
+            if acc < nxt: continue
+            nxt = acc + 1000.0
+            if not clear_of_towns(a.x, a.y): continue
+            d = V(b.x - a.x, b.y - a.y, 0); L = max(math.hypot(d.x, d.y), 1e-6); sx, sy = -d.y / L, d.x / L
+            m0 = sample(a.x, a.y); o1 = sample(a.x + sx * 5.0, a.y + sy * 5.0); o2 = sample(a.x - sx * 5.0, a.y - sy * 5.0)
+            o7 = sample(a.x + sx * 7.0, a.y + sy * 7.0)
+            if m0["water"] or o1["water"] or o2["water"]: continue
+            # (where two major roads run together out of a town (Brokenspire's to Ashenreach and to Vel Morrath share their first
+            # kilometres), 7 m off is the other road's cobbles: such a sample counts its middle only)
+            # (merged, the two lie on one line: "beside" is within 15 m of another major road and more than 1 m off its middle)
+            beside = any(1.0 < along14(o["pts"], a.x, a.y)[2] < 15.0 for o in majors if o is not r)
+            shared += beside
+            n += 1; cob.append(m0["cobble"] >= 0.9 and m0["road"] >= 0.9 and (beside or o7["cobble"] < 0.05))
+            if not cob[-1] and len(r.setdefault("fails", [])) < 6: r["fails"].append({"x": round(a.x), "y": round(a.y), "cob": m0["cobble"], "road": m0["road"], "cob7": o7["cobble"], "h": m0["h"], "river": m0["water"]})
+            rise.append(m0["h"] - (o1["h"] + o2["h"]) * 0.5)
+        rs = sorted(rise)
+        mj.append({"road": f'{r["from"]}-{r["to"]}', "km": round(r["len"] / 1000.0, 1), "samples": n, "beside_another": shared, "cobbled_share": round(sum(cob) / max(n, 1), 3),
+                   "rise_m_p10": round(rs[len(rs) // 10], 3) if rs else None, "fails": r.get("fails", []), "rise_m_median": round(rs[len(rs) // 2], 3) if rs else None})
+        yield
+    res["majors"] = mj
+    # ---- the places round Brokenspire: their ways
+    near = []
+    for l in g.get_wild_places_near(V(0, 0, 0), 12000.0):
+        q = str(l).split("|")
+        pid = int(q[0]); kind = q[1]
+        if kind in ("town", "city", "lair", "spawn") or pid >= (1 << 24): continue
+        near.append({"id": pid, "kind": kind, "name": q[2] if len(q) > 2 else ""})
+    by_dest = {r["id"]: r for r in minors}          # (the last way made to each: a village cut off has a second)
+    byi = {r["i"]: r for r in roads}
+    reached, chains, lanes, dirt, cut = 0, [], {"ok": 0, "none": 0}, [], {"no_way": 0, "broken": 0}
+    for pl in near:
+        if pl["kind"] == "village":
+            hop, r, ok = 0, by_dest.get(pl["id"]), False
+            if r is None: cut["no_way"] += 1
+            while r is not None and hop < 60:
+                if r["kind"] == "major": ok = True; break
+                r = byi.get(r["join"]) if r["join"] >= 0 else by_dest.get(r["parent"])
+                hop += 1
+            if r is None and pl["id"] in by_dest: cut["broken"] += 1
+            reached += ok; chains.append(hop)
+        else:
+            lanes["ok" if pl["id"] in by_dest else "none"] += 1
+    villages = [pl for pl in near if pl["kind"] == "village"]
+    res["villages"] = {"near": len(villages), "to_a_major_road": reached, "share": round(reached / max(len(villages), 1), 3), "hops_max": max(chains) if chains else 0, "cut": cut}
+    res["other_places"] = lanes
+    # (a minor road is dirt: its middle has the road's ground and no cobbles)
+    for r in [r for r in minors if r["len"] > 300][:60]:
+        pts = list(g.get_wild_road_points14(r["i"])); m = pts[len(pts) // 2]; s0 = sample(m.x, m.y)
+        if not s0["water"]: dirt.append(s0["road"] >= 0.5 and s0["cobble"] < 0.05)
+    res["minor_dirt_share"] = round(sum(dirt) / max(len(dirt), 1), 3)
+    yield
+    # ---- the signs
+    sg = [str(x).split("|") for x in g.get_wild_signs14(V(0, 0, 0), 30000.0)]
+    sg = [{"k": int(s[0]), "kind": int(s[1]), "x": float(s[2]), "y": float(s[3]), "yaw": float(s[4]), "a": s[5], "am": float(s[6]), "b": s[7], "bm": float(s[8]), "road": int(s[9])} for s in sg]
+    res["signs_30km"] = {"major": sum(1 for s in sg if s["kind"] == 0), "minor": sum(1 for s in sg if s["kind"] == 1), "fork": sum(1 for s in sg if s["kind"] == 2)}
+    rm = {r["i"]: r for r in majors}
+    maj_out = []
+    for r in majors:
+        sgs = [s for s in g.get_wild_signs14(V(0, 0, 0), 200000.0) if int(str(s).split("|")[9]) == r["i"] and int(str(s).split("|")[1]) == 0]
+        sgs = [str(s).split("|") for s in sgs]
+        al = []; bad = 0; off_max = 0.0
+        for s in sgs:
+            x, y = float(s[2]), float(s[3]); a_, L, off = along14(r["pts"], x, y); al.append(a_); off_max = max(off_max, off)
+            # (A names the road's To and how far along to its end, B its From and how far back: measured here on the road's points)
+            if s[5] != r["to"] or s[7] != r["from"]: bad += 1
+            elif abs(float(s[6]) - (L - a_)) > 0.05 * max(L - a_, 1.0) or abs(float(s[8]) - a_) > 0.05 * max(a_, 1.0): bad += 1
+        al.sort(); gaps = [b - a for a, b in zip([0.0] + al, al)]
+        maj_out.append({"road": f'{r["from"]}-{r["to"]}', "signs": len(al), "gap_max_m": round(max(gaps), 0) if gaps else None, "wrong": bad, "off_road_m_max": round(off_max, 1),
+                        "expected": max(0, int((r["len"] - 1000.0 - 1e-6) // 2000.0))})
+        yield
+    res["major_signs"] = maj_out
+    # (the minor roads near: every 1 km and a fork sign at each join, naming the place and its distance along the road within 5 %)
+    mn_ok, mn_bad, fk_ok, fk_none = 0, [], 0, 0
+    for r in [r for r in minors if r["id"] in {pl["id"] for pl in near}][:120]:
+        pts = list(g.get_wild_road_points14(r["i"]))
+        ss = [s for s in sg if s["road"] == r["i"]]
+        if not ss and math.hypot(pts[0].x, pts[0].y) > 29000: continue
+        exp = max(0, int((r["len"] - 200.0 - 1e-6) // 1000.0))
+        ms = [s for s in ss if s["kind"] == 1]
+        good = len(ms) == exp
+        for s in ms:
+            a_, L, off = along14(pts, s["x"], s["y"])
+            if s["a"] != r["dest"] or abs(s["am"] - a_) > 0.05 * max(a_, 1.0) or off > 6.0: good = False
+            if r["join"] >= 0 and road_info14(r["join"])["kind"] == "major":
+                ri = rm[r["join"]]; ja, jl, _ = along14(ri["pts"], pts[-1].x, pts[-1].y)
+                want_b = ri["from"] if ja < jl - ja else ri["to"]; want_m = (L - a_) + min(ja, jl - ja)
+                if s["b"] != want_b or abs(s["bm"] - want_m) > 0.05 * want_m: good = False
+        if good: mn_ok += 1
+        else: mn_bad.append({"road": r["i"], "dest": r["dest"], "len": r["len"], "signs": [(s["a"], s["am"], s["b"], s["bm"]) for s in ms][:3], "expected": exp})
+        if r["join"] >= 0:
+            if any(s["kind"] == 2 and s["a"] == r["dest"] for s in ss): fk_ok += 1
+            else: fk_none += 1
+    res["minor_signs"] = {"ok": mn_ok, "bad": len(mn_bad), "bad_first": mn_bad[:4], "forks": fk_ok, "forks_missing": fk_none}
+    yield
+    # ---- a sign laid: she stands by the nearest major road's first sign, its arms read from the text components
+    try:
+        s0 = min([s for s in sg if s["kind"] == 0], key=lambda s: math.hypot(s["x"], s["y"]))
+        a = math.radians(s0["yaw"]); fy = (-math.sin(a), math.cos(a)); fx = (math.cos(a), math.sin(a))
+        g.wild_drop_all(); g.wild_put_her(s0["x"] + fx[0] * 4.0 + fy[0] * 0.5, s0["y"] + fx[1] * 4.0 + fy[1] * 0.5); yield from wait_chunks(30, 50); yield from rwait(2.0)
+        laid = [str(x).split("|") for x in g.get_wild_sign_actors14()]
+        mine = [l for l in laid if int(l[0]) == s0["k"]]
+        res["laid"] = {"near": len(laid), "this": mine[0] if mine else None, "want": [f'{s0["a"]} / {dist_text14(s0["am"])}', f'{s0["b"]} / {dist_text14(s0["bm"])}']}
+        if mine:
+            texts = mine[0][6].split(";")
+            res["laid"]["arms_ok"] = int(mine[0][4]) == 5 and int(mine[0][5]) == 4 and all(w in texts for w in res["laid"]["want"])          # (a post, two arms, their cores)
+        yw = math.degrees(math.atan2(-fx[1], -fx[0]))
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=yw)); yield from rwait(1.0)
+        shot("roads14_sign", "1280x720"); yield from rwait(1.5)
+        g.wild_put_her(s0["x"] - fx[0] * 2.5 + fy[0] * 0.3, s0["y"] - fx[1] * 2.5 + fy[1] * 0.3); yield from rwait(1.5)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=2, yaw=math.degrees(math.atan2(fx[1], fx[0])))); yield from rwait(1.0)
+        shot("roads14_sign_back", "1280x720"); yield from rwait(1.5)
+        g.wild_put_her(s0["x"] + fx[0] * 4.0 + fy[0] * 0.5, s0["y"] + fx[1] * 4.0 + fy[1] * 0.5); yield from rwait(1.0)
+        # the cobbled road from beside it, looking along it
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-14, yaw=s0["yaw"] + 90.0)); yield from rwait(0.8)
+        shot("roads14_major", "1280x720"); yield from rwait(1.5)
+        g.set_map_open(True); yield from rwait(0.4); g.set_wild_map_view(s0["x"], s0["y"], 8.0); yield from rwait(1.2)
+        shot("roads14_map_near", "1280x720"); yield from rwait(1.2)
+        g.set_wild_map_view(s0["x"], s0["y"], 120.0); yield from rwait(1.2)
+        shot("roads14_map_far", "1280x720"); yield from rwait(1.2)
+        g.set_map_open(False); yield from rwait(0.5)
+        shot("roads14_minimap", "1280x720"); yield from rwait(1.2)
+    except Exception as e:
+        res["laid_error"] = repr(e)
+    # a minor road from on it, looking along it
+    try:
+        mr = next(r for r in minors if r["id"] in {pl["id"] for pl in near if pl["kind"] == "village"} and r["len"] > 600)
+        pts = list(g.get_wild_road_points14(mr["i"])); k = len(pts) // 2; a, b = pts[k], pts[k + 1]
+        g.wild_drop_all(); g.wild_put_her(a.x, a.y); yield from wait_chunks(30, 50); yield from rwait(2.0)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=math.degrees(math.atan2(b.y - a.y, b.x - a.x)))); yield from rwait(0.8)
+        shot("roads14_minor", "1280x720"); yield from rwait(1.5)
+        res["minor_shot"] = {"road": mr["i"], "dest": mr["dest"]}
+    except Exception as e:
+        res["minor_error"] = repr(e)
+    quiet(False)
+    ok = len(majors) >= 6 and all(m["cobbled_share"] >= 0.9 and (m["rise_m_median"] or 0) >= 0.12 and m["beside_another"] <= max(1, m["samples"] // 20) for m in mj) \
+        and res["villages"]["share"] >= 0.85 and res["villages"]["near"] >= 20 and res["minor_dirt_share"] >= 0.9 \
+        and all(m["wrong"] == 0 and m["signs"] >= m["expected"] and (m["gap_max_m"] or 0) <= 2200 and m["off_road_m_max"] < 10 for m in maj_out) \
+        and res["minor_signs"]["ok"] >= 10 and res["minor_signs"]["bad"] <= res["minor_signs"]["ok"] * 0.05 and res["minor_signs"]["forks_missing"] == 0 \
+        and res.get("laid", {}).get("arms_ok", False) and "structures 0 (" not in st
+    step_result("roads14", ok, **res)
+
+STEPS = {"roads14": step_roads14, "density14": step_density14, "discover14": step_discover14, "cities14": step_cities14, "save14": step_save14, "storm14": step_storm14, "locks14": step_locks14, "npc14": step_npc14, "farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)

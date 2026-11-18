@@ -364,7 +364,8 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 	Fx(WeatherWind, WindFx, SkyWind > 0.42f && !bSkySnowing && !bInside, L + FVector(0, 0, 150.f));
 	SkyApplyT += Dt;
 	if (SkyApplyT >= 0.25f) { SkyApplyT = 0.f; ApplySky7(); }
-	TickLightning14(Dt);          // (the list of 2026-11-16's tenth phase: a storm's lightning and thunder)
+	TickLightning14(Dt);
+	TickWildSigns14();          // (the list of 2026-11-16's fourteenth phase: the roads' signs near her)          // (the list of 2026-11-16's tenth phase: a storm's lightning and thunder)
 }
 
 void ARDDungeonGenerator::ApplySky7()

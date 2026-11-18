@@ -1,0 +1,191 @@
+{
+ "tag": "s14p14",
+ "plan": [
+  "roads14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "roads14",
+   "ok": true,
+   "stats": "villages 2957 (2794 ways, 163 without, 774 cut off, 226 of them joined on), places 614 (473 lanes), structures 2514 (2035 lanes), farmsteads 51 (28 lanes), roads 5562|major 6|minor 5556|signs 7255|init 1.47 s",
+   "roads": {
+    "major": 6,
+    "minor": 5556
+   },
+   "majors": [
+    {
+     "road": "Brokenspire-Ashenreach",
+     "km": 43.9,
+     "samples": 41,
+     "beside_another": 0,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.215,
+     "fails": [],
+     "rise_m_median": 0.22
+    },
+    {
+     "road": "Ashenreach-Graymourne",
+     "km": 100.7,
+     "samples": 97,
+     "beside_another": 0,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.21,
+     "fails": [],
+     "rise_m_median": 0.22
+    },
+    {
+     "road": "Brokenspire-Vel Morrath",
+     "km": 85.1,
+     "samples": 74,
+     "beside_another": 0,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.21,
+     "fails": [],
+     "rise_m_median": 0.22
+    },
+    {
+     "road": "Ashenreach-Vel Morrath",
+     "km": 44.8,
+     "samples": 36,
+     "beside_another": 0,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.21,
+     "fails": [],
+     "rise_m_median": 0.22
+    },
+    {
+     "road": "Graymourne-Kethrys Spire",
+     "km": 46.1,
+     "samples": 39,
+     "beside_another": 0,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.215,
+     "fails": [],
+     "rise_m_median": 0.22
+    },
+    {
+     "road": "Kethrys Spire-Heaven",
+     "km": 33.0,
+     "samples": 21,
+     "beside_another": 0,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.22,
+     "fails": [],
+     "rise_m_median": 0.22
+    }
+   ],
+   "villages": {
+    "near": 91,
+    "to_a_major_road": 89,
+    "share": 0.978,
+    "hops_max": 9,
+    "cut": {
+     "no_way": 2,
+     "broken": 0
+    }
+   },
+   "other_places": {
+    "ok": 17,
+    "none": 1
+   },
+   "minor_dirt_share": 1.0,
+   "signs_30km": {
+    "major": 40,
+    "minor": 816,
+    "fork": 622
+   },
+   "major_signs": [
+    {
+     "road": "Brokenspire-Ashenreach",
+     "signs": 21,
+     "gap_max_m": 2000.0,
+     "wrong": 0,
+     "off_road_m_max": 7.1,
+     "expected": 21
+    },
+    {
+     "road": "Ashenreach-Graymourne",
+     "signs": 49,
+     "gap_max_m": 2000.0,
+     "wrong": 0,
+     "off_road_m_max": 7.1,
+     "expected": 49
+    },
+    {
+     "road": "Brokenspire-Vel Morrath",
+     "signs": 42,
+     "gap_max_m": 2000.0,
+     "wrong": 0,
+     "off_road_m_max": 7.0,
+     "expected": 42
+    },
+    {
+     "road": "Ashenreach-Vel Morrath",
+     "signs": 21,
+     "gap_max_m": 2000.0,
+     "wrong": 0,
+     "off_road_m_max": 7.1,
+     "expected": 21
+    },
+    {
+     "road": "Graymourne-Kethrys Spire",
+     "signs": 22,
+     "gap_max_m": 2000.0,
+     "wrong": 0,
+     "off_road_m_max": 7.1,
+     "expected": 22
+    },
+    {
+     "road": "Kethrys Spire-Heaven",
+     "signs": 15,
+     "gap_max_m": 2000.0,
+     "wrong": 0,
+     "off_road_m_max": 7.0,
+     "expected": 15
+    }
+   ],
+   "minor_signs": {
+    "ok": 120,
+    "bad": 0,
+    "bad_first": [],
+    "forks": 48,
+    "forks_missing": 0
+   },
+   "laid": {
+    "near": 5,
+    "this": [
+     "0",
+     "88066",
+     "-197567",
+     "-1835",
+     "5",
+     "4",
+     "Ashenreach / 42 km;Ashenreach / 42 km;Brokenspire / 2.0 km;Brokenspire / 2.0 km;"
+    ],
+    "want": [
+     "Ashenreach / 42 km",
+     "Brokenspire / 2.0 km"
+    ],
+    "arms_ok": true
+   },
+   "minor_shot": {
+    "road": 389,
+    "dest": "Ashham"
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_s14p14_roads14_sign.png",
+  "wd_s14p14_roads14_sign_back.png",
+  "wd_s14p14_roads14_major.png",
+  "wd_s14p14_roads14_map_near.png",
+  "wd_s14p14_roads14_map_far.png",
+  "wd_s14p14_roads14_minimap.png",
+  "wd_s14p14_roads14_minor.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}

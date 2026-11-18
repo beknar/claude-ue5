@@ -55,7 +55,9 @@ FRDWGroundVertex RDWildGroundVertex(const FRDWSample& Q, const FVector& Nr, cons
 	// visible in the wilderness": it was 80 % of the mud layer, 3 m wide, on a 2 m grid. It has a layer of its own now: a
 	// trodden earth road, darker in its wheel ruts)
 	G.UV2 = FVector2D(Q.Sand, Q.Mud);
-	G.UV3 = FVector2D(Q.Road, Q.FieldCrop >= 0 ? Q.Field * (1.f - Q.Road) : 0.f);
+	// (the fourteenth phase: a major road's cobbles as UV3's V below 0: a field never lies on a road (its weight there is 0), and the
+	// procedural mesh has four UV channels, all taken; 887's ground material reads max(V, 0) the field, max(-V, 0) the cobbles)
+	G.UV3 = FVector2D(Q.Road, Q.Cobble > 0.01f ? -Q.Cobble : (Q.FieldCrop >= 0 ? Q.Field * (1.f - Q.Road) : 0.f));
 	return G;
 }
 

@@ -2609,6 +2609,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") int32 DebugOldWorld14();
 	/** tests: whether a road between towns passes within Rm metres of (Xm, Ym) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") bool IsNearTownRoad14(float Xm, float Ym, float Rm) const;
+	/** the fourteenth phase: the roads' signs laid within this of her (m) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bWildSigns14 = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float WildSignShowM14 = 300.f;
+	/** tests: the signs within RadiusM of At (cm): "index|kind|x|y|yaw|A|Am|B|Bm|road" (metres) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") TArray<FString> GetWildSigns14(FVector At, float RadiusM) const;
+	/** tests: the signs laid: "index|x|y|z (cm)|meshes|texts|each text;" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") TArray<FString> GetWildSignActors14() const;
+	/** tests: a road's points (x, y metres; z its bed's height over the sea) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") TArray<FVector> GetWildRoadPoints14(int32 Road) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") FString GetWildRoadInfo14(int32 Road) const;
+	/** tests: the minor road that leads to a place (its id), else -1 */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") int32 FindWildRoadTo14(int32 PlaceId) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") FString GetWildMinorStats14() const;
 	/** the list of 2026-11-16's tenth phase (RDList14j.cpp, 932): storms by strength (0 light, 1 moderate, 2 strong, 3 violent), drawn
 	 *  with each weather that carries rain, snow or dust; lightning in a storm of moderate strength or more */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bLightning14 = false;
@@ -2660,6 +2673,13 @@ public:
 	FName LastThunderSet14;
 	int32 Strike14(const FVector& Aim);
 	void TickLightning14(float Dt);
+	// ---- the list of 2026-11-16's fourteenth phase (RDList14k.cpp): the roads' signs laid where she goes
+	TMap<int32, TWeakObjectPtr<AActor>> WildSignActors14;
+	float NextSignTick14 = -1.f;
+	bool bSignMeshMissing14 = false;
+	AActor* SpawnWildSign14(int32 K);
+	void TickWildSigns14();
+	void DropWildSigns14();
 	struct FBolt14 { TArray<TWeakObjectPtr<UStaticMeshComponent>> Segs; TWeakObjectPtr<class UPointLightComponent> Light; float Born = 0.f; };
 	struct FThunder14 { float When = 0.f; float Dist = 0.f; };
 	TArray<FBolt14> Bolts14; TArray<FThunder14> Thunders14;

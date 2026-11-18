@@ -141,10 +141,18 @@ def materials():
     # it was 80 % of the mud. UV3's U, the lake village's soil road)
     uv3 = b.n(unreal.MaterialExpressionTextureCoordinate, -1500, coordinate_index=3)
     rock = b.mask(uv1, "", r=True); snow = b.mask(uv1, "", g=True); sand = b.mask(uv2, "", r=True); mud = b.mask(uv2, "", g=True); road = b.mask(uv3, "", r=True)
+    # (the list of 2026-11-16's fourteenth phase: a major road's cobbles are UV3's V below 0 (a field's weight is never there): the
+    # cobbles max(-V, 0), the field max(V, 0))
+    uv3v = b.mask(uv3, "", g=True)
+    negv = b.n(unreal.MaterialExpressionMultiply, -1350); b.c(uv3v, "", negv, "A"); negv.set_editor_property("const_b", -1.0)
+    cobble = b.n(unreal.MaterialExpressionMax, -1250); b.c(negv, "", cobble, "A"); cobble.set_editor_property("const_b", 0.0)
+    fieldw = b.n(unreal.MaterialExpressionMax, -1250); b.c(uv3v, "", fieldw, "A"); fieldw.set_editor_property("const_b", 0.0)
+    uvc = b.n(unreal.MaterialExpressionMultiply, -1350); b.c(uv0, "", uvc, "A"); uvc.set_editor_property("const_b", 2.0)
     ML = "/Game/Medieval_Lake_Village/Textures/"
     L = {"grass": (S + "T_Grass_BC", S + "T_Grass_N", uv0), "rock": (S + "T_RockyCliff_A_basecolor", S + "T_RockyCliff_A_normal", uv0b),
          "sand": (S + "T_Sand_basecolor", S + "T_Sand_normal", uv0), "mud": (S + "T_Mud_BC", S + "T_Mud_N", uv0),
          "road": (ML + "T_SoilRoad_BC", ML + "T_SoilRoad_N", uv0),
+         "cobble": ("/Game/FantasyCastle/Texture/T_Cobblestone_BC", "/Game/FantasyCastle/Texture/T_Cobblestone_N", uvc),
          "snow": ("/Game/AlienPlanet/Textures/Snow/T_Snow_B", "/Game/AlienPlanet/Textures/Snow/T_Snow_N", uv0)}
     T = {k: (b.tex(bc, u), b.tex(nm, u)) for k, (bc, nm, u) in L.items()}
     def chain(i):
@@ -152,6 +160,7 @@ def materials():
         e = b.lerp(e, T["sand"][i], sand)
         e = b.lerp(e, T["mud"][i], mud)
         e = b.lerp(e, T["road"][i], road)
+        e = b.lerp(e, T["cobble"][i], cobble)
         return b.lerp(e, T["snow"][i], snow)
     det = chain(0)
     # (the texture gives its detail as brightness against its own average (its coarsest mip); the hue is the world's own, from
@@ -161,7 +170,7 @@ def materials():
         s = b.tex(bc, u); s.set_editor_property("mip_value_mode", unreal.TextureMipValueMode.TMVM_MIP_LEVEL); s.set_editor_property("const_mip_value", 12)
         avg[k] = s
     def chain_avg():
-        e = b.lerp(avg["grass"], avg["rock"], rock); e = b.lerp(e, avg["sand"], sand); e = b.lerp(e, avg["mud"], mud); e = b.lerp(e, avg["road"], road); return b.lerp(e, avg["snow"], snow)
+        e = b.lerp(avg["grass"], avg["rock"], rock); e = b.lerp(e, avg["sand"], sand); e = b.lerp(e, avg["mud"], mud); e = b.lerp(e, avg["road"], road); e = b.lerp(e, avg["cobble"], cobble); return b.lerp(e, avg["snow"], snow)
     da = chain_avg()
     lum = b.n(unreal.MaterialExpressionDotProduct, -200); b.c(det, "", lum, "A"); b.c(b.const3((0.30, 0.59, 0.11)), "", lum, "B")
     lua = b.n(unreal.MaterialExpressionDotProduct, -200); b.c(da, "", lua, "A"); b.c(b.const3((0.30, 0.59, 0.11)), "", lua, "B")
@@ -200,7 +209,7 @@ def materials():
         ci = unreal.CustomInput(); ci.set_editor_property("input_name", nm); ins.append(ci)
     rows.set_editor_property("inputs", ins)
     uvf = b.n(unreal.MaterialExpressionTextureCoordinate, -1500, coordinate_index=0)
-    fw_ = b.mask(uv3, "", g=True)
+    fw_ = fieldw
     b.c(wpos, "", rows, "P"); b.c(uvf, "", rows, "F"); b.c(fw_, "", rows, "Wt")
     base = b.mul(base, rows, x=200)
     b.out(base, "", unreal.MaterialProperty.MP_BASE_COLOR)

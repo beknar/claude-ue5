@@ -105,9 +105,16 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 	for (const FRDWildWorld::FRiver& R : W.Rivers)
 		if (R.Box.Max.X > X0 && R.Box.Min.X < X1 && R.Box.Max.Y > Y0 && R.Box.Min.Y < Y1)
 			Lines(R.P, FLinearColor(0.20f, 0.36f, 0.42f, 0.9f), FMath::Clamp((float)(R.W.Last() / Mpp), 1.2f, 4.f) * Sc);
+	// (the list of 2026-11-16's fourteenth phase: "they should look different on the mini map and the large map": a major road a pale
+	// stone line in a dark edge, a minor road a thin brown line, shown once the map is near enough (under 40 m a pixel))
 	for (const FRDWildWorld::FRoad& R : W.Roads)
 		if (R.Box.Max.X > X0 && R.Box.Min.X < X1 && R.Box.Max.Y > Y0 && R.Box.Min.Y < Y1)
-			Lines(R.P, R.bTrack ? FLinearColor(0.45f, 0.37f, 0.26f, 0.75f) : FLinearColor(0.42f, 0.33f, 0.22f, 0.9f), FMath::Clamp((float)((R.bTrack ? 2.5 : 5.0) / Mpp), R.bTrack ? 0.8f : 1.3f, R.bTrack ? 1.8f : 3.f) * Sc);
+		{
+			if (R.bTrack) { if (Mpp < 40.0) Lines(R.P, FLinearColor(0.50f, 0.35f, 0.19f, 0.85f), FMath::Clamp((float)(4.0 / Mpp), 0.8f, 2.f) * Sc); continue; }
+			const float Wr = FMath::Clamp((float)(9.0 / Mpp), 2.f, 4.f) * Sc;
+			Lines(R.P, FLinearColor(0.13f, 0.11f, 0.09f, 0.95f), Wr + 2.f * Sc);
+			Lines(R.P, FLinearColor(0.80f, 0.76f, 0.66f, 1.f), Wr);
+		}
 	// the fog
 	{
 		FVector2D U0, U1;
@@ -200,6 +207,24 @@ void ARDHUD::DrawWildMinimap(float Sc, const FVector& L, float Yaw)
 	auto ToS = [&](const FVector2D& Wm) { return C + FVector2D((float)(Wm.Y - Here.Y), -(float)(Wm.X - Here.X)) * K; };
 	if (UTexture2D* T = GetSoftDisc()) DrawTexture(T, C.X - R * 1.3f, C.Y - R * 1.3f, R * 2.6f, R * 2.6f, 0.f, 0.f, 1.f, 1.f, FLinearColor(0.004f, 0.005f, 0.007f, 0.85f), BLEND_Translucent);
 	if (UTexture2D* M = Gen->WildMini(Here)) DrawTexture(M, C.X - R, C.Y - R, R * 2.f, R * 2.f, 0, 0, 1, 1, FLinearColor::White, BLEND_Translucent);
+	// the roads (the fourteenth phase): the major ones pale stone in a dark edge, the minor ones thin brown, inside the disc
+	{
+		const FBox2D Vb(Here - FVector2D(Rm), Here + FVector2D(Rm));
+		auto Seg = [&](const FVector2D& Pa, const FVector2D& Pb, const FLinearColor& Cl, float Wp)
+		{
+			const FVector2D Sa = ToS(Pa), Sb = ToS(Pb);
+			if (FVector2D::Distance(Sa, C) < R * 0.94f && FVector2D::Distance(Sb, C) < R * 0.94f) DrawLine(Sa.X, Sa.Y, Sb.X, Sb.Y, Cl, Wp);
+		};
+		for (int32 Pass = 0; Pass < 3; ++Pass)
+			for (const FRDWildWorld::FRoad& Rd : Gen->Wild->Roads)
+			{
+				if (!Rd.Box.Intersect(Vb) || (Pass < 2) == Rd.bTrack) continue;
+				const FLinearColor Cl = Rd.bTrack ? FLinearColor(0.50f, 0.35f, 0.19f, 0.9f) : (Pass == 0 ? FLinearColor(0.13f, 0.11f, 0.09f, 0.95f) : FLinearColor(0.80f, 0.76f, 0.66f, 1.f));
+				const float Wp = Rd.bTrack ? FMath::Max(4.f * K, 1.2f * Sc) : FMath::Max(9.f * K, 3.f * Sc) + (Pass == 0 ? 2.f * Sc : 0.f);
+				for (int32 I = 0; I + 1 < Rd.P.Num(); ++I)
+					if (FVector2D::DistSquared(Rd.P[I], Here) < Rm * Rm * 1.1) Seg(Rd.P[I], Rd.P[I + 1], Cl, Wp);
+			}
+	}
 	// the places near (towns and those found), the monsters after her
 	TArray<FRDWildPlace> Ps; Gen->WildKnownPlaces(Ps);
 	for (const FRDWildPlace& P : Ps)

@@ -181,6 +181,7 @@ struct FRDWSample
 	FLinearColor Color;         // the ground seen from above (linear)
 	FLinearColor RockColor;     // its regions' rock (the steep slopes)
 	float Rock = 0.f, Snow = 0.f, Sand = 0.f, Mud = 0.f, Road = 0.f, Field = 0.f, Lava = 0.f;
+	float Cobble = 0.f;         // (the list of 2026-11-16's fourteenth phase) a major road's cobbles (0-1; Road holds its whole bed)
 	float Canopy = 0.f;         // the forest's closeness there (0-1)
 	int32 Biome = 0;            // the biome with the most weight
 	int32 Biome2 = 0;           // the second (for the transitions)
@@ -286,10 +287,29 @@ public:
 	TArray<FRiver> Rivers;
 	struct FLake { FVector2D C; float R = 300.f; float Level = 0.f; float Depth = 6.f; int32 Kind = 2; uint32 Shape = 0; };
 	TArray<FLake> Lakes;             // lakes made at Init (ponds are found per cell, by Ponds())
-	/** a road between two towns; or (the list of 2026-11-14, bTrack) a track off a road or another track, a footpath to nowhere in
-	 *  particular, narrower, its bed eased less (From, To -1) */
-	struct FRoad { TArray<FVector2D> P; TArray<float> Z; FBox2D Box; int32 From = -1, To = -1; bool bTrack = false; };
+	/** a major road between two towns (cobbled and raised since the list of 2026-11-16's fourteenth phase); or (bTrack, bMinor) a
+	 *  minor road, dirt, from a place (its Dest, at P[0]) to what it joins (a major road, a village, another minor road: Join the road
+	 *  joined, -1 a village), whose signs name Up (UpM metres past its end) the other way (From, To -1) */
+	struct FRoad
+	{
+		TArray<FVector2D> P; TArray<float> Z; FBox2D Box; int32 From = -1, To = -1; bool bTrack = false; bool bMinor = false;
+		FString Dest, DestKind, Up; int32 DestId = -1, Join = -1, JoinSeg = -1, ParentVillage = -1; double JoinT = 0.0; double UpM = 0.0;
+	};
 	TArray<FRoad> Roads;
+	/** a sign post (the fourteenth phase): Kind 0 a major road's (every 2 km), 1 a minor road's (every 1 km), 2 at a minor road's
+	 *  join; its +Y (Yaw) along the road toward A (Am metres), its second arm toward B (none when empty) */
+	struct FRDWildSign { FVector2D At = FVector2D::ZeroVector; float Yaw = 0.f; FString A, B; float Am = 0.f, Bm = 0.f; uint8 Kind = 0; int32 Road = -1; };
+	TArray<FRDWildSign> Signs;
+	TMultiMap<FIntPoint, int32> SignHash;          // (500 m cells)
+	FString MinorStats;
+	void SignsNear(const FVector2D& P, double R, TArray<int32>& Out) const;
+	static FString SignDistText(double M);
+	double RoadAlong(int32 Ri, int32 Seg, double T) const;
+	double RoadLength(int32 Ri) const;
+	/** the nearest point within R of a road (bMajorOnly: of a road between towns) */
+	bool NearestRoadPoint(const FVector2D& P, double R, bool bMajorOnly, int32& OutRoad, int32& OutSeg, double& OutT, FVector2D& OutAt, const TBitArray<>* Allowed = nullptr) const;
+	/** what a way joining road Ri at (Seg, T) leads on to, and how far past the join */
+	void RoadUp(int32 Ri, int32 Seg, double T, FString& OutName, double& OutM) const;
 	/** a spatial hash of river and road segments: (2 km cell) -> (kind << 30 | index << 16 | segment) */
 	TMultiMap<FIntPoint, uint32> SegHash;
 	TMultiMap<FIntPoint, int32> LakeHash;
@@ -460,9 +480,14 @@ private:
 	void MakeRoads();
 	void MakeQuestPlaces();
 	void MakeCrossroads();
-	/** the list of 2026-11-14: tracks off the roads (where they meet, the crossroads: "a crossroads with a gibbet, shrine or notice
-	 *  post"; "milestones, a broken road or a toppled waymarker") */
-	void MakeTracks();
+	/** the list of 2026-11-16's fourteenth phase (RDWildRoads14.cpp): the minor roads, dirt, to every village (down to the major roads),
+	 *  place, structure and farmstead near a road; they took the tracks' place (the crossroads are where they leave a major road) */
+	void MakeMinorRoads();
+	bool MinorPath(const FVector2D& A, const FVector2D& B, uint32 Sk, const TMultiMap<FIntPoint, FVector2D>& Dots, TArray<FVector2D>& Out) const;
+	void MakeSigns();
+	/** where a major road runs within 30 m of an earlier one (two roads out of one gate: Brokenspire's to Ashenreach and to Vel Morrath ran
+	 *  side by side 7 m apart for kilometres), it takes the earlier one's line and bed, eased in over 30 to 60 m */
+	void MergeMajorRoads();
 	void HashSegments();
 	float Feature(double X, double Y, float H, FRDWSample* S) const;   // rivers, lakes, ponds, roads, towns on H
 	int32 Biome(const TCHAR* Name) const { const int32* I = BiomeIndex.Find(Name); return I ? *I : 0; }

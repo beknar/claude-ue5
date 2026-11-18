@@ -1,0 +1,940 @@
+{
+ "tag": "s14p14b",
+ "plan": [
+  "world",
+  "map",
+  "stream",
+  "density14",
+  "places",
+  "travellers10",
+  "quests",
+  "cities14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "world",
+   "ok": true,
+   "state": {
+    "ready": 1,
+    "seed": 20261103,
+    "init_s": 1.43,
+    "chunks": 4,
+    "in_flight": 13,
+    "built": 3,
+    "dropped": 0,
+    "max_active": 4,
+    "compute_ms": 191.6,
+    "build_ms_max": 7.4,
+    "revealed": 314,
+    "found": 1,
+    "towns": 6,
+    "wild_ticks": 5,
+    "gen_ticks": 5,
+    "paused": 0,
+    "menu": 0,
+    "panel": 0
+   },
+   "towns": {
+    "Brokenspire": {
+     "kind": "town",
+     "x": 0.0,
+     "y": 0.0,
+     "h": 87.5,
+     "style": 0,
+     "ease_m": 1150.0
+    },
+    "Ashenreach": {
+     "kind": "city",
+     "x": 35000.0,
+     "y": 0.0,
+     "h": 87.5,
+     "style": 1,
+     "ease_m": 1150.0
+    },
+    "Graymourne": {
+     "kind": "coast",
+     "x": 99050.0,
+     "y": 0.0,
+     "h": 87.5,
+     "style": 1,
+     "ease_m": 1150.0
+    },
+    "Vel Morrath": {
+     "kind": "city",
+     "x": 27500.0,
+     "y": 37500.0,
+     "h": 87.5,
+     "style": 1,
+     "ease_m": 5000.0
+    },
+    "Kethrys Spire": {
+     "kind": "city",
+     "x": 76300.0,
+     "y": -35000.0,
+     "h": 87.5,
+     "style": 1,
+     "ease_m": 5000.0
+    },
+    "Heaven": {
+     "kind": "city",
+     "x": 57140.0,
+     "y": -55459.0,
+     "h": 87.5,
+     "style": 1,
+     "ease_m": 5000.0
+    }
+   },
+   "graymourne_sea_north_m": 200.0,
+   "velmorrath_sea_east_m": null,
+   "kethrys_from_graymourne_km": 41.7,
+   "heaven_from_kethrys_km": 28.0,
+   "checks": {
+    "brokenspire_mid_south": true,
+    "ashenreach_middle": true,
+    "ashenreach_north_of_brokenspire": true,
+    "graymourne_north_coast": true,
+    "velmorrath_north_east": true,
+    "velmorrath_inland": true,
+    "kethrys_north_west_inland": true,
+    "heaven_past_kethrys_inland": true
+   },
+   "biomes": {
+    "grasslands": {
+     "cells": 7,
+     "x": 4473.0,
+     "y": -386.0,
+     "km": 4.5
+    },
+    "meadows": {
+     "cells": 11,
+     "x": 6393.0,
+     "y": 5922.0,
+     "km": 8.7
+    },
+    "farms": {
+     "cells": 1,
+     "x": 1500.0,
+     "y": -1200.0,
+     "km": 1.9
+    },
+    "savannahs": {
+     "cells": 13,
+     "x": -6753.0,
+     "y": -17321.0,
+     "km": 18.6
+    },
+    "hills": {
+     "cells": 47,
+     "x": -9691.0,
+     "y": 5298.0,
+     "km": 11.0
+    },
+    "mountains": {
+     "cells": 24,
+     "x": 10297.0,
+     "y": 309.0,
+     "km": 10.3
+    },
+    "tundras": {
+     "cells": 12,
+     "x": 59340.0,
+     "y": -10162.0,
+     "km": 60.2
+    },
+    "plains": {
+     "cells": 29,
+     "x": 696.0,
+     "y": -7962.0,
+     "km": 8.0
+    },
+    "pine forests": {
+     "cells": 14,
+     "x": 31240.0,
+     "y": -16920.0,
+     "km": 35.5
+    },
+    "temperate autumn forests": {
+     "cells": 4,
+     "x": 13327.0,
+     "y": -38638.0,
+     "km": 40.9
+    },
+    "marshes": {
+     "cells": 1,
+     "x": 24578.0,
+     "y": 12997.0,
+     "km": 27.8
+    },
+    "wetlands": {
+     "cells": 1,
+     "x": 20688.0,
+     "y": 18403.0,
+     "km": 27.7
+    },
+    "mountains and peaks": {
+     "cells": 10,
+     "x": -15178.0,
+     "y": -17778.0,
+     "km": 23.4
+    },
+    "volcanoes": {
+     "cells": 1,
+     "x": 61640.0,
+     "y": -55459.0,
+     "km": 82.9
+    },
+    "coastal regions": {
+     "cells": 28,
+     "x": -30759.0,
+     "y": -1256.0,
+     "km": 30.8
+    },
+    "arctic regions": {
+     "cells": 1,
+     "x": 83986.0,
+     "y": 19003.0,
+     "km": 86.1
+    },
+    "canyons": {
+     "cells": 1,
+     "x": -8010.0,
+     "y": -8654.0,
+     "km": 11.8
+    },
+    "mesas": {
+     "cells": 1,
+     "x": -16411.0,
+     "y": 4553.0,
+     "km": 17.0
+    },
+    "canyon networks": {
+     "cells": 2,
+     "x": -13056.0,
+     "y": -2913.0,
+     "km": 13.4
+    },
+    "cold steppes": {
+     "cells": 8,
+     "x": 39773.0,
+     "y": 34767.0,
+     "km": 52.8
+    },
+    "highland moorland": {
+     "cells": 20,
+     "x": 26589.0,
+     "y": 19204.0,
+     "km": 32.8
+    },
+    "boreal pine forest": {
+     "cells": 6,
+     "x": 52585.0,
+     "y": -23485.0,
+     "km": 57.6
+    },
+    "temperate aspen": {
+     "cells": 14,
+     "x": 31221.0,
+     "y": -10281.0,
+     "km": 32.9
+    },
+    "volcanic tundra": {
+     "cells": 7,
+     "x": 61491.0,
+     "y": -788.0,
+     "km": 61.5
+    },
+    "burned plain": {
+     "cells": 2,
+     "x": 37500.0,
+     "y": 0.0,
+     "km": 37.5
+    },
+    "geothermal caldera": {
+     "cells": 5,
+     "x": 27843.0,
+     "y": -43825.0,
+     "km": 51.9
+    },
+    "glacial": {
+     "cells": 20,
+     "x": 56772.0,
+     "y": -31068.0,
+     "km": 64.7
+    },
+    "taigas": {
+     "cells": 4,
+     "x": 67602.0,
+     "y": 20796.0,
+     "km": 70.7
+    },
+    "rocky coastal": {
+     "cells": 235,
+     "x": -22859.0,
+     "y": -13097.0,
+     "km": 26.3
+    }
+   },
+   "missing_templates": [],
+   "rivers": 35,
+   "lakes": 70,
+   "roads": [
+    "road|Brokenspire|Ashenreach|45.7|-4|272",
+    "road|Ashenreach|Graymourne|100.7|35300|0",
+    "road|Brokenspire|Vel Morrath|86.9|-4|272",
+    "road|Ashenreach|Vel Morrath|44.8|34941|294",
+    "road|Graymourne|Kethrys Spire|46.1|98887|-252",
+    "road|Kethrys Spire|Heaven|33.0|76095|-35219"
+   ],
+   "river_lengths_km": [
+    22.4,
+    21.1,
+    20.5,
+    19.0,
+    16.5,
+    15.3,
+    13.7,
+    13.2
+   ],
+   "map_continent": {
+    "ok": true,
+    "s": 1.3
+   },
+   "map_around": {
+    "ok": true,
+    "s": 1.0
+   },
+   "map_near": {
+    "ok": true,
+    "s": 0.8
+   },
+   "place_ids": {
+    "count": 86,
+    "north": 55,
+    "town_range_not_towns": [],
+    "shared": []
+   }
+  },
+  {
+   "step": "map",
+   "ok": true,
+   "minimap_drawn": true,
+   "open": {
+    "cx": 900.0,
+    "cy": -700.0,
+    "mpp": 5.0,
+    "level": 7.0,
+    "tiles": 25.0,
+    "asked": 0.0,
+    "tile_ms": 512.3,
+    "hover": -1.0,
+    "hover_name": "",
+    "made": 25.0,
+    "refusal": "",
+    "last_travel": ""
+   },
+   "drawn": [
+    "wmap_town",
+    "mapc_scroll_edge",
+    "mapc_compass",
+    "wild_map"
+   ],
+   "map_region": {
+    "cx": 2000.0,
+    "cy": 0.0,
+    "mpp": 60.0,
+    "level": 3.0,
+    "tiles": 35.0,
+    "asked": 0.0,
+    "tile_ms": 444.4,
+    "hover": -1.0,
+    "hover_name": "",
+    "made": 35.0,
+    "refusal": "",
+    "last_travel": ""
+   },
+   "map_region_drawn": [
+    "wmap_town"
+   ],
+   "map_country": {
+    "cx": 20000.0,
+    "cy": 10000.0,
+    "mpp": 160.0,
+    "level": 2.0,
+    "tiles": 43.0,
+    "asked": 0.0,
+    "tile_ms": 420.6,
+    "hover": -1.0,
+    "hover_name": "",
+    "made": 43.0,
+    "refusal": "",
+    "last_travel": ""
+   },
+   "map_country_drawn": [
+    "wmap_town",
+    "wmap_city"
+   ],
+   "map_continent": {
+    "cx": 35000.0,
+    "cy": 0.0,
+    "mpp": 165.0,
+    "level": 2.0,
+    "tiles": 50.0,
+    "asked": 0.0,
+    "tile_ms": 339.2,
+    "hover": -1.0,
+    "hover_name": "",
+    "made": 50.0,
+    "refusal": "",
+    "last_travel": ""
+   },
+   "map_continent_drawn": [
+    "wmap_town",
+    "wmap_city"
+   ],
+   "fog_drag": {
+    "frames": 40,
+    "builds": 0
+   },
+   "revealed_here": true,
+   "revealed_far": false
+  },
+  {
+   "step": "stream",
+   "ok": false,
+   "mem_start": 22786.0,
+   "census_start": {
+    "actors": 162,
+    "top": {
+     "RDLootPile": 68,
+     "RDMonster": 45,
+     "RDWildChunk": 17,
+     "RDWildAnimal": 2,
+     "WorldSettings": 1,
+     "Brush": 1,
+     "PostProcessVolume": 1,
+     "ExponentialHeightFog": 1,
+     "RDDungeonGenerator": 1,
+     "PlayerStart": 1,
+     "SkeletalMeshActor": 1,
+     "SceneCapture2D": 1
+    },
+    "lists": {
+     "loot_piles": 68
+    }
+   },
+   "mem_far": 22637.0,
+   "census_far": {
+    "actors": 376,
+    "top": {
+     "RDLootPile": 182,
+     "RDMonster": 120,
+     "RDWildChunk": 42,
+     "Actor": 2,
+     "RDWildAnimal": 2,
+     "WorldSettings": 1,
+     "Brush": 1,
+     "PostProcessVolume": 1,
+     "ExponentialHeightFog": 1,
+     "RDDungeonGenerator": 1,
+     "PlayerStart": 1,
+     "SkeletalMeshActor": 1
+    },
+    "lists": {
+     "loot_piles": 182
+    }
+   },
+   "mem_back": 22553.0,
+   "census_back": {
+    "actors": 667,
+    "top": {
+     "RDLootPile": 320,
+     "RDMonster": 222,
+     "RDWildChunk": 72,
+     "RDWildAnimal": 24,
+     "WorldSettings": 1,
+     "Brush": 1,
+     "PostProcessVolume": 1,
+     "ExponentialHeightFog": 1,
+     "RDDungeonGenerator": 1,
+     "PlayerStart": 1,
+     "SkeletalMeshActor": 1,
+     "SceneCapture2D": 1
+    },
+    "lists": {
+     "loot_piles": 320
+    }
+   },
+   "max_chunks": 72,
+   "outside_square": 0,
+   "samples": [
+    {
+     "y": 2600.0,
+     "chunks": 20,
+     "near": 4,
+     "mem": 22710
+    },
+    {
+     "y": 4100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22712
+    },
+    {
+     "y": 5600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22890
+    },
+    {
+     "y": 7100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22958
+    },
+    {
+     "y": 8600.0,
+     "chunks": 42,
+     "near": 4,
+     "mem": 22637
+    },
+    {
+     "y": 8600.0,
+     "chunks": 43,
+     "near": 4,
+     "mem": 22605
+    },
+    {
+     "y": 7100.0,
+     "chunks": 51,
+     "near": 4,
+     "mem": 22848
+    },
+    {
+     "y": 5600.0,
+     "chunks": 68,
+     "near": 4,
+     "mem": 22660
+    },
+    {
+     "y": 4100.0,
+     "chunks": 67,
+     "near": 4,
+     "mem": 22546
+    },
+    {
+     "y": 2600.0,
+     "chunks": 57,
+     "near": 4,
+     "mem": 22676
+    }
+   ],
+   "dropped": 333,
+   "built": 388,
+   "active_km2_max": 4.5,
+   "compute_ms": 127.2,
+   "build_ms_max": 109.2,
+   "out_growth_mb": -149.0,
+   "back_growth_mb": -84.0
+  },
+  {
+   "step": "density14",
+   "ok": true,
+   "counts": {
+    "places": {
+     "village": 90,
+     "camp": 5,
+     "cave": 3,
+     "ruins": 3,
+     "house": 4,
+     "lair": 4,
+     "ritual": 3,
+     "spawn": 2
+    },
+    "sites_12km": 202,
+    "scenery_12km": 4860,
+    "pois_4x1.5km": 3955,
+    "farmsteads_6km": 49
+   },
+   "villages": 209,
+   "nearest_m": {
+    "min": 1160,
+    "p10": 1380,
+    "median": 1655,
+    "p90": 1993,
+    "max": 2623,
+    "share_1_3km": 1.0
+   },
+   "villages_within_300m_of_a_road": 46,
+   "by_road": {
+    "near_cells": 66,
+    "near_places": 16,
+    "far_cells": 1025,
+    "far_places": 183,
+    "near_per_cell": 0.242,
+    "far_per_cell": 0.179
+   },
+   "before": {
+    "places": {
+     "lair": 2,
+     "ruins": 4,
+     "spawn": 2,
+     "house": 2
+    },
+    "sites_12km": 82,
+    "scenery_12km": 2200,
+    "pois_4x1.5km": 1634,
+    "farmsteads_6km": 18
+   },
+   "ratios": {
+    "places": 2.4,
+    "sites": 2.46,
+    "scenery": 2.21,
+    "pois": 2.42,
+    "farmsteads": 2.72
+   }
+  },
+  {
+   "step": "places",
+   "ok": true,
+   "visits": [
+    {
+     "kind": "camp",
+     "name": "Sun Camp",
+     "found": true,
+     "props": 46,
+     "monsters": 7
+    },
+    {
+     "kind": "ruins",
+     "name": "The Old Watchtower",
+     "found": true,
+     "props": 126,
+     "monsters": 9
+    },
+    {
+     "kind": "ritual",
+     "name": "Iron Circle",
+     "found": true,
+     "props": 42,
+     "monsters": 5
+    },
+    {
+     "kind": "house",
+     "name": "Elsa's Farmstead",
+     "found": true,
+     "props": 43,
+     "monsters": 0
+    },
+    {
+     "kind": "village",
+     "name": "Windholt",
+     "found": true,
+     "props": 121,
+     "monsters": 3
+    },
+    {
+     "kind": "cave",
+     "name": "Elm Cave",
+     "found": true,
+     "props": 40,
+     "monsters": 8
+    },
+    {
+     "kind": "lair",
+     "name": "The Mill Road Den",
+     "found": true,
+     "props": 28,
+     "monsters": 6,
+     "monster_m": [
+      18.9,
+      9.3
+     ],
+     "aggro": true
+    },
+    {
+     "kind": "spawn",
+     "name": "Oak Hollow",
+     "found": true,
+     "props": 55,
+     "monsters": 10,
+     "monster_m": [
+      12.9,
+      4.9
+     ],
+     "aggro": true
+    }
+   ],
+   "census": {
+    "camp": 16,
+    "cave": 20,
+    "house": 35,
+    "lair": 27,
+    "ritual": 17,
+    "ruins": 17,
+    "spawn": 15,
+    "village": 587
+   },
+   "killed_stays": {
+    "place": "Oak Hollow",
+    "before": 2,
+    "after": 1
+   }
+  },
+  {
+   "step": "travellers10",
+   "ok": true,
+   "road_at": [
+    1861.0,
+    152.2
+   ],
+   "forced": true,
+   "groups": 2,
+   "walked_m": 11.4,
+   "walking": 2,
+   "to": "Brokenspire",
+   "prompt": "talk to a refugee on the road to Brokenspire",
+   "f": "bark",
+   "said": "a refugee on the road to Brokenspire|Bread? No? Then move along, please. I'm tired of being looked at.",
+   "night": {
+    "x": 190147.0,
+    "y": -6589.0,
+    "z": 112.0,
+    "folk": 2,
+    "camped": true,
+    "walking": 0,
+    "to": "Brokenspire",
+    "bits": 5
+   },
+   "sitting": [
+    "AS_Town_SitTalk",
+    "AS_Town_SitTalk",
+    "AS_Town_SitTalk",
+    "AS_Town_SitTalk",
+    "AS_Town_SitTalk"
+   ],
+   "morning": {
+    "x": 189621.0,
+    "y": -5648.0,
+    "z": 158.0,
+    "folk": 2,
+    "camped": false,
+    "walking": 2,
+    "to": "Brokenspire",
+    "bits": 0
+   }
+  },
+  {
+   "step": "quests",
+   "ok": false,
+   "places": {
+    "wild:wolves": {
+     "id": 536870912,
+     "name": "The Mill Road Den",
+     "x": 1861.0,
+     "y": 152.2,
+     "kind": "lair",
+     "n": 4,
+     "killed": 0,
+     "progress": 0,
+     "rx": 1861.0,
+     "ry": 152.2,
+     "yaw": -150.1,
+     "shown": 0
+    },
+    "wild:patrol": {
+     "id": 536870913,
+     "name": "The Old Watchtower",
+     "x": 2471.4,
+     "y": -2106.8,
+     "kind": "ruins",
+     "n": 3,
+     "killed": 0,
+     "progress": 0,
+     "rx": 2465.7,
+     "ry": -2110.9,
+     "yaw": -143.4,
+     "shown": 0
+    }
+   },
+   "den": {
+    "from_brokenspire_km": 1.87,
+    "water": 0.0,
+    "h": 93.4,
+    "biome": "farms",
+    "road_m": 65
+   },
+   "tower": {
+    "from_brokenspire_km": 3.25,
+    "water": 0.0,
+    "h": 79.2,
+    "biome": "grasslands",
+    "road_m": null
+   },
+   "captain_panel": true,
+   "offered": [
+    "Quest: Thin the Horde",
+    "Quest: Cells Under the Keep",
+    "Quest: Wolves on the Mill Road",
+    "Quest: The Lost Patrol"
+   ],
+   "accept_wolves": true,
+   "accept_patrol": true,
+   "taken": {
+    "captain_wolves": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    },
+    "captain_patrol": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+    }
+   },
+   "on_map": {
+    "wild:wolves": 1,
+    "wild:patrol": 1
+   },
+   "travel_refused": false,
+   "refusal": "",
+   "den_pack": {
+    "alive": 4,
+    "kinds": [
+     "Ripper_dog"
+    ]
+   },
+   "after_three": {
+    "progress": 0,
+    "killed": 3,
+    "quest": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "again_alive": 1,
+   "after_all": {
+    "progress": 1,
+    "killed": 4,
+    "quest": {
+     "state": "ready",
+     "progress": 1,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "tower_guards": 3,
+   "tower_props": 126,
+   "patrol_at_10m": 0,
+   "patrol_at_2_5m": 1,
+   "patrol_quest": {
+    "state": "ready",
+    "progress": 1,
+    "count": 1,
+    "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+   },
+   "captain_again": true,
+   "turnin_lines": [
+    "Done: Wolves on the Mill Road",
+    "Done: The Lost Patrol"
+   ],
+   "gold": 320,
+   "done": {
+    "captain_wolves": "done",
+    "captain_patrol": "done"
+   },
+   "on_map_after": {
+    "wild:wolves": 0,
+    "wild:patrol": 0
+   }
+  },
+  {
+   "step": "cities14",
+   "ok": true,
+   "Vel Morrath": {
+    "biome_at": "mountains",
+    "biome_share_2km": 0.92,
+    "ground_range_m": 0.0,
+    "steepest_deg_3km": 39.9,
+    "steepest_at": [
+     26362,
+     34751,
+     2975,
+     869.5,
+     848.6,
+     "mountains and peaks",
+     0.0,
+     0.0
+    ],
+    "lava_max": 0.0,
+    "map": true
+   },
+   "Kethrys Spire": {
+    "biome_at": "glacial",
+    "biome_share_2km": 0.79,
+    "ground_range_m": 0.0,
+    "steepest_deg_3km": 31.5,
+    "steepest_at": [
+     78245,
+     -36945,
+     2750,
+     762.2,
+     746.8,
+     "glacial",
+     0.0,
+     0.0
+    ],
+    "lava_max": 0.0,
+    "snow_2km": 0.69,
+    "map": true
+   },
+   "Heaven": {
+    "biome_at": "volcanoes",
+    "biome_share_2km": 0.81,
+    "ground_range_m": 0.0,
+    "steepest_deg_3km": 24.2,
+    "steepest_at": [
+     59519,
+     -56444,
+     2575,
+     453.7,
+     442.5,
+     "volcanoes",
+     0.0,
+     0.0
+    ],
+    "lava_max": 0.0,
+    "cone_lava_max": 0.46,
+    "map": true
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_s14p14b_minimap.png",
+  "wd_s14p14b_map_near.png",
+  "wd_s14p14b_map_region.png",
+  "wd_s14p14b_map_country.png",
+  "wd_s14p14b_map_continent.png",
+  "wd_s14p14b_place_camp.png",
+  "wd_s14p14b_place_ruins.png",
+  "wd_s14p14b_place_ritual.png",
+  "wd_s14p14b_place_house.png",
+  "wd_s14p14b_place_village.png",
+  "wd_s14p14b_place_cave.png",
+  "wd_s14p14b_place_lair.png",
+  "wd_s14p14b_place_spawn.png",
+  "wd_s14p14b_travellers10_road.png",
+  "wd_s14p14b_travellers10_camp.png",
+  "wd_s14p14b_quest_den.png",
+  "wd_s14p14b_quest_tower.png",
+  "wd_s14p14b_cities14_heaven_cone.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}
