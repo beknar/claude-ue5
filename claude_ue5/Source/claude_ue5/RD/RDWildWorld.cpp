@@ -297,7 +297,7 @@ int32 FRDWildWorld::Blend(double X, double Y, int32* Idx, float* W, FVector2D* S
 	// list of 2026-11-04 ("the transition between terrain types is too abrupt and looks like a straight line from above ... it
 	// should look more natural and ragged and uneven") the warp has two finer scales too (700 m, 180 m) and the fall-off is
 	// wider: a border wanders at every scale and the regions flow into each other over 3 to 6 km
-	const double Wk = CellM / 14000.0;          // (the borders' broad warp by the cells' size)
+	const double Wk = WorldK();          // (the borders' broad warp at the continent's scale, as its cells)
 	const double Wx = X + Fbm(X, Y, 1.0 / (13000.0 * Wk), 4, Seed + 61u) * 6500.0 * Wk + Fbm(X, Y, 1.0 / 2600.0, 2, Seed + 63u) * 900.0
 	                    + Fbm(X, Y, 1.0 / 700.0, 2, Seed + 65u) * 320.0 + Fbm(X, Y, 1.0 / 180.0, 2, Seed + 67u) * 70.0;
 	const double Wy = Y + Fbm(X, Y, 1.0 / (13000.0 * Wk), 4, Seed + 62u) * 6500.0 * Wk + Fbm(X, Y, 1.0 / 2600.0, 2, Seed + 64u) * 900.0
@@ -865,7 +865,7 @@ void FRDWildWorld::MakeChannels()
 				Ch.Wall = M.Contains(TEXT("wall")) ? FCString::Atof(*M[TEXT("wall")]) : 0.5f;
 				const float Len = Range(M, TEXT("len"), 600.f, 1400.f, Rand01(Sk, 3, Seed));
 				const FVector2D C0 = CellSite.IsValidIndex(Ci) ? CellSite[Ci] : FVector2D::ZeroVector;
-				FVector2D P = C0 + FVector2D(Rand01(Sk, 4, Seed) - 0.5, Rand01(Sk, 5, Seed) - 0.5) * 10000.0;
+				FVector2D P = C0 + FVector2D(Rand01(Sk, 4, Seed) - 0.5, Rand01(Sk, 5, Seed) - 0.5) * 10000.0 * WorldK();          // (within its cell: PR #89's review)
 				double Ang = Rand01(Sk, 6, Seed) * 2.0 * PI;
 				for (double L = 0.0; L <= Len; L += 20.0)
 				{
@@ -1151,7 +1151,7 @@ void FRDWildWorld::MakeRivers()
 		float T, M; Climate(S.X, S.Y, T, M);
 		if (M < 0.42f || Continent(S.X, S.Y) < 0.1f) continue;
 		if (Rand01(K, 7, Seed + 91u) > 0.55f) continue;
-		Sources.Add(S + FVector2D((Rand01(K, 8, Seed + 92u) - 0.5) * 6000.0, (Rand01(K, 9, Seed + 93u) - 0.5) * 6000.0));
+		Sources.Add(S + FVector2D((Rand01(K, 8, Seed + 92u) - 0.5) * 6000.0, (Rand01(K, 9, Seed + 93u) - 0.5) * 6000.0) * WorldK());
 	}
 	const double Step = 300.0;
 	for (int32 Si = 0; Si < Sources.Num() && Rivers.Num() < 60; ++Si)
@@ -1235,7 +1235,7 @@ void FRDWildWorld::MakeLakes()
 		const FVector2D S = CellSite[K];
 		float T, M; Climate(S.X, S.Y, T, M);
 		if (M < 0.5f || Rand01(K, 21, Seed + 97u) > 0.42f) continue;
-		FLake L; L.C = S + FVector2D((Rand01(K, 22, Seed) - 0.5) * 7000.0, (Rand01(K, 23, Seed) - 0.5) * 7000.0);
+		FLake L; L.C = S + FVector2D((Rand01(K, 22, Seed) - 0.5) * 7000.0, (Rand01(K, 23, Seed) - 0.5) * 7000.0) * WorldK();
 		L.R = 450.f + 1900.f * Rand01(K, 24, Seed); L.Kind = 2; L.Shape = Hash(K, 25, Seed);
 		Lakes.Add(L);
 	}
@@ -1437,6 +1437,7 @@ void FRDWildWorld::HashSegments()
 
 void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 {
+	CellM = 14000.0 * WorldK();          // (the regions' cell at the continent's scale: one size, the frame (PR #89's review))
 	const double T0 = FPlatformTime::Seconds();
 	Seed = InSeed; Biomes = InBiomes;
 	{ FScopeLock Lk(&SiteCache->Lock); SiteCache->Cells.Reset(); }
@@ -1612,7 +1613,7 @@ int32 FRDWildWorld::TierAt(double X, double Y) const
 	// leg of the chain nearest it, from the tier of the town it leaves to the next one's. Until the list it was 1 to 5 by the
 	// distance from Brokenspire, 25 km a tier. The chain's towns are found once, at Init (MakeTierChain: PR #31's review))
 	const TArray<FVector2D>& At = TierSites; const TArray<float>& Ti = TierValues;
-	if (At.Num() < 2) return FMath::Clamp(1 + (int32)(FVector2D(X, Y).Size() / 25000.0), 1, 5);
+	if (At.Num() < 2) return FMath::Clamp(1 + (int32)(FVector2D(X, Y).Size() / (25000.0 * WorldK())), 1, 5);
 	const FVector2D P(X, Y);
 	double Best = 1e30; float Tier = Ti[0];
 	for (int32 K = 0; K + 1 < At.Num(); ++K)

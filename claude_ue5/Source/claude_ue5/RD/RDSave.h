@@ -15,6 +15,8 @@ class CLAUDE_UE5_API URDSaveGame : public USaveGame
 	GENERATED_BODY()
 public:
 	UPROPERTY() int32 Version = 1;
+	/** the world it was made in (apart from the save's own format, Version: PR #89's review); 1 in every save made before it */
+	UPROPERTY() int32 WorldVer = 1;
 	/** the wilderness's version (the list of 2026-11-16's world phases: each that moves the wilds' places raises it); a save of an
 	 *  older one loads with its wild state dropped, in Brokenspire's square (DropOldWorld) */
 	static constexpr int32 WorldVersion = 2;

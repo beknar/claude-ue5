@@ -17,6 +17,7 @@ void URDGameInstance::NewGame(FName Hero)
 	CirclesFound = { FName(TEXT("Brokenspire")) };
 	TownLooted.Reset(); CastleTiers.Reset(); CastleStartLooted.Reset(); GuardsDead.Reset(); HerPiles.Reset();
 	Dungeons.Reset(); ReturnAt = FVector::ZeroVector; ReturnYaw = 0.f; ReturnTown.Reset();
+	bOldWorld = false;          // (the list of 2026-11-16: an older save's give-back is not the new game's (PR #89's review))
 	Arrive.Reset();
 	TownHour = -1.f; TownDay = 1;
 	GardensHarvested.Reset(); FoodTaken.Reset(); bPortcullisUp = false; bHorseOwned = false;

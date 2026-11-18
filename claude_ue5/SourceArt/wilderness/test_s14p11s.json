@@ -1,0 +1,56 @@
+{
+ "tag": "s14p11s",
+ "plan": [
+  "save14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "save14",
+   "ok": true,
+   "load": true,
+   "at_m": [
+    66.0,
+    16.5
+   ],
+   "from_brokenspire_m": 68.0,
+   "town": {
+    "name": "Brokenspire",
+    "in_walls": 1.0,
+    "dist_m": 68.0
+   },
+   "found": [
+    1073741824
+   ],
+   "killed": 0,
+   "wild_counters": [],
+   "quests_back": 0,
+   "wild_quests_still_held": [],
+   "told": [
+    "139|The wilds have changed since this game was saved: you wake in Brokenspire"
+   ],
+   "give_back": {
+    "captain_panel": true,
+    "accept_wolves": true,
+    "accept_patrol": true,
+    "taken": {
+     "captain_wolves": "taken",
+     "captain_patrol": "taken"
+    },
+    "given_back": 2,
+    "after": {
+     "captain_wolves": "offered",
+     "captain_patrol": "offered"
+    },
+    "offered_again": true
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_s14p11s_save14_square.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

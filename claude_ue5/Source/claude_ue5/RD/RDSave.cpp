@@ -80,7 +80,10 @@ bool ARDDungeonGenerator::SaveGameNow(const FString& Slot, const FString& Why, c
 	Sv->Level = UWorld::RemovePIEPrefix(GetWorld()->GetOutermost()->GetName());
 	Sv->Hero = CurrentHero; Sv->At = Her->GetActorLocation(); Sv->Yaw = Her->GetActorRotation().Yaw;
 	Sv->Why = Why; Sv->Place = Place; Sv->bInTown = bTown; Sv->Name = Name;
-	Sv->Version = URDSaveGame::WorldVersion;          // (the list of 2026-11-16: the world it was made in)
+	// (the list of 2026-11-16: the world it was made in; an older world's give-back still waiting (loaded in the castle, saved there)
+	// done first, so what is written is whole (PR #89's review))
+	if (GI->bOldWorld) GiveBackWildQuests14();
+	Sv->WorldVer = URDSaveGame::WorldVersion;
 	RDSerializeGame(GI, Sv->Game, false);
 	// (the game goes on as it was)
 	GI->HerPiles = Piles; GI->TownLooted = Looted; GI->GuardsDead = Guards; GI->TownStore = Store; GI->CurrentTown = Current;
@@ -167,9 +170,10 @@ bool URDSaveGame::LoadAndOpen(UObject* Ctx, const FString& Slot)
 	GI->Arrive = Sv->bInTown ? TEXT("save") : FString(); GI->LoadAt = Sv->At; GI->LoadYaw = Sv->Yaw; GI->bLoadPending = Sv->bInTown;
 	// (the list of 2026-11-16's eleventh phase: a save of an older world (the continent at 300 km, its places' ids by its old frame):
 	// its wild state dropped; made in the wilds' level, she wakes in Brokenspire's square (TickTown with nothing to arrive by))
-	if (Sv->Version < WorldVersion)
+	GI->bOldWorld = false;          // (a flag left from an earlier load is no business of this one: PR #89's review)
+	if (Sv->WorldVer < WorldVersion)
 	{
-		DropOldWorld(GI, Sv->Version);
+		DropOldWorld(GI, Sv->WorldVer);
 		if (Sv->bInTown) { GI->Arrive.Reset(); GI->bLoadPending = false; }
 	}
 	UE_LOG(LogRDSave, Log, TEXT("RDSAVE loading %s: %s as %s (%s)"), *Slot, *Sv->Level, *Sv->Hero.ToString(), *Sv->Place);

@@ -4186,12 +4186,12 @@ def step_save14():
     res["quests_back"] = g.get_editor_property("wild_old_world_quests_back")
     wild_ids = {str(q.get_editor_property("id")) for q in g.get_editor_property("quests") if str(q.get_editor_property("goal")).startswith("wild:")}
     res["wild_quests_still_held"] = sorted(str(s_.get_editor_property("id")) for s_ in gi.get_editor_property("quests") if str(s_.get_editor_property("id")) in wild_ids)
-    msgs = []
-    t0 = time.time()
+    # (from the HUD's log of the last 20 messages (its latest line can be replaced before a watch begins: PR #89's review))
+    t0 = time.time(); msgs = []
     while time.time() - t0 < 8.0:
-        m_ = str(cb().get_editor_property("message")) if cb() else ""
-        if m_ and m_ not in msgs: msgs.append(m_)
-        yield from rwait(0.3)
+        msgs = [str(m_) for m_ in cb().get_message_log()] if cb() else []
+        if any("changed" in m_ for m_ in msgs): break
+        yield from rwait(0.5)
     res["told"] = [m_ for m_ in msgs if "changed" in m_][:1]
     shot("save14_square", "1280x720")
     # (the captain's quests given back: game3b held none of them, so here both are taken at the captain, an older world's drop done
@@ -4206,6 +4206,9 @@ def step_save14():
     gb["after"] = {q: (quest_of(q) or {}).get("state") for q in ("captain_wolves", "captain_patrol")}
     gb["offered_again"] = at_captain() and any("Mill Road" in p_[1] for p_ in panel() if p_[0] == "accept"); g.close_town_panel()
     res["give_back"] = gb
+    # (the copied save taken out again: it would be listed among the saves (PR #89's review))
+    try: os.remove(os.path.join(SAVES, "save_game3b_f17369.sav"))
+    except OSError: pass
     # (in Brokenspire's walls, at its square: the square stands 70 to 80 m from the town's site (towns' at_start: 79 m))
     ok = (res["load"] and res["town"]["name"] == "Brokenspire" and res["town"]["in_walls"] == 1 and res["from_brokenspire_m"] < 120.0 and res["found"] == [TOWN_ID] and res["killed"] == 0 and not res["wild_counters"]
           and res["quests_back"] >= 0 and not res["wild_quests_still_held"] and res["told"]
@@ -5656,37 +5659,6 @@ def walk_into(x_m, y_m, foot_m, secs=5.0):
         yield
     return {"nearest_m": round(best, 2), "half_m": round(half, 1), "through": best < 0.35 * min(foot_m)}
 
-def step_spires14():
-    """item 17 of the list of 2026-11-16: "very tall spires in the farm biomes with no collision layers - check the game save labeled
-    game3b": the user's save (the packaged game's, copied in for the step and taken out after) loaded, every piece over 30 m within
-    6 km of her listed with its collision, the nearest of each mesh walked into, and pictured. Retired from STEPS by the eleventh phase:
-    the save is of the 300 km world, and a save of an older world now loads in Brokenspire's square (save14 uses it); the spires' fix is
-    measured by collide14"""
-    g = G["gen"]; res = {}
-    src = os.path.join(os.environ.get("LOCALAPPDATA", ""), "claude_ue5", "Saved", "SaveGames", "save_game3b_f17369.sav")
-    if not os.path.isfile(src): step_result("spires14", False, error="no save game3b at " + src); return
-    os.makedirs(SAVES, exist_ok=True); open(os.path.join(SAVES, "save_game3b_f17369.sav"), "wb").write(open(src, "rb").read())
-    res["load"] = g.load_game_from("save_game3b_f17369"); yield from until_loaded13(); g = G["gen"]
-    yield from wait_chunks(30, 50); yield from rwait(4.0)
-    p = G["pawn"].get_actor_location(); res["at_km"] = [round(p.x / 100000.0, 2), round(p.y / 100000.0, 2)]
-    res["biome"] = sample(p.x / 100.0, p.y / 100.0)["biome"]; res["landmark"] = str(g.get_wild_landmark()); res["far_sight"] = str(g.get_wild_storm_line())
-    tall = tall_pieces(p); res["tall"] = tall[:40]; res["tall_count"] = len(tall)
-    # (each mesh's nearest walked into and pictured)
-    res["walks"] = {}; seen = set()
-    for r in tall:
-        if r["mesh"] in seen or len(seen) >= 6: continue
-        seen.add(r["mesh"])
-        w_ = yield from walk_into(r["x"], r["y"], r["foot_m"])
-        res["walks"][r["mesh"]] = dict(w_, owner=r["owner"], h_m=r["h_m"], collision=r["collision"], pawn=r["pawn"])
-        q = G["pawn"].get_actor_location()
-        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=12, yaw=math.degrees(math.atan2(r["y"] * 100.0 - q.y, r["x"] * 100.0 - q.x)) + 180.0))
-        g.wild_put_her(r["x"] + 40.0, r["y"]); yield from wait_chunks(30, 50); ground_put(r["x"] + 40.0, r["y"]); yield from rwait(1.0)
-        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=18, yaw=180.0)); yield from rwait(1.5)
-        shot("spires14_" + r["mesh"], "1280x720"); yield from rwait(1.0)
-    # (the fix: the landmark's shape made again from its faces (926 kit, 927 collide): it must stop her at its walls)
-    lm = res["walks"].get("SM_N13_LandmarkTower")
-    ok = bool(lm) and not lm["through"] and not any(v["through"] for v in res["walks"].values())
-    step_result("spires14", ok, **res)
 
 def wt():
     """wild_tables, the stages' shared helper (its list of what is walked through): loaded fresh each run"""

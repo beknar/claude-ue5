@@ -100,7 +100,8 @@ int32 ARDDungeonGenerator::GiveBackWildQuests14()
 	if (!GI) return 0;
 	GI->bOldWorld = false;
 	int32 Back = 0;
-	for (const FRDQuestDef& Q : Quests) if (Q.Goal.StartsWith(TEXT("wild:"))) Back += GI->Quests.RemoveAll([&Q](const FRDQuestState& S) { return S.Id == Q.Id; });
+	// (only those taken and not turned in: a quest done and paid stays done (PR #89's review: given back, it paid again))
+	for (const FRDQuestDef& Q : Quests) if (Q.Goal.StartsWith(TEXT("wild:"))) Back += GI->Quests.RemoveAll([&Q](const FRDQuestState& S) { return S.Id == Q.Id && S.State == 1; });
 	WildOldWorldNotice = Back > 0 ? FString::Printf(TEXT("The wilds have changed since this game was saved: you wake in Brokenspire, and the captain's %d quest(s) wait to be taken again"), Back)
 		: FString(TEXT("The wilds have changed since this game was saved: you wake in Brokenspire"));
 	WildOldWorldQuestsBack = Back;
