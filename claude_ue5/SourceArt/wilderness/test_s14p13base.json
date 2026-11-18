@@ -1,0 +1,406 @@
+{
+ "tag": "s14p13base",
+ "plan": [
+  "stream",
+  "poi7"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "stream",
+   "ok": true,
+   "mem_start": 20981.0,
+   "mem_far": 21375.0,
+   "mem_back": 21517.0,
+   "max_chunks": 72,
+   "outside_square": 0,
+   "samples": [
+    {
+     "y": 2600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21011
+    },
+    {
+     "y": 4100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21125
+    },
+    {
+     "y": 5600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21380
+    },
+    {
+     "y": 7100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21460
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21375
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21381
+    },
+    {
+     "y": 7100.0,
+     "chunks": 68,
+     "near": 4,
+     "mem": 21320
+    },
+    {
+     "y": 5600.0,
+     "chunks": 70,
+     "near": 4,
+     "mem": 21206
+    },
+    {
+     "y": 4100.0,
+     "chunks": 69,
+     "near": 4,
+     "mem": 21223
+    },
+    {
+     "y": 2600.0,
+     "chunks": 69,
+     "near": 4,
+     "mem": 21457
+    }
+   ],
+   "dropped": 376,
+   "built": 384,
+   "active_km2_max": 4.5,
+   "compute_ms": 101.3,
+   "build_ms_max": 112.2
+  },
+  {
+   "step": "poi7",
+   "ok": false,
+   "model_ok": false,
+   "run_ok": true,
+   "uses_ok": true,
+   "model": {
+    "lines": {
+     "brokenspire_0": {
+      "n": 12,
+      "kinds": [
+       "abandoned_camp",
+       "grave",
+       "herb_patch",
+       "lost_body",
+       "ruined_wall",
+       "standing_stones"
+      ],
+      "p50_s": 21.7,
+      "p90_s": 107.1,
+      "max_s": 143.7
+     },
+     "brokenspire_45": {
+      "n": 14,
+      "kinds": [
+       "abandoned_camp",
+       "lost_body",
+       "monster_nest",
+       "ruined_wall"
+      ],
+      "p50_s": 32.5,
+      "p90_s": 76.4,
+      "max_s": 79.0
+     },
+     "brokenspire_90": {
+      "n": 14,
+      "kinds": [
+       "abandoned_camp",
+       "grave",
+       "herb_patch",
+       "lost_body",
+       "monster_nest",
+       "ruined_wall"
+      ],
+      "p50_s": 24.0,
+      "p90_s": 57.7,
+      "max_s": 213.1
+     },
+     "brokenspire_135": {
+      "n": 12,
+      "kinds": [
+       "abandoned_camp",
+       "grave",
+       "lost_body",
+       "monster_nest",
+       "ruined_wall"
+      ],
+      "p50_s": 38.4,
+      "p90_s": 80.2,
+      "max_s": 104.2
+     },
+     "brokenspire_180": {
+      "n": 13,
+      "kinds": [
+       "abandoned_camp",
+       "grave",
+       "great_ruin",
+       "monster_nest",
+       "ruined_wall"
+      ],
+      "p50_s": 47.4,
+      "p90_s": 81.7,
+      "max_s": 129.1
+     },
+     "brokenspire_225": {
+      "n": 14,
+      "kinds": [
+       "abandoned_camp",
+       "grave",
+       "great_ruin",
+       "lost_body",
+       "monster_nest",
+       "ruined_wall"
+      ],
+      "p50_s": 25.9,
+      "p90_s": 73.7,
+      "max_s": 181.4
+     },
+     "brokenspire_270": {
+      "n": 17,
+      "kinds": [
+       "abandoned_camp",
+       "grave",
+       "great_ruin",
+       "lost_body",
+       "monster_nest",
+       "ruined_wall"
+      ],
+      "p50_s": 33.4,
+      "p90_s": 62.0,
+      "max_s": 67.7
+     },
+     "brokenspire_315": {
+      "n": 10,
+      "kinds": [
+       "abandoned_camp",
+       "grave",
+       "lost_body",
+       "monster_nest"
+      ],
+      "p50_s": 30.7,
+      "p90_s": 92.1,
+      "max_s": 159.8
+     },
+     "marshes": {
+      "n": 19,
+      "kinds": [
+       "bog_shrine",
+       "drowned_ruin",
+       "great_ruin",
+       "herb_patch",
+       "hermit_hut",
+       "lost_body",
+       "monster_nest"
+      ],
+      "p50_s": 28.3,
+      "p90_s": 54.0,
+      "max_s": 75.4
+     },
+     "pine forests": {
+      "n": 17,
+      "kinds": [
+       "abandoned_camp",
+       "bandit_cache",
+       "grave",
+       "herb_patch",
+       "hermit_hut",
+       "hidden_cache",
+       "lost_body",
+       "monster_nest",
+       "ruined_wall",
+       "woodcutters"
+      ],
+      "p50_s": 32.9,
+      "p90_s": 57.7,
+      "max_s": 58.3
+     },
+     "mountains": {
+      "n": 3,
+      "kinds": [
+       "cairn",
+       "lost_body"
+      ],
+      "p50_s": 158.3,
+      "p90_s": 198.6,
+      "max_s": 198.6
+     },
+     "savannahs": {
+      "n": 15,
+      "kinds": [
+       "abandoned_camp",
+       "grave",
+       "house",
+       "lost_body",
+       "monster_nest",
+       "ruined_wall",
+       "sun_altar"
+      ],
+      "p50_s": 36.0,
+      "p90_s": 51.4,
+      "max_s": 68.3
+     },
+     "tundras": {
+      "n": 18,
+      "kinds": [
+       "abandoned_camp",
+       "cairn",
+       "frozen_corpse",
+       "grave",
+       "lost_body",
+       "monster_nest",
+       "ruined_wall",
+       "standing_stones"
+      ],
+      "p50_s": 30.9,
+      "p90_s": 53.7,
+      "max_s": 80.0
+     },
+     "volcanoes": {
+      "n": 19,
+      "kinds": [
+       "abandoned_camp",
+       "fire_altar",
+       "grave",
+       "lost_body",
+       "monster_nest",
+       "ore_vein"
+      ],
+      "p50_s": 26.3,
+      "p90_s": 59.7,
+      "max_s": 98.6
+     }
+    },
+    "p50_s": 30.6,
+    "p90_s": 73.7,
+    "max_s": 213.1,
+    "kinds": [
+     "abandoned_camp",
+     "bandit_cache",
+     "bog_shrine",
+     "cairn",
+     "drowned_ruin",
+     "fire_altar",
+     "frozen_corpse",
+     "grave",
+     "great_ruin",
+     "herb_patch",
+     "hermit_hut",
+     "hidden_cache",
+     "house",
+     "lost_body",
+     "monster_nest",
+     "ore_vein",
+     "ruined_wall",
+     "standing_stones",
+     "sun_altar",
+     "woodcutters"
+    ]
+   },
+   "run": {
+    "seconds": 147.5,
+    "events": 25,
+    "met": 1,
+    "near": [
+     "animal",
+     "monster",
+     "pile"
+    ],
+    "max_gap_s": 27.2,
+    "gaps": [
+     18.1,
+     3.0,
+     3.0,
+     3.1,
+     3.0,
+     3.0,
+     3.1,
+     3.0,
+     11.1,
+     3.0,
+     3.1,
+     3.0,
+     3.0,
+     3.1,
+     3.0,
+     3.0,
+     3.0,
+     26.3,
+     3.0,
+     3.0,
+     3.1,
+     3.0,
+     3.1,
+     3.0,
+     27.2,
+     1.2
+    ],
+    "state": [
+     "state",
+     "1917",
+     "0",
+     "1",
+     "0",
+     "198.9"
+    ],
+    "moved_m": 521
+   },
+   "uses": {
+    "lore": {
+     "kind": "ruined_wall",
+     "prompt": "look at the ruined wall",
+     "says": "Old stones of a wall nobody remembers building. Moss has taken the carvings.",
+     "blessing": "",
+     "hp_share": 1.0
+    },
+    "loot": {
+     "kind": "abandoned_camp",
+     "things": [
+      "Bread",
+      "Small Healing Potion",
+      "Straw Rope",
+      "Straw Rope"
+     ],
+     "gained": {
+      "Bread": 1,
+      "Straw Rope": 2,
+      "Small Healing Potion": 1
+     },
+     "laid_again": 0
+    },
+    "buff": {
+     "kind": "standing_stones",
+     "prompt": "pray at the standing stones",
+     "says": "The Blessing of the Stones:  your blows 10% stronger, 10% less of each blow reaches you, for 5 minutes",
+     "blessing": "The Blessing of the Stones",
+     "hp_share": 1.0
+    },
+    "heal": {
+     "kind": "hermit_hut",
+     "prompt": "rest at the hermit's hut",
+     "says": "You rest by the hermit's hearth: your wounds close, your mana comes back.",
+     "blessing": "The Blessing of the Stones",
+     "hp_share": 1.0
+    }
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

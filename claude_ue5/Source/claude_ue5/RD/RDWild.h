@@ -321,7 +321,13 @@ public:
 	int32 BiomeAt(double X, double Y) const;
 	/** the places of interest in a 4 km cell (deterministic); towns are places too */
 	void PlacesIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const;
-	static constexpr double PlaceCellM = 4000.0;
+	// (the list of 2026-11-16's thirteenth phase: "2.5 times the density": the places' cells 2 km (4 km before; a village and another
+	// place in each), the points', structures' and scenery's cells smaller by the root of 2.5)
+	static constexpr double PlaceCellM = 2000.0;
+	/** a cell's village and its chance (none on the arctic or glaciers); the other place's chance, more within 1 km of a road between towns */
+	float VillageChance = 0.85f, PlaceChance = 0.30f, PlaceChanceByRoad = 0.48f;
+	/** whether a road between towns (not a track) passes within R metres of P */
+	bool NearTownRoad(const FVector2D& P, double R) const;
 	FIntPoint PlaceCellOf(double X, double Y) const { return FIntPoint(FMath::FloorToInt((X - Xs) / PlaceCellM), FMath::FloorToInt((Y - Yw) / PlaceCellM)); }
 	bool FindPlace(int32 Id, FRDWildPlace& Out) const;
 	/** the ponds (and hot springs) of a 4 km cell */
@@ -348,7 +354,7 @@ public:
 	 *  region (PoiKinds, set after Init from the generator's WildPoiKinds); their ids PoiIdBase + (cell x << 12 | cell y) (the
 	 *  continent is 2500 cells across), in the free range under the farms' 2^28 */
 	static constexpr int32 PoiIdBase = 1 << 24;
-	static constexpr double PoiCellM = 120.0;
+	static constexpr double PoiCellM = 76.0;          // (120 m before the list of 2026-11-16's density)
 	TArray<FRDWildPoiKind> PoiKinds;
 	float PoiFill = 0.8f;
 	FIntPoint PoiCellOf(double X, double Y) const { return FIntPoint(FMath::FloorToInt((X - Xs) / PoiCellM), FMath::FloorToInt((Y - Yw) / PoiCellM)); }
@@ -358,7 +364,7 @@ public:
 	 *  places of kind "site", ids SiteIdBase + (cell x << 12 | cell y), in the free range between the points of interest's and
 	 *  the farms' */
 	static constexpr int32 SiteIdBase = 1 << 27;
-	static constexpr double SiteCellM = 2500.0;
+	static constexpr double SiteCellM = 1580.0;          // (2500 m before the list of 2026-11-16's density)
 	TArray<FRDWildSiteKind> SiteKinds;
 	float SiteFill = 0.5f;
 	FIntPoint SiteCellOf(double X, double Y) const { return FIntPoint(FMath::FloorToInt((X - Xs) / SiteCellM), FMath::FloorToInt((Y - Yw) / SiteCellM)); }
@@ -373,7 +379,7 @@ public:
 	 *  rise or by water as its kind asks; places of kind "scenery", ids SceneryIdBase + (cell x << 10 | cell y) (500 cells across), in
 	 *  the free range between the points of interest's (to 2^24 + 2^24) and the structures' (2^27) */
 	static constexpr int32 SceneryIdBase = 1 << 26;
-	static constexpr double SceneryCellM = 600.0;
+	static constexpr double SceneryCellM = 380.0;          // (600 m before the list of 2026-11-16's density)
 	TArray<FRDWildSceneryKind> SceneryKinds;
 	float SceneryFill = 0.6f;
 	FIntPoint SceneryCellOf(double X, double Y) const { return FIntPoint(FMath::FloorToInt((X - Xs) / SceneryCellM), FMath::FloorToInt((Y - Yw) / SceneryCellM)); }

@@ -1,0 +1,41 @@
+{
+ "tag": "s14p13d0",
+ "plan": [
+  "density14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "density14",
+   "ok": false,
+   "counts": {
+    "places": {
+     "lair": 2,
+     "ruins": 4,
+     "spawn": 2,
+     "house": 2
+    },
+    "sites_12km": 82,
+    "scenery_12km": 2200,
+    "pois_4x1.5km": 1634,
+    "farmsteads_6km": 18
+   },
+   "villages": 2,
+   "nearest_m": {
+    "min": 14321,
+    "p10": 14321,
+    "median": 14321,
+    "p90": 14321,
+    "max": 14321,
+    "share_1_3km": 0.0
+   },
+   "villages_within_300m_of_a_road": 0,
+   "by_road": null,
+   "before": null
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}
