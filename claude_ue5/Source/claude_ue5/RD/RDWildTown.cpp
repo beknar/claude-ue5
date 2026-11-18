@@ -218,7 +218,11 @@ void ARDDungeonGenerator::TickWildPlaces(const FVector2D& AtM)
 		if (Gc != WildFarmCell)
 		{
 			WildFarmCell = Gc; WildFarmNear.Reset();
-			Wild->FarmsteadsIn((Gc.X - 1) * FRDWildWorld::GreatFieldM, (Gc.Y - 1) * FRDWildWorld::GreatFieldM, (Gc.X + 2) * FRDWildWorld::GreatFieldM, (Gc.Y + 2) * FRDWildWorld::GreatFieldM, WildFarmNear);
+			{
+		// (the great fields over the whole of WildDiscoverM round her (PR #91's review: 3 x 3 of 420 m missed some within 500 m))
+		const int32 Rg = FMath::CeilToInt(WildDiscoverM / FRDWildWorld::GreatFieldM);
+		Wild->FarmsteadsIn((Gc.X - Rg) * FRDWildWorld::GreatFieldM, (Gc.Y - Rg) * FRDWildWorld::GreatFieldM, (Gc.X + Rg + 1) * FRDWildWorld::GreatFieldM, (Gc.Y + Rg + 1) * FRDWildWorld::GreatFieldM, WildFarmNear);
+	}
 		}
 		Ps.Append(WildFarmNear);
 	}

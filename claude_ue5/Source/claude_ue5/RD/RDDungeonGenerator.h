@@ -2353,8 +2353,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") TObjectPtr<UNiagaraSystem> WildSteamFx = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") TObjectPtr<UNiagaraSystem> WildFireFx = nullptr;
 	/** she reveals the map this far round her; finds a place this near it (a town within its section) */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildRevealM = 300.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildDiscoverM = 90.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildRevealM = 500.f;          // (the list of 2026-11-16: the maps uncovered out to 500 m round her; 300 m before)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildDiscoverM = 500.f;          // (the list of 2026-11-16: "increase the discovery of a point of interest on the mini map and large map out to 500m"; 90 m before)
 	/** the wilderness's monsters notice her this far (cm; the halls' AggroDistance is 10 m) and give up at 1.8 times it */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildAggroDistance = 2500.f;
 	UPROPERTY(Transient, BlueprintReadOnly, Category = "RandomDungeon|Wild") TMap<FIntPoint, TObjectPtr<ARDWildChunk>> WildChunks;
@@ -2607,6 +2607,8 @@ public:
 	int32 GiveBackWildQuests14();
 	/** tests: an older world's save's drop, here and now; the captain's wild quests given back */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") int32 DebugOldWorld14();
+	/** tests: whether a road between towns passes within Rm metres of (Xm, Ym) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") bool IsNearTownRoad14(float Xm, float Ym, float Rm) const;
 	/** the list of 2026-11-16's tenth phase (RDList14j.cpp, 932): storms by strength (0 light, 1 moderate, 2 strong, 3 violent), drawn
 	 *  with each weather that carries rain, snow or dust; lightning in a storm of moderate strength or more */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bLightning14 = false;

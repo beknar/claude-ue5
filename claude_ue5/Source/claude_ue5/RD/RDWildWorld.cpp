@@ -517,7 +517,8 @@ void FRDWildWorld::FarmAt(double X, double Y, float FarmW, FRDWFarm& O) const
 	const float Fade = RDWSmooth(Need, Need + 0.12f, FarmW) * RDWSmooth(4.f, 14.f, (float)Eg);
 	if (Fade <= 0.f) return;
 	const float Pr = Rand01(G.X, G.Y, Seed + 85u);
-	O.Kind = Pr < 0.60f ? 1 : Pr < 0.80f ? 2 : Pr < 0.94f ? 3 : 0;
+	// (the list of 2026-11-16's density: half the great fields crofts (a farmstead's yard among small plots), 20 % before)
+	O.Kind = Pr < 0.40f ? 1 : Pr < 0.90f ? 2 : Pr < 0.97f ? 3 : 0;
 	if (O.Kind == 0) return;
 	O.Great = G; O.Site = Site; O.Fade = Fade;
 	const float GAng = Rand01(G.X, G.Y, Seed + 92u) * PI;
@@ -595,7 +596,7 @@ void FRDWildWorld::FarmsteadsIn(double X0, double Y0, double X1, double Y1, TArr
 		for (int32 Gj = J0; Gj <= J1; ++Gj)
 		{
 			const float Pr = Rand01(Gi, Gj, Seed + 85u);
-			if (Pr < 0.60f || Pr >= 0.80f) continue;
+			if (Pr < 0.40f || Pr >= 0.90f) continue;          // (the crofts, as FarmAt has them since the list of 2026-11-16's density)
 			const FVector2D At = RDWCellPoint(Gi, Gj, GreatFieldM, 0.15, Seed + 90u);
 			if (At.X < X0 || At.X >= X1 || At.Y < Y0 || At.Y >= Y1) continue;
 			if (At.X < Xs || At.X > Xn || At.Y < Yw || At.Y > Ye) continue;
@@ -1278,7 +1279,7 @@ void FRDWildWorld::MakeLakes()
 
 void FRDWildWorld::PondsIn(FIntPoint Cell, TArray<FLake>& Out) const
 {
-	const double Cx = Xs + (Cell.X + 0.5) * PlaceCellM, Cy = Yw + (Cell.Y + 0.5) * PlaceCellM;
+	const double Cx = Xs + (Cell.X + 0.5) * PondCellM, Cy = Yw + (Cell.Y + 0.5) * PondCellM;
 	if (Cx < Xs || Cx > Xn || Cy < Yw || Cy > Ye) return;
 	const int32 B = BiomeAt(Cx, Cy);
 	if (!Biomes.IsValidIndex(B)) return;
@@ -1288,7 +1289,7 @@ void FRDWildWorld::PondsIn(FIntPoint Cell, TArray<FLake>& Out) const
 	for (int32 I = 0; I < Nponds + Nsteam; ++I)
 	{
 		FLake L; L.Kind = I < Nponds ? 4 : 6;
-		L.C = FVector2D(Cx + (Rand01(Cell.X * 7 + I, Cell.Y, Seed + 103u) - 0.5) * PlaceCellM * 0.9, Cy + (Rand01(Cell.X, Cell.Y * 7 + I, Seed + 104u) - 0.5) * PlaceCellM * 0.9);
+		L.C = FVector2D(Cx + (Rand01(Cell.X * 7 + I, Cell.Y, Seed + 103u) - 0.5) * PondCellM * 0.9, Cy + (Rand01(Cell.X, Cell.Y * 7 + I, Seed + 104u) - 0.5) * PondCellM * 0.9);
 		L.R = L.Kind == 6 ? 14.f + 26.f * Rand01(Cell.X + I, Cell.Y, Seed + 105u) : 22.f + 90.f * Rand01(Cell.X + I, Cell.Y, Seed + 105u);
 		L.Shape = Hash(Cell.X * 31 + I, Cell.Y, Seed + 106u);
 		bool bBad = Continent(L.C.X, L.C.Y) < 0.03f;
@@ -1457,6 +1458,7 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 	const double T0 = FPlatformTime::Seconds();
 	Seed = InSeed; Biomes = InBiomes;
 	{ FScopeLock Lk(&SiteCache->Lock); SiteCache->Cells.Reset(); }
+	{ FScopeLock Lk(&PlaceCache2->Lock); PlaceCache2->Cells.Reset(); }
 	{ FScopeLock Lk(&SceneryCache->Lock); SceneryCache->Cells.Reset(); }
 	BiomeIndex.Reset();
 	for (int32 I = 0; I < Biomes.Num(); ++I) BiomeIndex.Add(Biomes[I].Name, I);
@@ -1485,8 +1487,8 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 	MakeLakes();
 	// the ponds and hot springs of every 4 km cell, once
 	Ponds.Reset(); PondHash.Reset();
-	for (int32 I = 0; I * PlaceCellM < Xn - Xs; ++I)
-		for (int32 J = 0; J * PlaceCellM < Ye - Yw; ++J) PondsIn(FIntPoint(I, J), Ponds);
+	for (int32 I = 0; I * PondCellM < Xn - Xs; ++I)
+		for (int32 J = 0; J * PondCellM < Ye - Yw; ++J) PondsIn(FIntPoint(I, J), Ponds);
 	for (int32 K = 0; K < Ponds.Num(); ++K)
 	{
 		const FLake& P = Ponds[K]; const double Pad = P.R * 1.3 + RDWPondBankM + 10.0;
@@ -1705,6 +1707,20 @@ FString FRDWildWorld::NameFor(const FString& Kind, uint32 H) const
 
 void FRDWildWorld::PlacesIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 {
+	// (made once a cell and kept (PR #91's review: every denser point, scenery and farmstead try made the cell's village and place again))
+	{
+		FScopeLock Lk(&PlaceCache2->Lock);
+		if (const TArray<FRDWildPlace>* Got = PlaceCache2->Cells.Find(Cell)) { Out.Append(*Got); return; }
+	}
+	TArray<FRDWildPlace> Mine;
+	PlacesInCell(Cell, Mine);
+	Out.Append(Mine);
+	FScopeLock Lk(&PlaceCache2->Lock);
+	PlaceCache2->Cells.Add(Cell, MoveTemp(Mine));
+}
+
+void FRDWildWorld::PlacesInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
+{
 	const double X0 = Xs + Cell.X * PlaceCellM, Y0 = Yw + Cell.Y * PlaceCellM;
 	for (int32 Ti = 0; Ti < Towns.Num(); ++Ti)
 	{
@@ -1718,9 +1734,53 @@ void FRDWildWorld::PlacesIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 	for (const FRDWildPlace& Q : QuestPlaces)
 		if (Q.At.X >= X0 && Q.At.X < X0 + PlaceCellM && Q.At.Y >= Y0 && Q.At.Y < Y0 + PlaceCellM) Out.Add(Q);
 	if (X0 < Xs || X0 + PlaceCellM > Xn || Y0 < Yw || Y0 + PlaceCellM > Ye) return;
-	const float R = Rand01(Cell.X, Cell.Y, Seed + 121u);
-	if (R > 0.48f) return;
+	// ---- the cell's village (the list of 2026-11-16: "villages can now be within 1km - 3km of each other ... a village can be near a
+	// road"): in the cell's middle half (so its neighbours stand 1 to 3 km off), on all land but the arctic and the glaciers; on a road
+	// it steps beside it (the road is no refusal, its middle is)
+	FVector2D Village(1e18, 1e18);
+	if (Rand01(Cell.X, Cell.Y, Seed + 131u) <= VillageChance)
+	{
+		FVector2D Va(X0 + (0.25 + 0.5 * Rand01(Cell.X, Cell.Y, Seed + 132u)) * PlaceCellM, Y0 + (0.25 + 0.5 * Rand01(Cell.X, Cell.Y, Seed + 133u)) * PlaceCellM);
+		// (its houses stand on a ring 23 to 34 m out: the ring clear of the road, not only its middle (PR #91's review))
+		auto RingOff = [this](const FVector2D& C) { for (int32 Q = 0; Q < 8; ++Q) { FRDWSample Sr; Sample(C.X + FMath::Cos(Q * PI / 4.0) * 36.0, C.Y + FMath::Sin(Q * PI / 4.0) * 36.0, Sr, false); if (Sr.Road > 0.05f) return false; } return true; };
+		FRDWSample Sv; Sample(Va.X, Va.Y, Sv, false);
+		if (Sv.Road > 0.1f || !RingOff(Va))
+			for (const double Dd : { 70.0, 120.0 })
+			{
+				bool bMoved = false;
+				for (int32 Tr = 0; Tr < 8 && !bMoved; ++Tr)
+				{
+					const FVector2D Q = Va + FVector2D(FMath::Cos(Tr * PI / 4.0), FMath::Sin(Tr * PI / 4.0)) * Dd;
+					FRDWSample Sq; Sample(Q.X, Q.Y, Sq, false);
+					if (Sq.Road <= 0.1f && RingOff(Q)) { Va = Q; Sv = Sq; bMoved = true; }
+				}
+				if (bMoved) break;
+			}
+		// (the towns and quests' distances after any step (PR #91's review))
+		double Dv; NearestTown(Va.X, Va.Y, Dv);
+		bool bOk = Dv >= 2600.0 && Sv.Road <= 0.1f && RingOff(Va);
+		for (const FRDWildPlace& Q : QuestPlaces) if (FVector2D::Distance(Q.At, Va) < 600.0) bOk = false;
+		if (bOk)
+		{
+			const FString Vb = Biomes[Sv.Biome].Name;
+			bOk = Sv.WaterKind == 0 && Sv.H >= 2.f && Sv.Road <= 0.1f && Sv.Lava <= 0.3f && Vb != TEXT("arctic regions") && Vb != TEXT("glacial");
+		}
+		if (bOk)
+		{
+			FRDWildPlace V;
+			V.Id = ((Cell.X & 0x3FF) << 14) | ((Cell.Y & 0x3FF) << 4) | 0;
+			V.Kind = RDWKinds[0]; V.At = Va; V.H = Sv.H; V.Biome = Sv.Biome; V.Tier = TierAt(Va.X, Va.Y);
+			V.Name = NameFor(V.Kind, Hash(Cell.X, Cell.Y, Seed + 134u));
+			V.Yaw = Rand01(Cell.X, Cell.Y, Seed + 135u) * 360.f;
+			Out.Add(V); Village = Va;
+		}
+	}
+	// ---- the cell's other place: 30 % of the cells (2.5 times the 4 km cells' 48 %), 48 % within 1 km of a road between towns ("add
+	// more along the roads between the cities"); never a village (the village has its own draw), 400 m or more from it
 	const FVector2D At(X0 + (0.2 + 0.6 * Rand01(Cell.X, Cell.Y, Seed + 122u)) * PlaceCellM, Y0 + (0.2 + 0.6 * Rand01(Cell.X, Cell.Y, Seed + 123u)) * PlaceCellM);
+	const float R = Rand01(Cell.X, Cell.Y, Seed + 121u);
+	if (R > PlaceChanceByRoad || (R > PlaceChance && !NearTownRoad(At, 1000.0))) return;
+	if (FVector2D::Distance(At, Village) < 400.0) return;
 	double Dt; NearestTown(At.X, At.Y, Dt);
 	if (Dt < 2600.0) return;
 	// (none on top of a quest's place)
@@ -1729,16 +1789,15 @@ void FRDWildWorld::PlacesIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 	if (S.WaterKind != 0 || S.H < 2.f || S.Road > 0.1f) return;
 	const FString Bn = Biomes[S.Biome].Name;
 	// the kinds a region holds, weighted
-	float Wt[8] = { 1.f, 1.f, 1.2f, 1.f, 1.f, 0.7f, 0.6f, 0.8f };
+	float Wt[8] = { 0.f, 1.f, 1.2f, 1.f, 1.f, 0.7f, 0.6f, 0.8f };          // (no village: the villages have their own draw above)
 	const bool bOpen = Bn == TEXT("plains") || Bn == TEXT("grasslands") || Bn == TEXT("meadows") || Bn == TEXT("farms") || Bn == TEXT("coastal regions") || Bn == TEXT("savannahs");
 	const bool bHigh = Bn.Contains(TEXT("mountain")) || Bn == TEXT("hills") || Bn == TEXT("mesas") || Bn.Contains(TEXT("canyon")) || Bn == TEXT("rocky coastal") || Bn == TEXT("glacial");
 	const bool bWild = Bn.Contains(TEXT("forest")) || Bn == TEXT("taigas") || Bn == TEXT("marshes") || Bn == TEXT("wetlands") || Bn.Contains(TEXT("volcan")) || Bn == TEXT("geothermal caldera");
-	if (bOpen) { Wt[0] = 1.6f; Wt[2] = 2.f; Wt[6] = 0.1f; }
-	if (!bOpen) Wt[0] = 0.15f;
+	if (bOpen) { Wt[2] = 2.f; Wt[6] = 0.1f; }
 	if (bHigh) { Wt[6] = 2.5f; Wt[7] = 1.4f; Wt[2] = 0.4f; Wt[4] = 1.4f; }
 	if (bWild) { Wt[7] = 2.f; Wt[3] = 1.6f; Wt[1] = 1.4f; }
 	if (Bn == TEXT("highland moorland") || Bn == TEXT("tundras") || Bn == TEXT("cold steppes")) Wt[5] = 2.2f;
-	if (Bn == TEXT("arctic regions") || Bn == TEXT("glacial")) { Wt[0] = 0.f; Wt[2] = 0.2f; }
+	if (Bn == TEXT("arctic regions") || Bn == TEXT("glacial")) Wt[2] = 0.2f;
 	float Sum = 0.f; for (float W : Wt) Sum += W;
 	float Pick = Rand01(Cell.X, Cell.Y, Seed + 124u) * Sum;
 	int32 K = 0; for (; K < 7; ++K) { if (Pick < Wt[K]) break; Pick -= Wt[K]; }
@@ -1748,6 +1807,27 @@ void FRDWildWorld::PlacesIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 	P.Name = NameFor(P.Kind, Hash(Cell.X, Cell.Y, Seed + 125u));
 	P.Yaw = Rand01(Cell.X, Cell.Y, Seed + 126u) * 360.f;
 	Out.Add(P);
+}
+
+bool FRDWildWorld::NearTownRoad(const FVector2D& P, double R) const
+{
+	// (the road hash's cells over P +- R, the roads between towns only (not the tracks): a segment within R)
+	const int32 I0 = FMath::FloorToInt((P.X - R) / HashM), I1 = FMath::FloorToInt((P.X + R) / HashM);
+	const int32 J0 = FMath::FloorToInt((P.Y - R) / HashM), J1 = FMath::FloorToInt((P.Y + R) / HashM);
+	TArray<uint32> Vals;
+	for (int32 I = I0; I <= I1; ++I)
+		for (int32 J = J0; J <= J1; ++J)
+		{
+			Vals.Reset(); SegHash.MultiFind(FIntPoint(I, J), Vals);
+			for (const uint32 V : Vals)
+			{
+				if (!(V >> 31)) continue;
+				const int32 Ri = (V >> 16) & 0x7FFF, Si = V & 0xFFFF;
+				if (!Roads.IsValidIndex(Ri) || Roads[Ri].bTrack || !Roads[Ri].P.IsValidIndex(Si + 1)) continue;
+				double T; if (RDWSegDist(P, Roads[Ri].P[Si], Roads[Ri].P[Si + 1], T) <= R) return true;
+			}
+		}
+	return false;
 }
 
 bool FRDWildWorld::FindPlace(int32 Id, FRDWildPlace& Out) const

@@ -287,12 +287,24 @@ def fly(on):
 def hover_at(x, y, over=300.0):
     z = sample(x, y)["z"] + over
     G["pawn"].set_actor_location(V(x * 100.0, y * 100.0, z), False, True)
+def actor_census():
+    """the world's actors by class (the 12 most), all, and the generator's lists that grow (the list of 2026-11-16: what a walk keeps)"""
+    g = G["gen"]; by = {}
+    for a in GS.get_all_actors_of_class(G["w"], unreal.Actor):
+        n_ = a.get_class().get_name(); by[n_] = by.get(n_, 0) + 1
+    top = dict(sorted(by.items(), key=lambda kv: -kv[1])[:12])
+    lists = {}
+    for k_ in ("loot_piles",):
+        try: lists[k_] = len(g.get_editor_property(k_))
+        except Exception: pass
+    return {"actors": sum(by.values()), "top": top, "lists": lists}
+
 def step_stream():
     g = G["gen"]; res = {}; quiet(True)
     yield from wait_ready(90)
     sx, sy = 3200.0, 2600.0
     g.wild_put_her(sx, sy); yield from wait_chunks(40, 56)
-    yield from rwait(2.0); res["mem_start"] = gc_mem(); s0 = state()
+    yield from rwait(2.0); res["mem_start"] = gc_mem(); s0 = state(); res["census_start"] = actor_census()
     fly(True)
     mx = 0; viol = 0; samples = []
     cm = g.get_editor_property("wild_chunk_m"); drop = g.get_editor_property("wild_drop_m")
@@ -305,17 +317,23 @@ def step_stream():
                 cx, cy = (c["x"] + 0.5) * cm, (c["y"] + 0.5) * cm
                 if abs(cx - sx) > drop + 1 or abs(cy - y) > drop + 1: viol += 1
             if k % 15 == 0: samples.append({"y": y, "chunks": len(cs), "near": sum(c["near"] for c in cs), "mem": round(g.get_memory_mb())})
-        if leg > 0: res["mem_far"] = gc_mem()
+        if leg > 0: res["mem_far"] = gc_mem(); res["census_far"] = actor_census()
     fly(False)
     g.wild_put_her(sx, sy); yield from wait_chunks(30, 56); yield from rwait(2.0)
-    res["mem_back"] = gc_mem(); s1 = state()
+    res["mem_back"] = gc_mem(); s1 = state(); res["census_back"] = actor_census()
     res["max_chunks"] = mx; res["outside_square"] = viol; res["samples"] = samples
     res["dropped"] = s1["dropped"] - s0["dropped"]; res["built"] = s1["built"] - s0["built"]
     res["active_km2_max"] = round(mx * cm * cm / 1e6, 2)
     res["compute_ms"] = s1["compute_ms"]; res["build_ms_max"] = s1["build_ms_max"]
     quiet(False)
     # (the 2 km square: a chunk is made when its middle is within 1 km of her on both axes, dropped past 1.125 km: 9 x 9 at most)
-    ok = mx <= 81 and viol == 0 and res["dropped"] >= 60 and res["built"] >= 60 and res["mem_back"] - res["mem_start"] < 700
+    # (what a walk keeps: the way back over the same ground adds nothing (the chunks and what they lay go with them: the actors' census
+    # the same at the start, the far end and back); the way out loads each new kind's assets once (meshes, textures: the list of
+    # 2026-11-16's density shows more kinds sooner: +1459 MB out where the 4 km world loaded +394, the census 598 / 581 / 658 actors).
+    # Measured as the return's growth; the first loads are reported (the packaged walk holds the whole to its limit))
+    res["out_growth_mb"] = res["mem_far"] - res["mem_start"]; res["back_growth_mb"] = res["mem_back"] - res["mem_far"]
+    ok = mx <= 81 and viol == 0 and res["dropped"] >= 60 and res["built"] >= 60 and res["back_growth_mb"] < 300 \
+        and res["mem_back"] - res["mem_start"] < 1800 and abs(res["census_back"]["actors"] - res["census_start"]["actors"]) < 120          # (the whole bounded too: PR #91's review)
     step_result("stream", ok, **res)
 
 
@@ -910,16 +928,25 @@ def step_poi7():
     uses = {}
     near = [p for p in CANDS.values() if p["kind"] in ("abandoned_camp", "lost_body", "herb_patch", "ore_vein", "grave", "cairn", "wayshrine", "milestone", "broken_wagon", "standing_stones", "hermit_hut", "ruined_wall")]
     want = {}
+    loot_cands = []
     for p in sorted(near, key=lambda q: math.hypot(q["x"] - b["x"], q["y"] - b["y"])):
         use = {"abandoned_camp": "loot", "lost_body": "loot", "broken_wagon": "loot", "herb_patch": "loot", "ore_vein": "loot", "grave": "lore", "cairn": "lore", "ruined_wall": "lore",
                "wayshrine": "heal", "hermit_hut": "heal", "milestone": "milestone", "standing_stones": "buff"}[p["kind"]]
         if use not in want: want[use] = p
+        if use == "loot": loot_cands.append(p)
+    # (a loot point's pile is laid only when its roll gives something: the nearest loot points tried in turn until one holds a pile
+    # (the denser world's nearest was a lost body whose roll was empty))
     for use, p in want.items():
         g.wild_drop_all(); g.wild_put_her(p["x"] - 6.0, p["y"]); yield from wait_chunks(30, 50); yield from rwait(1.0)
         c = cb()
         if use == "loot":
-            piles = [x for x in g.get_editor_property("loot_piles") if x and unreal.SystemLibrary.is_valid(x) and math.hypot(x.get_actor_location().x / 100 - p["x"], x.get_actor_location().y / 100 - p["y"]) < 6]
-            if not piles: uses[use] = {"kind": p["kind"], "piles": 0}; continue
+            piles = []
+            for lp in loot_cands[:6]:
+                g.wild_drop_all(); g.wild_put_her(lp["x"] - 6.0, lp["y"]); yield from wait_chunks(30, 50); yield from rwait(1.0)
+                piles = [x for x in g.get_editor_property("loot_piles") if x and unreal.SystemLibrary.is_valid(x) and math.hypot(x.get_actor_location().x / 100 - lp["x"], x.get_actor_location().y / 100 - lp["y"]) < 6]
+                if piles: break
+            p = lp
+            if not piles: uses[use] = {"kind": p["kind"], "piles": 0, "tried": len(loot_cands[:6])}; continue
             at = piles[0].get_actor_location(); things = [str(t) for t in piles[0].things]
             G["pawn"].set_actor_location(V(at.x - 90.0, at.y, at.z + 100.0), False, True); yield from rwait(0.5)
             n_before = {t: c.get_item_count(t) for t in set(things)}
@@ -4271,6 +4298,124 @@ def step_cities14():
     step_result("cities14", ok, **res)
 
 
+def density14_counts():
+    """what the wilds place round Brokenspire: places by kind within 12 km, structures and scenery within 12 km (their counts by kind
+    summed), points of interest within 1.5 km of four spots, farmsteads within 6 km"""
+    g = G["gen"]; out = {"places": {}}
+    for l in g.get_wild_places_near(V(0, 0, 0), 12000.0):
+        q = str(l).split("|")
+        if q[1] in ("town", "city"): continue
+        if q[0].isdigit() and int(q[0]) >= (1 << 24): continue
+        out["places"][q[1]] = out["places"].get(q[1], 0) + 1
+    def summed(lines):
+        n_ = 0
+        for l in lines:
+            q = str(l).split("|")
+            try: n_ += int(q[1])
+            except (ValueError, IndexError): pass
+        return n_
+    out["sites_12km"] = summed(g.count_wild_sites(0.0, 0.0, 12.0)); out["scenery_12km"] = summed(g.count_wild_scenery(0.0, 0.0, 12.0))
+    n_poi = 0
+    for cx, cy in ((4000, 3000), (-3000, 5000), (6000, -4000), (-5000, -3000)):
+        n_poi += sum(1 for l in g.get_wild_places_near(V(cx * 100.0, cy * 100.0, 0), 1500.0) if int(str(l).split("|")[0]) >= (1 << 24) and int(str(l).split("|")[0]) < (1 << 26))
+    out["pois_4x1.5km"] = n_poi
+    out["farmsteads_6km"] = len(g.find_wild_farmsteads(0.0, 0.0, 6000.0))
+    return out
+
+def step_density14():
+    """the list of 2026-11-16's thirteenth phase (items 23, 24: "2.5 times the density ... add more along the roads between the cities";
+    "remove the rule for villages to be refused placement if it's near a road ... villages can now be within 1km - 3km of each other"):
+    the counts round Brokenspire (against the record of the build before: test_s14p13d0's), the villages' nearest neighbours (1 to 3 km),
+    villages within 300 m of a road, the places more by the roads between towns than away from them"""
+    g = G["gen"]; res = {}
+    yield from wait_ready(90)
+    res["counts"] = density14_counts()
+    # (the villages over 40 km round Ashenreach's road: their nearest neighbours)
+    vil = []
+    for cx, cy in ((10000, 0), (25000, 0), (40000, 10000), (25000, 20000)):
+        for l in g.get_wild_places_near(V(cx * 100.0, cy * 100.0, 0), 9000.0):
+            q = str(l).split("|")
+            if q[1] == "village": vil.append((int(q[0]), float(q[3]), float(q[4])))
+    vil = list({v[0]: v for v in vil}.values())
+    nn = []
+    for i, a in enumerate(vil):
+        d_ = min((math.hypot(a[1] - b[1], a[2] - b[2]) for j, b in enumerate(vil) if j != i), default=None)
+        if d_ is not None: nn.append(d_)
+    nn.sort()
+    res["villages"] = len(vil)
+    res["nearest_m"] = {"min": round(nn[0]) if nn else None, "p10": round(nn[len(nn) // 10]) if nn else None, "median": round(nn[len(nn) // 2]) if nn else None,
+                        "p90": round(nn[len(nn) * 9 // 10]) if nn else None, "max": round(nn[-1]) if nn else None, "share_1_3km": round(sum(1 for d_ in nn if 1000 <= d_ <= 3000) / max(len(nn), 1), 2)}
+    near_road = 0
+    for v_ in vil[:60]:
+        if road_within(v_[1], v_[2], 300.0) is not None: near_road += 1
+    res["villages_within_300m_of_a_road"] = near_road
+    # (places by the roads between towns against away from them: places a square km within 1 km of the road out of Brokenspire's gate
+    # toward Ashenreach, and 3 to 6 km off it)
+    # (the places other than villages a square km within 1 km of a road between towns, against those farther: 48 % of the cells by a road,
+    # 30 % elsewhere (PR #91's review: never measured))
+    near_n = far_n = near_c = far_c = 0
+    for cx in range(-20000, 60001, 2000):
+        for cy in range(-30000, 30001, 2000):
+            if not g.is_near_town_road14(float(cx) + 1000.0, float(cy) + 1000.0, 1000.0) and not g.is_near_town_road14(float(cx) + 1000.0, float(cy) + 1000.0, 4000.0):
+                far_c += 1; tgt_ = "far"
+            elif g.is_near_town_road14(float(cx) + 1000.0, float(cy) + 1000.0, 1000.0):
+                near_c += 1; tgt_ = "near"
+            else: continue
+            for l in g.get_wild_places_near(V((cx + 1000.0) * 100.0, (cy + 1000.0) * 100.0, 0), 1000.0):
+                q = str(l).split("|")
+                if q[1] in ("village", "town", "city") or int(q[0]) >= (1 << 24): continue
+                if tgt_ == "near": near_n += 1
+                else: far_n += 1
+        yield
+    res["by_road"] = {"near_cells": near_c, "near_places": near_n, "far_cells": far_c, "far_places": far_n,
+                      "near_per_cell": round(near_n / max(near_c, 1), 3), "far_per_cell": round(far_n / max(far_c, 1), 3)}
+    base = None
+    try:
+        import json as _j
+        bj = _j.load(open(os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "SourceArt", "wilderness", "test_s14p13d0.json"), encoding="utf-8"))
+        base = next((s_["counts"] for s_ in bj["steps"] if s_["step"] == "density14"), None)
+    except Exception: base = None
+    res["before"] = base
+    if base:
+        tot = lambda c_: sum(v_ for k_, v_ in c_["places"].items() if k_ != "village")          # (the villages apart: PR #91's review)
+        res["ratios"] = {"places": round(tot(res["counts"]) / max(tot(base), 1), 2), "sites": round(res["counts"]["sites_12km"] / max(base["sites_12km"], 1), 2),
+                         "scenery": round(res["counts"]["scenery_12km"] / max(base["scenery_12km"], 1), 2), "pois": round(res["counts"]["pois_4x1.5km"] / max(base["pois_4x1.5km"], 1), 2),
+                         "farmsteads": round(res["counts"]["farmsteads_6km"] / max(base["farmsteads_6km"], 1), 2)}
+    r_ = res.get("ratios") or {}
+    ok = bool(r_) and all(1.8 <= r_.get(k_, 0) for k_ in ("places", "sites", "scenery", "pois", "farmsteads")) \
+        and res["nearest_m"]["share_1_3km"] >= 0.8 and res["villages"] >= 20 and near_road >= 1 \
+        and res["by_road"]["near_per_cell"] > res["by_road"]["far_per_cell"] * 1.2
+    step_result("density14", ok, **res)
+
+def step_discover14():
+    """the list of 2026-11-16's thirteenth phase (item 26: "increase the discovery of a point of interest on the mini map and large map
+    out to 500m"): an unfound village 600 m off stays unfound; at 450 m it is found (and on the maps); the maps uncovered 480 m off"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    tgt = None
+    for l in g.get_wild_places_near(V(2500000.0, 0, 0), 8000.0):
+        q = str(l).split("|")
+        if q[1] == "village" and q[-1] == "0": tgt = (int(q[0]), float(q[3]), float(q[4])); break
+    if not tgt: quiet(False); step_result("discover14", False, error="no unfound village"); return
+    res["village"] = tgt
+    def found():
+        return any(str(l).split("|")[0] == str(tgt[0]) and str(l).split("|")[-1] == "1" for l in g.get_wild_places_near(V(tgt[1] * 100.0, tgt[2] * 100.0, 0), 200.0))
+    try:
+        for d_, key in ((600.0, "at_600m"), (450.0, "at_450m")):
+            x_, y_ = tgt[1] - d_, tgt[2]
+            for k_ in range(16):
+                a_ = k_ * math.pi / 8; x_, y_ = tgt[1] + math.cos(a_) * d_, tgt[2] + math.sin(a_) * d_
+                if int(sample(x_, y_)["water"]) == 0: break
+            g.wild_put_her(x_, y_); yield from wait_chunks(30, 50); yield from rwait(2.0)
+            res[key] = found()
+        res["revealed_480m"] = bool(g.wild_revealed_at(x_ + 480.0, y_))
+        g.set_map_open(True); yield from rwait(1.5); shot("discover14_map", "1280x720"); g.set_map_open(False)
+    finally:
+        g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40); quiet(False)
+    ok = res.get("at_600m") is False and res.get("at_450m") is True and res.get("revealed_480m")
+    step_result("discover14", ok, **res)
+
+
 def step_sleep14():
     """the list of 2026-11-16's seventh phase (item 16: "the NPCs at farms should sleep at night"): at the first farmstead near
     Brokenspire, its family at 20:00 walk home (time sped up) and go into their farmhouse; at 23:00 each is asleep indoors, those with
@@ -5919,7 +6064,7 @@ def step_horse14():
     step_result("horse14", ok, **res)
 
 LOCK_STEPS = ("locks14",)
-STEPS = {"cities14": step_cities14, "save14": step_save14, "storm14": step_storm14, "locks14": step_locks14, "npc14": step_npc14, "farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"density14": step_density14, "discover14": step_discover14, "cities14": step_cities14, "save14": step_save14, "storm14": step_storm14, "locks14": step_locks14, "npc14": step_npc14, "farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)
