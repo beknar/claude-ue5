@@ -154,6 +154,9 @@ public:
 	/** her things lying where she fell when she left a level (each pile's things, wear and worn shield; its Hero is the
 	 *  level it lay in, "castle" or "town"): laid again where she comes into that level the next time */
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TArray<FRDCarry> HerPiles;
+	/** the list of 2026-11-16: a save of an older world was loaded (URDSaveGame::DropOldWorld); the wilds give the captain's wild quests
+	 *  back and tell her once (not saved) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") bool bOldWorld = false;
 	/** the town's time of day (hours, 0-24; -1: a new game, the town starts its day at TownStartHour) and which day it is:
 	 *  kept while she is in the castle (the castle is indoors: its clock stands still there) */
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TownHour = -1.f;

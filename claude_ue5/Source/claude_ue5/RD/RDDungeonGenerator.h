@@ -2600,6 +2600,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") float WildLostCalmSeconds14 = 6.f;
 	/** tests: every person calmed, a pick under way dropped */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") void CalmWildFolk14();
+	/** the list of 2026-11-16's eleventh phase: an older world's save loaded (RDSave.cpp's DropOldWorld): the line she is told, and how
+	 *  many of the captain's wild quests were given back (tests) */
+	FString WildOldWorldNotice;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 WildOldWorldQuestsBack = -1;
+	int32 GiveBackWildQuests14();
+	/** tests: an older world's save's drop, here and now; the captain's wild quests given back */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List14") int32 DebugOldWorld14();
 	/** the list of 2026-11-16's tenth phase (RDList14j.cpp, 932): storms by strength (0 light, 1 moderate, 2 strong, 3 violent), drawn
 	 *  with each weather that carries rain, snow or dust; lightning in a storm of moderate strength or more */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List14") bool bLightning14 = false;
@@ -3344,7 +3351,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildMapOpenMpp = 5.f;
 	double WildMapMinMpp = 0.9, WildMapMaxMpp = 380.0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") int32 WildMapMaxTiles = 360;
-	int32 WildMapMaxLevel = 10, WildMapMaxInFlight = 16, WildMiniLevel = 9;
+	int32 WildMapMaxLevel = 9, WildMapMaxInFlight = 16, WildMiniLevel = 8;          // (the list of 2026-11-16: 10 and 9 at 300 km; a tile's span is the frame's over 2^level, so one lower keeps their detail at 150 km)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildMiniRadiusM = 280.f;
 	FVector4 WildFogFor = FVector4(0, 0, 0, 0);
 	int32 WildFogVersion = -1;

@@ -237,9 +237,14 @@ struct FRDWFarm
 class CLAUDE_UE5_API FRDWildWorld
 {
 public:
-	// ---- the continent's frame (metres)
-	double Xs = -80000.0, Xn = 220000.0, Yw = -150000.0, Ye = 150000.0;
-	double CellM = 14000.0;      // a biome region's cell
+	// ---- the continent's frame (metres): 150 x 150 km since the list of 2026-11-16 ("reduce the size of the continent to 150km x
+	// 150km"; 300 x 300 km before), Brokenspire 40 km from its south edge, mid-way across
+	double Xs = -40000.0, Xn = 110000.0, Yw = -75000.0, Ye = 75000.0;
+	double CellM = 7000.0;      // a biome region's cell (14 km at 300 km: as many regions, each a quarter of the ground)
+	/** the continent's scale against the 300 km it was made at: every distance and wavelength of the continent's own (its coast, its
+	 *  climate, its relief's ranges, the cities' places, the port's easing) is the 300 km world's times this; local scales (a hill, a
+	 *  town's ground, a road's bed) are not */
+	double WorldK() const { return (Xn - Xs) / 300000.0; }
 	float SeaDepth = 60.f;
 
 	uint32 Seed = 1;

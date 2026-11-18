@@ -4,6 +4,7 @@
 // else of the terrain is kept), the grass and the trees' collision only round her; the map's fog lifted round her and the
 // places she comes to found.
 #include "RD/RDDungeonGenerator.h"
+#include "RD/RDSave.h"
 #include "RD/RDWild.h"
 #include "RD/RDWildChunkData.h"
 #include "RD/RDSection.h"
@@ -73,6 +74,9 @@ void ARDDungeonGenerator::StartWild()
 		for (const int32 Id : GI->WildFound) WildFound.Add(Id);
 	}
 	if (WildFound.Num() == 0) WildFound.Add(FRDWildWorld::TownIdBase);      // (Brokenspire: known from the start)
+	// (the list of 2026-11-16's eleventh phase: a save of an older world: the captain's wild quests (the den, the patrol), their places
+	// moved, given back to him to take again; she is told once she stands in the square)
+	if (URDGameInstance* GIw = URDGameInstance::Of(this); GIw && GIw->bOldWorld) GiveBackWildQuests14();
 	TSharedPtr<FRDWildWorld, ESPMode::ThreadSafe> W = Wild;
 	const TArray<FRDWildBiome> Biomes = WildBiomes;
 	const TArray<FRDWildPoiKind> Pois = WildPoiKinds; const float Fill = WildPoiFill;
@@ -88,12 +92,38 @@ void ARDDungeonGenerator::StartWild()
 	UE_LOG(LogRDWild, Log, TEXT("RDWILD the world asked for (seed %u, %d biomes)"), Seed, Biomes.Num());
 }
 
+int32 ARDDungeonGenerator::GiveBackWildQuests14()
+{
+	// (an older world's save: the captain's wild quests (the den, the patrol), their places moved, given back to him to take again;
+	// she is told once she stands in the square)
+	URDGameInstance* GI = URDGameInstance::Of(this);
+	if (!GI) return 0;
+	GI->bOldWorld = false;
+	int32 Back = 0;
+	for (const FRDQuestDef& Q : Quests) if (Q.Goal.StartsWith(TEXT("wild:"))) Back += GI->Quests.RemoveAll([&Q](const FRDQuestState& S) { return S.Id == Q.Id; });
+	WildOldWorldNotice = Back > 0 ? FString::Printf(TEXT("The wilds have changed since this game was saved: you wake in Brokenspire, and the captain's %d quest(s) wait to be taken again"), Back)
+		: FString(TEXT("The wilds have changed since this game was saved: you wake in Brokenspire"));
+	WildOldWorldQuestsBack = Back;
+	UE_LOG(LogRDWild, Log, TEXT("RDWILD an older world's save: %d of the captain's wild quests given back"), Back);
+	return Back;
+}
+
+int32 ARDDungeonGenerator::DebugOldWorld14()
+{
+	// (tests: what loading an older world's save does to the game instance, here and now (DropOldWorld), and the quests given back)
+	URDGameInstance* GI = URDGameInstance::Of(this);
+	if (!GI) return -1;
+	URDSaveGame::DropOldWorld(GI, 1);
+	return GiveBackWildQuests14();
+}
+
 void ARDDungeonGenerator::TickWild(float Dt, APlayerController* PC)
 {
 	++WildTicks;
 	if (!Wild.IsValid()) StartWild();
 	if (!IsWildReady()) return;
 	if (!bWildMadeLogged) { bWildMadeLogged = true; UE_LOG(LogRDWild, Log, TEXT("RDWILD the world made in %.2f s: %d rivers, %d lakes, %d roads, %d biome cells"), Wild->InitSeconds, Wild->Rivers.Num(), Wild->Lakes.Num(), Wild->Roads.Num(), Wild->CellBiome.Num()); }
+	if (!WildOldWorldNotice.IsEmpty() && PlayerCombat && GetWorld() && GetWorld()->GetTimeSeconds() > 3.f) { PlayerCombat->ShowMessage(WildOldWorldNotice); WildOldWorldNotice.Reset(); }
 	TickWildLoad();
 	TickWildFarms();
 	APawn* P = PC ? PC->GetPawn() : nullptr;

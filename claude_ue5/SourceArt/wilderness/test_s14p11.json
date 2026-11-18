@@ -1,0 +1,704 @@
+{
+ "tag": "s14p11",
+ "plan": [
+  "world",
+  "map",
+  "towns",
+  "travel",
+  "quests",
+  "save14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "world",
+   "ok": true,
+   "state": {
+    "ready": 1,
+    "seed": 20261103,
+    "init_s": 0.17,
+    "chunks": 16,
+    "in_flight": 49,
+    "built": 15,
+    "dropped": 0,
+    "max_active": 16,
+    "compute_ms": 112.3,
+    "build_ms_max": 9.1,
+    "revealed": 112,
+    "found": 1,
+    "towns": 6,
+    "wild_ticks": 18,
+    "gen_ticks": 18,
+    "paused": 0,
+    "menu": 0,
+    "panel": 0
+   },
+   "towns": {
+    "Brokenspire": {
+     "kind": "town",
+     "x": 0.0,
+     "y": 0.0,
+     "h": 87.5,
+     "style": 0
+    },
+    "Ashenreach": {
+     "kind": "city",
+     "x": 35000.0,
+     "y": 0.0,
+     "h": 87.5,
+     "style": 1
+    },
+    "Graymourne": {
+     "kind": "coast",
+     "x": 99050.0,
+     "y": 0.0,
+     "h": 87.5,
+     "style": 1
+    },
+    "Vel Morrath": {
+     "kind": "city",
+     "x": 27500.0,
+     "y": 37500.0,
+     "h": 87.5,
+     "style": 1
+    },
+    "Kethrys Spire": {
+     "kind": "city",
+     "x": 76300.0,
+     "y": -35000.0,
+     "h": 87.5,
+     "style": 1
+    },
+    "Heaven": {
+     "kind": "city",
+     "x": 57140.0,
+     "y": -55459.0,
+     "h": 87.5,
+     "style": 1
+    }
+   },
+   "graymourne_sea_north_m": 200.0,
+   "velmorrath_sea_east_m": null,
+   "kethrys_from_graymourne_km": 41.7,
+   "heaven_from_kethrys_km": 28.0,
+   "checks": {
+    "brokenspire_mid_south": true,
+    "ashenreach_middle": true,
+    "ashenreach_north_of_brokenspire": true,
+    "graymourne_north_coast": true,
+    "velmorrath_north_east": true,
+    "velmorrath_inland": true,
+    "kethrys_north_west_inland": true,
+    "heaven_past_kethrys_inland": true
+   },
+   "biomes": {
+    "grasslands": {
+     "cells": 7,
+     "x": 4473.0,
+     "y": -386.0,
+     "km": 4.5
+    },
+    "meadows": {
+     "cells": 12,
+     "x": 6393.0,
+     "y": 5922.0,
+     "km": 8.7
+    },
+    "farms": {
+     "cells": 3,
+     "x": 1500.0,
+     "y": -1200.0,
+     "km": 1.9
+    },
+    "savannahs": {
+     "cells": 13,
+     "x": -6753.0,
+     "y": -17321.0,
+     "km": 18.6
+    },
+    "hills": {
+     "cells": 47,
+     "x": -9691.0,
+     "y": 5298.0,
+     "km": 11.0
+    },
+    "mountains": {
+     "cells": 22,
+     "x": 10297.0,
+     "y": 309.0,
+     "km": 10.3
+    },
+    "tundras": {
+     "cells": 12,
+     "x": 59340.0,
+     "y": -10162.0,
+     "km": 60.2
+    },
+    "plains": {
+     "cells": 29,
+     "x": 696.0,
+     "y": -7962.0,
+     "km": 8.0
+    },
+    "pine forests": {
+     "cells": 14,
+     "x": 31240.0,
+     "y": -16920.0,
+     "km": 35.5
+    },
+    "temperate autumn forests": {
+     "cells": 4,
+     "x": 13327.0,
+     "y": -38638.0,
+     "km": 40.9
+    },
+    "marshes": {
+     "cells": 1,
+     "x": 24578.0,
+     "y": 12997.0,
+     "km": 27.8
+    },
+    "wetlands": {
+     "cells": 1,
+     "x": 20688.0,
+     "y": 18403.0,
+     "km": 27.7
+    },
+    "mountains and peaks": {
+     "cells": 10,
+     "x": -15178.0,
+     "y": -17778.0,
+     "km": 23.4
+    },
+    "volcanoes": {
+     "cells": 1,
+     "x": 12224.0,
+     "y": 3070.0,
+     "km": 12.6
+    },
+    "coastal regions": {
+     "cells": 28,
+     "x": -30759.0,
+     "y": -1256.0,
+     "km": 30.8
+    },
+    "arctic regions": {
+     "cells": 1,
+     "x": 83986.0,
+     "y": 19003.0,
+     "km": 86.1
+    },
+    "canyons": {
+     "cells": 1,
+     "x": -8010.0,
+     "y": -8654.0,
+     "km": 11.8
+    },
+    "mesas": {
+     "cells": 1,
+     "x": -16411.0,
+     "y": 4553.0,
+     "km": 17.0
+    },
+    "canyon networks": {
+     "cells": 2,
+     "x": -13056.0,
+     "y": -2913.0,
+     "km": 13.4
+    },
+    "cold steppes": {
+     "cells": 9,
+     "x": 39773.0,
+     "y": 34767.0,
+     "km": 52.8
+    },
+    "highland moorland": {
+     "cells": 20,
+     "x": 26589.0,
+     "y": 19204.0,
+     "km": 32.8
+    },
+    "boreal pine forest": {
+     "cells": 6,
+     "x": 52585.0,
+     "y": -23485.0,
+     "km": 57.6
+    },
+    "temperate aspen": {
+     "cells": 14,
+     "x": 31221.0,
+     "y": -10281.0,
+     "km": 32.9
+    },
+    "volcanic tundra": {
+     "cells": 7,
+     "x": 61491.0,
+     "y": -788.0,
+     "km": 61.5
+    },
+    "burned plain": {
+     "cells": 2,
+     "x": 37500.0,
+     "y": 0.0,
+     "km": 37.5
+    },
+    "geothermal caldera": {
+     "cells": 5,
+     "x": 27843.0,
+     "y": -43825.0,
+     "km": 51.9
+    },
+    "glacial": {
+     "cells": 18,
+     "x": 56772.0,
+     "y": -31068.0,
+     "km": 64.7
+    },
+    "taigas": {
+     "cells": 4,
+     "x": 67602.0,
+     "y": 20796.0,
+     "km": 70.7
+    },
+    "rocky coastal": {
+     "cells": 235,
+     "x": -22859.0,
+     "y": -13097.0,
+     "km": 26.3
+    }
+   },
+   "missing_templates": [],
+   "rivers": 37,
+   "lakes": 68,
+   "roads": [
+    "road|Brokenspire|Ashenreach|44.6|14|-272",
+    "road|Ashenreach|Graymourne|100.3|35300|0",
+    "road|Brokenspire|Vel Morrath|73.4|14|-272",
+    "road|Ashenreach|Vel Morrath|42.7|34941|294",
+    "road|Graymourne|Kethrys Spire|46.0|98887|-252",
+    "road|Kethrys Spire|Heaven|29.8|76095|-35219"
+   ],
+   "river_lengths_km": [
+    28.6,
+    23.7,
+    18.8,
+    16.4,
+    15.1,
+    14.6,
+    14.0,
+    13.6
+   ],
+   "map_continent": {
+    "ok": true,
+    "s": 1.1
+   },
+   "map_around": {
+    "ok": true,
+    "s": 0.8
+   },
+   "map_near": {
+    "ok": true,
+    "s": 0.7
+   },
+   "place_ids": {
+    "count": 12,
+    "north": 3,
+    "town_range_not_towns": [],
+    "shared": []
+   }
+  },
+  {
+   "step": "map",
+   "ok": true,
+   "minimap_drawn": true,
+   "open": {
+    "cx": 900.0,
+    "cy": -700.0,
+    "mpp": 5.0,
+    "level": 7.0,
+    "tiles": 26.0,
+    "asked": 0.0,
+    "tile_ms": 331.0,
+    "hover": -1.0,
+    "hover_name": "",
+    "made": 26.0,
+    "refusal": "",
+    "last_travel": ""
+   },
+   "drawn": [
+    "wmap_town",
+    "mapc_scroll_edge",
+    "mapc_compass",
+    "wild_map"
+   ],
+   "map_region": {
+    "cx": 2000.0,
+    "cy": 0.0,
+    "mpp": 60.0,
+    "level": 3.0,
+    "tiles": 37.0,
+    "asked": 0.0,
+    "tile_ms": 313.6,
+    "hover": -1.0,
+    "hover_name": "",
+    "made": 37.0,
+    "refusal": "",
+    "last_travel": ""
+   },
+   "map_region_drawn": [
+    "wmap_town"
+   ],
+   "map_country": {
+    "cx": 20000.0,
+    "cy": 10000.0,
+    "mpp": 160.0,
+    "level": 2.0,
+    "tiles": 45.0,
+    "asked": 0.0,
+    "tile_ms": 307.7,
+    "hover": -1.0,
+    "hover_name": "",
+    "made": 45.0,
+    "refusal": "",
+    "last_travel": ""
+   },
+   "map_country_drawn": [
+    "wmap_town",
+    "wmap_city"
+   ],
+   "map_continent": {
+    "cx": 35000.0,
+    "cy": 0.0,
+    "mpp": 165.0,
+    "level": 2.0,
+    "tiles": 52.0,
+    "asked": 0.0,
+    "tile_ms": 282.8,
+    "hover": -1.0,
+    "hover_name": "",
+    "made": 52.0,
+    "refusal": "",
+    "last_travel": ""
+   },
+   "map_continent_drawn": [
+    "wmap_town",
+    "wmap_city"
+   ],
+   "fog_drag": {
+    "frames": 40,
+    "builds": 0
+   },
+   "revealed_here": true,
+   "revealed_far": false
+  },
+  {
+   "step": "towns",
+   "ok": true,
+   "at_start": {
+    "idx": 0.0,
+    "name": "Brokenspire",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 79.0,
+    "build_s": 0.0,
+    "loaded": 0.0,
+    "dropped": 0.0,
+    "in_walls": 1.0,
+    "ox": 0.0,
+    "oy": 0.0,
+    "home": 1.0
+   },
+   "folk_start": 116,
+   "far": {
+    "idx": -1.0,
+    "name": "Brokenspire",
+    "loading": 0.0,
+    "section": 0.0,
+    "dist_m": 2300.0,
+    "build_s": 0.0,
+    "loaded": 0.0,
+    "dropped": 1.0,
+    "in_walls": 0.0,
+    "ox": 0.0,
+    "oy": 0.0,
+    "home": 1.0
+   },
+   "folk_far": 0,
+   "mem_far": 21924.0,
+   "back": {
+    "idx": 0.0,
+    "name": "Brokenspire",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 1200.0,
+    "build_s": 4.3,
+    "loaded": 1.0,
+    "dropped": 1.0,
+    "in_walls": 0.0,
+    "ox": 0.0,
+    "oy": 0.0,
+    "home": 1.0
+   },
+   "folk_back": 116,
+   "vm_near": {
+    "idx": 3.0,
+    "name": "Vel Morrath",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 1300.0,
+    "build_s": 5.7,
+    "loaded": 2.0,
+    "dropped": 2.0,
+    "in_walls": 0.0,
+    "ox": 2750000.0,
+    "oy": 3750000.0,
+    "home": 0.0
+   },
+   "minimap_outside": true,
+   "vm_in": {
+    "idx": 3.0,
+    "name": "Vel Morrath",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 63.0,
+    "build_s": 5.7,
+    "loaded": 2.0,
+    "dropped": 2.0,
+    "in_walls": 1.0,
+    "ox": 2750000.0,
+    "oy": 3750000.0,
+    "home": 0.0
+   },
+   "minimap_inside_wild": false,
+   "vm_folk": 158,
+   "vm_roles": [
+    "Beggar",
+    "Captain",
+    "Child",
+    "Drunk",
+    "Elder",
+    "Guard",
+    "Healer",
+    "Idiot",
+    "Innkeeper",
+    "Keeper",
+    "Militia",
+    "Monk",
+    "Mourner",
+    "Pilgrim",
+    "Preacher",
+    "Priest",
+    "Scholar",
+    "Smith",
+    "Soldier",
+    "Templar",
+    "Townsfolk",
+    "Trader"
+   ],
+   "vm_titles_brokenspire": [],
+   "vm_titles_own": [],
+   "vm_square": [
+    2749250,
+    3756300
+   ],
+   "vm_notables": [
+    "Archbishop Severin Aurel",
+    "Archivist Mott",
+    "Commander Ysolde Vane"
+   ]
+  },
+  {
+   "step": "travel",
+   "ok": true,
+   "hover": 98563.0,
+   "hover_name": "Wind Hollow",
+   "after": {
+    "cx": -13724.0,
+    "cy": -9033.0,
+    "mpp": 20.0,
+    "level": 5.0,
+    "tiles": 122.0,
+    "asked": 0.0,
+    "tile_ms": 321.2,
+    "hover": 98563.0,
+    "hover_name": "Wind Hollow",
+    "made": 122.0,
+    "refusal": "",
+    "last_travel": "Wind Hollow"
+   },
+   "from_place_m": 27.6,
+   "town_travel": true,
+   "town_after": {
+    "idx": 3.0,
+    "name": "Vel Morrath",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 205.0,
+    "build_s": 1.7,
+    "loaded": 3.0,
+    "dropped": 4.0,
+    "in_walls": 1.0,
+    "ox": 2750000.0,
+    "oy": 3750000.0,
+    "home": 0.0
+   },
+   "combat": true,
+   "refused": true,
+   "refusal": "You cannot travel while enemies are near"
+  },
+  {
+   "step": "quests",
+   "ok": false,
+   "places": {
+    "wild:wolves": {
+     "id": 536870912,
+     "name": "The Mill Road Den",
+     "x": 743.1,
+     "y": -1653.4,
+     "kind": "lair",
+     "n": 4,
+     "killed": 0,
+     "progress": 0,
+     "rx": 743.1,
+     "ry": -1653.4,
+     "yaw": -144.5,
+     "shown": 0
+    },
+    "wild:patrol": {
+     "id": 536870913,
+     "name": "The Old Watchtower",
+     "x": -2388.2,
+     "y": 2196.1,
+     "kind": "ruins",
+     "n": 3,
+     "killed": 0,
+     "progress": 0,
+     "rx": -2382.7,
+     "ry": 2200.5,
+     "yaw": 38.9,
+     "shown": 0
+    }
+   },
+   "den": {
+    "from_brokenspire_km": 1.81,
+    "water": 0.0,
+    "h": 73.8,
+    "biome": "farms",
+    "road_m": 45
+   },
+   "tower": {
+    "from_brokenspire_km": 3.24,
+    "water": 0.0,
+    "h": 100.6,
+    "biome": "farms",
+    "road_m": 95
+   },
+   "captain_panel": false,
+   "offered": [],
+   "accept_wolves": false,
+   "accept_patrol": false,
+   "taken": {
+    "captain_wolves": {
+     "state": "offered",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    },
+    "captain_patrol": {
+     "state": "offered",
+     "progress": 0,
+     "count": 1,
+     "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+    }
+   },
+   "on_map": {
+    "wild:wolves": 0,
+    "wild:patrol": 0
+   },
+   "travel_refused": false,
+   "refusal": "",
+   "den_pack": {
+    "alive": 4,
+    "kinds": [
+     "Ripper_dog"
+    ]
+   },
+   "after_three": {
+    "progress": 0,
+    "killed": 3,
+    "quest": {
+     "state": "offered",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "again_alive": 1,
+   "after_all": {
+    "progress": 1,
+    "killed": 4,
+    "quest": {
+     "state": "offered",
+     "progress": 1,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "tower_guards": 3,
+   "tower_props": 101,
+   "patrol_at_10m": 0,
+   "patrol_at_2_5m": 1,
+   "patrol_quest": {
+    "state": "offered",
+    "progress": 1,
+    "count": 1,
+    "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+   },
+   "captain_again": true,
+   "turnin_lines": [],
+   "gold": 0,
+   "done": {
+    "captain_wolves": "offered",
+    "captain_patrol": "offered"
+   },
+   "on_map_after": {
+    "wild:wolves": 0,
+    "wild:patrol": 0
+   }
+  },
+  {
+   "step": "save14",
+   "ok": false,
+   "load": true,
+   "at_m": [
+    66.0,
+    16.5
+   ],
+   "from_brokenspire_m": 68.0,
+   "found": [
+    1073741824
+   ],
+   "killed": 0,
+   "wild_counters": [],
+   "quests_back": 0,
+   "wild_quests_still_held": [],
+   "told": [
+    "The wilds have changed since this game was saved: you wake in Brokenspire"
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_s14p11_minimap.png",
+  "wd_s14p11_map_near.png",
+  "wd_s14p11_map_region.png",
+  "wd_s14p11_map_country.png",
+  "wd_s14p11_map_continent.png",
+  "wd_s14p11_quest_den.png",
+  "wd_s14p11_quest_tower.png",
+  "wd_s14p11_save14_square.png"
+ ],
+ "error": null,
+ "saves_put_back": 2,
+ "windows_shown_again": 2
+}
