@@ -1,0 +1,450 @@
+{
+ "tag": "s14p11r",
+ "plan": [
+  "world",
+  "quests",
+  "save14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "world",
+   "ok": true,
+   "state": {
+    "ready": 1,
+    "seed": 20261103,
+    "init_s": 0.2,
+    "chunks": 9,
+    "in_flight": 24,
+    "built": 8,
+    "dropped": 0,
+    "max_active": 9,
+    "compute_ms": 127.5,
+    "build_ms_max": 8.6,
+    "revealed": 113,
+    "found": 1,
+    "towns": 6,
+    "wild_ticks": 9,
+    "gen_ticks": 9,
+    "paused": 0,
+    "menu": 0,
+    "panel": 0
+   },
+   "towns": {
+    "Brokenspire": {
+     "kind": "town",
+     "x": 0.0,
+     "y": 0.0,
+     "h": 87.5,
+     "style": 0
+    },
+    "Ashenreach": {
+     "kind": "city",
+     "x": 35000.0,
+     "y": 0.0,
+     "h": 87.5,
+     "style": 1
+    },
+    "Graymourne": {
+     "kind": "coast",
+     "x": 99050.0,
+     "y": 0.0,
+     "h": 87.5,
+     "style": 1
+    },
+    "Vel Morrath": {
+     "kind": "city",
+     "x": 27500.0,
+     "y": 37500.0,
+     "h": 87.5,
+     "style": 1
+    },
+    "Kethrys Spire": {
+     "kind": "city",
+     "x": 76300.0,
+     "y": -35000.0,
+     "h": 87.5,
+     "style": 1
+    },
+    "Heaven": {
+     "kind": "city",
+     "x": 57140.0,
+     "y": -55459.0,
+     "h": 87.5,
+     "style": 1
+    }
+   },
+   "graymourne_sea_north_m": 200.0,
+   "velmorrath_sea_east_m": null,
+   "kethrys_from_graymourne_km": 41.7,
+   "heaven_from_kethrys_km": 28.0,
+   "checks": {
+    "brokenspire_mid_south": true,
+    "ashenreach_middle": true,
+    "ashenreach_north_of_brokenspire": true,
+    "graymourne_north_coast": true,
+    "velmorrath_north_east": true,
+    "velmorrath_inland": true,
+    "kethrys_north_west_inland": true,
+    "heaven_past_kethrys_inland": true
+   },
+   "biomes": {
+    "grasslands": {
+     "cells": 7,
+     "x": 4473.0,
+     "y": -386.0,
+     "km": 4.5
+    },
+    "meadows": {
+     "cells": 12,
+     "x": 6393.0,
+     "y": 5922.0,
+     "km": 8.7
+    },
+    "farms": {
+     "cells": 3,
+     "x": 1500.0,
+     "y": -1200.0,
+     "km": 1.9
+    },
+    "savannahs": {
+     "cells": 13,
+     "x": -6753.0,
+     "y": -17321.0,
+     "km": 18.6
+    },
+    "hills": {
+     "cells": 47,
+     "x": -9691.0,
+     "y": 5298.0,
+     "km": 11.0
+    },
+    "mountains": {
+     "cells": 22,
+     "x": 10297.0,
+     "y": 309.0,
+     "km": 10.3
+    },
+    "tundras": {
+     "cells": 12,
+     "x": 59340.0,
+     "y": -10162.0,
+     "km": 60.2
+    },
+    "plains": {
+     "cells": 29,
+     "x": 696.0,
+     "y": -7962.0,
+     "km": 8.0
+    },
+    "pine forests": {
+     "cells": 14,
+     "x": 31240.0,
+     "y": -16920.0,
+     "km": 35.5
+    },
+    "temperate autumn forests": {
+     "cells": 4,
+     "x": 13327.0,
+     "y": -38638.0,
+     "km": 40.9
+    },
+    "marshes": {
+     "cells": 1,
+     "x": 24578.0,
+     "y": 12997.0,
+     "km": 27.8
+    },
+    "wetlands": {
+     "cells": 1,
+     "x": 20688.0,
+     "y": 18403.0,
+     "km": 27.7
+    },
+    "mountains and peaks": {
+     "cells": 10,
+     "x": -15178.0,
+     "y": -17778.0,
+     "km": 23.4
+    },
+    "volcanoes": {
+     "cells": 1,
+     "x": 12224.0,
+     "y": 3070.0,
+     "km": 12.6
+    },
+    "coastal regions": {
+     "cells": 28,
+     "x": -30759.0,
+     "y": -1256.0,
+     "km": 30.8
+    },
+    "arctic regions": {
+     "cells": 1,
+     "x": 83986.0,
+     "y": 19003.0,
+     "km": 86.1
+    },
+    "canyons": {
+     "cells": 1,
+     "x": -8010.0,
+     "y": -8654.0,
+     "km": 11.8
+    },
+    "mesas": {
+     "cells": 1,
+     "x": -16411.0,
+     "y": 4553.0,
+     "km": 17.0
+    },
+    "canyon networks": {
+     "cells": 2,
+     "x": -13056.0,
+     "y": -2913.0,
+     "km": 13.4
+    },
+    "cold steppes": {
+     "cells": 9,
+     "x": 39773.0,
+     "y": 34767.0,
+     "km": 52.8
+    },
+    "highland moorland": {
+     "cells": 20,
+     "x": 26589.0,
+     "y": 19204.0,
+     "km": 32.8
+    },
+    "boreal pine forest": {
+     "cells": 6,
+     "x": 52585.0,
+     "y": -23485.0,
+     "km": 57.6
+    },
+    "temperate aspen": {
+     "cells": 14,
+     "x": 31221.0,
+     "y": -10281.0,
+     "km": 32.9
+    },
+    "volcanic tundra": {
+     "cells": 7,
+     "x": 61491.0,
+     "y": -788.0,
+     "km": 61.5
+    },
+    "burned plain": {
+     "cells": 2,
+     "x": 37500.0,
+     "y": 0.0,
+     "km": 37.5
+    },
+    "geothermal caldera": {
+     "cells": 5,
+     "x": 27843.0,
+     "y": -43825.0,
+     "km": 51.9
+    },
+    "glacial": {
+     "cells": 18,
+     "x": 56772.0,
+     "y": -31068.0,
+     "km": 64.7
+    },
+    "taigas": {
+     "cells": 4,
+     "x": 67602.0,
+     "y": 20796.0,
+     "km": 70.7
+    },
+    "rocky coastal": {
+     "cells": 235,
+     "x": -22859.0,
+     "y": -13097.0,
+     "km": 26.3
+    }
+   },
+   "missing_templates": [],
+   "rivers": 36,
+   "lakes": 71,
+   "roads": [
+    "road|Brokenspire|Ashenreach|43.9|272|14",
+    "road|Ashenreach|Graymourne|100.7|35300|0",
+    "road|Brokenspire|Vel Morrath|76.5|272|14",
+    "road|Ashenreach|Vel Morrath|43.7|34941|294",
+    "road|Graymourne|Kethrys Spire|45.9|98887|-252",
+    "road|Kethrys Spire|Heaven|29.8|76095|-35219"
+   ],
+   "river_lengths_km": [
+    22.4,
+    21.1,
+    20.5,
+    19.0,
+    17.5,
+    16.5,
+    15.3,
+    13.7
+   ],
+   "map_continent": {
+    "ok": true,
+    "s": 1.2
+   },
+   "map_around": {
+    "ok": true,
+    "s": 0.9
+   },
+   "map_near": {
+    "ok": true,
+    "s": 0.6
+   },
+   "place_ids": {
+    "count": 12,
+    "north": 3,
+    "town_range_not_towns": [],
+    "shared": []
+   }
+  },
+  {
+   "step": "quests",
+   "ok": true,
+   "places": {
+    "wild:wolves": {
+     "id": 536870912,
+     "name": "The Mill Road Den",
+     "x": 1703.2,
+     "y": -691.6,
+     "kind": "lair",
+     "n": 4,
+     "killed": 0,
+     "progress": 0,
+     "rx": 1703.2,
+     "ry": -691.6,
+     "yaw": -138.2,
+     "shown": 0
+    },
+    "wild:patrol": {
+     "id": 536870913,
+     "name": "The Old Watchtower",
+     "x": -2110.7,
+     "y": 2481.7,
+     "kind": "ruins",
+     "n": 3,
+     "killed": 0,
+     "progress": 0,
+     "rx": -2114.9,
+     "ry": 2476.1,
+     "yaw": -126.1,
+     "shown": 0
+    }
+   },
+   "den": {
+    "from_brokenspire_km": 1.84,
+    "water": 0.0,
+    "h": 85.5,
+    "biome": "farms",
+    "road_m": 45
+   },
+   "tower": {
+    "from_brokenspire_km": 3.26,
+    "water": 0.0,
+    "h": 102.9,
+    "biome": "farms",
+    "road_m": null
+   },
+   "captain_panel": true,
+   "offered": [
+    "Quest: Thin the Horde",
+    "Quest: Cells Under the Keep",
+    "Quest: Wolves on the Mill Road",
+    "Quest: The Lost Patrol"
+   ],
+   "accept_wolves": true,
+   "accept_patrol": true,
+   "taken": {
+    "captain_wolves": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    },
+    "captain_patrol": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+    }
+   },
+   "on_map": {
+    "wild:wolves": 1,
+    "wild:patrol": 1
+   },
+   "travel_refused": true,
+   "refusal": "You have not found The Mill Road Den yet",
+   "den_pack": {
+    "alive": 4,
+    "kinds": [
+     "Ripper_dog"
+    ]
+   },
+   "after_three": {
+    "progress": 0,
+    "killed": 3,
+    "quest": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "again_alive": 1,
+   "after_all": {
+    "progress": 1,
+    "killed": 4,
+    "quest": {
+     "state": "ready",
+     "progress": 1,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "tower_guards": 3,
+   "tower_props": 98,
+   "patrol_at_10m": 0,
+   "patrol_at_2_5m": 1,
+   "patrol_quest": {
+    "state": "ready",
+    "progress": 1,
+    "count": 1,
+    "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+   },
+   "captain_again": true,
+   "turnin_lines": [
+    "Done: Wolves on the Mill Road",
+    "Done: The Lost Patrol"
+   ],
+   "gold": 320,
+   "done": {
+    "captain_wolves": "done",
+    "captain_patrol": "done"
+   },
+   "on_map_after": {
+    "wild:wolves": 0,
+    "wild:patrol": 0
+   }
+  },
+  {
+   "step": "save14",
+   "ok": false,
+   "error": "'RDDungeonGenerator' object has no attribute 'get_message_log'",
+   "trace": "Traceback (most recent call last):\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\888_wilderness_test.py\", line 5905, in run\n    yield from STEPS[name]()\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\888_wilderness_test.py\", line 4192, in step_save14\n    msgs = [str(m_) for m_ in g.get_message_log()]\n                              ^^^^^^^^^^^^^^^^^\nAttributeError: 'RDDungeonGenerator' object has no attribute 'get_message_log'\n"
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_s14p11r_quest_den.png",
+  "wd_s14p11r_quest_tower.png"
+ ],
+ "error": null,
+ "saves_put_back": 2,
+ "windows_shown_again": 2
+}

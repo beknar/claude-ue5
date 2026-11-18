@@ -134,7 +134,10 @@ def wait_chunks(sec=40, need=60):
 
 
 # ------------------------------------------------------------------------------------------------ the world
-CONT = {"xs": -80000.0, "xn": 220000.0, "yw": -150000.0, "ye": 150000.0}
+# (the continent's frame: 150 km since the list of 2026-11-16's eleventh phase (300 km before); K its scale against the 300 km the
+# distances below were first written for)
+CONT = {"xs": -40000.0, "xn": 110000.0, "yw": -75000.0, "ye": 75000.0}
+K = (CONT["xn"] - CONT["xs"]) / 300000.0
 def sea_along(x, y, dx, dy, max_m, step=100.0):
     """metres walked from (x, y) along (dx, dy) until the sea (water kind 1), or None"""
     d = 0.0
@@ -154,25 +157,25 @@ def step_world():
         chk["brokenspire_mid_south"] = 0.15 < (b["x"] - CONT["xs"]) / W < 0.42 and abs(b["y"]) < 0.15 * W
     if a and b:
         mid = ((CONT["xs"] + CONT["xn"]) / 2, 0.0)
-        chk["ashenreach_middle"] = math.hypot(a["x"] - mid[0], a["y"] - mid[1]) < 25000
-        chk["ashenreach_north_of_brokenspire"] = a["x"] - b["x"] > 30000 and abs(a["y"] - b["y"]) < 15000
+        chk["ashenreach_middle"] = math.hypot(a["x"] - mid[0], a["y"] - mid[1]) < 25000 * K
+        chk["ashenreach_north_of_brokenspire"] = a["x"] - b["x"] > 30000 * K and abs(a["y"] - b["y"]) < 15000 * K
     if gm:
         res["graymourne_sea_north_m"] = sea_along(gm["x"], gm["y"], 1, 0, 6000)
-        chk["graymourne_north_coast"] = gm["x"] > (CONT["xs"] + CONT["xn"]) / 2 + 70000 and abs(gm["y"]) < 40000 and res["graymourne_sea_north_m"] is not None and res["graymourne_sea_north_m"] < 1500
+        chk["graymourne_north_coast"] = gm["x"] > (CONT["xs"] + CONT["xn"]) / 2 + 70000 * K and abs(gm["y"]) < 40000 * K and res["graymourne_sea_north_m"] is not None and res["graymourne_sea_north_m"] < 1500
     if vm and b:
-        res["velmorrath_sea_east_m"] = sea_along(vm["x"], vm["y"], 0, 1, 30000, 250.0)
+        res["velmorrath_sea_east_m"] = sea_along(vm["x"], vm["y"], 0, 1, 30000 * K, 250.0)
         s = sample(vm["x"], vm["y"])
         # (since 2026-11-06 the holy city: north-east of Brokenspire, inland)
-        chk["velmorrath_north_east"] = vm["y"] - b["y"] > 40000 and vm["x"] - b["x"] > 30000
-        chk["velmorrath_inland"] = (res["velmorrath_sea_east_m"] is None or res["velmorrath_sea_east_m"] > 20000) and int(s["water"]) == 0
+        chk["velmorrath_north_east"] = vm["y"] - b["y"] > 40000 * K and vm["x"] - b["x"] > 30000 * K
+        chk["velmorrath_inland"] = (res["velmorrath_sea_east_m"] is None or res["velmorrath_sea_east_m"] > 20000 * K) and int(s["water"]) == 0
     if ks and gm:
         # (the list of 2026-11-08b: Kethrys Spire north-west of Graymourne, inland, 60 to 120 km from it; PR #32's review)
         res["kethrys_from_graymourne_km"] = round(math.hypot(ks["x"] - gm["x"], ks["y"] - gm["y"]) / 1000.0, 1)
-        chk["kethrys_north_west_inland"] = ks["x"] < gm["x"] and ks["y"] < gm["y"] - 30000 and 60 <= res["kethrys_from_graymourne_km"] <= 120 and int(sample(ks["x"], ks["y"])["water"]) == 0
+        chk["kethrys_north_west_inland"] = ks["x"] < gm["x"] and ks["y"] < gm["y"] - 30000 * K and 60 * K <= res["kethrys_from_graymourne_km"] <= 120 * K and int(sample(ks["x"], ks["y"])["water"]) == 0
     if hv and ks:
         # (the list of 2026-11-08b: Heaven past Kethrys Spire, south-west of it, inland, 40 to 110 km from it)
         res["heaven_from_kethrys_km"] = round(math.hypot(hv["x"] - ks["x"], hv["y"] - ks["y"]) / 1000.0, 1)
-        chk["heaven_past_kethrys_inland"] = hv["x"] < ks["x"] and hv["y"] < ks["y"] and 40 <= res["heaven_from_kethrys_km"] <= 110 and int(sample(hv["x"], hv["y"])["water"]) == 0
+        chk["heaven_past_kethrys_inland"] = hv["x"] < ks["x"] and hv["y"] < ks["y"] and 40 * K <= res["heaven_from_kethrys_km"] <= 110 * K and int(sample(hv["x"], hv["y"])["water"]) == 0
     res["checks"] = chk
     # the templates' census
     bl = {}
@@ -185,7 +188,7 @@ def step_world():
     res["roads"] = [f for f in feats if f.startswith("road|")]
     res["river_lengths_km"] = sorted([float(f.split("|")[2]) for f in feats if f.startswith("river|")], reverse=True)[:8]
     # pictures of the continent and of Brokenspire's surroundings
-    for nm, px, box in (("continent", 1600, (CONT["xs"], CONT["yw"], CONT["xn"], CONT["ye"])), ("around", 1200, (-20000, -20000, 20000, 20000)), ("near", 1000, (-2500, -2500, 2500, 2500))):
+    for nm, px, box in (("continent", 1600, (CONT["xs"], CONT["yw"], CONT["xn"], CONT["ye"])), ("around", 1200, (-20000 * K, -20000 * K, 20000 * K, 20000 * K)), ("near", 1000, (-2500, -2500, 2500, 2500))):
         p = os.path.join(SHOTS, f"wd_{TAG}_map_{nm}.png")
         t0 = time.time(); ok = g.wild_debug_map(p, px, box[0], box[1], box[2], box[3], False)
         res[f"map_{nm}"] = {"ok": ok, "s": round(time.time() - t0, 1)}
@@ -193,15 +196,17 @@ def step_world():
     # (the places' ids: a place's id once reached the towns' range in the northern cells (x 62 and on), and those places were
     # taken for towns: no fast travel there, not on the map; one cell's were exactly towns 0 to 7)
     ids = {}
-    for cx, cy in ((190000, -40000), (200000, 30000), (60000, 0), (-20000, 20000)):
-        for l in g.get_wild_places_near(V(cx * 100.0, cy * 100.0, 0), 12000.0):
+    for cx, cy in ((190000 * K, -40000 * K), (200000 * K, 30000 * K), (60000 * K, 0), (-20000 * K, 20000 * K)):
+        for l in g.get_wild_places_near(V(cx * 100.0, cy * 100.0, 0), 12000.0 * K):
             p = str(l).split("|"); ids.setdefault(int(p[0]), set()).add((p[1], p[2]))
-    res["place_ids"] = {"count": len(ids), "north": sum(1 for i, v in ids.items() if any(k not in ("town", "city") for k, _ in v) and i >= 62 << 14),
+    # (the northern cells: 62 of 75 at 300 km, the same share of the 38 at 150 km)
+    north_cell = int(62 * K + 0.5)
+    res["place_ids"] = {"count": len(ids), "north": sum(1 for i, v in ids.items() if any(k not in ("town", "city") for k, _ in v) and i >= north_cell << 14),
                         "town_range_not_towns": sorted(i for i, v in ids.items() if i >= TOWN_ID and any(k not in ("town", "city") for k, _ in v))[:5],
                         "shared": sorted(i for i, v in ids.items() if len(v) > 1)[:5]}
     pid = res["place_ids"]
     ok = st.get("ready") == 1 and all(chk.values()) and len(chk) == 6 + (1 if ks else 0) + (1 if hv and ks else 0) and not res["missing_templates"] and res["rivers"] >= 8 and res["lakes"] >= 5 and len(res["roads"]) >= 4 + (1 if ks else 0) + (1 if hv else 0) \
-        and pid["count"] > 20 and pid["north"] > 0 and not pid["town_range_not_towns"] and not pid["shared"]
+        and pid["count"] > 20 * K * K and pid["north"] > 0 and not pid["town_range_not_towns"] and not pid["shared"]
     step_result("world", ok, **res)
 
 
@@ -419,7 +424,7 @@ def step_map():
     yield from rwait(0.5)
     res["open"] = map_state(); res["drawn"] = [a for a in drawn() if a.startswith(("wild_", "wmap_", "mapc_"))]
     shot("map_near", "1600x900"); yield from rwait(1.5)
-    for nm, mpp, cx, cy in (("map_region", 60.0, 2000.0, 0.0), ("map_country", 160.0, 40000.0, 20000.0), ("map_continent", 330.0, 70000.0, 0.0)):
+    for nm, mpp, cx, cy in (("map_region", 60.0, 2000.0, 0.0), ("map_country", 160.0, 40000.0 * K, 20000.0 * K), ("map_continent", 330.0 * K, 70000.0 * K, 0.0)):
         g.set_wild_map_view(cx, cy, mpp)
         t0 = time.time()
         while time.time() - t0 < 25 and map_state()["asked"] > 0: yield
@@ -434,10 +439,10 @@ def step_map():
         g.set_wild_map_view(2000.0 + k * 40.0, k * 25.0, 60.0 * (1.0 + 0.004 * k)); yield
     res["fog_drag"] = {"frames": 40, "builds": g.get_editor_property("wild_fog_builds") - b0}
     g.set_map_open(False); yield from rwait(0.5)
-    res["revealed_here"] = g.wild_revealed_at(900.0, -700.0); res["revealed_far"] = g.wild_revealed_at(150000.0, 100000.0)
+    res["revealed_here"] = g.wild_revealed_at(900.0, -700.0); res["revealed_far"] = g.wild_revealed_at(150000.0 * K, 100000.0 * K)
     quiet(False)
     ok = (res["minimap_drawn"] and res["open"]["tiles"] > 0 and res["revealed_here"] and not res["revealed_far"]
-          and res["map_continent"]["level"] <= 2 and res["open"]["level"] >= 8 and any(a in res["map_continent_drawn"] for a in ("wmap_town", "wmap_city"))
+          and res["map_continent"]["level"] <= 2 and res["open"]["level"] >= 8 + round(math.log2(K)) and any(a in res["map_continent_drawn"] for a in ("wmap_town", "wmap_city"))
           and res["fog_drag"]["builds"] <= 3)
     step_result("map", ok, **res)
 
@@ -4157,6 +4162,61 @@ def step_storm14():
     step_result("storm14", ok_a and ok_b and ok_c and ok_d, **res)
 
 
+def step_save14():
+    """the list of 2026-11-16's eleventh phase (item 23: the continent at 150 km): a save of the old world (the user's game3b, made out in
+    the 300 km wilds; the packaged game's, copied in for the step and taken out after) loads with its wild state dropped: she wakes in
+    Brokenspire's square, her found places only Brokenspire, her wild kills and the structures' and captain's quests' counters gone,
+    the captain's wild quests given back to take again, and she is told; a save made now carries the world's version and loads where
+    she stood"""
+    g = G["gen"]; res = {}
+    src = os.path.join(os.environ.get("LOCALAPPDATA", ""), "claude_ue5", "Saved", "SaveGames", "save_game3b_f17369.sav")
+    if not os.path.isfile(src): step_result("save14", False, error="no save game3b at " + src); return
+    os.makedirs(SAVES, exist_ok=True); open(os.path.join(SAVES, "save_game3b_f17369.sav"), "wb").write(open(src, "rb").read())
+    res["load"] = g.load_game_from("save_game3b_f17369"); yield from until_loaded13(); g = G["gen"]
+    yield from wait_ready(90); yield from wait_chunks(30, 50); yield from rwait(5.0)
+    gi = GS.get_game_instance(G["w"])
+    p = G["pawn"].get_actor_location(); res["at_m"] = [round(p.x / 100.0, 1), round(p.y / 100.0, 1)]
+    T = towns(); b = T.get("Brokenspire", {"x": 0.0, "y": 0.0})
+    res["from_brokenspire_m"] = round(math.hypot(p.x / 100.0 - b["x"], p.y / 100.0 - b["y"]), 1)
+    ts_ = town_state(); res["town"] = {"name": ts_.get("name"), "in_walls": ts_.get("in_walls"), "dist_m": ts_.get("dist_m")}
+    res["found"] = [int(x) for x in gi.get_editor_property("wild_found")]
+    res["killed"] = len(gi.get_editor_property("wild_killed"))
+    cn = {str(k_): int(v_) for k_, v_ in gi.get_editor_property("counters").items()}
+    res["wild_counters"] = sorted(k_ for k_ in cn if k_.startswith(("wq12:", "wild:")))[:8]
+    res["quests_back"] = g.get_editor_property("wild_old_world_quests_back")
+    wild_ids = {str(q.get_editor_property("id")) for q in g.get_editor_property("quests") if str(q.get_editor_property("goal")).startswith("wild:")}
+    res["wild_quests_still_held"] = sorted(str(s_.get_editor_property("id")) for s_ in gi.get_editor_property("quests") if str(s_.get_editor_property("id")) in wild_ids)
+    # (from the HUD's log of the last 20 messages (its latest line can be replaced before a watch begins: PR #89's review))
+    t0 = time.time(); msgs = []
+    while time.time() - t0 < 8.0:
+        msgs = [str(m_) for m_ in cb().get_message_log()] if cb() else []
+        if any("changed" in m_ for m_ in msgs): break
+        yield from rwait(0.5)
+    res["told"] = [m_ for m_ in msgs if "changed" in m_][:1]
+    shot("save14_square", "1280x720")
+    # (the captain's quests given back: game3b held none of them, so here both are taken at the captain, an older world's drop done
+    # now (as a load does it), and both are his to give again)
+    gb = {}
+    gb["captain_panel"] = at_captain(); yield from rwait(0.3)
+    gb["accept_wolves"] = g.activate_town_entry(line_of("accept", "Mill Road")); yield from rwait(0.2)
+    gb["accept_patrol"] = g.activate_town_entry(line_of("accept", "Lost Patrol")); yield from rwait(0.2)
+    g.close_town_panel(); yield from rwait(0.3)
+    gb["taken"] = {q: (quest_of(q) or {}).get("state") for q in ("captain_wolves", "captain_patrol")}
+    gb["given_back"] = g.debug_old_world14(); yield from rwait(0.5)
+    gb["after"] = {q: (quest_of(q) or {}).get("state") for q in ("captain_wolves", "captain_patrol")}
+    gb["offered_again"] = at_captain() and any("Mill Road" in p_[1] for p_ in panel() if p_[0] == "accept"); g.close_town_panel()
+    res["give_back"] = gb
+    # (the copied save taken out again: it would be listed among the saves (PR #89's review))
+    try: os.remove(os.path.join(SAVES, "save_game3b_f17369.sav"))
+    except OSError: pass
+    # (in Brokenspire's walls, at its square: the square stands 70 to 80 m from the town's site (towns' at_start: 79 m))
+    ok = (res["load"] and res["town"]["name"] == "Brokenspire" and res["town"]["in_walls"] == 1 and res["from_brokenspire_m"] < 120.0 and res["found"] == [TOWN_ID] and res["killed"] == 0 and not res["wild_counters"]
+          and res["quests_back"] >= 0 and not res["wild_quests_still_held"] and res["told"]
+          and all(v == "taken" for v in res["give_back"]["taken"].values()) and res["give_back"]["given_back"] == 2
+          and all(v != "taken" for v in res["give_back"]["after"].values()) and res["give_back"]["offered_again"])
+    step_result("save14", ok, **res)
+
+
 def step_sleep14():
     """the list of 2026-11-16's seventh phase (item 16: "the NPCs at farms should sleep at night"): at the first farmstead near
     Brokenspire, its family at 20:00 walk home (time sped up) and go into their farmhouse; at 23:00 each is asleep indoors, those with
@@ -5599,35 +5659,6 @@ def walk_into(x_m, y_m, foot_m, secs=5.0):
         yield
     return {"nearest_m": round(best, 2), "half_m": round(half, 1), "through": best < 0.35 * min(foot_m)}
 
-def step_spires14():
-    """item 17 of the list of 2026-11-16: "very tall spires in the farm biomes with no collision layers - check the game save labeled
-    game3b": the user's save (the packaged game's, copied in for the step and taken out after) loaded, every piece over 30 m within
-    6 km of her listed with its collision, the nearest of each mesh walked into, and pictured"""
-    g = G["gen"]; res = {}
-    src = os.path.join(os.environ.get("LOCALAPPDATA", ""), "claude_ue5", "Saved", "SaveGames", "save_game3b_f17369.sav")
-    if not os.path.isfile(src): step_result("spires14", False, error="no save game3b at " + src); return
-    os.makedirs(SAVES, exist_ok=True); open(os.path.join(SAVES, "save_game3b_f17369.sav"), "wb").write(open(src, "rb").read())
-    res["load"] = g.load_game_from("save_game3b_f17369"); yield from until_loaded13(); g = G["gen"]
-    yield from wait_chunks(30, 50); yield from rwait(4.0)
-    p = G["pawn"].get_actor_location(); res["at_km"] = [round(p.x / 100000.0, 2), round(p.y / 100000.0, 2)]
-    res["biome"] = sample(p.x / 100.0, p.y / 100.0)["biome"]; res["landmark"] = str(g.get_wild_landmark()); res["far_sight"] = str(g.get_wild_storm_line())
-    tall = tall_pieces(p); res["tall"] = tall[:40]; res["tall_count"] = len(tall)
-    # (each mesh's nearest walked into and pictured)
-    res["walks"] = {}; seen = set()
-    for r in tall:
-        if r["mesh"] in seen or len(seen) >= 6: continue
-        seen.add(r["mesh"])
-        w_ = yield from walk_into(r["x"], r["y"], r["foot_m"])
-        res["walks"][r["mesh"]] = dict(w_, owner=r["owner"], h_m=r["h_m"], collision=r["collision"], pawn=r["pawn"])
-        q = G["pawn"].get_actor_location()
-        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=12, yaw=math.degrees(math.atan2(r["y"] * 100.0 - q.y, r["x"] * 100.0 - q.x)) + 180.0))
-        g.wild_put_her(r["x"] + 40.0, r["y"]); yield from wait_chunks(30, 50); ground_put(r["x"] + 40.0, r["y"]); yield from rwait(1.0)
-        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=18, yaw=180.0)); yield from rwait(1.5)
-        shot("spires14_" + r["mesh"], "1280x720"); yield from rwait(1.0)
-    # (the fix: the landmark's shape made again from its faces (926 kit, 927 collide): it must stop her at its walls)
-    lm = res["walks"].get("SM_N13_LandmarkTower")
-    ok = bool(lm) and not lm["through"] and not any(v["through"] for v in res["walks"].values())
-    step_result("spires14", ok, **res)
 
 def wt():
     """wild_tables, the stages' shared helper (its list of what is walked through): loaded fresh each run"""
@@ -5834,7 +5865,7 @@ def step_horse14():
     step_result("horse14", ok, **res)
 
 LOCK_STEPS = ("locks14",)
-STEPS = {"storm14": step_storm14, "locks14": step_locks14, "npc14": step_npc14, "farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "spires14": step_spires14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"save14": step_save14, "storm14": step_storm14, "locks14": step_locks14, "npc14": step_npc14, "farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)

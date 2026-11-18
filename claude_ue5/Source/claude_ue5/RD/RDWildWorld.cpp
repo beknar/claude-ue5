@@ -80,8 +80,9 @@ float FRDWildWorld::PortFlatten(double X, double Y, float H) const
 	// back to the whole by 30 km, so the uplands rise from the coast over kilometres)
 	if (!bPortSea || H <= 1.f) return H;
 	const float D = (float)FVector2D::Distance(FVector2D(X, Y), PortSite);
-	if (D >= 30000.f) return H;
-	return 1.f + (H - 1.f) * FMath::Lerp(0.35f, 1.f, RDWSmooth(9000.f, 30000.f, D));
+	const float K = (float)WorldK();
+	if (D >= 30000.f * K) return H;
+	return 1.f + (H - 1.f) * FMath::Lerp(0.35f, 1.f, RDWSmooth(9000.f * K, 30000.f * K, D));
 }
 
 float FRDWildWorld::PortLift(double X, double Y) const
@@ -90,7 +91,8 @@ float FRDWildWorld::PortLift(double X, double Y) const
 	const float D = (float)FVector2D::Distance(FVector2D(X, Y), PortSite);
 	// (whole within 2.5 km, eased out by 40 km: over 3.5 km the sea's own face sloped 2 to 3 % (PR #50's review); over 37.5 km
 	// at most 0.3 %. No other town is within 40 km of the port)
-	return D >= 40000.f ? 0.f : PortLiftM * (1.f - RDWSmooth(2500.f, 40000.f, D));
+	const float K = (float)WorldK();
+	return D >= 40000.f * K ? 0.f : PortLiftM * (1.f - RDWSmooth(2500.f * K, 40000.f * K, D));
 }
 
 float FRDWildWorld::Grove(double X, double Y) const
@@ -135,12 +137,13 @@ float FRDWildWorld::Continent(double X, double Y) const
 {
 	// a rounded square (a superellipse) about the continent's middle, its coast pushed in and out by noise
 	const double Mx = (Xs + Xn) * 0.5, H = (Xn - Xs) * 0.5;
-	const double Wu = Fbm(X, Y, 1.0 / 70000.0, 3, Seed + 31u) * 0.10, Wv = Fbm(X, Y, 1.0 / 70000.0, 3, Seed + 32u) * 0.10;
+	const double K = WorldK();
+	const double Wu = Fbm(X, Y, 1.0 / (70000.0 * K), 3, Seed + 31u) * 0.10, Wv = Fbm(X, Y, 1.0 / (70000.0 * K), 3, Seed + 32u) * 0.10;
 	const double U = Y / H + Wu, V = (X - Mx) / H + Wv;
 	const double D = FMath::Pow(FMath::Pow(FMath::Abs(U), 4.0) + FMath::Pow(FMath::Abs(V), 4.0), 0.25);
-	float C = 0.86f - (float)D + Fbm(X, Y, 1.0 / 42000.0, 4, Seed + 1u) * 0.15f + Fbm(X, Y, 1.0 / 9000.0, 3, Seed + 2u) * 0.025f;
+	float C = 0.86f - (float)D + Fbm(X, Y, 1.0 / (42000.0 * K), 4, Seed + 1u) * 0.15f + Fbm(X, Y, 1.0 / 9000.0, 3, Seed + 2u) * 0.025f;
 	// (the towns' land: Brokenspire and Ashenreach well inland; Vel Morrath near its coast but on land)
-	C += 0.22f * FMath::Exp(-(float)((X * X + Y * Y) / (30000.0 * 30000.0)));
+	C += 0.22f * FMath::Exp(-(float)((X * X + Y * Y) / FMath::Square(30000.0 * K)));
 	for (const FRDWildTown& T : Towns)
 	{
 		if (T.Style == 0) continue;
@@ -155,9 +158,9 @@ void FRDWildWorld::Climate(double X, double Y, float& T, float& M) const
 {
 	// colder northward (the continent's south is warm, its north arctic) and with noise; wetter near the coasts
 	const float Lt = (float)((X - Xs) / (Xn - Xs));
-	T = 1.06f - 1.16f * Lt + Fbm(X, Y, 1.0 / 90000.0, 3, Seed + 41u) * 0.14f;
+	T = 1.06f - 1.16f * Lt + Fbm(X, Y, 1.0 / (90000.0 * WorldK()), 3, Seed + 41u) * 0.14f;
 	const float C = Continent(X, Y);
-	M = 0.5f + Fbm(X, Y, 1.0 / 65000.0, 4, Seed + 42u) * 0.62f + 0.22f * (1.f - RDWSmooth(0.f, 0.14f, C));
+	M = 0.5f + Fbm(X, Y, 1.0 / (65000.0 * WorldK()), 4, Seed + 42u) * 0.62f + 0.22f * (1.f - RDWSmooth(0.f, 0.14f, C));
 	M = FMath::Clamp(M, 0.f, 1.f);
 }
 
@@ -177,8 +180,8 @@ void FRDWildWorld::AssignBiomes()
 			float T, M; Climate(Site.X, Site.Y, T, M);
 			const float C = Continent(Site.X, Site.Y);
 			// relief: ranges along the ridges of a large ridged noise, and its peaks; volcanic areas, rare
-			const float R = Ridged(Site.X, Site.Y, 1.0 / 150000.0, 3, Seed + 7u) * 0.75f + 0.25f * (0.5f + 0.5f * Fbm(Site.X, Site.Y, 1.0 / 40000.0, 2, Seed + 8u));
-			const float V = Fbm(Site.X, Site.Y, 1.0 / 90000.0, 2, Seed + 9u);
+			const float R = Ridged(Site.X, Site.Y, 1.0 / (150000.0 * WorldK()), 3, Seed + 7u) * 0.75f + 0.25f * (0.5f + 0.5f * Fbm(Site.X, Site.Y, 1.0 / (40000.0 * WorldK()), 2, Seed + 8u));
+			const float V = Fbm(Site.X, Site.Y, 1.0 / (90000.0 * WorldK()), 2, Seed + 9u);
 			const float Rn = Rand01(I, J, Seed + 53u);
 			int32 Bi;
 			if (C < 0.075f) Bi = (R > 0.5f || T < 0.32f || Rn < 0.35f) ? B(TEXT("rocky coastal")) : B(TEXT("coastal regions"));
@@ -237,8 +240,8 @@ void FRDWildWorld::AssignBiomes()
 		if (!T.Biome.IsEmpty() && BiomeIndex.Contains(T.Biome))
 		{
 			CellBiome[K] = BiomeIndex[T.Biome];
-			CellSite[K] = T.Site + FVector2D(5000.0, 0.0);
-			if (I + 1 < CellsX) { CellBiome[(I + 1) * CellsY + J] = BiomeIndex[T.Biome]; CellSite[(I + 1) * CellsY + J] = T.Site + FVector2D(16000.0, 2000.0); }
+			CellSite[K] = T.Site + FVector2D(5000.0, 0.0) * WorldK();
+			if (I + 1 < CellsX) { CellBiome[(I + 1) * CellsY + J] = BiomeIndex[T.Biome]; CellSite[(I + 1) * CellsY + J] = T.Site + FVector2D(16000.0, 2000.0) * WorldK(); }
 		}
 		// (Brokenspire's neighbours: open lowlands, never mountains next door)
 		if (T.Style == 0)
@@ -278,7 +281,7 @@ void FRDWildWorld::AssignBiomes()
 			bool bTown = false; for (const FRDWildTown& T : Towns) if (FVector2D::Distance(T.Site, S) < CellM * 1.6) bTown = true;
 			if (bTown) continue;
 			float T, M; Climate(S.X, S.Y, T, M);
-			const float Sc = FMath::Square(T - P.T) * 4.f + FMath::Square(M - P.M) * 2.f + (float)(FVector2D::Distance(S, FVector2D::ZeroVector) / 400000.0);
+			const float Sc = FMath::Square(T - P.T) * 4.f + FMath::Square(M - P.M) * 2.f + (float)(FVector2D::Distance(S, FVector2D::ZeroVector) / (400000.0 * WorldK()));
 			// (a cell that is the only one of its own kind is kept)
 			int32 Same = 0; for (int32 Bj : CellBiome) if (Bj == CellBiome[K]) ++Same;
 			if (Same < 3) continue;
@@ -294,9 +297,10 @@ int32 FRDWildWorld::Blend(double X, double Y, int32* Idx, float* W, FVector2D* S
 	// list of 2026-11-04 ("the transition between terrain types is too abrupt and looks like a straight line from above ... it
 	// should look more natural and ragged and uneven") the warp has two finer scales too (700 m, 180 m) and the fall-off is
 	// wider: a border wanders at every scale and the regions flow into each other over 3 to 6 km
-	const double Wx = X + Fbm(X, Y, 1.0 / 13000.0, 4, Seed + 61u) * 6500.0 + Fbm(X, Y, 1.0 / 2600.0, 2, Seed + 63u) * 900.0
+	const double Wk = WorldK();          // (the borders' broad warp at the continent's scale, as its cells)
+	const double Wx = X + Fbm(X, Y, 1.0 / (13000.0 * Wk), 4, Seed + 61u) * 6500.0 * Wk + Fbm(X, Y, 1.0 / 2600.0, 2, Seed + 63u) * 900.0
 	                    + Fbm(X, Y, 1.0 / 700.0, 2, Seed + 65u) * 320.0 + Fbm(X, Y, 1.0 / 180.0, 2, Seed + 67u) * 70.0;
-	const double Wy = Y + Fbm(X, Y, 1.0 / 13000.0, 4, Seed + 62u) * 6500.0 + Fbm(X, Y, 1.0 / 2600.0, 2, Seed + 64u) * 900.0
+	const double Wy = Y + Fbm(X, Y, 1.0 / (13000.0 * Wk), 4, Seed + 62u) * 6500.0 * Wk + Fbm(X, Y, 1.0 / 2600.0, 2, Seed + 64u) * 900.0
 	                    + Fbm(X, Y, 1.0 / 700.0, 2, Seed + 66u) * 320.0 + Fbm(X, Y, 1.0 / 180.0, 2, Seed + 68u) * 70.0;
 	// (the user's of 2026-11-08: "a wall of earth that is a sheer drop that can't be climbed" 12 km from Brokenspire. The four
 	// heaviest regions were kept at their whole weight and the rest dropped, and so were weights under 0.03: where a mountain
@@ -318,7 +322,7 @@ int32 FRDWildWorld::Blend(double X, double Y, int32* Idx, float* W, FVector2D* S
 		}
 	// (the list of 2026-11-11: "near graymourne, it shifts abruptly to coastal regions. it should gradually turn into the coast
 	// from the previous biome": the regions round the port flow into each other over 2.6 times the distance, eased back by 22 km)
-	const double Tau = 2400.0 * (bPortSea ? 1.0 + 1.6 * (1.0 - RDWSmooth(9000.f, 22000.f, (float)FVector2D::Distance(FVector2D(X, Y), PortSite))) : 1.0);
+	const double Tau = 2400.0 * (bPortSea ? 1.0 + 1.6 * (1.0 - RDWSmooth(9000.f * (float)WorldK(), 22000.f * (float)WorldK(), (float)FVector2D::Distance(FVector2D(X, Y), PortSite))) : 1.0);
 	float Tw[RDWBlendMax];
 	for (int32 Q = 0; Q < N; ++Q) Tw[Q] = (float)FMath::Exp(-(Cd[Q] - Dmin) / Tau);
 	// the five heaviest, in order (a picked one marked -1)
@@ -861,7 +865,7 @@ void FRDWildWorld::MakeChannels()
 				Ch.Wall = M.Contains(TEXT("wall")) ? FCString::Atof(*M[TEXT("wall")]) : 0.5f;
 				const float Len = Range(M, TEXT("len"), 600.f, 1400.f, Rand01(Sk, 3, Seed));
 				const FVector2D C0 = CellSite.IsValidIndex(Ci) ? CellSite[Ci] : FVector2D::ZeroVector;
-				FVector2D P = C0 + FVector2D(Rand01(Sk, 4, Seed) - 0.5, Rand01(Sk, 5, Seed) - 0.5) * 10000.0;
+				FVector2D P = C0 + FVector2D(Rand01(Sk, 4, Seed) - 0.5, Rand01(Sk, 5, Seed) - 0.5) * 10000.0 * WorldK();          // (within its cell: PR #89's review)
 				double Ang = Rand01(Sk, 6, Seed) * 2.0 * PI;
 				for (double L = 0.0; L <= Len; L += 20.0)
 				{
@@ -1091,7 +1095,8 @@ void FRDWildWorld::PlaceTowns()
 	A.Tiles = 168; A.Plan = 2; A.Biome = TEXT("burned plain");
 	// (the coasts are found where the land measure falls below 0, walking out from inland)
 	auto Walk = [this](FVector2D From, FVector2D Dir) { FVector2D P = From; for (int32 I = 0; I < 3000; ++I) { if (Continent(P.X, P.Y) < 0.f) return P; P += Dir * 100.0; } return P; };
-	const FVector2D NorthCoast = Walk(FVector2D(Mx + 60000.0, 0.0), FVector2D(1, 0));
+	const double Wq = WorldK();          // (the list of 2026-11-16: the cities at the continent's scale (half their old distances))
+	const FVector2D NorthCoast = Walk(FVector2D(Mx + 60000.0 * Wq, 0.0), FVector2D(1, 0));
 	// (the port (the user's of 2026-11-07, docs/graymourne.txt): Brokenspire's size, its harbour along its northern wall, so it
 	// stands nearer the coast: its sea wall about 150 m from it (until then a small town 650 m inland))
 	G.Tiles = 168; G.Plan = 3;
@@ -1105,28 +1110,28 @@ void FRDWildWorld::PlaceTowns()
 	const FVector2D GraySite0 = PortAt(400.0);
 	// (Vel Morrath, the user's of 2026-11-06: "to the east, but not on the coast. north east of Brokenspire": 55 km north, and
 	// east toward the coast but 35 km or more inside it (until then 9 km inside it, due east))
-	const FVector2D NeCoast = Walk(FVector2D(55000.0, 30000.0), FVector2D(0, 1));
-	V.Site = FVector2D(55000.0, FMath::Min(75000.0, NeCoast.Y - 35000.0));
+	const FVector2D NeCoast = Walk(FVector2D(55000.0 * Wq, 30000.0 * Wq), FVector2D(0, 1));
+	V.Site = FVector2D(55000.0 * Wq, FMath::Min(75000.0 * Wq, NeCoast.Y - 35000.0 * Wq));
 	for (int32 I = 0; I < 60 && Continent(V.Site.X, V.Site.Y) < 0.08f; ++I) V.Site.Y -= 500.0;
 	Towns.Add(A); Towns.Add(G); Towns.Add(V);
 	// (Kethrys Spire, the mage city round its black tower (the list of 2026-11-08b): the road's next town after Graymourne, tiers
 	// 15 to 20: north-west, about 80 km from Graymourne and well inland; walked in from the coast until the land is solid)
 	FRDWildTown K; K.Name = TEXT("Kethrys Spire"); K.Seed = (int32)(Hash(4, 0, Seed) & 0x3FFFFFFF); K.Kind = TEXT("city");
 	K.Tiles = 168; K.Plan = 4;
-	K.Site = FVector2D(GraySite0.X - 45000.0, -70000.0);
+	K.Site = FVector2D(GraySite0.X - 45000.0 * WorldK(), -70000.0 * WorldK());
 	{
-		const FVector2D Inland = (FVector2D(Mx, -20000.0) - K.Site).GetSafeNormal();
-		for (int32 I = 0; I < 80 && Continent(K.Site.X, K.Site.Y) < 0.08f; ++I) K.Site += Inland * 1000.0;
+		const FVector2D Inland = (FVector2D(Mx, -20000.0 * WorldK()) - K.Site).GetSafeNormal();
+		for (int32 I = 0; I < 80 && Continent(K.Site.X, K.Site.Y) < 0.08f; ++I) K.Site += Inland * 1000.0 * WorldK();
 	}
 	Towns.Add(K);
 	// (Heaven, the modern city in its shield (the list of 2026-11-08b): the chain's last town, tiers 20 to 25: on past Kethrys
 	// Spire to the south-west, about 65 km on and well inland; walked in from the coast as Kethrys Spire)
 	FRDWildTown Hv; Hv.Name = TEXT("Heaven"); Hv.Seed = (int32)(Hash(5, 0, Seed) & 0x3FFFFFFF); Hv.Kind = TEXT("city");
 	Hv.Tiles = 168; Hv.Plan = 5;
-	Hv.Site = FVector2D(K.Site.X - 30000.0, K.Site.Y - 58000.0);
+	Hv.Site = FVector2D(K.Site.X - 30000.0 * WorldK(), K.Site.Y - 58000.0 * WorldK());
 	{
-		const FVector2D Inland = (FVector2D(Mx, -20000.0) - Hv.Site).GetSafeNormal();
-		for (int32 I = 0; I < 120 && Continent(Hv.Site.X, Hv.Site.Y) < 0.08f; ++I) Hv.Site += Inland * 1000.0;
+		const FVector2D Inland = (FVector2D(Mx, -20000.0 * WorldK()) - Hv.Site).GetSafeNormal();
+		for (int32 I = 0; I < 120 && Continent(Hv.Site.X, Hv.Site.Y) < 0.08f; ++I) Hv.Site += Inland * 1000.0 * WorldK();
 	}
 	Towns.Add(Hv);
 }
@@ -1146,7 +1151,7 @@ void FRDWildWorld::MakeRivers()
 		float T, M; Climate(S.X, S.Y, T, M);
 		if (M < 0.42f || Continent(S.X, S.Y) < 0.1f) continue;
 		if (Rand01(K, 7, Seed + 91u) > 0.55f) continue;
-		Sources.Add(S + FVector2D((Rand01(K, 8, Seed + 92u) - 0.5) * 6000.0, (Rand01(K, 9, Seed + 93u) - 0.5) * 6000.0));
+		Sources.Add(S + FVector2D((Rand01(K, 8, Seed + 92u) - 0.5) * 6000.0, (Rand01(K, 9, Seed + 93u) - 0.5) * 6000.0) * WorldK());
 	}
 	const double Step = 300.0;
 	for (int32 Si = 0; Si < Sources.Num() && Rivers.Num() < 60; ++Si)
@@ -1230,7 +1235,7 @@ void FRDWildWorld::MakeLakes()
 		const FVector2D S = CellSite[K];
 		float T, M; Climate(S.X, S.Y, T, M);
 		if (M < 0.5f || Rand01(K, 21, Seed + 97u) > 0.42f) continue;
-		FLake L; L.C = S + FVector2D((Rand01(K, 22, Seed) - 0.5) * 7000.0, (Rand01(K, 23, Seed) - 0.5) * 7000.0);
+		FLake L; L.C = S + FVector2D((Rand01(K, 22, Seed) - 0.5) * 7000.0, (Rand01(K, 23, Seed) - 0.5) * 7000.0) * WorldK();
 		L.R = 450.f + 1900.f * Rand01(K, 24, Seed); L.Kind = 2; L.Shape = Hash(K, 25, Seed);
 		Lakes.Add(L);
 	}
@@ -1432,6 +1437,7 @@ void FRDWildWorld::HashSegments()
 
 void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 {
+	CellM = 14000.0 * WorldK();          // (the regions' cell at the continent's scale: one size, the frame (PR #89's review))
 	const double T0 = FPlatformTime::Seconds();
 	Seed = InSeed; Biomes = InBiomes;
 	{ FScopeLock Lk(&SiteCache->Lock); SiteCache->Cells.Reset(); }
@@ -1607,7 +1613,7 @@ int32 FRDWildWorld::TierAt(double X, double Y) const
 	// leg of the chain nearest it, from the tier of the town it leaves to the next one's. Until the list it was 1 to 5 by the
 	// distance from Brokenspire, 25 km a tier. The chain's towns are found once, at Init (MakeTierChain: PR #31's review))
 	const TArray<FVector2D>& At = TierSites; const TArray<float>& Ti = TierValues;
-	if (At.Num() < 2) return FMath::Clamp(1 + (int32)(FVector2D(X, Y).Size() / 25000.0), 1, 5);
+	if (At.Num() < 2) return FMath::Clamp(1 + (int32)(FVector2D(X, Y).Size() / (25000.0 * WorldK())), 1, 5);
 	const FVector2D P(X, Y);
 	double Best = 1e30; float Tier = Ti[0];
 	for (int32 K = 0; K + 1 < At.Num(); ++K)
@@ -1640,12 +1646,13 @@ void FRDWildWorld::MakeTierChain()
 			for (int32 I = 1; I <= 8; ++I)
 			{
 				const FVector2D Q = H + Way * (Len * I / 8.0);
-				if (Q.X < Xs + 4000.0 || Q.X > Xn - 4000.0 || Q.Y < Yw + 4000.0 || Q.Y > Ye - 4000.0 || Continent(Q.X, Q.Y) < 0.08f) return false;
+				const double In = 4000.0 * WorldK();
+				if (Q.X < Xs + In || Q.X > Xn - In || Q.Y < Yw + In || Q.Y > Ye - In || Continent(Q.X, Q.Y) < 0.08f) return false;
 			}
 			return true;
 		};
 		FVector2D Best = FVector2D::ZeroVector; double BestLen = 0.0;
-		for (const double Len : { 40000.0, 30000.0, 20000.0 })
+		for (const double Len : { 40000.0 * WorldK(), 30000.0 * WorldK(), 20000.0 * WorldK() })
 		{
 			for (int32 K = 0; K <= 12 && BestLen == 0.0; ++K)
 			{

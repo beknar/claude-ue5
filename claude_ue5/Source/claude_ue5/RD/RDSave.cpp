@@ -80,6 +80,10 @@ bool ARDDungeonGenerator::SaveGameNow(const FString& Slot, const FString& Why, c
 	Sv->Level = UWorld::RemovePIEPrefix(GetWorld()->GetOutermost()->GetName());
 	Sv->Hero = CurrentHero; Sv->At = Her->GetActorLocation(); Sv->Yaw = Her->GetActorRotation().Yaw;
 	Sv->Why = Why; Sv->Place = Place; Sv->bInTown = bTown; Sv->Name = Name;
+	// (the list of 2026-11-16: the world it was made in; an older world's give-back still waiting (loaded in the castle, saved there)
+	// done first, so what is written is whole (PR #89's review))
+	if (GI->bOldWorld) GiveBackWildQuests14();
+	Sv->WorldVer = URDSaveGame::WorldVersion;
 	RDSerializeGame(GI, Sv->Game, false);
 	// (the game goes on as it was)
 	GI->HerPiles = Piles; GI->TownLooted = Looted; GI->GuardsDead = Guards; GI->TownStore = Store; GI->CurrentTown = Current;
@@ -164,9 +168,32 @@ bool URDSaveGame::LoadAndOpen(UObject* Ctx, const FString& Slot)
 	// (put back where she was only in a town's level: the castle reads none of it, and a flag left set there moved her to
 	// the castle's coordinates out in the wilds once she came back)
 	GI->Arrive = Sv->bInTown ? TEXT("save") : FString(); GI->LoadAt = Sv->At; GI->LoadYaw = Sv->Yaw; GI->bLoadPending = Sv->bInTown;
+	// (the list of 2026-11-16's eleventh phase: a save of an older world (the continent at 300 km, its places' ids by its old frame):
+	// its wild state dropped; made in the wilds' level, she wakes in Brokenspire's square (TickTown with nothing to arrive by))
+	GI->bOldWorld = false;          // (a flag left from an earlier load is no business of this one: PR #89's review)
+	if (Sv->WorldVer < WorldVersion)
+	{
+		DropOldWorld(GI, Sv->WorldVer);
+		if (Sv->bInTown) { GI->Arrive.Reset(); GI->bLoadPending = false; }
+	}
 	UE_LOG(LogRDSave, Log, TEXT("RDSAVE loading %s: %s as %s (%s)"), *Slot, *Sv->Level, *Sv->Hero.ToString(), *Sv->Place);
 	UGameplayStatics::OpenLevel(Ctx, FName(*Sv->Level), true, FString::Printf(TEXT("Hero=%s"), *Sv->Hero.ToString()));
 	return true;
+}
+
+void URDSaveGame::DropOldWorld(URDGameInstance* GI, int32 FromVersion)
+{
+	if (!GI) return;
+	GI->WildRevealKeys.Reset(); GI->WildRevealBits.Reset(); GI->WildFound.Reset(); GI->WildKilled.Reset();
+	// (the structures' quests (wq12:<site>...) by the old places' ids, the captain's (wild:...) by the old places: their counters gone;
+	// the captain's quests given back to him (StartWild, which has the quests' table: bOldWorld))
+	TArray<FString> Gone;
+	for (const TPair<FString, int32>& C : GI->Counters) if (C.Key.StartsWith(TEXT("wq12:")) || C.Key.StartsWith(TEXT("wild:"))) Gone.Add(C.Key);
+	for (const FString& K : Gone) GI->Counters.Remove(K);
+	// (a way back from a city's dungeon to the old city's gate: home to Brokenspire instead)
+	GI->ReturnAt = FVector::ZeroVector; GI->ReturnTown.Reset();
+	GI->bOldWorld = true;
+	UE_LOG(LogRDSave, Log, TEXT("RDSAVE a save of the world's version %d (now %d): its wild state dropped (%d counters)"), FromVersion, WorldVersion, Gone.Num());
 }
 
 bool URDSaveGame::ReadHead(const FString& Slot, FString& OutInfo, FDateTime& OutSavedAt)
