@@ -2677,6 +2677,9 @@ public:
 	TMap<int32, TWeakObjectPtr<AActor>> WildSignActors14;
 	float NextSignTick14 = -1.f;
 	bool bSignMeshMissing14 = false;
+	UPROPERTY(Transient) TObjectPtr<class UStaticMesh> SignPost14;
+	UPROPERTY(Transient) TObjectPtr<class UStaticMesh> SignArm14;
+	UPROPERTY(Transient) TObjectPtr<class UStaticMesh> SignCube14;
 	AActor* SpawnWildSign14(int32 K);
 	void TickWildSigns14();
 	void DropWildSigns14();

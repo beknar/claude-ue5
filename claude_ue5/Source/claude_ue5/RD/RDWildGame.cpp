@@ -127,6 +127,7 @@ void ARDDungeonGenerator::TickWild(float Dt, APlayerController* PC)
 	if (!WildOldWorldNotice.IsEmpty() && PlayerCombat && GetWorld() && GetWorld()->GetTimeSeconds() > 3.f) { PlayerCombat->ShowMessage(WildOldWorldNotice); WildOldWorldNotice.Reset(); }
 	TickWildLoad();
 	TickWildFarms();
+	TickWildSigns14();          // (the list of 2026-11-16's fourteenth phase: the roads' signs near her)
 	APawn* P = PC ? PC->GetPawn() : nullptr;
 	if (!P) return;
 	TickWildRunSpeed(P);          // (the list of 2026-11-07: rd.WildRunSpeed)

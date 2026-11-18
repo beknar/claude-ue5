@@ -303,6 +303,9 @@ public:
 	TMultiMap<FIntPoint, int32> SignHash;          // (500 m cells)
 	FString MinorStats;
 	void SignsNear(const FVector2D& P, double R, TArray<int32>& Out) const;
+	/** the roads whose segments the hash holds in a box (bMinor: the minor ones, else the major ones) */
+	void RoadsIn(const FBox2D& B, bool bMinor, TArray<int32>& Out) const;
+	TArray<int32> MajorRoadIdx;
 	static FString SignDistText(double M);
 	double RoadAlong(int32 Ri, int32 Seg, double T) const;
 	double RoadLength(int32 Ri) const;
@@ -483,7 +486,7 @@ private:
 	/** the list of 2026-11-16's fourteenth phase (RDWildRoads14.cpp): the minor roads, dirt, to every village (down to the major roads),
 	 *  place, structure and farmstead near a road; they took the tracks' place (the crossroads are where they leave a major road) */
 	void MakeMinorRoads();
-	bool MinorPath(const FVector2D& A, const FVector2D& B, uint32 Sk, const TMultiMap<FIntPoint, FVector2D>& Dots, TArray<FVector2D>& Out) const;
+	bool MinorPath(const FVector2D& A, const FVector2D& B, uint32 Sk, const TMultiMap<FIntPoint, FVector2D>& Dots, const FVector2D& OwnA, const FVector2D& OwnB, TArray<FVector2D>& Out) const;
 	void MakeSigns();
 	/** where a major road runs within 30 m of an earlier one (two roads out of one gate: Brokenspire's to Ashenreach and to Vel Morrath ran
 	 *  side by side 7 m apart for kilometres), it takes the earlier one's line and bed, eased in over 30 to 60 m */

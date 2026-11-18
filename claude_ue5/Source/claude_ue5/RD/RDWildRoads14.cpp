@@ -94,12 +94,12 @@ void FRDWildWorld::RoadUp(int32 Ri, int32 Seg, double T, FString& OutName, doubl
 	OutName = R.Up; OutM = (L - S) + R.UpM;
 }
 
-bool FRDWildWorld::MinorPath(const FVector2D& A, const FVector2D& B, uint32 Sk, const TMultiMap<FIntPoint, FVector2D>& Dots, TArray<FVector2D>& Out) const
+bool FRDWildWorld::MinorPath(const FVector2D& A, const FVector2D& B, uint32 Sk, const TMultiMap<FIntPoint, FVector2D>& Dots, const FVector2D& OwnA, const FVector2D& OwnB, TArray<FVector2D>& Out) const
 {
 	// (a way from A to B: straight, then bent a quarter and a half of its length to either side; 25 m steps wandering 15 m off the line
 	// (none at the ends). Refused over the sea, a lake, a pond, a marsh pool, a hot spring or lava, within 1.1 km of a town, or within
-	// 60 m of another place's middle (a way's own ends' places are 45 m from them: those within 50 m of an end are its own); a river
-	// it fords)
+	// 60 m of another place's middle (its own place and the village it leads to are named, OwnA / OwnB: PR #92's review, an end's 50 m
+	// excused a farmstead by a lane's join, whose yard the lane then crossed and which play then refused); a river it fords)
 	const double L = FVector2D::Distance(A, B);
 	if (L < 30.0) return false;
 	const FVector2D D = (B - A) / L, Pp(-D.Y, D.X);
@@ -132,7 +132,7 @@ bool FRDWildWorld::MinorPath(const FVector2D& A, const FVector2D& B, uint32 Sk, 
 						for (auto It = Dots.CreateConstKeyIterator(Kc + FIntPoint(Di, Dj)); It; ++It)
 						{
 							const FVector2D& O = It.Value();
-							if (FVector2D::DistSquared(O, A) < 50.0 * 50.0 || FVector2D::DistSquared(O, B) < 50.0 * 50.0) continue;
+							if (FVector2D::DistSquared(O, OwnA) < 1.0 || FVector2D::DistSquared(O, OwnB) < 1.0) continue;
 							if (FVector2D::DistSquared(O, Q) < 60.0 * 60.0) { bBad = true; break; }
 						}
 			}
@@ -221,6 +221,7 @@ void FRDWildWorld::MakeMinorRoads()
 			}
 	}
 	auto TownOk = [this](const FVector2D& At) { double Dt; NearestTown(At.X, At.Y, Dt); return Dt >= 1300.0; };
+	const FVector2D NoPt(1e18, 1e18);
 	// ---- the villages: each to a major road within 4 km where its cell is near one, else to the nearest village nearer the roads
 	// (its cell half a cell or more nearer: the ways run downhill to the roads and close no ring)
 	TArray<FRDR14Link> VL; VL.SetNum(Villages.Num());
@@ -233,7 +234,7 @@ void FRDWildWorld::MakeMinorRoads()
 		if (D0 <= 1.5f && NearestRoadPoint(V.At, 4000.0, true, Rr, Sg, Tt, At) && TownOk(At))
 		{
 			const FVector2D Dir = (At - V.At).GetSafeNormal();
-			if (MinorPath(V.At + Dir * 45.0, At, (uint32)V.Id, Dots, L.P)) { L.Join = Rr; L.JoinSeg = Sg; L.JoinT = Tt; L.bOk = true; return; }
+			if (MinorPath(V.At + Dir * 45.0, At, (uint32)V.Id, Dots, V.At, NoPt, L.P)) { L.Join = Rr; L.JoinSeg = Sg; L.JoinT = Tt; L.bOk = true; return; }
 		}
 		TArray<TPair<double, int32>> Cand;
 		for (int32 Di = -2; Di <= 2; ++Di)
@@ -250,7 +251,7 @@ void FRDWildWorld::MakeMinorRoads()
 		{
 			const FRDWildPlace& Q = Villages[Cand[C].Value];
 			const FVector2D Dir = (Q.At - V.At).GetSafeNormal();
-			if (MinorPath(V.At + Dir * 45.0, Q.At - Dir * 45.0, (uint32)V.Id, Dots, L.P)) { L.Parent = Cand[C].Value; L.Up = Q.Name; L.UpM = 45.0; L.bOk = true; return; }
+			if (MinorPath(V.At + Dir * 45.0, Q.At - Dir * 45.0, (uint32)V.Id, Dots, V.At, Q.At, L.P)) { L.Parent = Cand[C].Value; L.Up = Q.Name; L.UpM = 45.0; L.bOk = true; return; }
 		}
 	});
 	auto AddLink = [this](FRDR14Link& L) -> int32
@@ -314,7 +315,7 @@ void FRDWildWorld::MakeMinorRoads()
 			int32 Rr, Sg; double Tt; FVector2D At;
 			if (!NearestRoadPoint(V.At, 5000.0, false, Rr, Sg, Tt, At, &Allowed) || !TownOk(At)) return;
 			const FVector2D Dir = (At - V.At).GetSafeNormal();
-			if (MinorPath(V.At + Dir * 45.0, At, (uint32)V.Id * 13u + 5u, Dots, L.P)) { L.Join = Rr; L.JoinSeg = Sg; L.JoinT = Tt; L.bOk = true; }
+			if (MinorPath(V.At + Dir * 45.0, At, (uint32)V.Id * 13u + 5u, Dots, V.At, NoPt, L.P)) { L.Join = Rr; L.JoinSeg = Sg; L.JoinT = Tt; L.bOk = true; }
 		});
 		int32 NC = 0;
 		for (FRDR14Link& L : CL)
@@ -339,7 +340,7 @@ void FRDWildWorld::MakeMinorRoads()
 			if (!NearestRoadPoint(P.At, Reach, false, Rr, Sg, Tt, At) || !TownOk(At)) return;
 			const FVector2D Dir = (At - P.At).GetSafeNormal();
 			if (FVector2D::Distance(P.At, At) < Off + 40.0) return;          // (the road at its door: no lane)
-			if (MinorPath(P.At + Dir * Off, At, (uint32)P.Id * 7u + 3u, Dots, L.P)) { L.Join = Rr; L.JoinSeg = Sg; L.JoinT = Tt; L.bOk = true; }
+			if (MinorPath(P.At + Dir * Off, At, (uint32)P.Id * 7u + 3u, Dots, P.At, NoPt, L.P)) { L.Join = Rr; L.JoinSeg = Sg; L.JoinT = Tt; L.bOk = true; }
 		});
 		for (FRDR14Link& L : LL)
 		{
@@ -364,7 +365,9 @@ void FRDWildWorld::MakeSigns()
 	// (every 2 km of a major road, a post 7 m off its middle naming its two towns and how far each is along it; every 1 km of a minor
 	// road, a post 4 m off naming the place it leads to one way and what it joins the other; at every minor road's join, a post on it
 	// 14 m from the road it leaves, naming its place)
-	Signs.Reset(); SignHash.Reset();
+	Signs.Reset(); SignHash.Reset(); MajorRoadIdx.Reset();
+	int32 Skipped = 0;
+	for (int32 Ri = 0; Ri < Roads.Num(); ++Ri) if (!Roads[Ri].bTrack) MajorRoadIdx.Add(Ri);
 	auto Yaw = [](const FVector2D& D) { return (float)FMath::RadiansToDegrees(FMath::Atan2(-D.X, D.Y)); };          // (the post's +Y along D)
 	auto At = [this](int32 Ri, double S, FVector2D& OutP, FVector2D& OutD)
 	{
@@ -378,11 +381,35 @@ void FRDWildWorld::MakeSigns()
 		}
 		OutP = R.P.Num() ? R.P[0] : FVector2D::ZeroVector; OutD = FVector2D(1, 0);
 	};
-	auto Add = [&](uint8 Kind, int32 Ri, const FVector2D& P, const FVector2D& Dir, const FString& A, double Am, const FString& B, double Bm)
+	// (PR #92's review: where two major roads lie on one line (merged) or close, a post would stand on the other's cobbles or beside
+	// another's: none within 9 m of another major road's middle, and a major road's none within 60 m of one already laid)
+	auto Clear = [&](uint8 Kind, int32 Ri, const FVector2D& P, const FVector2D& Base) -> int32          // (0 clear, 1 beside another road, 2 by another post)
 	{
+		const FIntPoint Hc(FMath::FloorToInt(P.X / HashM), FMath::FloorToInt(P.Y / HashM));
+		for (auto It = SegHash.CreateConstKeyIterator(Hc); It; ++It)
+		{
+			const uint32 V = It.Value();
+			if ((V >> 31) == 0) continue;
+			const int32 J = (V >> 16) & 0x7FFF, Sg = V & 0xFFFF;
+			if (J == Ri || Roads[J].bTrack || !Roads[J].P.IsValidIndex(Sg + 1)) continue;
+			// (a road on this one's line (merged) is no other road: its posts are kept apart by the 60 m below)
+			double T, Tb;
+			if (RDR14SegDist(P, Roads[J].P[Sg], Roads[J].P[Sg + 1], T) < 9.0 && RDR14SegDist(Base, Roads[J].P[Sg], Roads[J].P[Sg + 1], Tb) > 2.0) return 1;
+		}
+		if (Kind == 0)
+		{
+			TArray<int32> Near; SignsNear(P, 60.0, Near);
+			for (const int32 K : Near) if (Signs[K].Kind == 0) return 2;
+		}
+		return 0;
+	};
+	auto Add = [&](uint8 Kind, int32 Ri, const FVector2D& Base, const FVector2D& P, const FVector2D& Dir, const FString& A, double Am, const FString& B, double Bm) -> int32
+	{
+		if (const int32 Why = Clear(Kind, Ri, P, Base)) return Why;
 		FRDWildSign S; S.Kind = Kind; S.Road = Ri; S.At = P; S.Yaw = Yaw(Dir); S.A = A; S.Am = (float)Am; S.B = B; S.Bm = (float)Bm;
 		const int32 K = Signs.Add(S);
 		SignHash.Add(FIntPoint(FMath::FloorToInt(P.X / 500.0), FMath::FloorToInt(P.Y / 500.0)), K);
+		return 0;
 	};
 	for (int32 Ri = 0; Ri < Roads.Num(); ++Ri)
 	{
@@ -395,7 +422,11 @@ void FRDWildWorld::MakeSigns()
 			{
 				FVector2D P, D; At(Ri, S, P, D);
 				// (arm A toward the road's end (its To), arm B back toward its From)
-				Add(0, Ri, P + FVector2D(D.Y, -D.X) * 7.0, D, Towns[R.To].Name, L - S, Towns[R.From].Name, S);
+				// (beside another road on its right, it tries its left, then 12 m out (the merge's easing bands: PR #92's review's fix had
+				// left 6 km gaps); by another post it is that post's place)
+				int32 Why = 1;
+				for (const double Off : { 7.0, -7.0, 12.0, -12.0 }) { Why = Add(0, Ri, P, P + FVector2D(D.Y, -D.X) * Off, D, Towns[R.To].Name, L - S, Towns[R.From].Name, S); if (Why != 1) break; }
+				if (Why == 1) ++Skipped;
 			}
 			continue;
 		}
@@ -404,15 +435,37 @@ void FRDWildWorld::MakeSigns()
 		for (double S = 1000.0; S < L - 200.0; S += 1000.0)
 		{
 			FVector2D P, D; At(Ri, S, P, D);
-			Add(1, Ri, P + FVector2D(D.Y, -D.X) * 4.0, -D, R.Dest, S, R.Up, (L - S) + R.UpM);
+			if (Add(1, Ri, P, P + FVector2D(D.Y, -D.X) * 4.0, -D, R.Dest, S, R.Up, (L - S) + R.UpM)) ++Skipped;
 		}
 		if (R.Join >= 0 && L > 40.0)
 		{
 			FVector2D P, D; At(Ri, L - 14.0, P, D);
-			Add(2, Ri, P + FVector2D(D.Y, -D.X) * 4.0, -D, R.Dest, L - 14.0, FString(), 0.0);
+			if (Add(2, Ri, P, P + FVector2D(D.Y, -D.X) * 4.0, -D, R.Dest, L - 14.0, FString(), 0.0)) ++Skipped;
 		}
 	}
-	UE_LOG(LogRDWildRoads, Log, TEXT("RDWILD %d signs"), Signs.Num());
+	UE_LOG(LogRDWildRoads, Log, TEXT("RDWILD %d signs (%d not laid: beside another major road on both sides)"), Signs.Num(), Skipped);
+}
+
+void FRDWildWorld::RoadsIn(const FBox2D& B, bool bMinor, TArray<int32>& Out) const
+{
+	if (!bMinor) { for (const int32 Ri : MajorRoadIdx) if (Roads[Ri].Box.Intersect(B)) Out.Add(Ri); return; }
+	const int32 I0 = FMath::FloorToInt(B.Min.X / HashM), I1 = FMath::FloorToInt(B.Max.X / HashM);
+	const int32 J0 = FMath::FloorToInt(B.Min.Y / HashM), J1 = FMath::FloorToInt(B.Max.Y / HashM);
+	TSet<int32> Seen;
+	if ((int64)(I1 - I0 + 1) * (J1 - J0 + 1) > 2500)
+	{
+		for (int32 Ri = 0; Ri < Roads.Num(); ++Ri) if (Roads[Ri].bTrack && Roads[Ri].Box.Intersect(B)) Out.Add(Ri);
+		return;
+	}
+	for (int32 I = I0; I <= I1; ++I)
+		for (int32 J = J0; J <= J1; ++J)
+			for (auto It = SegHash.CreateConstKeyIterator(FIntPoint(I, J)); It; ++It)
+			{
+				const uint32 V = It.Value();
+				if ((V >> 31) == 0) continue;
+				const int32 Ri = (V >> 16) & 0x7FFF;
+				if (Roads.IsValidIndex(Ri) && Roads[Ri].bTrack && !Seen.Contains(Ri)) { Seen.Add(Ri); Out.Add(Ri); }
+			}
 }
 
 void FRDWildWorld::SignsNear(const FVector2D& P, double R, TArray<int32>& Out) const

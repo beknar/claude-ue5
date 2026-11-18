@@ -107,14 +107,16 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 			Lines(R.P, FLinearColor(0.20f, 0.36f, 0.42f, 0.9f), FMath::Clamp((float)(R.W.Last() / Mpp), 1.2f, 4.f) * Sc);
 	// (the list of 2026-11-16's fourteenth phase: "they should look different on the mini map and the large map": a major road a pale
 	// stone line in a dark edge, a minor road a thin brown line, shown once the map is near enough (under 40 m a pixel))
-	for (const FRDWildWorld::FRoad& R : W.Roads)
-		if (R.Box.Max.X > X0 && R.Box.Min.X < X1 && R.Box.Max.Y > Y0 && R.Box.Min.Y < Y1)
-		{
-			if (R.bTrack) { if (Mpp < 40.0) Lines(R.P, FLinearColor(0.50f, 0.35f, 0.19f, 0.85f), FMath::Clamp((float)(4.0 / Mpp), 0.8f, 2.f) * Sc); continue; }
-			const float Wr = FMath::Clamp((float)(9.0 / Mpp), 2.f, 4.f) * Sc;
-			Lines(R.P, FLinearColor(0.13f, 0.11f, 0.09f, 0.95f), Wr + 2.f * Sc);
-			Lines(R.P, FLinearColor(0.80f, 0.76f, 0.66f, 1.f), Wr);
-		}
+	// (only the roads in view: the majors by their list, the minors through the segments' hash (PR #92's review: 5,500 roads a frame))
+	{
+		const FBox2D Vw(FVector2D(X0, Y0), FVector2D(X1, Y1));
+		TArray<int32> In;
+		if (Mpp < 40.0) { W.RoadsIn(Vw, true, In); for (const int32 Ri : In) Lines(W.Roads[Ri].P, FLinearColor(0.50f, 0.35f, 0.19f, 0.85f), FMath::Clamp((float)(4.0 / Mpp), 0.8f, 2.f) * Sc); }
+		In.Reset(); W.RoadsIn(Vw, false, In);
+		const float Wr = FMath::Clamp((float)(9.0 / Mpp), 2.f, 4.f) * Sc;
+		for (const int32 Ri : In) Lines(W.Roads[Ri].P, FLinearColor(0.13f, 0.11f, 0.09f, 0.95f), Wr + 2.f * Sc);
+		for (const int32 Ri : In) Lines(W.Roads[Ri].P, FLinearColor(0.80f, 0.76f, 0.66f, 1.f), Wr);
+	}
 	// the fog
 	{
 		FVector2D U0, U1;
@@ -215,10 +217,11 @@ void ARDHUD::DrawWildMinimap(float Sc, const FVector& L, float Yaw)
 			const FVector2D Sa = ToS(Pa), Sb = ToS(Pb);
 			if (FVector2D::Distance(Sa, C) < R * 0.94f && FVector2D::Distance(Sb, C) < R * 0.94f) DrawLine(Sa.X, Sa.Y, Sb.X, Sb.Y, Cl, Wp);
 		};
+		TArray<int32> Mn, Mj; Gen->Wild->RoadsIn(Vb, true, Mn); Gen->Wild->RoadsIn(Vb, false, Mj);
 		for (int32 Pass = 0; Pass < 3; ++Pass)
-			for (const FRDWildWorld::FRoad& Rd : Gen->Wild->Roads)
+			for (const int32 Ri : (Pass < 2 ? Mj : Mn))
 			{
-				if (!Rd.Box.Intersect(Vb) || (Pass < 2) == Rd.bTrack) continue;
+				const FRDWildWorld::FRoad& Rd = Gen->Wild->Roads[Ri];
 				const FLinearColor Cl = Rd.bTrack ? FLinearColor(0.50f, 0.35f, 0.19f, 0.9f) : (Pass == 0 ? FLinearColor(0.13f, 0.11f, 0.09f, 0.95f) : FLinearColor(0.80f, 0.76f, 0.66f, 1.f));
 				const float Wp = Rd.bTrack ? FMath::Max(4.f * K, 1.2f * Sc) : FMath::Max(9.f * K, 3.f * Sc) + (Pass == 0 ? 2.f * Sc : 0.f);
 				for (int32 I = 0; I + 1 < Rd.P.Num(); ++I)

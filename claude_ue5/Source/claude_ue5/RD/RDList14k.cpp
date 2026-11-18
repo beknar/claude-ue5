@@ -23,9 +23,13 @@ AActor* ARDDungeonGenerator::SpawnWildSign14(int32 K)
 {
 	if (!IsWildReady() || !Wild->Signs.IsValidIndex(K)) return nullptr;
 	const FRDWildWorld::FRDWildSign& S = Wild->Signs[K];
-	UStaticMesh* Post = LoadObject<UStaticMesh>(nullptr, RDS14Post);
-	UStaticMesh* Arm = LoadObject<UStaticMesh>(nullptr, RDS14Arm);
-	if (!Post || !Arm) { if (!bSignMeshMissing14) UE_LOG(LogRDSigns14, Error, TEXT("RDSIGN the sign's meshes are missing (%s)"), RDS14Post); bSignMeshMissing14 = true; return nullptr; }
+	// (loaded once; missing, never asked again (PR #92's review: every sign near her asked every half second))
+	if (bSignMeshMissing14) return nullptr;
+	if (!SignPost14) SignPost14 = LoadObject<UStaticMesh>(nullptr, RDS14Post);
+	if (!SignArm14) SignArm14 = LoadObject<UStaticMesh>(nullptr, RDS14Arm);
+	if (!SignCube14) SignCube14 = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
+	UStaticMesh* Post = SignPost14; UStaticMesh* Arm = SignArm14;
+	if (!Post || !Arm) { UE_LOG(LogRDSigns14, Error, TEXT("RDSIGN the sign's meshes are missing (%s): no signs are laid"), RDS14Post); bSignMeshMissing14 = true; return nullptr; }
 	FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	AActor* A = GetWorld()->SpawnActor<AActor>(AActor::StaticClass(), FTransform::Identity, Sp);
 	if (!A) return nullptr;
@@ -51,7 +55,7 @@ AActor* ARDDungeonGenerator::SpawnWildSign14(int32 K)
 		Ac->RegisterComponent();
 		// (a core inside the arm between its two faces' words: the arm turned half round let the far face's words show through it,
 		// mirrored over the near face's (the first pictures); 2 cm thick, 85 x 22 cm, inside the arm's 3.4 x 101 x 27 cm)
-		if (UStaticMesh* Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube")))
+		if (UStaticMesh* Cube = SignCube14)
 		{
 			UStaticMeshComponent* Cc = NewObject<UStaticMeshComponent>(A);
 			Cc->SetStaticMesh(Cube); Cc->SetupAttachment(Root);

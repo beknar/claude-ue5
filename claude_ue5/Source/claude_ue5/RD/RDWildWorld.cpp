@@ -2135,6 +2135,9 @@ void FRDWildWorld::MakeCrossroads()
 				if ((V >> 31) == 0) continue;
 				const int32 J = (V >> 16) & 0x7FFF, Sg = V & 0xFFFF;
 				if (J == Ri) continue;
+				// (PR #92's review: another major road, or a village's way that joins this one; the lanes to every place and farmstead
+				// would make a crossroads every 250 m)
+				if (Roads[J].bTrack && !(Roads[J].DestKind == TEXT("village") && Roads[J].Join == Ri)) continue;
 				double T; const double D = RDWSegDist(P, Roads[J].P[Sg], Roads[J].P[Sg + 1], T);
 				if (D > 12.0) continue;
 				const FVector2D Od = (Roads[J].P[Sg + 1] - Roads[J].P[Sg]).GetSafeNormal();
@@ -2148,7 +2151,7 @@ void FRDWildWorld::MakeCrossroads()
 			// kept from 1.1 km, past the town's level ground)
 			double Dt; NearestTown(P.X, P.Y, Dt);
 			if (Dt < 1100.0) continue;
-			if (Crossroads.ContainsByPredicate([&](const FVector2D& Q) { return FVector2D::DistSquared(Q, P) < 250.0 * 250.0; })) continue;
+			if (Crossroads.ContainsByPredicate([&](const FVector2D& Q) { return FVector2D::DistSquared(Q, P) < 1500.0 * 1500.0; })) continue;          // (1.5 km apart: the villages' ways join often)
 			Crossroads.Add(P);
 		}
 	}
@@ -2227,7 +2230,7 @@ void FRDWildWorld::SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) cons
 					for (auto It = SegHash.CreateConstKeyIterator(FIntPoint(I, J)); It; ++It)
 					{
 						const uint32 V = It.Value();
-						if ((V >> 31) == 0) continue;
+						if ((V >> 31) == 0 || Roads[(V >> 16) & 0x7FFF].bTrack) continue;          // (a major road's cell: the minor roads reach nearly every cell)
 						const FVector2D M = Roads[(V >> 16) & 0x7FFF].P[V & 0xFFFF];
 						if (M.X >= X0 && M.X < X0 + SceneryCellM && M.Y >= Y0 && M.Y < Y0 + SceneryCellM) { bRoad = true; break; }
 					}
