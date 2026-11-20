@@ -13,6 +13,13 @@ Parts (args):
                   the end of her weapons on every map she plays.
   quick           the third phase (item 14): a scroll her hero can read goes on the quick bar (bQuickScrolls15) on every map of the
                   game and martial_arts.
+  shelves <dir>   the fourth phase (item 7): the Gothic bookshelf (SM_Prop_Cabinet_D) exported to <dir>, its back panel cut into two
+                  door leaves by blender_numpy/shelf_doors15.py, imported to /Game/RandomDungeon/List15 (the cabinet's material);
+                  on every map of the game the Bookshelf and Bookshelf2 pieces turned round (their Adjust had put the cabinet's
+                  back panel to the room and its open front to the wall) and the leaves, their hinges and bShelfDoors15 set.
+  dungeon         the fourth phase (items 5, 6, 8, 11): the great hall's oven (bStartOven15), the stations' marks (bStationMarks15),
+                  the big map's zoom (bMapZoom15) and the pews facing the altar (bPewsFaceAltar15) on every map of the game; each
+                  dungeon map's start section built again (its oven and its shelves saved).
 """
 import gc, json, os, sys
 import unreal
@@ -25,8 +32,8 @@ REPORT = []
 MAPS = "/Game/RandomDungeon/Maps/"
 # (the maps of the game the Summoner plays: martial_arts is the Martial Artist's alone)
 GAME_MAPS = ("brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress")
-PARTS = ("allies", "summons", "hands", "quick")
-args = [a for a in sys.argv[1:] if a in PARTS] or list(PARTS)
+PARTS = ("allies", "summons", "hands", "quick", "shelves", "dungeon")
+args = [a for a in sys.argv[1:] if a in PARTS] or [p for p in PARTS if p != "shelves"]          # (shelves needs its folder: named only)
 SA = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "SourceArt")
 DUNGEONS = ("war_engine", "sewers", "kethrys_spire", "heaven_fortress")
 FAMILY = {}
@@ -106,12 +113,82 @@ def quick(g, m):
     return g.get_editor_property("quick_scrolls15")
 
 
+L15 = "/Game/RandomDungeon/List15"
+CAB = "/Game/Gothic_Props/Assets/Meshes/SM_Prop_Cabinet_D"
+BLENDER = r"C:\Program Files\Blender Foundation\Blender 5.1\blender.exe"
+SHELF = {}
+
+
+def shelves_make(work):
+    """the cabinet out, the two leaves made by Blender, in again (their size measured against the script's)"""
+    import subprocess
+    os.makedirs(work, exist_ok=True)
+    t = unreal.AssetExportTask(); t.object = unreal.load_asset(CAB); t.filename = os.path.join(work, "cabinet_d.fbx")
+    t.automated = True; t.replace_identical = True; t.prompt = False; t.exporter = unreal.StaticMeshExporterFBX()
+    assert unreal.Exporter.run_asset_export_task(t), "the cabinet's export failed"
+    out = os.path.join(work, "doors")
+    script = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "blender_numpy", "shelf_doors15.py")
+    r = subprocess.run([BLENDER, "-b", "-P", script, "--", t.filename, out], capture_output=True, text=True, timeout=600)
+    assert "SHELF15 done" in r.stdout, r.stdout[-2000:] + r.stderr[-2000:]
+    rec = json.load(open(os.path.join(out, "shelf_doors15.json"), encoding="utf-8"))
+    tasks = []
+    for side in ("L", "R"):
+        o = unreal.FbxImportUI(); o.import_mesh = True; o.import_materials = False; o.import_textures = False; o.import_as_skeletal = False
+        o.static_mesh_import_data.combine_meshes = True; o.static_mesh_import_data.auto_generate_collision = False
+        tk = unreal.AssetImportTask(); tk.filename = os.path.join(out, f"SM_RD_ShelfDoor{side}15.fbx"); tk.destination_path = L15
+        tk.replace_existing = True; tk.automated = True; tk.save = True; tk.options = o; tasks.append(tk)
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks(tasks)
+    mat = unreal.load_asset(CAB).get_material(0)
+    for side in ("L", "R"):
+        m = unreal.load_asset(f"{L15}/SM_RD_ShelfDoor{side}15"); assert m, f"no leaf {side}"
+        m.set_material(0, mat); unreal.EditorAssetLibrary.save_loaded_asset(m, False)
+        b = m.get_bounding_box(); want = rec[side]["box"]
+        got = [[round(b.min.x, 1), round(b.min.y, 1), round(b.min.z, 1)], [round(b.max.x, 1), round(b.max.y, 1), round(b.max.z, 1)]]
+        assert all(abs(got[i][k] - want[i][k]) < 1.0 for i in range(2) for k in range(3)), f"leaf {side} came in as {got}, made as {want}"
+        SHELF[side] = m
+    SHELF["hinge"] = unreal.Vector2D(rec["L"]["hinge"][0], abs(rec["L"]["hinge"][1]))
+    REPORT.append(f"934 shelves: leaves {rec['L']['box']} / {rec['R']['box']}, hinge {rec['L']['hinge']}")
+
+
+def shelves(g, m):
+    pcs = g.get_editor_property("pieces"); turned = []
+    for n in ("Bookshelf", "Bookshelf2"):
+        p = pcs.get(unreal.Name(n))
+        if not p or not p.get_editor_property("actor_class"): continue
+        a = p.get_editor_property("adjust")
+        # (turned once: the old Adjust's +90 sent the cabinet's front (its +Y) to -X, against the wall)
+        if a.rotation.z > 0.5:
+            a.rotation = unreal.Quat(0.0, 0.0, -0.70710678, 0.70710678)
+            a.translation = unreal.Vector(-a.translation.x, -a.translation.y, a.translation.z)
+            p.set_editor_property("adjust", a); pcs[unreal.Name(n)] = p; turned.append(n)
+    g.set_editor_property("pieces", pcs)
+    g.set_editor_property("shelf_door_l15", SHELF["L"]); g.set_editor_property("shelf_door_r15", SHELF["R"])
+    g.set_editor_property("shelf_door_hinge15", SHELF["hinge"]); g.set_editor_property("shelf_doors15", True)
+    back = g.get_editor_property("pieces").get(unreal.Name("Bookshelf"))
+    return {"turned": turned, "adjust": str(back.get_editor_property("adjust").rotation) if back else None}
+
+
+def dungeon(g, m):
+    for k in ("start_oven15", "station_marks15", "map_zoom15", "pews_face_altar15"): g.set_editor_property(k, True)
+    has_oven = g.get_editor_property("pieces").get(unreal.Name("BreadOven")) is not None
+    town = bool(g.get_editor_property("town"))
+    if not town: g.modify(); g.build_start_section()
+    return {"oven_piece": has_oven, "dungeon_ovens": g.get_editor_property("dungeon_ovens"), "start_built": not town}
+
+
 if "allies" in args: each(GAME_MAPS, allies, "allies")
 if "summons" in args:
     each(GAME_MAPS, summons, "summons")
     json.dump(CHOSEN, open(os.path.join(SA, "balance", "summons15.json"), "w", encoding="utf-8"), indent=1)
 if "hands" in args: each(GAME_MAPS, hands, "hands")
 if "quick" in args: each(GAME_MAPS + ("martial_arts",), quick, "quick")
+if "shelves" in args:
+    work = next((a for a in sys.argv[1:] if os.path.isabs(a)), None)
+    assert work, "934 shelves <work dir>: an absolute folder for the cabinet's export and the leaves"
+    shelves_make(work)
+    each(GAME_MAPS, shelves, "shelves")
+# (after shelves: the start sections built again with the turned shelves and their doors)
+if "dungeon" in args: each(GAME_MAPS, dungeon, "dungeon")
 print("\n".join(REPORT))
 del eal, eas, les, ues
 gc.collect()

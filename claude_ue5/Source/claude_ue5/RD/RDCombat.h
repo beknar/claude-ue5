@@ -647,6 +647,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List15") int32 SummonsReplaced15 = 0;
 	/** the kind the summoning being cast calls (fixed as it begins) */
 	FName CastKind15;
+	/** the big map open and zooming by the wheel (the wheel switches her weapons otherwise) */
+	bool MapWheel15() const;
 	/** an item put on the bar as an entry ("#<item>") */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool AssignQuickItem(int32 Slot, FName Item) { return AssignQuickEntry(Slot, FName(*(TEXT("#") + Item.ToString()))); }
 	/** a slot's number as the bar shows it: 1 to 9, 0, then 11, 12... (those have no key) */
