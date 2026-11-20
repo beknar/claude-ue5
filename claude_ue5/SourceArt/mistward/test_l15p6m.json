@@ -1,0 +1,27 @@
+{
+ "tag": "l15p6m",
+ "plan": [
+  "hearth15"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "hearth15",
+   "ok": true,
+   "hearths": 3,
+   "burning": 3,
+   "card_comps": 0,
+   "fire_near": [
+    "6080|-10200|0|1"
+   ],
+   "heard": true
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_l15p6m_hearth15.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

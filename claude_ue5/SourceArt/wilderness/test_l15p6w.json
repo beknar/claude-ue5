@@ -1,0 +1,48 @@
+{
+ "tag": "l15p6w",
+ "plan": [
+  "hearth15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "hearth15",
+   "ok": true,
+   "visits": [
+    {
+     "kind": "village",
+     "name": "Windholt",
+     "hearths": 4,
+     "burning": 4,
+     "card_comps": 0,
+     "heard": true
+    },
+    {
+     "kind": "village",
+     "name": "Redmere",
+     "hearths": 5,
+     "burning": 5,
+     "card_comps": 0,
+     "heard": true
+    },
+    {
+     "kind": "farmstead",
+     "name": "Odric's Croft",
+     "hearths": 1,
+     "burning": 1,
+     "card_comps": 0,
+     "heard": true
+    }
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_l15p6w_hearth15_0.png",
+  "wd_l15p6w_hearth15_1.png",
+  "wd_l15p6w_hearth15_2.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

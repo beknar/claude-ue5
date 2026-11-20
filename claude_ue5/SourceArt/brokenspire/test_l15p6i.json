@@ -1,0 +1,420 @@
+{
+ "tag": "l15p6i",
+ "plan": [
+  "cows15",
+  "warden15",
+  "mapsym15",
+  "hearth15",
+  "animals10",
+  "talk",
+  "satellite"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "cows15",
+   "ok": true,
+   "animals": 45,
+   "pens": 12,
+   "samples": 208,
+   "least_gap_cm": {
+    "0": 5.9,
+    "1": 34.7,
+    "2": 40.5,
+    "3": 126.5,
+    "4": 8.9,
+    "5": 9.6,
+    "6": 34.1,
+    "7": 40.2,
+    "8": 83.8,
+    "9": 26.4,
+    "10": 5.8,
+    "11": 32.9
+   },
+   "moved_m": {
+    "0": 4.2,
+    "1": 2.8,
+    "2": 2.3,
+    "3": 4.6,
+    "4": 3.7,
+    "5": 2.9,
+    "6": 2.7,
+    "7": 3.2,
+    "8": 1.3,
+    "9": 3.6,
+    "10": 3.6,
+    "11": 2.1
+   },
+   "switch_off": false
+  },
+  {
+   "step": "warden15",
+   "ok": true,
+   "offered_at_start": "captain_warden|Captain|The First Warden|offered|0|1|Slay a tier's boss in Mistward Castle",
+   "only_vel_morrath": 0,
+   "castle_slain": 1,
+   "accepted": true,
+   "after_accept": "captain_warden|Captain|The First Warden|ready|1|1|Slay a tier's boss in Mistward Castle",
+   "state": "ready",
+   "progress": [
+    "1",
+    "1"
+   ]
+  },
+  {
+   "step": "mapsym15",
+   "ok": true,
+   "satellite": {
+    "badges": 10,
+    "symbols": [
+     "ankh",
+     "comp_timber",
+     "healing_flask",
+     "icon_gold",
+     "mana_flask",
+     "map_anvil",
+     "mw_medieval_weapons_heater_shield",
+     "stew",
+     "wmap_cave"
+    ],
+    "legend": [
+     "temple, chapel: blessings",
+     "tavern: food and drink",
+     "smithy: repairs, the anvil",
+     "trader: buy and sell",
+     "healer: healing",
+     "storehouse: your storage",
+     "barracks: the town's guard",
+     "witch's hut: potions",
+     "the way into the dungeon",
+     "a quest giver: ! offers, ? to hand in"
+    ],
+    "symbols_not_in_key": [],
+    "building_words_left": []
+   },
+   "painted": {
+    "badges": 10,
+    "symbols": [
+     "ankh",
+     "comp_timber",
+     "healing_flask",
+     "icon_gold",
+     "mana_flask",
+     "map_anvil",
+     "mw_medieval_weapons_heater_shield",
+     "stew",
+     "wmap_cave"
+    ],
+    "legend": [
+     "temple, chapel: blessings",
+     "tavern: food and drink",
+     "smithy: repairs, the anvil",
+     "trader: buy and sell",
+     "healer: healing",
+     "storehouse: your storage",
+     "barracks: the town's guard",
+     "witch's hut: potions",
+     "the way into the dungeon",
+     "a quest giver: ! offers, ? to hand in"
+    ],
+    "symbols_not_in_key": [],
+    "building_words_left": []
+   }
+  },
+  {
+   "step": "hearth15",
+   "ok": true,
+   "hearths": 38,
+   "shots": 6,
+   "heard": [
+    true,
+    true,
+    true
+   ],
+   "fires": [
+    [
+     "-1420|-10350|0|1"
+    ],
+    [
+     "9080|-15750|0|1"
+    ],
+    [
+     "11180|-2550|0|1"
+    ]
+   ],
+   "all_fires": 38,
+   "no_fire": [],
+   "distinct": 38,
+   "cards_shown": []
+  },
+  {
+   "step": "animals10",
+   "ok": true,
+   "kinds": {
+    "SK_Tripo_Chicken": 40,
+    "SK_Tripo_Pig": 10,
+    "SK_Tripo_Goat": 32,
+    "SK_Farm_Cow": 16,
+    "SK_Tripo_Rabbit": 18
+   },
+   "each": {
+    "SK_Farm_Cow": {
+     "mesh": "SK_Farm_Cow",
+     "materials": [
+      "M_Farm_Cow_A_coat",
+      "M_Farm_Cow_A_black",
+      "M_Farm_Cow_A_udder",
+      "M_Farm_Cow_A_muzzle",
+      "M_Farm_Cow_A_nostril",
+      "M_Farm_Cow_A_hoof",
+      "M_Farm_Cow_A_horn",
+      "M_Farm_Cow_A_tuft",
+      "M_Farm_Cow_A_eye"
+     ],
+     "plays": true
+    },
+    "SK_Tripo_Chicken": {
+     "mesh": "SK_Tripo_Chicken",
+     "materials": [
+      "M_Tripo_Chicken"
+     ],
+     "plays": true,
+     "feet_head_over_ground_cm": [
+      1.0,
+      1.0
+     ],
+     "feet_head_rest_cm": [
+      1.0,
+      1.0
+     ],
+     "feet_off_cm": 0.0
+    },
+    "SK_Tripo_Goat": {
+     "mesh": "SK_Tripo_Goat",
+     "materials": [
+      "M_Tripo_Goat"
+     ],
+     "plays": true,
+     "feet_head_over_ground_cm": [
+      5.0,
+      5.0,
+      5.0,
+      5.0
+     ],
+     "feet_head_rest_cm": [
+      5.0,
+      5.0,
+      5.0,
+      5.0
+     ],
+     "feet_off_cm": 0.0
+    },
+    "SK_Tripo_Pig": {
+     "mesh": "SK_Tripo_Pig",
+     "materials": [
+      "M_Tripo_Pig"
+     ],
+     "plays": true,
+     "feet_head_over_ground_cm": [
+      3.8,
+      4.0,
+      3.3,
+      4.0
+     ],
+     "feet_head_rest_cm": [
+      4.0,
+      4.0,
+      4.0,
+      4.0
+     ],
+     "feet_off_cm": 0.7000000000000002
+    },
+    "SK_Tripo_Rabbit": {
+     "mesh": "SK_Tripo_Rabbit",
+     "materials": [
+      "M_Tripo_Rabbit"
+     ],
+     "plays": true,
+     "feet_head_over_ground_cm": [
+      1.2,
+      2.0,
+      1.2,
+      2.0
+     ],
+     "feet_head_rest_cm": [
+      1.2,
+      2.0,
+      1.2,
+      2.0
+     ],
+     "feet_off_cm": 0.0
+    }
+   },
+   "shots": [
+    "animals10_cow",
+    "animals10_chicken",
+    "animals10_goat",
+    "animals10_pig",
+    "animals10_rabbit"
+   ],
+   "moved_of": {
+    "SK_Tripo_Chicken": [
+     36,
+     40
+    ],
+    "SK_Tripo_Pig": [
+     8,
+     10
+    ],
+    "SK_Tripo_Goat": [
+     27,
+     32
+    ],
+    "SK_Farm_Cow": [
+     13,
+     16
+    ],
+    "SK_Tripo_Rabbit": [
+     10,
+     18
+    ]
+   }
+  },
+  {
+   "step": "talk",
+   "ok": true,
+   "prompt": "talk to Aldric Venn",
+   "panel": "talk",
+   "lines": [
+    "ask|Why do you need my help?||1",
+    "ask|What is Mistward Castle?||1",
+    "ask|What happened to the town?||1",
+    "accept|Quest: Word from the Spire|15 g|1",
+    "bye|Farewell||1"
+   ],
+   "asked_changed_text": true,
+   "accepted": true,
+   "quest": {
+    "state": "taken",
+    "progress": 0,
+    "count": 1
+   },
+   "scholar_panel": "talk",
+   "scholar_lines": [
+    "ask|What is the Mistward?||1",
+    "ask|Who broke the spire?||1",
+    "ask|What should I look for down there?||1",
+    "accept|Quest: The Third Seal|150 g|1",
+    "bye|Farewell||1"
+   ],
+   "quest_ready": {
+    "state": "ready",
+    "progress": 1,
+    "count": 1
+   },
+   "turnin": true,
+   "gold": 15,
+   "quest_done": {
+    "state": "done",
+    "progress": 1,
+    "count": 1
+   },
+   "next_offered": true,
+   "lines_after": [
+    "ask|Why do you need my help?||1",
+    "ask|What is Mistward Castle?||1",
+    "ask|What happened to the town?||1",
+    "accept|Quest: The Mistward Hall|60 g|1",
+    "bye|Farewell||1"
+   ],
+   "captain_later": [],
+   "captain_wild_offered": [
+    "Quest: Wolves on the Mill Road",
+    "Quest: The Lost Patrol"
+   ]
+  },
+  {
+   "step": "satellite",
+   "ok": false,
+   "state": {
+    "step": 3,
+    "px": 4096,
+    "middle": [
+     0.0,
+     0.0
+    ],
+    "half_m": 264.0,
+    "capture_ms": 4.0,
+    "captures": 1,
+    "hidden": 535,
+    "mips": 1,
+    "camera_z": 5000.0,
+    "culls_held": 0
+   },
+   "folk": 121,
+   "raw_complete": false,
+   "luma": {},
+   "edges": {},
+   "drawn_satellite": true,
+   "painted_drawn": [],
+   "labels_missing": [
+    "SMITHY",
+    "TRADER",
+    "HEALER",
+    "TEMPLE",
+    "STOREHOUSE",
+    "MISTWARD CASTLE",
+    "TAVERN",
+    "CHAPEL",
+    "BARRACKS"
+   ],
+   "seals": [
+    "seal|Elder",
+    "seal|Captain",
+    "seal|Scholar",
+    "seal|Board"
+   ],
+   "fading_before": 12,
+   "retaking_drawn_satellite": false,
+   "restarted_at_step": 1,
+   "again": {
+    "step": 3,
+    "px": 4096,
+    "middle": [
+     0.0,
+     0.0
+    ],
+    "half_m": 264.0,
+    "capture_ms": 3.0,
+    "captures": 2,
+    "hidden": 738,
+    "mips": 1,
+    "camera_z": 5000.0,
+    "culls_held": 0
+   },
+   "fading_after": 12
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "bs_l15p6i_cows15.png",
+  "bs_l15p6i_mapsym15_satellite.png",
+  "bs_l15p6i_mapsym15_painted.png",
+  "bs_l15p6i_hearth15_0_23.png",
+  "bs_l15p6i_hearth15_0_12.png",
+  "bs_l15p6i_hearth15_1_23.png",
+  "bs_l15p6i_hearth15_1_12.png",
+  "bs_l15p6i_hearth15_2_23.png",
+  "bs_l15p6i_hearth15_2_12.png",
+  "bs_l15p6i_animals10_cow.png",
+  "bs_l15p6i_animals10_chicken.png",
+  "bs_l15p6i_animals10_goat.png",
+  "bs_l15p6i_animals10_pig.png",
+  "bs_l15p6i_animals10_rabbit.png",
+  "bs_l15p6i_map_satellite1.png",
+  "bs_l15p6i_map_satellite3.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

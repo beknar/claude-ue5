@@ -1,0 +1,294 @@
+{
+ "tag": "l15p6k",
+ "plan": [
+  "cows15off",
+  "cows15",
+  "warden15",
+  "hearth15",
+  "animals10"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "cows15off",
+   "ok": true,
+   "animals": 51,
+   "pens": 12,
+   "samples": 206,
+   "least_gap_cm": {
+    "0": -10.3,
+    "1": -10.1,
+    "2": -66.7,
+    "3": -118.3,
+    "4": -24.2,
+    "5": -26.8,
+    "6": -51.4,
+    "7": -77.9,
+    "8": -124.8,
+    "9": -24.2,
+    "10": -9.1,
+    "11": -69.8
+   },
+   "moved_m": {
+    "0": 3.7,
+    "1": 3.3,
+    "2": 3.5,
+    "3": 1.7,
+    "4": 2.7,
+    "5": 3.3,
+    "6": 2.4,
+    "7": 3.6,
+    "8": 4.2,
+    "9": 3.3,
+    "10": 4.0,
+    "11": 2.4
+   },
+   "switch_off": true
+  },
+  {
+   "step": "cows15",
+   "ok": false,
+   "animals": 51,
+   "pens": 12,
+   "samples": 220,
+   "least_gap_cm": {
+    "0": 0.1,
+    "1": 0.8,
+    "2": -2.3,
+    "3": -23.0,
+    "4": 0.3,
+    "5": -0.7,
+    "6": -2.6,
+    "7": -2.1,
+    "8": 13.1,
+    "9": -0.6,
+    "10": 0.0,
+    "11": -2.4
+   },
+   "moved_m": {
+    "0": 3.8,
+    "1": 2.9,
+    "2": 2.3,
+    "3": 2.6,
+    "4": 2.5,
+    "5": 3.1,
+    "6": 3.7,
+    "7": 3.2,
+    "8": 1.7,
+    "9": 3.5,
+    "10": 3.2,
+    "11": 2.3
+   },
+   "switch_off": false
+  },
+  {
+   "step": "warden15",
+   "ok": true,
+   "offered_at_start": "captain_warden|Captain|The First Warden|offered|0|1|Slay a tier's boss in Mistward Castle",
+   "only_vel_morrath": 0,
+   "castle_slain": 1,
+   "bones_accepted": true,
+   "bones": [
+    "taken",
+    "0",
+    "2"
+   ],
+   "accepted": true,
+   "after_accept": "captain_warden|Captain|The First Warden|ready|1|1|Slay a tier's boss in Mistward Castle",
+   "state": "ready",
+   "progress": [
+    "1",
+    "1"
+   ]
+  },
+  {
+   "step": "hearth15",
+   "ok": true,
+   "hearths": 37,
+   "shots": 6,
+   "heard": [
+    true,
+    true,
+    true
+   ],
+   "fires": [
+    [
+     "3520|-10350|0|1"
+    ],
+    [
+     "4420|-4650|0|1"
+    ],
+    [
+     "9080|7650|0|1"
+    ]
+   ],
+   "own_light_lit": [
+    [
+     true
+    ],
+    [
+     true
+    ],
+    [
+     true
+    ]
+   ],
+   "all_fires": 37,
+   "no_fire": [],
+   "distinct": 37,
+   "cards_shown": []
+  },
+  {
+   "step": "animals10",
+   "ok": true,
+   "kinds": {
+    "SK_Tripo_Chicken": 44,
+    "SK_Tripo_Pig": 11,
+    "SK_Tripo_Goat": 29,
+    "SK_Farm_Cow": 16,
+    "SK_Tripo_Rabbit": 15
+   },
+   "each": {
+    "SK_Farm_Cow": {
+     "mesh": "SK_Farm_Cow",
+     "materials": [
+      "M_Farm_Cow_A_coat",
+      "M_Farm_Cow_A_black",
+      "M_Farm_Cow_A_udder",
+      "M_Farm_Cow_A_muzzle",
+      "M_Farm_Cow_A_nostril",
+      "M_Farm_Cow_A_hoof",
+      "M_Farm_Cow_A_horn",
+      "M_Farm_Cow_A_tuft",
+      "M_Farm_Cow_A_eye"
+     ],
+     "plays": true
+    },
+    "SK_Tripo_Chicken": {
+     "mesh": "SK_Tripo_Chicken",
+     "materials": [
+      "M_Tripo_Chicken"
+     ],
+     "plays": true,
+     "feet_head_over_ground_cm": [
+      0.5,
+      0.7
+     ],
+     "feet_head_rest_cm": [
+      1.0,
+      1.0
+     ],
+     "feet_off_cm": 0.5
+    },
+    "SK_Tripo_Goat": {
+     "mesh": "SK_Tripo_Goat",
+     "materials": [
+      "M_Tripo_Goat"
+     ],
+     "plays": true,
+     "feet_head_over_ground_cm": [
+      4.3,
+      3.4,
+      4.5,
+      4.3
+     ],
+     "feet_head_rest_cm": [
+      5.0,
+      5.0,
+      5.0,
+      5.0
+     ],
+     "feet_off_cm": 1.6
+    },
+    "SK_Tripo_Pig": {
+     "mesh": "SK_Tripo_Pig",
+     "materials": [
+      "M_Tripo_Pig"
+     ],
+     "plays": true,
+     "feet_head_over_ground_cm": [
+      4.0,
+      4.0,
+      4.0,
+      4.0
+     ],
+     "feet_head_rest_cm": [
+      4.0,
+      4.0,
+      4.0,
+      4.0
+     ],
+     "feet_off_cm": 0.0
+    },
+    "SK_Tripo_Rabbit": {
+     "mesh": "SK_Tripo_Rabbit",
+     "materials": [
+      "M_Tripo_Rabbit"
+     ],
+     "plays": true,
+     "feet_head_over_ground_cm": [
+      1.2,
+      2.0,
+      1.2,
+      2.0
+     ],
+     "feet_head_rest_cm": [
+      1.2,
+      2.0,
+      1.2,
+      2.0
+     ],
+     "feet_off_cm": 0.0
+    }
+   },
+   "shots": [
+    "animals10_cow",
+    "animals10_chicken",
+    "animals10_goat",
+    "animals10_pig",
+    "animals10_rabbit"
+   ],
+   "moved_of": {
+    "SK_Tripo_Chicken": [
+     43,
+     44
+    ],
+    "SK_Tripo_Pig": [
+     10,
+     11
+    ],
+    "SK_Tripo_Goat": [
+     27,
+     29
+    ],
+    "SK_Farm_Cow": [
+     13,
+     16
+    ],
+    "SK_Tripo_Rabbit": [
+     12,
+     15
+    ]
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "bs_l15p6k_cows15.png",
+  "bs_l15p6k_cows15.png",
+  "bs_l15p6k_hearth15_0_23.png",
+  "bs_l15p6k_hearth15_0_12.png",
+  "bs_l15p6k_hearth15_1_23.png",
+  "bs_l15p6k_hearth15_1_12.png",
+  "bs_l15p6k_hearth15_2_23.png",
+  "bs_l15p6k_hearth15_2_12.png",
+  "bs_l15p6k_animals10_cow.png",
+  "bs_l15p6k_animals10_chicken.png",
+  "bs_l15p6k_animals10_goat.png",
+  "bs_l15p6k_animals10_pig.png",
+  "bs_l15p6k_animals10_rabbit.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

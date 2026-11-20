@@ -1038,9 +1038,16 @@ void ARDDungeonGenerator::TickTownLights(float Dt)
 		TownLightsFor = S;
 		const float M = TileSize;
 		TInlineComponentArray<USceneComponent*> Cs(S);
+		// (the list of 2026-11-20 (item 22): a hearth keeps burning whoever is home: its fire and its glow, the light laid for it (tagged:
+		// PR #98's review, not every light near it), are left out)
 		for (USceneComponent* C : Cs)
 		{
 			if (!C || !(C->IsA<UPointLightComponent>() || C->IsA<UNiagaraComponent>())) continue;
+			if (bHearth15)
+			{
+				const UNiagaraComponent* Nc = Cast<UNiagaraComponent>(C);
+				if ((Nc && HearthFx15 && Nc->GetAsset() == HearthFx15) || C->ComponentHasTag(TEXT("RDHearth15"))) continue;
+			}
 			const FVector L = C->GetComponentLocation();
 			for (int32 BI = 0; BI < S->TownBlds.Num(); ++BI)
 			{
@@ -1605,6 +1612,8 @@ int32 ARDDungeonGenerator::QuestProgress(const FRDQuestDef& Q) const
 	// (a dungeon's own tier ("vel_morrath:tier", the catacombs' deepest floor opened): whole, as the castle's, from its tiers)
 	if (Q.Goal.EndsWith(TEXT(":tier"))) return FMath::Max(GI->GetCounter(Q.Goal), DungeonTierReached(Q.Goal.LeftChop(5)));
 	if (Q.Goal == TEXT("guards")) return GI->GuardsDead.Num();
+	// (the list of 2026-11-20 (item 20): the castle's tiers whose boss she has slain, whole: one slain before the quest was taken counts)
+	if (Q.Goal == TEXT("boss") && Q.bGoalWhole15 && bBossGoalCastle15) return CastleBossesSlain15();
 	// (the wilderness's (2026-11-07): read from the world, whole: the den's pack dead, the patrol found)
 	if (Q.Goal.StartsWith(TEXT("wild:"))) return WildQuestProgress(Q.Goal);
 	const FRDQuestState* St = GI->FindQuest(Q.Id);

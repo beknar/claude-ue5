@@ -252,6 +252,7 @@ void ARDTownAnimal::Init(ARDDungeonGenerator* InGenerator, int32 InDef, int32 In
 	Health14 = D.Health;          // (the list of 2026-11-16: its hit points, 0 for one that cannot be hurt)
 	SetState(R.RandRange(0, 1), GetWorld()->GetTimeSeconds());
 	if (const UAnimSequenceBase* S = Cast<UAnimSequenceBase>(Body->AnimationData.AnimToPlay)) Body->SetPosition(R.FRandRange(0.f, S->GetPlayLength()));
+	Register15();          // (the list of 2026-11-20: among its pen's, kept apart)
 }
 
 void ARDTownAnimal::SetState(int32 S, float Now)
@@ -266,7 +267,8 @@ void ARDTownAnimal::SetState(int32 S, float Now)
 	{
 		// (somewhere else in the pen, kept its body's half length from the fence)
 		const FVector2D H = (PenHalf - FVector2D(D.HalfSize.X, D.HalfSize.X)).ComponentMax(FVector2D(5.f, 5.f));
-		To = PenAt + FRotator(0.f, PenYaw, 0.f).RotateVector(FVector(R.FRandRange(-H.X, H.X), R.FRandRange(-H.Y, H.Y), 0.f));
+		// (the list of 2026-11-20: somewhere no mate stands nor walks to)
+		To = PenKey15.X != MAX_int32 && Gen->bPenApart15 ? FreeSpot15(R, H) : PenAt + FRotator(0.f, PenYaw, 0.f).RotateVector(FVector(R.FRandRange(-H.X, H.X), R.FRandRange(-H.Y, H.Y), 0.f));
 		Until = Now + 20.f;
 	}
 	else Until = Now + (S == 1 ? R.FRandRange(4.f, 11.f) : R.FRandRange(3.f, 8.f));
@@ -279,6 +281,7 @@ void ARDTownAnimal::Tick(float Dt)
 	const float Now = GetWorld()->GetTimeSeconds();
 	// (the list of 2026-11-16: killed, it falls on its side over half a second and lies there (as a hunted wild animal))
 	if (bDead14) { TickDead14(Now); return; }
+	if (PenKey15.X != MAX_int32 && Gen->bPenApart15) Apart15(Dt);          // (the list of 2026-11-20: out of a mate it stands in)
 	const FVector L = GetActorLocation();
 	// (the list of 2026-11-10: a loose hen runs from her, a couple of metres, quick, within its round)
 	if (bLoose && Now >= NextFleeCheck)
@@ -305,13 +308,21 @@ void ARDTownAnimal::Tick(float Dt)
 		FVector D = To - L; D.Z = 0.f;
 		if (D.Size() < 8.f || Now >= Until) { SetState(R.FRand() < 0.6f ? 1 : 0, Now); return; }
 		const FRotator Want = D.Rotation();
-		SetActorRotation(FRotator(0.f, FMath::RInterpConstantTo(GetActorRotation(), Want, Dt, 120.f).Yaw, 0.f));
+		const float NewYaw = FMath::RInterpConstantTo(GetActorRotation(), Want, Dt, 120.f).Yaw;
+		// (the list of 2026-11-20 (PR #98's review): a body is a box, and a turn swings it: one that would swing it further into a mate is
+		// not made; it stands, and picks another way later)
+		const bool bApart = PenKey15.X != MAX_int32 && Gen->bPenApart15;
+		if (bApart) { const float G0 = MinGap15(L, GetActorRotation().Yaw), G1 = MinGap15(L, NewYaw); if (G1 < 0.f && G1 < G0 - 0.1f) { SetState(0, Now); return; } }
+		SetActorRotation(FRotator(0.f, NewYaw, 0.f));
 		// (it walks the way it faces once it has nearly turned)
 		if (FMath::Abs(FMath::FindDeltaAngleDegrees(GetActorRotation().Yaw, Want.Yaw)) < 35.f)
 		{
 			FVector Nl = L + GetActorForwardVector() * FMath::Min(Speed * (Now < FleeUntil ? 3.f : 1.f) * Dt, D.Size());
 			// (on the wild ground: at its height where it steps (the paddock's ground rises and falls a little))
 			if (bWildGround && GroundN > 1) Nl.Z = GroundZAt(Nl);
+			// (the list of 2026-11-20: a step into a mate is not taken: it stops and stands (it picks another way later))
+			// (one already touching a mate may step only out of it, never further in)
+			if (bApart) { const float G0 = MinGap15(L, NewYaw), G1 = MinGap15(Nl, NewYaw); if (G1 < 0.f && G1 < G0 + 0.1f) { SetState(0, Now); return; } }
 			SetActorLocation(Nl, false);
 		}
 		return;

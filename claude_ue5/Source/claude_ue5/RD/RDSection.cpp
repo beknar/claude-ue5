@@ -668,6 +668,13 @@ void ARDSection::AddEffect(FName Name, const FVector& Loc, float Scale)
 		const int32 Kind = Name == TEXT("TorchFire") ? 0 : Name == TEXT("HearthFire") ? 2 : (Name == TEXT("BrazierFire") || Scale > 2.f) ? 1 : -1;
 		if (Kind >= 0) FirePoints.Add({ Loc, (uint8)Kind });
 	}
+	// (the list of 2026-11-20 (item 22): a hearth's fire is play's own, at the hearth's floor (42 cm under the old flame's point), never
+	// saved with a section)
+	if (Name == TEXT("HearthFire") && Generator->bHearth15 && Generator->HearthFx15)
+	{
+		if (const UWorld* W = GetWorld(); W && W->IsGameWorld()) Generator->SpawnHearth15(RootComponent, Loc - FVector(0, 0, 42));
+		return;
+	}
 	if (!bBuildStatic) return;
 	const TObjectPtr<UNiagaraSystem>* S = Generator->Effects.Find(Name);
 	if (!S || !*S) return;
@@ -1576,7 +1583,8 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 				const FVector P = Wall + Rt.RotateVector(FVector(Fp->Size.X * 0.5f + 30.f, 0, 0));
 				Center(TEXT("Fireplace"), P, Yaw, true, true);      // (on the lane at a wall without a door: block it)
 				AddEffect(TEXT("HearthFire"), P + Rt.RotateVector(FVector(0, 0, 0)) + FVector(0, 0, 42), RDHearthFlame);
-				AddLight(P + Rt.RotateVector(FVector(80, 0, 0)) + FVector(0, 0, 90), FLinearColor(1.f, 0.48f, 0.18f), 260.f, 1800.f, true, 0.25f);
+				if (UPointLightComponent* Hl = AddLight(P + Rt.RotateVector(FVector(80, 0, 0)) + FVector(0, 0, 90), FLinearColor(1.f, 0.48f, 0.18f), 260.f, 1800.f, true, 0.25f))
+					Hl->ComponentTags.Add(TEXT("RDHearth15"));          // (the list of 2026-11-20: a hearth's glow burns with its fire)
 			}
 		}
 		FurnishWalls(R, Rm, { TEXT("PrepTable"), TEXT("BreadOven"), TEXT("ShelfRack"), TEXT("Barrel"), TEXT("Crate") }, 300.f, 0.7f, true);
@@ -2172,6 +2180,7 @@ void ARDSection::ActivateForPlay()
 	bBuildStatic = false; bBuildInteractive = true;
 	ClearInteractive();
 	FirePoints.Reset(); AnvilPoints.Reset(); AnvilRoom = -1; Shelves.Reset(); ShelfSwing15.Reset(); Chapels15.Reset(); ForgePoints.Reset(); AlchemistPoints.Reset(); LibrarianPoints.Reset();
+	HideHearthCards15();          // (the list of 2026-11-20: a saved section's fireplaces lose their flat flames)
 	if (!Generator->bTown) TownOvens.Reset();          // (PR #40's review: a dungeon's ovens are made again with its furniture; the town's plan resets its own)
 	Theme = Generator->ThemeOf(Coord);
 	ThemeNames.Reset(); ThemeNamesOf = Theme;

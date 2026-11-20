@@ -628,7 +628,7 @@ def step_satellite():
         # (a 4096 px picture is written over a while: read it once it holds its IEND chunk and its size holds still (the file
         # is padded with zeros after IEND, so IEND is not at its end))
         t1 = time.time(); whole = False; last_n = -1
-        while time.time() - t1 < 20.0 and not whole:
+        while time.time() - t1 < 60.0 and not whole:          # (20 s fell short once a loaded machine wrote its 40 MB: 2026-11-03, 2026-11-20)
             yield from rwait(0.5)
             try:
                 n = os.path.getsize(p)
@@ -650,7 +650,11 @@ def step_satellite():
     res["drawn_satellite"] = "town_satellite" in drawn; res["painted_drawn"] = [a for a in drawn if a.startswith("mapc_") and a not in ("mapc_compass",)][:6]
     names = [l.split("|")[1] for l in labels if "|" in l]
     need = ("SMITHY", "TRADER", "HEALER", "TEMPLE", "STOREHOUSE", "MISTWARD CASTLE", "GATE", "TELEPORT CIRCLE", "QUEST BOARD", "TAVERN", "CHAPEL", "GRAVEYARD", "BARRACKS", "MILL", "WELL", "MARKET", "TOWN SQUARE")
-    res["labels_missing"] = [n for n in need if not any(x.startswith(n) for x in names)]
+    # (the list of 2026-11-20 (item 21): with the symbols on a trade is its badge, not its word)
+    SYM = {"SMITHY": "map_anvil", "TRADER": "icon_gold", "HEALER": "healing_flask", "TEMPLE": "ankh", "CHAPEL": "ankh", "STOREHOUSE": "comp_timber",
+           "MISTWARD CASTLE": "wmap_cave", "TAVERN": "stew", "BARRACKS": "mw_medieval_weapons_heater_shield"}
+    badges = {str(b).split("|")[0] for b in hud.get_town_badges15()} if g.get_editor_property("town_symbols15") else None
+    res["labels_missing"] = [n for n in need if not (badges is not None and n in SYM and SYM[n] in badges) and not any(x.startswith(n) for x in names)]
     res["seals"] = [l for l in labels if l.startswith("seal|")]
     shot("map_satellite1"); yield from rwait(1.5)
     for _ in range(5): yield from press("MouseScrollUp", 0.05)
@@ -4566,6 +4570,176 @@ def step_people10():
     ok = all(v["buildings"][0] == v["buildings"][1] and v["same_places"] and 1.2 <= v["ratio"] <= 1.3 and v["children"][1] > v["children"][0] for v in out.values())
     step_result("people10", ok, **res)
 TRIPO_J = os.path.join(OUT, "tripo_animals", "tripo_animals.json")
+def box_gap15(a, b):
+    """two animals' bodies as boxes on the ground (each its def's half length along its facing, half width across): the most any of the
+    four axes keeps them apart, negative when they overlap (the separating axis test)"""
+    la, lb = a.get_actor_location(), b.get_actor_location(); ha, hb = a.get_half_size15(), b.get_half_size15()
+    ya, yb = math.radians(a.get_actor_rotation().yaw), math.radians(b.get_actor_rotation().yaw)
+    ua, va = (math.cos(ya), math.sin(ya)), (-math.sin(ya), math.cos(ya)); ub, vb = (math.cos(yb), math.sin(yb)), (-math.sin(yb), math.cos(yb))
+    d = (lb.x - la.x, lb.y - la.y); dot = lambda p, q: p[0] * q[0] + p[1] * q[1]
+    return max(abs(dot(d, n)) - ha.x * abs(dot(ua, n)) - ha.y * abs(dot(va, n)) - hb.x * abs(dot(ub, n)) - hb.y * abs(dot(vb, n)) for n in (ua, va, ub, vb))
+
+def step_cows15(off=False):
+    """the list of 2026-11-20 (item 1): over 60 s every pen's animals sampled four times a second: no two of a pen ever overlapping
+    as boxes (their def's half length along their facing and half width across: PR #98's review, the half widths alone missed two
+    cows end to end), and they still walk (each pen's moved); a picture of the cows"""
+    g = G["gen"]; quiet(True); g.set_town_hour(11.0)
+    g.set_editor_property("pen_apart15", not off)          # (off: the switch's measure without it)
+    acts = [a for a in GS.get_all_actors_of_class(G["w"], unreal.RDTownAnimal) if a.pen >= 0]
+    pens = {}
+    for a in acts: pens.setdefault(a.pen, []).append(a)
+    res = {"animals": len(acts), "pens": len(pens)}
+    worst = {}; moved = {}; p0 = {a.get_name(): a.get_actor_location() for a in acts}
+    t0 = time.time(); n = 0
+    while time.time() - t0 < 60.0:
+        yield from rwait(0.25); n += 1
+        for pid, al in pens.items():
+            for i in range(len(al)):
+                for j in range(i + 1, len(al)):
+                    a, b = al[i], al[j]
+                    gap = box_gap15(a, b)
+                    if pid not in worst or gap < worst[pid]: worst[pid] = gap
+    for pid, al in pens.items(): moved[pid] = round(max(dist2(a.get_actor_location(), p0[a.get_name()]) for a in al) / 100, 1)
+    res["samples"] = n; res["least_gap_cm"] = {str(k): round(v, 1) for k, v in worst.items()}; res["moved_m"] = {str(k): v for k, v in moved.items()}
+    cows = [a for a in acts if "Cow" in (a.get_component_by_class(unreal.SkeletalMeshComponent).get_editor_property("skeletal_mesh_asset").get_name() if a.get_component_by_class(unreal.SkeletalMeshComponent).get_editor_property("skeletal_mesh_asset") else "")]
+    if cows:
+        L = cows[0].get_actor_location(); st = V(L.x + 600, L.y + 300, 0)
+        put(st, yaw=math.degrees(math.atan2(L.y - st.y, L.x - st.x)), z=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=math.degrees(math.atan2(L.y - st.y, L.x - st.x))))
+        yield from rwait(1.0); shot("cows15", "1280x720"); yield from rwait(0.6)
+    quiet(False)
+    g.set_editor_property("pen_apart15", True); res["switch_off"] = off
+    ok = len(pens) > 0 and any(v > 1.0 for v in moved.values()) and (any(v < -2.0 for v in worst.values()) if off else all(v >= -0.5 for v in worst.values()))
+    step_result("cows15off" if off else "cows15", ok, **res)
+
+def step_warden15():
+    """the list of 2026-11-20 (item 20): "The First Warden" offered from the start; Mistward Castle's tier 1 boss slain before it is
+    taken: taken, it reads 1 of 1 and is ready to hand in; a Vel Morrath boss's counter does not count"""
+    g = G["gen"]; gi = G["gi"]; quiet(True)
+    def line():
+        return next((str(l) for l in g.get_quest_lines() if str(l).startswith("captain_warden|")), None)
+    res = {"offered_at_start": line()}
+    keep = {k: gi.get_counter(k) for k in ("bossdone:1", "vel_morrath:bossdone:1")}
+    try:
+        g.debug_forget_quest15("captain_warden")
+        g.debug_set_counter15("bossdone:1", 0); g.debug_set_counter15("vel_morrath:bossdone:1", 1); res["only_vel_morrath"] = g.castle_bosses_slain15()
+        g.debug_set_counter15("bossdone:1", 1); res["castle_slain"] = g.castle_bosses_slain15()
+        # (another boss quest keeps counting only what comes after it is taken (PR #98's review): Wardens' Bones reads 0)
+        g.debug_forget_quest15("scholar_bones"); res["bones_accepted"] = g.town_quest_action("accept", "scholar_bones"); yield from rwait(0.3)
+        bl = next((str(l) for l in g.get_quest_lines() if str(l).startswith("scholar_bones|")), "").split("|"); res["bones"] = bl[3:6]
+        g.debug_forget_quest15("scholar_bones")
+        res["accepted"] = g.town_quest_action("accept", "captain_warden"); yield from rwait(0.3)
+        res["after_accept"] = line()
+    finally:
+        for k, v in keep.items(): g.debug_set_counter15(k, v)
+        g.debug_forget_quest15("captain_warden")
+    quiet(False)
+    a = (res["after_accept"] or "").split("|"); o = (res["offered_at_start"] or "").split("|")
+    res["state"] = a[3] if len(a) > 3 else None; res["progress"] = a[4:6] if len(a) > 5 else a
+    ok = len(o) > 3 and o[3] == "offered" and res["only_vel_morrath"] == 0 and res["castle_slain"] == 1 and res["accepted"] and res["state"] == "ready" \
+        and res["bones_accepted"] and len(res["bones"]) > 1 and res["bones"][1] == "0"
+    step_result("warden15", ok, **res)
+
+def step_mapsym15():
+    """the list of 2026-11-20 (item 21): the town map (M) in both its modes (the picture from above, the painted sheet): every functional
+    building carries its symbol (a badge at its middle), no building's words are written, and the key lists each symbol drawn and the
+    quest givers' seal; pictures of both"""
+    g = G["gen"]; quiet(True); hud = G["pc"].get_hud(); res = {}
+    words = ("SMITHY", "TRADER", "HEALER", "TEMPLE", "STOREHOUSE", "TAVERN", "CHAPEL", "BARRACKS", "WITCH", "MISTWARD CASTLE")
+    try:
+        for mode, sat in (("satellite", True), ("painted", False)):
+            g.set_editor_property("town_sat_hidden15", not sat)
+            yield from press("M"); yield from rwait(1.2)
+            badges = [str(b).split("|") for b in hud.get_town_badges15()]; legend = [str(l).split("|", 1) for l in hud.get_town_legend15()]
+            labels = [str(l) for l in hud.get_town_labels()]
+            shot(f"mapsym15_{mode}"); yield from rwait(0.8)
+            yield from press("M"); yield from rwait(0.4)
+            syms = sorted({b[0] for b in badges}); keyed = {l[0] for l in legend}
+            res[mode] = {"badges": len(badges), "symbols": syms, "legend": [l[1] if len(l) > 1 else l[0] for l in legend],
+                         "symbols_not_in_key": [s for s in syms if s not in keyed], "building_words_left": [l for l in labels if any(w in l.upper() for w in words)]}
+    finally:
+        g.set_editor_property("town_sat_hidden15", False); quiet(False)
+    ok = all(r["badges"] >= 5 and not r["symbols_not_in_key"] and not r["building_words_left"] and any("quest giver" in x for x in r["legend"]) for r in (res.get("satellite", {}), res.get("painted", {})) if r) and len(res) == 2
+    step_result("mapsym15", ok, **res)
+
+def step_hearth15():
+    """the list of 2026-11-20 (item 22): the town's hearths (its fire points of kind 2) pictured from 2.5 m in front at night and by day,
+    her body hidden; the hearths heard (the fire voices' places within 3 m of one)"""
+    g = G["gen"]; sec = section(); res = {}; quiet(True)
+    pts = [sec.get_fire_point(i) for i in range(sec.get_num_fire_points()) if sec.get_fire_kind(i) == 2]
+    res["hearths"] = len(pts)
+    pawn = G["pawn"]; shots_ = 0; heard = []; fires = []; lit = []
+    for k, P in enumerate(pts[:3]):
+        best = None
+        for a in range(0, 360, 30):
+            d = V(math.cos(math.radians(a)), math.sin(math.radians(a)), 0)
+            st = V(P.x + d.x * 250, P.y + d.y * 250, 0)
+            hit = unreal.SystemLibrary.line_trace_single(G["w"], V(P.x + d.x * 40, P.y + d.y * 40, 120), V(st.x, st.y, 120), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [pawn], unreal.DrawDebugTrace.NONE, True)
+            if not (hit and hit.to_tuple()[0]): best = (st, a); break
+        if not best: res[f"h{k}"] = "no clear spot"; continue
+        st, a = best; yw = a + 180.0
+        put(st, yaw=yw, z=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=yw)); pawn.set_actor_hidden_in_game(True)
+        for hr in (23.0, 12.0):
+            g.set_town_hour(hr); yield from rwait(1.5); shot(f"hearth15_{k}_{int(hr)}", "1280x720"); yield from rwait(0.9); shots_ += 1
+            if hr == 23.0:
+                # (its own light (tagged) on at night whoever is home; PR #98's review: only that light, not every light near it)
+                lit.append([bool(c.is_visible()) for c in sec.get_components_by_class(unreal.PointLightComponent) if c.component_has_tag("RDHearth15") and dist2(c.get_world_location(), P) < 150])
+        heard.append(any(dist2(v, P) < 300 for v in g.get_fire_loops()))
+        fires.append([str(x) for x in g.get_hearth_fires15(P, 80.0)])
+        pawn.set_actor_hidden_in_game(False)
+    res["shots"] = shots_; res["heard"] = heard; res["fires"] = fires; res["own_light_lit"] = lit; quiet(False); g.set_town_hour(11.0)
+    res["all_fires"] = sum(1 for P in pts if g.get_hearth_fires15(P, 80.0))
+    res["no_fire"] = [[round(P.x), round(P.y), round(P.z)] for P in pts if not g.get_hearth_fires15(P, 80.0)]
+    res["distinct"] = len({(round(P.x / 10), round(P.y / 10)) for P in pts})
+    # (every hearth's fire there and burning; the flame cards hidden: no fireplace instance draws the kit's flame material)
+    flame = [c.get_name() for c in sec.get_components_by_class(unreal.InstancedStaticMeshComponent) if c.get_editor_property("static_mesh") and c.get_editor_property("static_mesh").get_name().startswith("SM_Kit_Fireplace") and c.get_material(4) and c.get_material(4).get_name() == "MI_Flame"]
+    res["cards_shown"] = flame
+    step_result("hearth15", res["hearths"] > 0 and shots_ > 0 and res["all_fires"] == res["hearths"] and all(f and f[0].endswith("|1") for f in fires) and all(heard) and not flame and all(l and all(l) for l in lit), **res)
+
+HEARTH_FX15 = ["/Game/MysticDungeon/VFX/P_TorchFire", "/Game/Hearthvale/VFX/NS_Fireplace_Low", "/Game/Cave/VFX/Systems/NS_Firepit_Flame", "/Game/Medieval_Lake_Village/VFX/NS_Fire",
+               "/Game/Wildlands/VFX/FX/NS_Fire", "/Game/PitchBlackTemple/VFX/NS_Fire", "/Game/Medieval_Castle/VFX/Niagara/NS_Fire_System",
+               "/Game/Crownfall/VFX/Systems/NS_Fire_System", "/Game/Cave/VFX/Systems/NS_Braziers_Flame"]
+
+def step_hearthfx15():
+    """a screening (the list of 2026-11-20, item 22): at the town's first hearth, its own flame hidden, each candidate fire at scale 1
+    pictured 1.0 and 1.3 s after it starts (two moments: does it move), by night"""
+    g = G["gen"]; sec = section(); res = {}; quiet(True); pawn = G["pawn"]
+    pts = [sec.get_fire_point(i) for i in range(sec.get_num_fire_points()) if sec.get_fire_kind(i) == 2]
+    P = pts[0]; st = None
+    for a in range(0, 360, 30):
+        d = V(math.cos(math.radians(a)), math.sin(math.radians(a)), 0)
+        hit = unreal.SystemLibrary.line_trace_single(G["w"], V(P.x + d.x * 40, P.y + d.y * 40, 120), V(P.x + d.x * 220, P.y + d.y * 220, 120), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [pawn], unreal.DrawDebugTrace.NONE, True)
+        if not (hit and hit.to_tuple()[0]): st = (V(P.x + d.x * 220, P.y + d.y * 220, 0), a + 180.0); break
+    put(st[0], yaw=st[1], z=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=st[1])); pawn.set_actor_hidden_in_game(True)
+    g.set_town_hour(23.0)
+    own = [c for c in sec.get_components_by_class(unreal.NiagaraComponent) if dist2(c.get_world_location(), P) < 60]
+    # (the fireplace's own flame cards (its mesh's slot 4) hidden: M_RD15_Hidden on every fireplace instance component)
+    hid = unreal.load_asset("/Game/RandomDungeon/List15/M_RD15_Hidden"); cards = []
+    for c in sec.get_components_by_class(unreal.InstancedStaticMeshComponent):
+        sm = c.get_editor_property("static_mesh")
+        if sm and sm.get_name().startswith("SM_Kit_Fireplace"): cards.append((c, c.get_material(4))); c.set_material(4, hid)
+    # (every candidate spawned once far under the town first: a pack's effect compiles over its first seconds in the editor)
+    warm = [unreal.NiagaraFunctionLibrary.spawn_system_at_location(G["w"], unreal.load_asset(p_), V(P.x, P.y, P.z - 3000), unreal.Rotator(0, 0, 0), V(1, 1, 1), True, True) for p_ in HEARTH_FX15 if unreal.load_asset(p_)]
+    yield from rwait(12.0)
+    for w_ in warm:
+        if w_: w_.deactivate(); w_.destroy_component(w_)
+    try:
+        for c in own: c.set_visibility(False)
+        yield from rwait(1.0); shot("hearthfx15_none", "960x540"); yield from rwait(0.9)
+        for i, path in enumerate(HEARTH_FX15):
+            sys_ = unreal.load_asset(path)
+            if not sys_: res[path] = "missing"; continue
+            comp = unreal.NiagaraFunctionLibrary.spawn_system_at_location(G["w"], sys_, V(P.x, P.y, P.z - 42), unreal.Rotator(0, 0, 0), V(1, 1, 1), True, True)
+            yield from rwait(1.0); shot(f"hearthfx15_{i}a", "960x540"); yield from rwait(0.3); shot(f"hearthfx15_{i}b", "960x540"); yield from rwait(0.9)
+            res[str(i)] = path
+            if comp: comp.deactivate(); comp.destroy_component(comp)
+            yield from rwait(0.5)
+    finally:
+        for c in own: c.set_visibility(True)
+        for c, mt in cards: c.set_material(4, mt)
+        pawn.set_actor_hidden_in_game(False); g.set_town_hour(11.0); quiet(False)
+    res["own_hidden"] = len(own); res["card_comps"] = len(cards)
+    step_result("hearthfx15", True, **res)
+
 def step_animals10():
     """the list of 2026-11-10's fifth phase: "replace the chickens (goats, rabbits, pigs) in the game with the chicken model in ai
     models/chicken.glb and animate it": every pen's chickens, pigs, goats and rabbits are the Tripo meshes (SK_Tripo_<Animal>, their
@@ -5365,6 +5539,7 @@ def step_cityfps13():
     # (a measure, not a rule: ok when every city was reached and 15 s of frames counted in it)
     step_result("cityfps13", len(res) == 6 and all(v["fps"] * 15 >= 30 for v in res.values()), **res)
 STEPS.update({"cityfps13": step_cityfps13})
+STEPS.update({"hearthfx15": step_hearthfx15, "hearth15": step_hearth15, "cows15off": lambda: step_cows15(True), "cows15": step_cows15, "warden15": step_warden15, "mapsym15": step_mapsym15})
 
 def I2(x, y): return unreal.IntPoint(x, y)
 def step_quests13():

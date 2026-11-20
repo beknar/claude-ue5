@@ -1,0 +1,52 @@
+{
+ "tag": "l15p6l",
+ "plan": [
+  "cows15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "cows15",
+   "ok": true,
+   "animals": 47,
+   "pens": 12,
+   "samples": 204,
+   "least_gap_cm": {
+    "0": 0.0,
+    "1": 14.4,
+    "2": 0.8,
+    "3": 0.5,
+    "4": 0.9,
+    "5": 0.0,
+    "6": 1.9,
+    "7": 0.1,
+    "8": 1.1,
+    "9": 0.5,
+    "10": 0.5,
+    "11": 28.4
+   },
+   "moved_m": {
+    "0": 3.1,
+    "1": 3.4,
+    "2": 4.2,
+    "3": 3.2,
+    "4": 3.7,
+    "5": 3.9,
+    "6": 1.6,
+    "7": 3.4,
+    "8": 1.2,
+    "9": 2.4,
+    "10": 3.9,
+    "11": 3.7
+   },
+   "switch_off": false
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "bs_l15p6l_cows15.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}

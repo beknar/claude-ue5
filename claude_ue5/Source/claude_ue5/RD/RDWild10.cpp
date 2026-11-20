@@ -209,7 +209,9 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 	{
 		Put(TEXT("Fireplace"), Xb + Ds * (Fp->Size.X * 0.5f + 2.f), RoomC.Y, Face);
 		const FVector F = RDW10At(O, Yaw, Xb + Ds * 45.f, RoomC.Y, 22.f);
-		if (WildFireFx) UNiagaraFunctionLibrary::SpawnSystemAttached(WildFireFx, C->Ground, NAME_None, F - C->Ground->GetComponentLocation(), FRotator::ZeroRotator, FVector(0.7f), EAttachLocation::KeepRelativeOffset, true, ENCPoolMethod::None);
+		if (bHearth15 && HearthFx15) SpawnHearth15(C->Ground, F - FVector(0, 0, 22));          // (the list of 2026-11-20: a fire that burns)
+		else if (WildFireFx) UNiagaraFunctionLibrary::SpawnSystemAttached(WildFireFx, C->Ground, NAME_None, F - C->Ground->GetComponentLocation(), FRotator::ZeroRotator, FVector(0.7f), EAttachLocation::KeepRelativeOffset, true, ENCPoolMethod::None);
+		if (bWildHearthSound15) C->HearthPoints15.Add(F);          // (the list of 2026-11-20: heard crackling)
 	}
 	float BedY = Mx.Y - 70.f;
 	if (const FRDPiece* Bp = Piece(TEXT("Bed")))

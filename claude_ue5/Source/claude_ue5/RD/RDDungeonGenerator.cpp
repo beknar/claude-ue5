@@ -2142,6 +2142,15 @@ void ARDDungeonGenerator::UpdateFireLoops(const FVector& L)
 					const float D2 = FVector::DistSquared(F.At, L), Max = Set->InnerRadius + Set->FalloffDistance;
 					if (D2 < Max * Max) Cands.Add({ F.At, F.Kind, D2 });
 				}
+	// (the list of 2026-11-20 (item 22): the wilds' hearths, the chunks' own (gone with them))
+	if (bWild && bWildHearthSound15)
+		if (const FRDSoundSet* Set = Sounds.Find(RDFireKeys[2]); Set && Set->Sounds.Num() > 0)
+		{
+			const float Max = Set->InnerRadius + Set->FalloffDistance;
+			for (const TPair<FIntPoint, TObjectPtr<ARDWildChunk>>& Kv : WildChunks)
+				if (const ARDWildChunk* Ch = Kv.Value.Get())
+					for (const FVector& F : Ch->HearthPoints15) { const float D2 = FVector::DistSquared(F, L); if (D2 < Max * Max) Cands.Add({ F, 2, D2 }); }
+		}
 	Cands.Sort([](const FCand& A, const FCand& B) { return A.D2 < B.D2; });
 	if (Cands.Num() > FireLoopVoices) Cands.SetNum(FMath::Max(FireLoopVoices, 0));
 	// a voice whose fire is no longer among them falls silent; the fires that have a voice keep it

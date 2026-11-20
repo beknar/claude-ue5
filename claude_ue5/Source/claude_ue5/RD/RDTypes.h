@@ -1658,6 +1658,9 @@ struct FRDQuestDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName RewardItem;
 	/** offered once this one is turned in (none: at once) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName After;
+	/** the list of 2026-11-20 (item 20): its goal counts what she has done before it was taken too (a "boss" goal: Mistward Castle's
+	 *  tiers whose boss she has slain; the generator's bBossGoalCastle15). The First Warden's alone (934 town) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bGoalWhole15 = false;
 	/** the tracker's line ("Kill the guards of the Mistward Hall") */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Hint;
 };

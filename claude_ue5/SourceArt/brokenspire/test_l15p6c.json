@@ -1,0 +1,49 @@
+{
+ "tag": "l15p6c",
+ "plan": [
+  "hearthfx15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "hearthfx15",
+   "ok": true,
+   "0": "/Game/MysticDungeon/VFX/P_TorchFire",
+   "1": "/Game/Hearthvale/VFX/NS_Fireplace_Low",
+   "2": "/Game/Cave/VFX/Systems/NS_Firepit_Flame",
+   "3": "/Game/Medieval_Lake_Village/VFX/NS_Fire",
+   "4": "/Game/Wildlands/VFX/FX/NS_Fire",
+   "5": "/Game/PitchBlackTemple/VFX/NS_Fire",
+   "6": "/Game/Medieval_Castle/VFX/Niagara/NS_Fire_System",
+   "7": "/Game/Crownfall/VFX/Systems/NS_Fire_System",
+   "8": "/Game/Cave/VFX/Systems/NS_Braziers_Flame",
+   "own_hidden": 1,
+   "card_comps": 1
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "bs_l15p6c_hearthfx15_none.png",
+  "bs_l15p6c_hearthfx15_0a.png",
+  "bs_l15p6c_hearthfx15_0b.png",
+  "bs_l15p6c_hearthfx15_1a.png",
+  "bs_l15p6c_hearthfx15_1b.png",
+  "bs_l15p6c_hearthfx15_2a.png",
+  "bs_l15p6c_hearthfx15_2b.png",
+  "bs_l15p6c_hearthfx15_3a.png",
+  "bs_l15p6c_hearthfx15_3b.png",
+  "bs_l15p6c_hearthfx15_4a.png",
+  "bs_l15p6c_hearthfx15_4b.png",
+  "bs_l15p6c_hearthfx15_5a.png",
+  "bs_l15p6c_hearthfx15_5b.png",
+  "bs_l15p6c_hearthfx15_6a.png",
+  "bs_l15p6c_hearthfx15_6b.png",
+  "bs_l15p6c_hearthfx15_7a.png",
+  "bs_l15p6c_hearthfx15_7b.png",
+  "bs_l15p6c_hearthfx15_8a.png",
+  "bs_l15p6c_hearthfx15_8b.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}

@@ -555,6 +555,8 @@ class CLAUDE_UE5_API ARDWildChunk : public AActor
 public:
 	ARDWildChunk();
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly) TObjectPtr<UProceduralMeshComponent> Ground;
+	/** the list of 2026-11-20 (item 22): the hearths of its houses and farmhouses, heard crackling (Env.Hearth) as the dungeon's are */
+	TArray<FVector> HearthPoints15;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly) TObjectPtr<UProceduralMeshComponent> WaterMesh;
 	/** the plants and rocks, one component per mesh */
 	UPROPERTY() TArray<TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> Foliage;
