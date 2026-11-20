@@ -79,13 +79,13 @@ void ARDHorse::Init(const FRDHorseDef& InDef, bool bSecondColouring)
 			Saddle->SetVisibility(true);
 		}
 	}
-	// (the box from the mesh's own bounds: its body from the knees up, a little inside its outline; the pack's mesh's bounds are in
-	// its own axes, turned MeshYaw under the actor)
+	// (the box from the mesh's own bounds: its body from the knees up, a little inside its outline. The box hangs under Body, so it
+	// is already in the mesh's axes (turned MeshYaw with it): its bounds go in as they are; turned again they lay it across the
+	// horse (PR #93's review))
 	if (M && Blocker)
 	{
 		const FBoxSphereBounds Bd = M->GetBounds();
-		FVector E = Bd.BoxExtent, O = Bd.Origin;
-		if (Def.bPack) { const FRotator Yw(0.f, Def.MeshYaw, 0.f); O = Yw.RotateVector(O); const FVector Er = Yw.RotateVector(E); E = FVector(FMath::Abs(Er.X), FMath::Abs(Er.Y), E.Z); }
+		const FVector E = Bd.BoxExtent, O = Bd.Origin;
 		const float Bottom = O.Z - E.Z, Top = O.Z + E.Z;
 		const float Z0 = Bottom + (Top - Bottom) * 0.3f;
 		Blocker->SetBoxExtent(FVector(FMath::Max(E.X * 0.85f, 20.f), FMath::Max(E.Y * 0.85f, 20.f), FMath::Max((Top - Z0) * 0.5f, 20.f)));

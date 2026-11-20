@@ -656,6 +656,7 @@ void ARDDungeonGenerator::TickReel15(float RealDt)
 		Reel15End();
 		GI->bReel = false;
 		StopAutoplay(TEXT("the reel's end"));
+		bAutoplayIgnorePlayer = false;          // (any key takes over a later autoplay again: PR #93's review)
 		if (PlayerCombat) PlayerCombat->ShowMessage(FString());
 		Reel15Mark(FString::Printf(TEXT("note|done: %d rescues"), GI->ReelRescues));
 		if (!GI->ReelDone.IsEmpty()) FFileHelper::SaveStringToFile(FString::Join(GI->ReelLog, TEXT("\n")), *GI->ReelDone, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);

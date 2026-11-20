@@ -1,0 +1,89 @@
+{
+ "tag": "l15p1h",
+ "plan": [
+  "horse14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "horse14",
+   "ok": true,
+   "called_wilds_m": 2.2,
+   "said": "You whistle: your horse comes to your side",
+   "left_behind_m": 120.02,
+   "called_far_m": 2.2,
+   "calls": 2,
+   "mark_minimap": true,
+   "mark_bigmap": true,
+   "torch_lit_before": true,
+   "mounted": true,
+   "standing": {
+    "seat_along_cm": -12.2,
+    "seat_across_cm": 0.1,
+    "seat_up_cm": 58.3,
+    "hand_l_cm": 24.0,
+    "hand_r_cm": 24.5,
+    "hands_empty": true,
+    "reins": 0,
+    "seat_err15": 2.4,
+    "hand15_l": 16.5,
+    "hand15_r": 14.0
+   },
+   "seat_from_json": [
+    42.2,
+    69.4
+   ],
+   "shown_at_hands": [
+    0,
+    []
+   ],
+   "moving": {
+    "walk": {
+     "seat_along_cm": 11.6,
+     "seat_across_cm": 7.0,
+     "seat_up_cm": 57.5,
+     "hand_l_cm": 25.3,
+     "hand_r_cm": 27.3,
+     "seat_err15": 11.1,
+     "hand15_l": 24.7,
+     "hand15_r": 21.0,
+     "reins_min": 0,
+     "hands_empty_all": true
+    },
+    "gallop": {
+     "seat_along_cm": 10.7,
+     "seat_across_cm": 7.0,
+     "seat_up_cm": 57.6,
+     "hand_l_cm": 24.9,
+     "hand_r_cm": 26.9,
+     "seat_err15": 11.2,
+     "hand15_l": 24.8,
+     "hand15_r": 21.1,
+     "reins_min": 0,
+     "hands_empty_all": true
+    }
+   },
+   "seat_from_json_gallop": [
+    39.7,
+    67.8
+   ],
+   "after_down": {
+    "mounted": false,
+    "weapons_back": true,
+    "reins": "not riding"
+   },
+   "called_town_m": 2.2
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_l15p1h_horse14_minimap.png",
+  "wd_l15p1h_horse14_bigmap.png",
+  "wd_l15p1h_horse14_side_still.png",
+  "wd_l15p1h_horse14_side_walk.png",
+  "wd_l15p1h_horse14_side_gallop.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

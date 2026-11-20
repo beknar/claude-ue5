@@ -22,7 +22,9 @@ namespace
 void URDHorseAnimInstance::PlayClip(UAnimSequenceBase* Clip, bool bLoop, float Rate, float Blend, float StartTime)
 {
 	if (!Clip) return;
-	if (Clip == Cur.Clip && bLoop == Cur.bLoop) { Cur.Rate = Rate; return; }
+	// (the same loop asked again (the gaits, every tick): only its rate; the same one-off asked again (a second hit, a landing on
+	// a landing): played again from its start, or it stayed on its last frame (PR #93's review))
+	if (Clip == Cur.Clip && bLoop == Cur.bLoop && (bLoop || StartTime < 0.f)) { Cur.Rate = Rate; return; }
 	// (from the same share of the loop: every gait's loop is a stride, so the legs carry on from where they were)
 	float T = StartTime;
 	if (T < 0.f) T = Cur.Clip && Cur.bLoop ? GetPhase() * RDHorseClipLen(Clip) : 0.f;

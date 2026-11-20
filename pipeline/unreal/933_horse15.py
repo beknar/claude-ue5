@@ -193,6 +193,8 @@ if "level" in STEPS:
             "walk_clip_speed": J["horse"]["walk"]["ground_cm_s"], "run_clip_speed": J["horse"]["run"]["ground_cm_s"],
             "back_clip_speed": J["horse"]["back"]["ground_cm_s"], "swim_clip_speed": 300.0,
             "walk_falls": J["horse"]["walk"]["lands"], "run_falls": J["horse"]["run"]["lands"], "hoof_bones": HOOVES,
+            # (PR #93's review: the backing clip's own landings, measured above, for its hooves' sounds and dust)
+            "back_falls": J["horse"]["back"]["lands"],
             # (the user's choice: a natural gallop of about 12 m/s (the clip's own pace 1.7 times); a brisk walk 1.2 times its)
             "top_walk": round(J["horse"]["walk"]["ground_cm_s"] * 1.2), "top_run": 1200.0, "top_back": 140.0, "top_swim": 300.0,
             "accel": 320.0, "decel": 500.0, "hard_stop": 1100.0, "turn_slow": 150.0, "turn_fast": 65.0, "gallop_edge": 360.0, "jump_z": 450.0,

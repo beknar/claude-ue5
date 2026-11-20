@@ -98,8 +98,10 @@ bool ARDDungeonGenerator::MountHorse15(ACharacter* C)
 	UCharacterMovementComponent* CM = C->GetCharacterMovement();
 	const FRDRiderClips* RC = RiderClips.Find(CurrentHero);
 	FRide15& R = Ride15;
-	const int32 Mounts = R.Mounts, Dismounts = R.Dismounts;
-	R = FRide15(); R.Mounts = Mounts + 1; R.Dismounts = Dismounts;
+	// (the session's counters kept across a mount, as a dismount keeps them: PR #93's review)
+	const FRide15 Keep = R;
+	R = FRide15(); R.Mounts = Keep.Mounts + 1; R.Dismounts = Keep.Dismounts;
+	R.Jumps = Keep.Jumps; R.Rears = Keep.Rears; R.Hits = Keep.Hits; R.Stops = Keep.Stops; R.Swims = Keep.Swims; R.Falls = Keep.Falls; R.Dust = Keep.Dust; R.Blocked = Keep.Blocked; R.FallsOn = Keep.FallsOn;
 	// (from the horse's nearer side: its left is -Y of its actor (the pack's mesh's +X, where its left mount begins))
 	const FVector Local = Horse->GetActorTransform().InverseTransformPosition(C->GetActorLocation());
 	R.bLeft = Local.Y <= 0.f;
@@ -137,7 +139,9 @@ bool ARDDungeonGenerator::MountHorse15(ACharacter* C)
 bool ARDDungeonGenerator::DismountHorse15(ACharacter* C, bool bNow)
 {
 	FRide15& R = Ride15;
-	if (!C || !Horse) { bMounted = false; return true; }
+	if (!C) { bMounted = false; return true; }
+	// (the horse gone while she rides (PR #93's review): her movement, mesh and camera still put back, beside nothing)
+	if (!Horse) { R.bOffPlaced = false; FinishDismount15(C); return true; }
 	const FRDRiderClips* RC = RiderClips.Find(CurrentHero);
 	if (bNow || PlayerCombat == nullptr || PlayerCombat->IsDead() || R.bSwim || R.Phase == ERide15::Mounting)
 	{
@@ -324,8 +328,8 @@ void ARDDungeonGenerator::TickRide15(float Dt, ACharacter* C)
 		{
 			R.bStop = true; ++R.Stops;
 			Horse->PlayClip15(TEXT("stop"), D.Stop, true, 1.f, 0.25f, 0.f);
-			if (D.DustStop) UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, D.DustStop, Feet + Horse->GetActorForwardVector() * 40.f, Horse->GetActorRotation(), FVector(D.DustScale), true, true);
-			++R.Dust;
+			// (counted only when made: PR #93's review)
+			if (D.DustStop) { UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, D.DustStop, Feet + Horse->GetActorForwardVector() * 40.f, Horse->GetActorRotation(), FVector(D.DustScale), true, true); ++R.Dust; }
 			PlaySoundAt(TEXT("Horse.Snort"), Horse->GetActorLocation() + FVector(0, 0, 140.f));
 		}
 		if (!R.bAir)
@@ -433,7 +437,9 @@ void ARDDungeonGenerator::TickRide15(float Dt, ACharacter* C)
 	// ---- the hooves: heard where each lands, by the ground under it; dust thrown on dirt
 	if (HA && (Horse->ClipNow == TEXT("walk") || Horse->ClipNow == TEXT("run") || Horse->ClipNow == TEXT("back")) && Dt > 0.f)
 	{
-		const TArray<float>& Falls = Horse->ClipNow == TEXT("run") ? D.RunFalls : D.WalkFalls;
+		// (backing has landings of its own, measured on the backing clip (933): PR #93's review; the walk's if none were written)
+		const TArray<float>& Falls = Horse->ClipNow == TEXT("run") ? D.RunFalls
+			: (Horse->ClipNow == TEXT("back") && D.BackFalls.Num() > 0) ? D.BackFalls : D.WalkFalls;
 		const float P0 = HA->GetPhaseBefore(), P1 = HA->GetPhase();
 		for (int32 K = 0; K < Falls.Num() && K < D.HoofBones.Num(); ++K)
 		{

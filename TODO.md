@@ -101,7 +101,7 @@ Done in phases (all seven): 1 gold, the map in its scroll, the mouse on the big 
   - The teleports' outcomes are measured by calling the click at its screen point: through Slate the real mouse resting over the play window pulled the game's pointer to itself and turned presses into drags (`RDMAPPOINTER`'s log: the pointer jumped to the same spot every time). The pointer's own path (a pick under it, the wheel, a drag, a click that travels) is measured through Slate.
 - [ ] **The Ultimate Horse Pack's horse (2026-11-18), what is not done or measured** ([Brokenspire](docs/levels/brokenspire.md#the-ultimate-horse-packs-horse-the-users-of-2026-11-18)):
   - `888 gait12` reads a hoof slide of 47 % in both its walks (0.6 and 2.1 m/s) where `horse15` reads 1.6 % at the same speed and rate (and 8.5 % at the gallop against 4 to 10 %); its clip's phase moves at the rate the game says, its pitch is steady and its picture shows the hooves planted. Not explained; `gait12` fails for the pack's horse.
-  - Her hands are not on the reins' ends (14 to 17 cm off): no hand IK.
+  - Her hands are not on the reins' ends (14 to 17 cm off): no hand IK. At a gallop the worst sample varies between runs (21 to 30.3 cm over three runs of 2026-11-20): `horse14`'s 30 cm limit failed once at 30.3 (`test_l15p1r`) and passed on its rerun (`test_l15p1h`). Hand IK on the reins would end both.
   - The hooves on dirt and hard ground were not measured (the test's plains are grass), nor the dust's look screened in pictures beyond the stop's.
   - Nobody has heard the hooves or watched the ride in motion: it was judged in pictures and measures.
   - The packaged game with the pack is not tested beyond the reel.

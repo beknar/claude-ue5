@@ -177,7 +177,8 @@ void ARDDungeonGenerator::TickReel16(float RealDt)
 			GI->bHorseOwned = true; GI->bTamedOnly = false; GI->bRideTamed = false;
 			Reel16Aggro = AggroDistance; Reel16Lose = LoseDistance; AggroDistance = 0.f; LoseDistance = 1.f;
 			GI->ReelT0 = FPlatformTime::Seconds();
-			if (!Reel16FindSpots()) { bReel16 = false; return; }
+			// (no spots: the monsters' noticing put back before it stops, or nobody ever came after her again (PR #93's review))
+			if (!Reel16FindSpots()) { AggroDistance = Reel16Aggro; LoseDistance = Reel16Lose; bReel16 = false; return; }
 			WildPutHer(Reel16Plains.X, Reel16Plains.Y);
 			Reel16Sub = 1; Reel16T = 0.f; return;
 		}

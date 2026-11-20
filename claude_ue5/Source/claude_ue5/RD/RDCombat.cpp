@@ -340,13 +340,14 @@ float URDCombatComponent::GetBonusOf(int32 Index) const
 
 bool URDCombatComponent::StartAttack()
 {
+	// (2026-11-18: the attack's button in the pack's horse's saddle rears it (RDHorse15.cpp). Here, on the button's own way, not in
+	// StartAttackWith, which every cast goes through: a scroll read or a spell cast in the saddle reared it (PR #93's review))
+	if (Generator && Generator->IsMounted() && Generator->HorseDef.bPack) { Generator->RearHorse(); return false; }
 	return StartAttackWith(WeaponIndex);
 }
 
 bool URDCombatComponent::StartAttackWith(int32 Index)
 {
-	// (2026-11-18: the attack's button in the pack's horse's saddle rears it (RDHorse15.cpp))
-	if (Generator && Generator->IsMounted() && Generator->HorseDef.bPack) { Generator->RearHorse(); return false; }
 	if (Generator && Generator->IsRidingOrSwimming()) return false;          // (the eighth phase: no blow from the saddle; 2026-11-12: nor swimming)
 	const FRDWeaponDef* W = Generator && Generator->Weapons.IsValidIndex(Index) ? &Generator->Weapons[Index] : nullptr;
 	USkeletalMeshComponent* M = Body();

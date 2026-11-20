@@ -891,6 +891,7 @@ struct FRDHorseDef
 	 *  right): the hooves' sounds and dust */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<float> WalkFalls;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<float> RunFalls;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<float> BackFalls;          // (the backing clip's own landings, by phase)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FName> HoofBones;
 	/** the ride: top speeds (walk mode, run mode, backing, swimming: cm/s), speeding up and slowing (cm/s/s; HardStop when let go at
 	 *  a gallop), the turn (deg/s standing and at the top speed), the walk / gallop edge, the jump's lift */
