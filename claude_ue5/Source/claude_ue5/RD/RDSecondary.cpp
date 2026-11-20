@@ -509,6 +509,8 @@ bool URDCombatComponent::UseSecondary(FName Ability)
 		{
 			FlashPawnWas = C->GetCapsuleComponent()->GetCollisionResponseToChannel(ECC_Pawn);
 			C->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+			FlashAllyWas = C->GetCapsuleComponent()->GetCollisionResponseToChannel(ECC_RDAlly);
+			C->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_RDAlly, ECR_Ignore);          // (through her allies too (PR #94's review))
 			const float Dur = FMath::Clamp(Len / 4000.f, 0.15f, 0.6f);
 			TSharedPtr<FRootMotionSource_ConstantForce> F = MakeShared<FRootMotionSource_ConstantForce>();
 			F->InstanceName = TEXT("RDFlashStep");
@@ -640,7 +642,7 @@ void URDCombatComponent::TickSecondary(float Dt)
 		}
 	}
 	// (the flash step over: her capsule stops pawns again)
-	if (FlashUntil > 0.f && Now > FlashUntil) { C->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, FlashPawnWas); FlashUntil = -100.f; }
+	if (FlashUntil > 0.f && Now > FlashUntil) { C->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, FlashPawnWas); C->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_RDAlly, FlashAllyWas); FlashUntil = -100.f; }
 	// (the water walk: held on the water's face as she goes, its length counted over water; off it, or its length gone, she walks
 	// (or falls in))
 	if (bWaterWalking)

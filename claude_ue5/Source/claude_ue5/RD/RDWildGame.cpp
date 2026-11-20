@@ -341,6 +341,7 @@ bool ARDDungeonGenerator::StepWildBuild(FWildBuild& B)
 			W->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			W->SetCollisionResponseToAllChannels(ECR_Ignore);
 			W->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+			W->SetCollisionResponseToChannel(ECC_RDAlly, ECR_Block);          // (her allies wade too: the list of 2026-11-20)
 		}
 		D->Block.Empty(); D->BlockT.Empty();
 		B.Step = 4; B.Inst = 0; B.InstAt = 0;

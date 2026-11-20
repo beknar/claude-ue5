@@ -101,7 +101,10 @@ public:
 	FVector AllyYield15();
 	/** times it has stepped aside for her (a test's count) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List15") int32 Yields15 = 0;
-	float YieldSide15 = 0.f, YieldUntil15 = -100.f;
+	float YieldUntil15 = -100.f, YieldStart15 = -100.f;
+	FVector YieldDir15 = FVector::ZeroVector;
+	/** something solid within Len along Way (her and her allies passed over) */
+	bool YieldBlocked15(const FVector& Way, float Len) const;
 	/** the list of 2026-11-20 (item 2): solid to her, passing her other allies and the monsters (RDList15.cpp) */
 	void SetAllyCollision15(bool bSolid);
 	/** put on the ground at Feet (its capsule over it), its way forgotten */

@@ -1,0 +1,139 @@
+{
+ "tag": "l15p2d",
+ "plan": [
+  "allyspace",
+  "allies15"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "allyspace",
+   "ok": true,
+   "called": [
+    {
+     "spell": "Summon Tier 1",
+     "started": true,
+     "allies": 1,
+     "least_gap": null
+    },
+    {
+     "spell": "Summon Tier 1",
+     "started": true,
+     "allies": 2,
+     "least_gap": 58.3
+    },
+    {
+     "spell": "Summon Tier 2",
+     "started": true,
+     "allies": 3,
+     "least_gap": 58.3
+    },
+    {
+     "spell": "Summon Tier 2",
+     "started": true,
+     "allies": 4,
+     "least_gap": 58.3
+    },
+    {
+     "spell": "Summon Tier 3",
+     "started": true,
+     "allies": 5,
+     "least_gap": 58.3
+    },
+    {
+     "spell": "Summon Tier 3",
+     "started": true,
+     "allies": 6,
+     "least_gap": 58.3
+    }
+   ],
+   "off": {
+    "moving_least": -73.9,
+    "standing_least": -73.9,
+    "standing_overlap_share": 1.0
+   },
+   "on": {
+    "moving_least": 5.4,
+    "standing_least": 20.4,
+    "standing_overlap_share": 0.0
+   },
+   "far": {
+    "moved_m": 155.9,
+    "near_her": 6,
+    "allies": 6,
+    "least_gap": 58.3,
+    "behind_her": 0
+   },
+   "panel": {
+    "rows": [
+     "Rotting Soldier|2|2|40/40,40/40",
+     "Grave Gunner|2|3|85/85,85/85",
+     "Orc Skirmisher|2|4|144/144,144/144"
+    ],
+    "after_hurt": [
+     "Rotting Soldier|2|2|40/40,40/40",
+     "Grave Gunner|2|3|68/85,85/85",
+     "Orc Skirmisher|2|4|144/144,144/144"
+    ],
+    "hurt_hp": [
+     85.0,
+     68.0
+    ]
+   },
+   "marks": {
+    "allies": 6,
+    "minimap": 6,
+    "minimap_matched": 6,
+    "big": 6,
+    "big_matched": 6
+   }
+  },
+  {
+   "step": "allies15",
+   "ok": true,
+   "start": [
+    -150,
+    0
+   ],
+   "yaw": 0.0,
+   "solid_True": {
+    "least_gap": 0.1,
+    "her_along": 280,
+    "ally_along": 350,
+    "rule": {
+     "ally_type": "<CollisionChannel.ECC_RD_ALLY: 14>",
+     "ally_vs_pawn": "<CollisionResponseType.ECR_BLOCK: 2>",
+     "ally_vs_ally": "<CollisionResponseType.ECR_OVERLAP: 1>",
+     "her_vs_ally": "<CollisionResponseType.ECR_BLOCK: 2>",
+     "monster_vs_ally": "<CollisionResponseType.ECR_OVERLAP: 1>"
+    }
+   },
+   "solid_False": {
+    "least_gap": -46.1,
+    "her_along": 331,
+    "ally_along": 350
+   },
+   "yield": {
+    "allies": 3,
+    "yields": [
+     1,
+     1,
+     1
+    ],
+    "least_gap": 92.1,
+    "her_along": 1123,
+    "t_9m": 8.1,
+    "lines": "3|0:Soldier:609:93:93:1:0:-|1:Soldier:647:191:93:1:0:-|2:Gunner:602:-4:93:1:0:-"
+   }
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_l15p2d_summon_panel.png",
+  "mw_l15p2d_ally_marks_map.png",
+  "mw_l15p2d_allies15_after_walk.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

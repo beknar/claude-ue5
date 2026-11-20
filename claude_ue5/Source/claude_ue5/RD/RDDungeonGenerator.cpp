@@ -788,7 +788,7 @@ ARDMonster* ARDDungeonGenerator::SummonAlly(FName Kind, FVector At, float Streng
 	const FRDMonsterDef* Def = Monsters.FindByPredicate([Kind](const FRDMonsterDef& D) { return D.Name == Kind && D.Mesh; });
 	ARDSection* Sec = GetSection(WorldToSection(At));
 	// (the list of 2026-11-20: in the wilds, past every set, the wilds' section, on the ground under the spot)
-	if (!Sec && bWild && bWildSummons15) { Sec = EnsureWildSection(); FVector Gd; if (WildGroundAt15(At, Gd)) At = Gd; }
+	if (!Sec && Def && bWild && bWildSummons15) { Sec = EnsureWildSection(); FVector Gd; if (WildGroundAt15(At, At.Z, Def->CapsuleRadius, Def->CapsuleHalfHeight, Gd)) At = Gd; }
 	if (!Def || !Sec) return nullptr;
 	FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	ARDMonster* M = GetWorld()->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), FTransform(FRotator::ZeroRotator, At + FVector(0, 0, Def->CapsuleHalfHeight + 5.f)), Sp);

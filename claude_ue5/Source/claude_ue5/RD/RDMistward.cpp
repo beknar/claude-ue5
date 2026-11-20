@@ -437,7 +437,7 @@ ARDMonster* ARDDungeonGenerator::SpawnMonsterKind(int32 Kind, const FVector& At,
 	ARDSection* Sec = GetSection(WorldToSection(At));
 	// (the list of 2026-11-20 (item 30): her summons in the wilds, past every set: the wilds' section, on the ground under the spot)
 	FVector AtG = At;
-	if (!Sec && bSpawningAlly && bWild && bWildSummons15) { Sec = EnsureWildSection(); FVector Gd; if (WildGroundAt15(At, Gd)) AtG = Gd; }
+	if (!Sec && bSpawningAlly && bWild && bWildSummons15) { Sec = EnsureWildSection(); FVector Gd; if (WildGroundAt15(At, At.Z, Monsters[Kind].CapsuleRadius, Monsters[Kind].CapsuleHalfHeight, Gd)) AtG = Gd; }
 	if (!Sec) return nullptr;
 	const FRDMonsterDef& Def = Monsters[Kind];
 	FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;

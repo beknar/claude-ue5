@@ -223,6 +223,7 @@ ARDTownAnimal::ARDTownAnimal()
 	Collider->SetCollisionObjectType(ECC_WorldDynamic);
 	Collider->SetCollisionResponseToAllChannels(ECR_Ignore);
 	Collider->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	Collider->SetCollisionResponseToChannel(ECC_RDAlly, ECR_Block);          // (her allies too: the list of 2026-11-20)
 	Collider->SetCanEverAffectNavigation(false);
 	Collider->SetHiddenInGame(true);
 }

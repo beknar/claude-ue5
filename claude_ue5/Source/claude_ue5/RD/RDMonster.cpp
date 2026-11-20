@@ -51,8 +51,8 @@ void ARDMonster::Setup(ARDSection* InSection, const FRDMonsterDef& Def, int32 In
 	Section = InSection; MonsterName = Def.Name;
 	if (Section && Section->Generator && !Section->Generator->bMonstersBlockPawns)
 		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-	// (the list of 2026-11-20: her allies are Vehicle objects, solid to her; a monster passes them as before)
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Vehicle, ECR_Overlap);
+	// (the list of 2026-11-20: her allies are RDAlly objects, solid to her; a monster passes them as before)
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_RDAlly, ECR_Overlap);
 	R.Initialize(InSeed);
 	GetCapsuleComponent()->SetCapsuleSize(Def.CapsuleRadius, Def.CapsuleHalfHeight);
 	USkeletalMeshComponent* M = GetMesh();
@@ -726,7 +726,7 @@ bool ARDMonster::FollowPlayer(float Dt, URDCombatComponent* Pc)
 			{
 				// (the list of 2026-11-20: on open ground, on the ground under the spot (her height is not the slope's beside her))
 				FVector Gd;
-				if (bOpenGround && G->WildGroundAt15(Spot, Gd)) { ArriveAt15(Gd); return true; }
+				if (bOpenGround && G->WildGroundAt15(Spot, Hl.Z - Her->GetSimpleCollisionHalfHeight(), GetCapsuleComponent()->GetScaledCapsuleRadius(), GetCapsuleComponent()->GetScaledCapsuleHalfHeight(), Gd)) { ArriveAt15(Gd); return true; }
 				SetActorLocation(Spot + FVector(0, 0, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - 80.f), false, nullptr, ETeleportType::TeleportPhysics);
 				Path.Reset();
 				return true;
@@ -740,7 +740,7 @@ bool ARDMonster::FollowPlayer(float Dt, URDCombatComponent* Pc)
 			Side = GetWorld()->SweepSingleByChannel(H2, Hl, Other, FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(45.f), Qp)
 				? Hl + Her->GetActorForwardVector() * 200.f : Other;
 		}
-		if (FVector Gd; bOpenGround && G && G->WildGroundAt15(Side, Gd)) { ArriveAt15(Gd); return true; }
+		if (FVector Gd; bOpenGround && G && G->WildGroundAt15(Side, Hl.Z - Her->GetSimpleCollisionHalfHeight(), GetCapsuleComponent()->GetScaledCapsuleRadius(), GetCapsuleComponent()->GetScaledCapsuleHalfHeight(), Gd)) { ArriveAt15(Gd); return true; }
 		SetActorLocation(Side + FVector(0, 0, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - 80.f), false, nullptr, ETeleportType::TeleportPhysics);
 		Path.Reset();
 		return true;

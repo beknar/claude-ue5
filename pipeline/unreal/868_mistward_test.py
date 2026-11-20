@@ -6244,10 +6244,18 @@ def summon15(g, c, W, spell):
     return next((a for a in g.get_allies() if alive(a) and a.get_name() not in before), None)
 
 def step_allies15():
+    """the steps' switches put back whatever happens (a step stopped half way left the spacing off for the next step)"""
+    g = G["gen"]; keep = {k: g.get_editor_property(k) for k in ("ally_spacing", "ally_solid15", "ally_yield15")}
+    try: yield from _allies15()
+    finally:
+        for k, v in keep.items(): g.set_editor_property(k, v)
+        quiet(False)
+
+def _allies15():
     """the list of 2026-11-20 (items 2 and 3). Solid: an ally stands 3.5 m ahead on a clear line and she walks at it for 3 s: the
     room between her capsule and its never under -3 cm, and she ends behind it; the same with bAllySolid15 off walks through it
-    (the measure sees it). The collision rule read from the capsules: an ally a Vehicle object blocking Pawn, passing Vehicle
-    (her other allies); a monster's overlapping Vehicle (it passes them); hers blocking Vehicle. Stepping aside: three allies
+    (the measure sees it). The collision rule read from the capsules: an ally an RDAlly object (the project's channel) blocking Pawn,
+    passing RDAlly (her other allies); a monster's overlapping RDAlly (it passes them); hers blocking RDAlly. Stepping aside: three allies
     stood on her line 2.5, 4.5 and 6.5 m ahead (their spacing and stepping aside on), she walks 10 s: each steps aside (its count),
     she reaches 9 m along the line, and is never inside one"""
     c = yield from restart("Summoner"); g = G["gen"]; quiet(True)
@@ -6284,9 +6292,9 @@ def step_allies15():
             mo = g.spawn_monster_named("Rat", ahead(900), 1, 1.0, 1.0, 1.0); yield from wait(0.2)
             CT = unreal.CollisionChannel
             r["rule"] = {"ally_type": str(cap.get_collision_object_type()), "ally_vs_pawn": str(cap.get_collision_response_to_channel(CT.ECC_PAWN)),
-                         "ally_vs_vehicle": str(cap.get_collision_response_to_channel(CT.ECC_VEHICLE)),
-                         "her_vs_vehicle": str(her.get_collision_response_to_channel(CT.ECC_VEHICLE)),
-                         "monster_vs_vehicle": str(mo.capsule_component.get_collision_response_to_channel(CT.ECC_VEHICLE)) if mo else None}
+                         "ally_vs_ally": str(cap.get_collision_response_to_channel(CT.ECC_RD_ALLY)),
+                         "her_vs_ally": str(her.get_collision_response_to_channel(CT.ECC_RD_ALLY)),
+                         "monster_vs_ally": str(mo.capsule_component.get_collision_response_to_channel(CT.ECC_RD_ALLY)) if mo else None}
             drop([mo] if mo else [])
         res[f"solid_{solid}"] = r
     g.set_editor_property("ally_solid15", True)
@@ -6319,8 +6327,8 @@ def step_allies15():
     ru = on.get("rule", {})
     ok = ((on.get("least_gap") is not None and on["least_gap"] >= -3.0 and on["her_along"] < on["ally_along"])
           and (off.get("least_gap") is not None and off["least_gap"] < -20.0)
-          and "VEHICLE" in ru.get("ally_type", "") and "BLOCK" in ru.get("ally_vs_pawn", "") and "OVERLAP" in ru.get("ally_vs_vehicle", "")
-          and "BLOCK" in ru.get("her_vs_vehicle", "") and "OVERLAP" in (ru.get("monster_vs_vehicle") or "")
+          and "RD_ALLY" in ru.get("ally_type", "") and "BLOCK" in ru.get("ally_vs_pawn", "") and "OVERLAP" in ru.get("ally_vs_ally", "")
+          and "BLOCK" in ru.get("her_vs_ally", "") and "OVERLAP" in (ru.get("monster_vs_ally") or "")
           and yd["allies"] == 3 and all(y >= 1 for y in yd["yields"]) and yd["t_9m"] is not None and (yd["least_gap"] or -99) >= -3.0)
     step_result("allies15", ok, **res)
 

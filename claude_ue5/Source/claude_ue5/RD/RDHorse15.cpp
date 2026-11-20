@@ -349,6 +349,7 @@ void ARDDungeonGenerator::TickRide15(float Dt, ACharacter* C)
 			const FVector From = Feet + FVector(0, 0, 125.f);
 			const float Body = 105.f, Reach = Body + FMath::Abs(R.Speed) * 0.25f + 10.f;
 			FCollisionQueryParams Q(SCENE_QUERY_STAT(RDRide15Ahead), false, C); Q.AddIgnoredActor(Horse);
+			IgnoreAllies15(Q);          // (her allies are solid to her now: the ride passes them as it did (PR #94's review))
 			FHitResult Hit;
 			if (FMath::Abs(R.Speed) > 5.f && GetWorld()->SweepSingleByChannel(Hit, From, From + Fw * Sgn * Reach, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(28.f), Q)
 				&& Hit.ImpactNormal.Z < 0.6f)

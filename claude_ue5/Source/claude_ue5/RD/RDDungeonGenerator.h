@@ -29,6 +29,7 @@
 
 class ARDSection;
 class ARDMonster;
+struct FCollisionQueryParams;
 class URDCombatComponent;
 class URDBloodComponent;
 class UFXSystemComponent;
@@ -889,21 +890,25 @@ public:
 	 *  and RD4AllyGap); false: none clear, OutAt the roomiest */
 	bool FindAllySpot(const FVector& From, const FVector& Facing, float Radius, const AActor* Ignore, FVector& OutAt, const FVector& Prefer = FVector::ZeroVector) const;
 	// ---- the list of 2026-11-20's second phase (items 2, 3, 9, 30; RDList15.cpp)
+	// (each off by default, set on the maps she summons on by 934 allies (PR #94's review: the other levels, level 5's raised dead
+	// among them, stay as they were))
 	/** her allies stop her (and she them); they still pass each other and the monsters */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bAllySolid15 = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bAllySolid15 = false;
 	/** an ally she presses toward steps aside */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bAllyYield15 = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bAllyYield15 = false;
 	/** the arena's doors shut: her allies outside the room come in beside her */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bArenaAllies15 = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bArenaAllies15 = false;
 	/** the wilds: her summons answer out there (the wilds' section, open ground) */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bWildSummons15 = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bWildSummons15 = false;
 	/** allies brought into an arena (a test's count) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List15") int32 ArenaAlliesBrought15 = 0;
 	/** the arena's allies brought in beside her; the count */
 	int32 GatherAlliesInRoom15(ARDSection* S, int32 Room);
 	/** an ally's section where it stands: a set of rooms, else the wilds' (open ground); in the wilds, the ground under a spot */
 	void PlaceAllySection15(ARDMonster* A);
-	bool WildGroundAt15(const FVector& At, FVector& OutGround) const;
+	bool WildGroundAt15(const FVector& At, float FeetZ, float Rad, float Half, FVector& OutGround) const;
+	/** her allies added to a query's ignored actors (a sweep of hers that passes them: the ride's, the flash's) */
+	void IgnoreAllies15(FCollisionQueryParams& Q) const;
 	/** a test's: "<n>|<i>:<name>:<x>:<y>:<z>:<yields>:<open>:<foe>|..." her allies now */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") FString GetAllies15() const;
 	/** a display setting asked on the command line (-RDApplyDisplay=<width>x<height>x<mode>, mode 0 fullscreen, 1 windowed

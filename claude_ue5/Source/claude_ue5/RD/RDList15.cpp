@@ -10,6 +10,7 @@
 #include "RD/RDMonster.h"
 #include "RD/RDSection.h"
 #include "RD/RDCombat.h"
+#include "RD/RDHorse.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -28,12 +29,14 @@ void ARDMonster::SetAllyCollision15(bool bSolid)
 		C->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 		return;
 	}
-	// (a Vehicle object (nothing else in the game is one): her capsule blocks Vehicle as a pawn does; the monsters' overlap it
-	// (ARDMonster::Setup), her other allies' too (below); its own response to Pawn blocks, so the pair with her blocks both ways
-	// and with a monster resolves to the monster's overlap)
-	C->SetCollisionObjectType(ECC_Vehicle);
+	// (an object of the project's own channel (ECC_RDAlly, "RDAlly" in DefaultEngine.ini, blocked by default: PR #94's review, the
+	// engine's Vehicle type was shared with the packs): her capsule blocks it by default; the monsters' overlap it (ARDMonster::Setup),
+	// her other allies' too (below); its own response to Pawn blocks, so the pair with her blocks both ways and with a monster
+	// resolves to the monster's overlap. What blocks only pawns (the horse's box, the pens' animals, the wilds' wade floor) blocks
+	// RDAlly as well)
+	C->SetCollisionObjectType(ECC_RDAlly);
 	C->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
-	C->SetCollisionResponseToChannel(ECC_Vehicle, ECR_Overlap);
+	C->SetCollisionResponseToChannel(ECC_RDAlly, ECR_Overlap);
 }
 
 void ARDMonster::ArriveAt15(const FVector& Feet)
@@ -41,6 +44,8 @@ void ARDMonster::ArriveAt15(const FVector& Feet)
 	SetActorLocation(Feet + FVector(0, 0, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 5.f), false, nullptr, ETeleportType::TeleportPhysics);
 	Path.Reset();
 	GetCharacterMovement()->Velocity = FVector::ZeroVector;
+	// (its fight left where it was: a foe across a shut door kept it walking to the door (PR #94's review))
+	CurrentFoe = nullptr; bAggro = false; AttackTime = -1.f; YieldUntil15 = -100.f;
 }
 
 // ================================================================================================ item 3: stepping aside
@@ -67,24 +72,32 @@ FVector ARDMonster::AllyYield15()
 		bOnLine = Along > 0.f && Along < 120.f + R0 + Rh && FMath::Abs(Across) < R0 + Rh + 30.f;
 		if (bOnLine && Now >= YieldUntil15)
 		{
-			// (a new yield: to the side it already stands on, else the other, whichever has room; neither: on ahead of her)
-			++Yields15;
+			// (a new yield: to the side it already stands on, else the other, whichever has room; neither: on ahead of her. Its way is
+			// fixed for the yield (PR #94's review: rebuilt from her way each frame, a turn of hers sent it into a wall))
+			++Yields15; YieldStart15 = Now;
 			const float Pref = Across >= 0.f ? 1.f : -1.f;
 			const FVector Side = FVector(-W.Y, W.X, 0.f);
-			FCollisionQueryParams Q(SCENE_QUERY_STAT(RDYield15), false, this); Q.AddIgnoredActor(Her);
-			for (const ARDMonster* A : G->GetAllies()) if (IsValid(A)) Q.AddIgnoredActor(A);
-			YieldSide15 = 0.f;
+			YieldDir15 = W;
 			for (const float S : { Pref, -Pref })
-			{
-				FHitResult H;
-				if (!GetWorld()->SweepSingleByChannel(H, L, L + Side * S * (R0 + Rh + 90.f), FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(R0 * 0.8f), Q)) { YieldSide15 = S; break; }
-			}
+				if (!YieldBlocked15(Side * S, R0 + Rh + 90.f)) { YieldDir15 = (Side * S + W * 0.25f).GetSafeNormal(); break; }
 		}
 	}
-	if (bOnLine) YieldUntil15 = Now + 0.5f;          // (and on while she keeps pressing, half a second after)
-	if (Now >= YieldUntil15 || W.IsNearlyZero()) return FVector::ZeroVector;
-	const FVector Side = FVector(-W.Y, W.X, 0.f);
-	return YieldSide15 != 0.f ? (Side * YieldSide15 + W * 0.25f).GetSafeNormal() : W;
+	// (on while she keeps pressing, half a second after; never longer than 1.5 s a yield (with no room either side it went on ahead
+	// of her down a whole hallway: PR #94's review), and ended where its way meets a wall)
+	if (bOnLine && Now - YieldStart15 < 1.5f) YieldUntil15 = Now + 0.5f;
+	if (Now >= YieldUntil15 || Now - YieldStart15 >= 1.5f) return FVector::ZeroVector;
+	if (YieldBlocked15(YieldDir15, R0 + 30.f)) { YieldUntil15 = -100.f; return FVector::ZeroVector; }
+	return YieldDir15;
+}
+
+bool ARDMonster::YieldBlocked15(const FVector& Way, float Len) const
+{
+	const ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr;
+	FCollisionQueryParams Q(SCENE_QUERY_STAT(RDYield15), false, this);
+	if (G) { G->IgnoreAllies15(Q); if (G->GetPlayerCombat()) Q.AddIgnoredActor(G->GetPlayerCombat()->GetOwner()); }
+	FHitResult H; const FVector L = GetActorLocation();
+	return GetWorld()->SweepSingleByChannel(H, L, L + Way.GetSafeNormal2D() * Len, FQuat::Identity, ECC_Visibility,
+		FCollisionShape::MakeSphere(GetCapsuleComponent()->GetScaledCapsuleRadius() * 0.8f), Q);
 }
 
 // ================================================================================================ item 9: the arena
@@ -92,7 +105,8 @@ int32 ARDDungeonGenerator::GatherAlliesInRoom15(ARDSection* S, int32 Room)
 {
 	if (!bArenaAllies15 || !S || Room < 0 || !PlayerCombat || !PlayerCombat->GetOwner()) return 0;
 	const FVector Hl = PlayerCombat->GetOwner()->GetActorLocation();
-	FVector2D Mn, Mx; S->GetRoomBounds(Room, Mn, Mx);
+	// (only with her inside it: an arena begun from afar (a test's, a reel's) would shut her allies in without her (PR #94's review))
+	if (S->RoomAt(Hl) != Room) return 0;
 	// (the room's free tiles nearest her first; not on her, nor on one another)
 	const TArray<FVector> Tiles = S->GetRoomFreeTilesNear(Room, Hl);
 	TArray<FVector> Taken;
@@ -103,8 +117,8 @@ int32 ARDDungeonGenerator::GatherAlliesInRoom15(ARDSection* S, int32 Room)
 	{
 		if (!IsValid(A) || A->IsDead()) continue;
 		const FVector L = A->GetActorLocation();
-		const bool bIn = L.X > Mn.X + 20.f && L.X < Mx.X - 20.f && L.Y > Mn.Y + 20.f && L.Y < Mx.Y - 20.f && FMath::Abs(L.Z - Hl.Z) < 400.f;
-		if (bIn) continue;
+		// (in the room by its own tiles, not its rectangle: a shaped room's corners and its doorway are outside (PR #94's review))
+		if (S->RoomAt(L) == Room && FMath::Abs(L.Z - Hl.Z) < 400.f) continue;
 		for (; Next < Tiles.Num(); ++Next)
 		{
 			const FVector T = Tiles[Next];
@@ -123,17 +137,38 @@ int32 ARDDungeonGenerator::GatherAlliesInRoom15(ARDSection* S, int32 Room)
 }
 
 // ================================================================================================ item 30: the wilds
-bool ARDDungeonGenerator::WildGroundAt15(const FVector& At, FVector& OutGround) const
+void ARDDungeonGenerator::IgnoreAllies15(FCollisionQueryParams& Q) const
 {
+	for (const ARDMonster* A : Allies) if (IsValid(A)) Q.AddIgnoredActor(A);
+}
+
+bool ARDDungeonGenerator::WildGroundAt15(const FVector& At, float FeetZ, float Rad, float Half, FVector& OutGround) const
+{
+	// (PR #94's review: the first hit down from over the spot was a farmhouse's roof, a floor above, a box or the horse's: the floors
+	// under the point one after another, as the map's teleport takes them (RDList12.cpp); of those a capsule of its size fits on, the
+	// one nearest FeetZ (her feet's height), within 2.5 m of it)
 	UWorld* W = GetWorld();
 	if (!W) return false;
-	FHitResult H; FCollisionQueryParams Q(SCENE_QUERY_STAT(RDWildGround15), false);
+	FCollisionQueryParams Q(SCENE_QUERY_STAT(RDWildGround15), false);
 	if (PlayerCombat && PlayerCombat->GetOwner()) Q.AddIgnoredActor(PlayerCombat->GetOwner());
-	for (const ARDMonster* A : Allies) if (IsValid(A)) Q.AddIgnoredActor(A);
-	FCollisionObjectQueryParams O; O.AddObjectTypesToQuery(ECC_WorldStatic); O.AddObjectTypesToQuery(ECC_WorldDynamic);
-	if (!W->LineTraceSingleByObjectType(H, At + FVector(0, 0, 400.f), At - FVector(0, 0, 1200.f), O, Q)) return false;
-	OutGround = H.ImpactPoint;
-	return true;
+	IgnoreAllies15(Q);
+	if (Horse) Q.AddIgnoredActor(Horse);
+	FVector From(At.X, At.Y, FeetZ + 1500.f);
+	const FVector To(At.X, At.Y, FeetZ - 1500.f);
+	float BestD = 1e9f;
+	for (int32 K = 0; K < 12; ++K)
+	{
+		FHitResult Hit;
+		if (!W->LineTraceSingleByChannel(Hit, From, To, ECC_Visibility, Q)) break;
+		const FVector C = Hit.ImpactPoint + FVector(0, 0, Half + 5.f);
+		if (Hit.ImpactNormal.Z > 0.6f && !W->OverlapBlockingTestByChannel(C, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeCapsule(Rad, Half), Q))
+		{
+			const float D = FMath::Abs(Hit.ImpactPoint.Z - FeetZ);
+			if (D < 250.f && D < BestD) { BestD = D; OutGround = Hit.ImpactPoint; }
+		}
+		From = Hit.ImpactPoint - FVector(0, 0, 2.0);
+	}
+	return BestD < 1e8f;
 }
 
 void ARDDungeonGenerator::PlaceAllySection15(ARDMonster* A)

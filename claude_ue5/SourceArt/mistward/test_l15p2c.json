@@ -1,0 +1,244 @@
+{
+ "tag": "l15p2c",
+ "plan": [
+  "allies15",
+  "arena15",
+  "allyspace",
+  "summoner"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "allies15",
+   "ok": false,
+   "error": "type object 'CollisionChannel' has no attribute 'ECC_GAME_TRACE_CHANNEL1'",
+   "trace": "Traceback (most recent call last):\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\868_mistward_test.py\", line 6843, in run\n    yield from STEPS[s]()\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\868_mistward_test.py\", line 6287, in step_allies15\n    \"ally_vs_ally\": str(cap.get_collision_response_to_channel(CT.ECC_GAME_TRACE_CHANNEL1)),\n                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: type object 'CollisionChannel' has no attribute 'ECC_GAME_TRACE_CHANNEL1'\n"
+  },
+  {
+   "step": "arena15",
+   "ok": true,
+   "room": 18,
+   "allies": 2,
+   "outside_before": [
+    true,
+    true
+   ],
+   "began": true,
+   "brought": 2,
+   "inside_at_start": [
+    true,
+    true
+   ],
+   "near_her_m": [
+    3.0,
+    3.0
+   ],
+   "inside_at_first_wave": [
+    true,
+    true
+   ]
+  },
+  {
+   "step": "allyspace",
+   "ok": false,
+   "called": [
+    {
+     "spell": "Summon Tier 1",
+     "started": true,
+     "allies": 1,
+     "least_gap": null
+    },
+    {
+     "spell": "Summon Tier 1",
+     "started": true,
+     "allies": 2,
+     "least_gap": -6.0
+    },
+    {
+     "spell": "Summon Tier 2",
+     "started": true,
+     "allies": 3,
+     "least_gap": -6.0
+    },
+    {
+     "spell": "Summon Tier 2",
+     "started": true,
+     "allies": 4,
+     "least_gap": -6.0
+    },
+    {
+     "spell": "Summon Tier 3",
+     "started": true,
+     "allies": 5,
+     "least_gap": -6.0
+    },
+    {
+     "spell": "Summon Tier 3",
+     "started": true,
+     "allies": 6,
+     "least_gap": -6.0
+    }
+   ],
+   "off": {
+    "moving_least": -75.7,
+    "standing_least": -75.7,
+    "standing_overlap_share": 1.0
+   },
+   "on": {
+    "moving_least": -15.5,
+    "standing_least": 20.6,
+    "standing_overlap_share": 0.0
+   },
+   "far": {
+    "moved_m": 155.9,
+    "near_her": 6,
+    "allies": 6,
+    "least_gap": 58.3,
+    "behind_her": 0
+   },
+   "panel": {
+    "rows": [
+     "Rotting Soldier|2|2|40/40,40/40",
+     "Grave Gunner|2|3|85/85,85/85",
+     "Orc Skirmisher|2|4|144/144,144/144"
+    ],
+    "after_hurt": [
+     "Rotting Soldier|2|2|40/40,40/40",
+     "Grave Gunner|2|3|68/85,85/85",
+     "Orc Skirmisher|2|4|144/144,144/144"
+    ],
+    "hurt_hp": [
+     85.0,
+     68.0
+    ]
+   },
+   "marks": {
+    "allies": 6,
+    "minimap": 6,
+    "minimap_matched": 6,
+    "big": 6,
+    "big_matched": 6
+   }
+  },
+  {
+   "step": "summoner",
+   "ok": true,
+   "pawn": "BP_SU4_SummonerCharacter_C",
+   "hp": 85.0,
+   "mana": 60.0,
+   "weapons": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1"
+   ],
+   "same_as_mage": [
+    true,
+    true
+   ],
+   "clips": [
+    "AS_Summoner4_CastBolt",
+    "AS_Summoner4_Summon1",
+    "AS_Summoner4_Summon2",
+    "AS_Summoner4_Summon3",
+    "AS_Summoner4_Summon4",
+    "AS_Summoner4_Summon5"
+   ],
+   "fire": {
+    "started": true,
+    "lost": 25.0
+   },
+   "summon": [
+    {
+     "started": true,
+     "mana": 30.0,
+     "count": 1,
+     "message": "Rotting Soldier answers your call  (1 of 2)"
+    },
+    {
+     "started": true,
+     "mana": 30.0,
+     "count": 2,
+     "message": "Rotting Soldier answers your call  (2 of 2)"
+    },
+    {
+     "started": false,
+     "mana": 0.0,
+     "count": 2,
+     "message": "You lead 2 of them already (Rotting Soldier): no more answer Summon Tier 1"
+    }
+   ],
+   "allies": [
+    {
+     "kind": "Soldier",
+     "hp": 40.0,
+     "damage": 9.0,
+     "m": 2.3
+    },
+    {
+     "kind": "Soldier",
+     "hp": 40.0,
+     "damage": 9.0,
+     "m": 2.3
+    }
+   ],
+   "tier1_soldier": {
+    "hp": 60.0,
+    "damage": 14.0
+   },
+   "want_ally_hp": 40,
+   "allies_fight": 21.6,
+   "dagger": {
+    "index": 3,
+    "both_hands": true
+   },
+   "slash": {
+    "begun": false,
+    "message": "Only a warrior's weapons take the ember slash"
+   },
+   "armour_worn": "None",
+   "hp_ring": false,
+   "magic_ring": true,
+   "mana_ringed": 66.0,
+   "summon_mana_ringed": 33.0,
+   "tome": {
+    "knows": false,
+    "carried": 1
+   },
+   "torch": true,
+   "boss": {
+    "weapons": [
+     "Summon Tier 2"
+    ],
+    "unlocked": 1
+   },
+   "tier2": {
+    "started": true,
+    "mana": 33.0,
+    "kinds": [
+     "Gunner"
+    ]
+   },
+   "after_death": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1",
+    "Summon Tier 2"
+   ],
+   "after_restart": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1"
+   ]
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_l15p2c_arena15_allies.png",
+  "mw_l15p2c_summon_panel.png",
+  "mw_l15p2c_ally_marks_map.png",
+  "mw_l15p2c_summoner_soldiers.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}
