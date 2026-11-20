@@ -226,7 +226,8 @@ void ARDHUD::DrawCombat(float Sc)
 		Box(FVector2D(0, E), FVector2D(E, Canvas->ClipY - E), C); Box(FVector2D(Canvas->ClipX - E, E), FVector2D(Canvas->ClipX, Canvas->ClipY - E), C);
 	}
 	// ---- mistward5: autoplay's line at the top (its time left, what it does, how to take over)
-	if (Gen->IsAutoplaying())
+	// (not under the reel of 2026-11-18's caption, which stands where it does and says autoplay plays her)
+	if (Gen->IsAutoplaying() && Gen->ReelCaptionTitle.IsEmpty())
 	{
 		const float Left = Gen->GetAutoplayLeft();
 		const FString T = Left >= 0.f ? FString::Printf(TEXT("AUTOPLAY  %d:%02d    %s    any key takes over"), (int32)Left / 60, (int32)Left % 60, *Gen->AutoplayDoing.ToUpper())
@@ -854,6 +855,8 @@ void ARDHUD::DrawHUD()
 	// ---- Brokenspire: the town's panel
 	if (Gen->IsTownPanelOpen()) DrawTownPanel(Sc);
 	else { Gen->TownRowBoxes.Reset(); Gen->TownTabBoxes.Reset(); }
+	// ---- the reel of 2026-11-18: its caption at the top, out of the way of the action
+	if (!Gen->ReelCaptionTitle.IsEmpty() || !Gen->ReelCaptionLine.IsEmpty()) DrawReelCaption(Sc);
 	// ---- level 5: the Escape menu, over everything
 	if (Gen->IsMenuOpen()) DrawMenu(Sc);
 	else { Gen->MenuRowBoxes.Reset(); Gen->MenuTrackBoxes.Reset(); }
@@ -1877,6 +1880,46 @@ void ARDHUD::DrawNotices(float Sc)
 		}
 		else Box(FVector2D(X - 14.f * Sc, Y - 7.f * Sc), FVector2D(X + Tw + 14.f * Sc, Y + Th + 7.f * Sc), FLinearColor(0.03f, 0.03f, 0.04f, 0.65f * Al));
 		UI.Text(Cb->Message, FLinearColor(0.95f, 0.92f, 0.82f, Al), X, Y, Small, Sc * 1.3f);
+	}
+}
+
+void ARDHUD::DrawReelCaption(float Sc)
+{
+	// (a dark band at the top middle, between the controls' panel and the minimap: the title in gold, the line under it; a line
+	// too wide for the band is cut at a word into two)
+	UFont* Small = GEngine->GetSmallFont();
+	const float Ts = Sc * 1.15f, Ls = Sc * 1.25f, MaxW = FMath::Min(Canvas->ClipX * 0.50f, 1000.f * Sc);
+	TArray<FString> Lines;
+	{
+		TArray<FString> Words; Gen->ReelCaptionLine.ParseIntoArray(Words, TEXT(" "));
+		FString Cur;
+		for (const FString& W : Words)
+		{
+			const FString Try = Cur.IsEmpty() ? W : Cur + TEXT(" ") + W;
+			float Tw, Th; UI.TextSize(Try, Tw, Th, Small, Ls);
+			if (Tw > MaxW && !Cur.IsEmpty()) { Lines.Add(Cur); Cur = W; } else Cur = Try;
+		}
+		if (!Cur.IsEmpty()) Lines.Add(Cur);
+	}
+	float Tw0 = 0.f, Th0 = 0.f; UI.TextSize(Gen->ReelCaptionTitle, Tw0, Th0, Small, Ts, ERDType::Label);
+	float W = Tw0, H = Gen->ReelCaptionTitle.IsEmpty() ? 0.f : Th0 + 4.f * Sc;
+	TArray<float> Lh;
+	for (const FString& Ln : Lines) { float Tw, Th; UI.TextSize(Ln, Tw, Th, Small, Ls); W = FMath::Max(W, Tw); Lh.Add(Th); H += Th + 2.f * Sc; }
+	const float Pad = 16.f * Sc, Y0 = 14.f * Sc;
+	const FVector2D A((Canvas->ClipX - W) * 0.5f - Pad, Y0), B((Canvas->ClipX + W) * 0.5f + Pad, Y0 + H + Pad * 1.2f);
+	Box(A, B, FLinearColor(0.03f, 0.03f, 0.035f, 0.62f));
+	Frame(A, B, FLinearColor(0.85f, 0.70f, 0.38f, 0.75f), 1.5f * Sc);
+	float Y = Y0 + Pad * 0.6f;
+	if (!Gen->ReelCaptionTitle.IsEmpty())
+	{
+		UI.Text(Gen->ReelCaptionTitle, FLinearColor(1.f, 0.82f, 0.38f), (Canvas->ClipX - Tw0) * 0.5f, Y, Small, Ts, ERDType::Label);
+		Y += Th0 + 4.f * Sc;
+	}
+	for (int32 I = 0; I < Lines.Num(); ++I)
+	{
+		float Tw, Th; UI.TextSize(Lines[I], Tw, Th, Small, Ls);
+		UI.Text(Lines[I], FLinearColor(0.96f, 0.93f, 0.85f), (Canvas->ClipX - Tw) * 0.5f, Y, Small, Ls);
+		Y += Lh[I] + 2.f * Sc;
 	}
 }
 

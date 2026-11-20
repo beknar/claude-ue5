@@ -1,0 +1,164 @@
+{
+ "heroes": {
+  "Warrior": {
+   "rig": "Warrior3",
+   "seat_pelvis": [
+    -1.19,
+    -8.28,
+    141.19
+   ],
+   "foot_rest_z": 2.9,
+   "mount_foot0_z": [
+    1.68,
+    2.34
+   ]
+  },
+  "Mage": {
+   "rig": "Caster",
+   "seat_pelvis": [
+    -1.69,
+    -3.6,
+    152.79
+   ],
+   "foot_rest_z": 4.98,
+   "mount_foot0_z": [
+    4.02,
+    4.48
+   ]
+  },
+  "Warlock": {
+   "rig": "DarkCaster",
+   "seat_pelvis": [
+    -1.31,
+    -4.31,
+    150.85
+   ],
+   "foot_rest_z": 5.65,
+   "mount_foot0_z": [
+    4.52,
+    5.07
+   ]
+  },
+  "Rogue": {
+   "rig": "Rogue",
+   "seat_pelvis": [
+    2.11,
+    1.25,
+    150.16
+   ],
+   "foot_rest_z": 3.65,
+   "mount_foot0_z": [
+    2.73,
+    3.34
+   ]
+  },
+  "MartialArtist": {
+   "rig": "MartialArtist",
+   "seat_pelvis": [
+    1.64,
+    -10.69,
+    136.57
+   ],
+   "foot_rest_z": 1.61,
+   "mount_foot0_z": [
+    0.1,
+    0.98
+   ]
+  },
+  "Summoner": {
+   "rig": "Summoner4",
+   "seat_pelvis": [
+    2.41,
+    -2.99,
+    126.13
+   ],
+   "foot_rest_z": 2.95,
+   "mount_foot0_z": [
+    2.27,
+    2.72
+   ]
+  }
+ },
+ "horse": {
+  "walk": {
+   "clip": "A_Horse_Walk_Alternate",
+   "length": 1.367,
+   "rate_scale": 1.2,
+   "planted_cm_s_clip": 144.5,
+   "ground_cm_s": 173.4,
+   "lands": [
+    0.829,
+    0.341,
+    0.585,
+    0.098
+   ]
+  },
+  "run": {
+   "clip": "A_Horse_Canter",
+   "length": 0.6,
+   "rate_scale": 1.2,
+   "planted_cm_s_clip": 595.7,
+   "ground_cm_s": 714.8,
+   "lands": [
+    0.333,
+    0.5,
+    0.056,
+    0.222
+   ]
+  },
+  "back": {
+   "clip": "A_Horse_Walk_Backwards_3",
+   "length": 1.367,
+   "rate_scale": 1.2,
+   "planted_cm_s_clip": -144.5,
+   "ground_cm_s": 173.4,
+   "lands": [
+    0.707,
+    0.244,
+    0.854,
+    0.39
+   ]
+  },
+  "swim": {
+   "clip": "A_Horse_Swim",
+   "length": 0.833,
+   "rate_scale": 1.2,
+   "planted_cm_s_clip": -100.9,
+   "ground_cm_s": 121.1,
+   "lands": [
+    0.4,
+    0.85,
+    0.8,
+    0.15
+   ]
+  },
+  "idles": {
+   "A_horse_Idle_3": 3.5,
+   "A_horse_Idle_4": 2.6,
+   "A_horse_Idle_5": 2.6
+  },
+  "idles_kept": [
+   "A_horse_Idle_3",
+   "A_horse_Idle_4",
+   "A_horse_Idle_5"
+  ]
+ },
+ "pack_seat_pelvis": [
+  -0.67,
+  -12.97,
+  140.14
+ ],
+ "rider_socket": {
+  "loc": [
+   0.007,
+   -3.799,
+   102.721
+  ],
+  "quat": [
+   -0.5076704764124682,
+   -0.4918408105132695,
+   -0.5080394467846747,
+   -0.4921983594075761
+  ]
+ }
+}

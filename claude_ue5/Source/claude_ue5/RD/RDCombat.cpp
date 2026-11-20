@@ -345,6 +345,8 @@ bool URDCombatComponent::StartAttack()
 
 bool URDCombatComponent::StartAttackWith(int32 Index)
 {
+	// (2026-11-18: the attack's button in the pack's horse's saddle rears it (RDHorse15.cpp))
+	if (Generator && Generator->IsMounted() && Generator->HorseDef.bPack) { Generator->RearHorse(); return false; }
 	if (Generator && Generator->IsRidingOrSwimming()) return false;          // (the eighth phase: no blow from the saddle; 2026-11-12: nor swimming)
 	const FRDWeaponDef* W = Generator && Generator->Weapons.IsValidIndex(Index) ? &Generator->Weapons[Index] : nullptr;
 	USkeletalMeshComponent* M = Body();

@@ -1,0 +1,529 @@
+{
+ "tag": "h15g",
+ "plan": [
+  "horse15",
+  "horse9",
+  "gait12",
+  "horse14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "horse15",
+   "ok": true,
+   "def": {
+    "pack": true,
+    "mesh": "SK_HorseRealistic",
+    "saddle": true,
+    "anim": "RDHorseAnimInstance",
+    "top_walk": 208.0,
+    "top_run": 1200.0,
+    "walk_clip": 173.39999389648438,
+    "run_clip": 714.7999877929688,
+    "gallop_edge": 360.0
+   },
+   "mount_prompt": "ride your horse",
+   "mount": {
+    "phases": [
+     "mounting",
+     "riding"
+    ],
+    "riders": [
+     "idle",
+     "mountl"
+    ],
+    "foot_over_ground_cm_at_start": 1.3,
+    "pelvis_rise_cm": [
+     91.6,
+     157.2
+    ],
+    "after": {
+     "phase": "riding",
+     "speed": 0.0,
+     "yaw": 0.0,
+     "clip": "idle",
+     "rate": 1.0,
+     "loops": 0.0,
+     "pitch": -1.4,
+     "swim": 0.0,
+     "air": 0.0,
+     "rear": 0.0,
+     "jumps": 0.0,
+     "rears": 0.0,
+     "hits": 0.0,
+     "stops": 0.0,
+     "swims": 0.0,
+     "falls": 0.0,
+     "dust": 0.0,
+     "surface": "",
+     "seat_err": 3.3,
+     "hand_l": 17.3,
+     "hand_r": 15.1,
+     "back": 0.0,
+     "mounts": 1.0,
+     "dismounts": 0.0,
+     "blocked": 0.0,
+     "grass": 0.0,
+     "dirt": 0.0,
+     "hard": 0.0,
+     "lift": 0.0
+    }
+   },
+   "seated": {
+    "seat_err_cm": 1.6,
+    "hands_off_reins_cm": [
+     16.9,
+     14.5
+    ],
+    "rider": "idle",
+    "clip": "idle"
+   },
+   "attack_rears_not_strikes": true,
+   "walk": {
+    "speed_end": 206,
+    "clip": "walk",
+    "rate": 1.19,
+    "rider": "walk",
+    "pairs": 211,
+    "slide_median_cm_s": 3,
+    "speed_cm_s": 206,
+    "slide_share": 0.016
+   },
+   "gallop_rise": {
+    "t_600": 1.22,
+    "t_1000": 2.48,
+    "t_1150": 2.91,
+    "speed_end": 1200,
+    "clips": [
+     "run",
+     "walk"
+    ],
+    "rate_end": 1.68
+   },
+   "gallop": {
+    "clip": "run",
+    "rate": 1.68,
+    "rider": "run",
+    "pairs": 32,
+    "slide_median_cm_s": 119,
+    "speed_cm_s": 1200,
+    "slide_share": 0.099
+   },
+   "turn_gallop": {
+    "deg_s": 70.8,
+    "speed": 1200
+   },
+   "stop": {
+    "stops": 1.0,
+    "clips": [
+     "idle",
+     "run",
+     "stop",
+     "walk"
+    ],
+    "t_under_100": 1.01,
+    "dust": 57.0
+   },
+   "turn_walk": {
+    "deg_s": 144.4,
+    "speed": 206
+   },
+   "back": {
+    "speed_end": -92,
+    "clip": "back",
+    "backing": 1.0,
+    "yaw_kept": 0.0
+   },
+   "jump": {
+    "jumps": 1.0,
+    "rise_cm": 103,
+    "clips": [
+     "jump",
+     "jumploop",
+     "land",
+     "run"
+    ],
+    "riders": [
+     "jump",
+     "jumploop",
+     "land",
+     "run"
+    ]
+   },
+   "rear": {
+    "rears": 1.0,
+    "clips": [
+     "rear"
+    ],
+    "head_over_pelvis_cm_min": 39.0
+   },
+   "hit": {
+    "hits": 1.0,
+    "clips": [
+     "hit",
+     "idle"
+    ]
+   },
+   "hooves": {
+    "falls": 157.0,
+    "grass": 157.0,
+    "dirt": 0.0,
+    "hard": 0.0,
+    "dust": 62.0
+   },
+   "dismount": {
+    "phases": [
+     "dismounting",
+     "none"
+    ],
+    "mounted_after": false,
+    "beside_cm": 96,
+    "feet_over_horse_ground_cm": 3.0
+   },
+   "swim": {
+    "shore_m": 245,
+    "swims": 1.0,
+    "deepest_cm": 8894,
+    "rode_m": 86,
+    "frames_swimming": 31,
+    "clips": [
+     "swim"
+    ],
+    "speed_max": 1164,
+    "lift_cm": 167,
+    "pelvis_over_horse_cm": 317
+   },
+   "sounds": {
+    "Horse.Hoof.Grass": 233,
+    "Horse.Hoof.Dirt": 0,
+    "Horse.Hoof.Hard": 0,
+    "Horse.Mount": 2,
+    "Horse.Dismount": 1,
+    "Horse.Jump": 1,
+    "Horse.Neigh": 1,
+    "Horse.Snort": 2,
+    "Horse.Hit": 1,
+    "Horse.Swim": 1
+   },
+   "checks": {
+    "pack_horse": true,
+    "mount_clip": true,
+    "seat": true,
+    "walk": true,
+    "momentum": true,
+    "gallop": true,
+    "turns": true,
+    "stop": true,
+    "back": true,
+    "jump": true,
+    "rear": true,
+    "hit": true,
+    "hooves": true,
+    "sounds": true,
+    "dismount": true,
+    "swim": true
+   }
+  },
+  {
+   "step": "horse9",
+   "ok": true,
+   "stable_spots": 1,
+   "stable_at": [
+    -2350,
+    -20250
+   ],
+   "before": {
+    "owned": 0.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": -20611.0,
+    "y": -467978.0,
+    "z": -3155.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -3052.0,
+    "pelvis_z": 95.1,
+    "rider": "None",
+    "stable_horse": 1.0,
+    "pelvis_off_xy": 448343.0
+   },
+   "prompt": "the stable: a horse for 60 gold",
+   "bought": true,
+   "gold_taken": 60,
+   "price": 60,
+   "after_buy": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": -2158.0,
+    "y": -19854.0,
+    "z": 0.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": 100.6,
+    "pelvis_z": 94.7,
+    "rider": "None",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 220.4
+   },
+   "gi_owned": true,
+   "blocking_before_mount": true,
+   "walk_into_horse": {
+    "start_cm": 220,
+    "nearest_cm": 126
+   },
+   "horse_at_cm": 220,
+   "mount_prompt": "ride your horse",
+   "mounted": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 1.0,
+    "x": 70914.0,
+    "y": -795582.0,
+    "z": -2167.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -2064.8,
+    "pelvis_z": -2005.4,
+    "rider": "idle",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 4.1
+   },
+   "attack_refused": true,
+   "seat_err15": 3.3,
+   "blocking_mounted": false,
+   "riding": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 1.0,
+    "x": 71795.0,
+    "y": -795318.0,
+    "z": -2259.0,
+    "clip": "run",
+    "rate": 1.1,
+    "speed": 789.0,
+    "saddle_z": -2149.1,
+    "pelvis_z": -2086.2,
+    "rider": "run",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 14.9
+   },
+   "speed_m_s": {
+    "foot": 3.57,
+    "mounted": 11.84,
+    "ratio": 3.32,
+    "want": 1.0,
+    "want_m_s": 12.0,
+    "after": 3.41
+   },
+   "after_dismount": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": 76941.0,
+    "y": -793774.0,
+    "z": -2320.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -2220.0,
+    "pelvis_z": -2227.2,
+    "rider": "None",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 95.3
+   },
+   "death": {
+    "dead": true,
+    "mounted": 0.0,
+    "montage": true
+   }
+  },
+  {
+   "step": "gait12",
+   "ok": false,
+   "mounted": true,
+   "pack": true,
+   "def": {
+    "canter": false,
+    "walk_clip": 173,
+    "canter_clip": 650,
+    "run_clip": 715,
+    "canter_from": 400,
+    "gallop_from": 1300
+   },
+   "walk": {
+    "speed_cm_s": 62,
+    "clip": "walk",
+    "clip_share": 1.0,
+    "rate": 0.36,
+    "strides_a_second": 0.32,
+    "game_speed": 0.4,
+    "frames": 147,
+    "frame_ms_game": 19.4,
+    "hoof_down_pairs": 483,
+    "slide_median_cm_s": 30,
+    "slide_share": 0.481,
+    "slide_along_cm_s": 30,
+    "slide_across_cm_s": 0,
+    "facing_off_deg": [
+     0.0,
+     0.0
+    ],
+    "rider": "walk",
+    "pitch_deg": [
+     -2.8,
+     -2.5
+    ],
+    "pitch_step_deg_max": 0.1,
+    "phase_loops_s": 0.316
+   },
+   "canter": {
+    "speed_cm_s": 206,
+    "clip": "walk",
+    "clip_share": 1.0,
+    "rate": 1.19,
+    "strides_a_second": 1.04,
+    "game_speed": 0.4,
+    "frames": 164,
+    "frame_ms_game": 17.9,
+    "hoof_down_pairs": 121,
+    "slide_median_cm_s": 97,
+    "slide_share": 0.473,
+    "slide_along_cm_s": 97,
+    "slide_across_cm_s": 1,
+    "facing_off_deg": [
+     0.0,
+     0.0
+    ],
+    "rider": "walk",
+    "pitch_deg": [
+     -7.9,
+     -5.4
+    ],
+    "pitch_step_deg_max": 0.1,
+    "phase_loops_s": 1.043
+   },
+   "gallop": {
+    "speed_cm_s": 1200,
+    "clip": "run",
+    "clip_share": 1.0,
+    "rate": 1.68,
+    "strides_a_second": 3.36,
+    "game_speed": 0.4,
+    "frames": 168,
+    "frame_ms_game": 17.4,
+    "hoof_down_pairs": 60,
+    "slide_median_cm_s": 102,
+    "slide_share": 0.085,
+    "slide_along_cm_s": 102,
+    "slide_across_cm_s": 2,
+    "facing_off_deg": [
+     0.0,
+     0.0
+    ],
+    "rider": "run",
+    "pitch_deg": [
+     -3.2,
+     0.6
+    ],
+    "pitch_step_deg_max": 0.2,
+    "phase_loops_s": 3.063
+   }
+  },
+  {
+   "step": "horse14",
+   "ok": true,
+   "called_wilds_m": 2.2,
+   "said": "You whistle: your horse comes to your side",
+   "left_behind_m": 120.65,
+   "called_far_m": 2.2,
+   "calls": 2,
+   "mark_minimap": true,
+   "mark_bigmap": true,
+   "torch_lit_before": true,
+   "mounted": true,
+   "standing": {
+    "seat_along_cm": -10.6,
+    "seat_across_cm": 0.1,
+    "seat_up_cm": 58.7,
+    "hand_l_cm": 23.5,
+    "hand_r_cm": 23.8,
+    "hands_empty": true,
+    "reins": 0,
+    "seat_err15": 2.3,
+    "hand15_l": 16.4,
+    "hand15_r": 13.8
+   },
+   "seat_from_json": [
+    40.6,
+    69.8
+   ],
+   "shown_at_hands": [
+    0,
+    []
+   ],
+   "moving": {
+    "walk": {
+     "seat_along_cm": 10.0,
+     "seat_across_cm": 6.9,
+     "seat_up_cm": 57.6,
+     "hand_l_cm": 24.9,
+     "hand_r_cm": 26.7,
+     "seat_err15": 11.1,
+     "hand15_l": 24.8,
+     "hand15_r": 21.1,
+     "reins_min": 0,
+     "hands_empty_all": true
+    },
+    "gallop": {
+     "seat_along_cm": 7.4,
+     "seat_across_cm": 7.0,
+     "seat_up_cm": 58.0,
+     "hand_l_cm": 24.4,
+     "hand_r_cm": 26.0,
+     "seat_err15": 11.1,
+     "hand15_l": 24.7,
+     "hand15_r": 21.1,
+     "reins_min": 0,
+     "hands_empty_all": true
+    }
+   },
+   "seat_from_json_gallop": [
+    35.5,
+    68.3
+   ],
+   "after_down": {
+    "mounted": false,
+    "weapons_back": true,
+    "reins": "not riding"
+   },
+   "called_town_m": 2.2
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_h15g_horse15_mount.png",
+  "wd_h15g_horse15_seated.png",
+  "wd_h15g_horse15_gallop.png",
+  "wd_h15g_horse15_jump.png",
+  "wd_h15g_horse15_rear.png",
+  "wd_h15g_horse15_dismount.png",
+  "wd_h15g_horse15_swim.png",
+  "wd_h15g_horse_idle.png",
+  "wd_h15g_horse_side.png",
+  "wd_h15g_horse_back.png",
+  "wd_h15g_gait12_canter.png",
+  "wd_h15g_gait12_gallop.png",
+  "wd_h15g_horse14_minimap.png",
+  "wd_h15g_horse14_bigmap.png",
+  "wd_h15g_horse14_side_still.png",
+  "wd_h15g_horse14_side_walk.png",
+  "wd_h15g_horse14_side_gallop.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

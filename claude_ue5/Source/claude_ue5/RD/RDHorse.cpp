@@ -6,6 +6,7 @@
 // and further back. Hers is kept in the game instance (bHorseOwned, saved) and comes to her side on the town's level; the dungeons
 // have none.
 #include "RD/RDHorse.h"
+#include "RD/RDHorseAnim.h"
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDCombat.h"
 #include "RD/RDSection.h"
@@ -29,11 +30,21 @@ namespace { const FName RDHorseSlot(TEXT("DefaultSlot")); }
 ARDHorse::ARDHorse()
 {
 	PrimaryActorTick.bCanEverTick = false;
+	// (2026-11-18: a root at its feet and a pivot under the body, so the pack's horse can be pitched to the slope and its mesh turned
+	// to face +X; the Tripo horse's body sits on them unturned)
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	Pivot = CreateDefaultSubobject<USceneComponent>(TEXT("Pivot"));
+	Pivot->SetupAttachment(RootComponent);
 	Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
-	RootComponent = Body;
+	Body->SetupAttachment(Pivot);
 	Body->SetCollisionEnabled(ECollisionEnabled::NoCollision);           // (her capsule is what moves and collides)
 	Body->SetGenerateOverlapEvents(false);
 	Body->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	Saddle = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Saddle"));
+	Saddle->SetupAttachment(Body);
+	Saddle->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Saddle->SetGenerateOverlapEvents(false);
+	Saddle->SetVisibility(false);
 	// (the list of 2026-11-10: a box that stops pawns (her, monsters, townsfolk) and nothing else: the camera passes, traces pass)
 	Blocker = CreateDefaultSubobject<UBoxComponent>(TEXT("Blocker"));
 	Blocker->SetupAttachment(Body);
@@ -52,17 +63,36 @@ void ARDHorse::Init(const FRDHorseDef& InDef, bool bSecondColouring)
 	Def = InDef;
 	USkeletalMesh* M = bSecondColouring && Def.MeshB ? Def.MeshB.Get() : Def.Mesh.Get();
 	if (M) Body->SetSkeletalMesh(M);
-	// (the box from the mesh's own bounds: its body from the knees up, a little inside its outline)
+	if (Def.bPack)
+	{
+		// (the pack's horse: one mesh in two coats (the bay hers, the grey the stable's and the tamed one's), its saddle posed by it,
+		// its mesh's +Y turned to the actor's +X, its own clips through the crossfading instance)
+		Body->SetRelativeRotation(FRotator(0.f, Def.MeshYaw, 0.f));
+		if (UMaterialInterface* Coat = bSecondColouring ? Def.CoatB.Get() : Def.CoatA.Get()) Body->SetMaterial(Def.CoatSlot, Coat);
+		if (UMaterialInterface* Hair = bSecondColouring ? Def.HairB.Get() : Def.HairA.Get()) Body->SetMaterial(Def.HairSlot, Hair);
+		Body->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+		Body->SetAnimInstanceClass(URDHorseAnimInstance::StaticClass());
+		if (Def.SaddleMesh)
+		{
+			Saddle->SetSkeletalMesh(Def.SaddleMesh);
+			Saddle->SetLeaderPoseComponent(Body);
+			Saddle->SetVisibility(true);
+		}
+	}
+	// (the box from the mesh's own bounds: its body from the knees up, a little inside its outline; the pack's mesh's bounds are in
+	// its own axes, turned MeshYaw under the actor)
 	if (M && Blocker)
 	{
 		const FBoxSphereBounds Bd = M->GetBounds();
-		const FVector E = Bd.BoxExtent, O = Bd.Origin;
+		FVector E = Bd.BoxExtent, O = Bd.Origin;
+		if (Def.bPack) { const FRotator Yw(0.f, Def.MeshYaw, 0.f); O = Yw.RotateVector(O); const FVector Er = Yw.RotateVector(E); E = FVector(FMath::Abs(Er.X), FMath::Abs(Er.Y), E.Z); }
 		const float Bottom = O.Z - E.Z, Top = O.Z + E.Z;
 		const float Z0 = Bottom + (Top - Bottom) * 0.3f;
 		Blocker->SetBoxExtent(FVector(FMath::Max(E.X * 0.85f, 20.f), FMath::Max(E.Y * 0.85f, 20.f), FMath::Max((Top - Z0) * 0.5f, 20.f)));
 		Blocker->SetRelativeLocation(FVector(O.X, O.Y, (Z0 + Top) * 0.5f));
 	}
-	PlayFor(0.f);
+	if (Def.bPack) PlayClip15(TEXT("idle"), Def.Idle, true, 1.f, 0.f, 0.f);
+	else PlayFor(0.f);
 }
 
 void ARDHorse::SetBlocking(bool bOn)
@@ -75,8 +105,29 @@ bool ARDHorse::IsBlocking() const
 	return Blocker && Blocker->GetCollisionEnabled() != ECollisionEnabled::NoCollision;
 }
 
+URDHorseAnimInstance* ARDHorse::GetAnim15() const
+{
+	return Body ? Cast<URDHorseAnimInstance>(Body->GetAnimInstance()) : nullptr;
+}
+
+void ARDHorse::PlayClip15(FName Name, UAnimSequenceBase* Clip, bool bLoop, float Rate, float Blend, float StartTime)
+{
+	URDHorseAnimInstance* A = GetAnim15();
+	if (!A || !Clip) return;
+	A->PlayClip(Clip, bLoop, Rate, Blend, StartTime);
+	ClipNow = Name; RateNow = Rate; ClipAsset = Clip;
+}
+
+float ARDHorse::GetClipPhase() const
+{
+	const URDHorseAnimInstance* A = GetAnim15();
+	return A ? A->GetPhase() : (ClipAsset && ClipAsset->GetPlayLength() > 0.f ? FMath::Fmod(Body->GetPosition() / ClipAsset->GetPlayLength(), 1.f) : 0.f);
+}
+
 void ARDHorse::PlayFor(float Speed)
 {
+	// (the pack's horse: standing, its idle; its gaits are the ride's (RDHorse15.cpp))
+	if (Def.bPack) { if (Speed < 1.f) PlayClip15(TEXT("idle"), Def.Idle, true, 1.f, 0.3f, 0.f); return; }
 	// (the walk, the canter from CanterFrom, the gallop from GallopFrom; each at the rate its soles keep pace with the ground, held
 	// within reason. The list of 2026-11-12: each gait is made for the speeds it is ridden at (her walk on it about 6.7 m/s, a
 	// canter's; her run 21 m/s, the gallop's), so it plays near its own rate: the old walk had played up to 3 times over and the
@@ -107,6 +158,7 @@ void ARDHorse::PlayFor(float Speed)
 
 float ARDHorse::GetStridesASecond() const
 {
+	if (Def.bPack) { const URDHorseAnimInstance* A = GetAnim15(); return A && ClipNow != TEXT("idle") ? A->GetLoopsASecond() : 0.f; }
 	// (the clip's rate_scale counts: 915 sets it where the import's length differs from the one Blender built)
 	const float L = ClipAsset ? ClipAsset->GetPlayLength() : 0.f;
 	const float RS = ClipAsset ? ClipAsset->RateScale : 1.f;
@@ -115,6 +167,7 @@ float ARDHorse::GetStridesASecond() const
 
 FVector ARDHorse::GetSaddleLocation() const
 {
+	if (Def.bPack && Body && Body->DoesSocketExist(Def.RiderSocket)) return Body->GetSocketLocation(Def.RiderSocket);
 	return Body && Body->DoesSocketExist(Def.SaddleBone) ? Body->GetSocketLocation(Def.SaddleBone) : GetActorLocation() + FVector(0, 0, 160.f);
 }
 
@@ -210,6 +263,7 @@ bool ARDDungeonGenerator::MountHorse()
 	// (2026-11-12, PR #53's review: mounted from the water, the saddle kept the swim's jump (none) and her raised body as hers to
 	// give back: after it she never jumped again and floated over her capsule)
 	if (bSwimming) { PlayerCombat->ShowMessage(TEXT("Not while swimming")); return false; }
+	if (HorseDef.bPack) return MountHorse15(C);
 	bMounted = true;
 	Horse->SetBlocking(false);          // (the list of 2026-11-10: ridden, it stops nothing: her capsule does)
 	// (no jump from the saddle: it lifted the horse; the generator's tick after her movement's, so the horse is put under where
@@ -227,10 +281,11 @@ bool ARDDungeonGenerator::MountHorse()
 	return true;
 }
 
-bool ARDDungeonGenerator::DismountHorse()
+bool ARDDungeonGenerator::DismountHorse(bool bNow)
 {
 	ACharacter* C = Cast<ACharacter>(UGameplayStatics::GetPlayerPawn(this, 0));
 	if (!bMounted) return false;
+	if (HorseDef.bPack) return DismountHorse15(C, bNow);
 	bMounted = false;
 	if (C)
 	{
@@ -258,7 +313,7 @@ void ARDDungeonGenerator::TickHorse(float Dt)
 	if (!C || !HorseDef.Mesh) return;
 	// (hers comes to her on this level; she rides only while alive)
 	if (HasHorse() && !Horse && !bMounted && PlayerCombat && (bWild ? IsWildReady() : true)) CallHorse();
-	if (bMounted && (!Horse || !PlayerCombat || PlayerCombat->IsDead())) { DismountHorse(); return; }
+	if (bMounted && (!Horse || !PlayerCombat || PlayerCombat->IsDead())) { DismountHorse(true); return; }
 	if (bMounted && PlayerCombat->IsBusyForMount()) PlayerCombat->SetBlocking(false);          // (a block begun before: off)
 	// (the stable's horse: by the town's stable while she has none)
 	StableLookIn -= Dt;
@@ -278,6 +333,7 @@ void ARDDungeonGenerator::TickHorse(float Dt)
 	// (the list of 2026-11-10: unridden, its box on once she stands clear of it (2 m from its middle))
 	if (!bMounted && Horse && !Horse->IsBlocking() && FVector::Dist2D(C->GetActorLocation(), Horse->GetActorLocation()) > 200.f) Horse->SetBlocking(true);
 	if (!bMounted || !Horse) return;
+	if (HorseDef.bPack) { TickRide15(Dt, C); return; }
 	// ---- riding: the horse under her, its clip by her speed; her root on its saddle, her rider clip by its gait
 	const float Hh = C->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 	const FVector Feet = C->GetActorLocation() - FVector(0, 0, Hh);

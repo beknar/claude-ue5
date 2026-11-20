@@ -34,12 +34,20 @@
 # the wilderness round it stands, the game writes the ready file; the recording begins and the script writes the go file (the
 # pilot's beats: the sky, the cobbles, a sign, a garden, a pen, the tavern, the oven, the mill, the rises, the portcullis, the
 # road, the map, the animals, the weather, the dusk, the night, a named save), and it stops when the game writes the done file.
+# -Reel15 (the reel of 2026-11-18: the six towns, a hero each, then each hero at tier 3 in the castle, then each in an encounter in
+# the wilds; -Game a package with brokenspire; RD/RDReel15.cpp): the game is started with -RDStartHero=<hero> -RDReel15
+# -RDShowReady=<file> -RDShowGo=<file> -RDShowDone=<file> -AutoplayLocked; ready once Brokenspire stands, the recording begins and
+# the go is written, it stops when the game writes the done file (its timeline). Beside the video: <video>.go.txt (the seconds
+# from the video's start to the go, by the file's creation time and the go's) and <video>.timeline.txt (the done file), which
+# pipeline/blender_numpy/reel15_cut.py cuts the scenes and lays the narration by.
+# -Reel16 (the horse's reel of 2026-11-19: the Ultimate Horse Pack's horse ridden on the plains and in a lake; RD/RDReel16.cpp): as
+# -Reel15, the game started with -RDReel16 (ready once she stands at her horse on the plains), its timeline beside the video.
 # Args: [-Heroes MartialArtist,Summoner,...] [-Seconds 300] [-Res 3840x2160] [-Game <claude_ue5.exe>] [-Py <python with imageio_ffmpeg>]
 param([string[]]$Heroes = @("MartialArtist", "Summoner", "Warrior", "Mage", "Warlock", "Rogue"), [int]$Seconds = 300, [string]$Res = "3840x2160", [int]$Mode = 1,
       [string]$Game = (Join-Path $PSScriptRoot "..\builds\mistward_castle\Windows\claude_ue5.exe"), [string]$Py = "",
       [string]$Recorder = "ffmpeg", [int]$Fps = 60, [string]$Bitrate = "60M", [string]$Suffix = "", [int]$Presses = 3,
       [switch]$FromMenu, [string]$Out = "", [switch]$TimeName, [switch]$TownTour, [int]$TourRun = 100, [int]$TourCastle = 0, [string]$Title = "", [double]$TownHour = -1,
-      [switch]$FinalBoss, [switch]$Show7)
+      [switch]$FinalBoss, [switch]$Show7, [switch]$Reel15, [switch]$Reel16)
 $ErrorActionPreference = "Stop"
 $Game = (Resolve-Path $Game).Path
 $titles = @{ MartialArtist = "Martial Artist" }
@@ -141,10 +149,10 @@ foreach ($h in $Heroes) {
     if (Test-Path $mark) { Remove-Item $mark -Force }
     if (Test-Path $go) { Remove-Item $go -Force }
     foreach ($f_ in @($ready, $done)) { if (Test-Path $f_) { Remove-Item $f_ -Force } }
-    $t0 = Get-Date
+    $t0 = Get-Date; $goAt = $null
     # (windowed fullscreen at the resolution, in the settings of both places a packaged game reads them from; put back at the end)
     foreach ($g in $gus) { New-Item -ItemType Directory -Force (Split-Path $g) | Out-Null; [IO.File]::WriteAllText($g, (Settings $g), (New-Object Text.UTF8Encoding $false)) }
-    $gargs = if ($Show7) { @("-RDStartHero=$h", "-RDShow7", "-RDShowReady=`"$ready`"", "-RDShowGo=`"$go`"", "-RDShowDone=`"$done`"", "-AutoplayLocked") } elseif ($FinalBoss) { @("-RDStartHero=$h", "-RDFinalShow", "-RDShowReady=`"$ready`"", "-RDShowGo=`"$go`"", "-RDShowDone=`"$done`"", "-AutoplayLocked") } elseif ($TownTour) { @("-RDStartHero=$h", "-RDTownTour=$(if ($TourCastle -gt 0) { $TourCastle } else { [Math]::Max(15, $Seconds - 40) })", "-RDTourGo=`"$go`"", "-RDTourRun=$TourRun", "-AutoplayLocked", "-RDMarkFile=$mark") + $(if ($TownHour -ge 0) { @("-RDTownHour=$TownHour") } else { @() }) } elseif ($FromMenu) { @("-RDMenuPick=$h", "-RDMenuGo=`"$go`"", "-RDMenuAutoplay=$Seconds", "-AutoplayLocked") } else { @("-RDStartHero=$h", "-Autoplay=$($Seconds + 60)", "-AutoplayLocked", "-RDMarkFile=$mark") }
+    $gargs = if ($Reel16) { @("-RDStartHero=$h", "-RDReel16", "-RDShowReady=`"$ready`"", "-RDShowGo=`"$go`"", "-RDShowDone=`"$done`"", "-AutoplayLocked") } elseif ($Reel15) { @("-RDStartHero=$h", "-RDReel15", "-RDShowReady=`"$ready`"", "-RDShowGo=`"$go`"", "-RDShowDone=`"$done`"", "-AutoplayLocked") } elseif ($Show7) { @("-RDStartHero=$h", "-RDShow7", "-RDShowReady=`"$ready`"", "-RDShowGo=`"$go`"", "-RDShowDone=`"$done`"", "-AutoplayLocked") } elseif ($FinalBoss) { @("-RDStartHero=$h", "-RDFinalShow", "-RDShowReady=`"$ready`"", "-RDShowGo=`"$go`"", "-RDShowDone=`"$done`"", "-AutoplayLocked") } elseif ($TownTour) { @("-RDStartHero=$h", "-RDTownTour=$(if ($TourCastle -gt 0) { $TourCastle } else { [Math]::Max(15, $Seconds - 40) })", "-RDTourGo=`"$go`"", "-RDTourRun=$TourRun", "-AutoplayLocked", "-RDMarkFile=$mark") + $(if ($TownHour -ge 0) { @("-RDTownHour=$TownHour") } else { @() }) } elseif ($FromMenu) { @("-RDMenuPick=$h", "-RDMenuGo=`"$go`"", "-RDMenuAutoplay=$Seconds", "-AutoplayLocked") } else { @("-RDStartHero=$h", "-Autoplay=$($Seconds + 60)", "-AutoplayLocked", "-RDMarkFile=$mark") }
     $l = Start-Process -FilePath $Game -ArgumentList $gargs -PassThru
     $p = $null
     for ($s = 0; $s -lt 60 -and -not $p; $s++) { Start-Sleep 1; $p = Get-Process "claude_ue5*" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.ToLower().StartsWith($bin) -and $_.StartTime -ge $t0.AddSeconds(-1) } | Select-Object -First 1 }
@@ -154,7 +162,7 @@ foreach ($h in $Heroes) {
         for ($s = 0; $s -lt 120 -and [RDRec]::RectOf([uint32]$p.Id) -eq "none" -and -not $p.HasExited; $s++) { Start-Sleep 1 }
         Start-Sleep 15
     }
-    elseif ($FinalBoss -or $Show7) {
+    elseif ($FinalBoss -or $Show7 -or $Reel15 -or $Reel16) {
         # (the town, the castle, her kit, the set and him: until she stands before him)
         for ($s = 0; $s -lt 300 -and -not (Test-Path $ready) -and -not $p.HasExited; $s++) { Start-Sleep 1 }
         if (-not (Test-Path $ready)) { "$h : the showcase never got ready"; Stop-Process -Id $p.Id -Force; continue }
@@ -183,7 +191,7 @@ foreach ($h in $Heroes) {
         while (Test-Path $dst) { $dst = Join-Path $dir "$title ($k).mp4"; $k++ }
         $args_ = @("-hide_banner", "-loglevel", "error", "-init_hw_device", "d3d11va=dx", "-filter_hw_device", "dx", "-f", "lavfi", "-i", "ddagrab=output_idx=0:framerate=$($Fps):draw_mouse=0") + $codec + @("-t", "$Seconds", "-movflags", "+faststart", "`"$dst`"")          # (quoted: Start-Process splits a path at its spaces)
         $fp_ = Start-Process -FilePath $ff -ArgumentList $args_ -PassThru -WindowStyle Hidden -RedirectStandardError (Join-Path $env:TEMP "rd_record_ffmpeg.txt")
-        if ($FromMenu -or $TownTour -or $FinalBoss -or $Show7) { Start-Sleep 2; Set-Content -Path $go -Value "go" }          # (the menu may step to her now; the tour, the fight, the showcase begin)
+        if ($FromMenu -or $TownTour -or $FinalBoss -or $Show7 -or $Reel15 -or $Reel16) { Start-Sleep 2; Set-Content -Path $go -Value "go"; $goAt = Get-Date }          # (the menu may step to her now; the tour, the fight, the showcase begin)
         # (in front the whole time: checked every 10 s)
         $still = $true
         while (-not $fp_.HasExited) { Start-Sleep 10; if (-not $fp_.HasExited) { $fpid = 0; [void][RDRec]::GetWindowThreadProcessId([RDRec]::GetForegroundWindow(), [ref]$fpid); if ($fpid -ne $p.Id) { $still = $false } } }
@@ -205,8 +213,8 @@ foreach ($h in $Heroes) {
     "$h : Game Bar presses at $($pressT -join ', ') s after launch; started: $started"
     $rec0 = Get-Date
     if (-not $started) { "$h : Game Bar did not start recording ($Presses presses): not recorded"; foreach ($q in @($p, $l)) { if ($q -and -not $q.HasExited) { Stop-Process -Id $q.Id -Force } }; continue }
-    if ($FromMenu -or $TownTour -or $FinalBoss -or $Show7) { Start-Sleep 2; Set-Content -Path $go -Value "go" }          # (recording: the menu may step to her now; the tour, the fight begin)
-    if ($FinalBoss -or $Show7) {
+    if ($FromMenu -or $TownTour -or $FinalBoss -or $Show7 -or $Reel15 -or $Reel16) { Start-Sleep 2; Set-Content -Path $go -Value "go"; $goAt = Get-Date }          # (recording: the menu may step to her now; the tour, the fight begin)
+    if ($FinalBoss -or $Show7 -or $Reel15 -or $Reel16) {
         # (until the game says the fight is over, -Seconds at most)
         for ($s = 0; $s -lt $Seconds -and -not (Test-Path $done) -and -not $p.HasExited; $s++) { Start-Sleep 1 }
         "$h : the showcase: $(if (Test-Path $done) { Get-Content $done -Raw } else { 'no end within the seconds' })"
@@ -233,7 +241,7 @@ foreach ($h in $Heroes) {
     }
     # (the game quits itself after its autoplay (the castle's: 60 s after the recording's time, or after the tour's castle
     #  seconds); stopped if it has not within a minute; from the menu it does not quit)
-    for ($s = 0; $s -lt $(if ($FromMenu -or $FinalBoss -or $Show7) { 3 } else { 60 }) -and -not $p.HasExited; $s++) { Start-Sleep 1 }
+    for ($s = 0; $s -lt $(if ($FromMenu -or $FinalBoss -or $Show7 -or $Reel15 -or $Reel16) { 3 } else { 60 }) -and -not $p.HasExited; $s++) { Start-Sleep 1 }
     foreach ($q in @($p, $l)) { if ($q -and -not $q.HasExited) { Stop-Process -Id $q.Id -Force -Confirm:$false } }
     if (-not $new) { "$h : NO VIDEO (the game in front: $front)"; continue }
     if ($Recorder -ne "ffmpeg") {
@@ -243,7 +251,11 @@ foreach ($h in $Heroes) {
         "$h : Game Bar named it '$($new.Name)' (the app it recorded)"
         # (a clip of another app is not kept, and not looked at: it can be a private window)
         if ($new.Name -notlike "claude_ue5*") { Remove-Item $new.FullName -Force; "$h : WRONG APP recorded: the clip was deleted unseen"; continue }
+        $made0 = $new.CreationTime
         Move-Item $new.FullName $dst
+        # (the reel: where the go falls in the video, and the game's timeline, beside it)
+        if ($goAt) { [IO.File]::WriteAllText("$dst.go.txt", ("{0:N2}" -f ($goAt - $made0).TotalSeconds), (New-Object Text.UTF8Encoding $false)) }
+        if (($Reel15 -or $Reel16) -and (Test-Path $done)) { Copy-Item $done "$dst.timeline.txt" }
     }
     $len = ""
     if ($Py) {

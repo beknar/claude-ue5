@@ -1831,6 +1831,9 @@ void ARDDungeonGenerator::Tick(float Dt)
 	if (bTown && (bTourOn || !bTourCmdRead)) TickTownTour((float)FApp::GetDeltaTime());
 	// (the list of 2026-11-04's showcase pilot: on the real clock, also under the menu and the oven's panel)
 	if (bTown && bWild) TickShow7((float)FApp::GetDeltaTime(), UGameplayStatics::GetPlayerController(this, 0));
+	// (the reel of 2026-11-18: on the real clock, in the town, the wilds and the castle (RDReel15.cpp))
+	if (bTown || bTownLink) TickReel15((float)FApp::GetDeltaTime());
+	if (bTown || bTownLink) TickReel16((float)FApp::GetDeltaTime());          // (the horse's reel of 2026-11-19, RDReel16.cpp)
 	// (Brokenspire: the town's panel takes the keys while it is open, Escape too)
 	if (IsTownPanelOpen())
 	{

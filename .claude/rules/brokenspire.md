@@ -148,6 +148,18 @@ The starting town: a Save As copy of mistward_castle whose generator has `bTown`
   - Numbers two stages write go in one place (`horse_gaits.py`, the edges in the clips' record).
 - **A test that reads an animal's feet at one moment** reads a walking one's lifted hoof; read each planted bone's lowest over a second, and trace the ground from just over the animal (`884 animals10`).
 
+## The Ultimate Horse Pack's horse (the user's of 2026-11-18: `933`, `RD/RDHorse15.cpp`, `RD/RDHorseAnim.cpp`, `888 horse15`)
+
+- **A pack's clip can slide by itself**: `A_Horse_Walk`'s planted hooves swing from -33 to 294 cm/s round their median, a slide of 38 % at any rate (`888 horse15`); the pack's alternate walk holds within 1 %. Measure a pack's every candidate clip on its skeleton (each hoof's planted speed and its spread) before choosing one.
+- **A clip's track names can differ in case from its mesh's bones** (`root_m` against `Root_M`): Unreal's names ignore case, a Python dictionary does not, and every pose read back as the reference pose.
+- **A rider carried by a socket is carried by its movement, not its turn**: rigidly carried by the horse's `RiderSocket` she lay on her back in the rear (the pack's rear clip leans her forward itself). The rider's frame is the horse's mesh moved as the socket has moved (`HorseDef.RiderTurnShare` 0).
+- **The pack seats its rider's mesh 20 cm over the horse's origin** (its mount clips' root lowered 20 cm, its rider socket on `Spine1_M` at 103 cm): measured by placing the pack's mannequin there in the mount idle and looking.
+- **A walk and a gallop of fixed edges at a natural speed**: at the walk's top (2.1 m/s) a horse goes no faster without the gallop; a run mode below 60 % of the stick walks, above it gallops from 1.5 times the edge, so the blend between them is passed through, not ridden at.
+- **Water takes a gallop's speed**: eased down at the land's rate the horse swam at 11.6 m/s after going in at a gallop.
+- **A native anim instance with no graph works** (`URDHorseAnimInstance`: its proxy's `Evaluate` blends two clips' `GetAnimationPose`; times moved on in `PreUpdateAnimation`, before the proxy copies them): a single node cuts from clip to clip, and the pack's AnimBP is its Blueprint horse's.
+- **Two runs of one test on one editor share its play**: a background run still waiting on the editor's ping started when the editor came back, beside the next run, and every step's record was nonsense. Stop a waiting run before starting another; check `Win32_Process` for `888_wilderness_test` before a run.
+- **A bare launch of the editor can wait at "Wait for ZenServer?"** for as long as nobody answers: launch it with the session's launcher (it answers No).
+
 ## The list of 2026-11-10's fourth phase (`914 lines,sleep,people`, `RD/RDList10d.cpp`, `884 lines10,sleep10,people10`)
 
 - **A body that is not drawn is not posed**: the townsfolk tick their pose only when rendered (`OnlyTickPoseWhenRendered`, update-rate optimisations on), so a sleeper read from Python inside a house stood in its reference pose with its Sleep clip's position at 0.0, and setting `visibility_based_anim_tick_option` from Python changed nothing. Read a pose with her looking at it (a second in view: the clip's position moves, hips 29 cm over the bed), and check the clip's position moves.
