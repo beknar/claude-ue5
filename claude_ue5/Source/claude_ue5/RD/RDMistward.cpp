@@ -614,7 +614,8 @@ bool ARDDungeonGenerator::TakeLootNear(const FVector& From, float Reach)
 	// (the sixth phase: a wild place's stone taken for good)
 	if (Best->WildKey != -1) if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->WildKilled.AddUnique(Best->WildKey);
 	LootPiles.Remove(Best);
-	PlaySoundAt(TEXT("Player.Loot"), Best->GetActorLocation());
+	LastLootSound15 = LootSound15(Best->Things);          // (the list of 2026-11-20: gear's thud unless all are potions)
+	PlaySoundAt(LastLootSound15, Best->GetActorLocation());
 	Best->Destroy();
 	return true;
 }
@@ -691,7 +692,7 @@ FString ARDDungeonGenerator::DescribePadNear(const FVector& From) const
 	const TArray<int32> D = GetPadDestinations();
 	if (D.Num() == 0) return TEXT("teleporter: a tier's teleport ring takes you on");
 	const int32 Ch = D.Contains(PadChoice) ? PadChoice : D.Last();
-	return D.Num() > 1 ? FString::Printf(TEXT("teleport to tier %d    [G] another tier"), Ch) : FString::Printf(TEXT("teleport to tier %d"), Ch);
+	return D.Num() > 1 ? FString::Printf(TEXT("teleport to tier %d    %s another tier"), Ch, *TripKeyName15()) : FString::Printf(TEXT("teleport to tier %d"), Ch);
 }
 
 FString ARDDungeonGenerator::UsePadNear(const FVector& From)
@@ -707,7 +708,7 @@ FString ARDDungeonGenerator::UsePadNear(const FVector& From)
 		PadRingsTaken.Add(T);
 		if (TObjectPtr<ARDTeleporter>* A = PadActors.Find(T); A && *A) (*A)->ShowRing(false);
 		Pc->ShowMessage(FString::Printf(TEXT("You take the %s: use it (I) to go back to the first tier's teleporter"), *Ring.ToString().ToLower()));
-		PlaySoundAt(TEXT("Player.Loot"), From);
+		PlaySoundAt(LastLootSound15 = LootSound15({ Ring }), From);
 		return TEXT("ring");
 	}
 	if (T > 1) { TeleportToTier(1); return TEXT("teleport"); }
@@ -821,7 +822,7 @@ bool ARDSection::OpenCell(int32 Door)
 			Generator->LastFound = Gift; Generator->LastFoundList = { Gift }; Generator->LastFoundTime = GetWorld()->GetTimeSeconds();
 		}
 		++Generator->PrisonersFreed;
-		Generator->PlaySoundAt(TEXT("Player.Loot"), C.Frame.GetLocation());
+		Generator->PlaySoundAt(Generator->LastLootSound15 = Generator->LootSound15({ Gift }), C.Frame.GetLocation());
 		UE_LOG(LogRDMistward, Log, TEXT("RDPRISONER freed in cell %d of (%d,%d): gave %s"), Ci, Coord.X, Coord.Y, *Gift.ToString());
 	}
 	else if (ARDMonster* M = Cast<ARDMonster>(C.Who.Get()))

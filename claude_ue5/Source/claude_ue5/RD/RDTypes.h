@@ -1276,7 +1276,9 @@ enum class ERDTrapKind : uint8
 	Teleport,
 	/** directional: a spring plate on a room's way hurls her along it to the room's far end, where monsters wait or a ring
 	 *  of glyphs (the list's "directional ... traps", added 2026-10-27) */
-	Push
+	Push,
+	/** the list of 2026-11-20 (item 12): a rune stone that looks as the cursed one does, and blesses her (a buff for a while) */
+	Blessed
 };
 
 /** mistward_castle: one kind of trap (the generator's Traps; pipeline/unreal/86x). Damage is a share of her hit points. */

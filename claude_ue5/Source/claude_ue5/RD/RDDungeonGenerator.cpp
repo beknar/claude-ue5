@@ -1365,7 +1365,8 @@ void ARDDungeonGenerator::OnContainerOpened(ARDSection* Section, int32 Index, co
 	}
 	for (int32 K = 0; K < List.Num(); ++K) PlayerCombat->AddItem(List[K], LootCountIn(List, Section->Coord, Index, K));
 	LastFound = List[0]; LastFoundList = List; LastFoundTime = GetWorld()->GetTimeSeconds(); ItemsFound += List.Num();
-	PlaySoundAt(TEXT("Player.Loot"), At);
+	LastLootSound15 = LootSound15(List);          // (the list of 2026-11-20: gear's thud unless all are potions)
+	PlaySoundAt(LastLootSound15, At);
 	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDLOOT %s from container %d of section (%d, %d)"), *FString::JoinBy(List, TEXT(", "), [](const FName& N) { return N.ToString(); }),
 		Index, Section->Coord.X, Section->Coord.Y);
 }
@@ -1989,14 +1990,14 @@ void ARDDungeonGenerator::Tick(float Dt)
 			for (int32 Dx = -1; Dx <= 1; ++Dx) for (int32 Dy = -1; Dy <= 1; ++Dy) if (ARDSection* S = GetSection(Here + FIntPoint(Dx, Dy))) S->TickCells(Dt, Her);
 		}
 	if (bTeleporters)
-		if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0); PC && PC->GetPawn() && PC->WasInputKeyJustPressed(EKeys::G) && PadNear(PC->GetPawn()->GetActorLocation()) == 1)
+		if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0); PC && PC->GetPawn() && TripKeyPressed15(PC) && PadNear(PC->GetPawn()->GetActorLocation()) == 1)
 		{
 			const TArray<int32> D = GetPadDestinations();
 			if (D.Num() > 0) { const int32 I = D.Find(PadChoice); PadChoice = D[(I == INDEX_NONE ? 0 : I + 1) % D.Num()]; }
 		}
 	// (the list of 2026-11-10: G at a boss's teleporter turns it between the first room and the town)
 	if (bBossPorts && BossPorts.Num() > 0)
-		if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0); PC && PC->GetPawn() && PC->WasInputKeyJustPressed(EKeys::G) && BossPortNear(PC->GetPawn()->GetActorLocation()) > 0 && CanBossPortToTown())
+		if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0); PC && PC->GetPawn() && TripKeyPressed15(PC) && BossPortNear(PC->GetPawn()->GetActorLocation()) > 0 && CanBossPortToTown())
 			BossPortChoice = 1 - BossPortChoice;
 	if (bSeeThrough) TickSeeThrough(Dt);
 	else if (SeeHidden.Num() > 0) ClearSeeThrough();

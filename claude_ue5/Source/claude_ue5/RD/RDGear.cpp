@@ -153,12 +153,15 @@ bool URDCombatComponent::HoldTorch(bool bHold)
 		}
 		if (TorchItem.IsNone()) { SetMessage(TEXT("You have no torch: an anvil makes one")); return false; }
 		if (!FitOf(TorchItem)) { SetMessage(FString::Printf(TEXT("The %s cannot hold the %s"), *Generator->PlayerTitle.ToLower(), *TorchItem.ToString().ToLower())); return false; }
+		// (the list of 2026-11-20 (item 17): burned out, it waits for a repair item)
+		if (GetLightLeft15(TorchItem) == 0.f) { SetMessage(FString::Printf(TEXT("The %s has burned out: a repair item restores it"), *TorchItem.ToString().ToLower())); return false; }
 	}
 	bTorchHeld = bHold;
 	UpdateLeftHand(); UpdateWalkSpeed();
 	const int32 Ti = Generator->FindItem(TorchItem);
 	if (Ti >= 0 && Generator->Items[Ti].Kind == ERDItemKind::Light)
-		SetMessage(bHold ? FString::Printf(TEXT("You raise the %s: its light shows the traps and the unlooted chests near you"), *TorchItem.ToString().ToLower()) : FString::Printf(TEXT("You lower the %s"), *TorchItem.ToString().ToLower()));
+		SetMessage(bHold ? FString::Printf(TEXT("You raise the %s: its light shows %s near you"), *TorchItem.ToString().ToLower(), Generator->bAnkhChestsOnly15 ? TEXT("the unlooted chests") : TEXT("the traps and the unlooted chests"))
+		                 : FString::Printf(TEXT("You lower the %s"), *TorchItem.ToString().ToLower()));
 	else SetMessage(bHold ? FString(TEXT("You light the torch: it lights your way (your left hand is busy)")) : FString(TEXT("You put out the torch")));
 	Generator->PlaySoundAt(bHold ? FName(TEXT("Env.Torch")) : FName(TEXT("Player.Inventory")), GetOwner()->GetActorLocation());
 	return true;
@@ -218,7 +221,8 @@ void URDCombatComponent::GatherDroppable(TArray<FName>& Things, TArray<float>& W
 		if (bDeath && Generator->IsDungeonChainItem(N)) continue;
 		const int32 Cnt = GetItemCount(N) - (N == Keep ? 1 : 0);
 		const int32 Ix = Generator->FindItem(N);
-		const bool bKept = Ix >= 0 && (Generator->Items[Ix].Kind == ERDItemKind::Armour || Generator->Items[Ix].Kind == ERDItemKind::Shield);
+		// (the list of 2026-11-20: a burning light's time left too, so a trip, a save or a pile taken back keeps it (PR #97's review))
+		const bool bKept = Ix >= 0 && (Generator->Items[Ix].Kind == ERDItemKind::Armour || Generator->Items[Ix].Kind == ERDItemKind::Shield || IsBurningLight15(Ix));
 		const TArray<float>* Sp = Spares.Find(N);
 		for (int32 K = 0; K < Cnt; ++K)
 		{
@@ -254,6 +258,8 @@ void URDCombatComponent::TakeBack(const TArray<FName>& Things, const TArray<floa
 			// not wear it down again)
 			else { float& Cur = ArmourWear.FindOrAdd(N); Cur = FMath::Max(Cur, W); }
 		}
+		// (the list of 2026-11-20: a burning light's time left as it was (only the first of a stack carries the burning timer))
+		else if (IsBurningLight15(Ix) && Before == 0) ArmourWear.Add(N, W);
 	}
 	// (her own pile: the shield that was on her arm when she fell goes back on (a found one, or none if she wore none))
 	// (the third list, bKeepStartGear: her starting shield stayed on her arm; the one she wore when she fell goes back on in its place)

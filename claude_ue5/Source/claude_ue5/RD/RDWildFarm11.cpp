@@ -190,7 +190,7 @@ void ARDDungeonGenerator::OpenWildBox(ARDWildChunk* C, int32 Index)
 	for (const FName& G : Order) PlayerCombat->AddItem(G, N[G]);
 	LastFound = Order[0]; LastFoundList = Order; LastFoundTime = GetWorld()->GetTimeSeconds(); ItemsFound += Order.Num();
 	WildBoxThings += Got.Num();
-	PlaySoundAt(TEXT("Player.Loot"), D.At);
+	PlaySoundAt(LastLootSound15 = LootSound15(Got), D.At);          // (the list of 2026-11-20: a thud for gear)
 	UE_LOG(LogRDWildFarm11, Log, TEXT("RDWILDBOX %s (%lld): %s"), *D.Kind.ToString(), D.Key, *FString::JoinBy(Got, TEXT(", "), [](const FName& X) { return X.ToString(); }));
 }
 

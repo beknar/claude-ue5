@@ -123,6 +123,32 @@ void ARDSection::PlaceTraps()
 			UE_LOG(LogRDTraps, Log, TEXT("RDTRAP (%d,%d): a trap gauntlet in room %d, %d traps"), Coord.X, Coord.Y, RI, K);
 		}
 	}
+	// (the list of 2026-11-20 (item 12): blessed rune stones, after every other trap from a stream of their own, so the others keep
+	// their places and indices (SpentTraps): a share of the rooms, on a free tile off the lane no trap stands near)
+	const int32 BlessedDef = Generator->bBlessedStones15 ? Generator->Traps.IndexOfByPredicate([](const FRDTrapDef& D) { return D.Kind == ERDTrapKind::Blessed; }) : -1;
+	if (BlessedDef >= 0)
+	{
+		FRandomStream RB((int32)HashCombine((uint32)Seed ^ 0xB1E5u, 15u));
+		for (int32 RI = 0; RI < Rooms.Num(); ++RI)
+		{
+			const FRoom& Rm = Rooms[RI];
+			const float U = RB.FRand(); const int32 Pick = RB.RandRange(0, 1 << 20);
+			if (Rm.Kind == ERDRoomKind::Junction || RI == StartRoom || U >= Generator->BlessedShare15) continue;
+			TArray<FIntPoint> Free;
+			for (int32 X = Rm.Min.X + 1; X < Rm.Max.X - 1; ++X)
+				for (int32 Y = Rm.Min.Y + 1; Y < Rm.Max.Y - 1; ++Y)
+				{
+					const FIntPoint T(X, Y);
+					if (!IsWalkable(T) || Owner[Idx(T)] != RI || X == Rm.Lane.X || Y == Rm.Lane.Y) continue;
+					if (TrapList.ContainsByPredicate([&](const FTrapInst& O) { return FVector::Dist2D(O.At, TileWorld(T)) < 350.f; })) continue;
+					Free.Add(T);
+				}
+			if (Free.Num() == 0) continue;
+			const FIntPoint T = Free[Pick % Free.Num()];
+			FTrapInst Ti; Ti.Def = BlessedDef; Ti.At = TileWorld(T); Ti.Room = RI; Ti.Yaw = 90.f;          // (never on a lane: one way)
+			TrapList.Add(Ti);
+		}
+	}
 	for (int32 I = 0; I < TrapList.Num(); ++I)
 	{
 		if (const uint8* St = Generator->SpentTraps.Find(FIntVector(Coord.X, Coord.Y, I))) TrapList[I].State = *St;
@@ -145,7 +171,7 @@ void ARDSection::BuildTrapVisual(int32 I)
 	FTrapInst& T = TrapList[I];
 	const FRDTrapDef& D = Generator->Traps[T.Def];
 	// (what is seen of it: a plate, a rune, a skull; mounted at its place, turned across the way)
-	if (D.Mesh && !(D.Kind == ERDTrapKind::Cursed && T.State == 2))
+	if (D.Mesh && !((D.Kind == ERDTrapKind::Cursed || D.Kind == ERDTrapKind::Blessed) && T.State == 2))
 	{
 		UStaticMeshComponent* C = NewObject<UStaticMeshComponent>(this);
 		C->ComponentTags.Add(RDTrapTag);
@@ -200,11 +226,12 @@ bool ARDSection::FireTrap(int32 I)
 	if (D.Kind != ERDTrapKind::Ward) Generator->SpentTraps.Add(FIntVector(Coord.X, Coord.Y, I), 2);
 	const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
 	T.Goal = Her ? Her->GetActorLocation() : T.At;
-	++Generator->TrapsTriggered; Generator->LastTrap = D.Label;
+	// (a blessed stone is no trap to the counts or the message log: PR #97's review)
+	if (D.Kind != ERDTrapKind::Blessed) { ++Generator->TrapsTriggered; Generator->LastTrap = D.Label; }
 	if (D.TriggerFx) RDMSpawnFx(this, D.TriggerFx, T.At + FVector(0, 0, 10), FRotator(0, T.Yaw, 0), D.TriggerFxScale, nullptr, D.bMagic, true);
 	const FName Snd = D.SoundKey.IsNone() ? FName(D.bMagic ? TEXT("Player.Cast.Fire") : TEXT("Env.DoorOpen")) : FName(*FString::Printf(TEXT("Trap.%s.Trigger"), *D.SoundKey.ToString()));
 	Generator->PlaySoundAt(Generator->HasSound(Snd) ? Snd : FName(TEXT("Env.GenerateHit")), T.At + FVector(0, 0, 100));
-	if (URDCombatComponent* Pc = Generator->GetPlayerCombat()) Pc->ShowMessage(FString::Printf(TEXT("A trap: %s!"), *D.Label));
+	if (URDCombatComponent* Pc = Generator->GetPlayerCombat(); Pc && D.Kind != ERDTrapKind::Blessed) Pc->ShowMessage(FString::Printf(TEXT("A trap: %s!"), *D.Label));
 	UE_LOG(LogRDTraps, Log, TEXT("RDTRAP %s (%d) goes off in (%d,%d) at (%.0f, %.0f)"), *D.Name.ToString(), I, Coord.X, Coord.Y, T.At.X, T.At.Y);
 	return true;
 }
@@ -379,6 +406,28 @@ void ARDSection::TickTraps(float Dt, APawn* Her, URDCombatComponent* Pc)
 			{
 				if (Pc) { Pc->ApplyMonsterAbility(ERDMonsterAbility::Weaken, 3.f, 0.f); Pc->ShowMessage(FString::Printf(TEXT("The %s curses you: your blows are weaker"), *D.Label)); }
 				TrapStrike(I, T.At, D.Radius * 2.f, Share);
+				if (UStaticMeshComponent* M = T.Moving.Get()) M->SetVisibility(false);
+				T.Step = 1;
+			}
+			if (T.Time > 0.6f) SpendTrap(I, 2);
+			break;
+		case ERDTrapKind::Blessed:
+			// (the list of 2026-11-20 (item 12): it looks as the cursed stone does, and blesses her: one of the shrines' three blessings
+			// for a while, by a hash of the session and the stone (no stream drawn); no blow)
+			if (T.Step == 0)
+			{
+				if (Pc)
+				{
+					static const TCHAR* Names[3] = { TEXT("Blessing of might"), TEXT("Blessing of the bulwark"), TEXT("Blessing of swiftness") };
+					static const TCHAR* What[3] = { TEXT("your blows strike 25% harder"), TEXT("blows on you take 25% less"), TEXT("you move 20% faster") };
+					const int32 K = (int32)(HashCombine((uint32)Generator->SessionSeed ^ 0xB1E5u, GetTypeHash(FIntVector(Coord.X, Coord.Y, I))) % 3u);
+					const float Sec = FMath::Max(Generator->BlessedSeconds15, 1.f);
+					Pc->Bless(Names[K], K == 0 ? 0.25f : 0.f, K == 1 ? 0.25f : 0.f, K == 2 ? 0.2f : 0.f, Sec);
+					// (not its label: the label is the cursed stone's (it must look the same), and "the cursed rune stone blesses you" gave it away)
+					Pc->ShowMessage(FString::Printf(TEXT("The rune stone blesses you: %s, %s for %.0f s"), Names[K], What[K], Sec));
+					++Generator->BlessedTouched15;
+					Generator->PlaySoundAt(TEXT("Env.Generate"), T.At);
+				}
 				if (UStaticMeshComponent* M = T.Moving.Get()) M->SetVisibility(false);
 				T.Step = 1;
 			}

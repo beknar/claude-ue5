@@ -79,8 +79,8 @@ FString ARDDungeonGenerator::BossPortDescribe(const FVector& From) const
 {
 	if (BossPortNear(From) <= 0) return FString();
 	if (!CanBossPortToTown()) return TEXT("teleport back to the first room");
-	return BossPortChoice == 1 ? FString::Printf(TEXT("teleport to %s    [G] the first room"), *WayBackName())
-	                           : FString::Printf(TEXT("teleport back to the first room    [G] to %s"), *WayBackName());
+	return BossPortChoice == 1 ? FString::Printf(TEXT("teleport to %s    %s the first room"), *WayBackName(), *TripKeyName15())
+	                           : FString::Printf(TEXT("teleport back to the first room    %s to %s"), *TripKeyName15(), *WayBackName());
 }
 
 FString ARDDungeonGenerator::BossPortUse(const FVector& From)
@@ -231,7 +231,7 @@ FString ARDDungeonGenerator::ShelfSearch(const FVector& From)
 	TArray<FString> Names;
 	for (const FName& N : Got) if (FindItem(N) >= 0) { PlayerCombat->AddItem(N, 1); Names.Add(N.ToString()); }
 	if (Names.Num() == 0) PlayerCombat->ShowMessage(TEXT("You search the bookshelf: dusty books, nothing of use"));
-	else { PlayerCombat->ShowMessage(FString::Printf(TEXT("You search the bookshelf:  %s"), *FString::Join(Names, TEXT(", ")))); PlaySoundAt(TEXT("Player.Loot"), From); }
+	else { PlayerCombat->ShowMessage(FString::Printf(TEXT("You search the bookshelf:  %s"), *FString::Join(Names, TEXT(", ")))); PlaySoundAt(LastLootSound15 = LootSound15(Got), From); }
 	UE_LOG(LogRDList10b, Log, TEXT("RDSHELF (%d,%d) %d searched: %s"), S->Coord.X, S->Coord.Y, I, Names.Num() ? *FString::Join(Names, TEXT(", ")) : TEXT("nothing"));
 	return TEXT("shelf");
 }

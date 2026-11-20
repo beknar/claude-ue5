@@ -135,6 +135,7 @@ claude_ue5/SourceArt/mistward/audio_menu/
 claude_ue5/SourceArt/brokenspire/audio7/
 claude_ue5/SourceArt/brokenspire/audio_water/
 claude_ue5/SourceArt/wilderness/audio_storm/
+claude_ue5/SourceArt/list15/audio_items/
 
 # the FBX importer's unpacked textures (Tripo's, beside tripo_animals.py's FBX)
 *.fbm/

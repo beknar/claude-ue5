@@ -18,6 +18,11 @@ Parts (args):
                   on every map of the game the Bookshelf, Bookshelf2 and Pew pieces turned round as 770 writes them now (their
                   Adjust had put the cabinet's back panel and the pew's backrest to the front) and the leaves, their hinges and
                   bShelfDoors15 set.
+  items           the fifth phase (items 10, 12, 15, 16, 17, 19; SourceArt/list15/items15.json): each scroll's picture its spell's;
+                  the blessed rune stone (the cursed one's look and label, weight 0) and bBlessedStones15; Player.Loot.Gear (convert
+                  first: rdc_sound_prep.py SourceArt/list15/items15.json SourceArt/list15/audio_items) and bGearThud15; the ankh's
+                  chests only; the torch's and the ankh's burn time and bLightBurn15; the teleporters' R3 (bPadTripButton15). Run after
+                  910, 918 and 928, which write the items and spells anew.
   dungeon         the fourth phase (items 5, 6, 8, 11): the great hall's oven (bStartOven15), the stations' marks (bStationMarks15),
                   the big map's zoom (bMapZoom15) on every map of the game (the pews by 770's Pew and the shelves part); each
                   dungeon map's start section built again (its oven and its shelves saved).
@@ -33,7 +38,7 @@ REPORT = []
 MAPS = "/Game/RandomDungeon/Maps/"
 # (the maps of the game the Summoner plays: martial_arts is the Martial Artist's alone)
 GAME_MAPS = ("brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress")
-PARTS = ("allies", "summons", "hands", "quick", "shelves", "dungeon")
+PARTS = ("allies", "summons", "hands", "quick", "shelves", "dungeon", "items")
 args = [a for a in sys.argv[1:] if a in PARTS] or [p for p in PARTS if p != "shelves"]          # (shelves needs its folder: named only)
 SA = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "SourceArt")
 DUNGEONS = ("war_engine", "sewers", "kethrys_spire", "heaven_fortress")
@@ -182,6 +187,67 @@ def dungeon(g, m):
     return {"oven_piece": has_oven, "dungeon_ovens": g.get_editor_property("dungeon_ovens"), "start_built": not town}
 
 
+I15 = None
+
+
+def items_sounds():
+    """Player.Loot.Gear's files (rdc_sound_prep.py's conversion of SourceArt/list15/items15.json) imported once"""
+    aud = os.path.join(SA, "list15", "audio_items"); idx = os.path.join(aud, "index.json")
+    assert os.path.exists(idx), "run rdc_sound_prep.py SourceArt/list15/items15.json SourceArt/list15/audio_items first"
+    I = json.load(open(idx, encoding="utf-8")); dest = "/Game/RandomDungeon/Audio/List15"
+    if not eal.does_directory_exist(dest): eal.make_directory(dest)
+    at = unreal.AssetToolsHelpers.get_asset_tools(); made = {}
+    for key, spec in I15["sets"].items():
+        waves = []
+        for f in I.get(key, {}).get("files", []):
+            t = unreal.AssetImportTask(); t.set_editor_property("filename", os.path.join(aud, f)); t.set_editor_property("destination_path", dest)
+            t.set_editor_property("destination_name", "SW_" + f[:-4]); t.set_editor_property("replace_existing", True); t.set_editor_property("automated", True)
+            at.import_asset_tasks([t])
+            w = unreal.load_asset(f"{dest}/SW_{f[:-4]}")
+            if w: w.set_editor_property("looping", False); eal.save_loaded_asset(w, False); waves.append(w)
+        assert waves, f"934 items: no files for {key}"
+        made[key] = (waves, spec)
+    return made
+
+
+def items(g, m, made):
+    out = {}
+    # (item 15: the gear's thud)
+    snd = g.get_editor_property("sounds")
+    for key, (waves, spec) in made.items():
+        s = unreal.RDSoundSet(); s.set_editor_property("sounds", waves)
+        s.set_editor_property("volume", float(spec.get("volume", 1.0))); s.set_editor_property("pitch_variation", float(spec.get("pitch_var", 0.05)))
+        s.set_editor_property("b2d", bool(spec.get("flat", False)))
+        snd[unreal.Name(key)] = s
+    g.set_editor_property("sounds", snd)
+    # (item 10: each scroll's picture its spell's)
+    sp = {str(s.name): str(s.icon) for s in g.get_editor_property("spells")}
+    its = list(g.get_editor_property("items")); n_icon = 0; no_icon = []
+    for i, it in enumerate(its):
+        if it.kind == unreal.RDItemKind.SCROLL:
+            ic = sp.get(str(it.spell), "None")
+            if ic and ic != "None": it.set_editor_property("icon", unreal.Name(ic)); its[i] = it; n_icon += 1
+            else: no_icon.append(str(it.name))
+        # (item 17: the torch's and the ankh's burn time)
+        k = str(it.kind).split(".")[-1].split(":")[0].strip("<> ").title()
+        if k in ("Torch", "Light") and k in I15["light"]: it.set_editor_property("durability", float(I15["light"][k])); its[i] = it
+    g.set_editor_property("items", its)
+    out["scroll_icons"] = n_icon; out["scrolls_without_a_spell_icon"] = no_icon
+    # (item 12: the blessed stone, the cursed one's look and label, weight 0 (never drawn with the others))
+    tr = list(g.get_editor_property("traps"))
+    cur = next((t for t in tr if t.kind == unreal.RDTrapKind.CURSED), None)
+    tr = [t for t in tr if t.kind != unreal.RDTrapKind.BLESSED]
+    if cur:
+        b = unreal.RDTrapDef(); b.import_text(cur.export_text()); b.set_editor_property("kind", unreal.RDTrapKind.BLESSED); b.set_editor_property("weight", 0.0)
+        tr.append(b)
+    g.set_editor_property("traps", tr)
+    sets = {"blessed_stones15": bool(cur), "gear_thud15": True, "ankh_chests_only15": True, "light_burn15": True, "pad_trip_button15": True}
+    for k_, v_ in sets.items(): g.set_editor_property(k_, v_)
+    g.set_editor_property("blessed_share15", float(I15["blessed"]["share"])); g.set_editor_property("blessed_seconds15", float(I15["blessed"]["seconds"]))
+    out["blessed_def"] = bool(cur); out["gear_set"] = unreal.Name("Player.Loot.Gear") in g.get_editor_property("sounds")
+    return out
+
+
 if "allies" in args: each(GAME_MAPS, allies, "allies")
 if "summons" in args:
     each(GAME_MAPS, summons, "summons")
@@ -193,6 +259,10 @@ if "shelves" in args:
     assert work, "934 shelves <work dir>: an absolute folder for the cabinet's export and the leaves"
     shelves_make(work)
     each(GAME_MAPS, shelves, "shelves")
+if "items" in args:
+    I15 = json.load(open(os.path.join(SA, "list15", "items15.json"), encoding="utf-8"))
+    made = items_sounds()
+    each(tuple(I15["maps"]), lambda g, m: items(g, m, made), "items")
 # (after shelves: the start sections built again with the turned shelves and their doors)
 if "dungeon" in args: each(GAME_MAPS, dungeon, "dungeon")
 print("\n".join(REPORT))

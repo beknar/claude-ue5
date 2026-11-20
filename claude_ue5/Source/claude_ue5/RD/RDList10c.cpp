@@ -224,7 +224,8 @@ void ARDDungeonGenerator::TickAnkh(float Dt)
 			ARDSection* S = GetSection(Here + FIntPoint(Dx, Dy));
 			if (!S) continue;
 			// (the traps within its reach: seen and outlined, as the Rogue sees them; read by index, OutlineTrap may add to the list)
-			for (int32 I = 0; I < S->TrapList.Num(); ++I)
+			// (the list of 2026-11-20 (item 16): it lights the way and the chests and trunks not looted, no longer the traps)
+			for (int32 I = 0; I < S->TrapList.Num() && !bAnkhChestsOnly15; ++I)
 			{
 				if (S->TrapList[I].bSeen || S->TrapList[I].State != 0) continue;
 				const FVector At = S->TrapList[I].At;

@@ -1,0 +1,12 @@
+{
+  "comment": "The list of 2026-11-20's fifth phase (934 items). sets: rdc_sound_prep.py's manifest for Player.Loot.Gear, what she takes that is not a potion (item 15: 'some kind of thump or thud'). Chosen among the Quest Game pack's pick-ups and drops by measure (scratch thud_measure.py: the length over a tenth of the peak, where the peak falls after the onset, the spectral centroid of the first 0.25 s and its share under 300 Hz): Heavy_UI_Drop_Slide_3 (0.20 s, its peak 12 ms in, centroid 2.1 kHz, 56 % under 300 Hz), Book_Pick_Up_1_Heavy (0.15 s, 1.4 kHz, 62 %), Heavy_UI_Drop_Slide_2 (0.29 s, 2.8 kHz, 39 %); the bottle touch the potions keep (Player.Loot) is 1.6 to 2.9 kHz with 18 to 35 %. Converted into SourceArt/list15/audio_items (ignored), imported by 934 items. light: the burn time (seconds, the items' Durability) of the torch and the ankh (item 17). blessed: the blessed rune stones' share of rooms and their blessing's seconds (item 12).",
+  "maps": ["brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress", "martial_arts"],
+  "root": "I:/game assets",
+  "packs": {"quest": "humble bundle - 2d game creation mega bundle/gdm-quest-game/Quest_Game_16bit/Quest_Game_16bit"},
+  "sets": {
+    "Player.Loot.Gear": {"from": [["quest", "Doors and Chests/Quest_Game_Heavy_UI_Drop_Slide_3\\.wav$"], ["quest", "Game Actions/Quest_Game_Book_Pick_Up_1_Heavy\\.wav$"], ["quest", "Doors and Chests/Quest_Game_Heavy_UI_Drop_Slide_2\\.wav$"]],
+                         "max": 3, "max_len": 1.0, "level": -20, "volume": 0.8, "pitch_var": 0.05, "flat": true}
+  },
+  "light": {"Torch": 600, "Light": 900},
+  "blessed": {"share": 0.03, "seconds": 60}
+}
