@@ -614,7 +614,8 @@ bool ARDDungeonGenerator::TakeLootNear(const FVector& From, float Reach)
 	// (the sixth phase: a wild place's stone taken for good)
 	if (Best->WildKey != -1) if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->WildKilled.AddUnique(Best->WildKey);
 	LootPiles.Remove(Best);
-	PlaySoundAt(TEXT("Player.Loot"), Best->GetActorLocation());
+	LastLootSound15 = LootSound15(Best->Things);          // (the list of 2026-11-20: gear's thud unless all are potions)
+	PlaySoundAt(LastLootSound15, Best->GetActorLocation());
 	Best->Destroy();
 	return true;
 }
@@ -691,7 +692,7 @@ FString ARDDungeonGenerator::DescribePadNear(const FVector& From) const
 	const TArray<int32> D = GetPadDestinations();
 	if (D.Num() == 0) return TEXT("teleporter: a tier's teleport ring takes you on");
 	const int32 Ch = D.Contains(PadChoice) ? PadChoice : D.Last();
-	return D.Num() > 1 ? FString::Printf(TEXT("teleport to tier %d    [G] another tier"), Ch) : FString::Printf(TEXT("teleport to tier %d"), Ch);
+	return D.Num() > 1 ? FString::Printf(TEXT("teleport to tier %d    %s another tier"), Ch, *TripKeyName15()) : FString::Printf(TEXT("teleport to tier %d"), Ch);
 }
 
 FString ARDDungeonGenerator::UsePadNear(const FVector& From)

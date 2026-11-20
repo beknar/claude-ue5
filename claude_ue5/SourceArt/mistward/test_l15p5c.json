@@ -1,0 +1,42 @@
+{
+ "tag": "l15p5c",
+ "plan": [
+  "runes15"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "runes15",
+   "ok": true,
+   "defs_same": true,
+   "same_mesh_label": true,
+   "blessed": 13,
+   "cursed": 14,
+   "sets": 8,
+   "others_same": true,
+   "others": 187,
+   "blessed_after": 13,
+   "touch_blessed": {
+    "hp_lost": 0.0,
+    "blessing": "Blessing of the bulwark",
+    "weak": 0.0,
+    "message": "The rune stone blesses you: Blessing of the bulwark, blows on you take 25% less for 60 s",
+    "touched": 1
+   },
+   "touch_cursed": {
+    "hp_lost": 7.4,
+    "blessing": "Blessing of the bulwark",
+    "weak": 0.45,
+    "message": "The cursed rune stone curses you: your blows are weaker",
+    "touched": 0
+   }
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_l15p5c_runes15_blessed.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

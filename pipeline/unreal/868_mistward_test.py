@@ -6686,7 +6686,200 @@ def step_zoom15():
     step_result("zoom15", ok, **res)
 
 
-STEPS = {"oven15": step_oven15, "shelf15": step_shelf15, "chapel15": step_chapel15, "zoom15": step_zoom15, "summon15": step_summon15, "unwield15": step_unwield15, "quick15": step_quick15, "allies15": step_allies15, "arena15": step_arena15, "recipes14": step_recipes14, "tables14": step_tables14, "block14": step_block14, "horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
+def step_icons15():
+    """the list of 2026-11-20 (item 10): every scroll's picture is its spell's (the quick bar's), and the interface has it; a picture of
+    the inventory's scrolls tab"""
+    c = yield from restart("Mage"); g = G["gen"]; quiet(True)
+    sp = {str(s.name): str(s.icon) for s in g.get_editor_property("spells")}
+    scr = [i for i in g.get_editor_property("items") if i.kind == unreal.RDItemKind.SCROLL]
+    bad = [[str(i.name), str(i.icon), sp.get(str(i.spell))] for i in scr if str(i.icon) != sp.get(str(i.spell))]
+    art = None          # (the interface's art by name is the quick bar's, already drawn: the picture below shows it)
+    for i in scr[:6]: c.add_item(i.name, 1)
+    c.set_inventory_open(True); yield from rwait(0.4)
+    for t_ in range(6):
+        if any(str(l).startswith("scroll|") for l in c.get_inventory_lines()): break
+        c.set_inventory_tab(t_); yield from rwait(0.2)
+    shot("icons15_scrolls", "1280x720"); yield from rwait(0.6)
+    c.set_inventory_open(False); quiet(False)
+    res = {"scrolls": len(scr), "not_the_spells": bad, "without_art": art}
+    step_result("icons15", len(scr) > 0 and not bad and not art, **res)
+
+def step_runes15():
+    """the list of 2026-11-20 (item 12): blessed rune stones in the sets made (bBlessedStones15), the cursed stone's mesh, its look and
+    its label; touched, one blesses her (her blessing named, no hit points lost, the message) and a cursed one still curses; with the
+    switch off the same sets made again hold the same other traps at the same places"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    sets = yield from tier2_sets()
+    defs = list(g.get_editor_property("traps"))
+    cd = next((d for d in defs if d.kind == unreal.RDTrapKind.CURSED), None); bd = next((d for d in defs if d.kind == unreal.RDTrapKind.BLESSED), None)
+    res = {"defs_same": bool(cd and bd) and cd.export_text().replace("Kind=Cursed", "").replace("Weight=", "W=").split("W=")[0] == bd.export_text().replace("Kind=Blessed", "").replace("Weight=", "W=").split("W=")[0]}
+    res["same_mesh_label"] = bool(cd and bd) and cd.mesh == bd.mesh and str(cd.label) == str(bd.label)
+    # (a trap line names its kind by its number: ERDTrapKind's Cursed 8, Blessed 13)
+    KC, KB = str(int(unreal.RDTrapKind.CURSED.value)), str(int(unreal.RDTrapKind.BLESSED.value))
+    def others(): return sorted((t["s"].x, t["s"].y, t["i"], t["name"], round(t["at"].x), round(t["at"].y)) for t in trap_lines() if t["kind"] != KB)
+    T = trap_lines(); bl = [t for t in T if t["kind"] == KB and t["state"] == 0]; cu = [t for t in T if t["kind"] == KC and t["state"] == 0]
+    res["blessed"] = len(bl); res["cursed"] = len(cu); res["sets"] = len(sets)
+    # (the others' places with the switch on, then the same sets made again with it off)
+    on = others()
+    g.set_editor_property("blessed_stones15", False)
+    for s_ in sets: g.reload_section(s_)
+    for s_ in sets:
+        t0 = time.time()
+        while not g.is_section_generated(s_) and time.time() - t0 < 30: yield
+        yield from built(s_)
+    off = others(); res["others_same"] = on == off; res["others"] = len(on)
+    g.set_editor_property("blessed_stones15", True)
+    for s_ in sets: g.reload_section(s_)
+    for s_ in sets:
+        t0 = time.time()
+        while not g.is_section_generated(s_) and time.time() - t0 < 30: yield
+        yield from built(s_)
+    T = trap_lines(); bl = [t for t in T if t["kind"] == KB and t["state"] == 0]; cu = [t for t in T if t["kind"] == KC and t["state"] == 0]
+    res["blessed_after"] = len(bl)
+    def touch(t):
+        put(V(t["at"].x + 300, t["at"].y, t["at"].z), 180.0); yield from wait(0.5)
+        c.set_health(c.get_max_health()); h0 = c.get_health(); n0 = g.blessed_touched15
+        put(t["at"], 180.0); yield from wait(1.2)
+        return {"hp_lost": round(h0 - c.get_health(), 1), "blessing": str(c.get_blessing()), "weak": round(c.get_weakness(), 2), "message": str(c.message), "touched": g.blessed_touched15 - n0}
+    res["touch_blessed"] = (yield from touch(bl[0])) if bl else None
+    if bl: G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-35, yaw=0)); shot("runes15_blessed", "1280x720"); yield from rwait(0.6)
+    res["touch_cursed"] = (yield from touch(cu[0])) if cu else None
+    quiet(False)
+    tb, tc = res["touch_blessed"] or {}, res["touch_cursed"] or {}
+    ok = (res["same_mesh_label"] and res["blessed"] > 0 and res["others_same"] and tb.get("touched") == 1 and "Blessing" in tb.get("blessing", "") and tb.get("hp_lost", 9) <= 0.5
+          and "blesses you" in tb.get("message", "") and "cursed" not in tb.get("message", "").lower() and (not cu or tc.get("weak", 0) > 0))
+    step_result("runes15", ok, **res)
+
+def step_thud15():
+    """the list of 2026-11-20 (item 15): a pile of a sword taken plays the gear's set (Player.Loot.Gear), a pile of potions the bottle's
+    (Player.Loot); each recorded with only its set sounding (every other set silent) and with none: the taking's sound is in the
+    recording (its loudest tenth-seconds over the silent run's); the recordings kept for their measure offline"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    ctr = g.get_start_room_center(); put(V(ctr.x + 300, ctr.y + 300, ctr.z), 0.0); yield from wait(0.4)
+    lms = unreal.find_object(None, "/Script/UnrealEd.Default__LevelEditorMiscSettings"); bg0 = lms.get_editor_property("bAllowBackgroundAudio")
+    lms.set_editor_property("bAllowBackgroundAudio", True); unreal.RDDungeonGenerator.set_unfocused_volume(1.0)
+    mv0 = g.get_editor_property("music_volume"); g.set_editor_property("music_volume", 0.0)
+    out = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "Thud15", TAG); os.makedirs(out, exist_ok=True)
+    vols = {str(k_): v_.volume for k_, v_ in g.get_editor_property("sounds").items()}
+    def only(key):
+        snd = g.get_editor_property("sounds")
+        for k_ in list(snd.keys()):
+            st = snd[k_]; st.volume = vols[str(k_)] if str(k_) == key else 0.0; snd[k_] = st
+        g.set_editor_property("sounds", snd)
+    sword = next((str(w.item) for w in g.get_editor_property("weapons") if str(w.item) != "None"), None) or next(str(i.name) for i in g.get_editor_property("items") if i.kind == unreal.RDItemKind.WEAPON)
+    potion = next(str(i.name) for i in g.get_editor_property("items") if i.kind == unreal.RDItemKind.HEALING)
+    res = {"sword": sword, "potion": potion}
+    def take(name, things, key):
+        only(key); here = G["pawn"].get_actor_location()
+        g.debug_drop_loot15(V(here.x + 120, here.y, here.z - 80), things); yield from wait(1.5)
+        g.start_recording_output(2.5); yield from rwait(0.6)
+        f = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); played = str(g.get_editor_property("last_loot_sound15"))
+        yield from rwait(1.6); g.stop_recording_output(out, name); yield from rwait(0.8)
+        return {"f": f, "played": played, "wav": name + ".wav"}
+    try:
+        res["sword_on"] = yield from take("sword_on", [sword], "Player.Loot.Gear")
+        res["sword_off"] = yield from take("sword_off", [sword], "None")
+        res["potion_on"] = yield from take("potion_on", [potion], "Player.Loot")
+        res["potion_off"] = yield from take("potion_off", [potion], "None")
+    finally:
+        only("__all__")
+        snd = g.get_editor_property("sounds")
+        for k_ in list(snd.keys()): st = snd[k_]; st.volume = vols[str(k_)]; snd[k_] = st
+        g.set_editor_property("sounds", snd)
+        g.set_editor_property("music_volume", mv0); lms.set_editor_property("bAllowBackgroundAudio", bg0); quiet(False)
+    res["out"] = os.path.basename(out)
+    ok = res["sword_on"]["played"] == "Player.Loot.Gear" and res["potion_on"]["played"] == "Player.Loot"
+    step_result("thud15", ok, **res)
+
+def step_ankh15():
+    """the list of 2026-11-20 (item 16): the ankh raised in a set with traps and chests near: within its reach the chests and trunks not
+    looted are marked (AnkhCachesShown up), no trap is shown (AnkhTrapsShown and the traps' seen flags unchanged)"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    sets = yield from tier2_sets()
+    ank = str(g.get_ankh_item()); c.add_item(ank, 1)
+    T = [t for t in trap_lines() if t["state"] == 0 and t["seen"] == 0]
+    res = {"ankh": ank, "traps": len(T)}
+    best = None
+    for t in T:
+        S_ = g.get_section(t["s"])
+        if not S_: continue
+        near = [S_.get_container_location(i) for i in range(S_.get_num_containers()) if S_.get_container_kind(i) in ("chest", "trunk") and not S_.is_container_looted(i) and dist2(S_.get_container_location(i), t["at"]) < 700]
+        if near: best = (t, near); break
+    if not best: quiet(False); step_result("ankh15", False, error="no trap with a chest near", **res); return
+    t, near = best
+    put(V(t["at"].x + 250, t["at"].y, t["at"].z), 0.0); yield from wait(0.4)
+    tr0, ca0 = g.ankh_traps_shown, g.ankh_caches_shown
+    seen0 = sum(x["seen"] for x in trap_lines())
+    res["raised"] = c.use_item(unreal.Name(ank)); yield from wait(1.5)
+    res["traps_shown"] = g.ankh_traps_shown - tr0; res["caches_shown"] = g.ankh_caches_shown - ca0
+    res["seen_after"] = sum(x["seen"] for x in trap_lines()) - seen0
+    c.use_item(unreal.Name(ank)); quiet(False)
+    ok = res["raised"] and res["caches_shown"] >= 1 and res["traps_shown"] == 0 and res["seen_after"] == 0
+    step_result("ankh15", ok, **res)
+
+def step_light15():
+    """the list of 2026-11-20 (item 17): the torch held lit 30 s burns 30 s off its time (the inventory's detail says so); burned to the
+    end it goes out (her light down) and will not light; a repair item restores it; the ankh the same"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    items = {i.kind: i for i in g.get_editor_property("items")}
+    torch = next(str(i.name) for i in g.get_editor_property("items") if i.kind == unreal.RDItemKind.TORCH)
+    ank = str(g.get_ankh_item())
+    rep = next(str(i.name) for i in g.get_editor_property("items") if i.kind == unreal.RDItemKind.REPAIR)
+    res = {}
+    for name in (torch, ank):
+        c.add_item(name, 1); c.add_item(rep, 2)
+        full = c.get_light_left15(name)
+        r = {"full": round(full, 1)}
+        c.use_item(unreal.Name(name)); yield from wait(0.3); t0 = now()
+        r["lit"] = c.is_torch_held()
+        yield from wait(30.0)
+        r["after_30s"] = round(c.get_light_left15(name), 1); r["burned"] = round(full - c.get_light_left15(name), 1)
+        # (the burn's end: its time left set to 1 s, then 2 s held)
+        c.set_light_left15(name, 1.0); yield from wait(2.0)
+        r["out_after_end"] = not c.is_torch_held(); r["left_at_end"] = round(c.get_light_left15(name), 2); r["message_end"] = str(c.message)
+        r["relit"] = c.use_item(unreal.Name(name)); yield from wait(0.2); r["lit_when_burned"] = c.is_torch_held()
+        # (a repair item: the repair list names it, and mends it)
+        c.use_item(unreal.Name(rep)); yield from rwait(0.2)
+        lines = [str(l) for l in c.get_repair_lines()]
+        li = next((k for k, l in enumerate(lines) if ("|" + name + "|") in l), None)
+        r["in_repair_list"] = li is not None
+        if li is not None: r["repaired"] = c.repair_entry(li)
+        c.cancel_repair()
+        r["after_repair"] = round(c.get_light_left15(name), 1)
+        res[name] = r
+        if c.is_torch_held(): c.use_item(unreal.Name(name))
+        yield from wait(0.3)
+    quiet(False)
+    ok = all(abs(r["burned"] - 30.0) < 2.0 and r["lit"] and r["out_after_end"] and r["left_at_end"] == 0 and not r["lit_when_burned"] and r["in_repair_list"] and r.get("repaired") and r["after_repair"] > 0 for r in res.values())
+    step_result("light15", ok, **res)
+
+def step_trip15():
+    """the list of 2026-11-20 (item 19): at the great hall's teleporter with two tiers to choose, the pad's right stick pressed (R3) turns its
+    choice as G does, and the prompt names R3 while the pad is in use, G with the keyboard"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    # (tier 2's sets made, tier 3 opened and one of its sets made: their teleporters with them)
+    yield from tier2_sets(); g.debug_open_tiers(3, False); yield from wait(0.5)
+    for s3 in (I2(2, 0), I2(-2, 0), I2(0, 2)):
+        if 3 in {int(k) for k in g.pads.keys()}: break
+        if not g.is_section_generated(s3): g.generate_section_now(s3); yield from built(s3)
+    for t_ in (2, 3):
+        rg = next((str(i.name) for i in items_of(unreal.RDItemKind.TELEPORT) if i.teleport_tier == t_), None)
+        if rg: c.add_item(rg, 1)
+    pads = {int(k): v for k, v in g.pads.items()}
+    res = {"pads": sorted(pads)}
+    if 1 not in pads: quiet(False); step_result("trip15", False, **res); return
+    put(pads[1], 0.0); yield from wait(0.6)
+    res["destinations"] = list(g.get_pad_destinations())
+    here = G["pawn"].get_actor_location()
+    yield from press("G"); yield from rwait(0.2); res["says_keyboard"] = str(g.describe_nearest(here, 260.0))
+    yield from press("Gamepad_RightThumbstick"); yield from rwait(0.3); res["says_pad"] = str(g.describe_nearest(here, 260.0))
+    yield from press("Gamepad_RightThumbstick"); yield from rwait(0.3); res["says_pad2"] = str(g.describe_nearest(here, 260.0))
+    quiet(False)
+    ok = (len(res["destinations"]) >= 2 and "[G]" in res["says_keyboard"] and "[R3]" in res["says_pad"] and res["says_pad"] != res["says_pad2"])
+    step_result("trip15", ok, **res)
+
+
+STEPS = {"icons15": step_icons15, "runes15": step_runes15, "thud15": step_thud15, "ankh15": step_ankh15, "light15": step_light15, "trip15": step_trip15, "oven15": step_oven15, "shelf15": step_shelf15, "chapel15": step_chapel15, "zoom15": step_zoom15, "summon15": step_summon15, "unwield15": step_unwield15, "quick15": step_quick15, "allies15": step_allies15, "arena15": step_arena15, "recipes14": step_recipes14, "tables14": step_tables14, "block14": step_block14, "horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
          "spells11_spells": lambda: step_spells11(("spells",)), "spells11_curses": lambda: step_spells11(("curses",)), "spells11_slashes": lambda: step_spells11(("slashes",)), "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
          "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "menulook": step_menulook, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,

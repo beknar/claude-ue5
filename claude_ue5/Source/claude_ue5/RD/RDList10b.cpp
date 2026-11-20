@@ -79,8 +79,8 @@ FString ARDDungeonGenerator::BossPortDescribe(const FVector& From) const
 {
 	if (BossPortNear(From) <= 0) return FString();
 	if (!CanBossPortToTown()) return TEXT("teleport back to the first room");
-	return BossPortChoice == 1 ? FString::Printf(TEXT("teleport to %s    [G] the first room"), *WayBackName())
-	                           : FString::Printf(TEXT("teleport back to the first room    [G] to %s"), *WayBackName());
+	return BossPortChoice == 1 ? FString::Printf(TEXT("teleport to %s    %s the first room"), *WayBackName(), *TripKeyName15())
+	                           : FString::Printf(TEXT("teleport back to the first room    %s to %s"), *TripKeyName15(), *WayBackName());
 }
 
 FString ARDDungeonGenerator::BossPortUse(const FVector& From)

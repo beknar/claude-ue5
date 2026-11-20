@@ -1,0 +1,562 @@
+{
+ "tag": "l15p5a",
+ "plan": [
+  "icons15",
+  "runes15",
+  "thud15",
+  "ankh15",
+  "light15",
+  "trip15",
+  "traps"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "icons15",
+   "ok": true,
+   "scrolls": 36,
+   "not_the_spells": [],
+   "without_art": null
+  },
+  {
+   "step": "runes15",
+   "ok": false,
+   "defs_same": true,
+   "same_mesh_label": true,
+   "blessed": 0,
+   "cursed": 0,
+   "sets": 8,
+   "others_same": false,
+   "others": 272,
+   "touch_blessed": null,
+   "touch_cursed": null
+  },
+  {
+   "step": "thud15",
+   "ok": true,
+   "sword": "Viking Shortsword",
+   "potion": "Small Healing Potion",
+   "sword_on": {
+    "f": "loot",
+    "played": "Player.Loot.Gear",
+    "wav": "sword_on.wav"
+   },
+   "sword_off": {
+    "f": "loot",
+    "played": "Player.Loot.Gear",
+    "wav": "sword_off.wav"
+   },
+   "potion_on": {
+    "f": "loot",
+    "played": "Player.Loot",
+    "wav": "potion_on.wav"
+   },
+   "potion_off": {
+    "f": "loot",
+    "played": "Player.Loot",
+    "wav": "potion_off.wav"
+   },
+   "out": "l15p5a"
+  },
+  {
+   "step": "ankh15",
+   "ok": true,
+   "ankh": "Revealing Ankh",
+   "traps": 272,
+   "raised": true,
+   "traps_shown": 0,
+   "caches_shown": 9,
+   "seen_after": 0
+  },
+  {
+   "step": "light15",
+   "ok": true,
+   "Torch": {
+    "full": 600.0,
+    "lit": true,
+    "after_30s": 569.7,
+    "burned": 30.3,
+    "out_after_end": true,
+    "left_at_end": 0.0,
+    "message_end": "The torch has burned out: a repair item restores it",
+    "relit": false,
+    "lit_when_burned": false,
+    "in_repair_list": true,
+    "repaired": true,
+    "after_repair": 600.0
+   },
+   "Revealing Ankh": {
+    "full": 900.0,
+    "lit": true,
+    "after_30s": 869.7,
+    "burned": 30.3,
+    "out_after_end": true,
+    "left_at_end": 0.0,
+    "message_end": "The revealing ankh has burned out: a repair item restores it",
+    "relit": false,
+    "lit_when_burned": false,
+    "in_repair_list": true,
+    "repaired": true,
+    "after_repair": 900.0
+   }
+  },
+  {
+   "step": "trip15",
+   "ok": false,
+   "pads": [
+    1
+   ],
+   "destinations": [],
+   "says_keyboard": "teleporter: a tier's teleport ring takes you on",
+   "says_pad": "teleporter: a tier's teleport ring takes you on",
+   "says_pad2": "teleporter: a tier's teleport ring takes you on"
+  },
+  {
+   "step": "traps",
+   "ok": true,
+   "traps": 116,
+   "kinds_present": [
+    "Chain",
+    "Crusher",
+    "Cursed",
+    "Darts",
+    "Deadfall",
+    "Emanation",
+    "Glyph",
+    "Lingering",
+    "Pit",
+    "Snare",
+    "Spring",
+    "Teleport",
+    "Ward"
+   ],
+   "by_kind": {
+    "Pit": {
+     "present": true,
+     "kind": "0",
+     "hp_lost": 26.6,
+     "held": true,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.79,
+       26.6
+      ]
+     ],
+     "held_at": 0.79,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 296,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: pit trap!",
+     "fell_through": []
+    },
+    "Darts": {
+     "present": true,
+     "kind": "1",
+     "hp_lost": 29.9,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.15,
+       10.0
+      ],
+      [
+       0.45,
+       10.0
+      ],
+      [
+       0.75,
+       10.0
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 0,
+     "ambush": {},
+     "hits": 3,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: dart trap!",
+     "fell_through": []
+    },
+    "Deadfall": {
+     "present": true,
+     "kind": "2",
+     "hp_lost": 30.4,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.93,
+       15.2
+      ],
+      [
+       1.18,
+       15.2
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 1291,
+     "ambush": {},
+     "hits": 2,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: deadfall!",
+     "fell_through": []
+    },
+    "Crusher": {
+     "present": true,
+     "kind": "3",
+     "hp_lost": 57.0,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       1.36,
+       57.0
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 604,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: crusher!",
+     "fell_through": []
+    },
+    "Snare": {
+     "present": true,
+     "kind": "4",
+     "hp_lost": 9.5,
+     "held": true,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.11,
+       9.5
+      ]
+     ],
+     "held_at": 0.11,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 1,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: snare!",
+     "fell_through": []
+    },
+    "Glyph": {
+     "present": true,
+     "kind": "5",
+     "hp_lost": 41.8,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.63,
+       41.8
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 116,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: glyph of fire!",
+     "fell_through": []
+    },
+    "Ward": {
+     "present": true,
+     "kind": "6",
+     "hp_lost": 22.8,
+     "held": false,
+     "moved_m": 1.6,
+     "farthest_m": 1.6,
+     "peak_speed": 621,
+     "drops": [
+      [
+       0.1,
+       22.8
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 92,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 0,
+     "says": "A trap: warding barrier!",
+     "fell_through": []
+    },
+    "Emanation": {
+     "present": true,
+     "kind": "7",
+     "hp_lost": 91.2,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.1,
+       11.4
+      ],
+      [
+       0.6,
+       11.4
+      ],
+      [
+       1.12,
+       11.4
+      ],
+      [
+       1.66,
+       11.4
+      ],
+      [
+       2.21,
+       11.4
+      ],
+      [
+       2.73,
+       11.4
+      ],
+      [
+       3.24,
+       11.4
+      ],
+      [
+       3.76,
+       11.4
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.4,
+     "particles": 20,
+     "ambush": {},
+     "hits": 8,
+     "triggered": 1,
+     "state": 1,
+     "says": "You are slowed",
+     "fell_through": []
+    },
+    "Cursed": {
+     "present": true,
+     "kind": "8",
+     "hp_lost": 11.4,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.17,
+       11.4
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.45,
+     "slowness": 0.0,
+     "particles": 53,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "The cursed rune stone curses you: your blows are weaker",
+     "fell_through": []
+    },
+    "Chain": {
+     "present": true,
+     "kind": "9",
+     "hp_lost": 68.4,
+     "held": true,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       1.77,
+       30.4
+      ],
+      [
+       1.84,
+       15.2
+      ],
+      [
+       2.11,
+       22.8
+      ]
+     ],
+     "held_at": 0.13,
+     "weakness": 0.45,
+     "slowness": 0.0,
+     "particles": 390,
+     "ambush": {},
+     "hits": 4,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: chain of traps!",
+     "fell_through": []
+    },
+    "Lingering": {
+     "present": true,
+     "kind": "10",
+     "hp_lost": 106.0,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.16,
+       23.9
+      ],
+      [
+       1.46,
+       17.1
+      ],
+      [
+       3.65,
+       13.7
+      ],
+      [
+       4.2,
+       23.9
+      ],
+      [
+       5.46,
+       27.4
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 69,
+     "ambush": {},
+     "hits": 7,
+     "triggered": 1,
+     "state": 1,
+     "says": "A trap: lingering trap!",
+     "fell_through": []
+    },
+    "Teleport": {
+     "present": true,
+     "kind": "11",
+     "hp_lost": 0.0,
+     "held": false,
+     "moved_m": 219.0,
+     "farthest_m": 219.0,
+     "peak_speed": 0,
+     "drops": [],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 18,
+     "ambush": {
+      "2,0": "monsters|3|43050|-11250"
+     },
+     "hits": 0,
+     "triggered": 1,
+     "state": 2,
+     "says": "A teleport trap carries you off: into a room of monsters",
+     "fell_through": []
+    },
+    "Spring": {
+     "present": true,
+     "kind": "12",
+     "hp_lost": 15.2,
+     "held": true,
+     "moved_m": 3.0,
+     "farthest_m": 3.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.36,
+       15.2
+      ]
+     ],
+     "held_at": 0.1,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 527,
+     "ambush": {
+      "0,0": "glyphs|4|7350|-9450"
+     },
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A spring plate hurls you across the room: into a ring of glyphs",
+     "fell_through": []
+    }
+   },
+   "warrior_seen": 0,
+   "rogue": {
+    "seen_from_5m": 1,
+    "marks": [
+     7,
+     11
+    ],
+    "describe": "disarm the pit trap",
+    "f": "disarm",
+    "progress": 0.21,
+    "state_after": 3,
+    "disarmed": 1,
+    "says": "You disarm the pit trap"
+   },
+   "kind_ok": {
+    "Pit": true,
+    "Darts": true,
+    "Deadfall": true,
+    "Crusher": true,
+    "Snare": true,
+    "Glyph": true,
+    "Ward": true,
+    "Emanation": true,
+    "Cursed": true,
+    "Chain": true,
+    "Lingering": true,
+    "Teleport": true,
+    "Spring": true
+   }
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_l15p5a_icons15_scrolls.png",
+  "mw_l15p5a_trap_rogue.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

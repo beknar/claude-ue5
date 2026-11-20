@@ -937,6 +937,29 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") TArray<FString> GetChapelPews15(FIntPoint Section) const;
 	/** a test's: the big map as last drawn: its pixels a cm, the view's middle (x, y) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FVector GetMapScale15() const { return FVector(MapXK, MapXVw.X, MapXVw.Y); }
+	// ---- the list of 2026-11-20's fifth phase (items 10, 12, 15, 16, 17, 19; RDList15d.cpp), set by 934 items
+	/** blessed rune stones (item 12): a share of rooms gets one, from a stream of its own after the other traps (their places kept) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bBlessedStones15 = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float BlessedShare15 = 0.08f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float BlessedSeconds15 = 60.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List15") int32 BlessedTouched15 = 0;
+	/** what she takes that is not a potion sounds as gear (Player.Loot.Gear: a thud), potions as before (item 15) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bGearThud15 = false;
+	/** the sound set her last taking played (a test's) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List15") FName LastLootSound15;
+	/** the ankh shows only the chests and trunks not looted (item 16: not the traps) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bAnkhChestsOnly15 = false;
+	/** the torch and the ankh burn down while held lit (their Durability, seconds) and the repair items restore them (item 17) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bLightBurn15 = false;
+	/** at a teleporter the pad's right stick pressed (R3) does what G does (item 19); the prompts name the device's key */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bPadTripButton15 = false;
+	/** the sound set for taking these things: gear's unless every one is a potion */
+	FName LootSound15(const TArray<FName>& Things) const;
+	/** G, or R3 on the pad, pressed this frame (a teleporter's choice); the key's name as the prompt shows it */
+	bool TripKeyPressed15(const APlayerController* PC) const;
+	FString TripKeyName15() const;
+	/** a test's: a pile of these things dropped at At (F takes it) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") bool DebugDropLoot15(FVector At, const TArray<FName>& Things);
 	/** allies brought into an arena (a test's count) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List15") int32 ArenaAlliesBrought15 = 0;
 	/** the arena's allies brought in beside her; the count */

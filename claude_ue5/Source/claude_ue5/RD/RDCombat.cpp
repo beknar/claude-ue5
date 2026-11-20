@@ -821,6 +821,7 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	TickBolts(Dt);
 	TickSpells(Dt, Now);
 	TickScrollWeapon();          // (mistward: a scroll's weapon gone once its cast and bolts are done)
+	TickLightBurn15(Dt);          // (the list of 2026-11-20: the torch or ankh held lit burns down)
 	// (the third list: the slashes' burning ground and pulls; quick slots for weapons found or spells learned)
 	if (SlashAreas.Num() > 0 || Echoes.Num() > 0) TickSlashAreas(Dt);          // (the Echo slash's hits too: they waited for an area that never came)
 	if (Generator->Secondaries.Num() > 0) TickSecondary(Dt);          // (the sixth phase's abilities)
@@ -970,6 +971,9 @@ void URDCombatComponent::AddItem(FName Name, int32 Count)
 		ArmourWear.Add(Name, Full);
 		Count = 1;
 	}
+	// (the list of 2026-11-20 (item 17): a torch or ankh found is whole, its burn time full)
+	if (Ix >= 0 && Generator->bLightBurn15 && (Generator->Items[Ix].Kind == ERDItemKind::Torch || Generator->Items[Ix].Kind == ERDItemKind::Light) && Generator->Items[Ix].Durability > 0.f)
+		ArmourWear.Add(Name, Generator->Items[Ix].Durability);
 	// (mistward: one teleport ring of a tier is enough)
 	if (Ix >= 0 && Generator->Items[Ix].Kind == ERDItemKind::Teleport && GetItemCount(Name) > 0) return;
 	int32& N = Carried.FindOrAdd(Name);
@@ -1296,6 +1300,8 @@ float URDCombatComponent::GetArmourDurability(FName Item) const
 float URDCombatComponent::GetGearDurability(FName Item) const
 {
 	const int32 Ix = Generator ? Generator->FindItem(Item) : -1;
+	// (the list of 2026-11-20 (item 17): a torch's or the ankh's burn time too, so the repair items mend it)
+	if (Ix >= 0 && Generator->bLightBurn15 && (Generator->Items[Ix].Kind == ERDItemKind::Torch || Generator->Items[Ix].Kind == ERDItemKind::Light)) return Generator->Items[Ix].Durability;
 	return Ix >= 0 && (Generator->Items[Ix].Kind == ERDItemKind::Armour || Generator->Items[Ix].Kind == ERDItemKind::Shield) ? Generator->Items[Ix].Durability : 0.f;
 }
 

@@ -1,0 +1,59 @@
+{
+ "tag": "l15p5b",
+ "plan": [
+  "runes15",
+  "trip15"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "runes15",
+   "ok": true,
+   "defs_same": true,
+   "same_mesh_label": true,
+   "blessed": 26,
+   "cursed": 12,
+   "sets": 8,
+   "others_same": true,
+   "others": 158,
+   "blessed_after": 26,
+   "touch_blessed": {
+    "hp_lost": 0.0,
+    "blessing": "Blessing of might",
+    "weak": 0.0,
+    "message": "The cursed rune stone blesses you: Blessing of might, your blows strike 25% harder for 60 s",
+    "touched": 1
+   },
+   "touch_cursed": {
+    "hp_lost": 9.9,
+    "blessing": "Blessing of might",
+    "weak": 0.45,
+    "message": "The cursed rune stone curses you: your blows are weaker",
+    "touched": 0
+   }
+  },
+  {
+   "step": "trip15",
+   "ok": true,
+   "pads": [
+    1,
+    2,
+    3
+   ],
+   "destinations": [
+    2,
+    3
+   ],
+   "says_keyboard": "teleport to tier 2    [G] another tier",
+   "says_pad": "teleport to tier 3    [R3] another tier",
+   "says_pad2": "teleport to tier 2    [R3] another tier"
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_l15p5b_runes15_blessed.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

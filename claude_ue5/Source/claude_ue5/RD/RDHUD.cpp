@@ -1862,9 +1862,17 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 		return S;
 	}
 	case ERDItemKind::Torch:
-		return TEXT("Made at an anvil.  Lit, it is carried in your left hand and lights your way (your shield, or your second blade, waits meanwhile).");
+		return Cb && Cb->GetLightLeft15(It.Name) >= 0.f
+			? FString::Printf(TEXT("Made at an anvil.  Lit, it is carried in your left hand and lights your way (your shield, or your second blade, waits meanwhile).  Burns %.0f of %.0f s more; a repair item restores it."), Cb->GetLightLeft15(It.Name), It.Durability)
+			: FString(TEXT("Made at an anvil.  Lit, it is carried in your left hand and lights your way (your shield, or your second blade, waits meanwhile)."));
 	case ERDItemKind::Light:
-		return FString::Printf(TEXT("Found on tier 2's monsters and in its chests.  Raised in your left hand it lights your way, and within %.0f m it shows the traps (outlined) and the chests and trunks not yet looted (on your map).  Your shield waits meanwhile."), Gen ? Gen->AnkhRevealRange / 100.f : 10.f);
+	{
+		FString S = Gen && Gen->bAnkhChestsOnly15
+			? FString::Printf(TEXT("Found on tier 2's monsters and in its chests.  Raised in your left hand it lights your way, and within %.0f m it shows the chests and trunks not yet looted (on your map).  Your shield waits meanwhile."), Gen->AnkhRevealRange / 100.f)
+			: FString::Printf(TEXT("Found on tier 2's monsters and in its chests.  Raised in your left hand it lights your way, and within %.0f m it shows the traps (outlined) and the chests and trunks not yet looted (on your map).  Your shield waits meanwhile."), Gen ? Gen->AnkhRevealRange / 100.f : 10.f);
+		if (Cb && Cb->GetLightLeft15(It.Name) >= 0.f) S += FString::Printf(TEXT("  Burns %.0f of %.0f s more while raised; a repair item restores it."), Cb->GetLightLeft15(It.Name), It.Durability);
+		return S;
+	}
 	case ERDItemKind::Teleport:
 		return FString::Printf(TEXT("Found on the teleporter of tier %d.  Used, it carries you to the first tier's teleporter in the great hall; that teleporter takes you back to tier %d's while you hold this ring."), It.TeleportTier, It.TeleportTier);
 	case ERDItemKind::Slash:

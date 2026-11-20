@@ -649,6 +649,12 @@ public:
 	FName CastKind15;
 	/** the big map open and zooming by the wheel (the wheel switches her weapons otherwise) */
 	bool MapWheel15() const;
+	/** the list of 2026-11-20 (item 17): the torch or ankh held lit burns down (RDList15d.cpp) */
+	void TickLightBurn15(float Dt);
+	/** seconds of burning left on a torch or ankh (its durability; -1 it does not burn) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") float GetLightLeft15(FName Item) const;
+	/** a test's: its seconds left set (the end of its burn reached sooner) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") void SetLightLeft15(FName Item, float Seconds);
 	/** an item put on the bar as an entry ("#<item>") */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool AssignQuickItem(int32 Slot, FName Item) { return AssignQuickEntry(Slot, FName(*(TEXT("#") + Item.ToString()))); }
 	/** a slot's number as the bar shows it: 1 to 9, 0, then 11, 12... (those have no key) */

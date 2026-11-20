@@ -153,6 +153,8 @@ bool URDCombatComponent::HoldTorch(bool bHold)
 		}
 		if (TorchItem.IsNone()) { SetMessage(TEXT("You have no torch: an anvil makes one")); return false; }
 		if (!FitOf(TorchItem)) { SetMessage(FString::Printf(TEXT("The %s cannot hold the %s"), *Generator->PlayerTitle.ToLower(), *TorchItem.ToString().ToLower())); return false; }
+		// (the list of 2026-11-20 (item 17): burned out, it waits for a repair item)
+		if (GetLightLeft15(TorchItem) == 0.f) { SetMessage(FString::Printf(TEXT("The %s has burned out: a repair item restores it"), *TorchItem.ToString().ToLower())); return false; }
 	}
 	bTorchHeld = bHold;
 	UpdateLeftHand(); UpdateWalkSpeed();
