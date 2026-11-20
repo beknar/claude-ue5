@@ -1867,10 +1867,11 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 			: FString(TEXT("Made at an anvil.  Lit, it is carried in your left hand and lights your way (your shield, or your second blade, waits meanwhile)."));
 	case ERDItemKind::Light:
 	{
-		FString S = Gen && Gen->bAnkhChestsOnly15
-			? FString::Printf(TEXT("Found on tier 2's monsters and in its chests.  Raised in your left hand it lights your way, and within %.0f m it shows the chests and trunks not yet looted (on your map).  Your shield waits meanwhile."), Gen->AnkhRevealRange / 100.f)
-			: FString::Printf(TEXT("Found on tier 2's monsters and in its chests.  Raised in your left hand it lights your way, and within %.0f m it shows the traps (outlined) and the chests and trunks not yet looted (on your map).  Your shield waits meanwhile."), Gen ? Gen->AnkhRevealRange / 100.f : 10.f);
-		if (Cb && Cb->GetLightLeft15(It.Name) >= 0.f) S += FString::Printf(TEXT("  Burns %.0f of %.0f s more while raised; a repair item restores it."), Cb->GetLightLeft15(It.Name), It.Durability);
+		// (one sentence, its traps' clause by the switch (PR #97's review: two copies drift))
+		FString S = FString::Printf(TEXT("Found on tier 2's monsters and in its chests.  Raised in your left hand it lights your way, and within %.0f m it shows %sthe chests and trunks not yet looted (on your map).  Your shield waits meanwhile."),
+			Gen ? Gen->AnkhRevealRange / 100.f : 10.f, Gen && Gen->bAnkhChestsOnly15 ? TEXT("") : TEXT("the traps (outlined) and "));
+		const float Left = Cb ? Cb->GetLightLeft15(It.Name) : -1.f;
+		if (Left >= 0.f) S += FString::Printf(TEXT("  Burns %.0f of %.0f s more while raised; a repair item restores it."), Left, It.Durability);
 		return S;
 	}
 	case ERDItemKind::Teleport:

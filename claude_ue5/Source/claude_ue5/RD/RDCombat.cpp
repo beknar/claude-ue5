@@ -972,8 +972,8 @@ void URDCombatComponent::AddItem(FName Name, int32 Count)
 		Count = 1;
 	}
 	// (the list of 2026-11-20 (item 17): a torch or ankh found is whole, its burn time full)
-	if (Ix >= 0 && Generator->bLightBurn15 && (Generator->Items[Ix].Kind == ERDItemKind::Torch || Generator->Items[Ix].Kind == ERDItemKind::Light) && Generator->Items[Ix].Durability > 0.f)
-		ArmourWear.Add(Name, Generator->Items[Ix].Durability);
+	// (only one she had none of: a stack shares one burning timer, and another torch must not refill the one burning (PR #97's review))
+	if (IsBurningLight15(Ix) && GetItemCount(Name) == 0) ArmourWear.Add(Name, Generator->Items[Ix].Durability);
 	// (mistward: one teleport ring of a tier is enough)
 	if (Ix >= 0 && Generator->Items[Ix].Kind == ERDItemKind::Teleport && GetItemCount(Name) > 0) return;
 	int32& N = Carried.FindOrAdd(Name);
@@ -1301,7 +1301,7 @@ float URDCombatComponent::GetGearDurability(FName Item) const
 {
 	const int32 Ix = Generator ? Generator->FindItem(Item) : -1;
 	// (the list of 2026-11-20 (item 17): a torch's or the ankh's burn time too, so the repair items mend it)
-	if (Ix >= 0 && Generator->bLightBurn15 && (Generator->Items[Ix].Kind == ERDItemKind::Torch || Generator->Items[Ix].Kind == ERDItemKind::Light)) return Generator->Items[Ix].Durability;
+	if (IsBurningLight15(Ix)) return Generator->Items[Ix].Durability;
 	return Ix >= 0 && (Generator->Items[Ix].Kind == ERDItemKind::Armour || Generator->Items[Ix].Kind == ERDItemKind::Shield) ? Generator->Items[Ix].Durability : 0.f;
 }
 

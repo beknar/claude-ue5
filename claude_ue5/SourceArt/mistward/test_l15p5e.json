@@ -1,0 +1,98 @@
+{
+ "tag": "l15p5e",
+ "plan": [
+  "thud15",
+  "light15"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "thud15",
+   "ok": false,
+   "sword": "Viking Shortsword",
+   "potion": "Small Healing Potion",
+   "sword_on": {
+    "f": "loot",
+    "played": "Player.Loot.Gear",
+    "wav": "sword_on.wav",
+    "m": {
+     "loud_db": -26.0,
+     "under_300hz": 0.781
+    }
+   },
+   "sword_off": {
+    "f": "loot",
+    "played": "Player.Loot.Gear",
+    "wav": "sword_off.wav",
+    "m": {
+     "loud_db": -27.0,
+     "under_300hz": 0.73
+    }
+   },
+   "potion_on": {
+    "f": "loot",
+    "played": "Player.Loot",
+    "wav": "potion_on.wav",
+    "m": {
+     "loud_db": -28.0,
+     "under_300hz": 0.389
+    }
+   },
+   "potion_off": {
+    "f": "loot",
+    "played": "Player.Loot",
+    "wav": "potion_off.wav",
+    "m": {
+     "loud_db": -27.5,
+     "under_300hz": 0.542
+    }
+   },
+   "out": "l15p5e",
+   "sword_over_silent_db": 1.0
+  },
+  {
+   "step": "light15",
+   "ok": true,
+   "Torch": {
+    "full": 600.0,
+    "lit": true,
+    "after_30s": 569.7,
+    "burned": 30.3,
+    "out_after_end": true,
+    "left_at_end": 0.0,
+    "message_end": "The torch has burned out: a repair item restores it",
+    "relit": false,
+    "lit_when_burned": false,
+    "in_repair_list": true,
+    "repaired": true,
+    "after_repair": 600.0
+   },
+   "Revealing Ankh": {
+    "full": 900.0,
+    "lit": true,
+    "after_30s": 869.6,
+    "burned": 30.4,
+    "out_after_end": true,
+    "left_at_end": 0.0,
+    "message_end": "The revealing ankh has burned out: a repair item restores it",
+    "relit": false,
+    "lit_when_burned": false,
+    "in_repair_list": true,
+    "repaired": true,
+    "after_repair": 900.0
+   },
+   "stack": {
+    "after_another_found": 100.0,
+    "count": 2,
+    "count_after": 1,
+    "left_after": 599.0,
+    "still_lit": true,
+    "message": "The torch burns out; you light another (1 left)"
+   }
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

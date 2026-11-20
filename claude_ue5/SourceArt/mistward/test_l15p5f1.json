@@ -1,0 +1,61 @@
+{
+ "tag": "l15p5f1",
+ "plan": [
+  "thud15"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "thud15",
+   "ok": true,
+   "sword": "Viking Shortsword",
+   "potion": "Small Healing Potion",
+   "sword_on": {
+    "f": "loot",
+    "played": "Player.Loot.Gear",
+    "wav": "sword_on.wav",
+    "m": {
+     "loud_db": -25.7,
+     "taking_db": -22.1,
+     "under_300hz": 0.825
+    }
+   },
+   "sword_off": {
+    "f": "loot",
+    "played": "Player.Loot.Gear",
+    "wav": "sword_off.wav",
+    "m": {
+     "loud_db": -27.0,
+     "taking_db": -30.1,
+     "under_300hz": 0.734
+    }
+   },
+   "potion_on": {
+    "f": "loot",
+    "played": "Player.Loot",
+    "wav": "potion_on.wav",
+    "m": {
+     "loud_db": -28.0,
+     "taking_db": -26.1,
+     "under_300hz": 0.366
+    }
+   },
+   "potion_off": {
+    "f": "loot",
+    "played": "Player.Loot",
+    "wav": "potion_off.wav",
+    "m": {
+     "loud_db": -27.6,
+     "taking_db": -28.3,
+     "under_300hz": 0.611
+    }
+   },
+   "out": "l15p5f1",
+   "sword_over_silent_db": 8.0
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

@@ -46,12 +46,17 @@ FString ARDDungeonGenerator::TripKeyName15() const
 }
 
 // ================================================================================================ item 17: the light burns down
+bool URDCombatComponent::IsBurningLight15(int32 Ix) const
+{
+	if (!Generator || !Generator->bLightBurn15 || !Generator->Items.IsValidIndex(Ix) || Generator->Items[Ix].Durability <= 0.f) return false;
+	const ERDItemKind K = Generator->Items[Ix].Kind;
+	return K == ERDItemKind::Torch || K == ERDItemKind::Light;
+}
+
 float URDCombatComponent::GetLightLeft15(FName Item) const
 {
 	const int32 Ix = Generator ? Generator->FindItem(Item) : -1;
-	if (Ix < 0 || !Generator->bLightBurn15 || Generator->Items[Ix].Durability <= 0.f) return -1.f;
-	const ERDItemKind K = Generator->Items[Ix].Kind;
-	if (K != ERDItemKind::Torch && K != ERDItemKind::Light) return -1.f;
+	if (!IsBurningLight15(Ix)) return -1.f;
 	const float* W = ArmourWear.Find(Item);
 	return W ? *W : Generator->Items[Ix].Durability;
 }
@@ -63,15 +68,23 @@ void URDCombatComponent::SetLightLeft15(FName Item, float Seconds)
 
 void URDCombatComponent::TickLightBurn15(float Dt)
 {
-	if (!Generator || !Generator->bLightBurn15 || !bTorchHeld || TorchItem.IsNone() || Dt <= 0.f) return;
+	if (!Generator || !bTorchHeld || TorchItem.IsNone() || Dt <= 0.f) return;
 	const int32 Ix = Generator->FindItem(TorchItem);
-	if (Ix < 0 || Generator->Items[Ix].Durability <= 0.f) return;
+	if (!IsBurningLight15(Ix)) return;
 	float& W = ArmourWear.FindOrAdd(TorchItem, Generator->Items[Ix].Durability);
 	W = FMath::Max(0.f, W - Dt);
 	if (W > 0.f) return;
-	// (burned down: out, said so; a repair item restores it)
+	// (burned down. One of several (a stack of torches shares this timer, PR #97's review) is used up and the next lit whole; the
+	// last stays, burned out, until a repair item restores it)
 	const FName It = TorchItem;
-	HoldTorch(false);
+	if (GetItemCount(It) > 1)
+	{
+		RemoveCarried(It, 1); W = Generator->Items[Ix].Durability;
+		SetMessage(FString::Printf(TEXT("The %s burns out; you light another (%d left)"), *It.ToString().ToLower(), GetItemCount(It)));
+		return;
+	}
+	// (out, said once: forced out if HoldTorch refuses (she lies dead), or the message would come every tick)
+	if (!HoldTorch(false)) { bTorchHeld = false; UpdateLeftHand(); }
 	SetMessage(FString::Printf(TEXT("The %s has burned out: a repair item restores it"), *It.ToString().ToLower()));
 	UE_LOG(LogRDList15d, Log, TEXT("RDLIGHT15 %s burned out"), *It.ToString());
 }

@@ -653,6 +653,9 @@ public:
 	void TickLightBurn15(float Dt);
 	/** seconds of burning left on a torch or ankh (its durability; -1 it does not burn) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") float GetLightLeft15(FName Item) const;
+	/** the one rule (PR #97's review: it was written out four times): an item that burns down (a torch or the ankh, bLightBurn15,
+	 *  a burn time of its own) */
+	bool IsBurningLight15(int32 Ix) const;
 	/** a test's: its seconds left set (the end of its burn reached sooner) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") void SetLightLeft15(FName Item, float Seconds);
 	/** an item put on the bar as an entry ("#<item>") */

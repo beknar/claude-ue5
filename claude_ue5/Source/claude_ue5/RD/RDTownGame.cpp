@@ -2044,7 +2044,7 @@ bool ARDDungeonGenerator::TownBuy(FName Item)
 	PlayerCombat->AddItem(Item, 1);
 	TownCount(TEXT("bought"));
 	SetTownNote(FString::Printf(TEXT("You buy %s for %d gold"), *Item.ToString(), P));
-	PlaySoundAt(TEXT("Player.Loot"), PlayerCombat->GetOwner()->GetActorLocation());
+	PlaySoundAt(LastLootSound15 = LootSound15({ Item }), PlayerCombat->GetOwner()->GetActorLocation());
 	return true;
 }
 

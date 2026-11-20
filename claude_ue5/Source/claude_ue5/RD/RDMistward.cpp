@@ -708,7 +708,7 @@ FString ARDDungeonGenerator::UsePadNear(const FVector& From)
 		PadRingsTaken.Add(T);
 		if (TObjectPtr<ARDTeleporter>* A = PadActors.Find(T); A && *A) (*A)->ShowRing(false);
 		Pc->ShowMessage(FString::Printf(TEXT("You take the %s: use it (I) to go back to the first tier's teleporter"), *Ring.ToString().ToLower()));
-		PlaySoundAt(TEXT("Player.Loot"), From);
+		PlaySoundAt(LastLootSound15 = LootSound15({ Ring }), From);
 		return TEXT("ring");
 	}
 	if (T > 1) { TeleportToTier(1); return TEXT("teleport"); }
@@ -822,7 +822,7 @@ bool ARDSection::OpenCell(int32 Door)
 			Generator->LastFound = Gift; Generator->LastFoundList = { Gift }; Generator->LastFoundTime = GetWorld()->GetTimeSeconds();
 		}
 		++Generator->PrisonersFreed;
-		Generator->PlaySoundAt(TEXT("Player.Loot"), C.Frame.GetLocation());
+		Generator->PlaySoundAt(Generator->LastLootSound15 = Generator->LootSound15({ Gift }), C.Frame.GetLocation());
 		UE_LOG(LogRDMistward, Log, TEXT("RDPRISONER freed in cell %d of (%d,%d): gave %s"), Ci, Coord.X, Coord.Y, *Gift.ToString());
 	}
 	else if (ARDMonster* M = Cast<ARDMonster>(C.Who.Get()))

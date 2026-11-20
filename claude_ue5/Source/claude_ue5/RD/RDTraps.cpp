@@ -145,7 +145,7 @@ void ARDSection::PlaceTraps()
 				}
 			if (Free.Num() == 0) continue;
 			const FIntPoint T = Free[Pick % Free.Num()];
-			FTrapInst Ti; Ti.Def = BlessedDef; Ti.At = TileWorld(T); Ti.Room = RI; Ti.Yaw = (T.Y == Rm.Lane.Y) ? 0.f : 90.f;
+			FTrapInst Ti; Ti.Def = BlessedDef; Ti.At = TileWorld(T); Ti.Room = RI; Ti.Yaw = 90.f;          // (never on a lane: one way)
 			TrapList.Add(Ti);
 		}
 	}
@@ -226,11 +226,12 @@ bool ARDSection::FireTrap(int32 I)
 	if (D.Kind != ERDTrapKind::Ward) Generator->SpentTraps.Add(FIntVector(Coord.X, Coord.Y, I), 2);
 	const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
 	T.Goal = Her ? Her->GetActorLocation() : T.At;
-	++Generator->TrapsTriggered; Generator->LastTrap = D.Label;
+	// (a blessed stone is no trap to the counts or the message log: PR #97's review)
+	if (D.Kind != ERDTrapKind::Blessed) { ++Generator->TrapsTriggered; Generator->LastTrap = D.Label; }
 	if (D.TriggerFx) RDMSpawnFx(this, D.TriggerFx, T.At + FVector(0, 0, 10), FRotator(0, T.Yaw, 0), D.TriggerFxScale, nullptr, D.bMagic, true);
 	const FName Snd = D.SoundKey.IsNone() ? FName(D.bMagic ? TEXT("Player.Cast.Fire") : TEXT("Env.DoorOpen")) : FName(*FString::Printf(TEXT("Trap.%s.Trigger"), *D.SoundKey.ToString()));
 	Generator->PlaySoundAt(Generator->HasSound(Snd) ? Snd : FName(TEXT("Env.GenerateHit")), T.At + FVector(0, 0, 100));
-	if (URDCombatComponent* Pc = Generator->GetPlayerCombat()) Pc->ShowMessage(FString::Printf(TEXT("A trap: %s!"), *D.Label));
+	if (URDCombatComponent* Pc = Generator->GetPlayerCombat(); Pc && D.Kind != ERDTrapKind::Blessed) Pc->ShowMessage(FString::Printf(TEXT("A trap: %s!"), *D.Label));
 	UE_LOG(LogRDTraps, Log, TEXT("RDTRAP %s (%d) goes off in (%d,%d) at (%.0f, %.0f)"), *D.Name.ToString(), I, Coord.X, Coord.Y, T.At.X, T.At.Y);
 	return true;
 }

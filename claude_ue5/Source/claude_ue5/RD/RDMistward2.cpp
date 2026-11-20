@@ -1228,7 +1228,7 @@ FString ARDDungeonGenerator::UseSpecialNear(const FVector& From)
 						Pc->AddItem(P.Item, 1);
 						Pc->ShowMessage(FString::Printf(TEXT("You take the %s from the table"), *P.Item.ToString().ToLower()));
 						LastFound = P.Item; LastFoundList = { P.Item }; LastFoundTime = GetWorld()->GetTimeSeconds(); ++ItemsFound;
-						PlaySoundAt(TEXT("Player.Loot"), P.At);
+						PlaySoundAt(LastLootSound15 = LootSound15({ P.Item }), P.At);          // (the list of 2026-11-20: a thud for gear)
 						UE_LOG(LogRDMistward2, Log, TEXT("RDPICKUP %s taken from (%d,%d) %d"), *P.Item.ToString(), S->Coord.X, S->Coord.Y, Best);
 						return TEXT("pickup");
 					}
@@ -1297,7 +1297,7 @@ FName ARDDungeonGenerator::GiveBossSlash(int32 Tier, const FVector& At)
 	SlashesGiven.Add(S.Name);
 	PlayerCombat->ShowMessage(FString::Printf(TEXT("The boss leaves you the %s:  +%.0f %s,  %s  (I: put it on a weapon)"), *S.Name.ToString(), S.Bonus, *S.Type.ToLower(), *S.Text));
 	if (S.ImpactFx) RDMSpawnFx(this, S.ImpactFx, At + FVector(0, 0, 60.f), FRotator::ZeroRotator, S.ImpactFxScale * 1.5f, nullptr, false, true);
-	PlaySoundAt(TEXT("Player.Loot"), At);
+	PlaySoundAt(LastLootSound15 = LootSound15({ S.Name }), At);
 	UE_LOG(LogRDMistward2, Log, TEXT("RDSLASH %s given for a tier %d boss"), *S.Name.ToString(), Tier);
 	return S.Name;
 }

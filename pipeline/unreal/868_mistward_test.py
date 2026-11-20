@@ -6687,13 +6687,12 @@ def step_zoom15():
 
 
 def step_icons15():
-    """the list of 2026-11-20 (item 10): every scroll's picture is its spell's (the quick bar's), and the interface has it; a picture of
-    the inventory's scrolls tab"""
+    """the list of 2026-11-20 (item 10): every scroll's picture is its spell's (the quick bar's, drawn there already); a picture of the
+    inventory's scrolls tab"""
     c = yield from restart("Mage"); g = G["gen"]; quiet(True)
     sp = {str(s.name): str(s.icon) for s in g.get_editor_property("spells")}
     scr = [i for i in g.get_editor_property("items") if i.kind == unreal.RDItemKind.SCROLL]
     bad = [[str(i.name), str(i.icon), sp.get(str(i.spell))] for i in scr if str(i.icon) != sp.get(str(i.spell))]
-    art = None          # (the interface's art by name is the quick bar's, already drawn: the picture below shows it)
     for i in scr[:6]: c.add_item(i.name, 1)
     c.set_inventory_open(True); yield from rwait(0.4)
     for t_ in range(6):
@@ -6701,8 +6700,8 @@ def step_icons15():
         c.set_inventory_tab(t_); yield from rwait(0.2)
     shot("icons15_scrolls", "1280x720"); yield from rwait(0.6)
     c.set_inventory_open(False); quiet(False)
-    res = {"scrolls": len(scr), "not_the_spells": bad, "without_art": art}
-    step_result("icons15", len(scr) > 0 and not bad and not art, **res)
+    res = {"scrolls": len(scr), "not_the_spells": bad}
+    step_result("icons15", len(scr) > 0 and not bad, **res)
 
 def step_runes15():
     """the list of 2026-11-20 (item 12): blessed rune stones in the sets made (bBlessedStones15), the cursed stone's mesh, its look and
@@ -6788,7 +6787,39 @@ def step_thud15():
         g.set_editor_property("sounds", snd)
         g.set_editor_property("music_volume", mv0); lms.set_editor_property("bAllowBackgroundAudio", bg0); quiet(False)
     res["out"] = os.path.basename(out)
-    ok = res["sword_on"]["played"] == "Player.Loot.Gear" and res["potion_on"]["played"] == "Player.Loot"
+    # (the sound itself, from the recordings (PR #97's review: the set's name proved nothing): the loudest tenth-seconds of each
+    # taking against its silent run, and how low the loudest one sounds: its zero crossings a second (a thud's are fewer than a
+    # bottle's clink); waited for until the audio thread has written the file)
+    import wave, array
+    def measure(fn):
+        path = os.path.join(out, fn); t0 = time.time()
+        while time.time() - t0 < 5.0:
+            try:
+                w_ = wave.open(path, "rb"); break
+            except Exception: w_ = None
+        if not w_: return None
+        sr = w_.getframerate(); ch = w_.getnchannels(); data = array.array("h", w_.readframes(w_.getnframes())); w_.close()
+        mono = [sum(data[i:i + ch]) / ch / 32768.0 for i in range(0, len(data) - ch + 1, ch)]
+        n = int(sr * 0.1); wins = []
+        for i in range(0, len(mono) - n, n // 2):
+            seg = mono[i:i + n]; wins.append((math.sqrt(sum(v * v for v in seg) / n), i))
+        wins.sort(reverse=True); top = wins[:max(1, len(wins) // 10)]
+        db = 20 * math.log10(max(sum(e for e, _ in top) / len(top), 1e-6))
+        # (the share of the loudest tenth-second's energy under 300 Hz: a one-pole low pass over it (a zero-crossing count was the
+        # hiss's, not the sound's: 880 a second for the thud, 670 for the bottle))
+        seg = mono[top[0][1]: top[0][1] + n]; al = 1.0 - math.exp(-2.0 * math.pi * 300.0 / sr); y = 0.0; lo = 0.0; tot = 0.0
+        for v in seg: y += al * (v - y); lo += y * y; tot += v * v
+        # (the taking's own moment (F 0.6 s into the recording): the loudest 50 ms between 0.5 and 1.1 s, against the same span of
+        # the silent run (the loudest of the whole recording caught the room's other sounds: 6.5 dB over in one run, 1.0 in the next))
+        m = int(sr * 0.05); ev = 0.0
+        for i in range(int(0.5 * sr), min(int(1.1 * sr), len(mono) - m), m // 2):
+            seg2 = mono[i:i + m]; ev = max(ev, math.sqrt(sum(v * v for v in seg2) / m))
+        return {"loud_db": round(db, 1), "taking_db": round(20 * math.log10(max(ev, 1e-6)), 1), "under_300hz": round(lo / max(tot, 1e-12), 3)}
+    for k_ in ("sword_on", "sword_off", "potion_on", "potion_off"): res[k_]["m"] = measure(res[k_]["wav"])
+    so, sf, po = res["sword_on"]["m"] or {}, res["sword_off"]["m"] or {}, res["potion_on"]["m"] or {}
+    res["sword_over_silent_db"] = round(so.get("taking_db", -99) - sf.get("taking_db", 0), 1) if so and sf else None
+    ok = (res["sword_on"]["played"] == "Player.Loot.Gear" and res["potion_on"]["played"] == "Player.Loot"
+          and (res["sword_over_silent_db"] or 0) >= 3.0 and so.get("under_300hz", 0) > po.get("under_300hz", 1))
     step_result("thud15", ok, **res)
 
 def step_ankh15():
@@ -6849,8 +6880,16 @@ def step_light15():
         res[name] = r
         if c.is_torch_held(): c.use_item(unreal.Name(name))
         yield from wait(0.3)
+    # (PR #97's review: a stack of torches shares one timer: another torch found does not refill the one burning, and the burning one
+    # used up lights the next whole)
+    c.set_light_left15(torch, 100.0); c.add_item(torch, 1); st = {"after_another_found": round(c.get_light_left15(torch), 1), "count": c.get_item_count(torch)}
+    c.use_item(unreal.Name(torch)); yield from wait(0.2); c.set_light_left15(torch, 0.5); yield from wait(1.5)
+    st.update({"count_after": c.get_item_count(torch), "left_after": round(c.get_light_left15(torch), 1), "still_lit": c.is_torch_held(), "message": str(c.message)})
+    if c.is_torch_held(): c.use_item(unreal.Name(torch))
+    res["stack"] = st
     quiet(False)
-    ok = all(abs(r["burned"] - 30.0) < 2.0 and r["lit"] and r["out_after_end"] and r["left_at_end"] == 0 and not r["lit_when_burned"] and r["in_repair_list"] and r.get("repaired") and r["after_repair"] > 0 for r in res.values())
+    sk = res["stack"]
+    ok = (abs(sk["after_another_found"] - 100.0) < 1.0 and sk["count_after"] == sk["count"] - 1 and sk["left_after"] > 500 and sk["still_lit"]) and all(abs(r["burned"] - 30.0) < 2.0 and r["lit"] and r["out_after_end"] and r["left_at_end"] == 0 and not r["lit_when_burned"] and r["in_repair_list"] and r.get("repaired") and r["after_repair"] > 0 for k, r in res.items() if k != "stack")
     step_result("light15", ok, **res)
 
 def step_trip15():

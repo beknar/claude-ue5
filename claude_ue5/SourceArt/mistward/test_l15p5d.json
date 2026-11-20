@@ -1,0 +1,573 @@
+{
+ "tag": "l15p5d",
+ "plan": [
+  "icons15",
+  "runes15",
+  "thud15",
+  "ankh15",
+  "light15",
+  "trip15",
+  "traps"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "icons15",
+   "ok": true,
+   "scrolls": 36,
+   "not_the_spells": []
+  },
+  {
+   "step": "runes15",
+   "ok": true,
+   "defs_same": true,
+   "same_mesh_label": true,
+   "blessed": 10,
+   "cursed": 18,
+   "sets": 8,
+   "others_same": true,
+   "others": 198,
+   "blessed_after": 10,
+   "touch_blessed": {
+    "hp_lost": 0.0,
+    "blessing": "Blessing of swiftness",
+    "weak": 0.0,
+    "message": "The rune stone blesses you: Blessing of swiftness, you move 20% faster for 60 s",
+    "touched": 1
+   },
+   "touch_cursed": {
+    "hp_lost": 9.9,
+    "blessing": "Blessing of swiftness",
+    "weak": 0.45,
+    "message": "The cursed rune stone curses you: your blows are weaker",
+    "touched": 0
+   }
+  },
+  {
+   "step": "thud15",
+   "ok": false,
+   "sword": "Viking Shortsword",
+   "potion": "Small Healing Potion",
+   "sword_on": {
+    "f": "loot",
+    "played": "Player.Loot.Gear",
+    "wav": "sword_on.wav",
+    "m": {
+     "loud_db": -25.0,
+     "zero_crossings_s": 880
+    }
+   },
+   "sword_off": {
+    "f": "loot",
+    "played": "Player.Loot.Gear",
+    "wav": "sword_off.wav",
+    "m": {
+     "loud_db": -31.5,
+     "zero_crossings_s": 700
+    }
+   },
+   "potion_on": {
+    "f": "loot",
+    "played": "Player.Loot",
+    "wav": "potion_on.wav",
+    "m": {
+     "loud_db": -25.9,
+     "zero_crossings_s": 670
+    }
+   },
+   "potion_off": {
+    "f": "loot",
+    "played": "Player.Loot",
+    "wav": "potion_off.wav",
+    "m": {
+     "loud_db": -36.8,
+     "zero_crossings_s": 1210
+    }
+   },
+   "out": "l15p5d",
+   "sword_over_silent_db": 6.5
+  },
+  {
+   "step": "ankh15",
+   "ok": true,
+   "ankh": "Revealing Ankh",
+   "traps": 208,
+   "raised": true,
+   "traps_shown": 0,
+   "caches_shown": 9,
+   "seen_after": 0
+  },
+  {
+   "step": "light15",
+   "ok": false,
+   "error": "'burned'",
+   "trace": "    yield from STEPS[s]()\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\868_mistward_test.py\", line 6884, in step_light15\n    ok = (abs(sk[\"after_another_found\"] - 100.0) < 1.0 and sk[\"count_after\"] == sk[\"count\"] - 1 and sk[\"left_after\"] > 500 and sk[\"still_lit\"]) and all(abs(r[\"burned\"] - 30.0) < 2.0 and r[\"lit\"] and r[\"out_after_end\"] and r[\"left_at_end\"] == 0 and not r[\"lit_when_burned\"] and r[\"in_repair_list\"] and r.get(\"repaired\") and r[\"after_repair\"] > 0 for r in res.values())\n                                                                                                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\868_mistward_test.py\", line 6884, in <genexpr>\n    ok = (abs(sk[\"after_another_found\"] - 100.0) < 1.0 and sk[\"count_after\"] == sk[\"count\"] - 1 and sk[\"left_after\"] > 500 and sk[\"still_lit\"]) and all(abs(r[\"burned\"] - 30.0) < 2.0 and r[\"lit\"] and r[\"out_after_end\"] and r[\"left_at_end\"] == 0 and not r[\"lit_when_burned\"] and r[\"in_repair_list\"] and r.get(\"repaired\") and r[\"after_repair\"] > 0 for r in res.values())\n                                                                                                                                                            ~^^^^^^^^^^\nKeyError: 'burned'\n"
+  },
+  {
+   "step": "trip15",
+   "ok": true,
+   "pads": [
+    1,
+    2,
+    3
+   ],
+   "destinations": [
+    2,
+    3
+   ],
+   "says_keyboard": "teleport to tier 2    [G] another tier",
+   "says_pad": "teleport to tier 3    [R3] another tier",
+   "says_pad2": "teleport to tier 2    [R3] another tier"
+  },
+  {
+   "step": "traps",
+   "ok": true,
+   "traps": 226,
+   "kinds_present": [
+    "Chain",
+    "Crusher",
+    "Cursed",
+    "Darts",
+    "Deadfall",
+    "Emanation",
+    "Glyph",
+    "Lingering",
+    "Pit",
+    "Snare",
+    "Spring",
+    "Teleport",
+    "Ward"
+   ],
+   "by_kind": {
+    "Pit": {
+     "present": true,
+     "kind": "0",
+     "hp_lost": 26.6,
+     "held": true,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.38,
+       26.6
+      ]
+     ],
+     "held_at": 0.19,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 286,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: pit trap!",
+     "fell_through": []
+    },
+    "Darts": {
+     "present": true,
+     "kind": "1",
+     "hp_lost": 29.9,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.27,
+       10.0
+      ],
+      [
+       0.63,
+       10.0
+      ],
+      [
+       0.98,
+       10.0
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 0,
+     "ambush": {},
+     "hits": 3,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: dart trap!",
+     "fell_through": []
+    },
+    "Deadfall": {
+     "present": true,
+     "kind": "2",
+     "hp_lost": 45.6,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       1.0,
+       15.2
+      ],
+      [
+       1.27,
+       15.2
+      ],
+      [
+       1.54,
+       15.2
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 1473,
+     "ambush": {},
+     "hits": 3,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: deadfall!",
+     "fell_through": []
+    },
+    "Crusher": {
+     "present": true,
+     "kind": "3",
+     "hp_lost": 57.0,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.84,
+       57.0
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 532,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: crusher!",
+     "fell_through": []
+    },
+    "Snare": {
+     "present": true,
+     "kind": "4",
+     "hp_lost": 9.5,
+     "held": true,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.19,
+       9.5
+      ]
+     ],
+     "held_at": 0.19,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 1,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: snare!",
+     "fell_through": []
+    },
+    "Glyph": {
+     "present": true,
+     "kind": "5",
+     "hp_lost": 41.8,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.73,
+       41.8
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 107,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: glyph of fire!",
+     "fell_through": []
+    },
+    "Ward": {
+     "present": true,
+     "kind": "6",
+     "hp_lost": 22.8,
+     "held": false,
+     "moved_m": 1.6,
+     "farthest_m": 1.6,
+     "peak_speed": 564,
+     "drops": [
+      [
+       0.19,
+       22.8
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 91,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 0,
+     "says": "A trap: warding barrier!",
+     "fell_through": []
+    },
+    "Emanation": {
+     "present": true,
+     "kind": "7",
+     "hp_lost": 79.8,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.17,
+       11.4
+      ],
+      [
+       0.71,
+       11.4
+      ],
+      [
+       1.23,
+       11.4
+      ],
+      [
+       1.8,
+       11.4
+      ],
+      [
+       2.36,
+       11.4
+      ],
+      [
+       2.87,
+       11.4
+      ],
+      [
+       3.44,
+       11.4
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.4,
+     "particles": 13,
+     "ambush": {},
+     "hits": 8,
+     "triggered": 1,
+     "state": 1,
+     "says": "You are slowed",
+     "fell_through": []
+    },
+    "Cursed": {
+     "present": true,
+     "kind": "8",
+     "hp_lost": 11.4,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.15,
+       11.4
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.45,
+     "slowness": 0.0,
+     "particles": 38,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "The cursed rune stone curses you: your blows are weaker",
+     "fell_through": []
+    },
+    "Chain": {
+     "present": true,
+     "kind": "9",
+     "hp_lost": 68.4,
+     "held": true,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       1.74,
+       30.4
+      ],
+      [
+       1.83,
+       15.2
+      ],
+      [
+       2.43,
+       22.8
+      ]
+     ],
+     "held_at": 0.54,
+     "weakness": 0.45,
+     "slowness": 0.0,
+     "particles": 296,
+     "ambush": {},
+     "hits": 4,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: chain of traps!",
+     "fell_through": []
+    },
+    "Lingering": {
+     "present": true,
+     "kind": "10",
+     "hp_lost": 106.0,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.28,
+       23.9
+      ],
+      [
+       1.53,
+       17.1
+      ],
+      [
+       3.54,
+       13.7
+      ],
+      [
+       4.27,
+       23.9
+      ],
+      [
+       5.52,
+       27.4
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 61,
+     "ambush": {},
+     "hits": 7,
+     "triggered": 1,
+     "state": 1,
+     "says": "A trap: lingering trap!",
+     "fell_through": []
+    },
+    "Teleport": {
+     "present": true,
+     "kind": "11",
+     "hp_lost": 0.0,
+     "held": false,
+     "moved_m": 137.6,
+     "farthest_m": 137.6,
+     "peak_speed": 0,
+     "drops": [],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 19,
+     "ambush": {
+      "1,1": "monsters|3|36150|13350"
+     },
+     "hits": 0,
+     "triggered": 1,
+     "state": 2,
+     "says": "A teleport trap carries you off: into a room of monsters",
+     "fell_through": []
+    },
+    "Spring": {
+     "present": true,
+     "kind": "12",
+     "hp_lost": 15.2,
+     "held": true,
+     "moved_m": 3.0,
+     "farthest_m": 3.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.38,
+       15.2
+      ]
+     ],
+     "held_at": 0.15,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 532,
+     "ambush": {
+      "0,0": "glyphs|4|7350|-9450"
+     },
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A spring plate hurls you across the room: into a ring of glyphs",
+     "fell_through": []
+    }
+   },
+   "warrior_seen": 0,
+   "rogue": {
+    "seen_from_5m": 1,
+    "marks": [
+     7,
+     8,
+     11,
+     13
+    ],
+    "describe": "disarm the pit trap",
+    "f": "disarm",
+    "progress": 0.23,
+    "state_after": 3,
+    "disarmed": 1,
+    "says": "You disarm the pit trap"
+   },
+   "kind_ok": {
+    "Pit": true,
+    "Darts": true,
+    "Deadfall": true,
+    "Crusher": true,
+    "Snare": true,
+    "Glyph": true,
+    "Ward": true,
+    "Emanation": true,
+    "Cursed": true,
+    "Chain": true,
+    "Lingering": true,
+    "Teleport": true,
+    "Spring": true
+   }
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_l15p5d_icons15_scrolls.png",
+  "mw_l15p5d_runes15_blessed.png",
+  "mw_l15p5d_trap_rogue.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}
