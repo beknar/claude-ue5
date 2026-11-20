@@ -590,7 +590,7 @@ static TArray<FRD5Arm> RD5Arms(const ARDDungeonGenerator* G)
 	for (int32 I = 0; I < G->Weapons.Num(); ++I)
 	{
 		const FRDWeaponDef& W = G->Weapons[I];
-		if (W.bScroll) continue;
+		if (W.bScroll || W.bUnarmed15) continue;          // (her bare hands strike nothing: the list of 2026-11-20)
 		FRD5Arm A{ I, W.Reach * 0.85f, false, W.bSpell, NAME_None, 0 };
 		if (W.bSpell)
 		{
@@ -817,9 +817,21 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 			// (not where nothing can answer: a summon needs a set under it, or the wilds' summons (the reel of 2026-11-18: the
 			// Summoner called there for 55 s, refused each time, and cast nothing else; the list of 2026-11-20 lets them answer))
 			const bool bCanSummon = !(bWild && !bWildSummons15 && !GetSection(WorldToSection(L)));
-			if (BestSummon && bCanSummon && !bHid && CountSummoned(BestSummon->Spell) < BestSummon->Count && Pc->GetMana() >= Weapons[BestSummon->Index].ManaCost
-				&& Pc->StartAttackWith(BestSummon->Index))
-			{ bDid = true; AutoplayStats.FindOrAdd(TEXT("summons"))++; }
+			// (the list of 2026-11-20 (item 4): at her most, a minion under half its hit points is replaced by a cast)
+			const ARDMonster* Hurt15 = BestSummon ? MostHurtSummon15(BestSummon->Spell) : nullptr;
+			const bool bRoom15 = BestSummon && (CountSummoned(BestSummon->Spell) < BestSummon->Count
+				|| (Hurt15 && Hurt15->GetMaxHealth() > 0.f && Hurt15->GetHealth() < Hurt15->GetMaxHealth() * 0.5f));
+			if (BestSummon && bCanSummon && !bHid && bRoom15 && Pc->GetMana() >= Weapons[BestSummon->Index].ManaCost)
+			{
+				// (item 18: one of its kinds in turn, by the count of her summons (no draw from the autoplay's stream: a seed's run stays
+				// as it was), her own choice put back after the cast (PR #95's review))
+				const TArray<FName> Ks15 = Pc->GetSummonKindsHere15(BestSummon->Spell);
+				const FName Was15 = Pc->GetSummonKind15(BestSummon->Spell);
+				const bool bHadPick15 = Pc->SummonPick15.Contains(BestSummon->Spell);
+				if (Ks15.Num() > 1) Pc->SetSummonKind15(BestSummon->Spell, Ks15[AutoplayStats.FindOrAdd(TEXT("summons")) % Ks15.Num()]);
+				if (Pc->StartAttackWith(BestSummon->Index)) { bDid = true; AutoplayStats.FindOrAdd(TEXT("summons"))++; }
+				if (Ks15.Num() > 1) { if (bHadPick15) Pc->SetSummonKind15(BestSummon->Spell, Was15); else Pc->SummonPick15.Remove(BestSummon->Spell); }
+			}
 			for (int32 K = 0; K < Arms.Num() && !bDid; ++K)
 			{
 				const FRD5Arm& A = Arms[(K + AutoplayWeaponTurn) % Arms.Num()];

@@ -1,0 +1,465 @@
+{
+ "tag": "l15p3d",
+ "plan": [
+  "summon15",
+  "unwield15",
+  "summoner",
+  "autoplay"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "summon15",
+   "ok": true,
+   "weapons": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1",
+    "Bare Hands",
+    "Summon Tier 2",
+    "Summon Tier 3",
+    "Summon Tier 4",
+    "Summon Tier 5"
+   ],
+   "full_none_hurt": {
+    "cap": 2,
+    "had": 2,
+    "started": false,
+    "mana_spent": 0.0,
+    "refused": 1,
+    "after": 2,
+    "message": "You lead 2 of them already (Rotting Soldier), none of them hurt: no more answer Summon Tier 1"
+   },
+   "full_one_hurt": {
+    "started": true,
+    "mana_spent": 23.7,
+    "after": 2,
+    "hurt_gone": true,
+    "replaced": 1,
+    "shares": [
+     1.0,
+     1.0
+    ],
+    "message": "Rotting Soldier takes the place of your hurt Rotting Soldier"
+   },
+   "kinds": {
+    "Summon Tier 1": [
+     "Soldier",
+     "Chicken",
+     "Medic",
+     "Drinker",
+     "Half_Creature_05"
+    ],
+    "Summon Tier 2": [
+     "Gunner",
+     "Orc_03",
+     "Parasit",
+     "Parasites_Fat",
+     "Monster"
+    ],
+    "Summon Tier 3": [
+     "Orc_05",
+     "Tank",
+     "Pangolin",
+     "Insect",
+     "Devourer"
+    ],
+    "Summon Tier 4": [
+     "Alien_Warrior_05",
+     "Fantasy_Animal_raptor_mount",
+     "Parasite_Spider",
+     "Troll",
+     "Daemon"
+    ],
+    "Summon Tier 5": [
+     "Spider",
+     "Nasty",
+     "Hunter",
+     "Titan",
+     "Rock"
+    ],
+    "Summon Tier 6": [
+     "Iron_Golem",
+     "Mutant_Trooper",
+     "War_Mech",
+     "Cyber_Convict",
+     "Rusted_Robot"
+    ],
+    "Summon Tier 7": [
+     "Cyber_Soldier",
+     "Scrap_Mutant",
+     "Engine_Mech",
+     "Iron_Colossus",
+     "Flayed_Mechanic"
+    ],
+    "Summon Tier 8": [
+     "Tide_Captain",
+     "Abyssal_Shellclaw",
+     "Shellclaw",
+     "Spearsnout",
+     "Drowned_Captain"
+    ],
+    "Summon Tier 9": [
+     "Skeleton_Archmage",
+     "Spire_Witch_Elder",
+     "Spire_Witch",
+     "Skeleton_Witch",
+     "Skeleton_Mage"
+    ],
+    "Summon Tier 10": [
+     "Kratos_Commander",
+     "Kratos_Tank",
+     "Kratos_Operative",
+     "Kratos_Guard",
+     "Kratos_Trooper"
+    ]
+   },
+   "kinds_missing": {},
+   "trials": [
+    {
+     "spell": "Summon Tier 1",
+     "kind": "Soldier",
+     "set": true,
+     "came": "Soldier",
+     "follow_s": 0.6,
+     "struck_s": 1.7
+    },
+    {
+     "spell": "Summon Tier 1",
+     "kind": "Chicken",
+     "set": true,
+     "came": "Chicken",
+     "follow_s": 0.6,
+     "struck_s": 1.9
+    },
+    {
+     "spell": "Summon Tier 1",
+     "kind": "Medic",
+     "set": true,
+     "came": "Medic",
+     "follow_s": 0.5,
+     "struck_s": 0.7
+    },
+    {
+     "spell": "Summon Tier 1",
+     "kind": "Drinker",
+     "set": true,
+     "came": "Drinker",
+     "follow_s": 0.6,
+     "struck_s": 1.6
+    },
+    {
+     "spell": "Summon Tier 1",
+     "kind": "Half_Creature_05",
+     "set": true,
+     "came": "Half_Creature_05",
+     "follow_s": 0.6,
+     "struck_s": 1.8
+    },
+    {
+     "spell": "Summon Tier 2",
+     "kind": "Gunner",
+     "set": true,
+     "came": "Gunner",
+     "follow_s": 0.5,
+     "struck_s": 0.7
+    },
+    {
+     "spell": "Summon Tier 2",
+     "kind": "Orc_03",
+     "set": true,
+     "came": "Orc_03",
+     "follow_s": 0.5,
+     "struck_s": 2.1
+    },
+    {
+     "spell": "Summon Tier 2",
+     "kind": "Parasit",
+     "set": true,
+     "came": "Parasit",
+     "follow_s": 0.6,
+     "struck_s": 2.0
+    },
+    {
+     "spell": "Summon Tier 2",
+     "kind": "Parasites_Fat",
+     "set": true,
+     "came": "Parasites_Fat",
+     "follow_s": 0.6,
+     "struck_s": 1.7
+    },
+    {
+     "spell": "Summon Tier 2",
+     "kind": "Monster",
+     "set": true,
+     "came": "Monster",
+     "follow_s": 0.5,
+     "struck_s": 0.7
+    }
+   ],
+   "inventory_cycle": {
+    "line": 2,
+    "used": true,
+    "before": "Half_Creature_05",
+    "after": "Soldier",
+    "message": "Summon Tier 1 now calls Rotting Soldier  (1 of 5)"
+   }
+  },
+  {
+   "step": "unwield15",
+   "ok": true,
+   "weapons": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1",
+    "Bare Hands",
+    "Dagger"
+   ],
+   "dagger": 4,
+   "bare": 3,
+   "drawn": {
+    "mesh": "SM_Dagger",
+    "visible": true
+   },
+   "line": 4,
+   "put_away": true,
+   "after": {
+    "index": 3,
+    "mesh": null,
+    "visible": false,
+    "message": "You put the dagger away: your hands are free"
+   },
+   "bare_attack": false,
+   "bare_blows": 0,
+   "slots": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1",
+    "Bare Hands",
+    "Dagger",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "fire_cast": true,
+   "fire_blows": 1,
+   "drawn_again": {
+    "mesh": "SM_Dagger",
+    "visible": true
+   }
+  },
+  {
+   "step": "summoner",
+   "ok": true,
+   "pawn": "BP_SU4_SummonerCharacter_C",
+   "hp": 85.0,
+   "mana": 60.0,
+   "weapons": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1",
+    "Bare Hands"
+   ],
+   "same_as_mage": [
+    true,
+    true
+   ],
+   "clips": [
+    "AS_Summoner4_CastBolt",
+    "AS_Summoner4_Summon1",
+    "AS_Summoner4_Summon2",
+    "AS_Summoner4_Summon3",
+    "AS_Summoner4_Summon4",
+    "AS_Summoner4_Summon5"
+   ],
+   "fire": {
+    "started": true,
+    "lost": 25.0
+   },
+   "summon": [
+    {
+     "started": true,
+     "mana": 30.0,
+     "count": 1,
+     "message": "Rotting Soldier answers your call  (1 of 2)"
+    },
+    {
+     "started": true,
+     "mana": 30.0,
+     "count": 2,
+     "message": "Rotting Soldier answers your call  (2 of 2)"
+    },
+    {
+     "started": false,
+     "mana": 0.0,
+     "count": 2,
+     "message": "You lead 2 of them already (Rotting Soldier), none of them hurt: no more answer Summon Tier 1"
+    }
+   ],
+   "allies": [
+    {
+     "kind": "Soldier",
+     "hp": 40.0,
+     "damage": 9.0,
+     "m": 2.3
+    },
+    {
+     "kind": "Soldier",
+     "hp": 40.0,
+     "damage": 9.0,
+     "m": 2.3
+    }
+   ],
+   "tier1_soldier": {
+    "hp": 60.0,
+    "damage": 14.0
+   },
+   "want_ally_hp": 40,
+   "allies_fight": 30.6,
+   "dagger": {
+    "index": 4,
+    "both_hands": true
+   },
+   "slash": {
+    "begun": false,
+    "message": "Only a warrior's weapons take the ember slash"
+   },
+   "armour_worn": "None",
+   "hp_ring": false,
+   "magic_ring": true,
+   "mana_ringed": 66.0,
+   "summon_mana_ringed": 33.0,
+   "tome": {
+    "knows": false,
+    "carried": 1
+   },
+   "torch": true,
+   "boss": {
+    "weapons": [
+     "Summon Tier 2"
+    ],
+    "unlocked": 1
+   },
+   "tier2": {
+    "started": true,
+    "mana": 33.0,
+    "kinds": [
+     "Gunner"
+    ]
+   },
+   "after_death": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1",
+    "Bare Hands",
+    "Summon Tier 2"
+   ],
+   "after_restart": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1",
+    "Bare Hands"
+   ]
+  },
+  {
+   "step": "autoplay",
+   "ok": true,
+   "heroes": {
+    "Warrior": {
+     "ended_after": 40.1,
+     "still_on": false,
+     "metres": 123,
+     "attacks": 5,
+     "kills": 1,
+     "rooms": 3,
+     "used": 0,
+     "opened": 5,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "Mage": {
+     "ended_after": 40.1,
+     "still_on": false,
+     "metres": 131,
+     "attacks": 7,
+     "kills": 2,
+     "rooms": 3,
+     "used": 0,
+     "opened": 5,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "Warlock": {
+     "ended_after": 40.2,
+     "still_on": false,
+     "metres": 120,
+     "attacks": 8,
+     "kills": 2,
+     "rooms": 3,
+     "used": 0,
+     "opened": 6,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "Rogue": {
+     "ended_after": 40.2,
+     "still_on": false,
+     "metres": 131,
+     "attacks": 5,
+     "kills": 2,
+     "rooms": 2,
+     "used": 0,
+     "opened": 5,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "MartialArtist": {
+     "ended_after": 40.1,
+     "still_on": false,
+     "metres": 116,
+     "attacks": 4,
+     "kills": 1,
+     "rooms": 3,
+     "used": 0,
+     "opened": 6,
+     "stuck": 2,
+     "deaths": 0,
+     "doing": ""
+    },
+    "Summoner": {
+     "ended_after": 40.2,
+     "still_on": false,
+     "metres": 122,
+     "attacks": 6,
+     "kills": 1,
+     "rooms": 3,
+     "used": 0,
+     "opened": 5,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    }
+   },
+   "takeover": true
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_l15p3d_summoner_soldiers.png",
+  "mw_l15p3d_autoplay_Warrior.png",
+  "mw_l15p3d_autoplay_Mage.png",
+  "mw_l15p3d_autoplay_Warlock.png",
+  "mw_l15p3d_autoplay_Rogue.png",
+  "mw_l15p3d_autoplay_MartialArtist.png",
+  "mw_l15p3d_autoplay_Summoner.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

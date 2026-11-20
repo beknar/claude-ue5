@@ -169,7 +169,7 @@ void ARDDungeonGenerator::Reel15Switch(int32 K)
 	// (the last hero's summons go with her, and nothing she carried is the next one's)
 	StopAutoplay(TEXT("the reel's next hero"));
 	for (ARDMonster* A : GetAllies()) if (IsValid(A)) A->Destroy();
-	CarrySummons.Reset(); CarrySummonShares.Reset();
+	CarrySummons.Reset(); CarrySummonShares.Reset(); CarrySummonKinds15.Reset();
 	const bool bOk = SwitchHero(FName(RD15Hero[K]));
 	Reel15Mark(FString::Printf(TEXT("note|hero %s%s"), RD15Hero[K], bOk ? TEXT("") : TEXT(" REFUSED")));
 }

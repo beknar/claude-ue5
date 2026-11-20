@@ -647,7 +647,8 @@ void ARDHUD::DrawSummons(float Sc, const FVector2D& StatusA, float W, float Stat
 		{
 			FRow N; N.Spell = Al->SummonSpell;
 			const int32 Si = Gen->FindSpell(Al->SummonSpell);
-			N.Title = Si >= 0 ? Gen->SummonTitleOf(Gen->Spells[Si]) : (Al->Title.IsEmpty() ? Al->MonsterName.ToString() : Al->Title);
+			// (the kinds standing, not the one she would call next: PR #95's review)
+			N.Title = Gen->StandingTitles15(Al->SummonSpell);
 			N.Most = Si >= 0 ? FMath::Max(Gen->Spells[Si].Count, 1) : 1;
 			R = &Rows[Rows.Add(N)];
 		}
@@ -2395,13 +2396,27 @@ void ARDHUD::DrawInventory(float Sc)
 			// (mistward, the Summoner: who answers, how many she leads)
 			if (Sp && Sp->Kind == ERDSpellKind::Summon)
 			{
-				const int32 Mk = Gen->Monsters.IndexOfByPredicate([Sp](const FRDMonsterDef& D) { return D.Name == Sp->SummonKind; });
+				const FName Chosen = Cb->GetSummonKind15(Sp->Name);
+				const int32 Mk = Gen->Monsters.IndexOfByPredicate([Chosen](const FRDMonsterDef& D) { return D.Name == Chosen; });
 				const FString Who = Gen->SummonTitleOf(*Sp);
-				Para(FString::Printf(TEXT("Calls %s (as strong as a tier %d monster) to fight at your side until it falls; you lead %d at most, %d now"),
+				const TArray<FName> Here15 = Cb->GetSummonKindsHere15(Sp->Name);
+				if (Here15.Num() > 1)
+				{
+					TArray<FString> Ks; for (const FName& K : Here15) Ks.Add(Gen->KindTitle15(K));
+					Para(FString::Printf(TEXT("Its kinds: %s"), *FString::Join(Ks, TEXT(", "))), Dim, Sc * 1.0f);
+				}
+				Para(FString::Printf(TEXT("Calls %s (as strong as a tier %d monster) to fight at your side until it falls; you lead %d at most, %d now (at your most, a cast takes the place of the most hurt)"),
 					*Who, Mk >= 0 ? FMath::Max(Gen->Monsters[Mk].Tier, 1) : 1, FMath::Max(Sp->Count, 1), Gen->CountSummoned(Sp->Name)), RDCyan, Sc * 1.0f);
 			}
 			Ry += 6.f * Sc;
-			Para(Wp.bAlongside ? TEXT("Cast with RMB or E (LB) while your weapon stays drawn") : Wi == Cb->GetWeaponIndex() ? TEXT("In your hands") : (bPad ? TEXT("A  wield it") : TEXT("Enter  wield it")), Gold, Sc * 1.05f);
+			// (the list of 2026-11-20: in her hands, a summoning of several kinds steps to the next (item 18), a found weapon is put away
+			// for her bare hands (item 13))
+			const int32 NKinds15 = Sp && Sp->Kind == ERDSpellKind::Summon ? Cb->GetSummonKindsHere15(Sp->Name).Num() : 0;
+			const bool bKinds15 = NKinds15 > 1;
+			const bool bAway15 = Wp.Mesh && Cb->GetUnarmedIndex15() >= 0;
+			const FString InHands = bKinds15 ? FString::Printf(TEXT("In your hands   %s  call the next of its %d kinds"), bPad ? TEXT("A") : TEXT("Enter"), NKinds15)
+				: bAway15 ? FString::Printf(TEXT("In your hands   %s  put it away"), bPad ? TEXT("A") : TEXT("Enter")) : FString(TEXT("In your hands"));
+			Para(Wp.bAlongside ? TEXT("Cast with RMB or E (LB) while your weapon stays drawn") : Wi == Cb->GetWeaponIndex() ? InHands : (bPad ? TEXT("A  wield it") : TEXT("Enter  wield it")), Gold, Sc * 1.05f);
 			// (the third list: its slash, its quick slot)
 			if (const FRDSlashDef* Sl = Cb->SlashOf(Wi)) Para(FString::Printf(TEXT("%s:  +%.0f %s on every hit;  %s   (T / X takes it off)"), *Sl->Name.ToString(), Sl->Bonus, *Sl->Type.ToLower(), *Sl->Text), RDCyan, Sc * 1.05f);
 			if (Gen->bQuickSlots && !Wp.bAlongside)

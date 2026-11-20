@@ -64,6 +64,9 @@ struct FRDCarry
 	/** her summons standing: each one's summoning (its spell) and its share of hit points */
 	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<FName> Summons;
 	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<float> SummonShares;
+	/** the list of 2026-11-20 (item 18): each summon's kind (beside Summons), and the kind she chose for each summoning */
+	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<FName> SummonKinds15;
+	UPROPERTY(SaveGame, BlueprintReadOnly) TMap<FName, FName> SummonPicks15;
 	/** the list of 2026-11-08b's sixth phase: her secondary abilities' ranks and the spells her boosts raise */
 	UPROPERTY(SaveGame, BlueprintReadOnly) TMap<FName, int32> SecondaryRanks;
 	UPROPERTY(SaveGame, BlueprintReadOnly) TMap<FName, FName> BoostSpells;

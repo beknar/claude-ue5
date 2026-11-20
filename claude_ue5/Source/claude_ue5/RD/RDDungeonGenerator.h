@@ -849,6 +849,14 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward3") int32 CountSummoned(FName Spell) const;
 	/** the name of the monster a Summon spell calls, as the HUD writes it (its gallery title) */
 	FString SummonTitleOf(const FRDSpellDef& S) const;
+	/** the list of 2026-11-20 (item 4): of a summoning's minions standing, the one with the least share of its hit points under its
+	 *  whole (none: nullptr); taken away (no corpse, no kill) */
+	ARDMonster* MostHurtSummon15(FName Spell) const;
+	void DismissAlly15(ARDMonster* A);
+	/** a kind's title (the table's, else its name) */
+	FString KindTitle15(FName Kind) const;
+	/** the kinds of a summoning's minions standing (each once); none: the kind she would call */
+	FString StandingTitles15(FName Spell) const;
 	/** tests and reels (a card says so): tiers 2 to UpTo open now, as if each tier before had reached its share (with
 	 *  bEncounters each one's boss and guarded ring are set too); how many opened */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward3") int32 DebugOpenTiers(int32 UpTo, bool bEncounters);
@@ -900,6 +908,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bArenaAllies15 = false;
 	/** the wilds: her summons answer out there (the wilds' section, open ground) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bWildSummons15 = false;
+	/** the list of 2026-11-20 (item 14): a scroll her hero can read goes on the quick bar, read by it (934 quick) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bQuickScrolls15 = false;
 	/** allies brought into an arena (a test's count) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List15") int32 ArenaAlliesBrought15 = 0;
 	/** the arena's allies brought in beside her; the count */
@@ -1349,6 +1359,7 @@ public:
 	TArray<FString> CarryArrivedLines;
 	TArray<FName> CarrySummons;
 	TArray<float> CarrySummonShares;
+	TArray<FName> CarrySummonKinds15;          // (the list of 2026-11-20: each one's kind, beside its summoning)
 	float CarrySummonFrom = -1.f, CarrySummonUntil = -1.f;
 	void TickCarrySummons();
 	/** through the Mistgate (the town's) / back to the town (the castle's); a test's dry run only says where it would go */

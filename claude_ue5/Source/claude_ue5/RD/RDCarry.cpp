@@ -34,6 +34,7 @@ void URDCombatComponent::GatherState(FRDCarry& C) const
 	C.Stats.Reset(); C.SpellCasts.Reset(); C.SlashProcs.Reset(); C.Timed.Reset(); C.Cooldowns.Reset();
 	C.EffectItems.Reset(); C.EffectKinds.Reset(); C.EffectAmounts.Reset(); C.EffectLeft.Reset();
 	C.QuickSlots.Reset(); C.QuickOff.Reset(); C.Summons.Reset(); C.SummonShares.Reset(); C.SlashWeapons.Reset(); C.SlashNames.Reset();
+	C.SummonKinds15.Reset(); C.SummonPicks15 = SummonPick15;          // (the list of 2026-11-20: their kinds, her choices)
 	C.DexEnergy = -1.f; C.TorchHeld = NAME_None; C.QuickFirst = 0;
 	C.SecondaryRanks = SecondaryRanks; C.BoostSpells = BoostSpells;          // (the sixth phase)
 	const UWorld* W = GetWorld();
@@ -89,11 +90,13 @@ void URDCombatComponent::GatherState(FRDCarry& C) const
 		if (IsValid(A) && !A->IsDead() && !A->SummonSpell.IsNone())
 		{
 			C.Summons.Add(A->SummonSpell); C.SummonShares.Add(A->GetMaxHealth() > 0.f ? A->GetHealth() / A->GetMaxHealth() : 1.f);
+			C.SummonKinds15.Add(A->MonsterName);
 		}
 	// (and those she brought that are not at her side yet: the town's autosave as she comes in is taken before they are)
 	for (int32 I = 0; I < Generator->CarrySummons.Num(); ++I)
 	{
 		C.Summons.Add(Generator->CarrySummons[I]); C.SummonShares.Add(Generator->CarrySummonShares.IsValidIndex(I) ? Generator->CarrySummonShares[I] : 1.f);
+		C.SummonKinds15.Add(Generator->CarrySummonKinds15.IsValidIndex(I) ? Generator->CarrySummonKinds15[I] : NAME_None);
 	}
 }
 
@@ -183,7 +186,8 @@ void URDCombatComponent::RestoreState(const FRDCarry& C)
 	if (!C.TorchHeld.IsNone() && GetItemCount(C.TorchHeld) > 0) { TorchItem = C.TorchHeld; HoldTorch(true); }
 	UpdateWalkSpeed();
 	// ---- her summons: called to her side once she stands in this level (the generator's TickCarrySummons)
-	Generator->CarrySummons = C.Summons; Generator->CarrySummonShares = C.SummonShares;
+	Generator->CarrySummons = C.Summons; Generator->CarrySummonShares = C.SummonShares; Generator->CarrySummonKinds15 = C.SummonKinds15;
+	SummonPick15 = C.SummonPicks15;
 	Generator->CarrySummonFrom = Now + 0.5f; Generator->CarrySummonUntil = Now + 20.f;
 	UE_LOG(LogRDCarry, Log, TEXT("RDCARRY state back: %d statistics (%d kills), %d timed, %d effects, %d cooldowns, %d quick slots, torch %s, %d slashes, %d summons to call"),
 		C.Stats.Num(), Kills, C.Timed.Num() / 2, Effects.Num(), C.Cooldowns.Num(), C.QuickSlots.Num(), *C.TorchHeld.ToString(), C.SlashNames.Num(), C.Summons.Num());
@@ -237,26 +241,29 @@ void ARDDungeonGenerator::TickCarrySummons()
 	if (!P || PlayerCombat->IsDead()) return;
 	const FVector L = P->GetActorLocation(), Fw = P->GetActorForwardVector();
 	const float Half = P->GetSimpleCollisionHalfHeight();
-	TArray<FName> Left; TArray<float> LeftShares;
+	TArray<FName> Left, LeftKinds; TArray<float> LeftShares;
 	for (int32 I = 0; I < CarrySummons.Num(); ++I)
 	{
 		const FName Sp = CarrySummons[I];
 		const FRDSpellDef* S = Spells.FindByPredicate([Sp](const FRDSpellDef& D) { return D.Name == Sp; });
 		if (!S || S->SummonKind.IsNone()) { UE_LOG(LogRDCarry, Warning, TEXT("RDCARRY no summoning %s here: left behind"), *Sp.ToString()); continue; }
-		const FRDMonsterDef* Kd = Monsters.FindByPredicate([S](const FRDMonsterDef& D) { return D.Name == S->SummonKind; });
+		// (the list of 2026-11-20: as the kind it was, if this map has it; else the summoning's own)
+		FName Kn = CarrySummonKinds15.IsValidIndex(I) ? CarrySummonKinds15[I] : NAME_None;
+		if (Kn.IsNone() || !Monsters.ContainsByPredicate([&Kn](const FRDMonsterDef& D) { return D.Name == Kn && D.Mesh; })) Kn = S->SummonKind;
+		const FRDMonsterDef* Kd = Monsters.FindByPredicate([&Kn](const FRDMonsterDef& D) { return D.Name == Kn; });
 		FVector At = L + Fw * 230.f;
 		FindAllySpot(L, Fw, Kd ? Kd->CapsuleRadius : 45.f, P, At, Fw);
-		ARDMonster* M = SummonKindAlly(S->SummonKind, At - FVector(0, 0, Half), Sp);
-		if (!M) { Left.Add(Sp); LeftShares.Add(CarrySummonShares.IsValidIndex(I) ? CarrySummonShares[I] : 1.f); continue; }
+		ARDMonster* M = SummonKindAlly(Kn, At - FVector(0, 0, Half), Sp);
+		if (!M) { Left.Add(Sp); LeftKinds.Add(Kn); LeftShares.Add(CarrySummonShares.IsValidIndex(I) ? CarrySummonShares[I] : 1.f); continue; }
 		M->SetHealthShare(CarrySummonShares.IsValidIndex(I) ? CarrySummonShares[I] : 1.f);
 		UE_LOG(LogRDCarry, Log, TEXT("RDCARRY summon %s back at her side: %.0f of %.0f hit points"), *Sp.ToString(), M->GetHealth(), M->GetMaxHealth());
 	}
 	// (one with no set of rooms under its spot yet waits a little; at the end it is left behind, and said so)
-	CarrySummons = Left; CarrySummonShares = LeftShares;
+	CarrySummons = Left; CarrySummonShares = LeftShares; CarrySummonKinds15 = LeftKinds;
 	if (CarrySummons.Num() > 0 && Now >= CarrySummonUntil)
 	{
 		UE_LOG(LogRDCarry, Warning, TEXT("RDCARRY %d summons found no room at her side: left behind"), CarrySummons.Num());
-		CarrySummons.Reset(); CarrySummonShares.Reset();
+		CarrySummons.Reset(); CarrySummonShares.Reset(); CarrySummonKinds15.Reset();
 	}
 	else if (CarrySummons.Num() > 0) CarrySummonFrom = Now + 0.5f;
 }

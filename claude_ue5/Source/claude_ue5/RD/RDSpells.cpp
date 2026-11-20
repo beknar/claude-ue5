@@ -626,6 +626,11 @@ void URDCombatComponent::ReleaseSpell(int32 Wi)
 	{
 		// (mistward, the Summoner: one of its kind in front of her, beside the ones she leads already)
 		const int32 Have = Generator->CountSummoned(S->Name);
+		// (the list of 2026-11-20: the kind she chose (item 18); at the cap, the most hurt of them gives its place (item 4: refused
+		// before the cast when none is hurt))
+		const FName Kind15 = !CastKind15.IsNone() ? CastKind15 : GetSummonKind15(S->Name);
+		CastKind15 = NAME_None;
+		ARDMonster* const Worst15 = Have >= FMath::Max(S->Count, 1) ? Generator->MostHurtSummon15(S->Name) : nullptr;
 		const FVector Rt = O->GetActorRightVector();
 		const float Side = (Have % 2 == 0 ? 1.f : -1.f) * 70.f * ((Have + 1) / 2);
 		// (in front of her, else to a side, else behind: the first way with room for it; facing a wall from 60 cm the
@@ -637,7 +642,7 @@ void URDCombatComponent::ReleaseSpell(int32 Wi)
 		// of her, the second of each to the same place beside it; its own roomiest spot when none is clear)
 		if (Generator->bAllySpacing)
 		{
-			const FRDMonsterDef* Kd = Generator->Monsters.FindByPredicate([S](const FRDMonsterDef& D) { return D.Name == S->SummonKind; });
+			const FRDMonsterDef* Kd = Generator->Monsters.FindByPredicate([Kind15](const FRDMonsterDef& D) { return D.Name == Kind15; });
 			Generator->FindAllySpot(L, Fw, Kd ? Kd->CapsuleRadius : 45.f, O, At, Fw);
 		}
 		else
@@ -651,13 +656,20 @@ void URDCombatComponent::ReleaseSpell(int32 Wi)
 				if (D >= 120.f) break;
 			}
 		}
-		ARDMonster* K = Generator->SummonKindAlly(S->SummonKind, At - FVector(0, 0, O->GetSimpleCollisionHalfHeight()), S->Name);
+		// (at the cap with none hurt now (healed since the cast began: PR #95's review), nothing comes: its mana given back below)
+		ARDMonster* K = Have >= FMath::Max(S->Count, 1) && !Worst15 ? nullptr : Generator->SummonKindAlly(Kind15, At - FVector(0, 0, O->GetSimpleCollisionHalfHeight()), S->Name);
+		if (K && Worst15)
+		{
+			const FString Old = Worst15->Title.IsEmpty() ? Worst15->MonsterName.ToString() : Worst15->Title;
+			Generator->DismissAlly15(Worst15); ++SummonsReplaced15;
+			SetMessage(FString::Printf(TEXT("%s takes the place of your hurt %s"), *(K->Title.IsEmpty() ? K->MonsterName.ToString() : K->Title), *Old));
+		}
 		if (K)
 		{
 			++Summoned;
 			SpawnSpellFx(S->ImpactFx, K->GetActorLocation(), FRotator::ZeroRotator, S->ImpactFxScale, S);
 			SpawnSpellFx(S->AreaFx, At - FVector(0, 0, O->GetSimpleCollisionHalfHeight() - 5.f), FRotator::ZeroRotator, S->AreaFxScale, S);
-			SetMessage(FString::Printf(TEXT("%s answers your call  (%d of %d)"), *(K->Title.IsEmpty() ? K->MonsterName.ToString() : K->Title), Generator->CountSummoned(S->Name), FMath::Max(S->Count, 1)));
+			if (!Worst15) SetMessage(FString::Printf(TEXT("%s answers your call  (%d of %d)"), *(K->Title.IsEmpty() ? K->MonsterName.ToString() : K->Title), Generator->CountSummoned(S->Name), FMath::Max(S->Count, 1)));
 		}
 		else
 		{
