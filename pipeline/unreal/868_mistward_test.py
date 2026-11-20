@@ -6546,7 +6546,7 @@ def step_oven15():
     res = {"hall": hall, "ovens": [[round(o.x), round(o.y)] for o in ovens], "forges": len(forges), "anvils": len(anvils)}
     if not ovens: quiet(False); step_result("oven15", False, **res); return
     ov = ovens[0]
-    res["least_gap_m"] = round(min([dist2(ov, x) for x in forges + anvils] or [999]) / 100, 2)
+    res["least_gap_m"] = round(min([dist2(ov, x) for x in forges + anvils] or [999]) / 100, 2)          # (the tables' added from the map's marks below)
     # (F by it: the oven's recipes)
     end, yaw = clear_line(V(ov.x, ov.y, ctr.z), 0.0, 160.0)
     stand = end or V(ov.x + 150, ov.y, ctr.z)
@@ -6564,6 +6564,9 @@ def step_oven15():
     big = list(hud.get_marks_drawn()); shot("oven15_bigmap"); yield from rwait(0.8); yield from press("M")
     res["marks"] = {"oven_mini": near(20, ov, mini), "oven_big": near(20, ov, big), "kinds_big": sorted({int(v.z) for v in big if int(v.z) >= 20}),
                     "forge_big": any(near(23, f, big) for f in forges)}
+    # (the gap to every other station of the hall, the tables' too, from the big map's marks: PR #96's review)
+    others = [v for v in big if int(v.z) in (21, 22, 23) and S.room_at(V(v.x, v.y, ctr.z)) == hall] + [V(a.x, a.y, 6) for a in anvils]
+    res["least_gap_m"] = round(min([math.hypot(v.x - ov.x, v.y - ov.y) for v in others] or [999]) / 100, 2)
     quiet(False)
     ok = (len(ovens) == 1 and res["least_gap_m"] >= 1.5 and "oven" in res["says"] and res["station"] == "Oven" and res["crafting"]
           and res["marks"]["oven_mini"] and res["marks"]["oven_big"] and 21 in res["marks"]["kinds_big"] and (not forges or res["marks"]["forge_big"]))
@@ -6604,23 +6607,43 @@ def step_shelf15():
     put(V(front.x + (front.x - at.x) * 1.2, front.y + (front.y - at.y) * 1.2, front.z), yaw); yield from wait(0.6)
     G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=yaw)); yield from rwait(0.4); shot("shelf15_shut", "1280x720"); yield from rwait(0.6)
     here = G["pawn"].get_actor_location(); res["says"] = str(g.describe_nearest(here, 260.0))
-    res["f"] = str(g.interact_nearest(here, 260.0)); yield from wait(0.5)
+    res["f"] = str(g.interact_nearest(here, 260.0)); yield from wait(0.2)
+    d_mid = doors().get(si, {}); res["mid_swing"] = {"l": d_mid.get("l"), "r": d_mid.get("r")}          # (swinging, not snapped: PR #96's review)
+    yield from wait(1.0)
     G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=yaw)); yield from rwait(0.4); shot("shelf15_open", "1280x720"); yield from rwait(0.6)
     d1 = doors(); me = d1.get(si, {})
     res["searched"] = {"yaw": me.get("yaw"), "l": me.get("l"), "r": me.get("r"), "l_open": off(me.get("l", 0), me.get("yaw", 0) + 105), "r_open": off(me.get("r", 0), me.get("yaw", 0) - 105)}
     res["others_shut"] = all(off(d["l"], d["yaw"]) < 1 and off(d["r"], d["yaw"]) < 1 for i, d in d1.items() if i != si and not d["searched"])
-    # (the shelf faces the room: from 1.2 m before it at 1.4 m up, the line to its middle meets a book (the BP's books) first)
-    hit, where, comp = trace(V(front.x, front.y, front.z + 140), V(at.x, at.y, at.z + 140))
-    res["front_hit"] = comp
+    # (the shelf faces the room, measured on the cabinet itself (PR #96's review: a trace met the cabinet either way): its mesh's +Y,
+    # its open front with the shelves and books, against the way from the wall into the room (the shelf toward her front point))
+    cab = None
+    for a_ in GS.get_all_actors_of_class(G["w"], unreal.Actor):
+        if "Bookshelf" not in a_.get_class().get_name() or dist2(a_.get_actor_location(), at) > 60: continue
+        cab = next((c_ for c_ in a_.get_components_by_class(unreal.StaticMeshComponent) if c_.get_editor_property("static_mesh") and "Cabinet" in c_.get_editor_property("static_mesh").get_name()), None)
+        if cab: break
+    if cab:
+        fy = cab.get_right_vector(); into = V(front.x - at.x, front.y - at.y, 0.0); nn = math.hypot(into.x, into.y) or 1.0
+        res["front_dot"] = round((fy.x * into.x + fy.y * into.y) / nn, 3)
+    else: res["front_dot"] = None
     quiet(False)
+    mid_l = res["mid_swing"]["l"]; ms = off(mid_l, me.get("yaw", 0)) if mid_l is not None else 0
     ok = (res["before"]["n"] > 0 and res["before"]["with_leaves"] == res["before"]["n"] and res["before"]["shut"] == res["before"]["n"] and "shelf" in res["f"]
-          and res["searched"]["l_open"] < 2 and res["searched"]["r_open"] < 2 and res["others_shut"])
+          and res["searched"]["l_open"] < 2 and res["searched"]["r_open"] < 2 and res["others_shut"] and 5 < ms < 100
+          and (res["front_dot"] or 0) > 0.95)
     step_result("shelf15", ok, **res)
 
 def step_chapel15():
-    """the list of 2026-11-20 (item 11): every chapel of the sets made: each pew's seat (its mesh's -X, so its yaw + 180) faces the altar's
+    """the list of 2026-11-20 (item 11): every chapel of the sets made: each pew's seat (away from its backrest, measured on its mesh) faces the altar's
     wall within 10 degrees (the room's long way toward the altar), and its altar lies ahead of it"""
     c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    # (the seat's way measured on the Pew mesh as its Adjust lays it: its backrest (the top quarter's vertices) stands at the piece's
+    # -X or +X; the seat faces away from it. Not assumed from either frame (PR #96's review moved the Pew's front to its seat))
+    pc = g.get_editor_property("pieces")[unreal.Name("Pew")]; pm = pc.get_editor_property("mesh"); adj = pc.get_editor_property("adjust")
+    vs = []
+    for s in range(pm.get_num_sections(0)):
+        sec = unreal.ProceduralMeshLibrary.get_section_from_static_mesh(pm, 0, s); vs += [adj.transform_location(v) for v in sec[0]]
+    z0, z1 = min(v.z for v in vs), max(v.z for v in vs); hi = [v for v in vs if v.z > z0 + 0.75 * (z1 - z0)]
+    back_x = sum(v.x for v in hi) / max(len(hi), 1); seat_off = 180.0 if back_x > 0 else 0.0
     sets = [I2(0, 0)] + (yield from tier2_sets())
     chapels, bad, n = [], [], 0
     for s_ in sets:
@@ -6631,12 +6654,12 @@ def step_chapel15():
                 n += 1
                 dx, dy = ax - px, ay - py
                 axis = math.degrees(math.atan2(0.0, math.copysign(1.0, dx))) if abs(dx) >= abs(dy) else math.degrees(math.atan2(math.copysign(1.0, dy), 0.0))
-                seat = yw + 180.0
+                seat = yw + seat_off
                 err = abs((seat - axis + 180.0) % 360.0 - 180.0)
                 ahead = math.cos(math.radians(seat)) * dx + math.sin(math.radians(seat)) * dy > 0
                 if err > 10.0 or not ahead: bad.append([round(px), round(py), round(yw, 1), round(err, 1)])
             chapels.append({"set": [s_.x, s_.y], "room": int(p[0]), "pews": len(pews)})
-    res = {"chapels": chapels, "pews": n, "bad": bad[:10]}
+    res = {"chapels": chapels, "pews": n, "bad": bad[:10], "backrest_x": round(back_x, 1)}
     quiet(False)
     step_result("chapel15", n > 0 and not bad, **res)
 

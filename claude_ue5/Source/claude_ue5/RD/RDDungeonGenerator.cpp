@@ -1943,11 +1943,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 			// (the list of 2026-11-20 (item 8): the wheel, + and -, the right stick's up and down zoom it, as the town's map)
 			if (bMapZoom15)
 			{
-				const int32 Wz = (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp) ? 1 : 0) - (PC->WasInputKeyJustPressed(EKeys::MouseScrollDown) ? 1 : 0)
-					+ (PC->WasInputKeyJustPressed(EKeys::Add) || PC->WasInputKeyJustPressed(EKeys::Equals) ? 1 : 0) - (PC->WasInputKeyJustPressed(EKeys::Subtract) || PC->WasInputKeyJustPressed(EKeys::Hyphen) ? 1 : 0);
-				if (Wz != 0) MapZoom *= FMath::Pow(1.25f, (float)Wz);
-				const float Rz = PC->GetInputAnalogKeyState(EKeys::Gamepad_RightY);
-				if (FMath::Abs(Rz) > 0.2f) MapZoom *= FMath::Pow(2.2f, Rz * Dt);
+				MapZoom *= ReadMapZoomInput15(PC, Dt);
 				MapZoom = FMath::Clamp(MapZoom, FMath::Max(MapZoomMin15, 0.1f), FMath::Max(MapZoomMax15, MapZoomMin15));
 			}
 			if (MapPan.Size() > MapPanMax) MapPan = MapPan.GetSafeNormal() * MapPanMax;

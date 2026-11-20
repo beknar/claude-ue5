@@ -6,7 +6,7 @@ the front pillars (66 cm) and laid in the piece's frame: the cabinet's front +X 
 the leaf's face across X. Each leaf's origin is its hinge (on the floor's height), the leaf running along +Y from it (the right
 leaf, hinged at -Y) or -Y (the left, hinged at +Y); closed it stands FRONT_X in front of the piece's middle.
 
-Run:  blender -b -P shelf_doors15.py -- <cabinet_d.fbx> <out dir>
+Run:  blender -b -P shelf_doors15.py -- <cabinet_d.fbx> <out dir> <adjust x> <adjust y>   (the Bookshelf piece's Adjust as turned, cm)
 Writes <out dir>/SM_RD_ShelfDoorL15.fbx, SM_RD_ShelfDoorR15.fbx and shelf_doors15.json (the hinge places and the leaf's size, cm, in
 the piece's frame, for 934)."""
 import bpy, bmesh, json, os, sys
@@ -14,9 +14,10 @@ from mathutils import Vector
 
 argv = sys.argv[sys.argv.index("--") + 1:]
 SRC, OUT = argv[0], argv[1]
+# (the piece's Adjust after 934's turn, from the stage (PR #96's review: written here before): the mesh's +Y (its open front) to +X,
+# its middle (its x 8.42 cm off in the mesh's y) to 0)
+ADJ_X, ADJ_Y = float(argv[2]), float(argv[3])
 os.makedirs(OUT, exist_ok=True)
-# (the piece's Adjust after 934's turn: the mesh's +Y (its open front) to +X; its middle (x 8.42 cm off in the mesh's y) to 0)
-ADJ_X, ADJ_Y = -8.4168, -0.0575
 HINGE = 66.0          # (cm from the middle: the front pillars' inner faces)
 FRONT_Y_MESH = 27.0    # (cm, the mesh's y the closed leaves stand at: in front of the shelves' boards (y 23), behind the pillars' fronts)
 

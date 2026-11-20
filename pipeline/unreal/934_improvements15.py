@@ -15,10 +15,11 @@ Parts (args):
                   game and martial_arts.
   shelves <dir>   the fourth phase (item 7): the Gothic bookshelf (SM_Prop_Cabinet_D) exported to <dir>, its back panel cut into two
                   door leaves by blender_numpy/shelf_doors15.py, imported to /Game/RandomDungeon/List15 (the cabinet's material);
-                  on every map of the game the Bookshelf and Bookshelf2 pieces turned round (their Adjust had put the cabinet's
-                  back panel to the room and its open front to the wall) and the leaves, their hinges and bShelfDoors15 set.
+                  on every map of the game the Bookshelf, Bookshelf2 and Pew pieces turned round as 770 writes them now (their
+                  Adjust had put the cabinet's back panel and the pew's backrest to the front) and the leaves, their hinges and
+                  bShelfDoors15 set.
   dungeon         the fourth phase (items 5, 6, 8, 11): the great hall's oven (bStartOven15), the stations' marks (bStationMarks15),
-                  the big map's zoom (bMapZoom15) and the pews facing the altar (bPewsFaceAltar15) on every map of the game; each
+                  the big map's zoom (bMapZoom15) on every map of the game (the pews by 770's Pew and the shelves part); each
                   dungeon map's start section built again (its oven and its shelves saved).
 """
 import gc, json, os, sys
@@ -120,7 +121,8 @@ SHELF = {}
 
 
 def shelves_make(work):
-    """the cabinet out, the two leaves made by Blender, in again (their size measured against the script's)"""
+    """the cabinet out, the two leaves made by Blender for the Bookshelf piece's Adjust as turned (read from the castle's table:
+    PR #96's review, it was written into the script), in again (their size measured against the script's)"""
     import subprocess
     os.makedirs(work, exist_ok=True)
     t = unreal.AssetExportTask(); t.object = unreal.load_asset(CAB); t.filename = os.path.join(work, "cabinet_d.fbx")
@@ -128,7 +130,10 @@ def shelves_make(work):
     assert unreal.Exporter.run_asset_export_task(t), "the cabinet's export failed"
     out = os.path.join(work, "doors")
     script = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "blender_numpy", "shelf_doors15.py")
-    r = subprocess.run([BLENDER, "-b", "-P", script, "--", t.filename, out], capture_output=True, text=True, timeout=600)
+    g = open_map("mistward_castle"); a = g.get_editor_property("pieces")[unreal.Name("Bookshelf")].get_editor_property("adjust")
+    ax, ay = (a.translation.x, a.translation.y) if a.rotation.z < -0.5 else (-a.translation.x, -a.translation.y)
+    g = None; gc.collect()
+    r = subprocess.run([BLENDER, "-b", "-P", script, "--", t.filename, out, f"{ax:.4f}", f"{ay:.4f}"], capture_output=True, text=True, timeout=600)
     assert "SHELF15 done" in r.stdout, r.stdout[-2000:] + r.stderr[-2000:]
     rec = json.load(open(os.path.join(out, "shelf_doors15.json"), encoding="utf-8"))
     tasks = []
@@ -152,11 +157,12 @@ def shelves_make(work):
 
 def shelves(g, m):
     pcs = g.get_editor_property("pieces"); turned = []
-    for n in ("Bookshelf", "Bookshelf2"):
+    # (the saved maps' pieces as 770 writes them now (front "+y": PR #96's review fixed them at their source): the old "-y" Adjust's
+    # +90 sent the cabinet's open front and the pew's seat to -X; turned once, by half a turn)
+    for n in ("Bookshelf", "Bookshelf2", "Pew"):
         p = pcs.get(unreal.Name(n))
-        if not p or not p.get_editor_property("actor_class"): continue
+        if not p: continue
         a = p.get_editor_property("adjust")
-        # (turned once: the old Adjust's +90 sent the cabinet's front (its +Y) to -X, against the wall)
         if a.rotation.z > 0.5:
             a.rotation = unreal.Quat(0.0, 0.0, -0.70710678, 0.70710678)
             a.translation = unreal.Vector(-a.translation.x, -a.translation.y, a.translation.z)
@@ -169,7 +175,7 @@ def shelves(g, m):
 
 
 def dungeon(g, m):
-    for k in ("start_oven15", "station_marks15", "map_zoom15", "pews_face_altar15"): g.set_editor_property(k, True)
+    for k in ("start_oven15", "station_marks15", "map_zoom15"): g.set_editor_property(k, True)
     has_oven = g.get_editor_property("pieces").get(unreal.Name("BreadOven")) is not None
     town = bool(g.get_editor_property("town"))
     if not town: g.modify(); g.build_start_section()

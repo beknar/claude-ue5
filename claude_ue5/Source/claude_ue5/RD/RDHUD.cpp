@@ -1530,7 +1530,7 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 		TArray<TPair<int32, const TCHAR*>> St15;
 		if (Gen->bStationMarks15 && !Gen->bTown)
 		{
-			if (Gen->bDungeonOvens || Gen->bStartOven15) St15.Add({ 20, TEXT("oven: bake") });
+			if (Gen->bDungeonOvens) St15.Add({ 20, TEXT("oven: bake") });          // (where ovens bake: PR #96's review)
 			if (Gen->bTables14) St15.Add({ 21, TEXT("alchemist's table: potions") });
 			if (Gen->bTables14 && Gen->bLibrarianInDungeon14) St15.Add({ 22, TEXT("librarian's table: scrolls") });
 			if (Gen->bForge) St15.Add({ 23, TEXT("forge") });

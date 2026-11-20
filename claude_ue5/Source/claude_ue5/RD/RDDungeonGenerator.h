@@ -920,8 +920,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bMapZoom15 = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float MapZoomMin15 = 0.4f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float MapZoomMax15 = 4.f;
-	/** the chapels' pews face the altar (item 11: they had their backs to it) */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bPewsFaceAltar15 = false;
 	/** a library's bookshelves have doors, open once searched (item 7): the leaves (934 shelves), their hinges in the piece's frame
 	 *  (x in front of its middle, y each side), how far they swing */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bShelfDoors15 = false;
@@ -929,6 +927,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TObjectPtr<UStaticMesh> ShelfDoorR15;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FVector2D ShelfDoorHinge15 = FVector2D(18.58f, 66.f);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float ShelfDoorOpenDeg15 = 105.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float ShelfDoorSwingSeconds15 = 0.7f;
+	/** the zoom a big map's keys ask for this frame (the wheel, + and -, the right stick's up and down): its factor (1 none); the
+	 *  town's and the dungeon's maps both read it */
+	float ReadMapZoomInput15(APlayerController* PC, float Dt) const;
 	/** a test's: "<n>|<i>:<at x>:<at y>:<yaw>:<searched>:<left yaw>:<right yaw>|..." the shelves of a set and their doors */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") FString GetShelfDoors15(FIntPoint Section) const;
 	/** a test's: the pews of a set's chapels: "<room>|<altar x>|<altar y>|<pew x>:<pew y>:<yaw>;..." per chapel */

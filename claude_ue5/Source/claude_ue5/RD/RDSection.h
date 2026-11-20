@@ -379,11 +379,17 @@ public:
 	/** a library's bookshelves (the list of 2026-11-10: searched with F for scrolls, their parts and tomes): where each stands (its
 	 *  middle), its yaw (its front toward the room, +X), its depth, its room */
 	struct FShelf { FVector At = FVector::ZeroVector; float Yaw = 0.f; float Depth = 50.f; int32 Room = -1;
-		/** the list of 2026-11-20: its door leaves (on their hinges; none without bShelfDoors15) */
-		TWeakObjectPtr<UStaticMeshComponent> DoorL, DoorR; };
-	/** the list of 2026-11-20 (RDList15c.cpp): a shelf's doors hung (open at once if it was searched); a shelf's doors opened */
+		/** the list of 2026-11-20: its door leaves' hinges (interactive parts: none without bShelfDoors15), how far open (0 to 1) */
+		TWeakObjectPtr<USceneComponent> DoorL, DoorR; float Open15 = 0.f; };
+	/** the list of 2026-11-20 (RDList15c.cpp): a shelf's doors hung (open at once if it was searched); a shelf's doors opened (swung
+	 *  over ShelfSwing15's time, or at once) */
 	void MakeShelfDoors15(int32 I);
-	void OpenShelfDoors15(int32 I);
+	void OpenShelfDoors15(int32 I, bool bNow = false);
+	TArray<int32> ShelfSwing15;
+	void TickShelfDoors15(float Dt);
+	/** a piece on a free tile off a room's lanes whose four neighbours are free, the nearest such to Anchor, its front toward the lane
+	 *  (no random draw; its tile blocked; added to Points): the alchemist's and librarian's tables', the oven's rule */
+	bool PlaceNearAnchor15(FName Piece, int32 RI, const FVector& Anchor, TArray<FVector>& Points);
 	/** a bread oven by the start set's great hall's anvil */
 	void EnsureOven15();
 	/** a test's: the chapels' altars and pews as laid (by Furnish) */

@@ -1001,11 +1001,7 @@ void ARDDungeonGenerator::TickTownMapInput(APlayerController* PC, float Dt)
 	const ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	const float Span = S ? (S->TownInner.Width() + 1) * TileSize : 48000.f;
 	const float Z0 = MapZoom;
-	const int32 Wheel = (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp) ? 1 : 0) - (PC->WasInputKeyJustPressed(EKeys::MouseScrollDown) ? 1 : 0)
-		+ (PC->WasInputKeyJustPressed(EKeys::Add) || PC->WasInputKeyJustPressed(EKeys::Equals) ? 1 : 0) - (PC->WasInputKeyJustPressed(EKeys::Subtract) || PC->WasInputKeyJustPressed(EKeys::Hyphen) ? 1 : 0);
-	if (Wheel != 0) MapZoom *= FMath::Pow(1.25f, (float)Wheel);
-	const float Rs = PC->GetInputAnalogKeyState(EKeys::Gamepad_RightY);
-	if (FMath::Abs(Rs) > 0.2f) MapZoom *= FMath::Pow(2.2f, Rs * Dt);
+	MapZoom *= ReadMapZoomInput15(PC, Dt);          // (the wheel, + and -, the right stick: the dungeon's map reads the same, RDList15c.cpp)
 	MapZoom = FMath::Clamp(MapZoom, 1.f, FMath::Max(1.f, MapZoomMax));
 	// (moved as fast on the screen at every zoom: the arrow keys and the D-pad a third of the sheet a second)
 	auto Down = [&](const FKey& K) { return PC->IsInputKeyDown(K) ? 1.f : 0.f; };
