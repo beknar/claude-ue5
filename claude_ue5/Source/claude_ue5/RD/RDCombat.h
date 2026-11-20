@@ -635,6 +635,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") bool CycleSummonKind15(FName Spell, int32 Step = 1);
 	/** a kind of a summoning chosen by name (tests); false when it is none of its kinds */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") bool SetSummonKind15(FName Spell, FName Kind);
+	/** a summoning's kinds this map has (with a mesh): what Enter cycles through and the inventory lists */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FName> GetSummonKindsHere15(FName Spell) const;
 	/** her chosen kinds, by summoning (kept in the save and carried) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List15") TMap<FName, FName> SummonPick15;
 	/** the found weapon in her hands put away: her bare hands drawn (item 13); false when her hero has none */
@@ -643,6 +645,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") int32 GetUnarmedIndex15() const;
 	/** a cast at the cap took the place of a hurt one (item 4: a test's count) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List15") int32 SummonsReplaced15 = 0;
+	/** the kind the summoning being cast calls (fixed as it begins) */
+	FName CastKind15;
 	/** an item put on the bar as an entry ("#<item>") */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool AssignQuickItem(int32 Slot, FName Item) { return AssignQuickEntry(Slot, FName(*(TEXT("#") + Item.ToString()))); }
 	/** a slot's number as the bar shows it: 1 to 9, 0, then 11, 12... (those have no key) */

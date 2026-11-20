@@ -401,11 +401,15 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 			if (Now - NoManaTime > 0.6f)
 			{
 				++CastsRefused; ++SummonsRefused;
-				SetMessage(FString::Printf(TEXT("You lead %d of them already (%s), none of them hurt: no more answer %s"), FMath::Max(Sd->Count, 1), *Generator->SummonTitleOf(*Sd), *Sd->Name.ToString()));
+				SetMessage(FString::Printf(TEXT("You lead %d of them already (%s), none of them hurt: no more answer %s"), FMath::Max(Sd->Count, 1), *Generator->StandingTitles15(Sd->Name), *Sd->Name.ToString()));
 			}
 			NoManaTime = Now;
 			return false;
 		}
+	// (the list of 2026-11-20: the kind a summoning calls is fixed as the cast begins, not at its release a moment later (the autoplay
+	// puts the player's choice back after it starts the cast))
+	CastKind15 = NAME_None;
+	if (W->bSpell) if (const FRDSpellDef* Sk = SpellOf(Index); Sk && Sk->Kind == ERDSpellKind::Summon) CastKind15 = GetSummonKind15(Sk->Name);
 	// (the Martial Artist's chi attacks (bolts with a range of their own): with no monster within it that she can see, none
 	// is made and no mana spent (the first test's chi at 6 m took its 7 mana for nothing); martial_arts: made all the same)
 	if (bChi && !bChiFree && !Generator->bChiWithoutTarget && !PickTarget(W->BoltRange, true))
@@ -1980,7 +1984,7 @@ bool URDCombatComponent::UseInventoryEntry()
 		{
 			// (the list of 2026-11-20: on her summoning, the next of its kinds (item 18); on a found weapon, put away for her bare
 			// hands (item 13))
-			if (W.bSpell && Generator->Spells.IsValidIndex(W.SpellIndex) && Generator->Spells[W.SpellIndex].Kind == ERDSpellKind::Summon && Generator->Spells[W.SpellIndex].SummonKinds.Num() > 1)
+			if (W.bSpell && Generator->Spells.IsValidIndex(W.SpellIndex) && Generator->Spells[W.SpellIndex].Kind == ERDSpellKind::Summon && GetSummonKindsHere15(Generator->Spells[W.SpellIndex].Name).Num() > 1)
 				return CycleSummonKind15(Generator->Spells[W.SpellIndex].Name);
 			if (W.Mesh && PutWeaponAway15()) return true;
 			SetMessage(FString::Printf(TEXT("%s is in your hands"), *W.Name.ToString())); return false;

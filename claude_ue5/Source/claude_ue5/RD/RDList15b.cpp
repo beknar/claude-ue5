@@ -28,9 +28,7 @@ bool URDCombatComponent::CycleSummonKind15(FName Spell, int32 Step)
 {
 	const FRDSpellDef* S = Generator ? Generator->Spells.FindByPredicate([Spell](const FRDSpellDef& D) { return D.Name == Spell; }) : nullptr;
 	if (!S) return false;
-	TArray<FName> Ks;
-	for (const FName& K : S->SummonKinds)
-		if (Generator->Monsters.ContainsByPredicate([&K](const FRDMonsterDef& D) { return D.Name == K && D.Mesh; })) Ks.AddUnique(K);
+	const TArray<FName> Ks = GetSummonKindsHere15(Spell);
 	if (Ks.Num() < 2) { SetMessage(FString::Printf(TEXT("%s calls %s alone"), *Spell.ToString(), *Generator->KindTitle15(S->SummonKind))); return false; }
 	const int32 At = FMath::Max(0, Ks.IndexOfByKey(GetSummonKind15(Spell)));
 	const FName Next = Ks[((At + Step) % Ks.Num() + Ks.Num()) % Ks.Num()];
@@ -39,12 +37,34 @@ bool URDCombatComponent::CycleSummonKind15(FName Spell, int32 Step)
 	return true;
 }
 
+TArray<FName> URDCombatComponent::GetSummonKindsHere15(FName Spell) const
+{
+	// (the kinds this map has with a mesh: the cycle, the inventory's count and its list read the same ones (PR #95's review))
+	TArray<FName> Ks;
+	const FRDSpellDef* S = Generator ? Generator->Spells.FindByPredicate([Spell](const FRDSpellDef& D) { return D.Name == Spell; }) : nullptr;
+	if (!S) return Ks;
+	for (const FName& K : S->SummonKinds)
+		if (Generator->Monsters.ContainsByPredicate([&K](const FRDMonsterDef& D) { return D.Name == K && D.Mesh; })) Ks.AddUnique(K);
+	return Ks;
+}
+
 bool URDCombatComponent::SetSummonKind15(FName Spell, FName Kind)
 {
 	const FRDSpellDef* S = Generator ? Generator->Spells.FindByPredicate([Spell](const FRDSpellDef& D) { return D.Name == Spell; }) : nullptr;
 	if (!S || !(S->SummonKinds.Contains(Kind) || S->SummonKind == Kind)) return false;
 	SummonPick15.Add(Spell, Kind);
 	return true;
+}
+
+FString ARDDungeonGenerator::StandingTitles15(FName Spell) const
+{
+	// (the kinds of a summoning's minions standing, each once; none standing: the kind she would call)
+	TArray<FString> T;
+	for (const ARDMonster* A : Allies)
+		if (IsValid(A) && !A->IsDead() && A->SummonSpell == Spell) T.AddUnique(A->Title.IsEmpty() ? A->MonsterName.ToString() : A->Title);
+	if (T.Num() > 0) return FString::Join(T, TEXT(", "));
+	const FRDSpellDef* S = Spells.FindByPredicate([Spell](const FRDSpellDef& D) { return D.Name == Spell; });
+	return S ? SummonTitleOf(*S) : Spell.ToString();
 }
 
 FString ARDDungeonGenerator::KindTitle15(FName Kind) const

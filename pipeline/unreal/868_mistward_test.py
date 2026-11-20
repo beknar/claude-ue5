@@ -6465,6 +6465,7 @@ def step_summon15():
     ok = (nh["had"] == nh["cap"] and not nh["started"] and abs(nh["mana_spent"]) < 0.01 and nh["refused"] >= 1 and nh["after"] == nh["cap"]
           and oh["started"] and oh["mana_spent"] > 0 and oh["after"] == nh["cap"] and oh["hurt_gone"] and oh["replaced"] == 1 and max(oh["shares"]) >= 0.99
           and all(len(v) == 5 and len(set(v)) == 5 for v in spells.values()) and not res["kinds_missing"]
+          and len({k for v in spells.values() for k in v}) == sum(len(v) for v in spells.values())          # (no kind offered by two summonings: PR #95's review)
           and len(trials) == 10 and all(t.get("came") == t["kind"] and t.get("follow_s") is not None and t.get("struck_s") is not None for t in trials)
           and ic.get("used") and ic.get("after") != ic.get("before"))
     step_result("summon15", ok, **res)

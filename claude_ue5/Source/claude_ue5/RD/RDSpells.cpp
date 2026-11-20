@@ -628,7 +628,8 @@ void URDCombatComponent::ReleaseSpell(int32 Wi)
 		const int32 Have = Generator->CountSummoned(S->Name);
 		// (the list of 2026-11-20: the kind she chose (item 18); at the cap, the most hurt of them gives its place (item 4: refused
 		// before the cast when none is hurt))
-		const FName Kind15 = GetSummonKind15(S->Name);
+		const FName Kind15 = !CastKind15.IsNone() ? CastKind15 : GetSummonKind15(S->Name);
+		CastKind15 = NAME_None;
 		ARDMonster* const Worst15 = Have >= FMath::Max(S->Count, 1) ? Generator->MostHurtSummon15(S->Name) : nullptr;
 		const FVector Rt = O->GetActorRightVector();
 		const float Side = (Have % 2 == 0 ? 1.f : -1.f) * 70.f * ((Have + 1) / 2);
@@ -655,7 +656,8 @@ void URDCombatComponent::ReleaseSpell(int32 Wi)
 				if (D >= 120.f) break;
 			}
 		}
-		ARDMonster* K = Generator->SummonKindAlly(Kind15, At - FVector(0, 0, O->GetSimpleCollisionHalfHeight()), S->Name);
+		// (at the cap with none hurt now (healed since the cast began: PR #95's review), nothing comes: its mana given back below)
+		ARDMonster* K = Have >= FMath::Max(S->Count, 1) && !Worst15 ? nullptr : Generator->SummonKindAlly(Kind15, At - FVector(0, 0, O->GetSimpleCollisionHalfHeight()), S->Name);
 		if (K && Worst15)
 		{
 			const FString Old = Worst15->Title.IsEmpty() ? Worst15->MonsterName.ToString() : Worst15->Title;

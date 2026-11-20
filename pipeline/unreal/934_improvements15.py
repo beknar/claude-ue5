@@ -66,14 +66,18 @@ def summons(g, m):
     mons = [d for d in g.get_editor_property("monsters") if d.get_editor_property("mesh")]
     tier = {str(d.name): d.tier for d in mons}
     sp = list(g.get_editor_property("spells")); out = {}
+    # (a kind is offered by one summoning only: every summoning's own kind is taken first, then each one's four as they are chosen
+    # (PR #95's review: Summon Tier 6 and 7, both of The War Engine's tier 3, offered the same five))
+    used = {str(s.summon_kind) for s in sp if s.kind == unreal.RDSpellKind.SUMMON}
     for i, s in enumerate(sp):
         if s.kind != unreal.RDSpellKind.SUMMON: continue
         k0 = str(s.summon_kind)
         if k0 not in tier: out[str(s.name)] = f"no {k0} here"; continue
         fam = FAMILY.get(k0, "castle"); t0 = tier[k0]
-        cand = [d for d in mons if FAMILY.get(str(d.name), "castle") == fam and str(d.name) not in (k0, fb)]
+        cand = [d for d in mons if FAMILY.get(str(d.name), "castle") == fam and str(d.name) != fb and str(d.name) not in used]
         cand.sort(key=lambda d: (abs(d.tier - t0), -d.get_editor_property("health_factor"), str(d.name)))
         kinds = [k0] + [str(d.name) for d in cand[:4]]
+        used.update(kinds)
         s.set_editor_property("summon_kinds", [unreal.Name(k) for k in kinds]); sp[i] = s
         out[str(s.name)] = kinds
     g.set_editor_property("spells", sp)

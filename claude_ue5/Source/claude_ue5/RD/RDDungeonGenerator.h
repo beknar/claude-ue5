@@ -855,6 +855,8 @@ public:
 	void DismissAlly15(ARDMonster* A);
 	/** a kind's title (the table's, else its name) */
 	FString KindTitle15(FName Kind) const;
+	/** the kinds of a summoning's minions standing (each once); none: the kind she would call */
+	FString StandingTitles15(FName Spell) const;
 	/** tests and reels (a card says so): tiers 2 to UpTo open now, as if each tier before had reached its share (with
 	 *  bEncounters each one's boss and guarded ring are set too); how many opened */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward3") int32 DebugOpenTiers(int32 UpTo, bool bEncounters);
