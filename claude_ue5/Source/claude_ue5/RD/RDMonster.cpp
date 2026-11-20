@@ -51,6 +51,8 @@ void ARDMonster::Setup(ARDSection* InSection, const FRDMonsterDef& Def, int32 In
 	Section = InSection; MonsterName = Def.Name;
 	if (Section && Section->Generator && !Section->Generator->bMonstersBlockPawns)
 		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	// (the list of 2026-11-20: her allies are Vehicle objects, solid to her; a monster passes them as before)
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Vehicle, ECR_Overlap);
 	R.Initialize(InSeed);
 	GetCapsuleComponent()->SetCapsuleSize(Def.CapsuleRadius, Def.CapsuleHalfHeight);
 	USkeletalMeshComponent* M = GetMesh();
@@ -516,8 +518,9 @@ void ARDMonster::BecomeAlly(float Seconds, float InHealth, float InDamage)
 	M->bPauseAnims = false;
 	M->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	// (she walks through her allies, and they through each other and the monsters)
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	// (they walk through each other and the monsters; the list of 2026-11-20 (item 2): she no longer walks through them)
+	const ARDDungeonGenerator* Gn = Section ? Section->Generator.Get() : nullptr;
+	SetAllyCollision15(Gn ? Gn->bAllySolid15 : false);
 	// (and her camera passes them: one behind her pulled it into her back)
 	TArray<UPrimitiveComponent*> Prims; GetComponents<UPrimitiveComponent>(Prims);
 	for (UPrimitiveComponent* P : Prims) if (P) P->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
@@ -721,6 +724,9 @@ bool ARDMonster::FollowPlayer(float Dt, URDCombatComponent* Pc)
 			FVector Spot;
 			if (G->FindAllySpot(Hl, Her->GetActorRightVector() * Sgn, GetCapsuleComponent()->GetScaledCapsuleRadius(), this, Spot, Her->GetActorForwardVector()))
 			{
+				// (the list of 2026-11-20: on open ground, on the ground under the spot (her height is not the slope's beside her))
+				FVector Gd;
+				if (bOpenGround && G->WildGroundAt15(Spot, Gd)) { ArriveAt15(Gd); return true; }
 				SetActorLocation(Spot + FVector(0, 0, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - 80.f), false, nullptr, ETeleportType::TeleportPhysics);
 				Path.Reset();
 				return true;
@@ -734,8 +740,18 @@ bool ARDMonster::FollowPlayer(float Dt, URDCombatComponent* Pc)
 			Side = GetWorld()->SweepSingleByChannel(H2, Hl, Other, FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(45.f), Qp)
 				? Hl + Her->GetActorForwardVector() * 200.f : Other;
 		}
+		if (FVector Gd; bOpenGround && G && G->WildGroundAt15(Side, Gd)) { ArriveAt15(Gd); return true; }
 		SetActorLocation(Side + FVector(0, 0, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - 80.f), false, nullptr, ETeleportType::TeleportPhysics);
 		Path.Reset();
+		return true;
+	}
+	// (the list of 2026-11-20 (item 3): in her way while she presses toward it: off her line first)
+	if (const FVector Yd = AllyYield15(); !Yd.IsNearlyZero())
+	{
+		Path.Reset();
+		GetCharacterMovement()->MaxWalkSpeed = FMath::Max(WalkSpeed, 250.f) * SpeedMul();
+		AddMovementInput(Yd, 1.f);
+		SetWalkingAnim(GetVelocity().Size2D() > 25.f);
 		return true;
 	}
 	// (by her: it waits; mistward4: stepping out of another ally, or out of her, first)
@@ -758,12 +774,16 @@ bool ARDMonster::FollowPlayer(float Dt, URDCombatComponent* Pc)
 	{
 		ChaseTimer = 0.5f;
 		TArray<FIntPoint> Tiles; Path.Reset();
-		const FIntPoint From = WalkableTileAt(L), To = WalkableTileAt(Hl);
-		if (Section && Section->FindPath(From, To, Tiles) && Tiles.Num() >= 2) SetPathFromTiles(Tiles);
+		// (open ground: straight to her, no tiles (the list of 2026-11-20, the wilds))
+		if (!bOpenGround)
+		{
+			const FIntPoint From = WalkableTileAt(L), To = WalkableTileAt(Hl);
+			if (Section && Section->FindPath(From, To, Tiles) && Tiles.Num() >= 2) SetPathFromTiles(Tiles);
+		}
 		if (Path.Num() == 0) Path.Add(Hl);
 	}
 	const FVector Dir2 = FVector(Path[0].X - L.X, Path[0].Y - L.Y, 0);
-	if (WaitForDoor(L, Dir2)) return true;
+	if (!bOpenGround && WaitForDoor(L, Dir2)) return true;
 	if (Dir2.Size() < 70.f && Path.Num() > 1) { Path.RemoveAt(0); return true; }
 	AddMovementInput(AllySteer(Dir2), 1.f);
 	const float Speed = GetVelocity().Size2D();
@@ -943,7 +963,7 @@ bool ARDMonster::TickCombat(float Dt)
 	float Lose = bOpenGround && G->LoseDistance > 1.f ? FMath::Max(G->LoseDistance, G->WildAggroDistance * 1.8f) : G->LoseDistance;
 	if (bFinalBoss && G->bFinalBandFighting) Lose = FMath::Max(Lose, 4500.f);
 	if (PreyT && G->AggroDistance > 0.f) { Lose = FMath::Max(Lose, G->WildFolkPreyCm14 * 1.6f); if (Dist < 1500.f) PreyT->ScareWild14(this); }
-	if (!bHunt && (Dist > Lose || Dz > (bOpenGround ? 900.f : 400.f) || (bOpenGround && FVector::Dist2D(L, HomeAt) > WildLeash)))
+	if (!bHunt && (Dist > Lose || Dz > (bOpenGround ? 900.f : 400.f) || (bOpenGround && !bAlly && FVector::Dist2D(L, HomeAt) > WildLeash)))
 	{
 		CombatBranch = TEXT("lost");
 		bAggro = false; Path.Reset(); WaitTime = 1.f; GetCharacterMovement()->MaxWalkSpeed = WalkSpeed * SpeedMul(); CurrentFoe = nullptr;
@@ -1035,8 +1055,10 @@ bool ARDMonster::TickCombat(float Dt)
 	}
 	GetCharacterMovement()->MaxWalkSpeed = FMath::Min(WalkSpeed * G->ChaseSpeedScale, G->MaxChaseSpeed * MaxChaseScale) * SpeedMul();
 	const FVector Dir2 = FVector(Path[0].X - L.X, Path[0].Y - L.Y, 0);
-	if (WaitForDoor(L, Dir2)) { CombatBranch = TEXT("door"); return true; }
+	if (!bOpenGround && WaitForDoor(L, Dir2)) { CombatBranch = TEXT("door"); return true; }
 	if (Dir2.Size() < 70.f && Path.Num() > 1) { Path.RemoveAt(0); return true; }
+	// (the list of 2026-11-20 (item 3): her ally in her way steps off her line, even on its way to a foe)
+	if (bAlly) if (const FVector Yd = AllyYield15(); !Yd.IsNearlyZero()) { CombatBranch = TEXT("yield"); AddMovementInput(Yd, 1.f); SetWalkingAnim(true); return true; }
 	FVector Side = FVector::ZeroVector;
 	if (StuckTime > 0.5f) { const FVector Fw = Dir2.GetSafeNormal(); Side = FVector(-Fw.Y, Fw.X, 0) * (((int32)(StuckTime / 0.8f)) % 2 ? 1.f : -1.f); }
 	// (mistward4: her allies chasing one monster keep apart, and come at it from either side)

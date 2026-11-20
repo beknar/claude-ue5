@@ -1064,6 +1064,7 @@ bool ARDDungeonGenerator::StartArena(FIntPoint Section, int32 Room)
 	if (!S || S->GetRoomKindEnum(Room) != ERDRoomKind::Arena || ArenaRoom >= 0 || ArenasWon.Contains(FIntVector(Section.X, Section.Y, Room))) return false;
 	ArenaSection = Section; ArenaRoom = Room; ArenaWave = 0; ArenaMonsters.Reset(); bArenaSheInside = false;
 	S->ShutRoomDoors(Room);
+	GatherAlliesInRoom15(S, Room);          // (the list of 2026-11-20 (item 9): her allies left outside come in beside her)
 	RoomUses.FindOrAdd(TEXT("arena_begun"))++;
 	TierNotice = FString::Printf(TEXT("THE ARENA  -  SURVIVE %d WAVES"), ArenaWaves); TierNoticeTime = GetWorld()->GetTimeSeconds();
 	UE_LOG(LogRDMistward2, Log, TEXT("RDARENA begun in room %d of (%d,%d)"), Room, Section.X, Section.Y);

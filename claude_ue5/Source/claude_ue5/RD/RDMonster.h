@@ -96,6 +96,17 @@ public:
 	/** the way to move along Dir with that push: its part against Dir taken out (an ally queuing behind another was turned
 	 *  back from its foe, the PR review's find), the rest added; Dir itself when there is none */
 	FVector AllySteer(const FVector& Dir) const;
+	/** the list of 2026-11-20 (item 3, RDList15.cpp): the way and strength her ally steps off her line while she presses toward it
+	 *  within 1.2 m (0 none): sideways to the side with room, else ahead of her */
+	FVector AllyYield15();
+	/** times it has stepped aside for her (a test's count) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List15") int32 Yields15 = 0;
+	float YieldSide15 = 0.f, YieldUntil15 = -100.f;
+	/** the list of 2026-11-20 (item 2): solid to her, passing her other allies and the monsters (RDList15.cpp) */
+	void SetAllyCollision15(bool bSolid);
+	/** put on the ground at Feet (its capsule over it), its way forgotten */
+	void ArriveAt15(const FVector& Feet);
+	AActor* GetCurrentFoe() const { return CurrentFoe.Get(); }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsAlly() const { return bAlly; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetAllyTimeLeft() const { return AllySeconds > 0.f ? AllyLeft : 0.f; }
 	void SetChampion(bool b) { bChampion = b; }
