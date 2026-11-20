@@ -412,6 +412,8 @@ struct FRDWeaponDef
 	/** mistward_castle (docs/improvements3.txt): a scroll being read: a spell weapon of no mana that stands after hers for the
 	 *  cast only (not on the bar, not in the inventory, gone when its cast and its bolts are done) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bScroll = false;
+	/** the list of 2026-11-20 (item 13): her bare hands (no mesh; its attack refused): a weapon put away */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bUnarmed15 = false;
 };
 
 /** mistward_castle (docs/improvements2.txt): what a slash does with a hit, besides its bonus damage */
@@ -671,6 +673,9 @@ struct FRDSpellDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Icon = NAME_None;
 	/** a Summon spell: the monster kind that comes (the generator's Monsters by name) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName SummonKind = NAME_None;
+	/** the list of 2026-11-20 (item 18): the kinds she may choose among (SummonKind one of them; 934 summons: four more of its tier's
+	 *  table, on this map); empty: SummonKind alone */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FName> SummonKinds;
 	/** the list of 2026-11-11: a curse of the Warlock's (Kind Curse); the heroes alone who learn it (empty: every hero whose card
 	 *  learns its type); its element (fire, frost, shock, shadow or none: Elemental Ruin's) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERDCurseEffect CurseEffect = ERDCurseEffect::None;

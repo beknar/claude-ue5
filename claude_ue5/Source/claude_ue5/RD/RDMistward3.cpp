@@ -18,8 +18,8 @@ DEFINE_LOG_CATEGORY_STATIC(LogRDMistward3, Log, All);
 
 FString ARDDungeonGenerator::SummonTitleOf(const FRDSpellDef& S) const
 {
-	const int32 Mk = Monsters.IndexOfByPredicate([&S](const FRDMonsterDef& D) { return D.Name == S.SummonKind; });
-	return Mk >= 0 && !Monsters[Mk].Title.IsEmpty() ? Monsters[Mk].Title : S.SummonKind.ToString();
+	// (the list of 2026-11-20: the kind she chose for it)
+	return KindTitle15(PlayerCombat ? PlayerCombat->GetSummonKind15(S.Name) : S.SummonKind);
 }
 
 // ================================================================================================ harvests

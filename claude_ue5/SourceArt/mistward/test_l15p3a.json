@@ -1,0 +1,381 @@
+{
+ "tag": "l15p3a",
+ "plan": [
+  "summon15",
+  "unwield15",
+  "quick15",
+  "summoner",
+  "allyspace"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "summon15",
+   "ok": true,
+   "weapons": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1",
+    "Bare Hands",
+    "Summon Tier 2",
+    "Summon Tier 3",
+    "Summon Tier 4",
+    "Summon Tier 5"
+   ],
+   "full_none_hurt": {
+    "cap": 2,
+    "had": 2,
+    "started": false,
+    "mana_spent": 0.0,
+    "refused": 1,
+    "after": 2,
+    "message": "You lead 2 of them already (Rotting Soldier), none of them hurt: no more answer Summon Tier 1"
+   },
+   "full_one_hurt": {
+    "started": true,
+    "mana_spent": 23.7,
+    "after": 2,
+    "hurt_gone": true,
+    "replaced": 1,
+    "shares": [
+     1.0,
+     1.0
+    ],
+    "message": "Rotting Soldier takes the place of your hurt Rotting Soldier"
+   },
+   "kinds": {
+    "Summon Tier 1": [
+     "Soldier",
+     "Chicken",
+     "Medic",
+     "Drinker",
+     "Half_Creature_05"
+    ],
+    "Summon Tier 2": [
+     "Gunner",
+     "Orc_03",
+     "Parasit",
+     "Parasites_Fat",
+     "Monster"
+    ],
+    "Summon Tier 3": [
+     "Orc_05",
+     "Tank",
+     "Pangolin",
+     "Insect",
+     "Devourer"
+    ],
+    "Summon Tier 4": [
+     "Alien_Warrior_05",
+     "Fantasy_Animal_raptor_mount",
+     "Parasite_Spider",
+     "Troll",
+     "Daemon"
+    ],
+    "Summon Tier 5": [
+     "Spider",
+     "Nasty",
+     "Hunter",
+     "Titan",
+     "Rock"
+    ],
+    "Summon Tier 6": [
+     "Iron_Golem",
+     "Cyber_Soldier",
+     "Mutant_Trooper",
+     "War_Mech",
+     "Cyber_Convict"
+    ],
+    "Summon Tier 7": [
+     "Cyber_Soldier",
+     "Iron_Golem",
+     "Mutant_Trooper",
+     "War_Mech",
+     "Cyber_Convict"
+    ],
+    "Summon Tier 8": [
+     "Tide_Captain",
+     "Abyssal_Shellclaw",
+     "Shellclaw",
+     "Spearsnout",
+     "Drowned_Captain"
+    ],
+    "Summon Tier 9": [
+     "Skeleton_Archmage",
+     "Spire_Witch_Elder",
+     "Spire_Witch",
+     "Skeleton_Witch",
+     "Skeleton_Mage"
+    ],
+    "Summon Tier 10": [
+     "Kratos_Commander",
+     "Kratos_Tank",
+     "Kratos_Operative",
+     "Kratos_Guard",
+     "Kratos_Trooper"
+    ]
+   },
+   "kinds_missing": {},
+   "trials": [
+    {
+     "spell": "Summon Tier 1",
+     "kind": "Soldier",
+     "set": true,
+     "came": "Soldier",
+     "follow_s": 0.6,
+     "struck_s": 1.8
+    },
+    {
+     "spell": "Summon Tier 1",
+     "kind": "Chicken",
+     "set": true,
+     "came": "Chicken",
+     "follow_s": 0.6,
+     "struck_s": 1.9
+    },
+    {
+     "spell": "Summon Tier 1",
+     "kind": "Medic",
+     "set": true,
+     "came": "Medic",
+     "follow_s": 0.5,
+     "struck_s": 1.6
+    },
+    {
+     "spell": "Summon Tier 1",
+     "kind": "Drinker",
+     "set": true,
+     "came": "Drinker",
+     "follow_s": 0.6,
+     "struck_s": 1.8
+    },
+    {
+     "spell": "Summon Tier 1",
+     "kind": "Half_Creature_05",
+     "set": true,
+     "came": "Half_Creature_05",
+     "follow_s": 0.6,
+     "struck_s": 2.5
+    },
+    {
+     "spell": "Summon Tier 2",
+     "kind": "Gunner",
+     "set": true,
+     "came": "Gunner",
+     "follow_s": 0.5,
+     "struck_s": 0.7
+    },
+    {
+     "spell": "Summon Tier 2",
+     "kind": "Orc_03",
+     "set": true,
+     "came": "Orc_03",
+     "follow_s": 0.5,
+     "struck_s": 2.0
+    },
+    {
+     "spell": "Summon Tier 2",
+     "kind": "Parasit",
+     "set": true,
+     "came": "Parasit",
+     "follow_s": 0.6,
+     "struck_s": 1.8
+    },
+    {
+     "spell": "Summon Tier 2",
+     "kind": "Parasites_Fat",
+     "set": true,
+     "came": "Parasites_Fat",
+     "follow_s": 0.6,
+     "struck_s": 1.7
+    },
+    {
+     "spell": "Summon Tier 2",
+     "kind": "Monster",
+     "set": true,
+     "came": "Monster",
+     "follow_s": 0.5,
+     "struck_s": 1.6
+    }
+   ],
+   "inventory_cycle": {
+    "line": 2,
+    "used": true,
+    "before": "Half_Creature_05",
+    "after": "Soldier",
+    "message": "Summon Tier 1 now calls Rotting Soldier  (1 of 5)"
+   }
+  },
+  {
+   "step": "unwield15",
+   "ok": true,
+   "weapons": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1",
+    "Bare Hands",
+    "Dagger"
+   ],
+   "dagger": 4,
+   "bare": 3,
+   "drawn": {
+    "mesh": "SM_Dagger",
+    "visible": true
+   },
+   "line": 4,
+   "put_away": true,
+   "after": {
+    "index": 3,
+    "mesh": null,
+    "visible": false,
+    "message": "You put the dagger away: your hands are free"
+   },
+   "bare_attack": false,
+   "bare_blows": 0,
+   "slots": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1",
+    "Bare Hands",
+    "Dagger",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "fire_cast": true,
+   "fire_blows": 1,
+   "drawn_again": {
+    "mesh": "SM_Dagger",
+    "visible": true
+   }
+  },
+  {
+   "step": "quick15",
+   "ok": true,
+   "Summoner": {
+    "scroll": "Scroll of Fire Bolt",
+    "before": false,
+    "assigned": true,
+    "used": true,
+    "count": [
+     2,
+     1
+    ],
+    "read": 1,
+    "message": "You read the scroll of fire bolt:  Fire Bolt, no mana"
+   },
+   "Mage": {
+    "scroll": "Scroll of Fire Bolt",
+    "before": false,
+    "assigned": true,
+    "used": true,
+    "count": [
+     2,
+     1
+    ],
+    "read": 1,
+    "message": "You read the scroll of fire bolt:  Fire Bolt, no mana"
+   }
+  },
+  {
+   "step": "summoner",
+   "ok": false,
+   "error": "Array: Index 0 is out-of-bounds (len: 0) for property 'Attacks' (ArrayProperty)",
+   "trace": "Traceback (most recent call last):\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\868_mistward_test.py\", line 6996, in run\n    yield from STEPS[s]()\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\868_mistward_test.py\", line 2894, in step_summoner\n    \"clips\": sorted({w.attacks[0].get_name() for w in list(H[\"Summoner\"].weapons) + list(H[\"Summoner\"].locked_weapons)})}\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\868_mistward_test.py\", line 2894, in <setcomp>\n    \"clips\": sorted({w.attacks[0].get_name() for w in list(H[\"Summoner\"].weapons) + list(H[\"Summoner\"].locked_weapons)})}\n                     ~~~~~~~~~^^^\nIndexError: Array: Index 0 is out-of-bounds (len: 0) for property 'Attacks' (ArrayProperty)\n"
+  },
+  {
+   "step": "allyspace",
+   "ok": true,
+   "called": [
+    {
+     "spell": "Summon Tier 1",
+     "started": true,
+     "allies": 1,
+     "least_gap": null
+    },
+    {
+     "spell": "Summon Tier 1",
+     "started": true,
+     "allies": 2,
+     "least_gap": 58.3
+    },
+    {
+     "spell": "Summon Tier 2",
+     "started": true,
+     "allies": 3,
+     "least_gap": 58.3
+    },
+    {
+     "spell": "Summon Tier 2",
+     "started": true,
+     "allies": 4,
+     "least_gap": 58.3
+    },
+    {
+     "spell": "Summon Tier 3",
+     "started": true,
+     "allies": 5,
+     "least_gap": 58.3
+    },
+    {
+     "spell": "Summon Tier 3",
+     "started": true,
+     "allies": 6,
+     "least_gap": 58.3
+    }
+   ],
+   "off": {
+    "moving_least": -76.6,
+    "standing_least": -75.6,
+    "standing_overlap_share": 1.0
+   },
+   "on": {
+    "moving_least": 0.3,
+    "standing_least": 20.2,
+    "standing_overlap_share": 0.0
+   },
+   "far": {
+    "moved_m": 155.9,
+    "near_her": 6,
+    "allies": 6,
+    "least_gap": 58.3,
+    "behind_her": 0
+   },
+   "panel": {
+    "rows": [
+     "Rotting Soldier|2|2|40/40,40/40",
+     "Grave Gunner|2|3|85/85,85/85",
+     "Orc Skirmisher|2|4|144/144,144/144"
+    ],
+    "after_hurt": [
+     "Rotting Soldier|2|2|40/40,40/40",
+     "Grave Gunner|2|3|68/85,85/85",
+     "Orc Skirmisher|2|4|144/144,144/144"
+    ],
+    "hurt_hp": [
+     85.0,
+     68.0
+    ]
+   },
+   "marks": {
+    "allies": 6,
+    "minimap": 6,
+    "minimap_matched": 6,
+    "big": 6,
+    "big_matched": 6
+   }
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_l15p3a_quick15_Summoner.png",
+  "mw_l15p3a_quick15_Mage.png",
+  "mw_l15p3a_summon_panel.png",
+  "mw_l15p3a_ally_marks_map.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

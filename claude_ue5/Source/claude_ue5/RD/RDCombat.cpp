@@ -349,6 +349,14 @@ bool URDCombatComponent::StartAttack()
 bool URDCombatComponent::StartAttackWith(int32 Index)
 {
 	if (Generator && Generator->IsRidingOrSwimming()) return false;          // (the eighth phase: no blow from the saddle; 2026-11-12: nor swimming)
+	// (the list of 2026-11-20 (item 13): her bare hands strike nothing; her spells are cast as ever)
+	if (Generator && Generator->Weapons.IsValidIndex(Index) && Generator->Weapons[Index].bUnarmed15)
+	{
+		const float NowU = GetWorld()->GetTimeSeconds();
+		if (NowU - NoManaTime > 0.6f) SetMessage(TEXT("Your hands are empty: draw a weapon or a spell (I, or the quick bar)"));
+		NoManaTime = NowU;
+		return false;
+	}
 	const FRDWeaponDef* W = Generator && Generator->Weapons.IsValidIndex(Index) ? &Generator->Weapons[Index] : nullptr;
 	USkeletalMeshComponent* M = Body();
 	if (!W || !M || bDead || AttackTime >= 0.f || RollTime >= 0.f || W->Attacks.Num() == 0 || bInventoryOpen || bCraftOpen || bBlocking) return false;
@@ -383,15 +391,17 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 			return false;
 		}
 	}
-	// (mistward, the Summoner: a summon she leads as many of as it allows is refused before its mana is taken)
+	// (mistward, the Summoner: a summon she leads as many of as it allows is refused before its mana is taken; the list of
+	// 2026-11-20 (item 4): unless one of them is hurt, whose place the cast takes)
 	if (W->bSpell)
-		if (const FRDSpellDef* Sd = SpellOf(Index); Sd && Sd->Kind == ERDSpellKind::Summon && Generator->CountSummoned(Sd->Name) >= FMath::Max(Sd->Count, 1))
+		if (const FRDSpellDef* Sd = SpellOf(Index); Sd && Sd->Kind == ERDSpellKind::Summon && Generator->CountSummoned(Sd->Name) >= FMath::Max(Sd->Count, 1)
+			&& !Generator->MostHurtSummon15(Sd->Name))
 		{
 			const float Now = GetWorld()->GetTimeSeconds();
 			if (Now - NoManaTime > 0.6f)
 			{
 				++CastsRefused; ++SummonsRefused;
-				SetMessage(FString::Printf(TEXT("You lead %d of them already (%s): no more answer %s"), FMath::Max(Sd->Count, 1), *Generator->SummonTitleOf(*Sd), *Sd->Name.ToString()));
+				SetMessage(FString::Printf(TEXT("You lead %d of them already (%s), none of them hurt: no more answer %s"), FMath::Max(Sd->Count, 1), *Generator->SummonTitleOf(*Sd), *Sd->Name.ToString()));
 			}
 			NoManaTime = Now;
 			return false;
@@ -984,6 +994,7 @@ void URDCombatComponent::ClearItems()
 	ArmourWornOut = ItemsRepaired = ItemsCrafted = 0;
 	// (the third list's: the tab, the slots, the helmet, the slashes' work, the blessing)
 	SlashWith = NAME_None; SlashCursor = 0; InvTab = 0; AssignSlot = 0; bHelmetHidden = false; QuickSlots.Reset(); QuickOff.Reset(); ReadyAbility = NAME_None; QuickFirst = 0; LastWeaponCount = -1;
+	SummonPick15.Reset(); SummonsReplaced15 = 0;          // (the list of 2026-11-20)
 	SetBlocking(false); SlashProcs.Reset(); SlashBonusDealt = 0.f; BlockedHits = 0; StunReadyAt.Reset(); bSlashShieldUp = false;
 	HasteUntil = SlashEvadeUntil = DeflectUntil = BlessUntil = -100.f; BlessName.Reset();
 	UpdateWalkSpeed();
@@ -1965,7 +1976,15 @@ bool URDCombatComponent::UseInventoryEntry()
 		if (!Generator->Weapons.IsValidIndex(I)) return false;
 		const FRDWeaponDef& W = Generator->Weapons[I];
 		if (W.bAlongside) { SetMessage(FString::Printf(TEXT("%s is always at hand (RMB / E)"), *W.Name.ToString())); return false; }
-		if (I == WeaponIndex) { SetMessage(FString::Printf(TEXT("%s is in your hands"), *W.Name.ToString())); return false; }
+		if (I == WeaponIndex)
+		{
+			// (the list of 2026-11-20: on her summoning, the next of its kinds (item 18); on a found weapon, put away for her bare
+			// hands (item 13))
+			if (W.bSpell && Generator->Spells.IsValidIndex(W.SpellIndex) && Generator->Spells[W.SpellIndex].Kind == ERDSpellKind::Summon && Generator->Spells[W.SpellIndex].SummonKinds.Num() > 1)
+				return CycleSummonKind15(Generator->Spells[W.SpellIndex].Name);
+			if (W.Mesh && PutWeaponAway15()) return true;
+			SetMessage(FString::Printf(TEXT("%s is in your hands"), *W.Name.ToString())); return false;
+		}
 		SelectWeapon(I);
 		SetMessage(FString::Printf(TEXT("You wield the %s"), *W.Name.ToString().ToLower()));
 		return true;

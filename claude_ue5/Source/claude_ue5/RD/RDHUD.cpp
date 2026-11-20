@@ -2397,11 +2397,22 @@ void ARDHUD::DrawInventory(float Sc)
 			{
 				const int32 Mk = Gen->Monsters.IndexOfByPredicate([Sp](const FRDMonsterDef& D) { return D.Name == Sp->SummonKind; });
 				const FString Who = Gen->SummonTitleOf(*Sp);
-				Para(FString::Printf(TEXT("Calls %s (as strong as a tier %d monster) to fight at your side until it falls; you lead %d at most, %d now"),
+				if (Sp->SummonKinds.Num() > 1)
+				{
+					TArray<FString> Ks; for (const FName& K : Sp->SummonKinds) Ks.Add(Gen->KindTitle15(K));
+					Para(FString::Printf(TEXT("Its kinds: %s"), *FString::Join(Ks, TEXT(", "))), Dim, Sc * 1.0f);
+				}
+				Para(FString::Printf(TEXT("Calls %s (as strong as a tier %d monster) to fight at your side until it falls; you lead %d at most, %d now (at your most, a cast takes the place of the most hurt)"),
 					*Who, Mk >= 0 ? FMath::Max(Gen->Monsters[Mk].Tier, 1) : 1, FMath::Max(Sp->Count, 1), Gen->CountSummoned(Sp->Name)), RDCyan, Sc * 1.0f);
 			}
 			Ry += 6.f * Sc;
-			Para(Wp.bAlongside ? TEXT("Cast with RMB or E (LB) while your weapon stays drawn") : Wi == Cb->GetWeaponIndex() ? TEXT("In your hands") : (bPad ? TEXT("A  wield it") : TEXT("Enter  wield it")), Gold, Sc * 1.05f);
+			// (the list of 2026-11-20: in her hands, a summoning of several kinds steps to the next (item 18), a found weapon is put away
+			// for her bare hands (item 13))
+			const bool bKinds15 = Sp && Sp->Kind == ERDSpellKind::Summon && Sp->SummonKinds.Num() > 1;
+			const bool bAway15 = Wp.Mesh && Cb->GetUnarmedIndex15() >= 0;
+			const FString InHands = bKinds15 ? FString::Printf(TEXT("In your hands   %s  call the next of its %d kinds"), bPad ? TEXT("A") : TEXT("Enter"), Sp->SummonKinds.Num())
+				: bAway15 ? FString::Printf(TEXT("In your hands   %s  put it away"), bPad ? TEXT("A") : TEXT("Enter")) : FString(TEXT("In your hands"));
+			Para(Wp.bAlongside ? TEXT("Cast with RMB or E (LB) while your weapon stays drawn") : Wi == Cb->GetWeaponIndex() ? InHands : (bPad ? TEXT("A  wield it") : TEXT("Enter  wield it")), Gold, Sc * 1.05f);
 			// (the third list: its slash, its quick slot)
 			if (const FRDSlashDef* Sl = Cb->SlashOf(Wi)) Para(FString::Printf(TEXT("%s:  +%.0f %s on every hit;  %s   (T / X takes it off)"), *Sl->Name.ToString(), Sl->Bonus, *Sl->Type.ToLower(), *Sl->Text), RDCyan, Sc * 1.05f);
 			if (Gen->bQuickSlots && !Wp.bAlongside)

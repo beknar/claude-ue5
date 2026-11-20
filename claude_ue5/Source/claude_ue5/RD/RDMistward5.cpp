@@ -590,7 +590,7 @@ static TArray<FRD5Arm> RD5Arms(const ARDDungeonGenerator* G)
 	for (int32 I = 0; I < G->Weapons.Num(); ++I)
 	{
 		const FRDWeaponDef& W = G->Weapons[I];
-		if (W.bScroll) continue;
+		if (W.bScroll || W.bUnarmed15) continue;          // (her bare hands strike nothing: the list of 2026-11-20)
 		FRD5Arm A{ I, W.Reach * 0.85f, false, W.bSpell, NAME_None, 0 };
 		if (W.bSpell)
 		{
@@ -817,9 +817,13 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 			// (not where nothing can answer: a summon needs a set under it, or the wilds' summons (the reel of 2026-11-18: the
 			// Summoner called there for 55 s, refused each time, and cast nothing else; the list of 2026-11-20 lets them answer))
 			const bool bCanSummon = !(bWild && !bWildSummons15 && !GetSection(WorldToSection(L)));
-			if (BestSummon && bCanSummon && !bHid && CountSummoned(BestSummon->Spell) < BestSummon->Count && Pc->GetMana() >= Weapons[BestSummon->Index].ManaCost
-				&& Pc->StartAttackWith(BestSummon->Index))
-			{ bDid = true; AutoplayStats.FindOrAdd(TEXT("summons"))++; }
+			if (BestSummon && bCanSummon && !bHid && CountSummoned(BestSummon->Spell) < BestSummon->Count && Pc->GetMana() >= Weapons[BestSummon->Index].ManaCost)
+			{
+				// (the list of 2026-11-20 (item 18): one of its kinds, on her autoplay's own stream)
+				const FRDSpellDef* Bs = Spells.FindByPredicate([BestSummon](const FRDSpellDef& D) { return D.Name == BestSummon->Spell; });
+				if (Bs && Bs->SummonKinds.Num() > 1) Pc->SetSummonKind15(Bs->Name, Bs->SummonKinds[AutoplayR.RandRange(0, Bs->SummonKinds.Num() - 1)]);
+				if (Pc->StartAttackWith(BestSummon->Index)) { bDid = true; AutoplayStats.FindOrAdd(TEXT("summons"))++; }
+			}
 			for (int32 K = 0; K < Arms.Num() && !bDid; ++K)
 			{
 				const FRD5Arm& A = Arms[(K + AutoplayWeaponTurn) % Arms.Num()];

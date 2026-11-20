@@ -628,6 +628,21 @@ public:
 	static FName QuickItemOf(FName Entry) { return FName(*Entry.ToString().Mid(1)); }
 	/** an item of a kind that goes on the bar (whether she carries it or not) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") bool IsQuickableItem(FName Item) const;
+	// ---- the list of 2026-11-20's third phase (items 4, 18, 13; RDList15b.cpp)
+	/** the kind a summoning calls now: the one she chose among its kinds (SummonKinds), else its own */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FName GetSummonKind15(FName Spell) const;
+	/** the next (Step) of a summoning's kinds chosen; false when it has one kind only */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") bool CycleSummonKind15(FName Spell, int32 Step = 1);
+	/** a kind of a summoning chosen by name (tests); false when it is none of its kinds */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") bool SetSummonKind15(FName Spell, FName Kind);
+	/** her chosen kinds, by summoning (kept in the save and carried) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List15") TMap<FName, FName> SummonPick15;
+	/** the found weapon in her hands put away: her bare hands drawn (item 13); false when her hero has none */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") bool PutWeaponAway15();
+	/** the index of her bare hands among her weapons (-1 none) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") int32 GetUnarmedIndex15() const;
+	/** a cast at the cap took the place of a hurt one (item 4: a test's count) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List15") int32 SummonsReplaced15 = 0;
 	/** an item put on the bar as an entry ("#<item>") */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool AssignQuickItem(int32 Slot, FName Item) { return AssignQuickEntry(Slot, FName(*(TEXT("#") + Item.ToString()))); }
 	/** a slot's number as the bar shows it: 1 to 9, 0, then 11, 12... (those have no key) */

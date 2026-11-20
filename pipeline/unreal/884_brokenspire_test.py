@@ -1960,7 +1960,8 @@ def state_diff(a, b, tol=0.06):
             if not same: bad.append([k, A[k], B[k]]); break
     return bad
 def summons_now():
-    return sorted([str(a.summon_spell), round(a.get_health() / max(a.get_max_health(), 1.0), 2)] for a in G["gen"].get_allies() if a and not a.is_dead() and str(a.summon_spell) != "None")
+    # (the list of 2026-11-20: each one's kind too, carried with it)
+    return sorted([str(a.summon_spell), str(a.monster_name), round(a.get_health() / max(a.get_max_health(), 1.0), 2)] for a in G["gen"].get_allies() if a and not a.is_dead() and str(a.summon_spell) != "None")
 def item_of(kind):
     return next((str(i.name) for i in G["gen"].get_editor_property("items") if i.kind == kind), None)
 def weapon_index(name):
@@ -2016,7 +2017,12 @@ def set_up(hero, leg):
         # (two summons, one of them hurt)
         if leg == "town":
             si = weapon_index("Summon Tier 1")
-            for _ in range(2): c.set_mana(c.get_max_mana()); c.start_attack_with(si); yield from wait(2.6)
+            # (the list of 2026-11-20: two kinds of its five, the second another than its own)
+            ks = next(([str(k) for k in s.get_editor_property("summon_kinds")] for s in g.get_editor_property("spells") if str(s.name) == "Summon Tier 1"), [])
+            for n_ in range(2):
+                if len(ks) > 1: c.set_summon_kind15("Summon Tier 1", ks[n_])
+                c.set_mana(c.get_max_mana()); c.start_attack_with(si); yield from wait(2.6)
+            did["summon_kinds"] = ks[:2]
             al = [a for a in g.get_allies() if a and str(a.summon_spell) == "Summon Tier 1"]
             if al: al[0].apply_damage(al[0].get_max_health() * 0.4, None); yield from wait(0.3)
     else:

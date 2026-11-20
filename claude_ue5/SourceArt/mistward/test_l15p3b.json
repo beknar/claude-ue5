@@ -1,0 +1,221 @@
+{
+ "tag": "l15p3b",
+ "plan": [
+  "summoner",
+  "autoplay"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "summoner",
+   "ok": false,
+   "pawn": "BP_SU4_SummonerCharacter_C",
+   "hp": 85.0,
+   "mana": 60.0,
+   "weapons": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1",
+    "Bare Hands"
+   ],
+   "same_as_mage": [
+    true,
+    true
+   ],
+   "clips": [
+    "AS_Summoner4_CastBolt",
+    "AS_Summoner4_Summon1",
+    "AS_Summoner4_Summon2",
+    "AS_Summoner4_Summon3",
+    "AS_Summoner4_Summon4",
+    "AS_Summoner4_Summon5"
+   ],
+   "fire": {
+    "started": true,
+    "lost": 25.0
+   },
+   "summon": [
+    {
+     "started": true,
+     "mana": 30.0,
+     "count": 1,
+     "message": "Rotting Soldier answers your call  (1 of 2)"
+    },
+    {
+     "started": true,
+     "mana": 30.0,
+     "count": 2,
+     "message": "Rotting Soldier answers your call  (2 of 2)"
+    },
+    {
+     "started": false,
+     "mana": 0.0,
+     "count": 2,
+     "message": "You lead 2 of them already (Rotting Soldier), none of them hurt: no more answer Summon Tier 1"
+    }
+   ],
+   "allies": [
+    {
+     "kind": "Soldier",
+     "hp": 40.0,
+     "damage": 9.0,
+     "m": 2.3
+    },
+    {
+     "kind": "Soldier",
+     "hp": 40.0,
+     "damage": 9.0,
+     "m": 2.3
+    }
+   ],
+   "tier1_soldier": {
+    "hp": 60.0,
+    "damage": 14.0
+   },
+   "want_ally_hp": 40,
+   "allies_fight": 30.6,
+   "dagger": {
+    "index": 4,
+    "both_hands": true
+   },
+   "slash": {
+    "begun": false,
+    "message": "Only a warrior's weapons take the ember slash"
+   },
+   "armour_worn": "None",
+   "hp_ring": false,
+   "magic_ring": true,
+   "mana_ringed": 66.0,
+   "summon_mana_ringed": 33.0,
+   "tome": {
+    "knows": false,
+    "carried": 1
+   },
+   "torch": true,
+   "boss": {
+    "weapons": [
+     "Summon Tier 2"
+    ],
+    "unlocked": 1
+   },
+   "tier2": {
+    "started": true,
+    "mana": 33.0,
+    "kinds": [
+     "Gunner"
+    ]
+   },
+   "after_death": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1",
+    "Bare Hands",
+    "Summon Tier 2"
+   ],
+   "after_restart": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1",
+    "Bare Hands"
+   ]
+  },
+  {
+   "step": "autoplay",
+   "ok": true,
+   "heroes": {
+    "Warrior": {
+     "ended_after": 40.1,
+     "still_on": false,
+     "metres": 122,
+     "attacks": 8,
+     "kills": 2,
+     "rooms": 3,
+     "used": 0,
+     "opened": 7,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "Mage": {
+     "ended_after": 40.1,
+     "still_on": false,
+     "metres": 132,
+     "attacks": 7,
+     "kills": 2,
+     "rooms": 3,
+     "used": 0,
+     "opened": 5,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "Warlock": {
+     "ended_after": 40.1,
+     "still_on": false,
+     "metres": 118,
+     "attacks": 12,
+     "kills": 1,
+     "rooms": 3,
+     "used": 0,
+     "opened": 6,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "Rogue": {
+     "ended_after": 40.0,
+     "still_on": false,
+     "metres": 130,
+     "attacks": 6,
+     "kills": 2,
+     "rooms": 2,
+     "used": 0,
+     "opened": 5,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "MartialArtist": {
+     "ended_after": 40.3,
+     "still_on": false,
+     "metres": 128,
+     "attacks": 5,
+     "kills": 2,
+     "rooms": 3,
+     "used": 0,
+     "opened": 6,
+     "stuck": 1,
+     "deaths": 0,
+     "doing": ""
+    },
+    "Summoner": {
+     "ended_after": 40.0,
+     "still_on": false,
+     "metres": 123,
+     "attacks": 6,
+     "kills": 1,
+     "rooms": 3,
+     "used": 0,
+     "opened": 5,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    }
+   },
+   "takeover": true
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_l15p3b_summoner_soldiers.png",
+  "mw_l15p3b_autoplay_Warrior.png",
+  "mw_l15p3b_autoplay_Mage.png",
+  "mw_l15p3b_autoplay_Warlock.png",
+  "mw_l15p3b_autoplay_Rogue.png",
+  "mw_l15p3b_autoplay_MartialArtist.png",
+  "mw_l15p3b_autoplay_Summoner.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

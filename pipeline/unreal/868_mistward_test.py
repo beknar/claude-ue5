@@ -2891,7 +2891,7 @@ def step_summoner():
     ws = g.get_editor_property("weapons")
     res = {"pawn": G["pawn"].get_class().get_name(), "hp": c.get_max_health(), "mana": c.get_max_mana(), "weapons": W(),
            "same_as_mage": [(w.damage == mw.damage and w.bolt_effect == mw.bolt_effect and w.burst_effect == mw.burst_effect and w.mana_cost == mw.mana_cost) for w, mw in zip(ws[:2], mage.weapons)],
-           "clips": sorted({w.attacks[0].get_name() for w in list(H["Summoner"].weapons) + list(H["Summoner"].locked_weapons)})}
+           "clips": sorted({w.attacks[0].get_name() for w in list(H["Summoner"].weapons) + list(H["Summoner"].locked_weapons) if len(w.attacks) > 0})}          # (her Bare Hands have no clip: the list of 2026-11-20)
     m = spawn_dummy(ahead(450)); yield from wait(0.5); h0 = hp(m); c.set_mana(c.get_max_mana())
     c.select_weapon(0); yield from wait(0.3); res["fire"] = {"started": c.start_attack()}; yield from wait(2.0); res["fire"]["lost"] = round(h0 - hp(m), 1)
     # (Summon Tier 1, three times)
@@ -2961,14 +2961,14 @@ def step_summoner():
     g.switch_hero("Warrior"); yield from wait(0.6); refresh(); quiet(False)
     sm = res["summon"]; t1 = res.get("tier1_soldier") or {}
     sb = BAL["heroes"]["Summoner"]; mana0 = float(sb.get("mana", 50))
-    ok =(res["pawn"].startswith("BP_SU4_SummonerCharacter") and res["hp"] == 85 and res["mana"] == mana0 and res["weapons"] == ["Fire", "Dark Fire", "Summon Tier 1"]
+    ok =(res["pawn"].startswith("BP_SU4_SummonerCharacter") and res["hp"] == 85 and res["mana"] == mana0 and res["weapons"] == ["Fire", "Dark Fire", "Summon Tier 1", "Bare Hands"]
           and all(res["same_as_mage"]) and len(res["clips"]) == 6 and res["fire"]["started"] and abs(res["fire"]["lost"] - mage.weapons[0].damage) < 0.6
           and sm[0]["started"] and sm[0]["mana"] == round(mana0 * 0.5) and sm[0]["count"] == 1 and sm[1]["count"] == 2 and not sm[2]["started"] and sm[2]["mana"] == 0 and sm[2]["count"] == 2
           and "already" in sm[2]["message"] and len(res["allies"]) == 2 and all(a["kind"] == "Soldier" and abs(a["hp"] - res["want_ally_hp"]) < 1 for a in res["allies"])
           and res["allies_fight"] > 0 and res["dagger"]["both_hands"] and (not sl or not res["slash"]["begun"]) and res["armour_worn"] == "None"
           and not res["hp_ring"] and res["magic_ring"] and res["mana_ringed"] > mana0 and res["summon_mana_ringed"] == round(res["mana_ringed"] * 0.5)
           and not res["tome"]["knows"] and res["tome"]["carried"] == 1 and res["torch"]
-          and res["after_restart"] == ["Fire", "Dark Fire", "Summon Tier 1"])
+          and res["after_restart"] == ["Fire", "Dark Fire", "Summon Tier 1", "Bare Hands"])          # (her Bare Hands: the list of 2026-11-20, 934 hands)
     if g.get_editor_property("boss_encounters"):
         ok = ok and res["boss"]["weapons"] == ["Summon Tier 2"] and res.get("tier2", {}).get("started") and res["tier2"]["kinds"] == ["Gunner"] and "Summon Tier 2" in res["after_death"]
     step_result("summoner", ok, **res)
@@ -6387,7 +6387,152 @@ def step_arena15():
     step_result("arena15", ok, **res)
 
 
-STEPS = {"allies15": step_allies15, "arena15": step_arena15, "recipes14": step_recipes14, "tables14": step_tables14, "block14": step_block14, "horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
+def summoned_now(g, spell):
+    return [a for a in g.get_allies() if alive(a) and str(a.summon_spell) == spell]
+
+def step_summon15():
+    """the list of 2026-11-20 (items 4 and 18). The cap: Summon Tier 1's two called; a third with neither hurt is refused before its
+    mana is taken (her mana unchanged, still two); one hurt, a cast takes its place (still two, the hurt one gone, the new one whole,
+    her mana spent). Its kinds: the spell's SummonKinds are five, its own kind first; each of Summon Tier 1's and 2's five chosen and
+    called (by its name), follows her 9 m (within 6 m of her in 8 s) and fights a monster set beside it (the monster's hit points
+    fall: her blows held); the inventory's Enter on the summoning in her hands steps to its next kind; every kind of the other
+    summonings on this map is a monster of the map with its mesh"""
+    c = yield from restart("Summoner"); g = G["gen"]; quiet(True)
+    ctr = g.get_start_room_center(); kill_all_near(ctr, 6000)
+    g.unlock_hero_weapons(10); yield from wait(0.3)
+    W = [str(w.name) for w in g.get_editor_property("weapons")]
+    sp1 = "Summon Tier 1"
+    put(V(ctr.x + 300, ctr.y + 300, ctr.z), 0.0); yield from wait(0.4)
+    res = {"weapons": W}
+    # ---- the cap (item 4)
+    for _ in range(2): yield from summon15(g, c, W, sp1)
+    mine = summoned_now(g, sp1); cap = next(s.count for s in g.get_editor_property("spells") if str(s.name) == sp1)
+    c.set_mana(c.get_max_mana()); m0 = c.get_mana(); r0 = c.summons_refused
+    st = c.start_attack_with(W.index(sp1)); yield from wait(2.6)
+    res["full_none_hurt"] = {"cap": cap, "had": len(mine), "started": st, "mana_spent": round(m0 - c.get_mana(), 1), "refused": c.summons_refused - r0,
+                             "after": len(summoned_now(g, sp1)), "message": str(c.message)}
+    hurt = mine[0]; hurt.apply_damage(hurt.get_max_health() * 0.4, None); yield from wait(0.2)
+    hn = hurt.get_name(); rp0 = c.summons_replaced15
+    c.set_mana(c.get_max_mana()); m0 = c.get_mana()
+    st = c.start_attack_with(W.index(sp1)); yield from wait(2.6)
+    now_ = summoned_now(g, sp1)
+    res["full_one_hurt"] = {"started": st, "mana_spent": round(m0 - c.get_mana(), 1), "after": len(now_), "hurt_gone": all(a.get_name() != hn for a in now_),
+                            "replaced": c.summons_replaced15 - rp0, "shares": [round(a.get_health() / a.get_max_health(), 2) for a in now_], "message": str(c.message)}
+    # ---- the kinds (item 18)
+    spells = {str(s.name): [str(k) for k in s.get_editor_property("summon_kinds")] for s in g.get_editor_property("spells") if s.kind == unreal.RDSpellKind.SUMMON}
+    defs = {str(d.name): bool(d.get_editor_property("mesh")) for d in g.get_editor_property("monsters")}
+    res["kinds"] = spells
+    res["kinds_missing"] = {s: [k for k in ks if not defs.get(k)] for s, ks in spells.items() if any(not defs.get(k) for k in ks)}
+    trials = []
+    for spn in ("Summon Tier 1", "Summon Tier 2"):
+        if spn not in W: trials.append({"spell": spn, "error": "not hers"}); continue
+        for k in spells.get(spn, []):
+            for a in list(g.get_allies()):
+                if alive(a): a.apply_damage(1e7, None)
+            yield from wait(0.4); quiet(True); put(V(ctr.x + 300, ctr.y + 300, ctr.z), 0.0); yield from wait(0.3)
+            t = {"spell": spn, "kind": k, "set": c.set_summon_kind15(spn, k)}
+            a = yield from summon15(g, c, W, spn)
+            t["came"] = str(a.monster_name) if a else None
+            if a:
+                put(V(ctr.x + 300 + 900, ctr.y + 300, ctr.z)); t0 = now(); t["follow_s"] = None
+                while now() - t0 < 8.0:
+                    yield
+                    if dist2(a.get_actor_location(), G["pawn"].get_actor_location()) < 600: t["follow_s"] = round(now() - t0, 1); break
+                al = a.get_actor_location()
+                mo = g.spawn_monster_named("Rat", V(al.x + 250, al.y, ctr.z), 1, 3.0, 0.1, 1.0); yield from wait(0.2)
+                quiet(False); h0 = mo.get_health() if mo else 0.0; t0 = now()
+                while mo and now() - t0 < 12.0 and alive(mo) and mo.get_health() >= h0: yield
+                t["struck_s"] = round(now() - t0, 1) if mo and (not alive(mo) or mo.get_health() < h0) else None
+                quiet(True); drop([mo] if mo else [])
+            trials.append(t)
+    res["trials"] = trials
+    # ---- the inventory steps to the next kind (Enter on the summoning in her hands)
+    c.select_weapon(W.index(sp1)); yield from wait(0.3)
+    k_before = str(c.get_summon_kind15(sp1))
+    c.set_inventory_open(True); yield from rwait(0.3)
+    lines = [str(l) for l in c.get_inventory_lines()]
+    idx = next((i for i, l in enumerate(lines) if l.startswith("weapon|" + sp1 + "|")), None)
+    if idx is not None:
+        c.move_inventory_cursor(idx - c.get_inventory_cursor())
+        used = c.use_inventory_entry(); yield from rwait(0.3)
+        res["inventory_cycle"] = {"line": idx, "used": used, "before": k_before, "after": str(c.get_summon_kind15(sp1)), "message": str(c.message)}
+    else: res["inventory_cycle"] = {"error": "no line", "lines": lines[:20]}
+    c.set_inventory_open(False); yield from rwait(0.2)
+    for a in list(g.get_allies()):
+        if alive(a): a.apply_damage(1e7, None)
+    quiet(False)
+    nh, oh, ic = res["full_none_hurt"], res["full_one_hurt"], res["inventory_cycle"]
+    ok = (nh["had"] == nh["cap"] and not nh["started"] and abs(nh["mana_spent"]) < 0.01 and nh["refused"] >= 1 and nh["after"] == nh["cap"]
+          and oh["started"] and oh["mana_spent"] > 0 and oh["after"] == nh["cap"] and oh["hurt_gone"] and oh["replaced"] == 1 and max(oh["shares"]) >= 0.99
+          and all(len(v) == 5 and len(set(v)) == 5 for v in spells.values()) and not res["kinds_missing"]
+          and len(trials) == 10 and all(t.get("came") == t["kind"] and t.get("follow_s") is not None and t.get("struck_s") is not None for t in trials)
+          and ic.get("used") and ic.get("after") != ic.get("before"))
+    step_result("summon15", ok, **res)
+
+def step_unwield15():
+    """the list of 2026-11-20 (item 13): the Summoner draws a dagger (its mesh in her hand); Enter on it in the inventory puts it away:
+    her bare hands drawn, nothing in her hand; their attack refused (no blow); a spell drawn from the quick bar is cast; the dagger
+    drawn again shows in her hand"""
+    c = yield from restart("Summoner"); g = G["gen"]; quiet(True)
+    ctr = g.get_start_room_center(); kill_all_near(ctr, 6000); put(V(ctr.x + 300, ctr.y + 300, ctr.z), 0.0); yield from wait(0.3)
+    c.add_item("Dagger", 1); yield from wait(0.3)
+    W = [str(w.name) for w in g.get_editor_property("weapons")]
+    di = W.index("Dagger") if "Dagger" in W else -1; ui = c.get_unarmed_index15()
+    res = {"weapons": W, "dagger": di, "bare": ui}
+    if di < 0 or ui < 0: quiet(False); step_result("unwield15", False, **res); return
+    wm = c.get_weapon_mesh()
+    def held(): return {"mesh": wm.get_editor_property("static_mesh").get_name() if wm.get_editor_property("static_mesh") else None, "visible": wm.is_visible()}
+    c.select_weapon(di); yield from wait(0.3); res["drawn"] = held()
+    c.set_inventory_open(True); yield from rwait(0.3)
+    lines = [str(l) for l in c.get_inventory_lines()]
+    idx = next((i for i, l in enumerate(lines) if l.startswith("weapon|Dagger|")), None)
+    res["line"] = idx
+    if idx is not None:
+        c.move_inventory_cursor(idx - c.get_inventory_cursor())
+        res["put_away"] = c.use_inventory_entry(); yield from rwait(0.3)
+    c.set_inventory_open(False); yield from rwait(0.2)
+    res["after"] = {"index": c.get_weapon_index(), **held(), "message": str(c.message)}
+    a0 = c.attacks_made; res["bare_attack"] = c.start_attack(); yield from wait(1.0); res["bare_blows"] = c.attacks_made - a0
+    # (a spell from the quick bar: Fire's slot made ready, the attack casts it)
+    fi = W.index("Fire")
+    slots = [str(q) for q in c.get_quick_slots()]; res["slots"] = slots
+    c.select_weapon(fi); yield from wait(0.2); c.set_mana(c.get_max_mana()); a0 = c.attacks_made
+    res["fire_cast"] = c.start_attack(); yield from wait(1.5); res["fire_blows"] = c.attacks_made - a0
+    c.select_weapon(di); yield from wait(0.3); res["drawn_again"] = held()
+    quiet(False)
+    ok = (res["drawn"]["mesh"] and res["drawn"]["visible"] and res.get("put_away") and res["after"]["index"] == ui and not res["after"]["visible"]
+          and not res["bare_attack"] and res["bare_blows"] == 0 and "Bare Hands" in slots and res["fire_cast"] and res["fire_blows"] >= 1
+          and res["drawn_again"]["mesh"] and res["drawn_again"]["visible"])
+    step_result("unwield15", ok, **res)
+
+def step_quick15():
+    """the list of 2026-11-20 (item 14): for the Summoner and the Mage, a scroll she can read goes on the quick bar (refused before
+    bQuickScrolls15), and the bar's use reads it: one fewer, ScrollsRead up, its spell cast"""
+    res = {}; g = G["gen"]
+    for hero in ("Summoner", "Mage"):
+        c = yield from restart(hero); g = G["gen"]; quiet(True)
+        ctr = g.get_start_room_center(); kill_all_near(ctr, 6000); put(V(ctr.x + 300, ctr.y + 300, ctr.z), 0.0); yield from wait(0.3)
+        sc = None
+        for it in g.get_editor_property("items"):
+            if it.kind != unreal.RDItemKind.SCROLL: continue
+            if c.is_quickable_item(it.name): sc = str(it.name); break
+        r = {"scroll": sc}
+        if sc:
+            c.add_item(sc, 2); yield from wait(0.2)
+            g.set_editor_property("quick_scrolls15", False); r["before"] = c.assign_quick_item(5, sc)
+            g.set_editor_property("quick_scrolls15", True); r["assigned"] = c.assign_quick_item(5, sc)
+            n0, s0 = c.get_item_count(sc), c.scrolls_read
+            c.set_mana(c.get_max_mana()); r["used"] = c.use_ability("#" + sc); yield from wait(1.5)
+            r.update({"count": [n0, c.get_item_count(sc)], "read": c.scrolls_read - s0, "message": str(c.message)})
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=0)); yield from rwait(0.3)
+            shot(f"quick15_{hero}"); yield from rwait(0.5)
+        res[hero] = r
+        quiet(False)
+    ok = all(r.get("scroll") and not r["before"] and r["assigned"] and r["used"] and r["count"][1] == r["count"][0] - 1 and r["read"] == 1 for r in res.values())
+    step_result("quick15", ok, **res)
+
+
+STEPS = {"summon15": step_summon15, "unwield15": step_unwield15, "quick15": step_quick15, "allies15": step_allies15, "arena15": step_arena15, "recipes14": step_recipes14, "tables14": step_tables14, "block14": step_block14, "horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
          "spells11_spells": lambda: step_spells11(("spells",)), "spells11_curses": lambda: step_spells11(("curses",)), "spells11_slashes": lambda: step_spells11(("slashes",)), "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
          "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "menulook": step_menulook, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,

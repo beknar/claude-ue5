@@ -183,6 +183,12 @@ bool URDCombatComponent::IsQuickableItem(FName Item) const
 	if (Ix < 0) return false;
 	const ERDItemKind K = Generator->Items[Ix].Kind;
 	// (the list of 2026-11-16, item 20: food too)
+	// (the list of 2026-11-20 (item 14): a scroll her hero can read too: the bar reads it)
+	if (K == ERDItemKind::Scroll && Generator->bQuickScrolls15)
+	{
+		const int32 Si = Generator->FindSpell(Generator->Items[Ix].Spell);
+		return Si >= 0 && Generator->HeroReadsScroll(Generator->Spells[Si].Type);
+	}
 	return K == ERDItemKind::Torch || K == ERDItemKind::Light || K == ERDItemKind::Shield || K == ERDItemKind::Healing || K == ERDItemKind::Mana || K == ERDItemKind::Speed
 		|| (K == ERDItemKind::Food && Generator->bQuickUse14);
 }

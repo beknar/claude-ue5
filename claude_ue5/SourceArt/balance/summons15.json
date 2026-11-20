@@ -1,0 +1,506 @@
+{
+ "brokenspire": {
+  "Summon Tier 1": [
+   "Soldier",
+   "Chicken",
+   "Medic",
+   "Drinker",
+   "Half_Creature_05"
+  ],
+  "Summon Tier 2": [
+   "Gunner",
+   "Orc_03",
+   "Parasit",
+   "Parasites_Fat",
+   "Monster"
+  ],
+  "Summon Tier 3": [
+   "Orc_05",
+   "Tank",
+   "Pangolin",
+   "Insect",
+   "Devourer"
+  ],
+  "Summon Tier 4": [
+   "Alien_Warrior_05",
+   "Fantasy_Animal_raptor_mount",
+   "Parasite_Spider",
+   "Troll",
+   "Daemon"
+  ],
+  "Summon Tier 5": [
+   "Spider",
+   "Nasty",
+   "Hunter",
+   "Titan",
+   "Rock"
+  ],
+  "Summon Tier 6": [
+   "Iron_Golem",
+   "Cyber_Soldier",
+   "Mutant_Trooper",
+   "War_Mech",
+   "Cyber_Convict"
+  ],
+  "Summon Tier 7": [
+   "Cyber_Soldier",
+   "Iron_Golem",
+   "Mutant_Trooper",
+   "War_Mech",
+   "Cyber_Convict"
+  ],
+  "Summon Tier 8": [
+   "Tide_Captain",
+   "Abyssal_Shellclaw",
+   "Shellclaw",
+   "Spearsnout",
+   "Drowned_Captain"
+  ],
+  "Summon Tier 9": [
+   "Skeleton_Archmage",
+   "Spire_Witch_Elder",
+   "Spire_Witch",
+   "Skeleton_Witch",
+   "Skeleton_Mage"
+  ],
+  "Summon Tier 10": [
+   "Kratos_Commander",
+   "Kratos_Tank",
+   "Kratos_Operative",
+   "Kratos_Guard",
+   "Kratos_Trooper"
+  ]
+ },
+ "mistward_castle": {
+  "Summon Tier 1": [
+   "Soldier",
+   "Chicken",
+   "Medic",
+   "Drinker",
+   "Half_Creature_05"
+  ],
+  "Summon Tier 2": [
+   "Gunner",
+   "Orc_03",
+   "Parasit",
+   "Parasites_Fat",
+   "Monster"
+  ],
+  "Summon Tier 3": [
+   "Orc_05",
+   "Tank",
+   "Pangolin",
+   "Insect",
+   "Devourer"
+  ],
+  "Summon Tier 4": [
+   "Alien_Warrior_05",
+   "Fantasy_Animal_raptor_mount",
+   "Parasite_Spider",
+   "Troll",
+   "Daemon"
+  ],
+  "Summon Tier 5": [
+   "Spider",
+   "Nasty",
+   "Hunter",
+   "Titan",
+   "Rock"
+  ],
+  "Summon Tier 6": [
+   "Iron_Golem",
+   "Cyber_Soldier",
+   "Mutant_Trooper",
+   "War_Mech",
+   "Cyber_Convict"
+  ],
+  "Summon Tier 7": [
+   "Cyber_Soldier",
+   "Iron_Golem",
+   "Mutant_Trooper",
+   "War_Mech",
+   "Cyber_Convict"
+  ],
+  "Summon Tier 8": [
+   "Tide_Captain",
+   "Abyssal_Shellclaw",
+   "Shellclaw",
+   "Spearsnout",
+   "Drowned_Captain"
+  ],
+  "Summon Tier 9": [
+   "Skeleton_Archmage",
+   "Spire_Witch_Elder",
+   "Spire_Witch",
+   "Skeleton_Witch",
+   "Skeleton_Mage"
+  ],
+  "Summon Tier 10": [
+   "Kratos_Commander",
+   "Kratos_Tank",
+   "Kratos_Operative",
+   "Kratos_Guard",
+   "Kratos_Trooper"
+  ]
+ },
+ "vel_morrath": {
+  "Summon Tier 1": [
+   "Soldier",
+   "Chicken",
+   "Medic",
+   "Drinker",
+   "Half_Creature_05"
+  ],
+  "Summon Tier 2": [
+   "Gunner",
+   "Orc_03",
+   "Parasit",
+   "Parasites_Fat",
+   "Monster"
+  ],
+  "Summon Tier 3": [
+   "Orc_05",
+   "Tank",
+   "Pangolin",
+   "Insect",
+   "Devourer"
+  ],
+  "Summon Tier 4": [
+   "Alien_Warrior_05",
+   "Fantasy_Animal_raptor_mount",
+   "Parasite_Spider",
+   "Troll",
+   "Daemon"
+  ],
+  "Summon Tier 5": [
+   "Spider",
+   "Nasty",
+   "Hunter",
+   "Titan",
+   "Rock"
+  ],
+  "Summon Tier 6": [
+   "Iron_Golem",
+   "Cyber_Soldier",
+   "Mutant_Trooper",
+   "War_Mech",
+   "Cyber_Convict"
+  ],
+  "Summon Tier 7": [
+   "Cyber_Soldier",
+   "Iron_Golem",
+   "Mutant_Trooper",
+   "War_Mech",
+   "Cyber_Convict"
+  ],
+  "Summon Tier 8": [
+   "Tide_Captain",
+   "Abyssal_Shellclaw",
+   "Shellclaw",
+   "Spearsnout",
+   "Drowned_Captain"
+  ],
+  "Summon Tier 9": [
+   "Skeleton_Archmage",
+   "Spire_Witch_Elder",
+   "Spire_Witch",
+   "Skeleton_Witch",
+   "Skeleton_Mage"
+  ],
+  "Summon Tier 10": [
+   "Kratos_Commander",
+   "Kratos_Tank",
+   "Kratos_Operative",
+   "Kratos_Guard",
+   "Kratos_Trooper"
+  ]
+ },
+ "war_engine": {
+  "Summon Tier 1": [
+   "Soldier",
+   "Chicken",
+   "Medic",
+   "Drinker",
+   "Half_Creature_05"
+  ],
+  "Summon Tier 2": [
+   "Gunner",
+   "Orc_03",
+   "Parasit",
+   "Parasites_Fat",
+   "Monster"
+  ],
+  "Summon Tier 3": [
+   "Orc_05",
+   "Tank",
+   "Pangolin",
+   "Insect",
+   "Devourer"
+  ],
+  "Summon Tier 4": [
+   "Alien_Warrior_05",
+   "Fantasy_Animal_raptor_mount",
+   "Parasite_Spider",
+   "Troll",
+   "Daemon"
+  ],
+  "Summon Tier 5": [
+   "Spider",
+   "Nasty",
+   "Hunter",
+   "Titan",
+   "Rock"
+  ],
+  "Summon Tier 6": [
+   "Iron_Golem",
+   "Cyber_Soldier",
+   "Mutant_Trooper",
+   "War_Mech",
+   "Cyber_Convict"
+  ],
+  "Summon Tier 7": [
+   "Cyber_Soldier",
+   "Iron_Golem",
+   "Mutant_Trooper",
+   "War_Mech",
+   "Cyber_Convict"
+  ],
+  "Summon Tier 8": [
+   "Tide_Captain",
+   "Abyssal_Shellclaw",
+   "Shellclaw",
+   "Spearsnout",
+   "Drowned_Captain"
+  ],
+  "Summon Tier 9": [
+   "Skeleton_Archmage",
+   "Spire_Witch_Elder",
+   "Spire_Witch",
+   "Skeleton_Witch",
+   "Skeleton_Mage"
+  ],
+  "Summon Tier 10": [
+   "Kratos_Commander",
+   "Kratos_Tank",
+   "Kratos_Operative",
+   "Kratos_Guard",
+   "Kratos_Trooper"
+  ]
+ },
+ "sewers": {
+  "Summon Tier 1": [
+   "Soldier",
+   "Chicken",
+   "Medic",
+   "Drinker",
+   "Half_Creature_05"
+  ],
+  "Summon Tier 2": [
+   "Gunner",
+   "Orc_03",
+   "Parasit",
+   "Parasites_Fat",
+   "Monster"
+  ],
+  "Summon Tier 3": [
+   "Orc_05",
+   "Tank",
+   "Pangolin",
+   "Insect",
+   "Devourer"
+  ],
+  "Summon Tier 4": [
+   "Alien_Warrior_05",
+   "Fantasy_Animal_raptor_mount",
+   "Parasite_Spider",
+   "Troll",
+   "Daemon"
+  ],
+  "Summon Tier 5": [
+   "Spider",
+   "Nasty",
+   "Hunter",
+   "Titan",
+   "Rock"
+  ],
+  "Summon Tier 6": [
+   "Iron_Golem",
+   "Cyber_Soldier",
+   "Mutant_Trooper",
+   "War_Mech",
+   "Cyber_Convict"
+  ],
+  "Summon Tier 7": [
+   "Cyber_Soldier",
+   "Iron_Golem",
+   "Mutant_Trooper",
+   "War_Mech",
+   "Cyber_Convict"
+  ],
+  "Summon Tier 8": [
+   "Tide_Captain",
+   "Abyssal_Shellclaw",
+   "Shellclaw",
+   "Spearsnout",
+   "Drowned_Captain"
+  ],
+  "Summon Tier 9": [
+   "Skeleton_Archmage",
+   "Spire_Witch_Elder",
+   "Spire_Witch",
+   "Skeleton_Witch",
+   "Skeleton_Mage"
+  ],
+  "Summon Tier 10": [
+   "Kratos_Commander",
+   "Kratos_Tank",
+   "Kratos_Operative",
+   "Kratos_Guard",
+   "Kratos_Trooper"
+  ]
+ },
+ "kethrys_spire": {
+  "Summon Tier 1": [
+   "Soldier",
+   "Chicken",
+   "Medic",
+   "Drinker",
+   "Half_Creature_05"
+  ],
+  "Summon Tier 2": [
+   "Gunner",
+   "Orc_03",
+   "Parasit",
+   "Parasites_Fat",
+   "Monster"
+  ],
+  "Summon Tier 3": [
+   "Orc_05",
+   "Tank",
+   "Pangolin",
+   "Insect",
+   "Devourer"
+  ],
+  "Summon Tier 4": [
+   "Alien_Warrior_05",
+   "Fantasy_Animal_raptor_mount",
+   "Parasite_Spider",
+   "Troll",
+   "Daemon"
+  ],
+  "Summon Tier 5": [
+   "Spider",
+   "Nasty",
+   "Hunter",
+   "Titan",
+   "Rock"
+  ],
+  "Summon Tier 6": [
+   "Iron_Golem",
+   "Cyber_Soldier",
+   "Mutant_Trooper",
+   "War_Mech",
+   "Cyber_Convict"
+  ],
+  "Summon Tier 7": [
+   "Cyber_Soldier",
+   "Iron_Golem",
+   "Mutant_Trooper",
+   "War_Mech",
+   "Cyber_Convict"
+  ],
+  "Summon Tier 8": [
+   "Tide_Captain",
+   "Abyssal_Shellclaw",
+   "Shellclaw",
+   "Spearsnout",
+   "Drowned_Captain"
+  ],
+  "Summon Tier 9": [
+   "Skeleton_Archmage",
+   "Spire_Witch_Elder",
+   "Spire_Witch",
+   "Skeleton_Witch",
+   "Skeleton_Mage"
+  ],
+  "Summon Tier 10": [
+   "Kratos_Commander",
+   "Kratos_Tank",
+   "Kratos_Operative",
+   "Kratos_Guard",
+   "Kratos_Trooper"
+  ]
+ },
+ "heaven_fortress": {
+  "Summon Tier 1": [
+   "Soldier",
+   "Chicken",
+   "Medic",
+   "Drinker",
+   "Half_Creature_05"
+  ],
+  "Summon Tier 2": [
+   "Gunner",
+   "Orc_03",
+   "Parasit",
+   "Parasites_Fat",
+   "Monster"
+  ],
+  "Summon Tier 3": [
+   "Orc_05",
+   "Tank",
+   "Pangolin",
+   "Insect",
+   "Devourer"
+  ],
+  "Summon Tier 4": [
+   "Alien_Warrior_05",
+   "Fantasy_Animal_raptor_mount",
+   "Parasite_Spider",
+   "Troll",
+   "Daemon"
+  ],
+  "Summon Tier 5": [
+   "Spider",
+   "Nasty",
+   "Hunter",
+   "Titan",
+   "Rock"
+  ],
+  "Summon Tier 6": [
+   "Iron_Golem",
+   "Cyber_Soldier",
+   "Mutant_Trooper",
+   "War_Mech",
+   "Cyber_Convict"
+  ],
+  "Summon Tier 7": [
+   "Cyber_Soldier",
+   "Iron_Golem",
+   "Mutant_Trooper",
+   "War_Mech",
+   "Cyber_Convict"
+  ],
+  "Summon Tier 8": [
+   "Tide_Captain",
+   "Abyssal_Shellclaw",
+   "Shellclaw",
+   "Spearsnout",
+   "Drowned_Captain"
+  ],
+  "Summon Tier 9": [
+   "Skeleton_Archmage",
+   "Spire_Witch_Elder",
+   "Spire_Witch",
+   "Skeleton_Witch",
+   "Skeleton_Mage"
+  ],
+  "Summon Tier 10": [
+   "Kratos_Commander",
+   "Kratos_Tank",
+   "Kratos_Operative",
+   "Kratos_Guard",
+   "Kratos_Trooper"
+  ]
+ }
+}
