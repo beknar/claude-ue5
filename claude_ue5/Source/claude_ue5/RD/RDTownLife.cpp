@@ -308,7 +308,12 @@ void ARDTownAnimal::Tick(float Dt)
 		FVector D = To - L; D.Z = 0.f;
 		if (D.Size() < 8.f || Now >= Until) { SetState(R.FRand() < 0.6f ? 1 : 0, Now); return; }
 		const FRotator Want = D.Rotation();
-		SetActorRotation(FRotator(0.f, FMath::RInterpConstantTo(GetActorRotation(), Want, Dt, 120.f).Yaw, 0.f));
+		const float NewYaw = FMath::RInterpConstantTo(GetActorRotation(), Want, Dt, 120.f).Yaw;
+		// (the list of 2026-11-20 (PR #98's review): a body is a box, and a turn swings it: one that would swing it further into a mate is
+		// not made; it stands, and picks another way later)
+		const bool bApart = PenKey15.X != MAX_int32 && Gen->bPenApart15;
+		if (bApart) { const float G0 = MinGap15(L, GetActorRotation().Yaw), G1 = MinGap15(L, NewYaw); if (G1 < 0.f && G1 < G0 - 0.1f) { SetState(0, Now); return; } }
+		SetActorRotation(FRotator(0.f, NewYaw, 0.f));
 		// (it walks the way it faces once it has nearly turned)
 		if (FMath::Abs(FMath::FindDeltaAngleDegrees(GetActorRotation().Yaw, Want.Yaw)) < 35.f)
 		{
@@ -316,7 +321,8 @@ void ARDTownAnimal::Tick(float Dt)
 			// (on the wild ground: at its height where it steps (the paddock's ground rises and falls a little))
 			if (bWildGround && GroundN > 1) Nl.Z = GroundZAt(Nl);
 			// (the list of 2026-11-20: a step into a mate is not taken: it stops and stands (it picks another way later))
-			if (PenKey15.X != MAX_int32 && Gen->bPenApart15 && Crowded15(Nl) && !Crowded15(L)) { SetState(0, Now); return; }
+			// (one already touching a mate may step only out of it, never further in)
+			if (bApart) { const float G0 = MinGap15(L, NewYaw), G1 = MinGap15(Nl, NewYaw); if (G1 < 0.f && G1 < G0 + 0.1f) { SetState(0, Now); return; } }
 			SetActorLocation(Nl, false);
 		}
 		return;

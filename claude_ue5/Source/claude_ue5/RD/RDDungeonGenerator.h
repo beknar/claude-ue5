@@ -964,6 +964,7 @@ public:
 	/** a pen's animals keep apart (item 1: the cows walked through each other); each pen's animals, by the pen's middle */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bPenApart15 = false;
 	TMap<FIntPoint, TArray<TWeakObjectPtr<class ARDTownAnimal>>> PenMates15;
+	uint32 PenPrune15 = 0;
 	/** a quest's "boss" goal counts Mistward Castle's tiers whose boss she has slain (item 20: one slain before the quest was taken
 	 *  counts) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bBossGoalCastle15 = false;
@@ -985,8 +986,7 @@ public:
 	/** a test's: the hearth fires made ("x|y|z|active") within Range of At */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") TArray<FString> GetHearthFires15(FVector At, float Range) const;
 	TArray<TWeakObjectPtr<class UNiagaraComponent>> HearthFires15;
-	void TickHearths15();
-	float HearthWakeAt15 = 0.f;
+	uint32 HearthPrune15 = 0;
 	/** the wilds' hearths crackle (item 22: their fire was seen, never heard) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bWildHearthSound15 = false;
 	/** a test's: the hearths of the chunks within Range of At ("x|y|z" each) */

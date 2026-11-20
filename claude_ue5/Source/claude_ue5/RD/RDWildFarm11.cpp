@@ -1028,6 +1028,9 @@ bool ARDDungeonGenerator::RemoveWildFarm(int32 Id)
 			auto Shift = [](int32& A, int32& B, int32 A0, int32 B0) { const int32 N = B0 - A0; if (N > 0 && A >= B0) { A -= N; B -= N; } };
 			Shift(O.Clear0, O.Clear1, F.Clear0, F.Clear1); Shift(O.House0, O.House1, F.House0, F.House1); Shift(O.Door0, O.Door1, F.Door0, F.Door1);
 		}
+		// (the list of 2026-11-20: its hearth's crackle goes with its fire (PR #98's review))
+		for (const TWeakObjectPtr<UActorComponent>& W : F.Comps)
+			if (const UNiagaraComponent* N = Cast<UNiagaraComponent>(W.Get())) { const FVector L = N->GetComponentLocation(); C->HearthPoints15.RemoveAll([&L](const FVector& H) { return FVector::Dist2D(H, L) < 60.f; }); }
 		for (const TWeakObjectPtr<UActorComponent>& W : F.Comps) if (UActorComponent* X = W.Get()) X->DestroyComponent();
 		C->Stations14.RemoveAll([&F](const ARDWildChunk::FStation14& S) { return S.Owner == F.Id; });          // (its oven)
 		C->PlaceProps.RemoveAll([](const TObjectPtr<UStaticMeshComponent>& S) { return !IsValid(S) || S->IsBeingDestroyed(); });

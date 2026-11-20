@@ -1851,7 +1851,6 @@ void ARDDungeonGenerator::Tick(float Dt)
 	if (bPaused) return;
 	TickAllies(Dt);
 	TickCarrySummons();
-	if (bHearth15 && HearthFires15.Num() > 0) TickHearths15();          // (the list of 2026-11-20: fires culled far off woken near her)
 	TickDungeonKeys();
 	// input: F interacts, M toggles the map
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))

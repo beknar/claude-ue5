@@ -4570,9 +4570,19 @@ def step_people10():
     ok = all(v["buildings"][0] == v["buildings"][1] and v["same_places"] and 1.2 <= v["ratio"] <= 1.3 and v["children"][1] > v["children"][0] for v in out.values())
     step_result("people10", ok, **res)
 TRIPO_J = os.path.join(OUT, "tripo_animals", "tripo_animals.json")
+def box_gap15(a, b):
+    """two animals' bodies as boxes on the ground (each its def's half length along its facing, half width across): the most any of the
+    four axes keeps them apart, negative when they overlap (the separating axis test)"""
+    la, lb = a.get_actor_location(), b.get_actor_location(); ha, hb = a.get_half_size15(), b.get_half_size15()
+    ya, yb = math.radians(a.get_actor_rotation().yaw), math.radians(b.get_actor_rotation().yaw)
+    ua, va = (math.cos(ya), math.sin(ya)), (-math.sin(ya), math.cos(ya)); ub, vb = (math.cos(yb), math.sin(yb)), (-math.sin(yb), math.cos(yb))
+    d = (lb.x - la.x, lb.y - la.y); dot = lambda p, q: p[0] * q[0] + p[1] * q[1]
+    return max(abs(dot(d, n)) - ha.x * abs(dot(ua, n)) - ha.y * abs(dot(va, n)) - hb.x * abs(dot(ub, n)) - hb.y * abs(dot(vb, n)) for n in (ua, va, ub, vb))
+
 def step_cows15(off=False):
-    """the list of 2026-11-20 (item 1): over 60 s every pen's animals sampled four times a second: no two of a pen ever closer than
-    the sum of their half-widths (their middles' distance less both), and they still walk (each pen's moved); a picture of the cows"""
+    """the list of 2026-11-20 (item 1): over 60 s every pen's animals sampled four times a second: no two of a pen ever overlapping
+    as boxes (their def's half length along their facing and half width across: PR #98's review, the half widths alone missed two
+    cows end to end), and they still walk (each pen's moved); a picture of the cows"""
     g = G["gen"]; quiet(True); g.set_town_hour(11.0)
     g.set_editor_property("pen_apart15", not off)          # (off: the switch's measure without it)
     acts = [a for a in GS.get_all_actors_of_class(G["w"], unreal.RDTownAnimal) if a.pen >= 0]
@@ -4587,7 +4597,7 @@ def step_cows15(off=False):
             for i in range(len(al)):
                 for j in range(i + 1, len(al)):
                     a, b = al[i], al[j]
-                    gap = dist2(a.get_actor_location(), b.get_actor_location()) - a.get_half_width15() - b.get_half_width15()
+                    gap = box_gap15(a, b)
                     if pid not in worst or gap < worst[pid]: worst[pid] = gap
     for pid, al in pens.items(): moved[pid] = round(max(dist2(a.get_actor_location(), p0[a.get_name()]) for a in al) / 100, 1)
     res["samples"] = n; res["least_gap_cm"] = {str(k): round(v, 1) for k, v in worst.items()}; res["moved_m"] = {str(k): v for k, v in moved.items()}
@@ -4598,7 +4608,7 @@ def step_cows15(off=False):
         yield from rwait(1.0); shot("cows15", "1280x720"); yield from rwait(0.6)
     quiet(False)
     g.set_editor_property("pen_apart15", True); res["switch_off"] = off
-    ok = len(pens) > 0 and any(v > 1.0 for v in moved.values()) and (any(v < -2.0 for v in worst.values()) if off else all(v >= -2.0 for v in worst.values()))
+    ok = len(pens) > 0 and any(v > 1.0 for v in moved.values()) and (any(v < -2.0 for v in worst.values()) if off else all(v >= -0.5 for v in worst.values()))
     step_result("cows15off" if off else "cows15", ok, **res)
 
 def step_warden15():
@@ -4613,6 +4623,10 @@ def step_warden15():
         g.debug_forget_quest15("captain_warden")
         g.debug_set_counter15("bossdone:1", 0); g.debug_set_counter15("vel_morrath:bossdone:1", 1); res["only_vel_morrath"] = g.castle_bosses_slain15()
         g.debug_set_counter15("bossdone:1", 1); res["castle_slain"] = g.castle_bosses_slain15()
+        # (another boss quest keeps counting only what comes after it is taken (PR #98's review): Wardens' Bones reads 0)
+        g.debug_forget_quest15("scholar_bones"); res["bones_accepted"] = g.town_quest_action("accept", "scholar_bones"); yield from rwait(0.3)
+        bl = next((str(l) for l in g.get_quest_lines() if str(l).startswith("scholar_bones|")), "").split("|"); res["bones"] = bl[3:6]
+        g.debug_forget_quest15("scholar_bones")
         res["accepted"] = g.town_quest_action("accept", "captain_warden"); yield from rwait(0.3)
         res["after_accept"] = line()
     finally:
@@ -4621,7 +4635,8 @@ def step_warden15():
     quiet(False)
     a = (res["after_accept"] or "").split("|"); o = (res["offered_at_start"] or "").split("|")
     res["state"] = a[3] if len(a) > 3 else None; res["progress"] = a[4:6] if len(a) > 5 else a
-    ok = len(o) > 3 and o[3] == "offered" and res["only_vel_morrath"] == 0 and res["castle_slain"] == 1 and res["accepted"] and res["state"] == "ready"
+    ok = len(o) > 3 and o[3] == "offered" and res["only_vel_morrath"] == 0 and res["castle_slain"] == 1 and res["accepted"] and res["state"] == "ready" \
+        and res["bones_accepted"] and len(res["bones"]) > 1 and res["bones"][1] == "0"
     step_result("warden15", ok, **res)
 
 def step_mapsym15():
@@ -4652,7 +4667,7 @@ def step_hearth15():
     g = G["gen"]; sec = section(); res = {}; quiet(True)
     pts = [sec.get_fire_point(i) for i in range(sec.get_num_fire_points()) if sec.get_fire_kind(i) == 2]
     res["hearths"] = len(pts)
-    pawn = G["pawn"]; shots_ = 0; heard = []; fires = []
+    pawn = G["pawn"]; shots_ = 0; heard = []; fires = []; lit = []
     for k, P in enumerate(pts[:3]):
         best = None
         for a in range(0, 360, 30):
@@ -4665,17 +4680,20 @@ def step_hearth15():
         put(st, yaw=yw, z=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=yw)); pawn.set_actor_hidden_in_game(True)
         for hr in (23.0, 12.0):
             g.set_town_hour(hr); yield from rwait(1.5); shot(f"hearth15_{k}_{int(hr)}", "1280x720"); yield from rwait(0.9); shots_ += 1
+            if hr == 23.0:
+                # (its own light (tagged) on at night whoever is home; PR #98's review: only that light, not every light near it)
+                lit.append([bool(c.is_visible()) for c in sec.get_components_by_class(unreal.PointLightComponent) if c.component_has_tag("RDHearth15") and dist2(c.get_world_location(), P) < 150])
         heard.append(any(dist2(v, P) < 300 for v in g.get_fire_loops()))
         fires.append([str(x) for x in g.get_hearth_fires15(P, 80.0)])
         pawn.set_actor_hidden_in_game(False)
-    res["shots"] = shots_; res["heard"] = heard; res["fires"] = fires; quiet(False); g.set_town_hour(11.0)
+    res["shots"] = shots_; res["heard"] = heard; res["fires"] = fires; res["own_light_lit"] = lit; quiet(False); g.set_town_hour(11.0)
     res["all_fires"] = sum(1 for P in pts if g.get_hearth_fires15(P, 80.0))
     res["no_fire"] = [[round(P.x), round(P.y), round(P.z)] for P in pts if not g.get_hearth_fires15(P, 80.0)]
     res["distinct"] = len({(round(P.x / 10), round(P.y / 10)) for P in pts})
     # (every hearth's fire there and burning; the flame cards hidden: no fireplace instance draws the kit's flame material)
     flame = [c.get_name() for c in sec.get_components_by_class(unreal.InstancedStaticMeshComponent) if c.get_editor_property("static_mesh") and c.get_editor_property("static_mesh").get_name().startswith("SM_Kit_Fireplace") and c.get_material(4) and c.get_material(4).get_name() == "MI_Flame"]
     res["cards_shown"] = flame
-    step_result("hearth15", res["hearths"] > 0 and shots_ > 0 and res["all_fires"] == res["hearths"] and all(f and f[0].endswith("|1") for f in fires) and all(heard) and not flame, **res)
+    step_result("hearth15", res["hearths"] > 0 and shots_ > 0 and res["all_fires"] == res["hearths"] and all(f and f[0].endswith("|1") for f in fires) and all(heard) and not flame and all(l and all(l) for l in lit), **res)
 
 HEARTH_FX15 = ["/Game/MysticDungeon/VFX/P_TorchFire", "/Game/Hearthvale/VFX/NS_Fireplace_Low", "/Game/Cave/VFX/Systems/NS_Firepit_Flame", "/Game/Medieval_Lake_Village/VFX/NS_Fire",
                "/Game/Wildlands/VFX/FX/NS_Fire", "/Game/PitchBlackTemple/VFX/NS_Fire", "/Game/Medieval_Castle/VFX/Niagara/NS_Fire_System",

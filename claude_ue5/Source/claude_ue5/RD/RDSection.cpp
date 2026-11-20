@@ -1583,7 +1583,8 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 				const FVector P = Wall + Rt.RotateVector(FVector(Fp->Size.X * 0.5f + 30.f, 0, 0));
 				Center(TEXT("Fireplace"), P, Yaw, true, true);      // (on the lane at a wall without a door: block it)
 				AddEffect(TEXT("HearthFire"), P + Rt.RotateVector(FVector(0, 0, 0)) + FVector(0, 0, 42), RDHearthFlame);
-				AddLight(P + Rt.RotateVector(FVector(80, 0, 0)) + FVector(0, 0, 90), FLinearColor(1.f, 0.48f, 0.18f), 260.f, 1800.f, true, 0.25f);
+				if (UPointLightComponent* Hl = AddLight(P + Rt.RotateVector(FVector(80, 0, 0)) + FVector(0, 0, 90), FLinearColor(1.f, 0.48f, 0.18f), 260.f, 1800.f, true, 0.25f))
+					Hl->ComponentTags.Add(TEXT("RDHearth15"));          // (the list of 2026-11-20: a hearth's glow burns with its fire)
 			}
 		}
 		FurnishWalls(R, Rm, { TEXT("PrepTable"), TEXT("BreadOven"), TEXT("ShelfRack"), TEXT("Barrel"), TEXT("Crate") }, 300.f, 0.7f, true);

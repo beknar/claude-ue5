@@ -1038,19 +1038,15 @@ void ARDDungeonGenerator::TickTownLights(float Dt)
 		TownLightsFor = S;
 		const float M = TileSize;
 		TInlineComponentArray<USceneComponent*> Cs(S);
-		// (the list of 2026-11-20 (item 22): a hearth keeps burning whoever is home: its fire and its glow, the light laid before it,
-		// are left out)
-		TArray<FVector> Hearths;
-		if (bHearth15) for (const TWeakObjectPtr<UNiagaraComponent>& W : HearthFires15) if (const UNiagaraComponent* H = W.Get(); H && H->GetOwner() == S) Hearths.Add(H->GetComponentLocation());
+		// (the list of 2026-11-20 (item 22): a hearth keeps burning whoever is home: its fire and its glow, the light laid for it (tagged:
+		// PR #98's review, not every light near it), are left out)
 		for (USceneComponent* C : Cs)
 		{
 			if (!C || !(C->IsA<UPointLightComponent>() || C->IsA<UNiagaraComponent>())) continue;
-			if (Hearths.Num() > 0)
+			if (bHearth15)
 			{
 				const UNiagaraComponent* Nc = Cast<UNiagaraComponent>(C);
-				if (Nc && Nc->GetAsset() == HearthFx15) continue;
-				const FVector Lc = C->GetComponentLocation();
-				if (!Nc && Hearths.ContainsByPredicate([&Lc](const FVector& H) { return FVector::Dist2D(H, Lc) < 150.f && FMath::Abs(Lc.Z - H.Z) < 150.f; })) continue;
+				if ((Nc && HearthFx15 && Nc->GetAsset() == HearthFx15) || C->ComponentHasTag(TEXT("RDHearth15"))) continue;
 			}
 			const FVector L = C->GetComponentLocation();
 			for (int32 BI = 0; BI < S->TownBlds.Num(); ++BI)
@@ -1617,7 +1613,7 @@ int32 ARDDungeonGenerator::QuestProgress(const FRDQuestDef& Q) const
 	if (Q.Goal.EndsWith(TEXT(":tier"))) return FMath::Max(GI->GetCounter(Q.Goal), DungeonTierReached(Q.Goal.LeftChop(5)));
 	if (Q.Goal == TEXT("guards")) return GI->GuardsDead.Num();
 	// (the list of 2026-11-20 (item 20): the castle's tiers whose boss she has slain, whole: one slain before the quest was taken counts)
-	if (Q.Goal == TEXT("boss") && bBossGoalCastle15) return CastleBossesSlain15();
+	if (Q.Goal == TEXT("boss") && Q.bGoalWhole15 && bBossGoalCastle15) return CastleBossesSlain15();
 	// (the wilderness's (2026-11-07): read from the world, whole: the den's pack dead, the patrol found)
 	if (Q.Goal.StartsWith(TEXT("wild:"))) return WildQuestProgress(Q.Goal);
 	const FRDQuestState* St = GI->FindQuest(Q.Id);

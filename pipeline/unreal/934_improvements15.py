@@ -271,14 +271,17 @@ if "items" in args:
     made = items_sounds()
     each(tuple(I15["maps"]), lambda g, m: items(g, m, made), "items")
 def town(g, m):
+    # (brokenspire alone: the castle's and the dungeons' maps hold no quests, their trackers none to draw (PR #98's review asked))
     for k_ in ("pen_apart15", "boss_goal_castle15", "town_symbols15", "wild_hearth_sound15"): g.set_editor_property(k_, True)
     qs = list(g.get_editor_property("quests")); n = 0
     for i, q in enumerate(qs):
-        if str(q.get_editor_property("id")) == "captain_warden" and str(q.get_editor_property("after")) not in ("", "None"):
-            q.set_editor_property("after", unreal.Name("None")); qs[i] = q; n += 1
+        if str(q.get_editor_property("id")) == "captain_warden":
+            # (its kills before it was taken count: the user's choice for this quest, not every boss goal (PR #98's review))
+            q.set_editor_property("after", unreal.Name("None")); q.set_editor_property("goal_whole15", True); qs[i] = q; n += 1
     g.set_editor_property("quests", qs)
     w = next((q for q in g.get_editor_property("quests") if str(q.get_editor_property("id")) == "captain_warden"), None)
-    return {"warden_after": str(w.get_editor_property("after")) if w else "no quest", "changed": n, "hearth_set": unreal.Name("Env.Hearth") in g.get_editor_property("sounds")}
+    whole = [str(q.get_editor_property("id")) for q in g.get_editor_property("quests") if q.get_editor_property("goal_whole15")]
+    return {"warden_after": str(w.get_editor_property("after")) if w else "no quest", "changed": n, "whole": whole, "hearth_set": unreal.Name("Env.Hearth") in g.get_editor_property("sounds")}
 
 
 if "town" in args: each(("brokenspire",), town, "town")

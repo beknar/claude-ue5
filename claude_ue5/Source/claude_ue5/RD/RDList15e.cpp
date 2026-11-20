@@ -43,27 +43,15 @@ void ARDDungeonGenerator::DebugForgetQuest15(FName Id)
 UNiagaraComponent* ARDDungeonGenerator::SpawnHearth15(USceneComponent* Parent, const FVector& At)
 {
 	if (!HearthFx15 || !Parent) return nullptr;
-	// (once a place: a section laid again, a chunk made again, ask again for the same hearth)
-	HearthFires15.RemoveAll([](const TWeakObjectPtr<UNiagaraComponent>& W) { return !W.IsValid(); });
-	for (const TWeakObjectPtr<UNiagaraComponent>& W : HearthFires15) if (FVector::DistSquared(W->GetComponentLocation(), At) < 400.f) return W.Get();
+	// (once a place: a section laid again asks again for the same hearth; its parent's own children are looked at, PR #98's review)
+	for (USceneComponent* Ch : Parent->GetAttachChildren())
+		if (UNiagaraComponent* N = Cast<UNiagaraComponent>(Ch); N && N->GetAsset() == HearthFx15 && FVector::DistSquared(N->GetComponentLocation(), At) < 400.f) return N;
+	if ((++HearthPrune15 & 31) == 0) HearthFires15.RemoveAll([](const TWeakObjectPtr<UNiagaraComponent>& W) { return !W.IsValid(); });
 	UNiagaraComponent* C = UNiagaraFunctionLibrary::SpawnSystemAttached(HearthFx15, Parent, NAME_None, At, FRotator::ZeroRotator, FVector(HearthFxScale15),
 		EAttachLocation::KeepWorldPosition, false, ENCPoolMethod::None, true, false);          // (no pre-cull: one spawned out of view never drew, PR #60;
-		// kept, not destroyed when done: the effect's distance culling ended one made far from her for good (the second run's town had none)
+		// not destroyed when done: the town's lights-out rule's DeactivateImmediate destroyed the fires it reached (a whole run had none)
 	if (C) HearthFires15.Add(C);
 	return C;
-}
-
-void ARDDungeonGenerator::TickHearths15()
-{
-	// (once a second: a fire within 40 m of her that is not running (culled while she was far, or never begun) is begun again)
-	const UWorld* W = GetWorld();
-	if (!W || W->GetTimeSeconds() < HearthWakeAt15) return;
-	HearthWakeAt15 = W->GetTimeSeconds() + 1.f;
-	const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
-	if (!Her) return;
-	const FVector L = Her->GetActorLocation();
-	for (const TWeakObjectPtr<UNiagaraComponent>& Wk : HearthFires15)
-		if (UNiagaraComponent* C = Wk.Get(); C && !C->IsActive() && FVector::DistSquared(C->GetComponentLocation(), L) < FMath::Square(4000.f)) C->Activate(true);
 }
 
 TArray<FString> ARDDungeonGenerator::GetHearthFires15(FVector At, float Range) const
@@ -100,45 +88,74 @@ TArray<FString> ARDDungeonGenerator::GetWildHearths15(FVector At, float Range) c
 }
 
 // ================================================================================================ item 1: a pen's animals apart
-float ARDTownAnimal::GetHalfWidth15() const
+/** the gap between two animals' bodies as boxes on the ground (each its half length along its facing, half width across): the most
+ *  any axis of the two boxes keeps them apart, negative when they overlap; Push the way that takes A out of B the shortest */
+static float RDT15BoxGap(const FVector& Pa, float Ya, const FVector2D& Ha, const FVector& Pb, float Yb, const FVector2D& Hb, FVector* Push = nullptr)
 {
-	return Gen && Gen->TownAnimals.IsValidIndex(Def) ? FMath::Min(Gen->TownAnimals[Def].HalfSize.X, Gen->TownAnimals[Def].HalfSize.Y) : Rad15;
+	const FVector Ua = FRotator(0.f, Ya, 0.f).Vector(), Va(-Ua.Y, Ua.X, 0.f), Ub = FRotator(0.f, Yb, 0.f).Vector(), Vb(-Ub.Y, Ub.X, 0.f);
+	const FVector D(Pb.X - Pa.X, Pb.Y - Pa.Y, 0.f);
+	const FVector Axes[4] = { Ua, Va, Ub, Vb };
+	float Best = -BIG_NUMBER; FVector BestAx = Ua;
+	for (const FVector& N : Axes)
+	{
+		const float Ra = Ha.X * FMath::Abs(FVector::DotProduct(Ua, N)) + Ha.Y * FMath::Abs(FVector::DotProduct(Va, N));
+		const float Rb = Hb.X * FMath::Abs(FVector::DotProduct(Ub, N)) + Hb.Y * FMath::Abs(FVector::DotProduct(Vb, N));
+		const float Dn = FVector::DotProduct(D, N), Sep = FMath::Abs(Dn) - Ra - Rb;
+		if (Sep > Best) { Best = Sep; BestAx = Dn > 0.f ? -N : N; }
+	}
+	if (Push) *Push = BestAx;
+	return Best;
+}
+
+FVector2D ARDTownAnimal::GetHalfSize15() const
+{
+	return Gen && Gen->TownAnimals.IsValidIndex(Def) ? Gen->TownAnimals[Def].HalfSize : FVector2D(50.f, 50.f);
 }
 
 void ARDTownAnimal::Register15()
 {
 	if (!Gen || !Gen->bPenApart15 || bLoose || !Gen->TownAnimals.IsValidIndex(Def)) return;
-	const FRDTownAnimalDef& D = Gen->TownAnimals[Def];
-	Rad15 = FMath::Max((D.HalfSize.X + D.HalfSize.Y) * 0.5f, 10.f);
+	Half15 = Gen->TownAnimals[Def].HalfSize.ComponentMax(FVector2D(10.f, 10.f));
 	PenKey15 = FIntPoint(FMath::RoundToInt(PenAt.X / 10.f), FMath::RoundToInt(PenAt.Y / 10.f));
+	// (PR #98's review: the pens of the chunks dropped leave entries of dead animals: every 64th registration takes the empty ones out)
+	if ((++Gen->PenPrune15 & 63) == 0)
+		for (auto It = Gen->PenMates15.CreateIterator(); It; ++It)
+		{
+			It.Value().RemoveAll([](const TWeakObjectPtr<ARDTownAnimal>& A) { return !A.IsValid(); });
+			if (It.Value().Num() == 0) It.RemoveCurrent();
+		}
 	TArray<TWeakObjectPtr<ARDTownAnimal>>& M = Gen->PenMates15.FindOrAdd(PenKey15);
 	M.RemoveAll([](const TWeakObjectPtr<ARDTownAnimal>& A) { return !A.IsValid(); });
 	M.AddUnique(this);
-	// (laid where a mate already stands: moved to a free spot of its pen, from its own stream)
-	if (Crowded15(GetActorLocation()))
+	// (laid where a mate already stands: moved to a free spot of its pen, from its own stream, on the ground there (PR #98's review))
+	if (Crowded15(GetActorLocation(), GetActorRotation().Yaw))
 	{
-		const FVector2D H = (PenHalf - FVector2D(Rad15, Rad15)).ComponentMax(FVector2D(5.f, 5.f));
-		const FVector At = FreeSpot15(R, H);
-		SetActorLocation(FVector(At.X, At.Y, GetActorLocation().Z), false);
+		const float Rr = Half15.Size();
+		const FVector2D H = (PenHalf - FVector2D(Rr, Rr)).ComponentMax(FVector2D(5.f, 5.f));
+		FVector At = FreeSpot15(this->R, H);
+		At.Z = bWildGround && GroundN > 1 ? GroundZAt(At) : GetActorLocation().Z;
+		SetActorLocation(At, false);
 	}
 }
 
-bool ARDTownAnimal::Crowded15(const FVector& At) const
+float ARDTownAnimal::MinGap15(const FVector& At, float Yaw) const
 {
 	const TArray<TWeakObjectPtr<ARDTownAnimal>>* M = Gen ? Gen->PenMates15.Find(PenKey15) : nullptr;
-	if (!M) return false;
+	float G = BIG_NUMBER;
+	if (!M) return G;
 	for (const TWeakObjectPtr<ARDTownAnimal>& W : *M)
 	{
 		const ARDTownAnimal* O = W.Get();
 		if (!O || O == this || O->bDead14) continue;
-		if (FVector::Dist2D(At, O->GetActorLocation()) < Rad15 + O->Rad15) return true;
+		G = FMath::Min(G, RDT15BoxGap(At, Yaw, Half15, O->GetActorLocation(), O->GetActorRotation().Yaw, O->Half15));
 	}
-	return false;
+	return G;
 }
 
 FVector ARDTownAnimal::FreeSpot15(FRandomStream& Rs, const FVector2D& H) const
 {
-	// (somewhere in its pen no mate stands nor is walking to: the first of a few tries clear of all, else the last tried)
+	// (somewhere in its pen no mate stands nor is walking to, whichever way either then faces: their half lengths apart and 20 cm; the
+	// first of a few tries clear of all, else the last tried)
 	const TArray<TWeakObjectPtr<ARDTownAnimal>>* M = Gen ? Gen->PenMates15.Find(PenKey15) : nullptr;
 	FVector At = PenAt;
 	for (int32 K = 0; K < 8; ++K)
@@ -150,7 +167,7 @@ FVector ARDTownAnimal::FreeSpot15(FRandomStream& Rs, const FVector2D& H) const
 			{
 				const ARDTownAnimal* O = W.Get();
 				if (!O || O == this || O->bDead14) continue;
-				const float Need = Rad15 + O->Rad15 + 20.f;
+				const float Need = Half15.X + O->Half15.X + 20.f;
 				if (FVector::Dist2D(At, O->GetActorLocation()) < Need || (O->State == 2 && FVector::Dist2D(At, O->To) < Need)) { bClear = false; break; }
 			}
 		if (bClear) break;
@@ -160,27 +177,29 @@ FVector ARDTownAnimal::FreeSpot15(FRandomStream& Rs, const FVector2D& H) const
 
 void ARDTownAnimal::Apart15(float Dt)
 {
-	// (standing in a mate: eased out, half the overlap each a second at most its walk, kept inside its pen)
+	// (standing in a mate: eased out along the shortest way out of its box, half the overlap each, a second at most its walk, kept inside
+	// its pen)
 	const TArray<TWeakObjectPtr<ARDTownAnimal>>* M = Gen ? Gen->PenMates15.Find(PenKey15) : nullptr;
 	if (!M) return;
 	const FVector L = GetActorLocation();
+	const float Yaw = GetActorRotation().Yaw;
 	FVector Push = FVector::ZeroVector;
 	for (const TWeakObjectPtr<ARDTownAnimal>& W : *M)
 	{
 		const ARDTownAnimal* O = W.Get();
 		if (!O || O == this || O->bDead14) continue;
-		FVector D = L - O->GetActorLocation(); D.Z = 0.f;
-		const float Need = Rad15 + O->Rad15, Dd = D.Size();
-		if (Dd >= Need) continue;
-		const FVector U = Dd > 1.f ? D / Dd : FVector(1.f, 0.f, 0.f).RotateAngleAxis((float)((GetUniqueID() * 37u) % 360u), FVector::UpVector);
-		Push += U * (Need - Dd) * 0.5f;
+		FVector Way;
+		const float Gap = RDT15BoxGap(L, Yaw, Half15, O->GetActorLocation(), O->GetActorRotation().Yaw, O->Half15, &Way);
+		if (Gap >= 0.f) continue;
+		if (FVector::Dist2D(L, O->GetActorLocation()) < 1.f) Way = FVector(1.f, 0.f, 0.f).RotateAngleAxis((float)((GetUniqueID() * 37u) % 360u), FVector::UpVector);
+		Push += Way * (-Gap * 0.5f + 1.f);
 	}
 	if (Push.IsNearlyZero(0.5f)) return;
 	FVector N = L + Push.GetClampedToMaxSize(FMath::Max(Speed, 60.f) * Dt);
-	// (inside its pen: in the pen's frame, within its half sizes less its body)
 	const FRotator Pr(0.f, PenYaw, 0.f);
 	FVector Lp = Pr.UnrotateVector(N - PenAt);
-	const FVector2D H = (PenHalf - FVector2D(Rad15, Rad15)).ComponentMax(FVector2D(5.f, 5.f));
+	const float Rr = FMath::Min(Half15.X, Half15.Y);
+	const FVector2D H = (PenHalf - FVector2D(Rr, Rr)).ComponentMax(FVector2D(5.f, 5.f));
 	Lp.X = FMath::Clamp(Lp.X, -H.X, H.X); Lp.Y = FMath::Clamp(Lp.Y, -H.Y, H.Y);
 	N = PenAt + Pr.RotateVector(FVector(Lp.X, Lp.Y, 0.f)); N.Z = L.Z;
 	if (bWildGround && GroundN > 1) N.Z = GroundZAt(N);
