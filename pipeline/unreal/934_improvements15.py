@@ -23,6 +23,13 @@ Parts (args):
                   first: rdc_sound_prep.py SourceArt/list15/items15.json SourceArt/list15/audio_items) and bGearThud15; the ankh's
                   chests only; the torch's and the ankh's burn time and bLightBurn15; the teleporters' R3 (bPadTripButton15). Run after
                   910, 918 and 928, which write the items and spells anew.
+  town            the sixth phase (items 1, 20, 21, 22) on brokenspire: a pen's animals kept apart (bPenApart15), a quest's "boss" goal
+                  the castle's tiers whose boss she has slain (bBossGoalCastle15) and "The First Warden" offered from the start (its
+                  after taken off, as town.json now has it), the town maps' symbols and key (bTownSymbols15), the wilds' hearths heard
+                  (bWildHearthSound15).
+  hearth          the sixth phase's item 22 on every map of the game: the kit fireplace's flat flame cards (slot 4) hidden in a copy
+                  (SM_Kit_Fireplace15, M_RD15_Hidden in the slot) that the "Fireplace" piece points at, and Hearthvale's
+                  NS_Fireplace_Low at every hearth (bHearth15, HearthFx15; screened by 884 hearthfx15: P_TorchFire drew nothing there).
   dungeon         the fourth phase (items 5, 6, 8, 11): the great hall's oven (bStartOven15), the stations' marks (bStationMarks15),
                   the big map's zoom (bMapZoom15) on every map of the game (the pews by 770's Pew and the shelves part); each
                   dungeon map's start section built again (its oven and its shelves saved).
@@ -38,7 +45,7 @@ REPORT = []
 MAPS = "/Game/RandomDungeon/Maps/"
 # (the maps of the game the Summoner plays: martial_arts is the Martial Artist's alone)
 GAME_MAPS = ("brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress")
-PARTS = ("allies", "summons", "hands", "quick", "shelves", "dungeon", "items")
+PARTS = ("allies", "summons", "hands", "quick", "shelves", "dungeon", "items", "town", "hearth")
 args = [a for a in sys.argv[1:] if a in PARTS] or [p for p in PARTS if p != "shelves"]          # (shelves needs its folder: named only)
 SA = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "SourceArt")
 DUNGEONS = ("war_engine", "sewers", "kethrys_spire", "heaven_fortress")
@@ -263,6 +270,57 @@ if "items" in args:
     I15 = json.load(open(os.path.join(SA, "list15", "items15.json"), encoding="utf-8"))
     made = items_sounds()
     each(tuple(I15["maps"]), lambda g, m: items(g, m, made), "items")
+def town(g, m):
+    for k_ in ("pen_apart15", "boss_goal_castle15", "town_symbols15", "wild_hearth_sound15"): g.set_editor_property(k_, True)
+    qs = list(g.get_editor_property("quests")); n = 0
+    for i, q in enumerate(qs):
+        if str(q.get_editor_property("id")) == "captain_warden" and str(q.get_editor_property("after")) not in ("", "None"):
+            q.set_editor_property("after", unreal.Name("None")); qs[i] = q; n += 1
+    g.set_editor_property("quests", qs)
+    w = next((q for q in g.get_editor_property("quests") if str(q.get_editor_property("id")) == "captain_warden"), None)
+    return {"warden_after": str(w.get_editor_property("after")) if w else "no quest", "changed": n, "hearth_set": unreal.Name("Env.Hearth") in g.get_editor_property("sounds")}
+
+
+if "town" in args: each(("brokenspire",), town, "town")
+
+
+L15 = "/Game/RandomDungeon/List15"
+HEARTH = {}
+
+
+def hearth_assets():
+    MEL = unreal.MaterialEditingLibrary
+    hid = unreal.load_asset(f"{L15}/M_RD15_Hidden")
+    if not hid:
+        hid = unreal.AssetToolsHelpers.get_asset_tools().create_asset("M_RD15_Hidden", L15, unreal.Material, unreal.MaterialFactoryNew())
+        hid.set_editor_property("blend_mode", unreal.BlendMode.BLEND_MASKED); hid.set_editor_property("two_sided", True)
+        c = MEL.create_material_expression(hid, unreal.MaterialExpressionConstant, -300, 0); c.set_editor_property("r", 0.0)
+        MEL.connect_material_property(c, "", unreal.MaterialProperty.MP_OPACITY_MASK)
+        for u in ("used_with_instanced_static_meshes", "used_with_nanite"): hid.set_editor_property(u, True)
+        MEL.recompile_material(hid); eal.save_loaded_asset(hid, False)
+    src = unreal.load_asset("/Game/Castle/Furniture/Kit/SM_Kit_Fireplace")
+    names = [str(s.material_slot_name) for s in src.static_materials]
+    assert names[4] == "Flame", names          # (the kit's flame cards)
+    dst = f"{L15}/SM_Kit_Fireplace15"
+    m = unreal.load_asset(dst) or eal.duplicate_asset(src.get_path_name(), dst)
+    mats = list(m.static_materials); s = mats[4]; s.material_interface = hid; mats[4] = s
+    m.modify(); m.set_editor_property("static_materials", mats); eal.save_loaded_asset(m, False)
+    m = unreal.load_asset(dst); assert m.static_materials[4].material_interface == hid, "the flame slot kept its material"
+    fx = unreal.load_asset("/Game/Hearthvale/VFX/NS_Fireplace_Low"); assert fx, "no NS_Fireplace_Low"
+    HEARTH.update(mesh=m, hid=hid, fx=fx)
+
+
+def hearth(g, m):
+    pcs = g.get_editor_property("pieces"); p = pcs.get(unreal.Name("Fireplace"))
+    if p:
+        p.set_editor_property("mesh", HEARTH["mesh"]); pcs[unreal.Name("Fireplace")] = p; g.set_editor_property("pieces", pcs)
+    g.set_editor_property("hearth_fx15", HEARTH["fx"]); g.set_editor_property("hearth_hide_mat15", HEARTH["hid"]); g.set_editor_property("hearth15", True)
+    back = g.get_editor_property("pieces").get(unreal.Name("Fireplace"))
+    return {"fireplace": back.get_editor_property("mesh").get_name() if back else None, "fx": g.get_editor_property("hearth_fx15").get_name()}
+
+
+if "hearth" in args:
+    hearth_assets(); each(GAME_MAPS, hearth, "hearth")
 # (after shelves: the start sections built again with the turned shelves and their doors)
 if "dungeon" in args: each(GAME_MAPS, dungeon, "dungeon")
 print("\n".join(REPORT))

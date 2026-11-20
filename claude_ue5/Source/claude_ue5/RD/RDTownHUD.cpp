@@ -299,7 +299,7 @@ void ARDHUD::DrawTownMap(float Sc, const FVector& L, float Yaw)
 	UFont* Small = GEngine->GetSmallFont(); UFont* Medium = GEngine->GetMediumFont();
 	const ARDSection* S = Gen->GetSection(FIntPoint::ZeroValue);
 	if (!S) return;
-	TownLabels.Reset();
+	TownLabels.Reset(); TownBadges15.Reset(); Legend15.Reset();
 	Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor(0.f, 0.f, 0.01f, 0.6f));
 	const float Ms = FMath::Min(Canvas->ClipY * 0.9f, Canvas->ClipX * 0.62f);
 	const FVector2D A((Canvas->ClipX - Ms) * 0.5f, (Canvas->ClipY - Ms) * 0.5f), B = A + FVector2D(Ms);
@@ -356,7 +356,9 @@ void ARDHUD::DrawTownMap(float Sc, const FVector& L, float Yaw)
 	{
 		const FVector W = (S->LocalToWorld(Bd.Min) + S->LocalToWorld(Bd.Max - FIntPoint(1, 1))) * 0.5f;
 		const bool bHome = Bd.Kind == TK_Home;
-		Icon(RDTIconOf(Bd.Kind, Bd.State), W, (bHome ? 12.f : Bd.Kind == TK_Castle ? 40.f : 26.f) * Sc, RDTLabelOf(Bd.Kind));
+		const bool bBadge = Gen->bTownSymbols15 && !RDTLabelOf(Bd.Kind).IsEmpty();
+		Icon(RDTIconOf(Bd.Kind, Bd.State), W, (bHome ? 12.f : Bd.Kind == TK_Castle ? 40.f : 26.f) * Sc, bBadge ? FString() : RDTLabelOf(Bd.Kind));
+		if (bBadge) TownBadge15(Bd.Kind, ToM(FVector2D(W.X, W.Y)) + FVector2D(0.f, -20.f * Sc), 15.f * Sc, W);
 	}
 	// what stands outdoors: the square, the well, the market, the circle, the board, the graveyard, the mill, the still, the gate
 	FVector2D Stalls = FVector2D::ZeroVector; int32 NStalls = 0;
@@ -398,6 +400,7 @@ void ARDHUD::DrawTownMap(float Sc, const FVector& L, float Yaw)
 		Pending.Add({ T->Title, P, 9.f * Sc, FLinearColor(0.5f, 0.08f, 0.04f, 1.f), ERDType::Text, 0.85f });
 	}
 	PlaceTownMapLabels(Pending, Taken, Sc, FLinearColor(0.93f, 0.86f, 0.70f, 0.55f));
+	if (Gen->bTownSymbols15) DrawTownLegend15(A, B, Sc, false);
 	if (!S->MistgateAt.IsZero()) MistMark(10, ToM(FVector2D(S->MistgateAt.X, S->MistgateAt.Y)), 7.f * Sc);
 	{ FVector Ha; if (Gen->GetHorseMapAt(Ha) && Gen->IsInTownWalls(Ha)) DrawHorseMark(ToM(FVector2D(Ha.X, Ha.Y)), Sc * 1.2f); }          // (inside the town's walls: the map's sheet)
 	{
@@ -472,7 +475,7 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 	UFont* Small = GEngine->GetSmallFont(); UFont* Medium = GEngine->GetMediumFont();
 	const ARDSection* S = Gen->GetSection(FIntPoint::ZeroValue);
 	if (!S) return;
-	TownLabels.Reset();
+	TownLabels.Reset(); TownBadges15.Reset(); Legend15.Reset();
 	Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor(0.f, 0.f, 0.01f, 0.6f));
 	const float Ms = FMath::Min(Canvas->ClipY * 0.92f, Canvas->ClipX * 0.64f);
 	const FVector2D A((Canvas->ClipX - Ms) * 0.5f, (Canvas->ClipY - Ms) * 0.5f), B = A + FVector2D(Ms);
@@ -648,6 +651,8 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 	// what stands on the map, drawn from the top of the sheet down (the nearer covers the farther, as in the painting)
 	struct FMapPic { FName Name; FVector2D A, B; bool bFlip; bool bShadow; };
 	TArray<FMapPic> Pics;
+	struct FBadge15 { uint8 Kind; FVector2D P; FVector W; };
+	TArray<FBadge15> Badges15;          // (drawn over the pictures, after them)
 	TArray<FRDTMapLabel> Pending;
 	TArray<FBox2D> Taken;
 	// (on the picture from above the buildings are themselves: no painted pictures over them; the labels light on a dark halo)
@@ -698,7 +703,8 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 		const float Grow = Bd.Kind == TK_Castle ? 1.12f : Bd.Kind == TK_Home ? 1.3f : 1.22f;
 		Pic(Nm, Ctr, FMath::Max(Hw, Hh * 0.8f) * Grow, FMath::Max(Hh, Hw * 0.8f) * Grow, (Bd.Seed & 1u) != 0u && Bd.Kind != TK_Castle, true);
 		if (Bd.Kind != TK_Home) Taken.Add(FBox2D(Ctr - FVector2D(Hw, Hh) * 0.9f, Ctr + FVector2D(Hw, Hh) * 0.9f));
-		Label(RDTLabelOf(Bd.Kind), Ctr, FMath::Max(Hw, Hh), Nm.ToString());
+		if (Gen->bTownSymbols15 && !RDTLabelOf(Bd.Kind).IsEmpty()) Badges15.Add({ Bd.Kind, Ctr, FVector((W0 + W1) * 0.5f, 0.f) });
+		else Label(RDTLabelOf(Bd.Kind), Ctr, FMath::Max(Hw, Hh), Nm.ToString());
 	}
 	// (the castle's round towers)
 	for (const FVector& Tw : S->CastleTowers) Pic(TEXT("mapc_tower"), ToM(W2(Tw)), 380.f * K, 380.f * K, false, true);
@@ -795,7 +801,9 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 		for (const ARDSection::FTownSpot& Sp : S->TownSpots)
 			if (Sp.Kind == TS_Board) { Seal(ToM(W2(Sp.At)) + FVector2D(0.f, -16.f * Sc), RDTQuestMark(Ql, TEXT("Board"))); TownLabels.Add(TEXT("seal|Board")); break; }
 	// the labels: each where it covers no picture of a trade and no label before it, on a halo of the parchment's colour
+	for (const FBadge15& Bg : Badges15) TownBadge15(Bg.Kind, Bg.P, 17.f * Sc, Bg.W);
 	PlaceTownMapLabels(Pending, Taken, Sc, bSat ? FLinearColor(0.02f, 0.02f, 0.025f, 0.62f) : FLinearColor(0.95f, 0.89f, 0.74f, 0.62f));
+	if (Gen->bTownSymbols15) DrawTownLegend15(A, B, Sc, bSat);
 	if (!S->MistgateAt.IsZero()) MistMark(10, ToM(W2(S->MistgateAt)), 7.f * Sc);
 	{ FVector Ha; if (Gen->GetHorseMapAt(Ha) && Gen->IsInTownWalls(Ha)) DrawHorseMark(ToM(W2(Ha)), Sc * 1.2f); }
 	{
@@ -1054,4 +1062,83 @@ void ARDHUD::DrawTownPanel(float Sc)
 	const FString Keys = bPad ? (bTabs ? TEXT("D-pad  choose      LB / RB  the other list      A  do it      B  leave") : TEXT("D-pad  choose      A  do it      B  leave"))
 	                          : (bTabs ? TEXT("W S / wheel  choose      A D  the other list      Enter or click  do it      Esc or F  leave") : TEXT("W S / wheel  choose      Enter or click  do it      Esc or F  leave"));
 	UI.Text(Keys, RDTDim, A.X + Pd + Tin, Fy + 50.f * Sc, Small, Sc * 1.05f);
+}
+
+// ================================================================================================ the list of 2026-11-20 (item 21)
+/** a functional building's symbol on the town maps (one of the game's own painted pictures) and what the key says of it; NAME_None
+ *  for a building that keeps no badge (a home) */
+static FName RDT15SymbolOf(uint8 Kind, FString& Means)
+{
+	switch (Kind)
+	{
+	case TK_Castle: case TK_Cathedral: case TK_Foundry: case TK_SluiceHouse: case TK_Spire: case TK_Research:
+		Means = TEXT("the way into the dungeon"); return TEXT("wmap_cave");
+	case TK_Smithy: Means = TEXT("smithy: repairs, the anvil"); return TEXT("map_anvil");
+	case TK_Workshop: Means = TEXT("workshop"); return TEXT("rep_repair_kit");
+	case TK_Store: case TK_Shop: Means = TEXT("trader: buy and sell"); return TEXT("icon_gold");
+	case TK_Healer: Means = TEXT("healer: healing"); return TEXT("healing_flask");
+	case TK_Temple: case TK_Chapel: case TK_Monastery: Means = TEXT("temple, chapel: blessings"); return TEXT("ankh");
+	case TK_Storehouse: Means = TEXT("storehouse: your storage"); return TEXT("comp_timber");
+	case TK_Warehouse: case TK_Office: Means = TEXT("warehouse, offices"); return TEXT("comp_hardwood");
+	case TK_Tavern: Means = TEXT("tavern: food and drink"); return TEXT("stew");
+	case TK_Barracks: Means = TEXT("barracks: the town's guard"); return TEXT("mw_medieval_weapons_heater_shield");
+	case TK_SkyTower: Means = TEXT("tower"); return TEXT("wmap_city");
+	case TK_Witch: Means = TEXT("witch's hut: potions"); return TEXT("mana_flask");
+	case TK_Library: Means = TEXT("library: tomes"); return TEXT("tome");
+	case TK_Study: Means = TEXT("study: scrolls"); return TEXT("recipe_scroll");
+	case TK_Laboratory: Means = TEXT("laboratory: potions made"); return TEXT("recipe_potion");
+	case TK_Meditation: Means = TEXT("meditation chamber"); return TEXT("spell_starfall");
+	default: return NAME_None;
+	}
+}
+
+void ARDHUD::TownBadge15(uint8 Kind, const FVector2D& P, float Size, const FVector& World)
+{
+	FString Means;
+	const FName Sym = RDT15SymbolOf(Kind, Means);
+	if (Sym.IsNone()) return;
+	// (a parchment disc in a dark ring, the symbol on it: legible on the painted sheet and on the picture from above)
+	SoftDot(P + FVector2D(Size * 0.12f, Size * 0.18f), Size * 1.2f, FLinearColor(0.f, 0.f, 0.f, 0.45f));
+	SoftDot(P, Size * 1.12f, FLinearColor(0.20f, 0.12f, 0.05f, 1.f));
+	SoftDot(P, Size * 0.98f, FLinearColor(0.96f, 0.90f, 0.76f, 1.f));
+	if (!UI.Fit(Sym, P - FVector2D(Size * 0.8f), P + FVector2D(Size * 0.8f))) SoftDot(P, Size * 0.4f, FLinearColor(0.2f, 0.12f, 0.05f, 1.f));
+	TownBadges15.Add(FString::Printf(TEXT("%s|%.0f|%.0f"), *Sym.ToString(), World.X, World.Y));
+	if (!Legend15.ContainsByPredicate([&Sym](const TPair<FName, FString>& E) { return E.Key == Sym; })) Legend15.Add({ Sym, Means });
+}
+
+void ARDHUD::DrawTownLegend15(const FVector2D& A, const FVector2D& B, float Sc, bool bSat)
+{
+	// (the key: each symbol drawn on this map once, what it means; the quest givers' seal, her mark. In the sheet's lower left corner,
+	// a dark panel under it; cleared for the next frame)
+	UFont* Small = GEngine->GetSmallFont();
+	TArray<TPair<FName, FString>> Rows = Legend15;
+	Rows.Add({ TEXT("@seal"), TEXT("a quest giver: ! offers, ? to hand in") });
+	const float Rh = 30.f * Sc, W = 300.f * Sc, Pad = 12.f * Sc;
+	const float H = Rows.Num() * Rh + Pad * 2.f + 22.f * Sc;
+	// (left of the sheet where the screen has room for it (a wide screen): inside the sheet it covered the town's west; else the sheet's
+	// upper left, under its title (at its foot the panel ran under the footer's lines))
+	const float Out = A.X - (B.X - A.X) * 0.03f - W - 16.f * Sc;
+	const FVector2D P0(Out >= 16.f * Sc ? Out : A.X + 26.f * Sc, A.Y + 90.f * Sc);
+	Box(P0, P0 + FVector2D(W, H), FLinearColor(0.06f, 0.04f, 0.02f, 0.82f));
+	Frame(P0, P0 + FVector2D(W, H), FLinearColor(0.85f, 0.70f, 0.42f, 0.9f), 1.5f * Sc);
+	UI.Text(TEXT("KEY"), FLinearColor(0.95f, 0.82f, 0.5f, 1.f), P0.X + Pad, P0.Y + Pad * 0.6f, Small, Sc * 1.05f, ERDType::Label);
+	float Y = P0.Y + Pad + 22.f * Sc;
+	TownLegend15.Reset();
+	for (const TPair<FName, FString>& R : Rows)
+	{
+		const FVector2D C(P0.X + Pad + 12.f * Sc, Y + Rh * 0.5f);
+		if (R.Key == FName(TEXT("@seal")))
+		{
+			SoftDot(C, 11.f * Sc, FLinearColor(0.95f, 0.72f, 0.25f, 1.f)); SoftDot(C, 8.5f * Sc, FLinearColor(0.58f, 0.07f, 0.04f, 1.f));
+		}
+		else
+		{
+			SoftDot(C, 13.f * Sc, FLinearColor(0.96f, 0.90f, 0.76f, 1.f));
+			if (!UI.Fit(R.Key, C - FVector2D(11.f * Sc), C + FVector2D(11.f * Sc))) SoftDot(C, 5.f * Sc, FLinearColor(0.2f, 0.12f, 0.05f, 1.f));
+		}
+		UI.Text(R.Value, FLinearColor(0.95f, 0.92f, 0.85f, 1.f), P0.X + Pad + 32.f * Sc, Y + Rh * 0.5f - 9.f * Sc, Small, Sc * 0.95f, ERDType::Text);
+		TownLegend15.Add(FString::Printf(TEXT("%s|%s"), *R.Key.ToString(), *R.Value));
+		Y += Rh;
+	}
+	Legend15.Reset();
 }

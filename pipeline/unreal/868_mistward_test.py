@@ -6918,7 +6918,45 @@ def step_trip15():
     step_result("trip15", ok, **res)
 
 
-STEPS = {"icons15": step_icons15, "runes15": step_runes15, "thud15": step_thud15, "ankh15": step_ankh15, "light15": step_light15, "trip15": step_trip15, "oven15": step_oven15, "shelf15": step_shelf15, "chapel15": step_chapel15, "zoom15": step_zoom15, "summon15": step_summon15, "unwield15": step_unwield15, "quick15": step_quick15, "allies15": step_allies15, "arena15": step_arena15, "recipes14": step_recipes14, "tables14": step_tables14, "block14": step_block14, "horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
+def step_hearth15():
+    """the list of 2026-11-20 (item 22): the castle's hearths (fire points of kind 2 in the start set and, if it has none, the sets of
+    tier 2 round it): each has a fire burning (running and shown) at its floor, no fireplace of a set draws the kit's flame cards; a
+    picture of one from 2.2 m"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True); res = {}; pawn = G["pawn"]
+    def hearths():
+        out = []
+        for s in GS.get_all_actors_of_class(G["w"], unreal.RDSection):
+            out += [(s, s.get_fire_point(i)) for i in range(s.get_num_fire_points()) if s.get_fire_kind(i) == 2]
+        return out
+    hp = hearths()
+    if not hp:
+        g.debug_open_tiers(2, True)
+        for sc_ in (I2(1, 0), I2(0, 1), I2(-1, 0), I2(0, -1)):
+            if not g.is_section_generated(sc_): g.generate_section_now(sc_); yield from built(sc_)
+            hp = hearths()
+            if hp: break
+    res["hearths"] = len(hp)
+    res["burning"] = sum(1 for _s, P in hp if any(str(f).endswith("|1") for f in g.get_hearth_fires15(V(P.x, P.y, P.z - 42), 40.0)))
+    cards = 0
+    for s in GS.get_all_actors_of_class(G["w"], unreal.RDSection):
+        for cc in s.get_components_by_class(unreal.InstancedStaticMeshComponent):
+            sm = cc.get_editor_property("static_mesh")
+            if sm and sm.get_name().startswith("SM_Kit_Fireplace") and cc.get_instance_count() > 0 and cc.get_material(4) and cc.get_material(4).get_name() == "MI_Flame": cards += 1
+    res["card_comps"] = cards
+    if hp:
+        _s, P = hp[0]
+        for a in range(0, 360, 30):
+            d = V(math.cos(math.radians(a)), math.sin(math.radians(a)), 0)
+            hit = unreal.SystemLibrary.line_trace_single(G["w"], V(P.x + d.x * 40, P.y + d.y * 40, P.z + 80), V(P.x + d.x * 220, P.y + d.y * 220, P.z + 80), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [pawn], unreal.DrawDebugTrace.NONE, True)
+            if not (hit and hit.to_tuple()[0]):
+                yw = a + 180.0; put(V(P.x + d.x * 220, P.y + d.y * 220, P.z - 42), yaw=yw); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=yw))
+                pawn.set_actor_hidden_in_game(True); yield from rwait(2.5)
+                res["fire_near"] = [str(f) for f in g.get_hearth_fires15(V(P.x, P.y, P.z - 42), 40.0)]
+                res["heard"] = any(dist2(f, P) < 300 for f in g.get_fire_loops())
+                shot("hearth15", "1280x720"); yield from rwait(0.9); pawn.set_actor_hidden_in_game(False); break
+    quiet(False)
+    step_result("hearth15", res["hearths"] > 0 and res["burning"] == res["hearths"] and cards == 0 and bool(res.get("fire_near")), **res)
+STEPS = {"hearth15": step_hearth15, "icons15": step_icons15, "runes15": step_runes15, "thud15": step_thud15, "ankh15": step_ankh15, "light15": step_light15, "trip15": step_trip15, "oven15": step_oven15, "shelf15": step_shelf15, "chapel15": step_chapel15, "zoom15": step_zoom15, "summon15": step_summon15, "unwield15": step_unwield15, "quick15": step_quick15, "allies15": step_allies15, "arena15": step_arena15, "recipes14": step_recipes14, "tables14": step_tables14, "block14": step_block14, "horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
          "spells11_spells": lambda: step_spells11(("spells",)), "spells11_curses": lambda: step_spells11(("curses",)), "spells11_slashes": lambda: step_spells11(("slashes",)), "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
          "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "menulook": step_menulook, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,

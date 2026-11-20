@@ -1,0 +1,47 @@
+{
+ "tag": "l15p6h",
+ "plan": [
+  "hearth15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "hearth15",
+   "ok": true,
+   "hearths": 41,
+   "shots": 6,
+   "heard": [
+    true,
+    true,
+    true
+   ],
+   "fires": [
+    [
+     "4880|-9150|0|1"
+    ],
+    [
+     "9380|-18150|0|1"
+    ],
+    [
+     "-380|10350|0|1"
+    ]
+   ],
+   "all_fires": 41,
+   "no_fire": [],
+   "distinct": 41,
+   "cards_shown": []
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "bs_l15p6h_hearth15_0_23.png",
+  "bs_l15p6h_hearth15_0_12.png",
+  "bs_l15p6h_hearth15_1_23.png",
+  "bs_l15p6h_hearth15_1_12.png",
+  "bs_l15p6h_hearth15_2_23.png",
+  "bs_l15p6h_hearth15_2_12.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}

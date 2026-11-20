@@ -460,9 +460,11 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 		if (const FRDPiece* Fp = Piece(TEXT("Fireplace")))
 		{
 			PutAt(TEXT("Fireplace"), Mn.X + Fp->Size.X * 0.5f + 2.f, 0.f, 0.f);
-			if (WildFireFx)
+			if (bHearth15 && HearthFx15) { if (UNiagaraComponent* Fx = SpawnHearth15(C->Ground, At(Mn.X + 45.f, 0.f, 0.f))) Keep(Fx); }          // (the list of 2026-11-20)
+			else if (WildFireFx)
 				if (UNiagaraComponent* Fx = UNiagaraFunctionLibrary::SpawnSystemAttached(WildFireFx, C->Ground, NAME_None, At(Mn.X + 45.f, 0.f, 22.f) - C->Ground->GetComponentLocation(), FRotator::ZeroRotator, FVector(0.7f), EAttachLocation::KeepRelativeOffset, true, ENCPoolMethod::None))
 					Keep(Fx);
+			if (bWildHearthSound15) C->HearthPoints15.Add(At(Mn.X + 45.f, 0.f, 22.f));          // (the list of 2026-11-20: heard crackling)
 		}
 		float BedY = Mx.Y - 70.f;
 		if (const FRDPiece* Bp = Piece(TEXT("Bed")))

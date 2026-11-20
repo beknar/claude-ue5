@@ -252,6 +252,7 @@ void ARDTownAnimal::Init(ARDDungeonGenerator* InGenerator, int32 InDef, int32 In
 	Health14 = D.Health;          // (the list of 2026-11-16: its hit points, 0 for one that cannot be hurt)
 	SetState(R.RandRange(0, 1), GetWorld()->GetTimeSeconds());
 	if (const UAnimSequenceBase* S = Cast<UAnimSequenceBase>(Body->AnimationData.AnimToPlay)) Body->SetPosition(R.FRandRange(0.f, S->GetPlayLength()));
+	Register15();          // (the list of 2026-11-20: among its pen's, kept apart)
 }
 
 void ARDTownAnimal::SetState(int32 S, float Now)
@@ -266,7 +267,8 @@ void ARDTownAnimal::SetState(int32 S, float Now)
 	{
 		// (somewhere else in the pen, kept its body's half length from the fence)
 		const FVector2D H = (PenHalf - FVector2D(D.HalfSize.X, D.HalfSize.X)).ComponentMax(FVector2D(5.f, 5.f));
-		To = PenAt + FRotator(0.f, PenYaw, 0.f).RotateVector(FVector(R.FRandRange(-H.X, H.X), R.FRandRange(-H.Y, H.Y), 0.f));
+		// (the list of 2026-11-20: somewhere no mate stands nor walks to)
+		To = PenKey15.X != MAX_int32 && Gen->bPenApart15 ? FreeSpot15(R, H) : PenAt + FRotator(0.f, PenYaw, 0.f).RotateVector(FVector(R.FRandRange(-H.X, H.X), R.FRandRange(-H.Y, H.Y), 0.f));
 		Until = Now + 20.f;
 	}
 	else Until = Now + (S == 1 ? R.FRandRange(4.f, 11.f) : R.FRandRange(3.f, 8.f));
@@ -279,6 +281,7 @@ void ARDTownAnimal::Tick(float Dt)
 	const float Now = GetWorld()->GetTimeSeconds();
 	// (the list of 2026-11-16: killed, it falls on its side over half a second and lies there (as a hunted wild animal))
 	if (bDead14) { TickDead14(Now); return; }
+	if (PenKey15.X != MAX_int32 && Gen->bPenApart15) Apart15(Dt);          // (the list of 2026-11-20: out of a mate it stands in)
 	const FVector L = GetActorLocation();
 	// (the list of 2026-11-10: a loose hen runs from her, a couple of metres, quick, within its round)
 	if (bLoose && Now >= NextFleeCheck)
@@ -312,6 +315,8 @@ void ARDTownAnimal::Tick(float Dt)
 			FVector Nl = L + GetActorForwardVector() * FMath::Min(Speed * (Now < FleeUntil ? 3.f : 1.f) * Dt, D.Size());
 			// (on the wild ground: at its height where it steps (the paddock's ground rises and falls a little))
 			if (bWildGround && GroundN > 1) Nl.Z = GroundZAt(Nl);
+			// (the list of 2026-11-20: a step into a mate is not taken: it stops and stands (it picks another way later))
+			if (PenKey15.X != MAX_int32 && Gen->bPenApart15 && Crowded15(Nl) && !Crowded15(L)) { SetState(0, Now); return; }
 			SetActorLocation(Nl, false);
 		}
 		return;

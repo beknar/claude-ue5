@@ -386,6 +386,8 @@ public:
 	void MakeShelfDoors15(int32 I);
 	void OpenShelfDoors15(int32 I, bool bNow = false);
 	TArray<int32> ShelfSwing15;
+	/** the list of 2026-11-20 (item 22, bHearth15): the kit fireplace's flame cards (its slot 4) hidden on this section's saved pieces */
+	void HideHearthCards15();
 	void TickShelfDoors15(float Dt);
 	/** a piece on a free tile off a room's lanes whose four neighbours are free, the nearest such to Anchor, its front toward the lane
 	 *  (no random draw; its tile blocked; added to Points): the alchemist's and librarian's tables', the oven's rule */

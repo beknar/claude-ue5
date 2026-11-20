@@ -313,6 +313,16 @@ public:
 	bool CanBeHurt14() const;
 	int64 FarmKey14 = -1;
 	float Health14 = 0.f, DeadAt14 = 0.f, FallYaw14 = 90.f; bool bDead14 = false;
+	/** the list of 2026-11-20 (item 1, RDList15e.cpp): its round body's radius among its pen's (half its length and width), its pen's
+	 *  key; its pen-mates kept apart */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") float GetRadius15() const { return Rad15; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") float GetHalfWidth15() const;
+	float Rad15 = 50.f; FIntPoint PenKey15 = FIntPoint(MAX_int32, MAX_int32);
+	void Register15();
+	/** pushed apart from the mates it stands in; true when a step to At would take it into one */
+	void Apart15(float Dt);
+	bool Crowded15(const FVector& At) const;
+	FVector FreeSpot15(FRandomStream& Rs, const FVector2D& H) const;
 protected:
 	virtual void Tick(float Dt) override;
 private:

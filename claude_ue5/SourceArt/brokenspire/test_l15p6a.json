@@ -1,0 +1,129 @@
+{
+ "tag": "l15p6a",
+ "plan": [
+  "warden15",
+  "mapsym15",
+  "cows15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "warden15",
+   "ok": true,
+   "offered_at_start": "captain_warden|Captain|The First Warden|offered|0|1|Slay a tier's boss in Mistward Castle",
+   "only_vel_morrath": 0,
+   "castle_slain": 1,
+   "accepted": true,
+   "after_accept": "captain_warden|Captain|The First Warden|ready|1|1|Slay a tier's boss in Mistward Castle",
+   "state": "ready",
+   "progress": [
+    "1",
+    "1"
+   ]
+  },
+  {
+   "step": "mapsym15",
+   "ok": true,
+   "satellite": {
+    "badges": 10,
+    "symbols": [
+     "ankh",
+     "comp_timber",
+     "healing_flask",
+     "icon_gold",
+     "mana_flask",
+     "map_anvil",
+     "mw_medieval_weapons_heater_shield",
+     "stew",
+     "wmap_cave"
+    ],
+    "legend": [
+     "temple, chapel: blessings",
+     "tavern: food and drink",
+     "smithy: repairs, the anvil",
+     "trader: buy and sell",
+     "healer: healing",
+     "storehouse: your storage",
+     "barracks: the town's guard",
+     "witch's hut: potions",
+     "the way into the dungeon",
+     "a quest giver: ! offers, ? to hand in"
+    ],
+    "symbols_not_in_key": [],
+    "building_words_left": []
+   },
+   "painted": {
+    "badges": 10,
+    "symbols": [
+     "ankh",
+     "comp_timber",
+     "healing_flask",
+     "icon_gold",
+     "mana_flask",
+     "map_anvil",
+     "mw_medieval_weapons_heater_shield",
+     "stew",
+     "wmap_cave"
+    ],
+    "legend": [
+     "temple, chapel: blessings",
+     "tavern: food and drink",
+     "smithy: repairs, the anvil",
+     "trader: buy and sell",
+     "healer: healing",
+     "storehouse: your storage",
+     "barracks: the town's guard",
+     "witch's hut: potions",
+     "the way into the dungeon",
+     "a quest giver: ! offers, ? to hand in"
+    ],
+    "symbols_not_in_key": [],
+    "building_words_left": []
+   }
+  },
+  {
+   "step": "cows15",
+   "ok": true,
+   "animals": 50,
+   "pens": 12,
+   "samples": 219,
+   "least_gap_cm": {
+    "0": 5.8,
+    "1": 33.2,
+    "2": 40.2,
+    "3": 98.6,
+    "4": 8.6,
+    "5": 6.2,
+    "6": 33.3,
+    "7": 40.9,
+    "8": 84.8,
+    "9": 14.1,
+    "10": 5.8,
+    "11": 33.1
+   },
+   "moved_m": {
+    "0": 3.1,
+    "1": 1.7,
+    "2": 1.7,
+    "3": 2.9,
+    "4": 2.8,
+    "5": 4.3,
+    "6": 2.8,
+    "7": 2.7,
+    "8": 2.8,
+    "9": 3.4,
+    "10": 2.7,
+    "11": 1.4
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "bs_l15p6a_mapsym15_satellite.png",
+  "bs_l15p6a_mapsym15_painted.png",
+  "bs_l15p6a_cows15.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}

@@ -74,6 +74,10 @@ public:
 	}
 	/** tests (Brokenspire): the townspeople whose names were drawn over them last frame, with their quest marks ("<title>|<mark>") */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetTownNamesDrawn() const { return TownNamesDrawn; }
+	/** the list of 2026-11-20 (item 21): the town map's key as last drawn ("<symbol>|<what it means>"), and the badges drawn on the
+	 *  buildings ("<symbol>|<x>|<y>", the building's middle in the world) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetTownLegend15() const { return TownLegend15; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetTownBadges15() const { return TownBadges15; }
 
 private:
 	// ---- Brokenspire (RDTownHUD.cpp): the town's minimap and its papyrus map, the town's panel, the townspeople's names,
@@ -84,6 +88,12 @@ private:
 	void DrawWildMinimap(float Sc, const FVector& L, float Yaw);
 	int32 WildMapTilesDrawn = 0, WildMapStandIns = 0;
 	void DrawTownMap(float Sc, const FVector& L, float Yaw);
+	/** the list of 2026-11-20 (item 21, bTownSymbols15): a functional building's badge (its trade's symbol on a disc) in place of its
+	 *  words, each kind once in the key; the key's panel in the sheet's corner */
+	void TownBadge15(uint8 Kind, const FVector2D& P, float Size, const FVector& World);
+	void DrawTownLegend15(const FVector2D& A, const FVector2D& B, float Sc, bool bSat);
+	TArray<FString> TownLegend15, TownBadges15;
+	TArray<TPair<FName, FString>> Legend15;
 	/** the painted map in colour (RDTownHUD.cpp: the Fairhill reference's look; "mapc_*" pictures) */
 	void DrawTownMapColour(float Sc, const FVector& L, float Yaw);
 	/** a label of the town's maps: its text, the point it names, the size of the picture there, its colour, type and scale */

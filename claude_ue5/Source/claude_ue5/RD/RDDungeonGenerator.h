@@ -960,6 +960,37 @@ public:
 	FString TripKeyName15() const;
 	/** a test's: a pile of these things dropped at At (F takes it) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") bool DebugDropLoot15(FVector At, const TArray<FName>& Things);
+	// ---- the list of 2026-11-20's sixth phase (items 1, 20, 21, 22; RDList15e.cpp), set on brokenspire by 934 town
+	/** a pen's animals keep apart (item 1: the cows walked through each other); each pen's animals, by the pen's middle */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bPenApart15 = false;
+	TMap<FIntPoint, TArray<TWeakObjectPtr<class ARDTownAnimal>>> PenMates15;
+	/** a quest's "boss" goal counts Mistward Castle's tiers whose boss she has slain (item 20: one slain before the quest was taken
+	 *  counts) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bBossGoalCastle15 = false;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") int32 CastleBossesSlain15() const;
+	/** a test's: a counter of the game set; a quest's state taken off (back to offered) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") void DebugSetCounter15(const FString& Key, int32 Value);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") void DebugForgetQuest15(FName Id);
+	/** the town maps show the functional buildings' symbols and a key, not their words (item 21) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bTownSymbols15 = false;
+	/** the hearths burn (item 22: the kit's fireplace had flat flame cards that never moved, and its effect, P_TorchFire, drew nothing
+	 *  there): HearthFx15 at each hearth's floor (once a place), the cards hidden (934 town points "Fireplace" at a copy without them;
+	 *  a saved section's old ones take HearthHideMat15 in their flame slot in play) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bHearth15 = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TObjectPtr<class UNiagaraSystem> HearthFx15 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TObjectPtr<class UMaterialInterface> HearthHideMat15 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float HearthFxScale15 = 1.f;
+	/** a hearth's fire at its floor (At), made once a place (a section laid again and a saved one's pass ask twice); the component */
+	class UNiagaraComponent* SpawnHearth15(USceneComponent* Parent, const FVector& At);
+	/** a test's: the hearth fires made ("x|y|z|active") within Range of At */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") TArray<FString> GetHearthFires15(FVector At, float Range) const;
+	TArray<TWeakObjectPtr<class UNiagaraComponent>> HearthFires15;
+	void TickHearths15();
+	float HearthWakeAt15 = 0.f;
+	/** the wilds' hearths crackle (item 22: their fire was seen, never heard) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bWildHearthSound15 = false;
+	/** a test's: the hearths of the chunks within Range of At ("x|y|z" each) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") TArray<FString> GetWildHearths15(FVector At, float Range) const;
 	/** allies brought into an arena (a test's count) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List15") int32 ArenaAlliesBrought15 = 0;
 	/** the arena's allies brought in beside her; the count */
@@ -2036,7 +2067,7 @@ public:
 	bool TownBless();
 	bool TownDeposit(const FString& Ref);
 	bool TownWithdraw(int32 Index);
-	bool TownQuestAction(FName Act, FName Id);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") bool TownQuestAction(FName Act, FName Id);
 	void SetTownNote(const FString& Text);
 	/** what the trader has for sale now (the open tier's potions, food, repair items, scrolls) */
 	TArray<FName> TownStock() const;
@@ -2269,7 +2300,9 @@ public:
 	/** the hour and the plants' fading held for a capture under way put back (a capture begun again or a town rebuilt) */
 	void ReleaseTownSatHold();
 	/** the map draws the picture: one taken of this town and finished (the painted map while a new one is taken) */
-	bool HasTownSatellite() const { return TownSatellitePicture && TownSatCaptures > 0 && TownSatStep >= 3; }
+	bool HasTownSatellite() const { return TownSatellitePicture && TownSatCaptures > 0 && TownSatStep >= 3 && !bTownSatHidden15; }
+	/** a test's: the town map drawn painted though its picture from above is there (the list of 2026-11-20's symbols in both modes) */
+	UPROPERTY(Transient, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bTownSatHidden15 = false;
 	/** the picture taken again (tests, a reel): from the next frame on */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") void RecaptureTownSatellite() { ReleaseTownSatHold(); TownSatStep = 0; TownSatWait = TownSatelliteDelay; }
 	/** "<step: 3 done>|<size px>|<middle x>|<middle y>|<half width cm>|<capture ms>|<captures>|<components hidden>|<mips>|<camera z>|<culls held>" (tests) */

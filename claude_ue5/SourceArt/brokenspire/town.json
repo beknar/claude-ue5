@@ -98,7 +98,7 @@
   {"id": "captain_cells", "giver": "Captain", "title": "Cells Under the Keep", "goal": "prisoners", "count": 2, "gold": 100, "reward": "Medium Healing Potion",
    "offer": "Some of my scouts were taken alive: dragged into the castle and caged. If you find cells down there, open them.",
    "done": "Two of them walked in at dawn, white as ghosts, asking for their mothers. Thank you.", "hint": "Free two prisoners from the castle's cells"},
-  {"id": "captain_warden", "giver": "Captain", "after": "captain_horde", "title": "The First Warden", "goal": "boss", "count": 1, "gold": 150, "reward": "HP Potency Ring 1",
+  {"id": "captain_warden", "giver": "Captain", "title": "The First Warden", "goal": "boss", "count": 1, "gold": 150, "reward": "HP Potency Ring 1",
    "offer": "Each time a tier opens down there, something big comes up to meet whoever opened it. Kill one of those.",
    "done": "You killed one of the big ones. Take this ring; it was my father's. He'd want it used.", "hint": "Slay a tier's boss in Mistward Castle"},
   {"id": "captain_wolves", "giver": "Captain", "title": "Wolves on the Mill Road", "goal": "wild:wolves", "count": 1, "gold": 120,

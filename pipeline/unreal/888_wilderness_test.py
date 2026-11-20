@@ -4680,6 +4680,50 @@ def step_discover14():
     step_result("discover14", ok, **res)
 
 
+def step_hearth15():
+    """the list of 2026-11-20 (item 22): at the two nearest houses or villages and the first farmstead near Brokenspire, each hearth laid
+    (the wilds' hearth points) has a fire burning (running and shown) within 40 cm of its floor's point, no fireplace laid in the
+    chunks draws the kit's flame cards, the hearth is heard (a fire voice there with her by it); a picture of each by night from the
+    house's middle"""
+    g = G["gen"]; res = {"visits": []}; quiet(True)
+    yield from wait_ready(90)
+    near = sorted([p for p in places_near(0, 0, 25000) if p["kind"] in ("house", "village")], key=lambda p: math.hypot(p["x"], p["y"]))
+    fs = [str(x).split("|") for x in g.find_wild_farmsteads(0.0, 0.0, 3500.0)]
+    goals = [(p["kind"], p["name"], p["x"], p["y"]) for p in near[:2]] + [("farmstead", f[1], float(f[2]), float(f[3])) for f in fs[:1]]
+    pawn = G["pawn"]
+    try:
+        for k, (kind, name, x, y) in enumerate(goals):
+            v = {"kind": kind, "name": name}
+            g.wild_drop_all(); g.wild_put_her(x - 40.0, y); yield from wait_chunks(30, 50); yield from rwait(2.0)
+            hp = [str(s).split("|") for s in g.get_wild_hearths15(V(x * 100.0, y * 100.0, 0), 8000.0)]
+            hp = [V(float(a[0]), float(a[1]), float(a[2])) for a in hp]
+            v["hearths"] = len(hp)
+            v["burning"] = sum(1 for P in hp if any(str(f).endswith("|1") for f in g.get_hearth_fires15(P, 40.0)))
+            # (the cards: any instance component in the chunks of the kit's own fireplace (not the copy) still drawing its flame material)
+            cards = 0
+            for ch in GS.get_all_actors_of_class(G["w"], unreal.RDWildChunk):
+                for c in ch.get_components_by_class(unreal.InstancedStaticMeshComponent):
+                    sm = c.get_editor_property("static_mesh")
+                    if sm and sm.get_name().startswith("SM_Kit_Fireplace") and c.get_instance_count() > 0 and c.get_material(4) and c.get_material(4).get_name() == "MI_Flame": cards += 1
+            v["card_comps"] = cards
+            if hp:
+                P = min(hp, key=lambda P: math.hypot(P.x - x * 100.0, P.y - y * 100.0))
+                hs, _ds = wild_houses()
+                h = min(hs, key=lambda h: math.hypot(h["x"] - P.x, h["y"] - P.y)) if hs else None
+                if h and math.hypot(h["x"] - P.x, h["y"] - P.y) < 1200:
+                    st = V(h["x"], h["y"], 0); yw = math.degrees(math.atan2(P.y - st.y, P.x - st.x))
+                    put(st, yaw=yw, z=h["floor"]); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=yw)); pawn.set_actor_hidden_in_game(True)
+                    g.set_town_hour(23.0); yield from rwait(2.5)
+                    v["heard"] = any(math.hypot(f.x - P.x, f.y - P.y) < 300 for f in g.get_fire_loops())
+                    shot(f"hearth15_{k}", "1280x720"); yield from rwait(0.9)
+                    pawn.set_actor_hidden_in_game(False)
+            res["visits"].append(v)
+    finally:
+        pawn.set_actor_hidden_in_game(False); g.set_town_hour(11.0); quiet(False)
+    vs = res["visits"]
+    ok = len(vs) == 3 and all(v["hearths"] > 0 and v["burning"] == v["hearths"] and v["card_comps"] == 0 and v.get("heard") for v in vs)
+    step_result("hearth15", ok, **res)
+
 def step_sleep14():
     """the list of 2026-11-16's seventh phase (item 16: "the NPCs at farms should sleep at night"): at the first farmstead near
     Brokenspire, its family at 20:00 walk home (time sped up) and go into their farmhouse; at 23:00 each is asleep indoors, those with
@@ -6641,6 +6685,7 @@ STEPS = {"summon15": step_summon15, "roads14": step_roads14, "density14": step_d
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)
+STEPS.update({"hearth15": step_hearth15})
 STEPS["horse15"] = step_horse15
 SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
 def saves_snapshot():
