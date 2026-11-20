@@ -52,6 +52,7 @@ ARDHorse::ARDHorse()
 	Blocker->SetCollisionObjectType(ECC_WorldDynamic);
 	Blocker->SetCollisionResponseToAllChannels(ECR_Ignore);
 	Blocker->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	Blocker->SetCollisionResponseToChannel(ECC_RDAlly, ECR_Block);          // (her allies too: the list of 2026-11-20)
 	Blocker->SetGenerateOverlapEvents(false);
 	Blocker->SetCanEverAffectNavigation(false);
 	Blocker->SetBoxExtent(FVector(100.f, 32.f, 70.f));

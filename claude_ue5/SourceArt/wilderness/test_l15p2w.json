@@ -1,0 +1,314 @@
+{
+ "tag": "l15p2w",
+ "plan": [
+  "summon15",
+  "npc14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "summon15",
+   "ok": false,
+   "spell": "Summon Tier 2",
+   "section_under_her": false,
+   "travellers_forced": true,
+   "error": "'NoneType' object has no attribute 'set_mana'"
+  },
+  {
+   "step": "npc14",
+   "ok": true,
+   "road": {
+    "forced": true,
+    "travellers": 4,
+    "monster": "RDMonster_517",
+    "trace": [
+     [
+      "chase",
+      2.8
+     ],
+     [
+      "chase",
+      2.1
+     ],
+     [
+      "swing",
+      1.3
+     ],
+     [
+      "swing",
+      1.3
+     ],
+     [
+      "reach",
+      1.3
+     ],
+     [
+      "reach",
+      1.3
+     ],
+     [
+      "swing",
+      1.3
+     ],
+     [
+      "swing",
+      1.3
+     ],
+     [
+      "chase",
+      1.7
+     ],
+     [
+      "chase",
+      2.1
+     ],
+     [
+      "chase",
+      2.4
+     ],
+     [
+      "chase",
+      2.1
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "chase",
+      1.8
+     ],
+     [
+      "chase",
+      2.2
+     ],
+     [
+      "chase",
+      2.4
+     ],
+     [
+      "chase",
+      2.2
+     ],
+     [
+      "chase",
+      1.5
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "chase",
+      1.6
+     ],
+     [
+      "chase",
+      2.1
+     ],
+     [
+      "chase",
+      2.4
+     ],
+     [
+      "chase",
+      2.4
+     ],
+     [
+      "chase",
+      1.6
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "swing",
+      1.5
+     ],
+     [
+      "chase",
+      2.1
+     ],
+     [
+      "chase",
+      2.4
+     ],
+     [
+      "chase",
+      2.6
+     ],
+     [
+      "chase",
+      1.8
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "chase",
+      1.9
+     ],
+     [
+      "chase",
+      2.2
+     ],
+     [
+      "chase",
+      2.5
+     ],
+     [
+      "chase",
+      2.0
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "chase",
+      1.8
+     ]
+    ],
+    "her_struck_near": 0.0,
+    "hp_track": [
+     [
+      11.0,
+      36.0
+     ],
+     [
+      11.0,
+      36.0
+     ],
+     [
+      11.0,
+      36.0
+     ],
+     [
+      11.0,
+      36.0
+     ],
+     [
+      2.0,
+      36.0
+     ],
+     [
+      2.0,
+      36.0
+     ],
+     [
+      2.0,
+      36.0
+     ],
+     [
+      2.0,
+      36.0
+     ],
+     [
+      2.0,
+      36.0
+     ],
+     [
+      2.0,
+      36.0
+     ],
+     [
+      2.0,
+      36.0
+     ],
+     [
+      0.0,
+      36.0
+     ]
+    ],
+    "dead": "a soldier on the road to Ashenreach",
+    "killed_by": "RDMonster_517",
+    "flees": 12,
+    "hits": 13,
+    "head_over_ground": 33.4,
+    "drops": [
+     "Hardtack"
+    ],
+    "gold": 7,
+    "her_struck": 0.0,
+    "cowering_seen": 15
+   },
+   "farm": {
+    "farm": 268436478,
+    "title": "farmhand of Elsa's Holding",
+    "key": 12098939650018,
+    "hp0": 65.0,
+    "hits": [
+     50.7,
+     36.4,
+     22.1,
+     7.8,
+     0.0
+    ],
+    "dead": true,
+    "flees": 1,
+    "by": "her",
+    "head_over_ground": 21.7,
+    "drops": [
+     "Straw Rope",
+     "Straw Rope",
+     "Wood Log",
+     "Bread"
+    ],
+    "gold": 3,
+    "kept": true,
+    "piles": 1,
+    "pile_says": "search the body of farmhand of Elsa's Holding (4, 3 gold)",
+    "pile_f": "loot",
+    "taken": {
+     "Wood Log": 1,
+     "Bread": 1,
+     "Straw Rope": 2
+    },
+    "gold_got": 3,
+    "body_says": "open the door",
+    "again": {
+     "found": true,
+     "dead": true,
+     "picture_from_yaw": 105.0,
+     "head_over_ground": 21.7
+    }
+   },
+   "giver": {
+    "quest": "bounty",
+    "title": "a bounty hunter",
+    "hits_landed": 6,
+    "killed_by_million": false,
+    "hp": 1.0,
+    "dead": false
+   },
+   "parts_ok": {
+    "road": true,
+    "farm": true,
+    "giver": true
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_l15p2w_npc14_road.png",
+  "wd_l15p2w_npc14_farmhand.png",
+  "wd_l15p2w_npc14_farmhand_again.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

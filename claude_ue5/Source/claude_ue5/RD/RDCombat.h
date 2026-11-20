@@ -824,6 +824,7 @@ private:
 	/** the flash step: pawns passed through until it ends; the water walk: its distance left, where it was last */
 	float FlashUntil = -100.f, FlySpeedWas = -1.f;
 	TEnumAsByte<ECollisionResponse> FlashPawnWas = ECR_Block;
+	TEnumAsByte<ECollisionResponse> FlashAllyWas = ECR_Block;
 	float WaterLeft = 0.f, WaterUntil = -100.f;
 	FVector WaterLast = FVector::ZeroVector;
 	bool bWaterWalking = false, bWaterReached = false;

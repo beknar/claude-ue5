@@ -6538,7 +6538,106 @@ def step_roads14():
         and res.get("laid", {}).get("arms_ok", False) and "structures 0 (" not in st
     step_result("roads14", ok, **res)
 
-STEPS = {"roads14": step_roads14, "density14": step_density14, "discover14": step_discover14, "cities14": step_cities14, "save14": step_save14, "storm14": step_storm14, "locks14": step_locks14, "npc14": step_npc14, "farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+def step_summon15():
+    """the list of 2026-11-20 (item 30, RD/RDList15.cpp): the Summoner summons out in the wilds (no set of rooms there): the summon
+    stands on the ground under its spot, on open ground; she is put 20 m on five times (100 m, each within its 26 m) and it walks
+    after her each time (within 4 m of her in 12 s); she is carried 300 m at once (as a ride or a teleport takes her) and it is
+    back beside her, on the ground; a wild monster set 8 m off is fought and killed by it (her blows held: she never strikes);
+    travellers forced onto the road where she starts: its foe is only ever a monster, and their hit points stay whole"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    hero0 = str(g.get_editor_property("current_hero")); hour0 = g.get_town_hour()
+    mons = []
+    try:
+        g.set_town_hour(10.0)
+        if hero0 != "Summoner": g.switch_hero("Summoner"); yield from rwait(1.0); refresh()
+        # (her combat component is made a few frames after a switch: wait for it, as 868's restart does)
+        t0 = time.time()
+        while cb() is None and time.time() - t0 < 10: yield; refresh()
+        c = cb(); g.unlock_hero_weapons(4); yield from rwait(0.2)
+        W = [str(w.name) for w in g.get_editor_property("weapons")]
+        sp = next((n for n in ("Summon Tier 2", "Summon Tier 1") if n in W), next((n for n in W if n.startswith("Summon")), None))
+        res["spell"] = sp
+        if not sp: raise RuntimeError("no summoning among her weapons: " + ", ".join(W))
+        den = wq().get("wild:wolves")
+        rd = (den["x"], den["y"]) if den else (900.0, 0.0)
+        g.wild_drop_all(); g.wild_put_her(rd[0], rd[1]); yield from wait_chunks(30, 50); yield from rwait(1.0)
+        res["section_under_her"] = g.get_section(g.world_to_section(G["pawn"].get_actor_location())) is not None
+        for m0 in g.get_monsters():
+            try:
+                if alive(m0) and not m0.is_ally() and math.hypot(m0.get_actor_location().x - rd[0] * 100, m0.get_actor_location().y - rd[1] * 100) < 8000.0: m0.destroy_actor()
+            except Exception: pass
+        res["travellers_forced"] = g.force_wild_travellers(); yield from rwait(1.5)
+        trav = [f for f in wild_folk14() if "on the road to" in f["title"]]
+        trav_hp0 = {f["title"]: f["hp"] for f in trav}
+        foes = set()
+        def note():
+            for ln in str(g.get_allies15()).split("|")[1:]:
+                p = ln.split(":")
+                if len(p) >= 8: foes.add(p[7])
+        # ---- the summon
+        before = {a.get_name() for a in g.get_allies() if alive(a)}
+        c.set_mana(c.get_max_mana()); res["cast"] = c.start_attack_with(W.index(sp)); yield from rwait(2.6)
+        a = next((x for x in g.get_allies() if alive(x) and x.get_name() not in before), None)
+        res["came"] = a is not None
+        if not a: raise RuntimeError("no summon came: " + str(g.get_allies15()))
+        def feet_off(x):
+            l = x.get_actor_location(); return round(l.z - x.capsule_component.get_scaled_capsule_half_height() - g.wild_ground_z(l), 1)
+        res["summon"] = {"name": str(a.monster_name), "open_ground": bool(a.get_editor_property("open_ground")), "feet_over_ground_cm": feet_off(a),
+                         "from_her_m": round(dist2(a.get_actor_location(), G["pawn"].get_actor_location()) / 100, 1)}
+        # ---- on foot: 20 m on, five times
+        her = G["pawn"]; fw = her.get_actor_forward_vector(); legs = []
+        for k in range(5):
+            l = her.get_actor_location(); to = V(l.x + fw.x * 2000.0, l.y + fw.y * 2000.0, 0)
+            put(to, z=g.wild_ground_z(to)); t0 = time.time(); came = None
+            while time.time() - t0 < 12.0:
+                yield from rwait(0.25); note()
+                if dist2(a.get_actor_location(), her.get_actor_location()) < 400.0: came = round(time.time() - t0, 1); break
+            legs.append({"leg": k, "came_s": came, "gap_m": round(dist2(a.get_actor_location(), her.get_actor_location()) / 100, 1), "feet": feet_off(a)})
+        res["on_foot"] = legs
+        # ---- carried 300 m
+        l = her.get_actor_location(); to = V(l.x + fw.x * 30000.0, l.y + fw.y * 30000.0, 0)
+        put(to, z=g.wild_ground_z(to)); yield from wait_chunks(20, 30); yield from rwait(3.0); note()
+        res["carried"] = {"gap_m": round(dist2(a.get_actor_location(), her.get_actor_location()) / 100, 1), "feet": feet_off(a), "open_ground": bool(a.get_editor_property("open_ground"))}
+        # ---- a wild monster: fought and killed by the summon (her blows held: the test never strikes)
+        quiet(False)
+        l = her.get_actor_location(); spm = V(l.x + fw.x * 800.0, l.y + fw.y * 800.0, 0); spm.z = g.wild_ground_z(spm) + 100.0
+        m = g.spawn_test_ambusher(spm, 1, False); mons.append(m)
+        hpm0 = m.get_health() if m else 0.0; t0 = time.time(); killed = None; pictured = False
+        while m and time.time() - t0 < 45.0:
+            yield from rwait(0.3); note(); c.set_health(c.get_max_health())
+            if not pictured and m.get_health() < hpm0:
+                ml = m.get_actor_location(); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=math.degrees(math.atan2(ml.y - l.y, ml.x - l.x))))
+                yield from rwait(0.3); shot("summon15_fight", "1280x720"); pictured = True
+            if m.is_dead(): killed = round(time.time() - t0, 1); break
+        res["fight"] = {"monster": str(m.monster_name) if m else None, "hp0": round(hpm0, 1), "killed_s": killed, "her_attacks": c.get_editor_property("attacks_made") if hasattr(c, "attacks_made") else None}
+        quiet(True)
+        res["foes"] = sorted(foes)
+        cur = {f["title"]: f["hp"] for f in wild_folk14() if f["title"] in trav_hp0}
+        res["travellers"] = {"n": len(trav_hp0), "hurt": sorted(t for t, h in cur.items() if h < trav_hp0[t] - 0.01)}
+    except Exception as e_:
+        res["error"] = str(e_)
+    finally:
+        for m in mons:
+            try:
+                if alive(m): m.destroy_actor()
+            except Exception: pass
+        for a_ in list(g.get_allies()):
+            try:
+                if alive(a_): a_.apply_damage(1e7, None)
+            except Exception: pass
+        quiet(False)
+        g.set_town_hour(hour0)
+        if str(g.get_editor_property("current_hero")) != hero0: g.switch_hero(hero0); yield from rwait(1.0); refresh()
+    s = res.get("summon", {}); legs = res.get("on_foot", []); cr = res.get("carried", {}); fi = res.get("fight", {})
+    ok = ("error" not in res and not res.get("section_under_her") and res.get("came") and s.get("open_ground") and abs(s.get("feet_over_ground_cm", 99)) < 40
+          and len(legs) == 5 and all(x["came_s"] is not None and abs(x["feet"]) < 40 for x in legs)
+          and cr.get("gap_m", 99) < 6.0 and abs(cr.get("feet", 99)) < 40 and cr.get("open_ground")
+          and fi.get("killed_s") is not None and all(f in ("RDMonster", "-") for f in res.get("foes", [])) and "RDMonster" in res.get("foes", [])
+          and not res.get("travellers", {}).get("hurt"))
+    step_result("summon15", ok, **res)
+
+STEPS = {"summon15": step_summon15, "roads14": step_roads14, "density14": step_density14, "discover14": step_discover14, "cities14": step_cities14, "save14": step_save14, "storm14": step_storm14, "locks14": step_locks14, "npc14": step_npc14, "farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)

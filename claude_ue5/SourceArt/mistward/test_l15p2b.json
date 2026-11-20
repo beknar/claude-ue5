@@ -1,0 +1,54 @@
+{
+ "tag": "l15p2b",
+ "plan": [
+  "allies15"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "allies15",
+   "ok": true,
+   "start": [
+    -150,
+    0
+   ],
+   "yaw": 0.0,
+   "solid_True": {
+    "least_gap": 0.1,
+    "her_along": 280,
+    "ally_along": 350,
+    "rule": {
+     "ally_type": "<CollisionChannel.ECC_VEHICLE: 6>",
+     "ally_vs_pawn": "<CollisionResponseType.ECR_BLOCK: 2>",
+     "ally_vs_vehicle": "<CollisionResponseType.ECR_OVERLAP: 1>",
+     "her_vs_vehicle": "<CollisionResponseType.ECR_BLOCK: 2>",
+     "monster_vs_vehicle": "<CollisionResponseType.ECR_OVERLAP: 1>"
+    }
+   },
+   "solid_False": {
+    "least_gap": -46.4,
+    "her_along": 331,
+    "ally_along": 350
+   },
+   "yield": {
+    "allies": 3,
+    "yields": [
+     1,
+     1,
+     1
+    ],
+    "least_gap": 92.2,
+    "her_along": 1124,
+    "t_9m": 8.09,
+    "lines": "3|0:Soldier:609:89:93:1:0:-|1:Soldier:642:184:93:1:0:-|2:Gunner:598:26:93:1:0:-"
+   }
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_l15p2b_allies15_after_walk.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

@@ -8,6 +8,10 @@
  *  console's rd.Tier and the wilds' tiers run to it (SourceArt/balance/tier25.json's tiers.count says the same for the stages) */
 constexpr int32 RDGameTierMax = 30;
 
+/** the list of 2026-11-20: the object channel of her allies' capsules (Config/DefaultEngine.ini's "RDAlly", blocked by default):
+ *  solid to her, passed by the monsters (each overlaps it) and her other allies; what blocks only pawns blocks it too */
+#define ECC_RDAlly ECC_GameTraceChannel1
+
 class UStaticMesh;
 class USkeletalMesh;
 class UAnimationAsset;

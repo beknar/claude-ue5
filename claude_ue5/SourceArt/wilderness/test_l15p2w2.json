@@ -1,0 +1,82 @@
+{
+ "tag": "l15p2w2",
+ "plan": [
+  "summon15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "summon15",
+   "ok": true,
+   "spell": "Summon Tier 2",
+   "section_under_her": false,
+   "travellers_forced": true,
+   "cast": true,
+   "came": true,
+   "summon": {
+    "name": "Gunner",
+    "open_ground": true,
+    "feet_over_ground_cm": 2.3,
+    "from_her_m": 2.3
+   },
+   "on_foot": [
+    {
+     "leg": 0,
+     "came_s": 5.3,
+     "gap_m": 3.6,
+     "feet": 2.2
+    },
+    {
+     "leg": 1,
+     "came_s": 7.5,
+     "gap_m": 3.9,
+     "feet": 1.8
+    },
+    {
+     "leg": 2,
+     "came_s": 7.2,
+     "gap_m": 3.7,
+     "feet": 2.2
+    },
+    {
+     "leg": 3,
+     "came_s": 7.3,
+     "gap_m": 3.8,
+     "feet": 3.0
+    },
+    {
+     "leg": 4,
+     "came_s": 7.2,
+     "gap_m": 3.9,
+     "feet": 2.1
+    }
+   ],
+   "carried": {
+    "gap_m": 2.3,
+    "feet": 3.4,
+    "open_ground": true
+   },
+   "fight": {
+    "monster": "Rat",
+    "hp0": 40.0,
+    "killed_s": 9.6,
+    "her_attacks": 1
+   },
+   "foes": [
+    "-",
+    "RDMonster"
+   ],
+   "travellers": {
+    "n": 4,
+    "hurt": []
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_l15p2w2_summon15_fight.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

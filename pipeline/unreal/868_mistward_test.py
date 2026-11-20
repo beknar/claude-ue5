@@ -6219,8 +6219,175 @@ def step_block14():
           and res["standing_min"] is not None and res["standing_min"] > 45.0)
     step_result("block14", ok, **res)
 
+# ------------------------------------------------------------------------------------------------ the list of 2026-11-20 (phase 2)
+def walk_ahead(sec, on_tick=None):
+    """W held for sec seconds (her own movement through her input); on_tick(t) called each frame"""
+    cb().simulate_key(key("W"), True)
+    try:
+        t0 = now()
+        while now() - t0 < sec:
+            yield
+            if on_tick: on_tick(now() - t0)
+    finally:
+        cb().simulate_key(key("W"), False)
+    yield from wait(0.2)
 
-STEPS = {"recipes14": step_recipes14, "tables14": step_tables14, "block14": step_block14, "horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
+def her_gap(a):
+    """the room between her capsule and the ally's (cm; negative: one inside the other)"""
+    p = G["pawn"]
+    return dist2(p.get_actor_location(), a.get_actor_location()) - p.capsule_component.get_scaled_capsule_radius() - a.capsule_component.get_scaled_capsule_radius()
+
+def summon15(g, c, W, spell):
+    """one summon cast; the new ally (None when none came)"""
+    before = {a.get_name() for a in g.get_allies() if alive(a)}
+    c.set_mana(c.get_max_mana()); c.start_attack_with(W.index(spell)); yield from wait(2.6)
+    return next((a for a in g.get_allies() if alive(a) and a.get_name() not in before), None)
+
+def step_allies15():
+    """the steps' switches put back whatever happens (a step stopped half way left the spacing off for the next step)"""
+    g = G["gen"]; keep = {k: g.get_editor_property(k) for k in ("ally_spacing", "ally_solid15", "ally_yield15")}
+    try: yield from _allies15()
+    finally:
+        for k, v in keep.items(): g.set_editor_property(k, v)
+        quiet(False)
+
+def _allies15():
+    """the list of 2026-11-20 (items 2 and 3). Solid: an ally stands 3.5 m ahead on a clear line and she walks at it for 3 s: the
+    room between her capsule and its never under -3 cm, and she ends behind it; the same with bAllySolid15 off walks through it
+    (the measure sees it). The collision rule read from the capsules: an ally an RDAlly object (the project's channel) blocking Pawn,
+    passing RDAlly (her other allies); a monster's overlapping RDAlly (it passes them); hers blocking RDAlly. Stepping aside: three allies
+    stood on her line 2.5, 4.5 and 6.5 m ahead (their spacing and stepping aside on), she walks 10 s: each steps aside (its count),
+    she reaches 9 m along the line, and is never inside one"""
+    c = yield from restart("Summoner"); g = G["gen"]; quiet(True)
+    ctr = g.get_start_room_center(); kill_all_near(ctr, 6000)
+    g.unlock_hero_weapons(4); yield from wait(0.2)
+    W = [str(w.name) for w in g.get_editor_property("weapons")]
+    start, yaw = None, None
+    for r_ in range(6):
+        s_ = V(ctr.x + 150 * (r_ % 3) - 150, ctr.y + 150 * (r_ // 3), ctr.z)
+        end, yw = clear_line(s_, 0.0, 1100.0)
+        if end: start, yaw = s_, yw; break
+    if start is None: quiet(False); step_result("allies15", False, error="no clear 11 m line in the start room"); return
+    fx, fy = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
+    def ahead(d): return V(start.x + fx * d, start.y + fy * d, start.z)
+    def along(p): return (p.x - start.x) * fx + (p.y - start.y) * fy
+    spacing0 = g.get_editor_property("ally_spacing")
+    res = {"start": [round(start.x), round(start.y)], "yaw": yaw}
+    # ---- solid (item 2): with the rule on, then off
+    for solid in (True, False):
+        g.set_editor_property("ally_solid15", solid); g.set_editor_property("ally_yield15", False); g.set_editor_property("ally_spacing", False)
+        for a in list(g.get_allies()):
+            if alive(a): a.apply_damage(1e7, None)
+        yield from wait(0.5)
+        put(start, yaw); yield from wait(0.4)
+        a = yield from summon15(g, c, W, "Summon Tier 1")
+        if not a: res[f"solid_{solid}"] = {"error": "no summon came"}; continue
+        hh = a.capsule_component.get_scaled_capsule_half_height()
+        a.set_actor_location(V(ahead(350).x, ahead(350).y, start.z + hh + 5), False, True); put(start, yaw); yield from wait(0.6)
+        gaps = []
+        yield from walk_ahead(3.0, lambda t: gaps.append(her_gap(a)))
+        r = {"least_gap": round(min(gaps), 1) if gaps else None, "her_along": round(along(G["pawn"].get_actor_location())), "ally_along": round(along(a.get_actor_location()))}
+        if solid:
+            cap = a.capsule_component; her = G["pawn"].capsule_component
+            mo = g.spawn_monster_named("Rat", ahead(900), 1, 1.0, 1.0, 1.0); yield from wait(0.2)
+            CT = unreal.CollisionChannel
+            r["rule"] = {"ally_type": str(cap.get_collision_object_type()), "ally_vs_pawn": str(cap.get_collision_response_to_channel(CT.ECC_PAWN)),
+                         "ally_vs_ally": str(cap.get_collision_response_to_channel(CT.ECC_RD_ALLY)),
+                         "her_vs_ally": str(her.get_collision_response_to_channel(CT.ECC_RD_ALLY)),
+                         "monster_vs_ally": str(mo.capsule_component.get_collision_response_to_channel(CT.ECC_RD_ALLY)) if mo else None}
+            drop([mo] if mo else [])
+        res[f"solid_{solid}"] = r
+    g.set_editor_property("ally_solid15", True)
+    # ---- stepping aside (item 3): three on her line
+    g.set_editor_property("ally_yield15", True); g.set_editor_property("ally_spacing", spacing0)
+    for a in list(g.get_allies()):
+        if alive(a): a.apply_damage(1e7, None)
+    yield from wait(0.5); put(start, yaw); yield from wait(0.4)
+    al = []
+    for sp in ("Summon Tier 1", "Summon Tier 1", "Summon Tier 2"):
+        a = yield from summon15(g, c, W, sp)
+        if a: al.append(a)
+    for k, a in enumerate(al):
+        hh = a.capsule_component.get_scaled_capsule_half_height(); p = ahead(250 + 200 * k)
+        a.set_actor_location(V(p.x, p.y, start.z + hh + 5), False, True)
+    put(start, yaw); yield from wait(0.5)
+    y0 = [a.yields15 for a in al]; gaps = []; reach = {"t_9m": None}
+    def tick(t):
+        for a in al: gaps.append(her_gap(a))
+        if reach["t_9m"] is None and along(G["pawn"].get_actor_location()) >= 900: reach["t_9m"] = round(t, 2)
+    yield from walk_ahead(10.0, tick)          # (she walks about 1.1 m/s: 6 s reached 6.7 m with nothing in her way)
+    res["yield"] = {"allies": len(al), "yields": [a.yields15 - y for a, y in zip(al, y0)], "least_gap": round(min(gaps), 1) if gaps else None,
+                    "her_along": round(along(G["pawn"].get_actor_location())), "t_9m": reach["t_9m"], "lines": str(g.get_allies15())}
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-20, yaw=yaw + 180)); yield from rwait(0.4)
+    shot("allies15_after_walk"); yield from rwait(0.6)
+    for a in list(g.get_allies()):
+        if alive(a): a.apply_damage(1e7, None)
+    quiet(False)
+    on, off, yd = res.get("solid_True", {}), res.get("solid_False", {}), res["yield"]
+    ru = on.get("rule", {})
+    ok = ((on.get("least_gap") is not None and on["least_gap"] >= -3.0 and on["her_along"] < on["ally_along"])
+          and (off.get("least_gap") is not None and off["least_gap"] < -20.0)
+          and "RD_ALLY" in ru.get("ally_type", "") and "BLOCK" in ru.get("ally_vs_pawn", "") and "OVERLAP" in ru.get("ally_vs_ally", "")
+          and "BLOCK" in ru.get("her_vs_ally", "") and "OVERLAP" in (ru.get("monster_vs_ally") or "")
+          and yd["allies"] == 3 and all(y >= 1 for y in yd["yields"]) and yd["t_9m"] is not None and (yd["least_gap"] or -99) >= -3.0)
+    step_result("allies15", ok, **res)
+
+def step_arena15():
+    """the list of 2026-11-20 (item 9): two allies of hers left 6 m outside an arena's door when she steps in: when its doors shut
+    they are inside its room (beside her, on its free tiles), and still there when its first wave comes"""
+    c = yield from restart("Summoner"); g = G["gen"]; quiet(True)
+    g.unlock_hero_weapons(4); yield from wait(0.2)
+    W = [str(w.name) for w in g.get_editor_property("weapons")]
+    g.debug_clear_section(I2(0, 0), 0, V(0, 0, 0)); yield from wait(0.5)
+    r = None
+    for s_ in (I2(1, 0), I2(-1, 0), I2(0, 1), I2(0, -1), I2(1, 1), I2(-1, 1), I2(-1, -1), I2(1, -1)):
+        r = next((x for x in special_rooms() if x["kind"] == "Arena" and x["done"] == 0), None)
+        if r: break
+        if g.is_tier_open(2) and not g.is_section_generated(s_): g.generate_section_now(s_); yield from built(s_)
+    if not r: quiet(False); step_result("arena15", False, error="no arena in tier 2's sets"); return
+    S = g.get_section(r["s"]); room = r["room"]
+    tiles = S.get_room_tiles(room); tiles = tiles[0] if isinstance(tiles, tuple) else tiles
+    mid = S.get_room_center(room); st = min(tiles, key=lambda p: dist2(p, mid))
+    doors = [S.get_door_location(d) for d in S.get_room_doors(room)]
+    if not doors: quiet(False); step_result("arena15", False, error="the arena has no door"); return
+    d0 = doors[0]; n = max(dist2(d0, mid), 1.0)
+    out = V(d0.x - (mid.x - d0.x) / n * 600, d0.y - (mid.y - d0.y) / n * 600, st.z)
+    put(out, 0.0); yield from wait(0.5)
+    al = []
+    for sp in ("Summon Tier 1", "Summon Tier 1"):
+        a = yield from summon15(g, c, W, sp)
+        if a: al.append(a)
+    for k, a in enumerate(al):
+        hh = a.capsule_component.get_scaled_capsule_half_height()
+        a.set_actor_location(V(out.x + 120 * k, out.y + 120, st.z + hh + 5), False, True)
+    b0 = g.arena_allies_brought15
+    res = {"room": room, "allies": len(al), "outside_before": [S.room_at(a.get_actor_location()) != room for a in al]}
+    put(st, 0.0); t0 = now()
+    began = False
+    while now() - t0 < 3.0:
+        yield
+        if g.start_arena(r["s"], room) or len(g.get_crowd_lines()) > 0 or g.get_arena_wave() >= -1 and g.arena_allies_brought15 > b0: began = True; break
+    yield from wait(0.2)
+    res["began"] = began; res["brought"] = g.arena_allies_brought15 - b0
+    res["inside_at_start"] = [S.room_at(a.get_actor_location()) == room for a in al if alive(a)]
+    res["near_her_m"] = [round(dist2(a.get_actor_location(), G["pawn"].get_actor_location()) / 100, 1) for a in al if alive(a)]
+    lead = g.get_editor_property("crowd_lead")
+    while g.get_arena_wave() < 0 and now() - t0 < lead + 5: yield
+    res["inside_at_first_wave"] = [S.room_at(a.get_actor_location()) == room for a in al if alive(a)]
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=0)); yield from rwait(0.3)
+    shot("arena15_allies"); yield from rwait(0.6)
+    for _ in range(12):
+        if g.get_arena_wave() < 0: break
+        kill_all_near(mid, 2500); yield from wait(1.2)
+    for a in list(g.get_allies()):
+        if alive(a): a.apply_damage(1e7, None)
+    quiet(False)
+    ok = (res["allies"] == 2 and all(res["outside_before"]) and res["brought"] == 2 and len(res["inside_at_start"]) == 2 and all(res["inside_at_start"])
+          and all(res["inside_at_first_wave"]))
+    step_result("arena15", ok, **res)
+
+
+STEPS = {"allies15": step_allies15, "arena15": step_arena15, "recipes14": step_recipes14, "tables14": step_tables14, "block14": step_block14, "horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
          "spells11_spells": lambda: step_spells11(("spells",)), "spells11_curses": lambda: step_spells11(("curses",)), "spells11_slashes": lambda: step_spells11(("slashes",)), "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
          "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "menulook": step_menulook, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,

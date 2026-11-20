@@ -435,13 +435,16 @@ ARDMonster* ARDDungeonGenerator::SpawnMonsterKind(int32 Kind, const FVector& At,
 {
 	if (!Monsters.IsValidIndex(Kind) || !Monsters[Kind].Mesh) return nullptr;
 	ARDSection* Sec = GetSection(WorldToSection(At));
+	// (the list of 2026-11-20 (item 30): her summons in the wilds, past every set: the wilds' section, on the ground under the spot)
+	FVector AtG = At;
+	if (!Sec && bSpawningAlly && bWild && bWildSummons15) { Sec = EnsureWildSection(); FVector Gd; if (WildGroundAt15(At, At.Z, Monsters[Kind].CapsuleRadius, Monsters[Kind].CapsuleHalfHeight, Gd)) AtG = Gd; }
 	if (!Sec) return nullptr;
 	const FRDMonsterDef& Def = Monsters[Kind];
 	FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	// (its facing from the session seed and the spot, as its setup: the global random made a reel's summons face otherwise
 	// each run (the PR review's find))
 	const float Yaw = (float)(HashCombine((uint32)SessionSeed ^ 0x51D3u, GetTypeHash(At.X * 13.0 + At.Y * 7.0)) % 360u);
-	ARDMonster* M = GetWorld()->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), FTransform(FRotator(0, Yaw, 0), At + FVector(0, 0, Def.CapsuleHalfHeight + 5.f)), Sp);
+	ARDMonster* M = GetWorld()->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), FTransform(FRotator(0, Yaw, 0), AtG + FVector(0, 0, Def.CapsuleHalfHeight + 5.f)), Sp);
 	if (!M) return nullptr;
 	M->SpawnIndex = -1;           // (not one of its set's planned monsters: the tiers do not count it)
 	M->Setup(Sec, Def, (int32)HashCombine((uint32)SessionSeed, GetTypeHash(At.X * 13.0 + At.Y * 7.0)));
