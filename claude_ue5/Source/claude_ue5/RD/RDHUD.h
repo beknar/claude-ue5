@@ -176,6 +176,8 @@ private:
 	// ---- random_dungeonmagic_level4 (generator Heroes)
 	/** "FOUND  <item>" a moment after a container gave it, and what the inventory last did */
 	void DrawNotices(float Sc);
+	/** the reel of 2026-11-18's caption (ARDDungeonGenerator::ReelCaptionTitle / Line): at the top, between the panels */
+	void DrawReelCaption(float Sc);
 	/** the list of 2026-11-16: the last 20 messages (RDList14.cpp) */
 	void DrawMessageLog(float Sc);
 	/** her horse on a map (RDList14b.cpp) */

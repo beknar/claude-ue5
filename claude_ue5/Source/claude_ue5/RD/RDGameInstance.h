@@ -183,6 +183,12 @@ public:
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bTamedOnly = false;
 	/** the showcase's command line read (once a game) */
 	bool bShow7Read = false;
+	/** the reel of 2026-11-18 (RDReel15.cpp: -RDReel15): its stage and timeline, kept across the levels it goes through */
+	bool bReelRead = false, bReel = false, bReelGoing = false, bReelShots = false;
+	int32 ReelStage = 0, ReelRescues = 0;
+	double ReelT0 = 0.0;
+	FString ReelGo, ReelDone, ReelReady;
+	TArray<FString> ReelLog;
 	// ---- the wilderness (RDWild*.cpp): the world's seed, the map she revealed (50 m cells in blocks of 32 x 32: a block's
 	// key and its 16 words), the places she found, the town she is in or nearest (whose state TownLooted and GuardsDead hold)
 	// and the others' state

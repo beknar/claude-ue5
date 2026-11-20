@@ -84,7 +84,8 @@ void ARDDungeonGenerator::TickReins14()
 	// (item 6: no reins on the model: two leather cords from the bit to her hands while she rides, a cylinder each stretched
 	// between them; hidden when she is down)
 	ACharacter* C = Cast<ACharacter>(UGameplayStatics::GetPlayerPawn(this, 0));
-	const bool bOn = bHorseCall14 && bMounted && Horse && C;
+	// (2026-11-18: the pack's horse holds its own reins (HorseDef.bModelReins): none drawn)
+	const bool bOn = bHorseCall14 && bMounted && Horse && C && !HorseDef.bModelReins;
 	// (the reins' mesh and material are the generator's, set by 927 horse: referenced by the level, so cooked and kept (PR #79's
 	// review: a function-static raw pointer loaded by its path dangled after a level change and was never cooked))
 	UStaticMesh* Cyl = ReinsMesh;

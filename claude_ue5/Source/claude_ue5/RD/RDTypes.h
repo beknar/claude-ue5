@@ -856,6 +856,76 @@ struct FRDHorseDef
 	/** the bit (the reins' other end) from the horse's head bone, along the horse and up (cm) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BitAhead = 30.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BitUp = -15.f;
+
+	// ---- the user's of 2026-11-18 ("there is a new ultimate horse kit downloaded in the fab cache. use those resources to improve the
+	// horse movement and riding mechanics"; the user's choices: the pack's horse with its own clips, momentum and gaits, mounting and
+	// getting down, a jump and a rear, the hooves' sound and dust, swimming, and a natural gallop of about 12 m/s): the Ultimate Horse
+	// Pack's realistic horse (RDHorse15.cpp, 933). bPack on: everything below is used, the Tripo fields above are not
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bPack = false;
+	/** its saddle, a second mesh posed by the horse's; the mesh's own +Y is its front: turned MeshYaw under the actor */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<USkeletalMesh> SaddleMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float MeshYaw = -90.f;
+	/** the coat's and the mane's material slots, and the bay's and the grey's materials on them */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 CoatSlot = 2;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 HairSlot = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UMaterialInterface> CoatA;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UMaterialInterface> CoatB;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UMaterialInterface> HairA;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UMaterialInterface> HairB;
+	/** its clips besides Idle / Walk / Run (the gallop): backing, the sudden stop's pose, the jump's three, the rear, the swim's two,
+	 *  the four hit reactions (front, back, left, right), the idles it shifts through standing */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Back;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Stop;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> JumpStart;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> JumpLoop;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> JumpLand;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Rear;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> SwimIdle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Swim;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<TObjectPtr<UAnimSequenceBase>> Hits;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<TObjectPtr<UAnimSequenceBase>> Idles;
+	/** the ground speed of each clip at rate 1 (cm/s: a planted hoof's speed back along the horse, 933 measures it on the clip) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BackClipSpeed = 145.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float SwimClipSpeed = 300.f;
+	/** where each hoof lands in the walk and the gallop (shares of the loop) and its bone (front left, front right, hind left, hind
+	 *  right): the hooves' sounds and dust */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<float> WalkFalls;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<float> RunFalls;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<float> BackFalls;          // (the backing clip's own landings, by phase)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FName> HoofBones;
+	/** the ride: top speeds (walk mode, run mode, backing, swimming: cm/s), speeding up and slowing (cm/s/s; HardStop when let go at
+	 *  a gallop), the turn (deg/s standing and at the top speed), the walk / gallop edge, the jump's lift */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float TopWalk = 200.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float TopRun = 1200.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float TopBack = 140.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float TopSwim = 300.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Accel = 320.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Decel = 500.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HardStop = 1100.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float TurnSlow = 150.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float TurnFast = 65.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float GallopEdge = 420.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float JumpZ = 560.f;
+	/** the rider's frame: the horse's socket she is carried by (its place in the reference pose, the horse's component space) and
+	 *  how far over the horse's origin her mesh's origin sits there (the pack's rider: 20 cm) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName RiderSocket = TEXT("RiderSocket");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform RiderSocketRef;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RiderFrameUp = 20.f;
+	/** how much of the socket's turn from its rest the rider takes (0: none, her frame stays the horse's; the pack's rear clip leans
+	 *  her itself) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RiderTurnShare = 0.f;
+	/** the pack's rider's pelvis seated (its mount idle's, in the rider's frame): where each hero's is brought (tests) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector SeatPelvis = FVector(-0.7f, -13.f, 140.1f);
+	/** swimming: the water at least this deep under the face where she stands (cm), and the horse's origin this far over the face */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float SwimDepth = 110.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float SwimLift = 25.f;
+	/** the dust at a hoof on dirt, a stride's at the gallop, the sudden stop's; and the wind at the top speed */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<class UNiagaraSystem> DustStep;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<class UNiagaraSystem> DustGallop;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<class UNiagaraSystem> DustStop;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float DustScale = 1.f;
+	/** the pack's mesh holds its own reins: none drawn (the list of 2026-11-16's cords) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bModelReins = false;
 };
 
 /** the list of 2026-11-12's third phase ("have at least 20 kinds of ruins", "add these ruin types in the wilderness: temple ruins,
@@ -970,6 +1040,21 @@ struct FRDRiderClips
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Idle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Walk;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Run;
+	/** the user's of 2026-11-18 (the Ultimate Horse Pack's rider, retargeted to her by 933): up from the horse's left and right, down
+	 *  to each side, the jump's three, the rear */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> MountL;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> MountR;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> DismountL;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> DismountR;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> JumpStart;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> JumpLoop;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> JumpLand;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Rear;
+	/** her mesh moved this far in the rider's frame (her mesh's own axes) so her pelvis sits where the pack's rider's does: her rig is
+	 *  not the pack's (933 measures her seated pelvis against the pack's); and on the ground at the mount's start (her lowest foot
+	 *  on the ground as she steps up) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector SeatOffset = FVector::ZeroVector;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector GroundOffset = FVector::ZeroVector;
 };
 
 /** the user's of 2026-11-12 ("create swimming animations for all current playable classes"): a hero's two swimming clips, the

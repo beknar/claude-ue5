@@ -1640,6 +1640,31 @@ public:
 	/** the showcase's save's slot, and a save of that name the player had (put back at the end) */
 	FString Show7SaveSlot;
 	UPROPERTY(Transient) TObjectPtr<class USaveGame> Show7KeptSave;
+	// the reel of 2026-11-18 (RDReel15.cpp): the six towns, a hero each; each hero at tier 3 in the castle; each in an encounter
+	// in the wilds. -RDReel15 in the game, StartReel15 in play (a rehearsal; Go empty: at once; bShots: a picture a scene)
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Reel15") void StartReel15(const FString& Go, const FString& Done, bool bShots, int32 FromStage = 0);
+	/** "<on>|<stage>|<step>|<time in it>|<rescues>|<the timeline's last line>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Reel15") FString GetReel15State() const;
+	void TickReel15(float RealDt);
+	void Reel15Mark(const FString& What);
+	void Reel15Scene(const FString& Name, const FString& Title, const FString& Line, const FString& Say);
+	void Reel15End();
+	void Reel15Shot(const FString& Name);
+	void Reel15Switch(int32 K);
+	FString Reel15Kit(int32 K, int32 Part);
+	void Reel15Camera(float Dt, float Pitch);
+	/** the scene's caption, drawn at the top of the screen (ARDHUD::DrawReelCaption); no UPROPERTY: a package staged on an
+	 *  earlier cook (-SkipCook) reads the generator's properties unversioned, and a new one made it crash at its start) */
+	FString ReelCaptionTitle, ReelCaptionLine;
+	int32 Reel15Sub = 0;
+	float Reel15T = 0.f, Reel15Ready = 0.f, Reel15Aggro = -1.f, Reel15Lose = -1.f, Reel15Down = -1.f, Reel15Yaw = 0.f;
+	bool bReel15Travel = false, bReel15Set = false;
+	FVector Reel15A = FVector::ZeroVector, Reel15B = FVector::ZeroVector;
+	TArray<FVector> Reel15Path;
+	TArray<int32> Reel15Rooms;
+	TArray<TWeakObjectPtr<ARDMonster>> Reel15Foes;
+	FString Reel15SceneName;
+	TSet<FString> Reel15Biomes;
 	// the swarms and birds round her, the wild animals (RDWildLife.cpp)
 	void TickWildLife(float Dt, const FVector& Her);
 	struct FRDSwarmInst { int32 Def = -1; TWeakObjectPtr<class UNiagaraComponent> C; FVector At = FVector::ZeroVector; };
@@ -3330,12 +3355,63 @@ public:
 	/** the list of 2026-11-12: with a bought horse and a tamed one, the other one saddled (at the stable; not while riding) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Horse") bool SwapHorse();
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Horse") bool MountHorse();
-	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Horse") bool DismountHorse();
+	/** bNow: off at once, no clip (a death, a test); else the pack's horse stops first and she climbs down beside it */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Horse") bool DismountHorse(bool bNow = false);
 	/** tests: "<owned>|<spawned>|<mounted>|<x>|<y>|<z>|<its clip>|<its rate>|<her speed>|<saddle z>|<her pelvis z>|<her rider clip>|<the stable's horse>|<her pelvis from the saddle, flat (cm)>" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Horse") FString GetHorseState() const;
 	/** Coat: -1 by whose it is (the stable's grey, her bay), 0 the bay, 1 the grey (a tamed horse) */
 	class ARDHorse* SpawnHorseAt(const FVector& At, float Yaw, bool bHers, int32 Coat = -1);
 	void TickHorse(float Dt);
+	// ---- the user's of 2026-11-18 (RDHorse15.cpp; 933): the Ultimate Horse Pack's horse (HorseDef.bPack): the ride with momentum
+	// (speeding up, slowing, turning by the speed, backing, a sudden stop), getting on and off by the pack's clips, a jump and a
+	// rear, the hooves heard by the ground and dust thrown up, swimming, a hit taken
+	enum class ERide15 : uint8 { None, Mounting, Riding, Dismounting };
+	struct FRide15
+	{
+		ERide15 Phase = ERide15::None;
+		float T = 0.f, Len = 0.f;          // (the getting on's or off's clip: its time, its length)
+		bool bLeft = true;                 // (from the horse's left)
+		float Yaw = 0.f, Speed = 0.f;      // (the horse's heading (deg) and its speed along it (cm/s; under 0 backing))
+		bool bBack = false, bAir = false, bSwim = false, bRear = false, bStop = false, bWantOff = false, bJumped = false;
+		float ActT = 0.f;                  // (the rear's, the landing's, the hit's, the sudden stop's time left)
+		float HitT = 0.f, IdleT = 0.f, SnortT = 8.f, Pitch = 0.f, Lift = 0.f, LastHealth = -1.f;
+		FVector OffAt = FVector::ZeroVector; bool bOffPlaced = false;
+		FName Gait;                        // (the gait clip the horse plays: "idle", "walk", "run", "back", "swim", "swimidle")
+		FString Surface;
+		// (the movement's own, given back when she gets down)
+		float MaxAccelWas = 0.f, BrakeWas = 0.f, FrictionWas = 0.f, BrakeFrictionWas = 0.f; bool bSepBrakeWas = false, bOrientWas = false;
+		FRotator MeshRotWas = FRotator::ZeroRotator;
+		// (tests)
+		int32 Jumps = 0, Rears = 0, Hits = 0, Stops = 0, Swims = 0, Falls = 0, Dust = 0, Mounts = 0, Dismounts = 0, Blocked = 0;
+		TMap<FString, int32> FallsOn;
+	};
+	FRide15 Ride15;
+	bool MountHorse15(class ACharacter* C);
+	bool DismountHorse15(class ACharacter* C, bool bNow);
+	void FinishDismount15(class ACharacter* C);
+	void TickRide15(float Dt, class ACharacter* C);
+	/** where the rider's mesh goes this frame: the horse's rider socket's move from its rest, RiderFrameUp over the horse's origin */
+	FTransform RiderFrame15() const;
+	void PlayRider15(class ACharacter* C, class UAnimSequenceBase* Clip, bool bLoop, float Rate, float Blend);
+	/** the hooves' ground: "Grass", "Dirt" or "Hard" (a town's streets, the cobbles, rock) */
+	FString HoofSurface15(const FVector& At) const;
+	/** the attack's button in the saddle rears the horse (standing or walking; not in the air, the water or a getting on or off) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Horse") bool RearHorse();
+	/** tests: "<phase>|<speed>|<yaw>|<gait>|<rate>|<loops a second>|<pitch>|<swim>|<air>|<rear>|<jumps>|<rears>|<hits>|<stops>|
+	 *  <swims>|<hoof falls>|<dust>|<last ground>|<her pelvis off its seat (cm)>|<left hand off the left rein>|<right ...>|<backing>|
+	 *  <mounts>|<dismounts>|<blocked>|<falls on grass>|<on dirt>|<on hard ground>|<the horse's lift>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Horse") FString GetRideLine15() const;
+	// ---- the horse's reel (the user's of 2026-11-19, RDReel16.cpp): -RDReel16 in the game, StartReel16 in play (a rehearsal)
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Reel16") void StartReel16(const FString& Go, const FString& Done, bool bShots);
+	/** "<on>|<scene>|<sub>|<its time>|<the timeline's last line>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Reel16") FString GetReel16State() const;
+	void TickReel16(float RealDt);
+	bool Reel16FindSpots();
+	bool bReel16 = false, bReel16Read = false, bReel16Going = false, bReel16Shots = false, bReel16Lake = false;
+	int32 Reel16Stage = -1, Reel16Sub = 0;
+	float Reel16T = 0.f, Reel16Yaw = 0.f, Reel16SwimYaw = 0.f, Reel16Base = 0.f, Reel16Aggro = 0.f, Reel16Lose = 0.f, Reel16Dry = 0.f, Reel16Swam = 0.f;
+	bool Reel16Back = false;
+	FVector2D Reel16Plains = FVector2D::ZeroVector, Reel16Shore = FVector2D::ZeroVector, Reel16Water = FVector2D::ZeroVector;
 	// ---- the captain's two wilderness quests (2026-11-07, RDWildQuest.cpp): "wild:wolves" (the Mill Road Den's pack killed,
 	// every one: read from the kills kept, WildKilled), "wild:patrol" (the lost patrol's remains found at the old watchtower)
 	/** how many monsters a quest's place has (its kills' keys are its id x 16 + 0..N-1) */

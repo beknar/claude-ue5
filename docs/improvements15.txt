@@ -1,0 +1,32 @@
+the cows in town can walk through each other
+the summoner should not be able to walk through her own summons
+if a summoner's minions are blocking the way and the summoner pushes on them, they should move away to make room
+if the summoner summons another minion, it should replace a damaged minion.  if there are no damaged minions or if there are maximum number of minions, the spell is refused
+there should be an oven in the starting room in a dungeon
+there should be a symbol for the oven and alchemist's table on the mini-map in the dungeons, like there is for an anvil
+bookshelf doors should open when searched
+there should be a way to make the big overhead dungeon map zoom in and out
+if the summoner's minions are trapped behind a door when the Arena event happens, they should re-appear beside her
+the scrolls should have an icon that represents the spell, just like in the quick bar
+in the dungeon chapel, the pews should face the altar/front of the room
+there should be rune stones that look exactly like the cursed rune stones but instead of being cursed, they'll give a boost or buff and there should be a message that the player was blessed 
+summoner cannot unwieldy the dagger
+summoner cannot put scrolls into the quick bar
+claiming a piece of equipment that is not a potion should not make the same a potion does, it should be some kind of thump or thud
+the ankh of revealing should only light the way and chests/trunks not yet looted
+the ankh of revealing and torch should be able to be repaired via the repair items
+the summoner should be able to pick from 5 different types of the appropriate Tier minions to summon.  leave the current default creatures that can be summoned in that list.
+on the teleport circle spawned by killing the first boss, there is a gamepad button to take the player back to the first room, but the [G] for going to Brokenspire doesn't exist on the gamepad.  this should be a valid button
+there is a quest from the captain titled 'The First Warden' to slayer a tier's boss in Mistward Castle.  this appears as not completed even after slaying the Tier 1 boss and appears after slaying the Tier 1 boss.  it should appear as one of the first quests, and if it's not taken until after the first boss is slain, 
+on the overhead town map, there should be a chart showing what the symbols mean, as well as symbols for the functional buildings instead of text.
+the fireplaces do not have a crackling fire - put in an animated fire there
+there is a spire in game save named game3b that's 4.4km away from Brokenspire that appears to serve no other purpose than to hide a random encounter.  significantly visible buildings like this from far away should serve some purpose that will take up a player's time, like holding the entrance to a cave dungeon, which doesn't have to be part of the terrain.  the entrance could transport the player to a level that is a procedurally generated cave complex of the same Tier that the region is coded for.
+put in the new Ultimate Horse code into the shipping game
+implement the suggestions in docs/wilderness_ideas.md to make the wilderness feel more interactive and alive
+the small villages on the hillsides should have cut flat ledges into the hillsides and support them with retaining walls and buttresses to create ground for homes, plazas and fortifications.  the procedural terrain generation should account for this when placing villages onto angled terrain like hills, mountains, etc
+the small villages are not inhabited.  example: Hawkby
+the small villages should be somewhat bigger, with 8-15 small buildings, with a 2-5 person household per building for the population
+some of the stairs in the small villages have buildings with stairs that do not reach all the way to the ground so the player cannot go inside the building
+the summoner should be able to summon her minions in the wilderness
+break up these changes into appropriate pieces, formulate a plan to implement it, write that plan to an MD file in the docs directory, review the plan, then create a PR for reasonably sized portion of the plan and execute each PR in order.  If there are opportunities to do parallel actions.  once the PR is merged, build the shipping binary.
+

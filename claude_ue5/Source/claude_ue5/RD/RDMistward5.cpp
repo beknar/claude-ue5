@@ -814,7 +814,10 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 			// whatever its tier (the trials of 2026-11-05))
 			const FRD5Arm* BestSummon = nullptr;
 			for (const FRD5Arm& A : Arms) if (A.bSummon && (!BestSummon || A.SummonTier > BestSummon->SummonTier)) BestSummon = &A;
-			if (BestSummon && !bHid && CountSummoned(BestSummon->Spell) < BestSummon->Count && Pc->GetMana() >= Weapons[BestSummon->Index].ManaCost
+			// (not where nothing can answer: a summon needs a set under it, and out in the wilds there is none (the reel of
+			// 2026-11-18: the Summoner called there for 55 s, refused each time, and cast nothing else))
+			const bool bCanSummon = !(bWild && !GetSection(WorldToSection(L)));
+			if (BestSummon && bCanSummon && !bHid && CountSummoned(BestSummon->Spell) < BestSummon->Count && Pc->GetMana() >= Weapons[BestSummon->Index].ManaCost
 				&& Pc->StartAttackWith(BestSummon->Index))
 			{ bDid = true; AutoplayStats.FindOrAdd(TEXT("summons"))++; }
 			for (int32 K = 0; K < Arms.Num() && !bDid; ++K)

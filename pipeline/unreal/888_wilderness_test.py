@@ -1041,8 +1041,11 @@ def step_horse9():
     res["walk_into_horse"] = {"start_cm": round(d_), "nearest_cm": round(dmin)}
     G["pawn"].set_actor_location(q0, False, True); yield from rwait(0.5)
     res["horse_at_cm"] = round(d_); res["mount_prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 400.0))
-    yield from press("F"); yield from rwait(1.0)
+    pack = g.get_editor_property("horse_def").pack
+    yield from press("F"); yield from rwait(3.0 if pack else 1.0)
     m = hs(); res["mounted"] = m; res["attack_refused"] = not cb().start_attack()
+    if pack: yield from rwait(3.2)          # (the attack's button rears the pack's horse: let it end)
+    res["seat_err15"] = float(str(g.get_ride_line15()).split("|")[18]) if pack else None
     hz = g.get_editor_property("horse"); res["blocking_mounted"] = hz.is_blocking() if hz else None
     G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=G["pawn"].get_actor_rotation().yaw + 90)); yield from rwait(0.6); shot("horse_idle", "1280x720"); yield from rwait(1.0)
     # (her speed mounted once the horse is up to it: the last 3 s of a 6 s run (the list of 2026-11-10: at 5.5 times her speed the
@@ -1062,8 +1065,9 @@ def step_horse9():
         while time.time() - t0 < 1.2: G["pawn"].add_movement_input(V(1.0, 0.3, 0.0), 1.0); yield
         G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=math.degrees(math.atan2(0.3, 1.0)) + yawoff))
         G["pawn"].add_movement_input(V(1.0, 0.3, 0.0), 1.0); shot(nm, "1280x720"); yield from rwait(1.2)
-    res["speed_m_s"] = {"foot": round(foot, 2), "mounted": round(mounted, 2), "ratio": round(mounted / max(foot, 0.01), 2), "want": round(g.get_editor_property("horse_def").speed_mul, 2)}
-    yield from press("F"); yield from rwait(0.8)
+    res["speed_m_s"] = {"foot": round(foot, 2), "mounted": round(mounted, 2), "ratio": round(mounted / max(foot, 0.01), 2), "want": round(g.get_editor_property("horse_def").speed_mul, 2),
+                        "want_m_s": round(g.get_editor_property("horse_def").top_run / 100.0, 2) if pack else None}
+    yield from press("F"); yield from rwait(4.5 if pack else 0.8)
     res["after_dismount"] = hs()
     # (away from the horse left beside her: run the way it stands, its box (on once she is 2 m clear) stopped her (2026-11-10, the
     # Tripo horse set down the way she ran: 0.03 m/s))
@@ -1084,14 +1088,18 @@ def step_horse9():
     g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
     quiet(False)
     b = res["before"]; a = res["after_buy"]; mt = res["mounted"]; rd = res["riding"] or {}; sp = res["speed_m_s"]
+    pack = g.get_editor_property("horse_def").pack
+    # (the seat and the speed: the Tripo horse's saddle bone and 5.5 times her speed; the pack's horse (2026-11-18) its rider's seat
+    # and the user's natural gallop (HorseDef.TopRun, about 12 m/s: about three times her run))
+    seat_ok = ((res["seat_err15"] or 99) < 6 if pack else abs(mt["pelvis_z"] - mt["saddle_z"] - 14.0) < 15 and mt["pelvis_off_xy"] < 15 and (rd.get("pelvis_off_xy", 99) < 15))
+    speed_ok = (abs(sp["mounted"] - sp["want_m_s"]) < 0.8 if pack else abs(sp["ratio"] - sp["want"]) < 0.35 and sp["ratio"] >= 5.0)
     ok = (b["stable_horse"] == 1 and b["owned"] == 0 and "horse" in res["prompt"] and res["bought"] and res["gold_taken"] == res["price"] > 0
           and a["owned"] == 1 and a["spawned"] == 1 and res["gi_owned"]
-          and mt["mounted"] == 1 and abs(mt["pelvis_z"] - mt["saddle_z"] - 14.0) < 15 and mt["pelvis_off_xy"] < 15 and (rd.get("pelvis_off_xy", 99) < 15) and mt["rider"] not in ("", "None") and res["attack_refused"]
-          and rd.get("clip") == "run" and abs(sp["ratio"] - sp["want"]) < 0.35 and res["after_dismount"]["mounted"] == 0 and abs(sp["after"] - sp["foot"]) < max(0.4, 0.2 * sp["foot"])
+          and mt["mounted"] == 1 and seat_ok and mt["rider"] not in ("", "None") and res["attack_refused"]
+          and rd.get("clip") == "run" and speed_ok and res["after_dismount"]["mounted"] == 0 and abs(sp["after"] - sp["foot"]) < max(0.4, 0.2 * sp["foot"])
           and res["death"]["dead"] and res["death"]["mounted"] == 0 and res["death"]["montage"]
-          # (the list of 2026-11-10: blocked by it standing, not while ridden; at least five times her speed)
-          and res["blocking_before_mount"] is True and res["blocking_mounted"] is False and res["walk_into_horse"]["nearest_cm"] > 35
-          and sp["ratio"] >= 5.0)
+          # (the list of 2026-11-10: blocked by it standing, not while ridden)
+          and res["blocking_before_mount"] is True and res["blocking_mounted"] is False and res["walk_into_horse"]["nearest_cm"] > 35)
     step_result("horse9", ok, **res)
 
 
@@ -1133,8 +1141,10 @@ def step_gait12():
         res["mounted"] = bool(hz and g.is_mounted())
         if not res["mounted"]: raise _NotMounted()
         body = hz.get_editor_property("body")
-        HOOVES = ("hoof_front_l", "hoof_front_r", "hoof_rear_l", "hoof_rear_r")
         hd = g.get_editor_property("horse_def")
+        HOOVES = ("Fingers_L", "Fingers_R", "Toes2_L", "Toes2_R") if hd.pack else ("hoof_front_l", "hoof_front_r", "hoof_rear_l", "hoof_rear_r")
+        if hd.pack: yield from rwait(2.0)          # (the pack's mount clip)
+        res["pack"] = hd.pack
         res["def"] = {"canter": bool(hd.canter), "walk_clip": round(hd.walk_clip_speed), "canter_clip": round(hd.canter_clip_speed),
                       "run_clip": round(hd.run_clip_speed), "canter_from": round(hd.canter_from), "gallop_from": round(hd.gallop_from)}
         # (the plains' way: straight on, a little to the side of where the spot finder looked)
@@ -1155,7 +1165,7 @@ def step_gait12():
                 rows.append((gt(), h, [body.get_socket_location(b) for b in HOOVES], vel.length(),
                              hz.get_actor_rotation().yaw, math.degrees(math.atan2(vel.y, vel.x))))
                 clips.append((str(hz.get_editor_property("clip_now")), hz.get_editor_property("rate_now"), hz.get_strides_a_second(),
-                              str(g.get_horse_state()).split("|")[11]))
+                              str(g.get_horse_state()).split("|")[11], float(str(g.get_ride_line15()).split("|")[6]) if hd.pack else 0.0, hz.get_clip_phase(), gt()))
                 yield
             unreal.GameplayStatics.set_global_time_dilation(w, 1.0)
             # (the picture from her side after the measured stretch: the camera turned under the measure would turn her and the horse)
@@ -1199,21 +1209,30 @@ def step_gait12():
                          "slide_share": round(slides[len(slides) // 2] / max(speed, 1.0), 3) if slides else None,
                          "slide_along_cm_s": round(along[len(along) // 2]) if along else None, "slide_across_cm_s": round(across[len(across) // 2]) if across else None,
                          "facing_off_deg": [round(offs[len(offs) // 2], 1), round(offs[-1], 1)] if offs else None,
-                         "rider": max(set(c[3] for c in clips), key=[c[3] for c in clips].count) if clips else ""}
+                         "rider": max(set(c[3] for c in clips), key=[c[3] for c in clips].count) if clips else "",
+                         # (the pack's horse: its pitch to the slope, and how much it changes frame to frame)
+                         "pitch_deg": [round(min(c[4] for c in clips), 2), round(max(c[4] for c in clips), 2)] if clips else None,
+                         "pitch_step_deg_max": round(max((abs(b[4] - a[4]) for a, b in zip(clips, clips[1:])), default=0.0), 3),
+                         # (the clip's phase as it moves in play, loops a game second (its wraps unrolled), against the strides it says)
+                         "phase_loops_s": round(sum((((b[5] - a[5]) + 0.5) % 1.0) - 0.5 for a, b in zip(clips, clips[1:])) / max(clips[-1][6] - clips[0][6], 1e-3), 3) if len(clips) > 2 else None}
         # (her speeds by the stick's share: Python's move input passes by her character's MoveScale, the walk / run switch's, so the
         # first run's "walk" with the switch off went at her full speed (1944 cm/s); a tenth, a third and the whole of her speed are a
         # walk, her walk (about 5.5 times hers on foot: a canter) and her run)
-        yield from ride("walk", 0.1, False)
-        yield from ride("canter", 0.33, False, pic="gait12_canter")
+        # (the pack's horse (2026-11-18): its walks read with the game slowed too: at the editor's 40-80 ms frames no two fell in one
+        # stance (0 pairs))
+        sl = 0.4 if res.get("pack") else 1.0
+        yield from ride("walk", 0.1, False, slow=sl)
+        yield from ride("canter", 0.33, False, slow=sl, pic="gait12_canter")
         yield from ride("gallop", 1.0, True, slow=0.4, pic="gait12_gallop")
         cb().set_run_mode(False)
-        g.dismount_horse(); yield from rwait(0.5)
+        # (off at once: the pack's horse's clip would still be under way at the teleport below, and put her back beside it after)
+        g.dismount_horse(True); yield from rwait(0.5)
     except _NotMounted:
         pass
     finally:
         unreal.GameplayStatics.set_global_time_dilation(w, 1.0)
         gi.set_editor_property("horse_owned", owned0)
-        if g.is_mounted(): g.dismount_horse()
+        if g.is_mounted(): g.dismount_horse(True)
         quiet(False)
     g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
     ok = res.get("mounted", False)
@@ -1221,11 +1240,248 @@ def step_gait12():
         wk, c, r = res["walk"], res["canter"], res["gallop"]
         def good(x, clip):
             return (x["clip"] == clip and x["clip_share"] >= 0.9 and x["hoof_down_pairs"] >= 6 and x["slide_share"] is not None and x["slide_share"] < 0.15)
-        ok = (res["def"]["canter"] and good(wk, "walk") and good(c, "canter") and good(r, "run")
-              # (each near its own rate: the clip made for the speed it is ridden at)
-              and 0.6 <= (c["rate"] or 0) <= 1.6 and 0.6 <= (r["rate"] or 0) <= 1.8
-              and wk["rider"] == "walk" and c["rider"] == "canter" and r["rider"] == "run")
+        if res.get("pack"):
+            # (the pack's horse (2026-11-18): a walk and a gallop, no canter; the walk mode's walk at its brisk top, the gallop at the
+            # user's natural 12 m/s)
+            ok = (good(wk, "walk") and good(c, "walk") and good(r, "run") and 0.6 <= (c["rate"] or 0) <= 1.8 and 1.2 <= (r["rate"] or 0) <= 1.8
+                  and wk["rider"] == "walk" and c["rider"] == "walk" and r["rider"] == "run")
+        else:
+            ok = (res["def"]["canter"] and good(wk, "walk") and good(c, "canter") and good(r, "run")
+                  # (each near its own rate: the clip made for the speed it is ridden at)
+                  and 0.6 <= (c["rate"] or 0) <= 1.6 and 0.6 <= (r["rate"] or 0) <= 1.8
+                  and wk["rider"] == "walk" and c["rider"] == "canter" and r["rider"] == "run")
     step_result("gait12", ok, **res)
+
+
+def step_horse15():
+    """the user's of 2026-11-18 ("use those resources to improve the horse movement and riding mechanics": the Ultimate Horse Pack's
+    horse, 933, RD/RDHorse15.cpp): on the plains, her horse called; up from its left by the pack's clip (her feet on the ground at
+    its start, her pelvis on the pack's rider's seat once up); the walk mode's walk and the run mode's gallop at their speeds and
+    rates, reached and left with momentum (the speed's rise over time), the sudden stop when let go at a gallop, the turn slower at
+    the gallop than at the walk, backing; each hoof measured in the world (no slide while it is down); the hooves heard and the
+    dust; a jump, a rear (the attack's button), a hit taken; down to the side by the clip (her feet on the ground beside it); then
+    into a lake: the horse swims under her; pictures of each"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    w = G["w"]; gi = G["gi"]; owned0 = gi.get_editor_property("horse_owned")
+    K = ["phase", "speed", "yaw", "clip", "rate", "loops", "pitch", "swim", "air", "rear", "jumps", "rears", "hits", "stops", "swims", "falls",
+         "dust", "surface", "seat_err", "hand_l", "hand_r", "back", "mounts", "dismounts", "blocked", "grass", "dirt", "hard", "lift"]
+    def rl():
+        p = str(g.get_ride_line15()).split("|")
+        return {a: (b if a in ("phase", "clip", "surface") else float(b)) for a, b in zip(K, p)}
+    def rider(): return str(g.get_horse_state()).split("|")[11]
+    def gt(): return unreal.GameplayStatics.get_time_seconds(w)
+    def face(yaw, pitch=-12.0): G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=pitch, yaw=yaw))
+    def sounds(): return {k: g.get_sound_count(k) for k in ("Horse.Hoof.Grass", "Horse.Hoof.Dirt", "Horse.Hoof.Hard", "Horse.Mount", "Horse.Dismount", "Horse.Jump", "Horse.Neigh", "Horse.Snort", "Horse.Hit", "Horse.Swim")}
+    HOOVES = ("Fingers_L", "Fingers_R", "Toes2_L", "Toes2_R")
+    def drive(dxy, scale, run, sec, rows=None, every=0.0, hooves=False):
+        """her input along a world way for sec seconds of the game's time: a record of (game time, ride line, [hooves], horse place)"""
+        cb().set_run_mode(run); d = V(dxy[0], dxy[1], 0.0); g0 = gt(); tn = -1.0
+        while gt() - g0 < sec:
+            if scale > 0: G["pawn"].add_movement_input(d, scale)
+            if rows is not None and gt() - tn >= every:
+                tn = gt(); body = hz.get_editor_property("body")
+                rows.append((gt() - g0, rl(), [body.get_socket_location(b) for b in HOOVES] if hooves else None, hz.get_actor_location()))
+            yield
+    def slide(rows):
+        """each hoof's slide while it is down (within 2 cm of its lowest over 0.3 s, against the horse's feet), per the speed"""
+        ts = [r[0] for r in rows]; out = []
+        for k in range(4):
+            rel = [r[2][k].z - r[3].z for r in rows]; lo = win_min(ts, rel, 0.15)
+            for i in range(1, len(rows)):
+                dt = ts[i] - ts[i - 1]
+                if dt <= 0 or dt > 0.035 or not (rel[i] < lo[i] + 2.0 and rel[i - 1] < lo[i] + 2.0): continue
+                a, b = rows[i - 1][2][k], rows[i][2][k]; out.append(math.hypot(b.x - a.x, b.y - a.y) / dt)
+        out.sort(); sp = sorted(abs(r[1]["speed"]) for r in rows)
+        v = sp[len(sp) // 2] if sp else 0.0
+        return {"pairs": len(out), "slide_median_cm_s": round(out[len(out) // 2]) if out else None, "speed_cm_s": round(v),
+                "slide_share": round(out[len(out) // 2] / max(v, 1.0), 3) if out else None}
+    try:
+        gi.set_editor_property("horse_owned", True)
+        xy = clear_spot("plains"); g.wild_put_her(*xy); yield from wait_chunks(30, 50); yield from rwait(1.0)
+        g.call_horse(); yield from rwait(1.0)
+        hz = g.get_editor_property("horse"); hd = g.get_editor_property("horse_def")
+        body = hz.get_editor_property("body")
+        ai = body.get_anim_instance()
+        res["def"] = {"pack": hd.pack, "mesh": hd.mesh.get_name() if hd.mesh else None, "saddle": hz.get_editor_property("saddle").is_visible(),
+                      "anim": ai.get_class().get_name() if ai else None, "top_walk": hd.top_walk, "top_run": hd.top_run,
+                      "walk_clip": hd.walk_clip_speed, "run_clip": hd.run_clip_speed, "gallop_edge": hd.gallop_edge}
+        s0 = sounds()
+        # ---- up from its left: her feet against the ground as the clip begins, her pelvis on the seat once up
+        h0 = hz.get_actor_location(); rt = hz.get_actor_right_vector(); hy = hz.get_actor_rotation().yaw
+        G["pawn"].set_actor_location(V(h0.x - rt.x * 120.0, h0.y - rt.y * 120.0, h0.z + 100.0), False, True); yield from rwait(0.6)
+        face(hy + 60.0)
+        res["mount_prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 400.0))
+        yield from press("F")
+        rows = []; t0 = time.time(); pic = False
+        while time.time() - t0 < 3.0:
+            m = G["pawn"].mesh; hzl = hz.get_actor_location()
+            rows.append((time.time() - t0, rl()["phase"], rider(), min(m.get_socket_location(b).z for b in ("foot_l", "foot_r", "ball_l", "ball_r")) - hzl.z,
+                         m.get_socket_location("pelvis").z - hzl.z))
+            if not pic and time.time() - t0 > 0.8: shot("horse15_mount", "1280x720"); pic = True
+            yield
+        early = [r for r in rows if r[1] == "mounting" and r[0] < 0.35]
+        res["mount"] = {"phases": sorted(set(r[1] for r in rows)), "riders": sorted(set(r[2] for r in rows)),
+                        "foot_over_ground_cm_at_start": round(min(r[3] for r in early), 1) if early else None,
+                        "pelvis_rise_cm": [round(rows[0][4], 1), round(rows[-1][4], 1)], "after": rl()}
+        yield from rwait(0.8)
+        sit = rl(); res["seated"] = {"seat_err_cm": sit["seat_err"], "hands_off_reins_cm": [sit["hand_l"], sit["hand_r"]], "rider": rider(), "clip": sit["clip"]}
+        res["attack_rears_not_strikes"] = None
+        face(hy - 90.0 + 90.0, -8.0); yield from rwait(0.5); shot("horse15_seated", "1280x720")
+        # ---- the walk mode: her walk's share of her input (a third), the horse's brisk walk
+        way = (math.cos(math.radians(hy)), math.sin(math.radians(hy)))
+        face(hy)
+        yield from drive(way, 0.33, False, 2.5)
+        # (the hooves read with the game slowed, as the gallop's: at the editor's frame rate few frame pairs fall in one stance)
+        unreal.GameplayStatics.set_global_time_dilation(w, 0.4)
+        wr = []; yield from drive(way, 0.33, False, 2.5, wr, 0.0, True)
+        unreal.GameplayStatics.set_global_time_dilation(w, 1.0)
+        res["walk"] = {"speed_end": round(wr[-1][1]["speed"]), "clip": wr[-1][1]["clip"], "rate": round(wr[-1][1]["rate"], 2), "rider": rider(), **slide(wr)}
+        # ---- the run mode from the walk: the speed's rise (momentum), the gallop's rate, the hooves (the game slowed to see them)
+        rr = []; yield from drive(way, 1.0, True, 6.0, rr, 0.0)
+        t_to = lambda v: next((round(r[0], 2) for r in rr if r[1]["speed"] >= v), None)
+        res["gallop_rise"] = {"t_600": t_to(600), "t_1000": t_to(1000), "t_1150": t_to(1150), "speed_end": round(rr[-1][1]["speed"]),
+                              "clips": sorted(set(r[1]["clip"] for r in rr)), "rate_end": round(rr[-1][1]["rate"], 2)}
+        unreal.GameplayStatics.set_global_time_dilation(w, 0.4)
+        gr = []; yield from drive(way, 1.0, True, 2.0, gr, 0.0, True)
+        unreal.GameplayStatics.set_global_time_dilation(w, 1.0)
+        res["gallop"] = {"clip": gr[-1][1]["clip"], "rate": round(gr[-1][1]["rate"], 2), "rider": rider(), **slide(gr)}
+        face(hy + 90.0, -6.0)
+        t0 = time.time()
+        while time.time() - t0 < 1.0:
+            G["pawn"].add_movement_input(V(way[0], way[1], 0.0), 1.0)
+            if time.time() - t0 > 0.5 and not res.get("_g"): shot("horse15_gallop", "1280x720"); res["_g"] = 1
+            yield
+        res.pop("_g", None); face(rl()["yaw"])
+        # ---- the turn at the gallop and at the walk: a way 90 degrees to its right held for 1.2 s
+        def turn_rate(scale, run):
+            y0 = rl()["yaw"]; r = math.radians(y0 + 90.0); rows = []
+            yield from drive((math.cos(r), math.sin(r)), scale, run, 1.2, rows, 0.0)
+            # (its rate over the first 0.4 s: a turn of 90 degrees ends inside 1.2 s at a walk, and the rest of the time reads nothing)
+            ys = [x[1]["yaw"] for x in rows if x[0] <= 0.4]
+            tot = sum(((b - a + 180.0) % 360.0) - 180.0 for a, b in zip(ys, ys[1:]))
+            span = max((x[0] for x in rows if x[0] <= 0.4), default=0.4) or 0.4
+            return {"deg_s": round(tot / span, 1), "speed": round(rows[-1][1]["speed"])}
+        res["turn_gallop"] = yield from turn_rate(1.0, True)
+        # ---- let go at the gallop: the sudden stop
+        st0 = rl()["stops"]; sr = []; yield from drive((1, 0), 0.0, True, 3.5, sr, 0.0)
+        res["stop"] = {"stops": rl()["stops"] - st0, "clips": sorted(set(r[1]["clip"] for r in sr)), "t_under_100": next((round(r[0], 2) for r in sr if abs(r[1]["speed"]) < 100), None),
+                       "dust": rl()["dust"]}
+        res["turn_walk"] = yield from turn_rate(0.33, False)
+        yield from drive((1, 0), 0.0, False, 1.5)
+        # ---- backing: the camera behind it, the stick held back
+        hy2 = rl()["yaw"]; face(hy2); r = math.radians(hy2 + 180.0)
+        br = []; yield from drive((math.cos(r), math.sin(r)), 0.33, False, 2.5, br, 0.0)
+        res["back"] = {"speed_end": round(br[-1][1]["speed"]), "clip": br[-1][1]["clip"], "backing": br[-1][1]["back"], "yaw_kept": round(abs(((br[-1][1]["yaw"] - hy2 + 180) % 360) - 180), 1)}
+        yield from drive((1, 0), 0.0, False, 1.5)
+        # ---- a jump from a canter: her jump's button
+        hy3 = rl()["yaw"]; way = (math.cos(math.radians(hy3)), math.sin(math.radians(hy3))); face(hy3 + 70.0, -6.0)
+        yield from drive(way, 1.0, True, 2.0)
+        j0 = rl()["jumps"]; z0 = hz.get_actor_location().z; zmax = z0; clips = set(); riders = set()
+        cb().simulate_key(key("SpaceBar"), True)
+        t0 = time.time(); pic = False
+        while time.time() - t0 < 2.0:
+            G["pawn"].add_movement_input(V(way[0], way[1], 0.0), 1.0)
+            if time.time() - t0 > 0.15: cb().simulate_key(key("SpaceBar"), False)
+            zmax = max(zmax, hz.get_actor_location().z); clips.add(rl()["clip"]); riders.add(rider())
+            if not pic and rl()["air"] == 1 and time.time() - t0 > 0.25: shot("horse15_jump", "1280x720"); pic = True
+            yield
+        res["jump"] = {"jumps": rl()["jumps"] - j0, "rise_cm": round(zmax - z0), "clips": sorted(clips), "riders": sorted(riders)}
+        # ---- a rear: standing, the attack's button
+        yield from drive((1, 0), 0.0, True, 3.0)
+        r0 = rl()["rears"]; face(rl()["yaw"] + 80.0, -4.0)
+        res["attack_rears_not_strikes"] = cb().start_attack() is False
+        t0 = time.time(); clips = set(); pic = False; up = []
+        while time.time() - t0 < 6.0 and (time.time() - t0 < 0.5 or rl()["rear"] == 1):
+            clips.add(rl()["clip"]); m = G["pawn"].mesh
+            up.append(m.get_socket_location("head").z - m.get_socket_location("pelvis").z)
+            if not pic and time.time() - t0 > 1.0: shot("horse15_rear", "1280x720"); pic = True
+            yield
+        # (she stays upright on it: her head over her pelvis all through it (carried rigidly by the socket she lay on her back))
+        res["rear"] = {"rears": rl()["rears"] - r0, "clips": sorted(clips), "head_over_pelvis_cm_min": round(min(up), 1) if up else None}
+        yield from rwait(0.4)
+        # ---- a hit taken: the horse shies
+        hh0 = rl()["hits"]; c_ = cb(); c_.apply_damage(3.0, None); clips = set(); t0 = time.time()
+        while time.time() - t0 < 1.2: clips.add(rl()["clip"]); yield
+        res["hit"] = {"hits": rl()["hits"] - hh0, "clips": sorted(clips)}
+        res["hooves"] = {k: rl()[k] for k in ("falls", "grass", "dirt", "hard", "dust")}
+        # ---- down to its side
+        yield from rwait(0.6)
+        hp = hz.get_actor_location(); yield from press("F")
+        rows = []; t0 = time.time(); pic = False
+        while time.time() - t0 < 3.0:
+            rows.append((time.time() - t0, rl()["phase"], g.is_mounted()))
+            if not pic and time.time() - t0 > 0.9: shot("horse15_dismount", "1280x720"); pic = True
+            yield
+        q = G["pawn"].get_actor_location(); hp = hz.get_actor_location()
+        res["dismount"] = {"phases": sorted(set(r[1] for r in rows)), "mounted_after": g.is_mounted(), "beside_cm": round(math.hypot(q.x - hp.x, q.y - hp.y)),
+                           "feet_over_horse_ground_cm": round(q.z - G["pawn"].capsule_component.get_scaled_capsule_half_height() - hp.z, 1)}
+        # ---- into a lake: the horse swims
+        # (a lake, a river or a pond 2 m deep or more: no lake 2.5 m deep lay within 30 km of the first run's world)
+        wp = yield from ring_find13(lambda s: int(s["water"]) in (2, 3, 4) and s["water_m"] - s["h"] >= 2.0, 400.0, 60.0)
+        res["swim"] = None
+        if wp:
+            # (the shore: out along 16 rays to the first dry ground (a lake's deep middle can be far from it), the nearest, 25 m on)
+            wx, wy, _ = wp; dry = None; best = 1e9
+            for a in range(0, 360, 22):
+                ca, sa = math.cos(math.radians(a)), math.sin(math.radians(a))
+                for rr_ in range(20, 2000, 20):
+                    if sample(wx + rr_ * ca, wy + rr_ * sa)["water"] == 0:
+                        if rr_ < best: best = rr_; dry = (wx + (rr_ + 25) * ca, wy + (rr_ + 25) * sa)
+                        break
+                yield
+            if dry:
+                g.wild_put_her(*dry); yield from wait_chunks(30, 50); yield from rwait(1.0)
+                g.call_horse(); yield from rwait(0.8); g.mount_horse(); yield from rwait(2.5)
+                d = (wx - dry[0], wy - dry[1]); n_ = math.hypot(*d) or 1.0; d = (d[0] / n_, d[1] / n_)
+                face(math.degrees(math.atan2(d[1], d[0])))
+                # (on until it has swum 3 s, 25 s at most: a lake's floor can stay under 1.1 m for a long way out; the deepest water
+                # under her feet kept)
+                sw = []; s0w = rl()["swims"]; deep = 0.0; t0 = time.time()
+                while time.time() - t0 < 25.0 and sum(1 for r in sw if r[1]["swim"] == 1) < 30:
+                    yield from drive(d, 1.0, True, 0.5, sw, 0.1)
+                    q_ = G["pawn"].get_actor_location(); s_ = sample(q_.x / 100.0, q_.y / 100.0)
+                    if s_["water"]: deep = max(deep, s_["water_m"] * 100.0 - (q_.z - G["pawn"].capsule_component.get_scaled_capsule_half_height()))
+                inw = [r for r in sw if r[1]["swim"] == 1]
+                face(math.degrees(math.atan2(d[1], d[0])) + 90.0, -10.0); yield from rwait(0.6)
+                if inw: shot("horse15_swim", "1280x720")
+                pel = G["pawn"].mesh.get_socket_location("pelvis").z
+                res["swim"] = {"shore_m": round(math.hypot(wx - dry[0], wy - dry[1])), "swims": rl()["swims"] - s0w, "deepest_cm": round(deep),
+                               "rode_m": round(math.hypot(G["pawn"].get_actor_location().x / 100.0 - dry[0], G["pawn"].get_actor_location().y / 100.0 - dry[1])), "frames_swimming": len(inw),
+                               "clips": sorted(set(r[1]["clip"] for r in inw)), "speed_max": round(max((abs(r[1]["speed"]) for r in inw), default=0)),
+                               "lift_cm": round(max((r[1]["lift"] for r in inw), default=0)), "pelvis_over_horse_cm": round(pel - hz.get_actor_location().z)}
+        res["sounds"] = {k: v - s0.get(k, 0) for k, v in sounds().items()}
+        g.dismount_horse(True); yield from rwait(0.5)
+    finally:
+        unreal.GameplayStatics.set_global_time_dilation(w, 1.0)
+        gi.set_editor_property("horse_owned", owned0)
+        if g.is_mounted(): g.dismount_horse(True)
+        cb().set_run_mode(False)
+        quiet(False)
+    g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    d = res.get("def", {}); mt = res.get("mount", {}); se = res.get("seated", {}); wk = res.get("walk", {}); gr = res.get("gallop", {}); ri = res.get("gallop_rise", {})
+    tg, tw = res.get("turn_gallop", {}), res.get("turn_walk", {}); stp = res.get("stop", {}); bk = res.get("back", {}); jp = res.get("jump", {})
+    rr_, ht, dm, sw, so = res.get("rear", {}), res.get("hit", {}), res.get("dismount", {}), res.get("swim"), res.get("sounds", {})
+    checks = {
+        "pack_horse": d.get("pack") and d.get("anim") == "RDHorseAnimInstance" and d.get("saddle"),
+        "mount_clip": "mounting" in mt.get("phases", []) and "mountl" in mt.get("riders", []) and (mt.get("foot_over_ground_cm_at_start") is not None and -6 < mt["foot_over_ground_cm_at_start"] < 18),
+        "seat": se.get("seat_err_cm", 99) < 6 and se.get("rider") == "idle",
+        "walk": wk.get("clip") == "walk" and abs(wk.get("speed_end", 0) - d.get("top_walk", 0)) < 25 and (wk.get("slide_share") is not None and wk["slide_share"] < 0.2),
+        "momentum": ri.get("t_1000") is not None and 1.5 < ri["t_1000"] < 5.0 and abs(ri.get("speed_end", 0) - d.get("top_run", 0)) < 60,
+        "gallop": gr.get("clip") == "run" and 1.3 <= gr.get("rate", 0) <= 1.8 and gr.get("rider") == "run" and (gr.get("slide_share") is not None and gr["slide_share"] < 0.2),
+        "turns": 0 < tg.get("deg_s", 0) < 90 and tw.get("deg_s", 0) > tg.get("deg_s", 0) + 30,
+        "stop": stp.get("stops", 0) >= 1 and "stop" in stp.get("clips", []) and (stp.get("t_under_100") or 9) < 2.0,
+        "back": bk.get("speed_end", 0) < -60 and bk.get("clip") == "back" and bk.get("yaw_kept", 99) < 5,
+        "jump": jp.get("jumps", 0) >= 1 and jp.get("rise_cm", 0) > 40 and "jump" in jp.get("riders", []),
+        "rear": rr_.get("rears", 0) >= 1 and "rear" in rr_.get("clips", []) and res.get("attack_rears_not_strikes") is True and (rr_.get("head_over_pelvis_cm_min") or 0) > 35,
+        "hit": ht.get("hits", 0) >= 1 and "hit" in ht.get("clips", []),
+        "hooves": so.get("Horse.Hoof.Grass", 0) + so.get("Horse.Hoof.Dirt", 0) + so.get("Horse.Hoof.Hard", 0) >= 20 and res.get("hooves", {}).get("falls", 0) >= 20,
+        "sounds": so.get("Horse.Mount", 0) >= 1 and so.get("Horse.Dismount", 0) >= 1 and so.get("Horse.Jump", 0) >= 1 and so.get("Horse.Neigh", 0) >= 1,
+        "dismount": "dismounting" in dm.get("phases", []) and dm.get("mounted_after") is False and 50 < dm.get("beside_cm", 0) < 200 and abs(dm.get("feet_over_horse_ground_cm", 99)) < 40,
+        "swim": bool(sw) and sw.get("swims", 0) >= 1 and sw.get("frames_swimming", 0) > 5 and sw.get("lift_cm", 0) > 40,
+    }
+    res["checks"] = checks
+    step_result("horse15", all(checks.values()), **res)
 
 
 def scen_things(g, sid):
@@ -6000,13 +6256,15 @@ def step_horse14():
     if torch_: cb().add_item(torch_, 1); cb().use_item(torch_); yield from rwait(0.5)
     res["torch_lit_before"] = bool(torch_) and not cb().are_ride_hands_empty()
     weapons_before = not cb().are_ride_hands_empty()
-    yield from press("F"); yield from rwait(1.5)
+    pack = g.get_editor_property("horse_def").pack
+    yield from press("F"); yield from rwait(3.0 if pack else 1.5)
     res["mounted"] = str(g.get_horse_state()).split("|")[2] == "1"
     def rider():
         q = str(g.get_rider_line()).split("|")
         if len(q) < 7: return {"line": str(g.get_rider_line())}
+        r15 = str(g.get_ride_line15()).split("|")
         return {"seat_along_cm": float(q[0]), "seat_across_cm": float(q[1]), "seat_up_cm": float(q[2]), "hand_l_cm": float(q[3]), "hand_r_cm": float(q[4]),
-                "hands_empty": q[5] == "1", "reins": int(q[6])}
+                "hands_empty": q[5] == "1", "reins": int(q[6]), "seat_err15": float(r15[18]), "hand15_l": float(r15[19]), "hand15_r": float(r15[20])}
     res["standing"] = rider()
     # (measured on their own (PR #79's review: the line reads the point the game put her on, and its own hidden flags)): her pelvis
     # against the seat worked out here from the saddle bone and horse_seat.json's measure; every mesh, light and effect of hers at her
@@ -6042,12 +6300,12 @@ def step_horse14():
             yield
         rs = [r for r in rs if "hand_l_cm" in r]
         if rs:
-            worst[gait] = {k: round(max(abs(r[k]) for r in rs), 1) for k in ("seat_along_cm", "seat_across_cm", "seat_up_cm", "hand_l_cm", "hand_r_cm")}
+            worst[gait] = {k: round(max(abs(r[k]) for r in rs), 1) for k in ("seat_along_cm", "seat_across_cm", "seat_up_cm", "hand_l_cm", "hand_r_cm", "seat_err15", "hand15_l", "hand15_r")}
             worst[gait]["reins_min"] = min(r["reins"] for r in rs); worst[gait]["hands_empty_all"] = all(r["hands_empty"] for r in rs)
         G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=yw + 90.0)); shot(f"horse14_side_{gait}", "1280x720"); yield from rwait(1.0)
     res["moving"] = worst
     res["seat_from_json_gallop"] = seat_from_json()
-    yield from press("F"); yield from rwait(1.5)
+    yield from press("F"); yield from rwait(4.5 if pack else 1.5)
     res["after_down"] = {"mounted": str(g.get_horse_state()).split("|")[2] == "1", "weapons_back": (not cb().are_ride_hands_empty()) == weapons_before,
                          "reins": str(g.get_rider_line())}
     # ---- in Brokenspire's streets
@@ -6061,12 +6319,21 @@ def step_horse14():
         except Exception: pass
     quiet(False)
     st_ = res["standing"]
+    if pack:
+        # (the pack's horse (2026-11-18): her pelvis on its rider's seat, her hands by its reins' ends (its rein sockets: the pack's own
+        # rider's clip holds them 25 cm off), its own reins (none drawn), her weapons put away)
+        # (moving, the pack's rider rises in the stirrups and the horse's back surges with its stride: within 15 cm of the seat at rest)
+        ride_ok = ("seat_err15" in st_ and st_["seat_err15"] < 6.0 and st_["hand15_l"] < 25.0 and st_["hand15_r"] < 25.0 and st_["hands_empty"] and st_["reins"] == 0
+                   and res["shown_at_hands"][0] == 0
+                   and all(w and w["seat_err15"] < 15.0 and w["hand15_l"] < 30.0 and w["hand15_r"] < 30.0 and w["reins_min"] == 0 and w["hands_empty_all"] for w in worst.values()))
+    else:
+        ride_ok = ("hand_l_cm" in st_ and abs(st_["seat_along_cm"]) < 4.0 and abs(st_["seat_up_cm"]) < 4.0
+                   and st_["hand_l_cm"] < 6.0 and st_["hand_r_cm"] < 6.0 and st_["hands_empty"] and st_["reins"] == 2
+                   and res["seat_from_json"][0] < 3.0 and abs(res["seat_from_json"][1]) < 3.0 and res["shown_at_hands"][0] == 0
+                   and all(w and w["seat_along_cm"] < 6.0 and w["hand_l_cm"] < 8.0 and w["hand_r_cm"] < 8.0 and w["reins_min"] == 2 and w["hands_empty_all"] for w in worst.values()))
     ok = (res["called_wilds_m"] is not None and res["called_wilds_m"] < 4.0 and res["left_behind_m"] and res["left_behind_m"] > 100.0
           and res["called_far_m"] is not None and res["called_far_m"] < 4.0 and res["calls"] == 2 and res["mark_minimap"] and res["mark_bigmap"]
-          and res["mounted"] and "hand_l_cm" in st_ and abs(st_["seat_along_cm"]) < 4.0 and abs(st_["seat_up_cm"]) < 4.0
-          and st_["hand_l_cm"] < 6.0 and st_["hand_r_cm"] < 6.0 and st_["hands_empty"] and st_["reins"] == 2
-          and res["seat_from_json"][0] < 3.0 and abs(res["seat_from_json"][1]) < 3.0 and res["shown_at_hands"][0] == 0
-          and all(w and w["seat_along_cm"] < 6.0 and w["hand_l_cm"] < 8.0 and w["hand_r_cm"] < 8.0 and w["reins_min"] == 2 and w["hands_empty_all"] for w in worst.values())
+          and res["mounted"] and ride_ok
           and not res["after_down"]["mounted"] and res["after_down"]["weapons_back"]
           and res["called_town_m"] is not None and res["called_town_m"] < 4.0)
     step_result("horse14", ok, **res)
@@ -6275,6 +6542,7 @@ STEPS = {"roads14": step_roads14, "density14": step_density14, "discover14": ste
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)
+STEPS["horse15"] = step_horse15
 SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
 def saves_snapshot():
     """the save folder's files and their bytes: put back at the end, the tests' own new saves deleted (PR #61's review)"""
