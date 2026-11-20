@@ -1,0 +1,126 @@
+{
+ "tag": "l15p4c",
+ "plan": [
+  "chapel15"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "chapel15",
+   "ok": true,
+   "chapels": [
+    {
+     "set": [
+      0,
+      0
+     ],
+     "room": 40,
+     "pews": 20
+    },
+    {
+     "set": [
+      1,
+      0
+     ],
+     "room": 21,
+     "pews": 5
+    },
+    {
+     "set": [
+      1,
+      0
+     ],
+     "room": 30,
+     "pews": 8
+    },
+    {
+     "set": [
+      -1,
+      0
+     ],
+     "room": 39,
+     "pews": 16
+    },
+    {
+     "set": [
+      0,
+      1
+     ],
+     "room": 23,
+     "pews": 10
+    },
+    {
+     "set": [
+      0,
+      1
+     ],
+     "room": 47,
+     "pews": 16
+    },
+    {
+     "set": [
+      0,
+      -1
+     ],
+     "room": 22,
+     "pews": 20
+    },
+    {
+     "set": [
+      1,
+      1
+     ],
+     "room": 14,
+     "pews": 2
+    },
+    {
+     "set": [
+      -1,
+      1
+     ],
+     "room": 47,
+     "pews": 0
+    },
+    {
+     "set": [
+      -1,
+      -1
+     ],
+     "room": 14,
+     "pews": 20
+    },
+    {
+     "set": [
+      -1,
+      -1
+     ],
+     "room": 15,
+     "pews": 14
+    },
+    {
+     "set": [
+      1,
+      -1
+     ],
+     "room": 27,
+     "pews": 20
+    },
+    {
+     "set": [
+      1,
+      -1
+     ],
+     "room": 42,
+     "pews": 2
+    }
+   ],
+   "pews": 153,
+   "bad": [],
+   "backrest_x": -26.7
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

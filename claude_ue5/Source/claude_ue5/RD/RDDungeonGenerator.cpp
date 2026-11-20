@@ -1939,7 +1939,13 @@ void ARDDungeonGenerator::Tick(float Dt)
 			auto Down = [&](const FKey& K) { return PC->IsInputKeyDown(K) ? 1.f : 0.f; };
 			const float N = Down(EKeys::Up) + Down(EKeys::Gamepad_DPad_Up) - Down(EKeys::Down) - Down(EKeys::Gamepad_DPad_Down);
 			const float E = Down(EKeys::Right) + Down(EKeys::Gamepad_DPad_Right) - Down(EKeys::Left) - Down(EKeys::Gamepad_DPad_Left);
-			MapPan += FVector2D(FMath::Clamp(N, -1.f, 1.f), FMath::Clamp(E, -1.f, 1.f)) * MapPanSpeed * Dt;
+			MapPan += FVector2D(FMath::Clamp(N, -1.f, 1.f), FMath::Clamp(E, -1.f, 1.f)) * MapPanSpeed * Dt / FMath::Max(bMapZoom15 ? MapZoom : 1.f, 0.1f);
+			// (the list of 2026-11-20 (item 8): the wheel, + and -, the right stick's up and down zoom it, as the town's map)
+			if (bMapZoom15)
+			{
+				MapZoom *= ReadMapZoomInput15(PC, Dt);
+				MapZoom = FMath::Clamp(MapZoom, FMath::Max(MapZoomMin15, 0.1f), FMath::Max(MapZoomMax15, MapZoomMin15));
+			}
 			if (MapPan.Size() > MapPanMax) MapPan = MapPan.GetSafeNormal() * MapPanMax;
 			if (PC->WasInputKeyJustPressed(EKeys::C) || PC->WasInputKeyJustPressed(EKeys::Gamepad_RightThumbstick)) CenterMap();
 		}

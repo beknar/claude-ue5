@@ -1628,7 +1628,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			// the draws are FurnishWalls' own, so nothing else moves)
 			TArray<FPlacedPiece> Placed;
 			FurnishWalls(R, Rm, { TEXT("Bookshelf"), TEXT("Bookshelf"), TEXT("Bookshelf2") }, 240.f, 0.9f, false, &Placed);
-			for (const FPlacedPiece& Pp : Placed) { FShelf Sh; Sh.At = Pp.At; Sh.Yaw = Pp.Yaw; Sh.Depth = Pp.Size.X; Sh.Room = RI; Shelves.Add(Sh); }
+			for (const FPlacedPiece& Pp : Placed) { FShelf Sh; Sh.At = Pp.At; Sh.Yaw = Pp.Yaw; Sh.Depth = Pp.Size.X; Sh.Room = RI; Shelves.Add(Sh); MakeShelfDoors15(Shelves.Num() - 1); }
 		}
 		for (const FVector& Q : Quads)
 		{
@@ -1656,6 +1656,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			+ (bAltarOnDoor ? (AltarSide < 2 ? FVector(0, 1, 0) : FVector(1, 0, 0)) * 450.f : FVector::ZeroVector);
 		const FVector Altar = Wall + Rt.RotateVector(FVector(160.f, 0, 0));
 		Center(TEXT("Altar"), Altar, Yaw, true, true);
+		FChapel15 Ch15; Ch15.Room = RI; Ch15.Altar = Altar;
 		const FRDPiece* Al = this->Pc(TEXT("Altar"));
 		Candles(Altar + FVector(0, 0, Al ? Al->Size.Z : 100.f) + Rt.RotateVector(FVector(0, -50, 0)), 30.f);
 		Candles(Altar + FVector(0, 0, Al ? Al->Size.Z : 100.f) + Rt.RotateVector(FVector(0, 50, 0)), 30.f);
@@ -1673,8 +1674,13 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			{
 				const FVector P = Altar + Rt.RotateVector(FVector(D, Sd * 270.f, 0));
 				if (!B.ExpandBy(-120.f).IsInside(FVector2D(P.X, P.Y)) || !LaneFree(Rm, P, 40.f)) continue;
-				Center(TEXT("Pew"), P, Yaw + 180.f);
+				// (the list of 2026-11-20 (item 11): 770 wrote the Pew's front as its backrest (-y), so this turn put every pew's back to
+				// the altar; its front is its seat's way now (770, and 934 pieces on the saved maps), and the turn faces the altar)
+				const float PewYaw = Yaw + 180.f;
+				Center(TEXT("Pew"), P, PewYaw);
+				Ch15.Pews.Add(FTransform(FRotator(0.f, PewYaw, 0.f), P));
 			}
+		Chapels15.Add(Ch15);
 		AddPieceAt(TEXT("CarpetLong"), (Altar + Ctr) * 0.5f + FVector(0, 0, 1), Yaw + 90.f, 1.f, true);
 		// chandeliers over the nave, candle stands along the side walls
 		for (const FVector& Q : Quads)
@@ -2018,7 +2024,7 @@ void ARDSection::BeginGenerate(ARDDungeonGenerator* InGenerator, FIntPoint InCoo
 	GenStart = FPlatformTime::Seconds();
 	Generator = InGenerator; Coord = InCoord; Seed = InSeed; bEditorBuilt = bEditorBuild;
 	bBuildStatic = true; bBuildInteractive = true;
-	NumInstances = 0; NumLights = 0; NextRoom = 0; NextCorr = 0; GenTicks = 0; FurnishMs = 0.0; AnvilPoints.Reset(); AnvilRoom = -1; Shelves.Reset(); ForgePoints.Reset(); AlchemistPoints.Reset(); LibrarianPoints.Reset(); if (!Generator || !Generator->bTown) TownOvens.Reset();
+	NumInstances = 0; NumLights = 0; NextRoom = 0; NextCorr = 0; GenTicks = 0; FurnishMs = 0.0; AnvilPoints.Reset(); AnvilRoom = -1; Shelves.Reset(); ShelfSwing15.Reset(); Chapels15.Reset(); ForgePoints.Reset(); AlchemistPoints.Reset(); LibrarianPoints.Reset(); if (!Generator || !Generator->bTown) TownOvens.Reset();
 	Theme = Generator->ThemeOf(Coord);
 	ThemeNames.Reset(); ThemeNamesOf = Theme;
 	GenR.Initialize(Seed);
@@ -2094,7 +2100,7 @@ bool ARDSection::ContinueGenerate(double Budget)
 	}
 	FurnishMs += (FPlatformTime::Seconds() - T0) * 1000.0;
 	if (NextRoom < Rooms.Num() || NextCorr < Corrs.Num()) return false;
-	EnsureAnvil(); EnsureForge(); EnsureTables14();
+	EnsureAnvil(); EnsureForge(); EnsureTables14(); EnsureOven15();
 	// the instanced furniture goes in at once (one rebuild per mesh instead of one per frame)
 	const double T1 = FPlatformTime::Seconds();
 	FlushInstances();
@@ -2165,7 +2171,7 @@ void ARDSection::ActivateForPlay()
 	// same plan as the editor build (same seed); only the interactive part is instantiated
 	bBuildStatic = false; bBuildInteractive = true;
 	ClearInteractive();
-	FirePoints.Reset(); AnvilPoints.Reset(); AnvilRoom = -1; Shelves.Reset(); ForgePoints.Reset(); AlchemistPoints.Reset(); LibrarianPoints.Reset();
+	FirePoints.Reset(); AnvilPoints.Reset(); AnvilRoom = -1; Shelves.Reset(); ShelfSwing15.Reset(); Chapels15.Reset(); ForgePoints.Reset(); AlchemistPoints.Reset(); LibrarianPoints.Reset();
 	if (!Generator->bTown) TownOvens.Reset();          // (PR #40's review: a dungeon's ovens are made again with its furniture; the town's plan resets its own)
 	Theme = Generator->ThemeOf(Coord);
 	ThemeNames.Reset(); ThemeNamesOf = Theme;
@@ -2196,7 +2202,7 @@ void ARDSection::ActivateForPlay()
 	bNoBlock = true;
 	for (int32 CI = 0; CI < Corrs.Num(); ++CI) DecorateCorridor(R, CI);
 	bNoBlock = false;
-	EnsureAnvil(); EnsureForge(); EnsureTables14();
+	EnsureAnvil(); EnsureForge(); EnsureTables14(); EnsureOven15();
 	NumInstances = Inst; NumLights = Lights;
 	bBuildStatic = true;
 	// (mistward: the monsters it had go first: RestartPlay activates the kept start set again, and every planned monster
@@ -2716,6 +2722,7 @@ void ARDSection::Tick(float Dt)
 	const FVector PL = Pawn ? Pawn->GetActorLocation() : FVector(1e9);
 	if (TownDummies.Num() > 0) TickTownDummies(Now);          // (the list of 2026-11-07: a struck dummy rocks)
 	if (HeavenCars.Num() > 0) TickHeavenCars(Dt, PL);          // (Heaven's traffic)
+	if (ShelfSwing15.Num() > 0) TickShelfDoors15(Dt);          // (the list of 2026-11-20: a searched shelf's doors swing open)
 	// cinematics: doors open by themselves in front of the tracked actor
 	if (Generator && Generator->TrackedActor && Generator->TrackedAutoDoorDistance > 0.f)
 		for (int32 I = 0; I < Doors.Num(); ++I)

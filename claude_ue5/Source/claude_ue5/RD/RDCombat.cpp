@@ -2295,8 +2295,9 @@ void URDCombatComponent::TickCasterInput(const APlayerController* PC)
 	if (Generator->bRogueControls)
 	{
 		// (the rogue: the wheel or Y switch weapons, the left mouse button or RB uses the one in her hands, B rolls)
-		if (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp)) NextWeapon(-1);
-		if (PC->WasInputKeyJustPressed(EKeys::MouseScrollDown) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Top)) NextWeapon(1);
+		// (the list of 2026-11-20: with the big map open the wheel zooms it, not her weapons)
+		if (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp) && !MapWheel15()) NextWeapon(-1);
+		if ((PC->WasInputKeyJustPressed(EKeys::MouseScrollDown) && !MapWheel15()) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Top)) NextWeapon(1);
 		if (PC->WasInputKeyJustPressed(EKeys::B) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Right)) StartRoll(FVector::ZeroVector);
 		// (mistward6: Q or LB, her stealth)
 		if (MaxDexEnergy > 0.f && (PC->WasInputKeyJustPressed(EKeys::Q) || PC->WasInputKeyJustPressed(EKeys::Gamepad_LeftShoulder))) StartStealth();
@@ -2319,8 +2320,8 @@ void URDCombatComponent::TickCasterInput(const APlayerController* PC)
 	// (with heroes to choose, random_dungeonmagic_level4: the wheel or Y switch between her weapons, as the Rogue's do)
 	if (Generator->Heroes.Num() > 0)
 	{
-		if (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp)) NextWeapon(-1);
-		if (PC->WasInputKeyJustPressed(EKeys::MouseScrollDown) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Top)) NextWeapon(1);
+		if (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp) && !MapWheel15()) NextWeapon(-1);
+		if ((PC->WasInputKeyJustPressed(EKeys::MouseScrollDown) && !MapWheel15()) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Top)) NextWeapon(1);
 	}
 	// the weapon in her hand: left mouse or RB. The spell: right mouse, E or LB: the one cast alongside the drawn weapon,
 	// or the drawn weapon itself when it is a spell (then the left mouse and RB cast it too)

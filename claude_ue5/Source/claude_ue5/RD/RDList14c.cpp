@@ -76,34 +76,13 @@ void ARDSection::EnsureTables14()
 	// drawn, so the rooms and their furniture stay; its tile is blocked, so in that one room a monster, trap or special thing placed
 	// after it may stand on another tile than before (PR #81's review). A town's are its buildings' (TownTables14))
 	if (!Generator || !Generator->bTables14 || TownBlds.Num() > 0 || AnvilRoom < 0 || !Rooms.IsValidIndex(AnvilRoom) || AnvilPoints.Num() == 0) return;
-	const FRoom& Rm = Rooms[AnvilRoom];
 	const int32 RI = AnvilRoom;
-	auto Free = [&](FIntPoint T) { return In(T) && Type[Idx(T)] == 1 && !Blocked[Idx(T)] && RoomAtLocal(T) == RI; };
 	const FVector An = AnvilPoints.Last();
+	// (the placement is ARDSection::PlaceNearAnchor15's, shared with the great hall's oven (RDList15c.cpp): the same rule as before)
 	auto Put = [&](FName Piece, TArray<FVector>& Points)
 	{
 		if (Points.ContainsByPredicate([this, RI](const FVector& F) { return RoomAt(F) == RI; })) return;
-		const FRDPiece* P = Pc(Piece);
-		if (!P) { UE_LOG(LogRDTables14, Warning, TEXT("RDTABLES14 no piece %s"), *Piece.ToString()); return; }
-		FIntPoint Pick(-1, -1); float PickD = MAX_flt;
-		for (int32 X = Rm.Min.X + 1; X < Rm.Max.X - 1; ++X)
-			for (int32 Y = Rm.Min.Y + 1; Y < Rm.Max.Y - 1; ++Y)
-			{
-				if (X == Rm.Lane.X || Y == Rm.Lane.Y) continue;
-				const FIntPoint T(X, Y);
-				if (!Free(T) || !Free(T + FIntPoint(1, 0)) || !Free(T + FIntPoint(-1, 0)) || !Free(T + FIntPoint(0, 1)) || !Free(T + FIntPoint(0, -1))) continue;
-				const float D = FVector::DistSquared2D(TileWorld(T), An);
-				if (D < PickD) { PickD = D; Pick = T; }
-			}
-		if (Pick.X < 0) { UE_LOG(LogRDTables14, Warning, TEXT("RDTABLES14 no room for the %s by the anvil (section %d,%d)"), *Piece.ToString(), Coord.X, Coord.Y); return; }
-		const FVector At = TileWorld(Pick);
-		// (its front, where she stands, toward the room's lane)
-		const FVector ToLane = FMath::Abs(Pick.X - Rm.Lane.X) > FMath::Abs(Pick.Y - Rm.Lane.Y) ? FVector(FMath::Sign((float)(Rm.Lane.X - Pick.X)), 0.f, 0.f) : FVector(0.f, FMath::Sign((float)(Rm.Lane.Y - Pick.Y)), 0.f);
-		const float Yaw = ToLane.Rotation().Yaw;
-		AddPieceAt(Piece, At, Yaw);
-		MarkBlocked(At, Yaw, FVector2D(P->Size.X, P->Size.Y));
-		// (AddPiece records it under bTables14; put by name here, it is a table whatever the names say)
-		if (!Points.ContainsByPredicate([&At](const FVector& F) { return FVector::Dist2D(F, At) < 10.f; })) Points.Add(At);
+		PlaceNearAnchor15(Piece, RI, An, Points);
 	};
 	Put(Generator->AlchemistPiece, AlchemistPoints);
 	if (Generator->bLibrarianInDungeon14) Put(Generator->LibrarianPiece, LibrarianPoints);

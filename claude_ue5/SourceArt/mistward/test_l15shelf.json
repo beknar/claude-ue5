@@ -1,0 +1,117 @@
+{
+ "tag": "l15shelf",
+ "plan": [
+  "list10b"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "list10b",
+   "ok": false,
+   "opened_before": [],
+   "opened_n": 1,
+   "port_band_nearest_m": 12.73,
+   "prisoner_cells": 35,
+   "prisoner": {
+    "room": 16,
+    "before": 0,
+    "after_minimap": 1,
+    "big_map": 1
+   },
+   "shelf_census": {
+    "1": {
+     "COMPONENT": 49,
+     "SCROLL": 51,
+     "TOME": 15
+    },
+    "2": {
+     "COMPONENT": 36,
+     "SCROLL": 57,
+     "TOME": 21,
+     "RECIPE": 5
+    },
+    "3": {
+     "COMPONENT": 40,
+     "RECIPE": 10,
+     "SCROLL": 55,
+     "TOME": 14
+    },
+    "4": {
+     "SCROLL": 48,
+     "RECIPE": 14,
+     "TOME": 21,
+     "COMPONENT": 45
+    },
+    "5": {
+     "SCROLL": 57,
+     "COMPONENT": 47,
+     "RECIPE": 8,
+     "TOME": 12
+    }
+   },
+   "shelf_bad": [
+    "t2:Draught of Swiftness Recipe:RECIPE:[2, 7, 12, 17, 22, 27]",
+    "t2:Draught of Swiftness Recipe:RECIPE:[2, 7, 12, 17, 22, 27]",
+    "t2:Elixir of Iron Hide Recipe:RECIPE:[2, 7, 12, 17, 22, 27]",
+    "t2:Draught of Swiftness Recipe:RECIPE:[2, 7, 12, 17, 22, 27]",
+    "t2:Hunter's Stew Recipe:RECIPE:[2, 7, 12, 17, 22, 27]",
+    "t3:Hunter's Stew Recipe:RECIPE:[2, 7, 12, 17, 22, 27]",
+    "t3:Elixir of Might Recipe:RECIPE:[3, 8, 13, 18, 23, 28]",
+    "t3:Honey Cake Recipe:RECIPE:[2, 7, 12, 17, 22, 27]",
+    "t3:Elixir of Iron Hide Recipe:RECIPE:[2, 7, 12, 17, 22, 27]",
+    "t3:Hunter's Stew Recipe:RECIPE:[2, 7, 12, 17, 22, 27]",
+    "t3:Feast Pie Recipe:RECIPE:[3, 8, 13, 18, 23, 28]",
+    "t3:Feast Pie Recipe:RECIPE:[3, 8, 13, 18, 23, 28]"
+   ],
+   "shelves_built": 135,
+   "shelf": {
+    "at": [
+     0,
+     0,
+     0
+    ],
+    "says": "search the bookshelf",
+    "f": "shelf",
+    "want": [
+     "Mutant Ichor"
+    ],
+    "got": {
+     "Mutant Ichor": 1
+    },
+    "again": "",
+    "searched": 1
+   },
+   "ports": {
+    "before": 0,
+    "after": 1,
+    "bosses": 2,
+    "lines": [
+     [
+      "2",
+      "-5850.0",
+      "-9750.0",
+      "0.0"
+     ]
+    ]
+   },
+   "port_from_boss_m": 10.91,
+   "port_same_room": true,
+   "port_says": "teleport back to the first room    [G] to Brokenspire",
+   "port_f": "teleport",
+   "to_first_room_m": 0.0,
+   "port_says_g": "teleport to Brokenspire    [G] the first room",
+   "port_f_g": "town",
+   "last_travel": "town"
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_l15shelf_l10b_prisoner_minimap.png",
+  "mw_l15shelf_l10b_prisoner_map.png",
+  "mw_l15shelf_l10b_shelf.png",
+  "mw_l15shelf_l10b_bossport.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

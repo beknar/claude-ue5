@@ -4824,7 +4824,8 @@ def step_list10b():
             for n in g.shelf_loot_of(sec, i):
                 k = kind_of(n); got[k] = got.get(k, 0) + 1
                 tr = tiers_of(n)
-                fits = ("SCROLL" in k or "TOME" in k or ("COMPONENT" in k and str(n) in parts)) and (not tr or min(tr) <= gt)
+                # (list 14's recipes (928) are found on the shelves too: a recipe of the tier or below)
+                fits = ("SCROLL" in k or "TOME" in k or "RECIPE" in k or ("COMPONENT" in k and str(n) in parts)) and (not tr or min(tr) <= gt)
                 if not fits: bad.append(f"t{t}:{n}:{k}:{tr}")
         census[t] = got
     res["shelf_census"] = census; res["shelf_bad"] = bad[:12]
@@ -6533,7 +6534,159 @@ def step_quick15():
     step_result("quick15", ok, **res)
 
 
-STEPS = {"summon15": step_summon15, "unwield15": step_unwield15, "quick15": step_quick15, "allies15": step_allies15, "arena15": step_arena15, "recipes14": step_recipes14, "tables14": step_tables14, "block14": step_block14, "horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
+def step_oven15():
+    """the list of 2026-11-20 (items 5 and 6): the great hall has a bread oven (in its room, apart from its anvil, forge and alchemist's
+    table: none within 1.5 m of another), F by it opens the oven's recipes; the minimap and the big map mark the oven (20), the
+    alchemist's table (21) and the forge (23) where they stand, the key lists them; pictures of the minimap and the big map"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    ctr = g.get_start_room_center(); S = g.get_section(I2(0, 0)); hall = S.room_at(ctr)
+    ovens = [o for o in g.get_all_ovens() if S.room_at(o) == hall]
+    forges = [f for f in g.get_all_forges() if S.room_at(f) == hall]
+    anvils = [a for a in S.get_anvil_points() if S.room_at(a) == hall]
+    res = {"hall": hall, "ovens": [[round(o.x), round(o.y)] for o in ovens], "forges": len(forges), "anvils": len(anvils)}
+    if not ovens: quiet(False); step_result("oven15", False, **res); return
+    ov = ovens[0]
+    res["least_gap_m"] = round(min([dist2(ov, x) for x in forges + anvils] or [999]) / 100, 2)          # (the tables' added from the map's marks below)
+    # (F by it: the oven's recipes)
+    end, yaw = clear_line(V(ov.x, ov.y, ctr.z), 0.0, 160.0)
+    stand = end or V(ov.x + 150, ov.y, ctr.z)
+    put(stand, math.degrees(math.atan2(ov.y - stand.y, ov.x - stand.x))); yield from wait(0.6)
+    res["says"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 260.0))
+    res["f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from rwait(0.4)
+    res["station"] = str(c.get_craft_station()); res["crafting"] = c.is_crafting_open()
+    if c.is_crafting_open(): c.set_crafting_open(False); yield from rwait(0.3)
+    # (the marks: the minimap as drawn, then the big map)
+    hud = G["pc"].get_hud(); yield from rwait(0.5)
+    def near(kind, at, marks): return any(int(v.z) == kind and math.hypot(v.x - at.x, v.y - at.y) < 60 for v in marks)
+    mini = list(hud.get_marks_drawn())
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-20, yaw=0)); shot("oven15_minimap"); yield from rwait(0.6)
+    yield from press("M"); yield from rwait(0.7)
+    big = list(hud.get_marks_drawn()); shot("oven15_bigmap"); yield from rwait(0.8); yield from press("M")
+    res["marks"] = {"oven_mini": near(20, ov, mini), "oven_big": near(20, ov, big), "kinds_big": sorted({int(v.z) for v in big if int(v.z) >= 20}),
+                    "forge_big": any(near(23, f, big) for f in forges)}
+    # (the gap to every other station of the hall, the tables' too, from the big map's marks: PR #96's review)
+    others = [v for v in big if int(v.z) in (21, 22, 23) and S.room_at(V(v.x, v.y, ctr.z)) == hall] + [V(a.x, a.y, 6) for a in anvils]
+    res["least_gap_m"] = round(min([math.hypot(v.x - ov.x, v.y - ov.y) for v in others] or [999]) / 100, 2)
+    quiet(False)
+    ok = (len(ovens) == 1 and res["least_gap_m"] >= 1.5 and "oven" in res["says"] and res["station"] == "Oven" and res["crafting"]
+          and res["marks"]["oven_mini"] and res["marks"]["oven_big"] and 21 in res["marks"]["kinds_big"] and (not forges or res["marks"]["forge_big"]))
+    step_result("oven15", ok, **res)
+
+def tier2_sets():
+    """the start set cleared and tier 2's sets made (as arena5 does): the sets made"""
+    g = G["gen"]
+    g.debug_clear_section(I2(0, 0), 0, V(0, 0, 0)); yield from wait(0.5)
+    made = []
+    for s_ in (I2(1, 0), I2(-1, 0), I2(0, 1), I2(0, -1), I2(1, 1), I2(-1, 1), I2(-1, -1), I2(1, -1)):
+        if g.is_tier_open(2) and not g.is_section_generated(s_): g.generate_section_now(s_); yield from built(s_)
+        if g.is_section_generated(s_): made.append(s_)
+    return made
+
+def step_shelf15():
+    """the list of 2026-11-20 (item 7): every library shelf has its two leaves, shut (their yaw the shelf's); one searched swings its
+    leaves open (the shelf's yaw +-105), the others stay shut; the shelf faces the room now (a line from its front at a book's height
+    meets the shelf's books, not its back panel); pictures before and after the search"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    sets = yield from tier2_sets()
+    sl = [str(l).split("|") for l in g.get_shelf_lines()]
+    res = {"shelves": len(sl)}
+    pick = next((p for p in sl if p[7] == "0"), None)
+    if not pick: quiet(False); step_result("shelf15", False, error="no shelf", **res); return
+    sec = I2(int(pick[0]), int(pick[1])); si = int(pick[2])
+    def doors():
+        out = {}
+        for x in str(g.get_shelf_doors15(sec)).split("|")[1:]:
+            q = x.split(":"); out[int(q[0])] = {"yaw": float(q[3]), "searched": q[4] == "1", "l": float(q[5]), "r": float(q[6])}
+        return out
+    def off(a, b): return abs((a - b + 180.0) % 360.0 - 180.0)
+    d0 = doors()
+    res["before"] = {"n": len(d0), "with_leaves": sum(1 for d in d0.values() if d["l"] > -900 and d["r"] > -900),
+                     "shut": sum(1 for d in d0.values() if off(d["l"], d["yaw"]) < 1 and off(d["r"], d["yaw"]) < 1)}
+    front = V(float(pick[8]), float(pick[9]), float(pick[5])); at = V(float(pick[3]), float(pick[4]), float(pick[5]))
+    yaw = math.degrees(math.atan2(at.y - front.y, at.x - front.x))
+    put(V(front.x + (front.x - at.x) * 1.2, front.y + (front.y - at.y) * 1.2, front.z), yaw); yield from wait(0.6)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=yaw)); yield from rwait(0.4); shot("shelf15_shut", "1280x720"); yield from rwait(0.6)
+    here = G["pawn"].get_actor_location(); res["says"] = str(g.describe_nearest(here, 260.0))
+    res["f"] = str(g.interact_nearest(here, 260.0)); yield from wait(0.2)
+    d_mid = doors().get(si, {}); res["mid_swing"] = {"l": d_mid.get("l"), "r": d_mid.get("r")}          # (swinging, not snapped: PR #96's review)
+    yield from wait(1.0)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=yaw)); yield from rwait(0.4); shot("shelf15_open", "1280x720"); yield from rwait(0.6)
+    d1 = doors(); me = d1.get(si, {})
+    res["searched"] = {"yaw": me.get("yaw"), "l": me.get("l"), "r": me.get("r"), "l_open": off(me.get("l", 0), me.get("yaw", 0) + 105), "r_open": off(me.get("r", 0), me.get("yaw", 0) - 105)}
+    res["others_shut"] = all(off(d["l"], d["yaw"]) < 1 and off(d["r"], d["yaw"]) < 1 for i, d in d1.items() if i != si and not d["searched"])
+    # (the shelf faces the room, measured on the cabinet itself (PR #96's review: a trace met the cabinet either way): its mesh's +Y,
+    # its open front with the shelves and books, against the way from the wall into the room (the shelf toward her front point))
+    cab = None
+    for a_ in GS.get_all_actors_of_class(G["w"], unreal.Actor):
+        if "Bookshelf" not in a_.get_class().get_name() or dist2(a_.get_actor_location(), at) > 60: continue
+        cab = next((c_ for c_ in a_.get_components_by_class(unreal.StaticMeshComponent) if c_.get_editor_property("static_mesh") and "Cabinet" in c_.get_editor_property("static_mesh").get_name()), None)
+        if cab: break
+    if cab:
+        fy = cab.get_right_vector(); into = V(front.x - at.x, front.y - at.y, 0.0); nn = math.hypot(into.x, into.y) or 1.0
+        res["front_dot"] = round((fy.x * into.x + fy.y * into.y) / nn, 3)
+    else: res["front_dot"] = None
+    quiet(False)
+    mid_l = res["mid_swing"]["l"]; ms = off(mid_l, me.get("yaw", 0)) if mid_l is not None else 0
+    ok = (res["before"]["n"] > 0 and res["before"]["with_leaves"] == res["before"]["n"] and res["before"]["shut"] == res["before"]["n"] and "shelf" in res["f"]
+          and res["searched"]["l_open"] < 2 and res["searched"]["r_open"] < 2 and res["others_shut"] and 5 < ms < 100
+          and (res["front_dot"] or 0) > 0.95)
+    step_result("shelf15", ok, **res)
+
+def step_chapel15():
+    """the list of 2026-11-20 (item 11): every chapel of the sets made: each pew's seat (away from its backrest, measured on its mesh) faces the altar's
+    wall within 10 degrees (the room's long way toward the altar), and its altar lies ahead of it"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    # (the seat's way measured on the Pew mesh as its Adjust lays it: its backrest (the top quarter's vertices) stands at the piece's
+    # -X or +X; the seat faces away from it. Not assumed from either frame (PR #96's review moved the Pew's front to its seat))
+    pc = g.get_editor_property("pieces")[unreal.Name("Pew")]; pm = pc.get_editor_property("mesh"); adj = pc.get_editor_property("adjust")
+    vs = []
+    for s in range(pm.get_num_sections(0)):
+        sec = unreal.ProceduralMeshLibrary.get_section_from_static_mesh(pm, 0, s); vs += [adj.transform_location(v) for v in sec[0]]
+    z0, z1 = min(v.z for v in vs), max(v.z for v in vs); hi = [v for v in vs if v.z > z0 + 0.75 * (z1 - z0)]
+    back_x = sum(v.x for v in hi) / max(len(hi), 1); seat_off = 180.0 if back_x > 0 else 0.0
+    sets = [I2(0, 0)] + (yield from tier2_sets())
+    chapels, bad, n = [], [], 0
+    for s_ in sets:
+        for ln in g.get_chapel_pews15(s_):
+            p = str(ln).split("|"); ax, ay = float(p[1]), float(p[2])
+            pews = [tuple(float(v) for v in q.split(":")) for q in p[3].split(";") if q]
+            for (px, py, yw) in pews:
+                n += 1
+                dx, dy = ax - px, ay - py
+                axis = math.degrees(math.atan2(0.0, math.copysign(1.0, dx))) if abs(dx) >= abs(dy) else math.degrees(math.atan2(math.copysign(1.0, dy), 0.0))
+                seat = yw + seat_off
+                err = abs((seat - axis + 180.0) % 360.0 - 180.0)
+                ahead = math.cos(math.radians(seat)) * dx + math.sin(math.radians(seat)) * dy > 0
+                if err > 10.0 or not ahead: bad.append([round(px), round(py), round(yw, 1), round(err, 1)])
+            chapels.append({"set": [s_.x, s_.y], "room": int(p[0]), "pews": len(pews)})
+    res = {"chapels": chapels, "pews": n, "bad": bad[:10], "backrest_x": round(back_x, 1)}
+    quiet(False)
+    step_result("chapel15", n > 0 and not bad, **res)
+
+def step_zoom15():
+    """the list of 2026-11-20 (item 8): the big map open, + zooms it in (its pixels a cm up by 1.25 a press), - out, the wheel too; her
+    mark stays at the view's middle (the view's middle unchanged); the wheel does not switch her weapon while it is open; pictures"""
+    c = yield from restart("Summoner"); g = G["gen"]; quiet(True)
+    ctr = g.get_start_room_center(); put(V(ctr.x + 300, ctr.y + 300, ctr.z), 0.0); yield from wait(0.4)
+    yield from press("M"); yield from rwait(0.6)
+    k0 = g.get_map_scale15(); w0 = c.get_weapon_index()
+    shot("zoom15_1x", "1280x720"); yield from rwait(0.6)
+    for _ in range(3): yield from press("Add"); yield from rwait(0.15)
+    k1 = g.get_map_scale15(); shot("zoom15_in", "1280x720"); yield from rwait(0.6)
+    for _ in range(6): yield from press("Subtract"); yield from rwait(0.15)
+    k2 = g.get_map_scale15()
+    yield from press("MouseScrollUp"); yield from rwait(0.3); k3 = g.get_map_scale15(); w3 = c.get_weapon_index()
+    shot("zoom15_out", "1280x720"); yield from rwait(0.6)
+    yield from press("M"); yield from rwait(0.3)
+    res = {"k": [round(k.x, 6) for k in (k0, k1, k2, k3)], "view": [[round(k.y), round(k.z)] for k in (k0, k1, k2, k3)], "weapon": [w0, w3], "zoom": round(g.get_editor_property("map_zoom"), 3)}
+    quiet(False)
+    r1, r2, r3 = k1.x / k0.x, k2.x / k0.x, k3.x / k2.x
+    res["ratios"] = [round(r1, 3), round(r2, 3), round(r3, 3)]
+    ok = abs(r1 - 1.25 ** 3) < 0.05 and abs(r2 - 1.25 ** -3) < 0.05 and abs(r3 - 1.25) < 0.03 and all(math.hypot(v[0] - res["view"][0][0], v[1] - res["view"][0][1]) < 30 for v in res["view"]) and w0 == w3
+    step_result("zoom15", ok, **res)
+
+
+STEPS = {"oven15": step_oven15, "shelf15": step_shelf15, "chapel15": step_chapel15, "zoom15": step_zoom15, "summon15": step_summon15, "unwield15": step_unwield15, "quick15": step_quick15, "allies15": step_allies15, "arena15": step_arena15, "recipes14": step_recipes14, "tables14": step_tables14, "block14": step_block14, "horsecall14": step_horsecall14, "log14": step_log14, "quick14": step_quick14, "rogue12": step_rogue12, "rogue12_smoke": lambda: step_rogue12(("SmokeBomb",)), "rogue12fx": step_rogue12fx, "list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
          "spells11_spells": lambda: step_spells11(("spells",)), "spells11_curses": lambda: step_spells11(("curses",)), "spells11_slashes": lambda: step_spells11(("slashes",)), "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
          "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "menulook": step_menulook, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,

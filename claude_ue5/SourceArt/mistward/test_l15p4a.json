@@ -1,0 +1,401 @@
+{
+ "tag": "l15p4a",
+ "plan": [
+  "oven15",
+  "shelf15",
+  "chapel15",
+  "zoom15",
+  "list10b",
+  "tables14"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "oven15",
+   "ok": true,
+   "hall": 24,
+   "ovens": [
+    [
+     -150,
+     -150
+    ]
+   ],
+   "forges": 1,
+   "anvils": 1,
+   "least_gap_m": 4.24,
+   "says": "bake at the oven",
+   "f": "oven",
+   "station": "Oven",
+   "crafting": true,
+   "marks": {
+    "oven_mini": true,
+    "oven_big": true,
+    "kinds_big": [
+     20,
+     21,
+     23
+    ],
+    "forge_big": true
+   }
+  },
+  {
+   "step": "shelf15",
+   "ok": true,
+   "shelves": 347,
+   "before": {
+    "n": 37,
+    "with_leaves": 37,
+    "shut": 37
+   },
+   "says": "search the bookshelf",
+   "f": "shelf",
+   "searched": {
+    "yaw": 0.0,
+    "l": 105.0,
+    "r": -105.0,
+    "l_open": 0.0,
+    "r_open": 0.0
+   },
+   "others_shut": true,
+   "front_hit": "SM_Prop_Cabinet_D"
+  },
+  {
+   "step": "chapel15",
+   "ok": true,
+   "chapels": [
+    {
+     "set": [
+      0,
+      0
+     ],
+     "room": 40,
+     "pews": 20
+    },
+    {
+     "set": [
+      1,
+      0
+     ],
+     "room": 31,
+     "pews": 16
+    },
+    {
+     "set": [
+      1,
+      0
+     ],
+     "room": 32,
+     "pews": 10
+    },
+    {
+     "set": [
+      -1,
+      0
+     ],
+     "room": 6,
+     "pews": 16
+    },
+    {
+     "set": [
+      -1,
+      0
+     ],
+     "room": 15,
+     "pews": 16
+    },
+    {
+     "set": [
+      0,
+      1
+     ],
+     "room": 7,
+     "pews": 14
+    },
+    {
+     "set": [
+      0,
+      1
+     ],
+     "room": 26,
+     "pews": 16
+    },
+    {
+     "set": [
+      0,
+      -1
+     ],
+     "room": 5,
+     "pews": 10
+    },
+    {
+     "set": [
+      0,
+      -1
+     ],
+     "room": 37,
+     "pews": 2
+    },
+    {
+     "set": [
+      1,
+      1
+     ],
+     "room": 15,
+     "pews": 10
+    },
+    {
+     "set": [
+      1,
+      1
+     ],
+     "room": 28,
+     "pews": 16
+    },
+    {
+     "set": [
+      -1,
+      1
+     ],
+     "room": 1,
+     "pews": 7
+    },
+    {
+     "set": [
+      -1,
+      1
+     ],
+     "room": 19,
+     "pews": 20
+    },
+    {
+     "set": [
+      -1,
+      -1
+     ],
+     "room": 1,
+     "pews": 0
+    },
+    {
+     "set": [
+      -1,
+      -1
+     ],
+     "room": 27,
+     "pews": 0
+    },
+    {
+     "set": [
+      1,
+      -1
+     ],
+     "room": 24,
+     "pews": 20
+    },
+    {
+     "set": [
+      1,
+      -1
+     ],
+     "room": 31,
+     "pews": 20
+    }
+   ],
+   "pews": 213,
+   "bad": []
+  },
+  {
+   "step": "zoom15",
+   "ok": true,
+   "k": [
+    0.148667,
+    0.290365,
+    0.076117,
+    0.095147
+   ],
+   "view": [
+    [
+     300,
+     300
+    ],
+    [
+     300,
+     300
+    ],
+    [
+     300,
+     300
+    ],
+    [
+     300,
+     300
+    ]
+   ],
+   "weapon": [
+    0,
+    0
+   ],
+   "zoom": 0.64,
+   "ratios": [
+    1.953,
+    0.512,
+    1.25
+   ]
+  },
+  {
+   "step": "list10b",
+   "ok": true,
+   "opened_before": [],
+   "opened_n": 1,
+   "port_band_nearest_m": 12.73,
+   "prisoner_cells": 35,
+   "prisoner": {
+    "room": 16,
+    "before": 0,
+    "after_minimap": 1,
+    "big_map": 1
+   },
+   "shelf_census": {
+    "1": {
+     "COMPONENT": 45,
+     "SCROLL": 51,
+     "TOME": 11
+    },
+    "2": {
+     "SCROLL": 56,
+     "COMPONENT": 56,
+     "TOME": 13,
+     "RECIPE": 7
+    },
+    "3": {
+     "SCROLL": 38,
+     "TOME": 17,
+     "COMPONENT": 48,
+     "RECIPE": 13
+    },
+    "4": {
+     "COMPONENT": 50,
+     "SCROLL": 45,
+     "RECIPE": 9,
+     "TOME": 16
+    },
+    "5": {
+     "SCROLL": 46,
+     "COMPONENT": 45,
+     "TOME": 15,
+     "RECIPE": 12
+    }
+   },
+   "shelf_bad": [],
+   "shelves_built": 184,
+   "shelf": {
+    "at": [
+     0,
+     0,
+     0
+    ],
+    "says": "search the bookshelf",
+    "f": "shelf",
+    "want": [
+     "Faint Essence",
+     "Faint Essence"
+    ],
+    "got": {
+     "Faint Essence": 2
+    },
+    "again": "",
+    "searched": 1
+   },
+   "ports": {
+    "before": 0,
+    "after": 1,
+    "bosses": 3,
+    "lines": [
+     [
+      "2",
+      "-5850.0",
+      "-9750.0",
+      "0.0"
+     ]
+    ]
+   },
+   "port_from_boss_m": 11.26,
+   "port_same_room": true,
+   "port_says": "teleport back to the first room    [G] to Brokenspire",
+   "port_f": "teleport",
+   "to_first_room_m": 0.0,
+   "port_says_g": "teleport to Brokenspire    [G] the first room",
+   "port_f_g": "town",
+   "last_travel": "town"
+  },
+  {
+   "step": "tables14",
+   "ok": true,
+   "switch": true,
+   "alchemist_tables": 1,
+   "librarian_tables": 0,
+   "table_from_anvil_m": 4.2,
+   "alchemist_offers": [
+    "Small Healing Potion",
+    "Medium Healing Potion",
+    "Small Mana Potion",
+    "Medium Mana Potion"
+   ],
+   "librarian_offers": [
+    "Scroll of Fire Bolt",
+    "Scroll of Dark Fire",
+    "Scroll of Ash Ward",
+    "Scroll of Frost Shard"
+   ],
+   "anvil_potions": [],
+   "anvil_scrolls": [],
+   "alchemist_not_potions": [],
+   "all_scroll_recipes": 36,
+   "says": "use the alchemist's table",
+   "f": "alchemist",
+   "station": "Alchemist",
+   "panel": [
+    "Medium Healing Potion",
+    "Medium Mana Potion",
+    "Small Healing Potion",
+    "Small Mana Potion"
+   ],
+   "brewed": true,
+   "potion": [
+    "Small Healing Potion",
+    0,
+    1
+   ],
+   "message": null,
+   "by_forge_says": "the forge (only the Warrior works it)",
+   "by_forge_m": [
+    1.1,
+    7.75
+   ],
+   "anvil_says": "use the anvil",
+   "anvil_f": "anvil",
+   "anvil_station": "None",
+   "anvil_panel_potions": [],
+   "anvil_panel_scrolls": [],
+   "anvil_panel": 7
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_l15p4a_oven15_minimap.png",
+  "mw_l15p4a_oven15_bigmap.png",
+  "mw_l15p4a_shelf15_shut.png",
+  "mw_l15p4a_shelf15_open.png",
+  "mw_l15p4a_zoom15_1x.png",
+  "mw_l15p4a_zoom15_in.png",
+  "mw_l15p4a_zoom15_out.png",
+  "mw_l15p4a_l10b_prisoner_minimap.png",
+  "mw_l15p4a_l10b_prisoner_map.png",
+  "mw_l15p4a_l10b_shelf.png",
+  "mw_l15p4a_l10b_bossport.png",
+  "mw_l15p4a_tables14_table.png",
+  "mw_l15p4a_tables14_panel.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

@@ -226,6 +226,7 @@ FString ARDDungeonGenerator::ShelfSearch(const FVector& From)
 	const ARDSection* S = PlayerCombat ? ShelfNear(From, I) : nullptr;
 	if (!S) return FString();
 	ShelvesSearched.Add(FIntVector(S->Coord.X, S->Coord.Y, I)); ++ShelvesSearchedCount;
+	const_cast<ARDSection*>(S)->OpenShelfDoors15(I);          // (the list of 2026-11-20: its doors swing open)
 	const TArray<FName> Got = ShelfLootOf(S->Coord, I);
 	TArray<FString> Names;
 	for (const FName& N : Got) if (FindItem(N) >= 0) { PlayerCombat->AddItem(N, 1); Names.Add(N.ToString()); }

@@ -910,6 +910,33 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bWildSummons15 = false;
 	/** the list of 2026-11-20 (item 14): a scroll her hero can read goes on the quick bar, read by it (934 quick) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bQuickScrolls15 = false;
+	// ---- the list of 2026-11-20's fourth phase (items 5, 6, 7, 8, 11; RDList15c.cpp), each set on the game's maps by 934 dungeon
+	/** a bread oven in the start set's great hall, by its anvil (item 5) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bStartOven15 = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FName OvenPiece15 = TEXT("BreadOven");
+	/** the ovens, the alchemist's and librarian's tables and the forges marked on the dungeon's maps and their key (item 6) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bStationMarks15 = false;
+	/** the big map zooms (item 8): the wheel, + and -, the right stick's up and down, between these */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bMapZoom15 = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float MapZoomMin15 = 0.4f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float MapZoomMax15 = 4.f;
+	/** a library's bookshelves have doors, open once searched (item 7): the leaves (934 shelves), their hinges in the piece's frame
+	 *  (x in front of its middle, y each side), how far they swing */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bShelfDoors15 = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TObjectPtr<UStaticMesh> ShelfDoorL15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TObjectPtr<UStaticMesh> ShelfDoorR15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FVector2D ShelfDoorHinge15 = FVector2D(18.58f, 66.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float ShelfDoorOpenDeg15 = 105.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float ShelfDoorSwingSeconds15 = 0.7f;
+	/** the zoom a big map's keys ask for this frame (the wheel, + and -, the right stick's up and down): its factor (1 none); the
+	 *  town's and the dungeon's maps both read it */
+	float ReadMapZoomInput15(APlayerController* PC, float Dt) const;
+	/** a test's: "<n>|<i>:<at x>:<at y>:<yaw>:<searched>:<left yaw>:<right yaw>|..." the shelves of a set and their doors */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") FString GetShelfDoors15(FIntPoint Section) const;
+	/** a test's: the pews of a set's chapels: "<room>|<altar x>|<altar y>|<pew x>:<pew y>:<yaw>;..." per chapel */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") TArray<FString> GetChapelPews15(FIntPoint Section) const;
+	/** a test's: the big map as last drawn: its pixels a cm, the view's middle (x, y) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FVector GetMapScale15() const { return FVector(MapXK, MapXVw.X, MapXVw.Y); }
 	/** allies brought into an arena (a test's count) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List15") int32 ArenaAlliesBrought15 = 0;
 	/** the arena's allies brought in beside her; the count */

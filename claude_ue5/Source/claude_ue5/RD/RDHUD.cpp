@@ -1079,6 +1079,15 @@ void ARDHUD::GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistan
 		// (level 5: the anvils she has seen, where repair items are made)
 		if (Gen->Recipes.Num() > 0)
 			for (const FVector& A : S->GetAnvilPoints()) if (Discovered(A)) Out.Add({ FVector2D(A), 6 });
+		// (the list of 2026-11-20 (item 6): the ovens, the alchemist's and librarian's tables and the forges she has seen, each its
+		// own mark (20 to 23, drawn by MistMark), the town's left to its own map)
+		if (Gen->bStationMarks15 && !Gen->bTown)
+		{
+			for (const FVector& A : S->TownOvens) if (Discovered(A)) Out.Add({ FVector2D(A), 20 });
+			for (const FVector& A : S->AlchemistPoints) if (Discovered(A)) Out.Add({ FVector2D(A), 21 });
+			for (const FVector& A : S->LibrarianPoints) if (Discovered(A)) Out.Add({ FVector2D(A), 22 });
+			for (const FVector& A : S->ForgePoints) if (Discovered(A)) Out.Add({ FVector2D(A), 23 });
+		}
 		// a hallway end on the section's border that leads where she has not been: the next section is not generated, or
 		// nothing of it is discovered (it is generated as she nears it, so "not generated" alone was hardly ever seen)
 		const FVector2D Mid = (FVector2D(Gen->SectionMinTile(S->Coord)) + FVector2D(Gen->SectionTiles * 0.5f)) * TS;
@@ -1164,6 +1173,44 @@ void ARDHUD::MistMark(int32 Kind, const FVector2D& S, float Sz)
 		// (mistward4: her ally, a green ring with a green middle: the monsters are red dots and orange triangles)
 		static const FLinearColor AllyC(0.35f, 1.f, 0.45f, 1.f);
 		SoftDot(S, Sz * 1.7f, RDTacA(AllyC, 0.3f)); Circle(Sz * 0.85f, AllyC, Sz * 0.28f); SoftDot(S, Sz * 0.45f, AllyC);
+		break;
+	}
+	case 20: case 21: case 22: case 23:
+	{
+		// (the list of 2026-11-20 (item 6): the stations, each on a glow of its own colour as the anvil's: 20 an oven (a dome with
+		// its fire), 21 the alchemist's table (a flask), 22 the librarian's (an open book), 23 a forge (a flame on its hearth))
+		static const FLinearColor Glow[4] = { FLinearColor(1.f, 0.45f, 0.15f, 0.95f), FLinearColor(0.35f, 0.95f, 0.45f, 0.95f), FLinearColor(0.45f, 0.65f, 1.f, 0.95f), FLinearColor(1.f, 0.25f, 0.12f, 0.95f) };
+		static const FLinearColor Ink(0.10f, 0.08f, 0.07f, 1.f), Pale(0.95f, 0.92f, 0.85f, 1.f), Fire(1.f, 0.78f, 0.25f, 1.f);
+		const float R = Sz * 1.6f;
+		SoftDot(S, R * 1.5f, FLinearColor(0.f, 0.f, 0.f, 0.5f));
+		SoftDot(S, R * 1.2f, Glow[Kind - 20]);
+		auto Poly = [&](std::initializer_list<FVector2D> Q, const FLinearColor& Fill, const FLinearColor& Edge)
+		{
+			TArray<FVector2D> V; FVector2D Mid(0.f, 0.f);
+			for (const FVector2D& X : Q) { V.Add(S + X * R); Mid += X; }
+			RDFan(this, S + Mid / (float)Q.size() * R, V, Fill, Edge);
+		};
+		if (Kind == 20)
+		{
+			Poly({ { -0.8f, 0.55f }, { -0.8f, 0.05f }, { -0.55f, -0.45f }, { 0.f, -0.65f }, { 0.55f, -0.45f }, { 0.8f, 0.05f }, { 0.8f, 0.55f } }, Ink, Ink);
+			Poly({ { -0.35f, 0.55f }, { -0.35f, 0.15f }, { 0.f, -0.08f }, { 0.35f, 0.15f }, { 0.35f, 0.55f } }, Fire, Fire);
+		}
+		else if (Kind == 21)
+		{
+			Poly({ { -0.18f, -0.75f }, { 0.18f, -0.75f }, { 0.18f, -0.2f }, { 0.7f, 0.6f }, { -0.7f, 0.6f }, { -0.18f, -0.2f } }, Ink, Ink);
+			Poly({ { -0.42f, 0.2f }, { 0.42f, 0.2f }, { 0.58f, 0.48f }, { -0.58f, 0.48f } }, FLinearColor(0.45f, 1.f, 0.55f, 1.f), FLinearColor(0.45f, 1.f, 0.55f, 1.f));
+		}
+		else if (Kind == 22)
+		{
+			Poly({ { -0.85f, -0.45f }, { -0.05f, -0.3f }, { -0.05f, 0.6f }, { -0.85f, 0.45f } }, Pale, Ink);
+			Poly({ { 0.05f, -0.3f }, { 0.85f, -0.45f }, { 0.85f, 0.45f }, { 0.05f, 0.6f } }, Pale, Ink);
+			DrawLine(S.X, S.Y - R * 0.35f, S.X, S.Y + R * 0.62f, Ink, FMath::Max(R * 0.12f, 1.f));
+		}
+		else
+		{
+			Poly({ { -0.85f, 0.45f }, { 0.85f, 0.45f }, { 0.7f, 0.75f }, { -0.7f, 0.75f } }, Ink, Ink);
+			Poly({ { -0.45f, 0.42f }, { -0.5f, 0.f }, { -0.15f, -0.35f }, { 0.f, -0.8f }, { 0.2f, -0.3f }, { 0.5f, 0.f }, { 0.45f, 0.42f } }, Fire, FLinearColor(0.9f, 0.3f, 0.05f, 1.f));
+		}
 		break;
 	}
 	default: break;
@@ -1325,7 +1372,8 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 	Board(TEXT("panel_wide"), A, B, Sc, 40.f * Sc);
 	// the vignette: the minimap's feathered dark disc stretched over the area (the board's leather shows in its corners)
 	if (UTexture2D* T = GetSoftDisc()) DrawTexture(T, C.X - Hf.X * 1.12f, C.Y - Hf.Y * 1.12f, Hf.X * 2.24f, Hf.Y * 2.24f, 0.f, 0.f, 1.f, 1.f, FLinearColor(0.004f, 0.005f, 0.007f, 0.9f), BLEND_Translucent);
-	const float K = (B.Y - A.Y) / (TacticalMapMeters * 100.f), TS = Gen->TileSize;
+	// (the list of 2026-11-20 (item 8): zoomed about the view's middle (her mark, or where the arrow keys moved it))
+	const float K = (B.Y - A.Y) / (TacticalMapMeters * 100.f) * (Gen->bMapZoom15 ? Gen->MapZoom : 1.f), TS = Gen->TileSize;
 	// (its middle: her, or where the arrow keys scrolled it)
 	const FVector Vw = L + FVector(Gen->MapPan.X, Gen->MapPan.Y, 0.f);
 	MapView = FVector2D(Vw.X, Vw.Y);
@@ -1478,7 +1526,16 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 	}
 	{
 		// (level 5: a line more, the sealed passages; another, the anvils)
-		float Y = B.Y - ((Gen->MaxTier > 0 ? 189.f : 166.f) + (Gen->Recipes.Num() > 0 ? 23.f : 0.f)) * Sc; const float X = A.X + 44.f * Sc;
+		// (the list of 2026-11-20: a line for each station the map has)
+		TArray<TPair<int32, const TCHAR*>> St15;
+		if (Gen->bStationMarks15 && !Gen->bTown)
+		{
+			if (Gen->bDungeonOvens) St15.Add({ 20, TEXT("oven: bake") });          // (where ovens bake: PR #96's review)
+			if (Gen->bTables14) St15.Add({ 21, TEXT("alchemist's table: potions") });
+			if (Gen->bTables14 && Gen->bLibrarianInDungeon14) St15.Add({ 22, TEXT("librarian's table: scrolls") });
+			if (Gen->bForge) St15.Add({ 23, TEXT("forge") });
+		}
+		float Y = B.Y - ((Gen->MaxTier > 0 ? 189.f : 166.f) + (Gen->Recipes.Num() > 0 ? 23.f : 0.f) + 23.f * St15.Num()) * Sc; const float X = A.X + 44.f * Sc;
 		UI.Text(TEXT("KEY"), Gold, X - 6.f * Sc, Y - 30.f * Sc, Small, Sc * 1.05f, ERDType::Label);
 		UI.Fit(TEXT("divider"), FVector2D(X - 14.f * Sc, Y - 14.f * Sc), FVector2D(X + 200.f * Sc, Y + 2.f * Sc));
 		auto Key = [&](int32 Kind, const TCHAR* What)
@@ -1486,6 +1543,7 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 			const FVector2D P(X + 6.f * Sc, Y + 8.f * Sc);
 			if (Kind == 0) SoftDot(P, 5.5f * Sc, RDTacRed); else if (Kind == 1) Triangle(P, 7.5f * Sc, RDTacElite); else if (Kind == 2) Star(P, 7.5f * Sc, RDTacGold);
 			else if (Kind == 3) Diamond(P, 6.5f * Sc, RDTacExit); else if (Kind == 5) SealMark(P, 6.f * Sc); else if (Kind == 6) AnvilMark(P, 9.f * Sc);
+			else if (Kind >= 20) MistMark(Kind, P, 5.6f * Sc);
 			else DrawLine(P.X - 7.f * Sc, P.Y, P.X + 7.f * Sc, P.Y, RDTacDoor, 2.5f * Sc);
 			UI.Text(What, Ink, X + 24.f * Sc, Y, Small, Sc);
 			Y += 23.f * Sc;
@@ -1493,6 +1551,7 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 		Key(0, TEXT("monster")); Key(1, TEXT("elite")); Key(2, TEXT("unlooted chest or trunk")); Key(3, TEXT("unexplored passage")); Key(4, TEXT("door"));
 		if (Gen->MaxTier > 0) Key(5, TEXT("sealed passage"));
 		if (Gen->Recipes.Num() > 0) Key(6, TEXT("anvil: make repair items"));
+		for (const TPair<int32, const TCHAR*>& Kv : St15) Key(Kv.Key, Kv.Value);
 		// (mistward: its own markers, a column of their own to the right of the key)
 		const bool bPrisonKey = Gen->PrisonerDefs.Num() > 0;
 		if (Gen->bBossEncounters || Gen->bRingGuards || Gen->bDropOnDeath || Gen->bTeleporters || Gen->Traps.Num() > 0 || Gen->bAllyMarkers || bPrisonKey)
@@ -1525,7 +1584,7 @@ void ARDHUD::DrawTacticalMap(float Sc, const FVector& L, float Yaw)
 	if (UI.Has(TEXT("panel_wide"))) { DrawPaintedMap(Sc, L, Yaw); return; }
 	UFont* Small = GEngine->GetSmallFont(); UFont* Medium = GEngine->GetMediumFont();
 	const FVector2D C(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
-	const float K = Canvas->ClipY / (TacticalMapMeters * 100.f), TS = Gen->TileSize;
+	const float K = Canvas->ClipY / (TacticalMapMeters * 100.f) * (Gen->bMapZoom15 ? Gen->MapZoom : 1.f), TS = Gen->TileSize;
 	const FVector Vw = L + FVector(Gen->MapPan.X, Gen->MapPan.Y, 0.f);       // (her, or where the arrow keys scrolled it)
 	MapView = FVector2D(Vw.X, Vw.Y);
 	auto ToS = [&](const FVector2D& W) { return C + FVector2D(W.Y - Vw.Y, -(W.X - Vw.X)) * K; };
