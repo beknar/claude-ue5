@@ -155,6 +155,9 @@ public:
 	/** the tenth phase: the places the lookouts' tops marked on her map, and the lookouts climbed */
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> WildMarked15;
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> WildLookoutsClimbed15;
+	/** the eleventh phase: the roamers she has seen (their rounds on her map) and slain (dead for the game, their rings given) */
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> RoamersSeen15;
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> RoamersSlain15;
 	/** where she comes into the town: "" the town square (a new game), "castle" the castle's door (back from the castle),
 	 *  "portal" before the Mistgate (tests) */
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString Arrive;

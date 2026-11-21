@@ -1,0 +1,26 @@
+{
+  "_": "the named roaming monsters (the list of 2026-11-20's eleventh phase, idea 3; 937_roamers15.py). names and epithets make a roamer's name ('<name> the <epithet>'); rings: the unique named rings a roamer drops once (items of weight 0 on every map of the game: never found anywhere else), each a copy of the strongest ring of its kind on the map, its amount times 'times'; chance: the share of the regions' cells with a roamer; tier_up: tiers over its region's; hp: its hit points' factor; round_seconds: once round its round; reach_m: how near she must be for one to be laid",
+  "names": ["Grimtooth", "Old Morrow", "Vexhollow", "Brannoc", "Skarra", "Uthgar", "Morwen", "Kael", "Drask", "Ylva", "Thorne", "Ghast", "Rhunn", "Orsk", "Malbrecht", "Sable"],
+  "epithets": ["Ravager", "Unbowed", "Hollow-Eyed", "Grey Stalker", "Bonebreaker", "Night Walker", "Storm-Born", "Devourer", "Ancient", "Wanderer", "Gloomhide", "Ironhide"],
+  "rings": [
+    {"name": "Grimfang's Band", "kind": "Health", "times": 1.5},
+    {"name": "Ashen Circlet", "kind": "Magic", "times": 1.5},
+    {"name": "Gloomhunter's Loop", "kind": "Dexterity", "times": 1.5},
+    {"name": "Ring of the Unbowed", "kind": "Health", "times": 1.7},
+    {"name": "Stormborn Signet", "kind": "Magic", "times": 1.7},
+    {"name": "Ravager's Knuckle", "kind": "Dexterity", "times": 1.7},
+    {"name": "Bonebreaker's Coil", "kind": "Health", "times": 1.6},
+    {"name": "Nightwalker's Seal", "kind": "Magic", "times": 1.6},
+    {"name": "Hollow-Eye Ring", "kind": "Dexterity", "times": 1.6},
+    {"name": "Wanderer's Token", "kind": "Health", "times": 1.4},
+    {"name": "Ironhide Band", "kind": "Health", "times": 1.8},
+    {"name": "Devourer's Ring", "kind": "Magic", "times": 1.8}
+  ],
+  "chance": 0.6,
+  "tier_up": 4,
+  "hp": 2.5,
+  "round_seconds": 900,
+  "reach_m": 900,
+  "road_tiers": true,
+  "maps": ["brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress", "caves", "martial_arts"]
+}

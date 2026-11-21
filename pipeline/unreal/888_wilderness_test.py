@@ -7231,6 +7231,143 @@ def step_night15():
           and res.get("camped") and len(res.get("smoke", [])) == 1 and 30 <= res["smoke"][0]["height_m"] <= 40)
     step_result("night15", ok, **res)
 STEPS["night15"] = step_night15
+def roamers15_lines(g, km=40.0):
+    out = []
+    for l in g.get_roamers15(km):
+        f = str(l).split("|")
+        out.append({"id": int(f[0]), "name": f[1], "kind": f[2], "tier": int(f[3]), "region_tier": int(f[4]), "when": int(f[5]), "c": (float(f[6]), float(f[7])), "radius": float(f[8]),
+                    "now": (float(f[9]), float(f[10])), "laid": f[11] == "1", "seen": f[12] == "1", "slain": f[13] == "1", "ring": f[14], "m": (float(f[15]) / 100.0, float(f[16]) / 100.0), "out": f[17] == "1"})
+    return out
+
+
+def step_roamers15():
+    """idea 3 (the list of 2026-11-20's eleventh phase): a named roamer out at all hours: its tier over its region's; laid as she comes
+    within 2.5 km of where it is on its round; it walks its round (it moves on with no one to hunt); seen within 150 m it is marked on her
+    map; slain, its ring is dropped and taken (in her things), it is not laid again, and a save and load keep it slain; a roamer of the
+    night is not out at noon and is at 23:00; the major roads coloured by their tier (the colour of each segment's tier, more than one band
+    within 40 km); a picture of the roamer and of the map"""
+    g = G["gen"]; res = {}; h0 = g.get_town_hour(); quiet(True)
+    try:
+        g.set_town_hour(12.0)
+        g.wild_put_her(9000.0, 3000.0); yield from wait_chunks(30, 50); ground_put(9000.0, 3000.0); yield from rwait(1.5)
+        rs = roamers15_lines(g); res["roamers_40km"] = len(rs); res["by_when"] = [sum(1 for r in rs if r["when"] == w) for w in range(3)]
+        me = G["pawn"].get_actor_location()
+        al = sorted([r for r in rs if r["when"] == 0 and not r["slain"]], key=lambda r: math.hypot(r["now"][0] - me.x / 100, r["now"][1] - me.y / 100))
+        if not al: step_result("roamers15", False, **res); return
+        r = al[0]; res["roamer"] = {k: r[k] for k in ("name", "kind", "tier", "region_tier", "radius", "ring")}
+        # (she comes within 400 m of where it is now)
+        nx, ny = r["now"]
+        g.wild_put_her(nx + 400.0, ny); yield from wait_chunks(30, 50); ground_put(nx + 400.0, ny); yield from rwait(3.0)
+        r1 = next(x for x in roamers15_lines(g) if x["id"] == r["id"])
+        res["laid"] = r1["laid"]
+        if r1["laid"]:
+            p0 = r1["m"]; yield from rwait(20.0)
+            r2 = next(x for x in roamers15_lines(g) if x["id"] == r["id"])
+            res["walked_m"] = round(math.hypot(r2["m"][0] - p0[0], r2["m"][1] - p0[1]), 1)
+            # (its home stays near it as it walks its round (PR #103's review: by the clock the home ran from it))
+            mh = [m for m in g.get_monsters() if not m.is_dead() and math.hypot(m.get_actor_location().x / 100 - r2["m"][0], m.get_actor_location().y / 100 - r2["m"][1]) < 5.0]
+            if mh:
+                # (copied: a struct read from Python is a view of the live value, and the first read moved with it: 0 m every time)
+                h_ = mh[0].get_editor_property("home_at"); ho = V(h_.x, h_.y, h_.z); yield from rwait(40.0)
+                h_ = mh[0].get_editor_property("home_at"); ho2 = V(h_.x, h_.y, h_.z); ml = mh[0].get_actor_location()
+                res["home_moved_m"] = round(dist2(ho, ho2) / 100.0, 1); res["from_home_m"] = round(dist2(ml, ho2) / 100.0, 1)
+            res["from_round_m"] = round(abs(math.hypot(r2["m"][0] - r2["c"][0], r2["m"][1] - r2["c"][1]) - r2["radius"]), 1)
+            # (seen: she stands 90 m from it, a picture of it)
+            mx, my = r2["m"]
+            g.wild_put_her(mx + 90.0, my); yield from wait_chunks(10, 10); ground_put(mx + 90.0, my); yield from rwait(2.5)
+            # (the camera at it where it is now from 35 m, her body hidden: it walks on, and from 90 m it was a speck)
+            rn = next(x for x in roamers15_lines(g) if x["id"] == r["id"])
+            ground_put(rn["m"][0] + 35.0, rn["m"][1]); yield from rwait(1.0)
+            rn = next(x for x in roamers15_lines(g) if x["id"] == r["id"]); me2 = G["pawn"].get_actor_location()
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=math.degrees(math.atan2(rn["m"][1] - me2.y / 100.0, rn["m"][0] - me2.x / 100.0))))
+            G["pawn"].set_actor_hidden_in_game(True); yield from rwait(1.0); shot("roamers15_roamer", "1280x720"); yield from rwait(1.0); G["pawn"].set_actor_hidden_in_game(False)
+            r3 = next(x for x in roamers15_lines(g) if x["id"] == r["id"])
+            res["seen"] = r3["seen"]
+            # (the map: its skull and the roads by tier)
+            g.set_map_open(True); yield from rwait(1.5); shot("roamers15_map", "1280x720"); yield from rwait(1.0); g.set_map_open(False)
+            # (slain)
+            ms = [m for m in g.get_monsters() if not m.is_dead() and math.hypot(m.get_actor_location().x / 100 - r3["m"][0], m.get_actor_location().y / 100 - r3["m"][1]) < 5.0]
+            res["found_actor"] = len(ms)
+            if ms:
+                ms[0].apply_damage(1e9, G["pawn"]); yield from rwait(2.0)
+                r4 = next(x for x in roamers15_lines(g) if x["id"] == r["id"])
+                res["slain"] = r4["slain"]
+                pile = ms[0].get_actor_location()
+                # (on the ground beside them: by the body's height she was put under the ground and the safety net took her away)
+                ground_put(pile.x / 100.0 + 0.8, pile.y / 100.0); yield from rwait(1.0)
+                res["prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 300.0))
+                n0 = cb().get_item_count(r["ring"])
+                # (its parts' harvest lies there too and the nearer pile takes F: F until both are taken)
+                res["f"] = []
+                for _k in range(3):
+                    res["f"].append(str(g.interact_nearest(G["pawn"].get_actor_location()))); yield from rwait(0.5)
+                    if cb().get_item_count(r["ring"]) > n0: break
+                res["ring_taken"] = cb().get_item_count(r["ring"]) - n0
+                # (away 4 km and back: not laid again)
+                g.wild_put_her(nx + 4000.0, ny); yield from wait_chunks(30, 50); yield from rwait(2.0)
+                r5 = next(x for x in roamers15_lines(g) if x["id"] == r["id"])
+                nx2, ny2 = r5["now"]
+                g.wild_put_her(nx2 + 300.0, ny2); yield from wait_chunks(30, 50); yield from rwait(3.0)
+                res["laid_again"] = next(x for x in roamers15_lines(g) if x["id"] == r["id"])["laid"]
+                # (the roads by tier: after the kill and before the save and load (after it, put by a road she stayed in Brokenspire and its own map opened))
+                pal = [(0.42, 0.78, 0.36), (0.92, 0.84, 0.30), (0.95, 0.55, 0.20), (0.88, 0.22, 0.18), (0.62, 0.32, 0.85), (0.18, 0.12, 0.16)]
+                segs = [str(l).split("|") for l in g.get_road_tiers15(40.0)]
+                bad = [s_ for s_ in segs if any(abs(float(s_[3 + k]) - pal[min(5, (int(s_[2]) - 1) // 5)][k]) > 0.02 for k in range(3))]
+                res["road_segments"] = len(segs); res["road_bands"] = sorted({(int(s_[2]) - 1) // 5 for s_ in segs}); res["road_colour_wrong"] = len(bad)
+                # (a picture of the map where two bands meet: at the first segment of the second band, the map shown whole and opened at 60 m a
+                # pixel (the fog hides what she has not seen), then put back)
+                sb = [s_ for s_ in segs if (int(s_[2]) - 1) // 5 == 1]
+                if sb:
+                    bx, by = float(sb[0][0]), float(sb[0][1])
+                    g.wild_put_her(bx, by); yield from wait_chunks(20, 30); ground_put(bx, by); yield from rwait(1.0)
+                    unreal.SystemLibrary.execute_console_command(G["w"], "rd.RevealMap")
+                    mpp0 = g.get_editor_property("wild_map_open_mpp")
+                    try:
+                        g.set_editor_property("wild_map_open_mpp", 60.0)
+                        g.set_map_open(True); yield from rwait(1.5); shot("roamers15_roads", "1280x720"); yield from rwait(1.0)
+                        # (what the map drew (PR #103's review: the colour read back from the map's own drawing, its tier read where it drew it)
+                        drawn = [str(l).split("|") for l in G["pc"].get_hud().get_roads_drawn15()]
+                        wrong = []
+                        for d_ in drawn[:400]:
+                            t_ = int(str(g.get_wild_sample_at(V(float(d_[0]) * 100, float(d_[1]) * 100, 0))).split("|")[14])
+                            want = pal[min(5, (t_ - 1) // 5)]
+                            if any(abs(float(d_[2 + k]) - want[k]) > 0.02 for k in range(3)): wrong.append(d_[:2] + [t_])
+                        res["map_drawn"] = len(drawn); res["map_wrong"] = len(wrong); res["map_bands"] = sorted({min(5, (int(str(g.get_wild_sample_at(V(float(d_[0]) * 100, float(d_[1]) * 100, 0))).split("|")[14]) - 1) // 5) for d_ in drawn[:400]})
+                        g.set_map_open(False)
+                    finally:
+                        g.set_editor_property("wild_map_open_mpp", mpp0); unreal.SystemLibrary.execute_console_command(G["w"], "rd.RevealMap off")
+                # (a save and load: still slain)
+                res["saved"] = g.save_game_now("save_roamers15", "test", "roamers15")
+                res["load"] = g.load_game_from("save_roamers15"); yield from until_loaded13(); yield from wait_ready(90)
+                g = G["gen"]; quiet(True)
+                g.wild_put_her(nx2 + 300.0, ny2); yield from wait_chunks(30, 50); yield from rwait(3.0)
+                r6 = next(x for x in roamers15_lines(g) if x["id"] == r["id"])
+                res["after_load"] = {"slain": r6["slain"], "laid": r6["laid"], "seen": r6["seen"]}
+        # (a roamer of the night)
+        g.wild_put_her(9000.0, 3000.0); yield from wait_chunks(30, 50); yield from rwait(1.0)
+        nr = [x for x in roamers15_lines(g) if x["when"] == 1 and not x["slain"]]
+        if nr:
+            n = nr[0]; res["night_roamer"] = n["name"]
+            g.set_town_hour(12.0); g.wild_put_her(n["now"][0] + 400.0, n["now"][1]); yield from wait_chunks(30, 50); yield from rwait(3.0)
+            res["night_at_noon"] = next(x for x in roamers15_lines(g) if x["id"] == n["id"])["laid"]
+            g.set_town_hour(23.0); yield from rwait(1.0)
+            nn = next(x for x in roamers15_lines(g) if x["id"] == n["id"])
+            g.wild_put_her(nn["now"][0] + 400.0, nn["now"][1]); yield from wait_chunks(30, 50); yield from rwait(3.0)
+            res["night_at_23"] = next(x for x in roamers15_lines(g) if x["id"] == n["id"])["laid"]
+    finally:
+        try: G["gen"].set_town_hour(h0); G["gen"].set_map_open(False); G["pawn"].set_actor_hidden_in_game(False)
+        except Exception: pass
+        quiet(False)
+        sf = os.path.join(SAVES, "save_roamers15.sav")
+        if os.path.isfile(sf): os.remove(sf)
+    rr = res.get("roamer", {})
+    ok = (rr and rr["tier"] >= min(rr["region_tier"] + 3, 30) and res.get("laid") and res.get("walked_m", 0) > 10 and res.get("from_round_m", 999) < 150
+          and res.get("seen") and res.get("slain") and res.get("ring_taken") == 1 and res.get("laid_again") is False
+          and res.get("after_load", {}).get("slain") and not res.get("after_load", {}).get("laid")
+          and ("night_roamer" not in res or (res["night_at_noon"] is False and res["night_at_23"] is True))
+          and res.get("map_drawn", 0) > 0 and res.get("map_wrong", 1) == 0 and len(res.get("map_bands", [])) >= 2 and res.get("home_moved_m", 0) > 20 and res.get("from_home_m", 999) < 90)
+    step_result("roamers15", ok, **res)
+STEPS["roamers15"] = step_roamers15
 SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
 def saves_snapshot():
     """the save folder's files and their bytes: put back at the end, the tests' own new saves deleted (PR #61's review)"""
