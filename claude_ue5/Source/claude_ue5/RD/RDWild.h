@@ -198,7 +198,17 @@ struct FRDWSample
 	uint8 FieldStage = 0;             // (the list of 2026-11-14: its field's stage (FRDWFarm::Stage))
 	// (the list of 2026-11-14: a dry channel's bed there (an arroyo, a creek bed, a slot canyon): 0-1 toward its middle, its kind)
 	float Chan = 0.f; int32 ChanKind = -1;
+	// (the list of 2026-11-20's seventh phase: a village's terrace there: 1 on its level ground, falling to 0 over its edge's band)
+	float Terrace = 0.f;
 };
+
+/** the list of 2026-11-20 (item 26, "cut flat ledges into the hillsides"): a village's level ground: a house's or its square's
+ *  rectangle (its middle, its turn: +X its front, toward the square; its half sizes) held at H (the natural ground at its middle) */
+struct FRDWPad { FVector2D C = FVector2D::ZeroVector; float Yaw = 0.f; FVector2D Half = FVector2D(8.f, 12.f); float H = 0.f; uint8 Kind = 0; };
+struct FRDWTerraces { FVector2D Mid = FVector2D::ZeroVector; double R = 0.0; int32 VillageId = -1; bool bHeights = false; TArray<FRDWPad> Pads; };
+/** while one is in scope on a thread, the ground is the land without the villages' terraces (a village is placed on it, and its pads'
+ *  heights read from it: no terrace may ask for itself) */
+struct FRDWNoTerrace { FRDWNoTerrace(); ~FRDWNoTerrace(); static bool On(); };
 
 /** a ground vertex as the ground material reads it: its colour (the lava in its alpha), UV0 the field rows' way and crop, UV1
  *  rock and snow, UV2 sand and mud, UV3 the road and the field's weight. One rule for the chunks (RDWildChunk.cpp) and the far
@@ -442,6 +452,36 @@ public:
 	 *  before Init (the generator's bPortWaterOpen): the port stands on its coast, its harbour open to the sea, and the land and
 	 *  sea round it are lifted so the sea is at the harbour's water (PortLift); its coast blends in wider (Blend) */
 	bool bPortSea = false;
+	// ---- the list of 2026-11-20's seventh phase (RDList15f.cpp): the villages' terraces (the generator's bVillageTerraces15), on only
+	// once Init has made the world (its roads are made from heights before every place is final)
+	bool bTerraces15 = false, bTerracesReady = false;
+	bool bTerraceGroundOff = false;          // (the probe's -NoTerraces: the villages placed and laid out the same, the ground left as the land)
+	/** how far from a village's middle its ways start (the list of 2026-11-20: past its outer ring of pads, 63 m, and the road bed's own
+	 *  easing: a bed run through the pads, the land's coarse height smoothed, stood up to 58 m off a mountain village's terraces) */
+	double VillageWayInsetM() const { return bTerraces15 ? 80.0 : 45.0; }
+	TMultiMap<FIntPoint, FVector2D> VillageDots15;          // (the villages' middles while the minor roads are made: ways keep 92 m clear of them)
+	static constexpr int32 VillageHousesMin = 8;
+	static constexpr int32 VillageHousesMax = 15;
+	static constexpr float TerraceMaxStepM = 7.f;
+	static constexpr float TerraceRampRun = 3.f;          // (a door side's earth ramp: metres along for a metre up)          // (a village whose pads would stand more than this off the land is not placed)
+	/** a village's pads (no heights): its square, then 8 to 15 of its 15 slots (seven on a ring at 33 m, eight at 55 m, facing the
+	 *  square) where a house can stand (the land within TerraceMaxStepM of the pad's middle over it, no water), in order; the number
+	 *  of slots that can (from the place's own hash: its count and jitters drawn whatever the land) */
+	int32 VillageSlots(const FRDWildPlace& V, TArray<FRDWPad>* Out) const;
+	/** the terraces of the village of the place cell holding (X, Y), worked out once a cell (null where none) */
+	TSharedPtr<const FRDWTerraces> TerracesAt(double X, double Y) const;
+	/** the cell's village's terraces recorded where the village is placed (PlacesInCell), so the pads are those its placing tested:
+	 *  the places are made during Init, before the minor roads whose beds change the ground (worked out afterwards, two of six
+	 *  villages placed had no pads) */
+	void StoreTerraces(FIntPoint Cell, const FRDWildPlace* V) const;
+	/** the ground with no terraces, before the port's lift (Feature's frame) */
+	float NaturalHeight(double X, double Y) const;
+	/** where a pad's height is read: a house's front door's edge, the square's middle */
+	static FVector2D PadRef(const FRDWPad& Pd);
+	/** a sample's height with the terraces: H on a pad, eased to the land over its band (longer where a road comes in); Terrace 0-1 */
+	float ApplyTerrace(double X, double Y, float H, float RoadW, float& Terrace) const;
+	struct FTerraceCache { FCriticalSection Lock; TMap<FIntPoint, TSharedPtr<const FRDWTerraces>> Cells; };
+	TSharedPtr<FTerraceCache> TerraceCache = MakeShared<FTerraceCache>();
 	FVector2D PortSite = FVector2D(1e12, 1e12);
 	float PortLiftM = 0.f;
 	/** how much the land and the sea are lifted at a point (metres): PortLiftM within 2.5 km of the port, easing to 0 by 40 km */

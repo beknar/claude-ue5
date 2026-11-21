@@ -30,6 +30,8 @@ Parts (args):
   hearth          the sixth phase's item 22 on every map of the game: the kit fireplace's flat flame cards (slot 4) hidden in a copy
                   (SM_Kit_Fireplace15, M_RD15_Hidden in the slot) that the "Fireplace" piece points at, and Hearthvale's
                   NS_Fireplace_Low at every hearth (bHearth15, HearthFx15; screened by 884 hearthfx15: P_TorchFire drew nothing there).
+  terrace         the seventh phase (items 26, 29) on brokenspire: the villages' houses and square on level pads cut into the slope,
+                  their retaining walls and buttresses, 8 to 15 houses (bVillageTerraces15; the world's version 6).
   dungeon         the fourth phase (items 5, 6, 8, 11): the great hall's oven (bStartOven15), the stations' marks (bStationMarks15),
                   the big map's zoom (bMapZoom15) on every map of the game (the pews by 770's Pew and the shelves part); each
                   dungeon map's start section built again (its oven and its shelves saved).
@@ -45,7 +47,7 @@ REPORT = []
 MAPS = "/Game/RandomDungeon/Maps/"
 # (the maps of the game the Summoner plays: martial_arts is the Martial Artist's alone)
 GAME_MAPS = ("brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress")
-PARTS = ("allies", "summons", "hands", "quick", "shelves", "dungeon", "items", "town", "hearth")
+PARTS = ("allies", "summons", "hands", "quick", "shelves", "dungeon", "items", "town", "hearth", "terrace")
 args = [a for a in sys.argv[1:] if a in PARTS] or [p for p in PARTS if p != "shelves"]          # (shelves needs its folder: named only)
 SA = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "SourceArt")
 DUNGEONS = ("war_engine", "sewers", "kethrys_spire", "heaven_fortress")
@@ -320,6 +322,14 @@ def hearth(g, m):
     g.set_editor_property("hearth_fx15", HEARTH["fx"]); g.set_editor_property("hearth_hide_mat15", HEARTH["hid"]); g.set_editor_property("hearth15", True)
     back = g.get_editor_property("pieces").get(unreal.Name("Fireplace"))
     return {"fireplace": back.get_editor_property("mesh").get_name() if back else None, "fx": g.get_editor_property("hearth_fx15").get_name()}
+
+
+def terrace(g, m):
+    g.set_editor_property("village_terraces15", True)
+    return {"village_terraces15": g.get_editor_property("village_terraces15")}
+
+
+if "terrace" in args: each(("brokenspire",), terrace, "terrace")
 
 
 if "hearth" in args:

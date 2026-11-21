@@ -1,0 +1,176 @@
+{
+ "seed": 24680,
+ "probe": "RDWildProbe -Half=90 -Step=1, with and without -NoTerraces",
+ "villages_with": 2492,
+ "villages_without": 2757,
+ "villages": [
+  {
+   "grid": [
+    181,
+    788.4,
+    8153.4,
+    1.0
+   ],
+   "village": {
+    "id": 328336,
+    "name": "Blackton",
+    "x": 878.4,
+    "y": 8243.4,
+    "houses": 10
+   },
+   "ok": true,
+   "pads": 11,
+   "houses": 10,
+   "new_steps": 265,
+   "on_edge": 265,
+   "off_edge_n": 0,
+   "largest_edge_step_m": 8.84,
+   "far_diff_m": 0.0,
+   "land_range_under_pads_m": 10.19,
+   "doors_reached": 10,
+   "doors": 10,
+   "out_of_the_village": true,
+   "walkable_samples": 31672
+  },
+  {
+   "grid": [
+    181,
+    -5568.3,
+    -5955.0,
+    1.0
+   ],
+   "village": {
+    "id": 279072,
+    "name": "Elmwick",
+    "x": -5478.3,
+    "y": -5865.0,
+    "houses": 11
+   },
+   "ok": true,
+   "pads": 12,
+   "houses": 11,
+   "new_steps": 31,
+   "on_edge": 31,
+   "off_edge_n": 0,
+   "largest_edge_step_m": 2.63,
+   "far_diff_m": 0.0,
+   "land_range_under_pads_m": 3.48,
+   "doors_reached": 11,
+   "doors": 11,
+   "out_of_the_village": true,
+   "walkable_samples": 31797
+  },
+  {
+   "grid": [
+    181,
+    -4608.3,
+    -7871.4,
+    1.0
+   ],
+   "village": {
+    "id": 279056,
+    "name": "Marshford",
+    "x": -4518.3,
+    "y": -7781.4,
+    "houses": 9
+   },
+   "ok": true,
+   "pads": 10,
+   "houses": 9,
+   "new_steps": 47,
+   "on_edge": 47,
+   "off_edge_n": 0,
+   "largest_edge_step_m": 2.94,
+   "far_diff_m": 0.0,
+   "land_range_under_pads_m": 3.65,
+   "doors_reached": 9,
+   "doors": 9,
+   "out_of_the_village": true,
+   "walkable_samples": 31982
+  },
+  {
+   "grid": [
+    181,
+    3030.5,
+    7990.5,
+    1.0
+   ],
+   "village": {
+    "id": 344720,
+    "name": "Mistwell",
+    "x": 3120.5,
+    "y": 8080.5,
+    "houses": 8
+   },
+   "ok": true,
+   "pads": 9,
+   "houses": 8,
+   "new_steps": 159,
+   "on_edge": 159,
+   "off_edge_n": 0,
+   "largest_edge_step_m": 6.76,
+   "far_diff_m": 0.0,
+   "land_range_under_pads_m": 10.86,
+   "doors_reached": 8,
+   "doors": 8,
+   "out_of_the_village": true,
+   "walkable_samples": 31602
+  },
+  {
+   "grid": [
+    181,
+    -7467.3,
+    -6054.9,
+    1.0
+   ],
+   "village": {
+    "id": 262688,
+    "name": "Oakford",
+    "x": -7377.3,
+    "y": -5964.9,
+    "houses": 13
+   },
+   "ok": true,
+   "pads": 14,
+   "houses": 13,
+   "new_steps": 202,
+   "on_edge": 202,
+   "off_edge_n": 0,
+   "largest_edge_step_m": 5.93,
+   "far_diff_m": 0.0,
+   "land_range_under_pads_m": 7.07,
+   "doors_reached": 13,
+   "doors": 13,
+   "out_of_the_village": true,
+   "walkable_samples": 31600
+  },
+  {
+   "grid": [
+    181,
+    9307.3,
+    -42.0,
+    1.0
+   ],
+   "village": {
+    "id": 393808,
+    "name": "Thornwick",
+    "x": 9397.3,
+    "y": 48.0,
+    "houses": 14
+   },
+   "ok": true,
+   "pads": 15,
+   "houses": 14,
+   "new_steps": 53,
+   "on_edge": 53,
+   "off_edge_n": 0,
+   "largest_edge_step_m": 2.43,
+   "far_diff_m": 0.0,
+   "land_range_under_pads_m": 3.01,
+   "doors_reached": 14,
+   "doors": 14,
+   "out_of_the_village": true,
+   "walkable_samples": 31517
+  }
+ ]
+}

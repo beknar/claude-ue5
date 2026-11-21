@@ -49,7 +49,8 @@ int32 URDWildProbeCommandlet::Main(const FString& Params)
 
 	FRDWildWorld W;
 	W.bPortSea = Gen->bPortWaterOpen && !FParse::Param(*Params, TEXT("NoPortSea"));   // (the level's own world: the port's open sea, the list of 2026-11-11; -NoPortSea: as before it)
-	W.ChannelRules = Gen->WildChannelRules;          // (the list of 2026-11-14: the dry channels cut into the land, as the game's)
+	W.ChannelRules = Gen->WildChannelRules;
+	W.bTerraces15 = Gen->bVillageTerraces15; W.bTerraceGroundOff = FParse::Param(*Params, TEXT("NoTerraces"));          // (the list of 2026-11-20; -NoTerraces: as before it)          // (the list of 2026-11-14: the dry channels cut into the land, as the game's)
 	W.Init(Seed, Gen->WildBiomes);
 	UE_LOG(LogRDWildProbe, Display, TEXT("RDWILDPROBE the world made: seed %u, %d biomes, %d towns, %d roads, %d channels, %d crossroads, %.2f s"), Seed, W.Biomes.Num(), W.Towns.Num(), W.Roads.Num(), W.Channels.Num(), W.Crossroads.Num(), W.InitSeconds);
 	for (const FVector2D& Q : W.Crossroads) UE_LOG(LogRDWildProbe, Display, TEXT("RDWILDPROBE crossroads at (%.0f, %.0f)"), Q.X, Q.Y);
@@ -94,6 +95,23 @@ int32 URDWildProbeCommandlet::Main(const FString& Params)
 		for (const FRDWildPlace& P : Fs) Info += FString::Printf(TEXT("farmstead|%d|%s|%.1f|%.1f|%.1f\n"), P.Id, *P.Name, P.At.X, P.At.Y, P.Yaw);
 	}
 	if (W.FarmsBiome >= 0) for (const FRDWildCrop& Cr : W.Biomes[W.FarmsBiome].Crops) Info += FString::Printf(TEXT("crop|%s|%.1f\n"), *Cr.Name, Cr.Weight);
+	// (the list of 2026-11-20: the villages' pads in the window, "pad|<village>|kind|x|y|yaw|halfx|halfy|h" (metres); with -NoTerraces
+	// the pads the village would have, read from the same layout, so a run without can be compared with one with)
+	{
+		const int32 C0x = W.PlaceCellOf(X0, Y0).X, C0y = W.PlaceCellOf(X0, Y0).Y, C1x = W.PlaceCellOf(X0 + 2.0 * Half, Y0 + 2.0 * Half).X, C1y = W.PlaceCellOf(X0 + 2.0 * Half, Y0 + 2.0 * Half).Y;
+		for (int32 Ci = C0x; Ci <= C1x; ++Ci)
+			for (int32 Cj = C0y; Cj <= C1y; ++Cj)
+			{
+				TArray<FRDWildPlace> Ps; W.PlacesIn(FIntPoint(Ci, Cj), Ps);
+				for (const FRDWildPlace& P : Ps)
+				{
+					if (P.Kind != TEXT("village")) continue;
+					TArray<FRDWPad> Pads; if (const TSharedPtr<const FRDWTerraces> Tt = W.TerracesAt(P.At.X, P.At.Y)) Pads = Tt->Pads; else W.VillageSlots(P, &Pads);
+					Info += FString::Printf(TEXT("village|%d|%s|%.1f|%.1f|%d\n"), P.Id, *P.Name, P.At.X, P.At.Y, Pads.Num() - 1);
+					for (const FRDWPad& Pd : Pads) Info += FString::Printf(TEXT("pad|%d|%d|%.2f|%.2f|%.2f|%.1f|%.1f|%.2f\n"), P.Id, Pd.Kind, Pd.C.X, Pd.C.Y, Pd.Yaw, Pd.Half.X, Pd.Half.Y, Pd.H != 0.f ? Pd.H : W.NaturalHeight(Pd.C.X, Pd.C.Y));
+				}
+			}
+	}
 	bOk &= FFileHelper::SaveStringToFile(Info, *(Out / TEXT("info.txt")));
 
 	// (-Places: every place of the continent as the game makes them, cell by cell (PlacesIn: the towns, the quests' places, the
@@ -116,6 +134,8 @@ int32 URDWildProbeCommandlet::Main(const FString& Params)
 		Count.KeySort(TLess<FString>());
 		for (const TPair<FString, int32>& C : Count) { Head += FString::Printf(TEXT("count|%s|%d\n"), *C.Key, C.Value); UE_LOG(LogRDWildProbe, Display, TEXT("RDWILDPROBE places %s %d"), *C.Key, C.Value); }
 		bOk &= FFileHelper::SaveStringToFile(Head + Txt, *(Out / TEXT("places.txt")));
+		{ extern int32 GRDW15Refused[3]; extern int32 GRDW15SlotHist[16]; UE_LOG(LogRDWildProbe, Display, TEXT("RDWILDPROBE villages refused: road %d, square %d, slope %d"), GRDW15Refused[0], GRDW15Refused[1], GRDW15Refused[2]);
+		FString Hs; for (int32 Q = 0; Q < 16; ++Q) Hs += FString::Printf(TEXT(" %d"), GRDW15SlotHist[Q]); UE_LOG(LogRDWildProbe, Display, TEXT("RDWILDPROBE slots buildable 0..15:%s"), *Hs); }
 	}
 
 	// (the points: what each is made of)
@@ -130,7 +150,7 @@ int32 URDWildProbeCommandlet::Main(const FString& Params)
 			int32 Bi[4]; float Wt[4]; FVector2D Si[4];
 			const int32 M = W.Blend(Px, Py, Bi, Wt, Si);
 			FRDWSample S; W.Sample(Px, Py, S, true, 2.f);
-			Txt += FString::Printf(TEXT("point|%.2f|%.2f|base %.3f|height %.3f|sample %.3f|continent %.4f|regions %d"), Px, Py, W.BaseHeight(Px, Py), W.Height(Px, Py), S.H, W.Continent(Px, Py), M);
+			Txt += FString::Printf(TEXT("point|%.2f|%.2f|base %.3f|height %.3f|sample %.3f|natural %.3f|road %.3f|terrace %.2f|continent %.4f|regions %d"), Px, Py, W.BaseHeight(Px, Py), W.Height(Px, Py), S.H, W.NaturalHeight(Px, Py), S.Road, S.Terrace, W.Continent(Px, Py), M);
 			for (int32 Q = 0; Q < M; ++Q) Txt += FString::Printf(TEXT("|%s %.4f at (%.0f, %.0f)"), *W.BiomeName(Bi[Q]), Wt[Q], Si[Q].X, Si[Q].Y);
 			Txt += TEXT("\n");
 		}

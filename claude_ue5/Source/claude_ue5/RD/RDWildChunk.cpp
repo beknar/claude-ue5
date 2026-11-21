@@ -258,7 +258,7 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 					if (F.Clump > 0.f) Wb *= RDWCSmooth(-0.1f, 0.35f, FRDWildWorld::Fbm(X0 + Lx, Y0 + Ly, 1.0 / 60.0, 2, Hs + 3u)) * F.Clump + (1.f - F.Clump);
 					// (the list of 2026-11-11: a meadow's trees in clusters and strips, its clearings bare)
 					if (F.Grove > 0.f) Wb *= FMath::Lerp(1.f, W.Grove(X0 + Lx, Y0 + Ly), FMath::Clamp(F.Grove, 0.f, 1.f));
-					if (Q.Road > 0.15f || (Q.Snow > 0.85f && !bTree && F.Kind != TEXT("rock") && F.Kind != TEXT("ice"))) continue;
+					if (Q.Road > 0.15f || Q.Terrace > 0.f || (Q.Snow > 0.85f && !bTree && F.Kind != TEXT("rock") && F.Kind != TEXT("ice"))) continue;
 					if (Clears.Num() > 0 && InClear(X0 + Lx, Y0 + Ly)) continue;
 					if (bCrop ? Q.Field < 0.5f : (Q.Field > 0.3f && F.Kind != TEXT("rock"))) continue;
 					// (a farmstead's yard: its grass only (its house, barn and paddock stand there))
@@ -334,7 +334,7 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 					if (Lx < 0.0 || Ly < 0.0 || Lx >= Cm || Ly >= Cm) continue;
 					int32 I, J; Nearest(Lx, Ly, I, J);
 					const FRDWSample& Q = Sat(I, J);
-					if (Q.FieldCell != Kv.Key || Q.Field < 0.5f || Q.Road > 0.1f || Q.WaterKind) continue;
+					if (Q.FieldCell != Kv.Key || Q.Field < 0.5f || Q.Road > 0.1f || Q.WaterKind || Q.Terrace > 0.f) continue;
 					// (the list of 2026-11-08b: the strips divided by their furrows: none sown within 0.8 m of a strip's edge, from
 					// the plant's own place (the samples are 2 m apart))
 					if (Q.StripW > 0.f)
