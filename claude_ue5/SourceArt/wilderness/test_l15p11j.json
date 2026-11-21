@@ -1,5 +1,5 @@
 {
- "tag": "l15p11e",
+ "tag": "l15p11j",
  "plan": [
   "roamers15"
  ],
@@ -8,10 +8,10 @@
   {
    "step": "roamers15",
    "ok": true,
-   "roamers_40km": 46,
+   "roamers_40km": 45,
    "by_when": [
     29,
-    7,
+    6,
     10
    ],
    "roamer": {
@@ -23,8 +23,10 @@
     "ring": "Stormborn Signet"
    },
    "laid": true,
-   "walked_m": 17.9,
-   "from_round_m": 9.5,
+   "walked_m": 34.1,
+   "home_moved_m": 67.4,
+   "from_home_m": 64.5,
+   "from_round_m": 2.5,
    "seen": true,
    "found_actor": 1,
    "slain": true,
@@ -34,6 +36,19 @@
    ],
    "ring_taken": 1,
    "laid_again": false,
+   "road_segments": 1004,
+   "road_bands": [
+    0,
+    1,
+    2
+   ],
+   "road_colour_wrong": 0,
+   "map_drawn": 377,
+   "map_wrong": 0,
+   "map_bands": [
+    0,
+    1
+   ],
    "saved": true,
    "load": true,
    "after_load": {
@@ -43,20 +58,14 @@
    },
    "night_roamer": "Morwen the Gloomhide",
    "night_at_noon": false,
-   "night_at_23": true,
-   "road_segments": 315,
-   "road_bands": [
-    0,
-    1
-   ],
-   "road_colour_wrong": 0
+   "night_at_23": true
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
  "shots": [
-  "wd_l15p11e_roamers15_roamer.png",
-  "wd_l15p11e_roamers15_map.png",
-  "wd_l15p11e_roamers15_roads.png"
+  "wd_l15p11j_roamers15_roamer.png",
+  "wd_l15p11j_roamers15_map.png",
+  "wd_l15p11j_roamers15_roads.png"
  ],
  "error": null,
  "saves_put_back": 1,

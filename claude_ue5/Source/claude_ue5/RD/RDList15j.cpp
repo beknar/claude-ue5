@@ -33,6 +33,11 @@ bool ARDDungeonGenerator::RoamerOf15(FIntPoint Cell, FRoamer15& Out) const
 			if (Q.WaterKind != 0) continue;
 			double Dt = 1e12; W.NearestTown(C.X, C.Y, Dt);
 			if (Dt < 3000.0) continue;
+			const float Radius = 350.f + 300.f * FRDWildWorld::Rand01(Cell.X, Cell.Y, W.Seed + 1705u);
+			// (its whole round on dry land (PR #103's review: only its middle was looked at, and a round over a lake laid it on the bed))
+			bool bDry = true;
+			for (int32 K = 0; K < 16 && bDry; ++K) { FRDWSample Qr; W.Sample(C.X + Radius * FMath::Cos(K * PI / 8.0), C.Y + Radius * FMath::Sin(K * PI / 8.0), Qr, false); bDry = Qr.WaterKind == 0 && Qr.Lava < 0.05f; }
+			if (!bDry) continue;
 			const uint32 H = FRDWildWorld::Hash(Cell.X, Cell.Y, W.Seed + 1704u);
 			R.RegionTier = FMath::Clamp(W.TierAt(C.X, C.Y), 1, GameTierMax);
 			R.Tier = FMath::Clamp(R.RegionTier + RoamerTierUp15, 1, GameTierMax);
@@ -40,7 +45,7 @@ bool ARDDungeonGenerator::RoamerOf15(FIntPoint Cell, FRoamer15& Out) const
 			Kinds.RemoveAll([this](int32 K) { return !Monsters.IsValidIndex(K) || Monsters[K].Weight <= 0.f; });
 			if (Kinds.Num() == 0) break;
 			R.Kind = Kinds[H % (uint32)Kinds.Num()];
-			R.C = C; R.Radius = 350.f + 300.f * FRDWildWorld::Rand01(Cell.X, Cell.Y, W.Seed + 1705u);
+			R.C = C; R.Radius = Radius;
 			R.Phase = FRDWildWorld::Rand01(Cell.X, Cell.Y, W.Seed + 1706u) * 2.f * PI;
 			const float U = FRDWildWorld::Rand01(Cell.X, Cell.Y, W.Seed + 1707u);
 			R.When = U < 0.6f ? 0 : U < 0.85f ? 1 : 2;          // (always, by night, in storms)
@@ -55,11 +60,18 @@ bool ARDDungeonGenerator::RoamerOf15(FIntPoint Cell, FRoamer15& Out) const
 	return R.Kind >= 0;
 }
 
+double ARDDungeonGenerator::RoamerAngle15(const FRoamer15& R) const
+{
+	// (where on its round it is when it is laid: once round in RoamerRoundSeconds15 of the world's clock; once laid it walks on at its
+	// own pace (RoamerAngles15))
+	const double T = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0;
+	return R.Phase + 2.0 * PI * T / FMath::Max(RoamerRoundSeconds15, 60.f);
+}
+
 FVector2D ARDDungeonGenerator::RoamerAt15(const FRoamer15& R) const
 {
-	// (where it is on its round now: once round in RoamerRoundSeconds15 of the world's clock)
-	const double T = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0;
-	const double A = R.Phase + 2.0 * PI * T / FMath::Max(RoamerRoundSeconds15, 60.f);
+	const double* Laid = RoamerAngles15.Find(R.Id);
+	const double A = Laid ? *Laid : RoamerAngle15(R);
 	return R.C + FVector2D(FMath::Cos(A), FMath::Sin(A)) * R.Radius;
 }
 
@@ -96,12 +108,25 @@ void ARDDungeonGenerator::TickRoamers15(float Dt, const FVector& Her)
 			{
 				M->WildLeash = 20000.f;
 				Roamers15.Add(R.Id, M);
+				RoamerAngles15.Add(R.Id, RoamerAngle15(R));
 				UE_LOG(LogRDList15j, Log, TEXT("RDROAMER15 %s (%s, tier %d in a tier-%d region) out at (%.0f, %.0f)"), *R.Name, *Monsters[R.Kind].Name.ToString(), R.Tier, R.RegionTier, P.X, P.Y);
 			}
 		}
 		if (!M || M->IsDead()) continue;
-		// (on its round: its home moved along it while it hunts nobody)
-		if (!M->IsAggro()) M->HomeAt = FVector(P.X * 100.0, P.Y * 100.0, WildGroundZ(FVector(P.X * 100.0, P.Y * 100.0, 0.0)) + 100.f);
+		// (on its round at its own pace: its home the next point on it, moved on (15 degrees) once it is within 25 m of it, while it hunts
+		// nobody (PR #103's review: moved on by the clock the home ran from it at twice its walk, and past 0.8 of its leash it noticed no
+		// one))
+		if (!M->IsAggro())
+		{
+			// (its home 10 degrees ahead of where it is on its round, read from its own place each look: it walks on at its own pace,
+			// never left behind (the first fix's 25 m never came: it wandered round a home 100 m off))
+			const FVector2D Mp = FVector2D(M->GetActorLocation()) / 100.0 - R.C;
+			double& A = RoamerAngles15.FindOrAdd(R.Id, RoamerAngle15(R));
+			A = FMath::Atan2(Mp.Y, Mp.X) + PI / 18.0;
+			const FVector2D Hp = R.C + FVector2D(FMath::Cos(A), FMath::Sin(A)) * R.Radius;
+			M->HomeAt = FVector(Hp.X * 100.0, Hp.Y * 100.0, WildGroundZ(FVector(Hp.X * 100.0, Hp.Y * 100.0, 0.0)) + 100.f);
+			M->WalkTo15(M->HomeAt);          // (walked there, not left to wander round it: its trips are 3 to 15 m round its home with waits between)
+		}
 		// (seen within 150 m: marked on her map, told once)
 		if (GI && !GI->RoamersSeen15.Contains(R.Id) && FVector::Dist2D(M->GetActorLocation(), Her) < 15000.f)
 		{
@@ -116,16 +141,19 @@ void ARDDungeonGenerator::TickRoamers15(float Dt, const FVector& Her)
 		if (!M) { It.RemoveCurrent(); continue; }
 		if (Near.Contains(It.Key()) || M->IsDead()) continue;
 		M->Destroy();
+		RoamerAngles15.Remove(It.Key());
 		It.RemoveCurrent();
 	}
 }
 
-bool ARDDungeonGenerator::OnRoamerKilled15(ARDMonster* Monster)
+bool ARDDungeonGenerator::OnRoamerKilled15(ARDMonster* Monster, bool bHers)
 {
 	if (!Monster) return false;
 	int32 Id = -1;
 	for (const auto& Kv : Roamers15) if (Kv.Value.Get() == Monster) { Id = Kv.Key; break; }
 	if (Id < 0) return false;
+	// (a death that is no doing of hers (lightning) pays her nothing (PR #103's review): no ring, not slain for the game: it walks again)
+	if (!bHers) { Roamers15.Remove(Id); RoamerAngles15.Remove(Id); return true; }
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	if (GI && GI->RoamersSlain15.Contains(Id)) return true;
 	if (GI) GI->RoamersSlain15.AddUnique(Id);

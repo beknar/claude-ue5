@@ -20,6 +20,7 @@
   "tier_up": 4,
   "hp": 2.5,
   "round_seconds": 900,
-  "reach_m": 2500,
-  "maps": ["brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress", "caves"]
+  "reach_m": 900,
+  "road_tiers": true,
+  "maps": ["brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress", "caves", "martial_arts"]
 }

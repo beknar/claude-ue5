@@ -28,6 +28,9 @@ def each(fn, label, maps):
         REPORT.append(f"937 {label} {m}: {what}")
 
 
+TEMPLATE = {}          # (a ring of each kind as text, from the first map that has one: a map with none of a kind (martial_arts) takes it)
+
+
 def items(g):
     names = {r["name"] for r in J["rings"]}
     its = [i for i in g.get_editor_property("items") if str(i.get_editor_property("name")) not in names]
@@ -35,11 +38,17 @@ def items(g):
     added = []
     for r in J["rings"]:
         same = [i for i in rings if i.get_editor_property("ring_kind") == KIND[r["kind"]]]
-        assert same, (r["kind"], "no ring of that kind on the map")
-        best = max(same, key=lambda i: i.get_editor_property("amount"))
-        d = unreal.RDItemDef(); d.import_text(best.export_text())
+        if same:
+            best = max(same, key=lambda i: i.get_editor_property("amount"))
+            TEMPLATE.setdefault(r["kind"], best.export_text())
+            src = best.export_text()
+        else:
+            assert r["kind"] in TEMPLATE, (r["kind"], "no ring of that kind on this map or the ones before it")
+            src = TEMPLATE[r["kind"]]
+        d = unreal.RDItemDef(); d.import_text(src)
+        base = float(d.get_editor_property("amount"))
         d.set_editor_property("name", r["name"])
-        d.set_editor_property("amount", round(float(best.get_editor_property("amount")) * float(r["times"]), 2))
+        d.set_editor_property("amount", round(base * float(r["times"]), 2))
         d.set_editor_property("weight", 0.0)
         d.set_editor_property("tiers", [])
         d.set_editor_property("found_max", 1)
@@ -55,6 +64,7 @@ def data(g):
     for k, p in (("chance", "roamer_chance15"), ("hp", "roamer_hp15"), ("round_seconds", "roamer_round_seconds15"), ("reach_m", "roamer_reach_m15")):
         g.set_editor_property(p, float(J[k]))
     g.set_editor_property("roamer_tier_up15", int(J["tier_up"]))
+    g.set_editor_property("road_tiers15", bool(J.get("road_tiers", True)))          # (idea 9: the roads by tier on the big map)
     have = {str(i.get_editor_property("name")) for i in g.get_editor_property("items")}
     missing = [r["name"] for r in J["rings"] if r["name"] not in have]
     assert not missing, ("run 937 items first", missing)

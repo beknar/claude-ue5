@@ -215,6 +215,8 @@ public:
 	 *  height alone, chases her straight, and gives up beyond WildLeash of its home */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") bool bOpenGround = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") FVector HomeAt = FVector::ZeroVector;
+	/** the list of 2026-11-20's eleventh phase: a roamer walked on to a point of its round (its trip there at once, no wait) */
+	void WalkTo15(const FVector& P) { Path.Reset(); Path.Add(P); Goal = P; StuckTime = 0.f; WaitTime = 0.f; }
 	/** the list of 2026-11-12's fourth phase (a lair hidden behind something): the cover's radius round HomeAt (cm; 0 none), in which
 	 *  it wanders, and its way out (a point just outside its opening), through which it goes after her and comes home */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") float CoverR = 0.f;

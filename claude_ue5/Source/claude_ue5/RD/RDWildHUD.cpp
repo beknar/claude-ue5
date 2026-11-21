@@ -89,25 +89,37 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 			DrawTexture(T, Q0.X, Q0.Y, Q1.X - Q0.X, Q1.Y - Q0.Y, Ua, Va, Ub - Ua, Vb - Va, FLinearColor::White, BLEND_Opaque);
 			++Drawn;
 		}
-	// rivers and roads as lines (thin features a pixel of the map cannot show)
-	auto Lines = [&](const TArray<FVector2D>& P, const FLinearColor& C, float Wpx)
+	// rivers and roads as lines (thin features a pixel of the map cannot show); each segment's colour from a callback (the list of
+	// 2026-11-20's eleventh phase: the major roads by their tier, one clipper for every line (PR #103's review))
+	auto LinesBy = [&](const TArray<FVector2D>& P, TFunctionRef<FLinearColor(const FVector2D&, const FVector2D&)> Col, float Wpx, bool bRecord)
 	{
-		FVector2D Last(-1e9f, -1e9f); bool bHave = false;
+		FVector2D Last(-1e9f, -1e9f), LastW(0, 0); bool bHave = false;
 		for (int32 K = 0; K < P.Num(); ++K)
 		{
 			const FVector2D S = ToS(P[K]);
 			if (bHave && FVector2D::DistSquared(S, Last) < 16.f && K + 1 < P.Num()) continue;
 			const bool bIn = S.X > A.X && S.X < B.X && S.Y > A.Y && S.Y < B.Y;
-			if (bHave && (bIn || (Last.X > A.X && Last.X < B.X && Last.Y > A.Y && Last.Y < B.Y))) DrawLine(Last.X, Last.Y, S.X, S.Y, C, Wpx);
-			Last = S; bHave = true;
+			if (bHave && (bIn || (Last.X > A.X && Last.X < B.X && Last.Y > A.Y && Last.Y < B.Y)))
+			{
+				const FLinearColor C = Col(LastW, P[K]);
+				DrawLine(Last.X, Last.Y, S.X, S.Y, C, Wpx);
+				if (bRecord && RoadsDrawn15.Num() < 4000)
+				{
+					const FVector2D Mw = (LastW + P[K]) * 0.5;
+					RoadsDrawn15.Add(FString::Printf(TEXT("%.0f|%.0f|%.3f|%.3f|%.3f"), Mw.X, Mw.Y, C.R, C.G, C.B));
+				}
+			}
+			Last = S; LastW = P[K]; bHave = true;
 		}
 	};
+	auto Lines = [&](const TArray<FVector2D>& P, const FLinearColor& C, float Wpx) { LinesBy(P, [&C](const FVector2D&, const FVector2D&) { return C; }, Wpx, false); };
 	for (const FRDWildWorld::FRiver& R : W.Rivers)
 		if (R.Box.Max.X > X0 && R.Box.Min.X < X1 && R.Box.Max.Y > Y0 && R.Box.Min.Y < Y1)
 			Lines(R.P, FLinearColor(0.20f, 0.36f, 0.42f, 0.9f), FMath::Clamp((float)(R.W.Last() / Mpp), 1.2f, 4.f) * Sc);
 	// (the list of 2026-11-16's fourteenth phase: "they should look different on the mini map and the large map": a major road a pale
 	// stone line in a dark edge, a minor road a thin brown line, shown once the map is near enough (under 40 m a pixel))
 	// (only the roads in view: the majors by their list, the minors through the segments' hash (PR #92's review: 5,500 roads a frame))
+	RoadsDrawn15.Reset();
 	{
 		const FBox2D Vw(FVector2D(X0, Y0), FVector2D(X1, Y1));
 		TArray<int32> In;
@@ -115,27 +127,11 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 		In.Reset(); W.RoadsIn(Vw, false, In);
 		const float Wr = FMath::Clamp((float)(9.0 / Mpp), 2.f, 4.f) * Sc;
 		for (const int32 Ri : In) Lines(W.Roads[Ri].P, FLinearColor(0.13f, 0.11f, 0.09f, 0.95f), Wr + 2.f * Sc);
-		// (the list of 2026-11-20's eleventh phase (idea 9, "the danger shown on the map"): a major road in its tier's colour, segment by
-		// segment (the tier read at each drawn segment's middle); its pale stone line kept when the colours are off)
-		if (Gen->RoamerNames15.Num() == 0) { for (const int32 Ri : In) Lines(W.Roads[Ri].P, FLinearColor(0.80f, 0.76f, 0.66f, 1.f), Wr); }
-		else
-			for (const int32 Ri : In)
-			{
-				const TArray<FVector2D>& P = W.Roads[Ri].P;
-				FVector2D Last(-1e9f, -1e9f), LastW(0, 0); bool bHave = false;
-				for (int32 K = 0; K < P.Num(); ++K)
-				{
-					const FVector2D S = ToS(P[K]);
-					if (bHave && FVector2D::DistSquared(S, Last) < 16.f && K + 1 < P.Num()) continue;
-					const bool bIn = S.X > A.X && S.X < B.X && S.Y > A.Y && S.Y < B.Y;
-					if (bHave && (bIn || (Last.X > A.X && Last.X < B.X && Last.Y > A.Y && Last.Y < B.Y)))
-					{
-						const FVector2D Mw = (LastW + P[K]) * 0.5;
-						DrawLine(Last.X, Last.Y, S.X, S.Y, ARDDungeonGenerator::RoadTierColor15(W.TierAt(Mw.X, Mw.Y)), Wr);
-					}
-					Last = S; LastW = P[K]; bHave = true;
-				}
-			}
+		// (the eleventh phase (idea 9, "the danger shown on the map", bRoadTiers15): a major road in its tier's colour, segment by segment
+		// (the tier read at each drawn segment's middle); its pale stone line when the switch is off)
+		for (const int32 Ri : In)
+			if (Gen->bRoadTiers15) LinesBy(W.Roads[Ri].P, [&W](const FVector2D& P0, const FVector2D& P1) { const FVector2D Mw = (P0 + P1) * 0.5; return ARDDungeonGenerator::RoadTierColor15(W.TierAt(Mw.X, Mw.Y)); }, Wr, true);
+			else Lines(W.Roads[Ri].P, FLinearColor(0.80f, 0.76f, 0.66f, 1.f), Wr);
 	}
 	// the fog
 	{
@@ -187,7 +183,7 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 		UI.Text(Nm, FLinearColor(1.f, 0.55f, 0.48f, 1.f), S.X - Tw * 0.5f, S.Y + Ic + 2.f * Sc, Small, Sc * 0.9f, ERDType::Label);
 	});
 	// (and the roads' key: the tiers' colours, in the sheet's bottom left (in its top left it lay over the map's title))
-	if (Gen->RoamerNames15.Num() > 0)
+	if (Gen->bRoadTiers15)
 	{
 		const float Kw = 22.f * Sc, Kh = 8.f * Sc, Kx = A.X + 12.f * Sc, Ky = B.Y - 34.f * Sc - (6 * (Kh + 6.f * Sc) + 20.f * Sc);          // (its last row clear of the scroll's edge)
 		Box(FVector2D(Kx - 6.f * Sc, Ky - 6.f * Sc), FVector2D(Kx + 132.f * Sc, Ky + 6 * (Kh + 6.f * Sc) + 20.f * Sc), FLinearColor(0.f, 0.f, 0.f, 0.45f));

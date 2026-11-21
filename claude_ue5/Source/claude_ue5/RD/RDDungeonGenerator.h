@@ -2080,7 +2080,7 @@ public:
 	mutable TMap<FIntPoint, FRoamer15> RoamerCache15;
 	TMap<int32, TWeakObjectPtr<class ARDMonster>> Roamers15;
 	float RoamerLook15 = 0.f;
-	/** the roamers' data (938 from SourceArt/wilderness/roamers15.json): their names and epithets, their rings (items of weight 0 on every
+	/** the roamers' data (937 from SourceArt/wilderness/roamers15.json): their names and epithets, their rings (items of weight 0 on every
 	 *  map), the share of the regions' cells with one, how far over the region's tier, their hit points' factor, the round's time, and how
 	 *  near she must be for one to be laid */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> RoamerNames15;
@@ -2090,13 +2090,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") int32 RoamerTierUp15 = 4;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float RoamerHp15 = 2.5f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float RoamerRoundSeconds15 = 900.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float RoamerReachM15 = 2500.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float RoamerReachM15 = 900.f;
+	/** idea 9: the major roads drawn in their tier's colour on the big map, with a key (937 data) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bRoadTiers15 = false;
 	bool RoamerOf15(FIntPoint Cell, FRoamer15& Out) const;
 	FVector2D RoamerAt15(const FRoamer15& R) const;
+	double RoamerAngle15(const FRoamer15& R) const;
+	/** a laid roamer's place on its round (its angle), walked on at its own pace */
+	TMap<int32, double> RoamerAngles15;
 	bool RoamerOut15(const FRoamer15& R) const;
 	void TickRoamers15(float Dt, const FVector& Her);
 	/** a roamer's death: kept for the game, its ring dropped once; false when it was no roamer */
-	bool OnRoamerKilled15(class ARDMonster* Monster);
+	bool OnRoamerKilled15(class ARDMonster* Monster, bool bHers);
 	void DrawRoamerMarks15(TFunctionRef<void(const FVector2D& AtM, const FString& Name)> Each) const;
 	/** tests: the roamers of the cells within Km, "id|name|kind|tier|region tier|when|round x|y|radius|now x|y|laid|seen|slain|ring|monster x|y (cm)|out now" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetRoamers15(float Km) const;

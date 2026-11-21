@@ -456,7 +456,7 @@ FName ARDDungeonGenerator::PickFinalReward() const
 	const FString H = CurrentHero.ToString();
 	const ERDRingKind Want = H.Contains(TEXT("Rogue")) ? ERDRingKind::Dexterity : (H.Contains(TEXT("Warrior")) || H.Contains(TEXT("Martial")) ? ERDRingKind::Health : ERDRingKind::Magic);
 	for (const FRDItemDef& It : Items)
-		if (It.Kind == ERDItemKind::Ring && It.RingKind == Want && It.Amount > BestV) { BestV = It.Amount; Best = It.Name; }
+		if (It.Kind == ERDItemKind::Ring && It.Weight > 0.f && It.RingKind == Want && It.Amount > BestV) { BestV = It.Amount; Best = It.Name; }          // (a ring that is found: not a roamer's (weight 0, PR #103's review))
 	return Best;
 }
 
@@ -701,7 +701,7 @@ void ARDDungeonGenerator::TickFinalShow(float RealDt)
 			else if (It.Kind == ERDItemKind::Weapon) { for (const FRDWeaponFit& F : It.WeaponFits) if (F.Hero == CurrentHero && F.Weapon.Damage > Wv) { Wv = F.Weapon.Damage; Wpn = It.Name; } }
 			else if (It.Kind == ERDItemKind::Shield && It.Amount > Sv) { Sv = It.Amount; Shd = It.Name; }
 			else if (It.Kind == ERDItemKind::Healing && It.Amount > Hv) { Hv = It.Amount; Heal = It.Name; }
-			else if (It.Kind == ERDItemKind::Ring) { TPair<FName, float>& B = Rings.FindOrAdd((uint8)It.RingKind, TPair<FName, float>(NAME_None, -1.f)); if (It.Amount > B.Value) B = TPair<FName, float>(It.Name, It.Amount); }
+			else if (It.Kind == ERDItemKind::Ring && It.Weight > 0.f) { TPair<FName, float>& B = Rings.FindOrAdd((uint8)It.RingKind, TPair<FName, float>(NAME_None, -1.f)); if (It.Amount > B.Value) B = TPair<FName, float>(It.Name, It.Amount); }
 		}
 		if (!Arm.IsNone()) { Pc->AddItem(Arm, 1); if (Pc->WearArmour(Arm)) Kit.Add(Arm.ToString()); }
 		if (!Shd.IsNone()) { Pc->AddItem(Shd, 1); if (Pc->WearShield(Shd)) Kit.Add(Shd.ToString()); }
