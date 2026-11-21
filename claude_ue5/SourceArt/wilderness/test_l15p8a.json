@@ -1,0 +1,272 @@
+{
+ "tag": "l15p8a",
+ "plan": [
+  "villages15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "villages15",
+   "ok": false,
+   "villages": [
+    {
+     "name": "Windholt",
+     "houses": 12,
+     "people": 50,
+     "per_house": [
+      2,
+      3,
+      4,
+      4,
+      4,
+      4,
+      4,
+      5,
+      5,
+      5,
+      5,
+      5
+     ],
+     "houses_with_people": 12,
+     "dormant_here": 0,
+     "fps_square": {
+      "fps": 25.5,
+      "worst_ms": 73
+     },
+     "fps_400m_off": {
+      "fps": 32.7,
+      "worst_ms": 58
+     },
+     "dormant_from_1500m": [
+      0,
+      0
+     ],
+     "night": {
+      "people": 0,
+      "indoors": 0,
+      "asleep": 0,
+      "in_bed": 0,
+      "with_bed": 0,
+      "in_own_house": 0
+     }
+    },
+    {
+     "name": "Redmere",
+     "houses": 9,
+     "people": 27,
+     "per_house": [
+      2,
+      2,
+      2,
+      3,
+      3,
+      3,
+      4,
+      4,
+      4
+     ],
+     "houses_with_people": 9,
+     "dormant_here": 0,
+     "night": {
+      "people": 27,
+      "indoors": 27,
+      "asleep": 27,
+      "in_bed": 27,
+      "with_bed": 27,
+      "in_own_house": 27
+     }
+    },
+    {
+     "name": "Ironholt",
+     "houses": 14,
+     "people": 46,
+     "per_house": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      4,
+      4,
+      4,
+      4,
+      4,
+      5,
+      5
+     ],
+     "houses_with_people": 14,
+     "dormant_here": 0,
+     "night": {
+      "people": 46,
+      "indoors": 46,
+      "asleep": 46,
+      "in_bed": 46,
+      "with_bed": 46,
+      "in_own_house": 46
+     }
+    },
+    {
+     "name": "Hawkmere",
+     "houses": 15,
+     "people": 54,
+     "per_house": [
+      2,
+      2,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      4,
+      4,
+      4,
+      5,
+      5,
+      5,
+      5
+     ],
+     "houses_with_people": 15,
+     "dormant_here": 0
+    },
+    {
+     "name": "Marshmere",
+     "houses": 11,
+     "people": 42,
+     "per_house": [
+      2,
+      3,
+      3,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      5,
+      5
+     ],
+     "houses_with_people": 11,
+     "dormant_here": 0
+    },
+    {
+     "name": "Hollowwick",
+     "houses": 9,
+     "people": 33,
+     "per_house": [
+      2,
+      2,
+      3,
+      3,
+      4,
+      4,
+      5,
+      5,
+      5
+     ],
+     "houses_with_people": 9,
+     "dormant_here": 0
+    },
+    {
+     "name": "Coldham",
+     "houses": 12,
+     "people": 40,
+     "per_house": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      4,
+      5,
+      5,
+      5,
+      5
+     ],
+     "houses_with_people": 12,
+     "dormant_here": 0
+    },
+    {
+     "name": "Ashwell",
+     "houses": 13,
+     "people": 46,
+     "per_house": [
+      2,
+      2,
+      2,
+      3,
+      3,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      5,
+      5
+     ],
+     "houses_with_people": 13,
+     "dormant_here": 0
+    },
+    {
+     "name": "Hawkby",
+     "houses": 15,
+     "people": 53,
+     "per_house": [
+      2,
+      2,
+      2,
+      3,
+      3,
+      3,
+      3,
+      4,
+      4,
+      4,
+      4,
+      4,
+      5,
+      5,
+      5
+     ],
+     "houses_with_people": 15,
+     "dormant_here": 0
+    },
+    {
+     "name": "Hawkham",
+     "houses": 14,
+     "people": 50,
+     "per_house": [
+      2,
+      2,
+      2,
+      3,
+      3,
+      3,
+      3,
+      4,
+      4,
+      4,
+      5,
+      5,
+      5,
+      5
+     ],
+     "houses_with_people": 14,
+     "dormant_here": 0
+    }
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_l15p8a_villages15_day.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

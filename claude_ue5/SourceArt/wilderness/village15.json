@@ -1,0 +1,31 @@
+{
+ "_doc": "The villagers' lines (the list of 2026-11-20's eighth phase, items 27 and 28): what a village's household says, by role; {village} is the village's name. Read by 934 folk into the brokenspire generator's WildVillageLines15 as role|line.",
+ "villager": [
+  "We cut these ledges into the hill ourselves, my father and his brothers. Every stone in that wall came out of the ground it holds up.",
+  "The well in the square has never run dry, not in the worst summer. That's why {village} is where it is.",
+  "Mind the drop past the wall when you leave by the back. More than one carter's gone over it in the dark.",
+  "We trade wool and cheese down the road for salt and iron. Prices are fair if you don't mind the walk.",
+  "There's been beasts on the ridge at night. We keep the doors barred after dusk now.",
+  "If you're bound for the towns, take the road down past the last house. The old path along the slope washed out in spring."
+ ],
+ "villagewoman": [
+  "Feeding the hens is the easy part. Keeping the foxes from them is the work.",
+  "My mother was born in that house, and her mother before. The walls have been patched more than they've been built.",
+  "You look like you've come a long way. There's water at the well, and nobody in {village} will begrudge you a cup.",
+  "Market day is when the carts come up from the valley. The rest of the week it's just us and the goats.",
+  "The children know every step of every terrace. Don't follow them if you value your ankles.",
+  "We had a stranger through here last month asking about the ruins. Never saw him come back."
+ ],
+ "child": [
+  "I can climb the big wall by the stairs! Well, almost to the top.",
+  "Do you have a sword? Can I hold it?",
+  "My brother says there's a dragon past the hills. He's lying, isn't he?",
+  "I found a shiny stone by the well. You can't have it.",
+  "We're not allowed past the last house after dark."
+ ],
+ "any": [
+  "Welcome to {village}. It's not much, but it's ours.",
+  "Fine weather for the season, if it holds.",
+  "Keep to the paths and the ledges, and you'll not go wrong here."
+ ]
+}

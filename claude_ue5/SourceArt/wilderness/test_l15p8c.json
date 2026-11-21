@@ -1,0 +1,685 @@
+{
+ "tag": "l15p8c",
+ "plan": [
+  "villages15",
+  "npc14",
+  "locks14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "villages15",
+   "ok": true,
+   "villages": [
+    {
+     "name": "Windholt",
+     "houses": 12,
+     "people": 50,
+     "per_house": [
+      2,
+      3,
+      4,
+      4,
+      4,
+      4,
+      4,
+      5,
+      5,
+      5,
+      5,
+      5
+     ],
+     "houses_with_people": 12,
+     "dormant_here": 0,
+     "fps_square": {
+      "fps": 26.9,
+      "worst_ms": 57
+     },
+     "fps_400m_off": {
+      "fps": 29.8,
+      "worst_ms": 81
+     },
+     "dormant_from_400m": [
+      50,
+      50
+     ],
+     "night": {
+      "people": 50,
+      "indoors": 50,
+      "asleep": 50,
+      "in_bed": 50,
+      "with_bed": 50,
+      "in_own_house": 50
+     }
+    },
+    {
+     "name": "Redmere",
+     "houses": 9,
+     "people": 27,
+     "per_house": [
+      2,
+      2,
+      2,
+      3,
+      3,
+      3,
+      4,
+      4,
+      4
+     ],
+     "houses_with_people": 9,
+     "dormant_here": 0,
+     "night": {
+      "people": 27,
+      "indoors": 27,
+      "asleep": 27,
+      "in_bed": 27,
+      "with_bed": 27,
+      "in_own_house": 27
+     }
+    },
+    {
+     "name": "Ironholt",
+     "houses": 14,
+     "people": 46,
+     "per_house": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      4,
+      4,
+      4,
+      4,
+      4,
+      5,
+      5
+     ],
+     "houses_with_people": 14,
+     "dormant_here": 0,
+     "night": {
+      "people": 46,
+      "indoors": 46,
+      "asleep": 46,
+      "in_bed": 46,
+      "with_bed": 46,
+      "in_own_house": 46
+     }
+    },
+    {
+     "name": "Coldford",
+     "houses": 13,
+     "people": 45,
+     "per_house": [
+      2,
+      2,
+      3,
+      3,
+      3,
+      3,
+      3,
+      4,
+      4,
+      4,
+      4,
+      5,
+      5
+     ],
+     "houses_with_people": 13,
+     "dormant_here": 0
+    },
+    {
+     "name": "Hawkmere",
+     "houses": 15,
+     "people": 54,
+     "per_house": [
+      2,
+      2,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      4,
+      4,
+      4,
+      5,
+      5,
+      5,
+      5
+     ],
+     "houses_with_people": 15,
+     "dormant_here": 0
+    },
+    {
+     "name": "Marshmere",
+     "houses": 11,
+     "people": 42,
+     "per_house": [
+      2,
+      3,
+      3,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      5,
+      5
+     ],
+     "houses_with_people": 11,
+     "dormant_here": 0
+    },
+    {
+     "name": "Hollowwick",
+     "houses": 9,
+     "people": 33,
+     "per_house": [
+      2,
+      2,
+      3,
+      3,
+      4,
+      4,
+      5,
+      5,
+      5
+     ],
+     "houses_with_people": 9,
+     "dormant_here": 0
+    },
+    {
+     "name": "Coldham",
+     "houses": 12,
+     "people": 40,
+     "per_house": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      4,
+      5,
+      5,
+      5,
+      5
+     ],
+     "houses_with_people": 12,
+     "dormant_here": 0
+    },
+    {
+     "name": "Ashwell",
+     "houses": 13,
+     "people": 46,
+     "per_house": [
+      2,
+      2,
+      2,
+      3,
+      3,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      5,
+      5
+     ],
+     "houses_with_people": 13,
+     "dormant_here": 0
+    },
+    {
+     "name": "Hawkby",
+     "houses": 15,
+     "people": 53,
+     "per_house": [
+      2,
+      2,
+      2,
+      3,
+      3,
+      3,
+      3,
+      4,
+      4,
+      4,
+      4,
+      4,
+      5,
+      5,
+      5
+     ],
+     "houses_with_people": 15,
+     "dormant_here": 0
+    }
+   ]
+  },
+  {
+   "step": "npc14",
+   "ok": true,
+   "road": {
+    "forced": true,
+    "travellers": 5,
+    "monster": "RDMonster_3058",
+    "trace": [
+     [
+      "reach",
+      1.1
+     ],
+     [
+      "swing",
+      1.1
+     ],
+     [
+      "reach",
+      1.4
+     ],
+     [
+      "reach",
+      1.4
+     ],
+     [
+      "reach",
+      1.4
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "chase",
+      1.8
+     ],
+     [
+      "chase",
+      2.1
+     ],
+     [
+      "chase",
+      2.2
+     ],
+     [
+      "chase",
+      2.5
+     ],
+     [
+      "chase",
+      1.7
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "chase",
+      2.0
+     ],
+     [
+      "chase",
+      2.3
+     ],
+     [
+      "chase",
+      2.6
+     ],
+     [
+      "chase",
+      1.9
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "chase",
+      1.9
+     ],
+     [
+      "chase",
+      2.2
+     ],
+     [
+      "chase",
+      2.4
+     ],
+     [
+      "chase",
+      2.1
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "chase",
+      1.8
+     ],
+     [
+      "chase",
+      2.2
+     ],
+     [
+      "chase",
+      2.5
+     ],
+     [
+      "chase",
+      2.3
+     ],
+     [
+      "chase",
+      1.6
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "swing",
+      1.5
+     ],
+     [
+      "chase",
+      2.1
+     ],
+     [
+      "chase",
+      2.4
+     ],
+     [
+      "chase",
+      2.5
+     ],
+     [
+      "chase",
+      1.8
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "swing",
+      1.4
+     ],
+     [
+      "chase",
+      1.9
+     ],
+     [
+      "chase",
+      2.2
+     ]
+    ],
+    "her_struck_near": 0.0,
+    "hp_track": [
+     [
+      45.0,
+      10.0,
+      36.0
+     ],
+     [
+      45.0,
+      10.0,
+      36.0
+     ],
+     [
+      45.0,
+      10.0,
+      36.0
+     ],
+     [
+      45.0,
+      10.0,
+      36.0
+     ],
+     [
+      45.0,
+      10.0,
+      36.0
+     ],
+     [
+      45.0,
+      1.0,
+      36.0
+     ],
+     [
+      45.0,
+      1.0,
+      36.0
+     ],
+     [
+      45.0,
+      1.0,
+      36.0
+     ],
+     [
+      45.0,
+      1.0,
+      36.0
+     ],
+     [
+      45.0,
+      1.0,
+      36.0
+     ],
+     [
+      45.0,
+      1.0,
+      36.0
+     ],
+     [
+      45.0,
+      0.0,
+      36.0
+     ]
+    ],
+    "dead": "a townsman on the road to Ashenreach",
+    "killed_by": "RDMonster_3058",
+    "flees": 6,
+    "hits": 7,
+    "head_over_ground": -24.5,
+    "drops": [
+     "Bread",
+     "Cheese"
+    ],
+    "gold": 5,
+    "her_struck": 0.0,
+    "cowering_seen": 16
+   },
+   "farm": {
+    "farm": 268436478,
+    "title": "farmhand of Elsa's Holding",
+    "key": 12098939650018,
+    "hp0": 65.0,
+    "hits": [
+     65.0,
+     50.7,
+     36.4,
+     22.1,
+     7.8,
+     0.0
+    ],
+    "dead": true,
+    "flees": 1,
+    "by": "her",
+    "head_over_ground": 23.3,
+    "drops": [
+     "Straw Rope",
+     "Straw Rope",
+     "Wood Log",
+     "Bread"
+    ],
+    "gold": 3,
+    "kept": true,
+    "piles": 1,
+    "pile_says": "search the body of farmhand of Elsa's Holding (4, 3 gold)",
+    "pile_f": "loot",
+    "taken": {
+     "Straw Rope": 2,
+     "Bread": 1,
+     "Wood Log": 1
+    },
+    "gold_got": 3,
+    "body_says": "open the door",
+    "again": {
+     "found": true,
+     "dead": true,
+     "picture_from_yaw": 105.0,
+     "head_over_ground": 21.7
+    }
+   },
+   "giver": {
+    "quest": "bounty",
+    "title": "a carter",
+    "hits_landed": 4,
+    "killed_by_million": false,
+    "hp": 1.0,
+    "dead": false
+   },
+   "parts_ok": {
+    "road": true,
+    "farm": true,
+    "giver": true
+   }
+  },
+  {
+   "step": "locks14",
+   "ok": true,
+   "boxes_seen": 20,
+   "locked_share": 0.55,
+   "gardens_locked": 0,
+   "farm": 268436478,
+   "rogue_box_raised": true,
+   "mage": {
+    "open_prompt": "open the chest",
+    "open_f": "container",
+    "opened": true,
+    "locked_prompt": "the barrel is locked",
+    "locked_f": "locked",
+    "locked_stayed_shut": true,
+    "refused": 1,
+    "hostile_after": 0
+   },
+   "rogue": {
+    "prompt": "pick the lock of the wardrobe",
+    "people_found": 19,
+    "buildings": 5,
+    "hidden_spots": {
+     "of": 84,
+     "game": 51,
+     "test": 51
+    },
+    "lines_out_stopped": {
+     "of": 12,
+     "s": 0,
+     "sd": 9,
+     "vis": 9,
+     "examples": {
+      "sd": [
+       0.5,
+       "InstancedStaticMeshComponent",
+       "<CollisionChannel.ECC_WORLD_DYNAMIC: 1>"
+      ],
+      "vis": [
+       0.5,
+       "InstancedStaticMeshComponent",
+       "<CollisionChannel.ECC_WORLD_DYNAMIC: 1>"
+      ]
+     }
+    },
+    "piece_types": {
+     "StaticMeshComponent|<CollisionChannel.ECC_WORLD_DYNAMIC: 1>|<CollisionEnabled.QUERY_AND_PHYSICS: 3>": 46
+    },
+    "placed": {
+     "heard": {
+      "title": "farmer of Elsa's Holding",
+      "i": 0,
+      "d_box_m": 16.2,
+      "d_her_m": 16.0,
+      "line": false,
+      "test_line": false,
+      "hostile": true,
+      "by": "heard"
+     },
+     "seen": {
+      "title": "farmwife of Elsa's Holding",
+      "i": 1,
+      "d_box_m": 33.1,
+      "d_her_m": 32.0,
+      "line": true,
+      "test_line": true,
+      "hostile": true,
+      "by": "seen"
+     },
+     "hidden": {
+      "title": "farmer of Odric's Croft",
+      "i": 4,
+      "d_box_m": 32.2,
+      "d_her_m": 32.0,
+      "line": false,
+      "test_line": false,
+      "hostile": false,
+      "by": ""
+     },
+     "far": {
+      "title": "farmwife of Odric's Croft",
+      "i": 5,
+      "d_box_m": 57.1,
+      "d_her_m": 56.0,
+      "line": true,
+      "test_line": true,
+      "hostile": false,
+      "by": ""
+     }
+    },
+    "f": "pick",
+    "opened_early": false,
+    "opened": true,
+    "picked": 1,
+    "heard": 2,
+    "seen": 1,
+    "blows_on_her": 2,
+    "her_hp_lost": 12.0
+   },
+   "warrior": {
+    "prompt": "break the lock of the crate",
+    "f": "break",
+    "opened_at_once": true,
+    "broken": 1
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_l15p8c_villages15_day.png",
+  "wd_l15p8c_villages15_sleeper.png",
+  "wd_l15p8c_npc14_road.png",
+  "wd_l15p8c_npc14_farmhand.png",
+  "wd_l15p8c_npc14_farmhand_again.png",
+  "wd_l15p8c_locks14_hostile.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

@@ -1936,6 +1936,24 @@ public:
 	UPROPERTY(Transient) TObjectPtr<UStaticMesh> TerraceCube15 = nullptr;
 	void LayTerraceWalls15(ARDWildChunk* C, const struct FRDWTerraces& T);
 	int32 TerraceWalls15 = 0, TerraceButtresses15 = 0;
+	// ---- the list of 2026-11-20's eighth phase (RDList15g.cpp): the villages lived in
+	/** each village house a household of 2 to 5 (items 27, 28: "the small villages are not inhabited"): their beds, their day (the farm
+	 *  folk's: work, home, asleep), their lines; dormant beyond 250 m */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bVillageFolk15 = false;
+	/** the villagers' lines, "<role>|<line>" (villager, villagewoman, child, any; {village} its name), from SourceArt/wilderness/village15.json */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> WildVillageLines15;
+	TArray<TWeakObjectPtr<class ARDTownsfolk>> WildVillageFolk15;
+	float VillageFolkCheckAt15 = 0.f;
+	/** the households waiting to be laid, one a frame after the village's pieces (PR #100's review: a village's 30 to 75 people in one
+	 *  frame were a hitch, and the square's props, laid after them, came down on them) */
+	struct FVillageHouseQ15 { TWeakObjectPtr<ARDWildChunk> Chunk; FRDWildPlace P; int32 HouseK = 0; FVector RoomC = FVector::ZeroVector; };
+	TArray<FVillageHouseQ15> VillageHouseQueue15;
+	void LayVillageHousehold15(ARDWildChunk* C, const FRDWildPlace& P, int32 HouseK, int32 HouseIdx);
+	/** once a second: a wild person (a farm's, a village's, a traveller, a structure's) beyond 250 m of her stops its day (its body still
+	 *  posed when seen); one a frame from the households' queue */
+	void TickVillageFolk15();
+	/** a test's: the villagers of the village named, "title|house|x|y|z|asleep|in bed|indoors|dormant|beds of the house" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") TArray<FString> GetVillageFolk15(const FString& Village) const;
 	/** the walls laid, "village|x|y|z bottom|z top|pad z|land z|land x|land y" (cm; the land read 1.2 m out from the pad's edge) */
 	TArray<FString> TerraceWallLines15;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetTerraceWallLines15() const { return TerraceWallLines15; }
@@ -2677,6 +2695,11 @@ public:
 	TArray<FRDWildFarmRec> WildFarms;
 	/** the list of 2026-11-16's seventh phase (RDList14f.cpp): a farm's family member given its home in the farmhouse and its own bed (the K-th) if there is one */
 	void SetWildFarmFolkHome14(class ARDTownsfolk* T, const FRDWildFarmRec& Rec, const FVector& DoorOut, const FVector& HouseIn, int32 K);
+	/** the list of 2026-11-20: a wild household member's home (its door outside, its place inside side by side with the others, its K-th
+	 *  bed if there is one), a farm's or a village's */
+	void SetWildFolkHome15(class ARDTownsfolk* T, const TArray<FTransform>& Beds, const FVector& DoorOut, const FVector& HouseIn, int32 K);
+	/** the wilds' townsfolk bodies by kind: grown men, grown women, children (the defs with a mesh and no town of their own) */
+	void WildBodyPools15(TArray<int32>& Men, TArray<int32>& Women, TArray<int32>& Kids) const;
 	/** the seventh phase's second part (RDList14g.cpp): a farm animal's kill key (from its farm's id and its place in the farm's
 	 *  plan), whether it was killed in this game, and the farm animals her blows and bolts reach */
 	int64 FarmAnimalKey14(const FRDWildFarmRec& Rec, int32 Slot, int32 K) const;

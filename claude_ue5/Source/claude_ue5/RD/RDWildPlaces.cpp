@@ -188,7 +188,17 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 			const TSharedPtr<const FRDWTerraces> T = Wild->TerracesAt(P.At.X, P.At.Y);
 			if (T.IsValid() && T->VillageId == P.Id)
 			{
-				for (const FRDWPad& Pd : T->Pads) if (Pd.Kind == 1) Put(TEXT("house"), Pd.C, Pd.Yaw, 1.f, 25.f);
+				int32 HouseK = 0;
+				for (const FRDWPad& Pd : T->Pads)
+				{
+					if (Pd.Kind != 1) continue;
+					const int32 H0 = C->Houses.Num();
+					Put(TEXT("house"), Pd.C, Pd.Yaw, 1.f, 25.f);
+					// (the list of 2026-11-20's eighth phase: its household)
+					// (queued: laid one a frame after the village's pieces and walls (PR #100's review), found again by its room's middle)
+					if (bVillageFolk15 && C->Houses.Num() > H0) VillageHouseQueue15.Add({ C, P, HouseK, C->Houses.Last().RoomC15 });
+					++HouseK;
+				}
 				Put(TEXT("well"), P.At, R.FRandRange(0.f, 360.f));
 				Ring(3, 9.f, 25.f, [&](const FVector2D& At, float Yaw) { Put(TEXT("hay"), At, Yaw + R.FRandRange(-40.f, 40.f), 1.f, 5.f); });
 				Put(TEXT("cart"), P.At + FVector2D(6.f, -5.f), R.FRandRange(0.f, 360.f));

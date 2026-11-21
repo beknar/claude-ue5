@@ -32,6 +32,8 @@ Parts (args):
                   NS_Fireplace_Low at every hearth (bHearth15, HearthFx15; screened by 884 hearthfx15: P_TorchFire drew nothing there).
   terrace         the seventh phase (items 26, 29) on brokenspire: the villages' houses and square on level pads cut into the slope,
                   their retaining walls and buttresses, 8 to 15 houses (bVillageTerraces15; the world's version 6).
+  folk            the eighth phase (items 27, 28) on brokenspire: each village house a household of 2 to 5 (bVillageFolk15), their lines
+                  from SourceArt/wilderness/village15.json (WildVillageLines15).
   dungeon         the fourth phase (items 5, 6, 8, 11): the great hall's oven (bStartOven15), the stations' marks (bStationMarks15),
                   the big map's zoom (bMapZoom15) on every map of the game (the pews by 770's Pew and the shelves part); each
                   dungeon map's start section built again (its oven and its shelves saved).
@@ -47,7 +49,7 @@ REPORT = []
 MAPS = "/Game/RandomDungeon/Maps/"
 # (the maps of the game the Summoner plays: martial_arts is the Martial Artist's alone)
 GAME_MAPS = ("brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress")
-PARTS = ("allies", "summons", "hands", "quick", "shelves", "dungeon", "items", "town", "hearth", "terrace")
+PARTS = ("allies", "summons", "hands", "quick", "shelves", "dungeon", "items", "town", "hearth", "terrace", "folk")
 args = [a for a in sys.argv[1:] if a in PARTS] or [p for p in PARTS if p != "shelves"]          # (shelves needs its folder: named only)
 SA = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "SourceArt")
 DUNGEONS = ("war_engine", "sewers", "kethrys_spire", "heaven_fortress")
@@ -330,6 +332,16 @@ def terrace(g, m):
 
 
 if "terrace" in args: each(("brokenspire",), terrace, "terrace")
+
+
+def folk(g, m):
+    J = json.load(open(os.path.join(SA, "wilderness", "village15.json"), encoding="utf-8"))
+    lines = [f"{role}|{l}" for role, ls in J.items() if not role.startswith("_") for l in ls]
+    g.set_editor_property("wild_village_lines15", lines); g.set_editor_property("village_folk15", True)
+    return {"lines": len(g.get_editor_property("wild_village_lines15")), "village_folk15": g.get_editor_property("village_folk15")}
+
+
+if "folk" in args: each(("brokenspire",), folk, "folk")
 
 
 if "hearth" in args:

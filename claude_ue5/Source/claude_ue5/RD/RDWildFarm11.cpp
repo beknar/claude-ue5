@@ -927,14 +927,7 @@ void ARDDungeonGenerator::SpawnWildFarm11(ARDWildChunk* C, const FRDWildPlace& P
 	// ---- the family (the old layout's): the farmer at a sown plot's edge, the farmwife at the first pen's gate, a farmhand before
 	// the barn's door, a child by the well (or the house's door)
 	TArray<int32> Men, Women, Kids;
-	for (int32 I = 0; I < Townsfolk.Num(); ++I)
-	{
-		const FRDTownsfolkDef& Df = Townsfolk[I];
-		if (!Df.Mesh || !Df.Town.IsEmpty()) continue;
-		const FString Nm = Df.Name.ToString();
-		if (Df.Role == ERDTownRole::Child) Kids.Add(I);
-		else if (Df.Role == ERDTownRole::Townsfolk) (Nm.Contains(TEXT("woman")) ? Women : Men).Add(I);
-	}
+	WildBodyPools15(Men, Women, Kids);
 	FVector2D TendAt = RDWF11At(P, 36.f, 0.f); float TendYaw = P.Yaw;
 	{
 		const float Fw0 = Wild->FarmWeight(P.At.X, P.At.Y);
