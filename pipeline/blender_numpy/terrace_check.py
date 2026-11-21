@@ -13,7 +13,7 @@ For the village whose pads the "with" grid's info.txt lists (the one nearest the
 - every step the terraces add (a step of 1.5 m or more between two neighbouring samples, four times the steps beside it, found in
   the grid with them and not in the one without) lies on a pad's edge (within 2.5 m of it, the wall's band and a sample), where its
   retaining wall stands; and none away from them;
-- the ground beyond 90 m of the village's middle the same in both grids (no change outside the village).
+- the ground beyond 100 m of the village's middle the same in both grids (no change outside the village).
 Exit code 1 when any check fails. Needs numpy."""
 import argparse, json, math, os, sys
 import numpy as np
@@ -91,7 +91,7 @@ else:
         e = min(abs(E[i1, j1]), abs(E[i2, j2]))
         (on_edge if e <= 2.5 else off_edge).append({"x": round(float(X[i1, 0]), 1), "y": round(float(Y[0, j1]), 1), "step_m": round(dv, 2), "edge_m": round(float(e), 2)})
     # (on foot: every sample she can walk to from the square's middle (a step to a neighbour climbing at most 0.75 of its length, not
-    # water, not a wall's band); each house's front door (its +X edge's middle, 1 m in) and the land beyond 90 m among them)
+    # water, not a wall's band); each house's front door (its +X edge's middle, 1 m in) and the land beyond 100 m among them)
     from collections import deque
     ok_cell = ~Wa & ~WZ
     seen = np.zeros_like(ok_cell); sq = [p for p in pads if p["kind"] == 0][0]
@@ -110,8 +110,8 @@ else:
         dx, dy = p["x"] + c * (p["hx"] - 1.0), p["y"] + s * (p["hx"] - 1.0)
         di_, dj_ = int(round((dx - x0) / st)), int(round((dy - y0) / st))
         doors.append(bool(0 <= di_ < n and 0 <= dj_ < n and seen[di_, dj_]))
-    beyond = bool((seen & (np.hypot(X - vil["x"], Y - vil["y"]) > 90.0)).any())
-    far = np.hypot(X - vil["x"], Y - vil["y"]) > 90.0
+    beyond = bool((seen & (np.hypot(X - vil["x"], Y - vil["y"]) > 100.0)).any())
+    far = np.hypot(X - vil["x"], Y - vil["y"]) > 100.0
     far_diff = float(np.abs(Ha[far] - Hb[far]).max()) if far.any() else 0.0
     res.update(pads=len(pads), houses=vil["houses"], flat=flat, new_steps=len(new), on_edge=len(on_edge), off_edge=off_edge[:20], off_edge_n=len(off_edge),
                largest_edge_step_m=max([s["step_m"] for s in on_edge], default=0.0), far_diff_m=round(far_diff, 4),
@@ -121,7 +121,7 @@ else:
     print(f"{vil['name']} ({vil['x']:.0f}, {vil['y']:.0f}): {vil['houses']} houses, {len(pads)} pads; the land under a pad spans up to {res['land_range_under_pads_m']} m; "
           f"pads level within {max(f['max_off_m'] for f in flat):.3f} m (walked vs drawn {max((f['walked_vs_drawn_m'] or 0) for f in flat):.3f}); "
           f"steps added {len(new)}: {len(on_edge)} on pads' edges (largest {res['largest_edge_step_m']} m), {len(off_edge)} elsewhere; "
-          f"front doors reached on foot from the square {sum(doors)} of {len(doors)}, the land beyond 90 m {'reached' if beyond else 'NOT reached'}; beyond 90 m the ground differs by {far_diff:.4f} m -> {'ok' if res['ok'] else 'FAILED'}")
+          f"front doors reached on foot from the square {sum(doors)} of {len(doors)}, the land beyond 100 m {'reached' if beyond else 'NOT reached'}; beyond 100 m the ground differs by {far_diff:.4f} m -> {'ok' if res['ok'] else 'FAILED'}")
 if a.json:
     with open(a.json, "w") as f: json.dump(res, f, indent=1)
 sys.exit(0 if res["ok"] else 1)

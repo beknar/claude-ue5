@@ -20,12 +20,30 @@ FRDWNoTerrace::FRDWNoTerrace() { ++GRDW15NoTerrace; }
 FRDWNoTerrace::~FRDWNoTerrace() { --GRDW15NoTerrace; }
 bool FRDWNoTerrace::On() { return GRDW15NoTerrace > 0; }
 
+/** the gap between two rectangles on the ground (the most any of their four axes keeps them apart; negative: they overlap) */
+static float RDW15PadGap(const FRDWPad& A, const FRDWPad& B)
+{
+	const FVector2D Ua(FMath::Cos(FMath::DegreesToRadians(A.Yaw)), FMath::Sin(FMath::DegreesToRadians(A.Yaw))), Va(-Ua.Y, Ua.X);
+	const FVector2D Ub(FMath::Cos(FMath::DegreesToRadians(B.Yaw)), FMath::Sin(FMath::DegreesToRadians(B.Yaw))), Vb(-Ub.Y, Ub.X);
+	const FVector2D D = B.C - A.C;
+	float Best = -1e9f;
+	for (const FVector2D& N : { Ua, Va, Ub, Vb })
+	{
+		const float Ra = A.Half.X * FMath::Abs(FVector2D::DotProduct(Ua, N)) + A.Half.Y * FMath::Abs(FVector2D::DotProduct(Va, N));
+		const float Rb = B.Half.X * FMath::Abs(FVector2D::DotProduct(Ub, N)) + B.Half.Y * FMath::Abs(FVector2D::DotProduct(Vb, N));
+		Best = FMath::Max(Best, FMath::Abs(FVector2D::DotProduct(D, N)) - Ra - Rb);
+	}
+	return Best;
+}
+
 int32 FRDWildWorld::VillageSlots(const FRDWildPlace& V, TArray<FRDWPad>* Out) const
 {
 	// (the houses are up to 10.7 x 20.9 m with their doors on their +X and -X walls (measured on the five meshes at their scale): a
-	// pad 16 x 24 m leaves 2.6 m before each door; seven slots at 33 m round the square (24 m across) and eight at 55 m, their chords
-	// 26 m and more at the least angles, so no pads meet. The count and the jitters are drawn first, whatever the land, so a slot's
-	// place never moves with another's refusal)
+	// pad 16 x 24 m leaves 2.6 m before each door; seven slots at 36 m round the square (24 m across) and eight at 60 m. PR #99's
+	// review: at 33 m the inner pads' inner corners cleared each other by 4 cm at their nominal 51.4 degrees and met under the jitter;
+	// at 36 m they need 46.4, and a slot whose pad would meet one kept already (by their rectangles, 1 m apart at least) is not built.
+	// The count and the jitters are drawn first, whatever the land, so a slot's place never moves with another's refusal. Each pad kept
+	// carries its height, the land at its PadRef as tested)
 	FRandomStream R((int32)Hash(V.Id, 501, Seed));
 	const int32 N = R.RandRange(VillageHousesMin, VillageHousesMax);
 	TArray<FRDWPad> Slots;
@@ -39,10 +57,10 @@ int32 FRDWildWorld::VillageSlots(const FRDWildPlace& V, TArray<FRDWPad>* Out) co
 			Slots.Add(P);
 		}
 	};
-	Ring(7, 33.f, 0.f);
-	Ring(8, 55.f, 0.5f);
+	Ring(7, VillageInnerRingM, 0.f);
+	Ring(8, VillageOuterRingM, 0.5f);
 	FRDWPad Sq; Sq.C = V.At; Sq.Yaw = V.Yaw; Sq.Half = FVector2D(12.f, 12.f); Sq.Kind = 0;
-	auto Buildable = [this](const FRDWPad& Pd)
+	auto Buildable = [this](FRDWPad& Pd)
 	{
 		const FVector2D Ax(FMath::Cos(FMath::DegreesToRadians(Pd.Yaw)), FMath::Sin(FMath::DegreesToRadians(Pd.Yaw))), Ay(-Ax.Y, Ax.X);
 		const FVector2D Hr = PadRef(Pd);
@@ -56,14 +74,20 @@ int32 FRDWildWorld::VillageSlots(const FRDWildPlace& V, TArray<FRDWPad>* Out) co
 				// (the land's own height there (with its detail): the coarse sample without it stood up to 10 m off it in the hills)
 				if (Sq2.WaterKind != 0 || FMath::Abs(NaturalHeight(Q.X, Q.Y) - Hc) > TerraceMaxStepM) return false;
 			}
+		Pd.H = Hc;
 		return true;
 	};
 	extern int32 GRDW15Refused[3];
 	if (!Buildable(Sq)) { if (FRDWNoTerrace::On()) FPlatformAtomics::InterlockedIncrement(&GRDW15Refused[1]); return 0; }
-	if (Out) Out->Add(Sq);
+	TArray<FRDWPad> Kept; Kept.Add(Sq);
 	int32 Can = 0;
-	for (const FRDWPad& S : Slots)
-		if (Buildable(S)) { if (Out && Can < N) Out->Add(S); ++Can; }
+	for (FRDWPad& S : Slots)
+	{
+		bool bClear = true;
+		for (const FRDWPad& K : Kept) if (RDW15PadGap(S, K) < 1.f) { bClear = false; break; }
+		if (bClear && Buildable(S)) { if (Can < N) Kept.Add(S); ++Can; }
+	}
+	if (Out) *Out = MoveTemp(Kept);
 	{ extern int32 GRDW15SlotHist[16]; FPlatformAtomics::InterlockedIncrement(&GRDW15SlotHist[FMath::Clamp(Can, 0, 15)]); }
 	return Can;
 }
@@ -83,29 +107,36 @@ float FRDWildWorld::NaturalHeight(double X, double Y) const
 	return Feature(X, Y, LandHeight(X, Y, true), nullptr);
 }
 
-void FRDWildWorld::StoreTerraces(FIntPoint Cell, const FRDWildPlace* V) const
+void FRDWildWorld::StoreTerraces(FIntPoint Cell, const FRDWildPlace* V, const TArray<FRDWPad>* Pads) const
 {
-	// (the slots its placing tested, at the heights it tested them: the land as the places are made. Read after the minor roads,
-	// whose beds ran through the pads, a pad's land spanned 30 m in the mountains; the ways now start past the pads (VillageWayInsetM))
+	// (the slots its placing tested, at the heights it tested them (PR #99's review: passed from that test, not worked out twice): the
+	// land as the places are made. Read after the minor roads, whose beds ran through the pads, a pad's land spanned 30 m in the
+	// mountains; the ways now start past the pads (VillageWayInsetM))
 	TSharedPtr<FRDWTerraces> Tr;
-	if (V)
+	if (V && Pads)
 	{
-		const FRDWNoTerrace G;
 		Tr = MakeShared<FRDWTerraces>();
-		Tr->Mid = V->At; Tr->VillageId = V->Id;
-		VillageSlots(*V, &Tr->Pads);
+		Tr->Mid = V->At; Tr->VillageId = V->Id; Tr->Pads = *Pads;
 		double Rm = 0.0;
-		for (FRDWPad& Pd : Tr->Pads) { const FVector2D Hr = PadRef(Pd); Pd.H = NaturalHeight(Hr.X, Hr.Y); Rm = FMath::Max(Rm, FVector2D::Distance(Pd.C, V->At) + Pd.Half.Size()); }
-		Tr->bHeights = true;
-		Tr->R = Rm + 26.0;          // (the longest band, a road's, 25 m)
+		for (const FRDWPad& Pd : Tr->Pads) Rm = FMath::Max(Rm, FVector2D::Distance(Pd.C, V->At) + Pd.Half.Size());
+		Tr->R = Rm + 25.0;          // (the longest ramp, 24 m)
 	}
 	FScopeLock Lk(&TerraceCache->Lock);
 	if (!TerraceCache->Cells.Contains(Cell)) TerraceCache->Cells.Add(Cell, Tr);
 }
 
+namespace
+{
+	// (a thread's last cell asked for: every ground sample of a chunk asks for its cell, and nearly all ask for the same one (PR #99's
+	// review: a lock and a map lookup for every sample on every worker). Keyed by the world and its Init, which empties the cache)
+	struct FRDW15LastTerrace { const FRDWildWorld* W = nullptr; uint32 Gen = 0; FIntPoint Cell = FIntPoint(MIN_int32, MIN_int32); TSharedPtr<const FRDWTerraces> T; };
+	thread_local FRDW15LastTerrace GRDW15Last;
+}
+
 TSharedPtr<const FRDWTerraces> FRDWildWorld::TerracesAt(double X, double Y) const
 {
 	const FIntPoint Cell = PlaceCellOf(X, Y);
+	if (GRDW15Last.W == this && GRDW15Last.Gen == TerraceGen && GRDW15Last.Cell == Cell) return GRDW15Last.T;
 	TSharedPtr<const FRDWTerraces> Got;
 	bool bHave = false;
 	for (int32 Pass = 0; Pass < 2 && !bHave; ++Pass)
@@ -117,27 +148,21 @@ TSharedPtr<const FRDWTerraces> FRDWildWorld::TerracesAt(double X, double Y) cons
 		// (the cell's places made (they record its village's slots); a cell outside the continent's places has none)
 		if (!bHave && Pass == 0) { const FRDWNoTerrace G; TArray<FRDWildPlace> Ps; PlacesIn(Cell, Ps); }
 	}
-	if (!bHave) { FScopeLock Lk(&TerraceCache->Lock); if (!TerraceCache->Cells.Contains(Cell)) TerraceCache->Cells.Add(Cell, nullptr); return nullptr; }
-	if (!Got.IsValid() || Got->bHeights || !bTerracesReady) return Got;
-	// (its pads' heights, the land at each pad's middle on the world as made; another thread's, if it was first)
-	TSharedPtr<FRDWTerraces> Done = MakeShared<FRDWTerraces>(*Got);
-	for (FRDWPad& Pd : Done->Pads) Pd.H = NaturalHeight(Pd.C.X, Pd.C.Y);
-	Done->bHeights = true;
-	FScopeLock Lk(&TerraceCache->Lock);
-	TSharedPtr<const FRDWTerraces>& Slot = TerraceCache->Cells.FindOrAdd(Cell);
-	if (!Slot.IsValid() || !Slot->bHeights) Slot = Done;
-	return Slot;
+	if (!bHave) { FScopeLock Lk(&TerraceCache->Lock); if (!TerraceCache->Cells.Contains(Cell)) TerraceCache->Cells.Add(Cell, nullptr); }
+	GRDW15Last.W = this; GRDW15Last.Gen = TerraceGen; GRDW15Last.Cell = Cell; GRDW15Last.T = Got;
+	return Got;
 }
 
-float FRDWildWorld::ApplyTerrace(double X, double Y, float H, float RoadW, float& Terrace) const
+float FRDWildWorld::ApplyTerrace(double X, double Y, float H, float& Terrace) const
 {
-	// (a house's pad: level; on its two door sides (its +X front, toward the square, and its back) an earth ramp to the land, 1 in 2.5
+	// (a house's pad: level; on its two door sides (its +X front, toward the square, and its back) an earth ramp to the land, 1 in 3
 	// (walkable: with walls on every side the land stood off, no door was reached on foot); on its long sides a retaining wall's
-	// band (LayTerraceWalls15). The square ramps on every side. Where two ramps meet, each pad's eased height weighted by how near it
-	// is, so the ground runs on between neighbouring pads)
+	// band (LayTerraceWalls15). The square ramps on every side. Where two ramps meet, each pad's eased height weighted so that a
+	// pad's own height holds at its edge (PR #99's review: weighted by nearness alone, a neighbour's ramp lifted the ground just
+	// outside a pad 2 m over its edge), and how far the pads reach by the nearest's)
 	Terrace = 0.f;
 	const TSharedPtr<const FRDWTerraces> T = TerracesAt(X, Y);
-	if (!T.IsValid() || !T->bHeights) return H;
+	if (!T.IsValid()) return H;
 	const FVector2D P(X, Y);
 	if (FVector2D::DistSquared(P, T->Mid) > T->R * T->R) return H;
 	float Ws = 0.f, Hs = 0.f;
@@ -154,21 +179,22 @@ float FRDWildWorld::ApplyTerrace(double X, double Y, float H, float RoadW, float
 		const float Wr = Pd.Kind == 0 ? 1.f : Py <= 0.f ? 1.f : Px <= 0.f ? 0.f : Px / (Px + Py);
 		const float Band = FMath::Lerp(0.6f, FMath::Clamp(FMath::Abs(Pd.H - H) * TerraceRampRun, 0.6f, 24.f), Wr);
 		if (E >= Band) continue;
-		const float Af = E / Band, W = FMath::Square(1.f - Af);
+		const float Af = E / Band;
+		const float W = FMath::Square(1.f - Af) / FMath::Max(Af, 1e-3f);
 		Hs += W * FMath::Lerp(Pd.H, H, Af); Ws += W;          // (straight: a smoothstep's middle is 1.5 times its slope)
 		Terrace = FMath::Max(Terrace, 1.f - Af);
 	}
 	if (Ws <= 0.f) return H;
-	const float Wl = FMath::Max(0.f, 1.f - Ws);
-	return (Hs + Wl * H) / (Ws + Wl);
+	return FMath::Lerp(H, Hs / Ws, Terrace);
 }
 
 // ================================================================================================ the village laid on its pads
 void ARDDungeonGenerator::LayTerraceWalls15(ARDWildChunk* C, const FRDWTerraces& T)
 {
-	// (a retaining wall along every edge the land stands 40 cm or more off its pad: on its line, from under the lower ground to over the
-	// higher (a low parapet where the pad is the higher); a buttress every 4 m on its low side where it is over 1.2 m tall (shallow on
-	// the pad's side, so it does not stand in a house); none where a road comes onto the pad. One instanced mesh for the village)
+	// (a retaining wall along a house pad's long sides where the land stands 40 cm or more off it: on its line, from under the lower
+	// ground to over the higher (a low parapet where the pad is the higher); a buttress every 4 m on its low side where it is over 1.2 m
+	// tall (shallow on the pad's side, so it does not stand in a house). One instanced mesh for the village; each wall recorded
+	// (TerraceWallLines15) for the test)
 	if (!C || !Wild.IsValid()) return;
 	if (!TerraceCube15) TerraceCube15 = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
 	if (!TerraceCube15) return;
@@ -205,14 +231,19 @@ void ARDDungeonGenerator::LayTerraceWalls15(ARDWildChunk* C, const FRDWTerraces&
 				if (Sr.Road > 0.1f || Sr.WaterKind != 0) continue;
 				const float Lo = FMath::Min(Pd.H, Nat) - 0.6f, Hi = FMath::Max(Pd.H, Nat) + (D > 0.f ? 0.35f : 0.1f);
 				const FVector2D Pw = Pe + Nrm * 0.3f;
-				const float Zl = Wild->ToZ(Lo), Zh = Wild->ToZ(Hi);
+				// (the drawn ground is the terraces' heights plus the port's lift (PR #99's review: without it the walls stood the lift under it
+				// within 40 km of Graymourne))
+				const float Lift = Wild->PortLift(Pw.X, Pw.Y);
+				const float Zl = Wild->ToZ(Lo + Lift), Zh = Wild->ToZ(Hi + Lift);
+				TerraceWallLines15.Add(FString::Printf(TEXT("%d|%.0f|%.0f|%.0f|%.0f|%.0f|%.0f|%.0f|%.0f"), T.VillageId, Pw.X * 100.0, Pw.Y * 100.0, Zl, Zh, Wild->ToZ(Pd.H + Lift), Wild->ToZ(Nat + Lift), Po.X * 100.0, Po.Y * 100.0));
+				if (TerraceWallLines15.Num() > 6000) TerraceWallLines15.RemoveAt(0, 1000);
 				Is->AddInstance(FTransform(FRotator(0.f, Yaw, 0.f), FVector(Pw.X * 100.0, Pw.Y * 100.0, (Zl + Zh) * 0.5f), FVector(Seg + 0.05f, 0.6f, (Zh - Zl) / 100.f)), true);
 				++Walls;
 				if (K % 2 == 0 && FMath::Abs(D) > 1.2f)
 				{
 					const float Depth = D > 0.f ? 0.9f : 0.35f;
 					const FVector2D Pb = D > 0.f ? Pe + Nrm * (0.6f + Depth * 0.5f) : Pe - Nrm * (Depth * 0.5f);
-					const float Zb = Wild->ToZ(FMath::Min(Pd.H, Nat) + FMath::Abs(D) * 0.85f);
+					const float Zb = Wild->ToZ(FMath::Min(Pd.H, Nat) + FMath::Abs(D) * 0.85f + Lift);
 					Is->AddInstance(FTransform(FRotator(0.f, Yaw, 0.f), FVector(Pb.X * 100.0, Pb.Y * 100.0, (Zl + Zb) * 0.5f), FVector(0.7f, Depth, (Zb - Zl) / 100.f)), true);
 					++Buttresses;
 				}
@@ -232,6 +263,6 @@ TArray<FString> ARDDungeonGenerator::GetVillageTerraces15(FVector2D AtM) const
 	if (!T.IsValid()) return Out;
 	Out.Add(FString::Printf(TEXT("village|%d|%.1f|%.1f|%.1f"), T->VillageId, T->Mid.X, T->Mid.Y, T->R));
 	for (const FRDWPad& Pd : T->Pads)
-		Out.Add(FString::Printf(TEXT("pad|%d|%.2f|%.2f|%.1f|%.1f|%.1f|%.1f"), Pd.Kind, Pd.C.X, Pd.C.Y, Pd.Yaw, Pd.Half.X, Pd.Half.Y, Wild->ToZ(Pd.H)));
+		Out.Add(FString::Printf(TEXT("pad|%d|%.2f|%.2f|%.1f|%.1f|%.1f|%.1f"), Pd.Kind, Pd.C.X, Pd.C.Y, Pd.Yaw, Pd.Half.X, Pd.Half.Y, Wild->ToZ(Pd.H + Wild->PortLift(Pd.C.X, Pd.C.Y))));
 	return Out;
 }

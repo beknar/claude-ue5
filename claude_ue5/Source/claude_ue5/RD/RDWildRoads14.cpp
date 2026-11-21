@@ -130,7 +130,7 @@ bool FRDWildWorld::MinorPath(const FVector2D& A, const FVector2D& B, uint32 Sk, 
 				for (int32 Di = -1; Di <= 1 && !bBad; ++Di)
 					for (int32 Dj = -1; Dj <= 1 && !bBad; ++Dj)
 						for (auto It = VillageDots15.CreateConstKeyIterator(Kc + FIntPoint(Di, Dj)); It; ++It)
-							if (FVector2D::DistSquared(It.Value(), OwnA) >= 1.0 && FVector2D::DistSquared(It.Value(), OwnB) >= 1.0 && FVector2D::DistSquared(It.Value(), Q) < 92.0 * 92.0) { bBad = true; break; }
+							if (FVector2D::DistSquared(It.Value(), OwnA) >= 1.0 && FVector2D::DistSquared(It.Value(), OwnB) >= 1.0 && FVector2D::DistSquared(It.Value(), Q) < 100.0 * 100.0) { bBad = true; break; }
 				for (int32 Di = -1; Di <= 1 && !bBad; ++Di)
 					for (int32 Dj = -1; Dj <= 1 && !bBad; ++Dj)
 						for (auto It = Dots.CreateConstKeyIterator(Kc + FIntPoint(Di, Dj)); It; ++It)
@@ -203,7 +203,7 @@ void FRDWildWorld::MakeMinorRoads()
 	for (const TArray<FRDWildPlace>& A : RowFm) Farms.Append(A);
 	TMultiMap<FIntPoint, FVector2D> Dots;
 	for (const TArray<FRDWildPlace>* L : { &Villages, &Others, &Sites, &Farms }) for (const FRDWildPlace& P : *L) Dots.Add(RDR14DotKey(P.At), P.At);
-	// (the list of 2026-11-20: a way keeps clear of a village's terraces, its pads out to 63 m and their walls: 92 m from its middle)
+	// (the list of 2026-11-20: a way keeps clear of a village's terraces, its pads out to 68 m and their ramps: 100 m from its middle)
 	VillageDots15.Reset();
 	if (bTerraces15) for (const FRDWildPlace& P : Villages) VillageDots15.Add(RDR14DotKey(P.At), P.At);
 	// ---- how far each place cell is from a major road (in cells: a chamfer from the cells the roads pass through)

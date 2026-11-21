@@ -1,14 +1,14 @@
 {
  "seed": 24680,
  "probe": "RDWildProbe -Half=90 -Step=1, with and without -NoTerraces",
- "villages_with": 2492,
+ "villages_with": 2477,
  "villages_without": 2757,
  "villages": [
   {
    "grid": [
-    181,
-    788.4,
-    8153.4,
+    201,
+    778.4,
+    8143.4,
     1.0
    ],
    "village": {
@@ -21,22 +21,22 @@
    "ok": true,
    "pads": 11,
    "houses": 10,
-   "new_steps": 265,
-   "on_edge": 265,
+   "new_steps": 213,
+   "on_edge": 213,
    "off_edge_n": 0,
-   "largest_edge_step_m": 8.84,
+   "largest_edge_step_m": 6.82,
    "far_diff_m": 0.0,
-   "land_range_under_pads_m": 10.19,
+   "land_range_under_pads_m": 9.15,
    "doors_reached": 10,
    "doors": 10,
    "out_of_the_village": true,
-   "walkable_samples": 31672
+   "walkable_samples": 39081
   },
   {
    "grid": [
-    181,
-    -5568.3,
-    -5955.0,
+    201,
+    -5578.3,
+    -5965.0,
     1.0
    ],
    "village": {
@@ -49,22 +49,22 @@
    "ok": true,
    "pads": 12,
    "houses": 11,
-   "new_steps": 31,
-   "on_edge": 31,
+   "new_steps": 16,
+   "on_edge": 16,
    "off_edge_n": 0,
-   "largest_edge_step_m": 2.63,
+   "largest_edge_step_m": 3.2,
    "far_diff_m": 0.0,
-   "land_range_under_pads_m": 3.48,
+   "land_range_under_pads_m": 4.2,
    "doors_reached": 11,
    "doors": 11,
    "out_of_the_village": true,
-   "walkable_samples": 31797
+   "walkable_samples": 39408
   },
   {
    "grid": [
-    181,
-    -4608.3,
-    -7871.4,
+    201,
+    -4618.3,
+    -7881.4,
     1.0
    ],
    "village": {
@@ -77,50 +77,22 @@
    "ok": true,
    "pads": 10,
    "houses": 9,
-   "new_steps": 47,
-   "on_edge": 47,
+   "new_steps": 68,
+   "on_edge": 68,
    "off_edge_n": 0,
-   "largest_edge_step_m": 2.94,
+   "largest_edge_step_m": 3.34,
    "far_diff_m": 0.0,
-   "land_range_under_pads_m": 3.65,
+   "land_range_under_pads_m": 3.78,
    "doors_reached": 9,
    "doors": 9,
    "out_of_the_village": true,
-   "walkable_samples": 31982
+   "walkable_samples": 39596
   },
   {
    "grid": [
-    181,
-    3030.5,
-    7990.5,
-    1.0
-   ],
-   "village": {
-    "id": 344720,
-    "name": "Mistwell",
-    "x": 3120.5,
-    "y": 8080.5,
-    "houses": 8
-   },
-   "ok": true,
-   "pads": 9,
-   "houses": 8,
-   "new_steps": 159,
-   "on_edge": 159,
-   "off_edge_n": 0,
-   "largest_edge_step_m": 6.76,
-   "far_diff_m": 0.0,
-   "land_range_under_pads_m": 10.86,
-   "doors_reached": 8,
-   "doors": 8,
-   "out_of_the_village": true,
-   "walkable_samples": 31602
-  },
-  {
-   "grid": [
-    181,
-    -7467.3,
-    -6054.9,
+    201,
+    -7477.3,
+    -6064.9,
     1.0
    ],
    "village": {
@@ -133,22 +105,22 @@
    "ok": true,
    "pads": 14,
    "houses": 13,
-   "new_steps": 202,
-   "on_edge": 202,
+   "new_steps": 172,
+   "on_edge": 172,
    "off_edge_n": 0,
-   "largest_edge_step_m": 5.93,
+   "largest_edge_step_m": 5.92,
    "far_diff_m": 0.0,
-   "land_range_under_pads_m": 7.07,
+   "land_range_under_pads_m": 7.6,
    "doors_reached": 13,
    "doors": 13,
    "out_of_the_village": true,
-   "walkable_samples": 31600
+   "walkable_samples": 39216
   },
   {
    "grid": [
-    181,
-    9307.3,
-    -42.0,
+    201,
+    9297.3,
+    -52.0,
     1.0
    ],
    "village": {
@@ -161,16 +133,44 @@
    "ok": true,
    "pads": 15,
    "houses": 14,
-   "new_steps": 53,
-   "on_edge": 53,
+   "new_steps": 47,
+   "on_edge": 47,
    "off_edge_n": 0,
-   "largest_edge_step_m": 2.43,
+   "largest_edge_step_m": 2.7,
    "far_diff_m": 0.0,
    "land_range_under_pads_m": 3.01,
    "doors_reached": 14,
    "doors": 14,
    "out_of_the_village": true,
-   "walkable_samples": 31517
+   "walkable_samples": 39139
+  },
+  {
+   "grid": [
+    201,
+    -9231.2,
+    -3960.6,
+    1.0
+   ],
+   "village": {
+    "id": 246320,
+    "name": "Windholt",
+    "x": -9131.2,
+    "y": -3860.6,
+    "houses": 10
+   },
+   "ok": true,
+   "pads": 11,
+   "houses": 10,
+   "new_steps": 141,
+   "on_edge": 141,
+   "off_edge_n": 0,
+   "largest_edge_step_m": 5.8,
+   "far_diff_m": 0.0,
+   "land_range_under_pads_m": 6.53,
+   "doors_reached": 10,
+   "doors": 10,
+   "out_of_the_village": true,
+   "walkable_samples": 39499
   }
  ]
 }

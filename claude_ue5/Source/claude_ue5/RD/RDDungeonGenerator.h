@@ -1936,6 +1936,9 @@ public:
 	UPROPERTY(Transient) TObjectPtr<UStaticMesh> TerraceCube15 = nullptr;
 	void LayTerraceWalls15(ARDWildChunk* C, const struct FRDWTerraces& T);
 	int32 TerraceWalls15 = 0, TerraceButtresses15 = 0;
+	/** the walls laid, "village|x|y|z bottom|z top|pad z|land z|land x|land y" (cm; the land read 1.2 m out from the pad's edge) */
+	TArray<FString> TerraceWallLines15;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetTerraceWallLines15() const { return TerraceWallLines15; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetVillageTerraces15(FVector2D AtM) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FIntPoint GetTerraceWalls15() const { return FIntPoint(TerraceWalls15, TerraceButtresses15); }
 	/** the Old Watchtower climbed: its doorway open (hidden boxes round its ring, not its quarters' collision), a spiral stair up to

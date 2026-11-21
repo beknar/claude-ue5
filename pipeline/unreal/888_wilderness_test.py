@@ -3565,6 +3565,15 @@ def step_terrace15():
                                     h["y"] + math.sin(math.radians(h["yaw"])) * h["hx"] * i * 0.8 + math.cos(math.radians(h["yaw"])) * h["hy"] * j * 0.8, 0)) for i in (-1, 0, 1) for j in (-1, 0, 1)]
             fits.append({"on_pad": on_pad, "floor_off_cm": round(h["floor"] - q["z"], 1), "ground_off_cm": round(max(abs(z - q["z"]) for z in gz), 1)})
         v["fits"] = fits
+        # (PR #99's review: each wall measured, not counted: its foot under the lower ground and its top over the higher, its pad's height
+        # the pad's, and the land it holds back the ground in play there (1.2 m out from the pad's edge))
+        vid = next((int(str(l).split("|")[1]) for l in g.get_village_terraces15(unreal.Vector2D(p["x"], p["y"])) if str(l).startswith("village|")), None)
+        wl = [[float(x) for x in str(l).split("|")[1:]] for l in g.get_terrace_wall_lines15() if str(l).split("|")[0] == str(vid)]
+        bad = []
+        for x_, y_, zl, zh, pz, lz, lx, ly in wl:
+            gz = g.wild_ground_z(V(lx, ly, 0))
+            if not (zl <= min(pz, lz) - 40 and zh >= max(pz, lz) + 5 and abs(gz - lz) <= 30 and any(abs(pz - q["z"]) < 2 for q in pd)): bad.append([round(x_), round(y_), round(zl), round(zh), round(pz), round(lz), round(gz)])
+        v["walls"] = len(wl); v["walls_bad"] = bad[:6]; v["walls_bad_n"] = len(bad); v["wall_height_max_cm"] = round(max([w[3] - w[2] for w in wl], default=0))
         # (two houses walked into from 3.5 m out, by a door)
         walks = []
         for h in hs[:2]:
@@ -3616,7 +3625,7 @@ def step_terrace15():
     quiet(False)
     vs = res["visits"]
     ok = len(vs) >= 3 and res["walls_laid"][0] > 0 and all(
-        8 <= v["houses"] <= 15 and v["houses"] == v["houses_planned"] and all(f["on_pad"] and abs(f["floor_off_cm"]) <= 15 and f["ground_off_cm"] <= 15 for f in v["fits"])
+        8 <= v["houses"] <= 15 and v["houses"] == v["houses_planned"] and v["walls_bad_n"] == 0 and all(f["on_pad"] and abs(f["floor_off_cm"]) <= 15 and f["ground_off_cm"] <= 15 for f in v["fits"])
         and all(w.get("inside") and abs(w["feet_over_floor_cm"]) < 15 for w in v["walks"]) and len(v["walks"]) == 2 for v in vs)
     step_result("terrace15", ok, **res)
 
