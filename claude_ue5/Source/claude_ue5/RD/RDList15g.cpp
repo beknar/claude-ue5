@@ -137,7 +137,7 @@ void ARDDungeonGenerator::TickVillageFolk15()
 		ARDWildChunk* C = Q.Chunk.Get();
 		if (!IsValid(C)) continue;
 		const int32 Hi = C->Houses.IndexOfByPredicate([&Q](const ARDWildChunk::FHouse& H) { return FVector::Dist2D(H.RoomC15, Q.RoomC) < 10.f; });
-		if (Hi >= 0) { LayVillageHousehold15(C, Q.P, Q.HouseK, Hi); AddHouseLight15(C, C->Houses[Hi].RoomC15, C->Houses[Hi].DoorOut15, C->Houses[Hi].bDoor15); break; }          // (the tenth phase: its light by night)
+		if (Hi >= 0) { LayVillageHousehold15(C, Q.P, Q.HouseK, Hi); break; }
 	}
 	// (once a second: a wild person beyond 250 m of her stops its day (no tick); its body is left to pose as the engine poses what is seen
 	// (PR #100's review: its skeletal tick switched off too, a village laid off screen and looked at from 300 m stood in its reference

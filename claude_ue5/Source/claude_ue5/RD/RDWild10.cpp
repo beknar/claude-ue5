@@ -285,6 +285,9 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 	}
 	C->Houses.Add(Rec);
 	UE_LOG(LogRDWild10, Verbose, TEXT("RDWILDHOUSE %s at (%.0f, %.0f, %.0f): %d doors, %d furniture, %d plants cleared"), *Rec.Of, O.X, O.Y, O.Z, Rec.Doors, Rec.Furniture, Gone);
+	// (the list of 2026-11-20's tenth phase: its light by night, laid with the house (PR #102's review: laid from the households' queue, a
+	// village with no folk or no terraces had none))
+	if (C->Houses.Num() > 0) { const ARDWildChunk::FHouse& Hl = C->Houses.Last(); AddHouseLight15(C, Hl.RoomC15, Hl.DoorOut15, Hl.bDoor15); }
 	return true;
 }
 

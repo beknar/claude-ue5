@@ -2013,10 +2013,13 @@ public:
 	 *  their tops marked on her map (seen, not found: drawn at half strength, no travel), the last two kept with the game */
 	TMap<int32, FVector> WildLookoutTops15;
 	TSet<int32> LookoutsClimbed15, WildMarked15;
+	/** the marked places as places, looked up once when the marks change (PR #102's review: WildKnownPlaces looked each up every frame) */
+	mutable TArray<FRDWildPlace> WildMarkedCache15;
+	mutable int32 WildMarkedCacheFor15 = -1;
 	float LookoutLook15 = 0.f;
 	int32 LastLookoutMarked15 = 0;
 	void NoteLookoutTop15(const struct FRDWildPlace& P, const FVector& Mid, float TopZ);
-	void TickLookouts15(const FVector& Her);
+	void TickLookouts15(float Dt, const FVector& Her);
 	int32 ClimbLookout15(const struct FRDWildPlace& L);
 	void LoadLookouts15();
 	/** tests: the lookouts within Km of her, "id|name|x m|y m|top z cm (-1: not laid)|climbed|found|cell x|cell y|tier" */
@@ -2036,6 +2039,9 @@ public:
 	struct FRegionLandmark15 { int32 Line = -1; FVector2D At = FVector2D::ZeroVector; float Z = 0.f, TopZ = 0.f, Yaw = 0.f; bool bExtraNight = false;
 		TWeakObjectPtr<class UStaticMeshComponent> Main, Extra; };
 	TMap<FIntVector, FRegionLandmark15> RegionLandmarks15;
+	mutable TMap<FIntVector, FRegionLandmark15> RegionLandmarkSites15;
+	/** the 6 km squares' tower sites, worked out once (x, y m; z 1 when it has one) */
+	mutable TMap<FIntPoint, FVector> WildTowerSites13;
 	/** the open lands' far towers (a 6 km square's -> its tower, laid as seen from afar; the nearest is WildLandmark) */
 	TMap<FIntPoint, TWeakObjectPtr<class UStaticMeshComponent>> FarTowers15;
 	/** a 6 km square's broken tower's spot (TickWildLandmark13's rule, shared): false where it has none */
@@ -2043,7 +2049,15 @@ public:
 	float RegionLandmarkLook15 = 0.f;
 	bool RegionLandmarkOf15(FIntPoint Cell, int32 Slot, FRegionLandmark15& Out) const;
 	void LayRegionLandmark15(FRegionLandmark15& Lm);
-	void TickRegionLandmarks15(const FVector& Her);
+	void TickRegionLandmarks15(float Dt, const FVector& Her);
+	/** the landmark lines parsed once (PR #102's review), and each cell's and slot's landmark worked out once (pure functions of the seed) */
+	struct FRegionLandmarkKind15 { FString Name; TArray<FString> Biomes; int32 Main = -1, Extra = -1, Mat = -1; float Height = 100.f, ExtraHeight = 100.f, ExtraWidth = 10.f, Sink = 2.f; bool bNight = false; };
+	mutable TArray<FRegionLandmarkKind15> RegionLandmarkParsed15;
+	mutable int32 RegionLandmarkParsedFor15 = -1;
+	void ParseRegionLandmarks15() const;
+	/** one night for the phase's rules (the sky's: 20:00 to 5:30), and the houses' lights' hours (dusk to bed, and before dawn) */
+	bool IsWildNight15() const;
+	bool IsHouseLightHour15() const;
 	/** tests: the landmarks laid round her, "kind|x m|y m|ground z|top z (cm)|main laid|extra (0 none, 1 hidden, 2 shown)" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetRegionLandmarks15() const;
 	/** the travellers' camps' smoke (a column over the fire, its width and height in m as X and Z) */
@@ -2056,7 +2070,7 @@ public:
 	TArray<TWeakObjectPtr<class UPointLightComponent>> HouseLights15;
 	float HouseLightLook15 = 0.f;
 	class UPointLightComponent* AddHouseLight15(ARDWildChunk* C, const FVector& RoomC, const FVector& DoorOut, bool bDoor);
-	void TickHouseLights15(const FVector& Her);
+	void TickHouseLights15(float Dt, const FVector& Her);
 	/** tests: the houses' lights within RadiusM of a point (m), "x|y|z|on|candelas" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetHouseLights15(FVector2D AtM, float RadiusM) const;
 	/** tests: the cave level's "key|tier|base|cap|title" */

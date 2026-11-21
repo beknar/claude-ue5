@@ -180,6 +180,8 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 			}
 			if (bWildHouseInsides) FitWildTower(C, FVector(P.At.X * 100.0, P.At.Y * 100.0, 0.0), Z0, Hs, P.Yaw, bLookout ? -1e6f : Y0 + 90.f * Kept, Storeys);
 			if (bLookout) NoteLookoutTop15(P, FVector(P.At.X * 100.0, P.At.Y * 100.0, 0.0), Z0 + Storeys * Hs);
+			// (its ground cleared of trees and plants 7 m round (PR #102's review: in a forest a trunk could stand through its stair or its open top))
+			if (bLookout) WildClearRect(C, FVector(P.At.X * 100.0, P.At.Y * 100.0, Z0), 0.f, FVector2D(700.f, 700.f));
 			for (int32 I = 0; I < 3; ++I)
 			{
 				const float A = FMath::DegreesToRadians(P.Yaw + 120.f + 60.f * I + R.FRandRange(-15.f, 15.f)), D = R.FRandRange(8.f, 12.f);

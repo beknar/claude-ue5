@@ -7091,6 +7091,19 @@ def step_landmarks15():
                     g.set_town_hour(h0); G["pawn"].set_actor_hidden_in_game(False)
                 hills.append(h)
             res["regions"][bn] = hills
+        # (PR #102's review: she comes to a far tower (not the one laid whole) and its cave's mouth is there: 5 km out of Brokenspire, the
+        # far towers listed, she is put 60 m from the nearest of them)
+        g.wild_put_her(5000.0, 0.0); yield from wait_chunks(30, 50); ground_put(5000.0, 0.0); yield from rwait(4.5)
+        me = G["pawn"].get_actor_location()
+        towers = [str(l).split("|") for l in g.get_region_landmarks15() if str(l).startswith("tower|")]
+        whole = str(g.get_wild_landmark()).split("|")
+        far = [t for t in towers if not (whole[0] == "on" and abs(float(t[1]) * 100 - float(whole[1])) < 100 and abs(float(t[2]) * 100 - float(whole[2])) < 100)]
+        if far:
+            t = min(far, key=lambda f: math.hypot(float(f[1]) - me.x / 100.0, float(f[2]) - me.y / 100.0))
+            tx, ty = float(t[1]), float(t[2])
+            g.wild_put_her(tx + 60.0, ty); yield from wait_chunks(30, 50); ground_put(tx + 60.0, ty); yield from rwait(4.5)
+            m = str(g.get_cave_mouth15()).split("|")
+            res["far_tower"] = {"at_m": [round(tx), round(ty)], "mouth": m[0], "mouth_from_tower_m": round(math.hypot(float(m[1]) / 100 - tx, float(m[2]) / 100 - ty), 1) if m[0] == "on" else None}
     finally:
         try: g.set_town_hour(h0); G["pawn"].set_actor_hidden_in_game(False)
         except Exception: pass
@@ -7101,7 +7114,8 @@ def step_landmarks15():
     nightly = ("beacon stone", "lighthouse")
     ok_night = all("extra_day" not in h or (not any(e in h["extra_day"] for e in (n + ":2" for n in nightly))
                                              and all((n + ":2") in h["extra_night"] for n in nightly if (n + ":1") in h["extra_day"])) for r in res["regions"].values() if r for h in r)
-    step_result("landmarks15", ok_view and ok_night, **res)
+    ok_far = bool(res.get("far_tower")) and res["far_tower"]["mouth"] == "on" and (res["far_tower"]["mouth_from_tower_m"] or 99) < 25.0
+    step_result("landmarks15", ok_view and ok_night and ok_far, **res)
 
 
 def step_lookout15():

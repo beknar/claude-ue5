@@ -432,6 +432,9 @@ public:
 	FIntPoint LookoutCellOf(double X, double Y) const { return FIntPoint(FMath::FloorToInt((X - Xs) / CellM), FMath::FloorToInt((Y - Yw) / CellM)); }
 	bool LookoutOf(FIntPoint Cell, FRDWildPlace& Out) const;
 	void LookoutsIn(double X0, double Y0, double X1, double Y1, TArray<FRDWildPlace>& Out) const;
+	/** a point R metres from every place, structure, point of interest, scenery, farmstead and quest's place (and, asked, every lookout):
+	 *  the layers of the list of 2026-11-20's tenth phase stand clear of all of them (PR #102's review) */
+	bool ClearOfPlaces15(const FVector2D& S, double R, bool bLookouts) const;
 	struct FLookoutCache { FCriticalSection Lock; TMap<FIntPoint, FRDWildPlace> Cells; };
 	TSharedPtr<FLookoutCache> LookoutCache = MakeShared<FLookoutCache>();
 	/** where two roads meet (Init): the crossroads a scenery kind of Place "crossroads" stands at */
