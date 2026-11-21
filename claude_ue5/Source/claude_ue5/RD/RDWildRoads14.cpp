@@ -129,6 +129,10 @@ bool FRDWildWorld::MinorPath(const FVector2D& A, const FVector2D& B, uint32 Sk, 
 				const FIntPoint Kc = RDR14DotKey(Q);
 				for (int32 Di = -1; Di <= 1 && !bBad; ++Di)
 					for (int32 Dj = -1; Dj <= 1 && !bBad; ++Dj)
+						for (auto It = VillageDots15.CreateConstKeyIterator(Kc + FIntPoint(Di, Dj)); It; ++It)
+							if (FVector2D::DistSquared(It.Value(), OwnA) >= 1.0 && FVector2D::DistSquared(It.Value(), OwnB) >= 1.0 && FVector2D::DistSquared(It.Value(), Q) < 100.0 * 100.0) { bBad = true; break; }
+				for (int32 Di = -1; Di <= 1 && !bBad; ++Di)
+					for (int32 Dj = -1; Dj <= 1 && !bBad; ++Dj)
 						for (auto It = Dots.CreateConstKeyIterator(Kc + FIntPoint(Di, Dj)); It; ++It)
 						{
 							const FVector2D& O = It.Value();
@@ -199,6 +203,9 @@ void FRDWildWorld::MakeMinorRoads()
 	for (const TArray<FRDWildPlace>& A : RowFm) Farms.Append(A);
 	TMultiMap<FIntPoint, FVector2D> Dots;
 	for (const TArray<FRDWildPlace>* L : { &Villages, &Others, &Sites, &Farms }) for (const FRDWildPlace& P : *L) Dots.Add(RDR14DotKey(P.At), P.At);
+	// (the list of 2026-11-20: a way keeps clear of a village's terraces, its pads out to 68 m and their ramps: 100 m from its middle)
+	VillageDots15.Reset();
+	if (bTerraces15) for (const FRDWildPlace& P : Villages) VillageDots15.Add(RDR14DotKey(P.At), P.At);
 	// ---- how far each place cell is from a major road (in cells: a chamfer from the cells the roads pass through)
 	TArray<float> Dg; Dg.Init(1e9f, NI * NJ);
 	for (const FRoad& R : Roads)
@@ -234,7 +241,7 @@ void FRDWildWorld::MakeMinorRoads()
 		if (D0 <= 1.5f && NearestRoadPoint(V.At, 4000.0, true, Rr, Sg, Tt, At) && TownOk(At))
 		{
 			const FVector2D Dir = (At - V.At).GetSafeNormal();
-			if (MinorPath(V.At + Dir * 45.0, At, (uint32)V.Id, Dots, V.At, NoPt, L.P)) { L.Join = Rr; L.JoinSeg = Sg; L.JoinT = Tt; L.bOk = true; return; }
+			if (MinorPath(V.At + Dir * VillageWayInsetM(), At, (uint32)V.Id, Dots, V.At, NoPt, L.P)) { L.Join = Rr; L.JoinSeg = Sg; L.JoinT = Tt; L.bOk = true; return; }
 		}
 		TArray<TPair<double, int32>> Cand;
 		for (int32 Di = -2; Di <= 2; ++Di)
@@ -251,7 +258,7 @@ void FRDWildWorld::MakeMinorRoads()
 		{
 			const FRDWildPlace& Q = Villages[Cand[C].Value];
 			const FVector2D Dir = (Q.At - V.At).GetSafeNormal();
-			if (MinorPath(V.At + Dir * 45.0, Q.At - Dir * 45.0, (uint32)V.Id, Dots, V.At, Q.At, L.P)) { L.Parent = Cand[C].Value; L.Up = Q.Name; L.UpM = 45.0; L.bOk = true; return; }
+			if (MinorPath(V.At + Dir * VillageWayInsetM(), Q.At - Dir * VillageWayInsetM(), (uint32)V.Id, Dots, V.At, Q.At, L.P)) { L.Parent = Cand[C].Value; L.Up = Q.Name; L.UpM = VillageWayInsetM(); L.bOk = true; return; }
 		}
 	});
 	auto AddLink = [this](FRDR14Link& L) -> int32
@@ -260,7 +267,16 @@ void FRDWildWorld::MakeMinorRoads()
 		FRoad R; R.bTrack = true; R.bMinor = true; R.P = MoveTemp(L.P);
 		R.Dest = L.Dest; R.DestKind = L.DestKind; R.DestId = L.DestId; R.Join = L.Join; R.JoinSeg = L.JoinSeg; R.JoinT = L.JoinT;
 		// (its bed the land's height smoothed along it, its end on the road it joins)
-		for (const FVector2D& Q : R.P) R.Z.Add(LandHeight(Q.X, Q.Y, false));
+		// (the list of 2026-11-20: within 200 m of a village with terraces its bed is the land's detailed height (the coarse one stood up
+		// to 33 m off a mountain village's ground, and its bank, out to 45 m, reshaped the pads' ground after the village was placed))
+		for (const FVector2D& Q : R.P)
+		{
+			bool bNearV = false;
+			const FIntPoint Kq = RDR14DotKey(Q);
+			for (int32 Di = -1; Di <= 1 && !bNearV; ++Di) for (int32 Dj = -1; Dj <= 1 && !bNearV; ++Dj)
+				for (auto It = VillageDots15.CreateConstKeyIterator(Kq + FIntPoint(Di, Dj)); It; ++It) if (FVector2D::DistSquared(It.Value(), Q) < 200.0 * 200.0) { bNearV = true; break; }
+			R.Z.Add(LandHeight(Q.X, Q.Y, bNearV));
+		}
 		for (int32 Pass = 0; Pass < 4; ++Pass)
 		{
 			TArray<float> Z = R.Z;
@@ -315,7 +331,7 @@ void FRDWildWorld::MakeMinorRoads()
 			int32 Rr, Sg; double Tt; FVector2D At;
 			if (!NearestRoadPoint(V.At, 5000.0, false, Rr, Sg, Tt, At, &Allowed) || !TownOk(At)) return;
 			const FVector2D Dir = (At - V.At).GetSafeNormal();
-			if (MinorPath(V.At + Dir * 45.0, At, (uint32)V.Id * 13u + 5u, Dots, V.At, NoPt, L.P)) { L.Join = Rr; L.JoinSeg = Sg; L.JoinT = Tt; L.bOk = true; }
+			if (MinorPath(V.At + Dir * VillageWayInsetM(), At, (uint32)V.Id * 13u + 5u, Dots, V.At, NoPt, L.P)) { L.Join = Rr; L.JoinSeg = Sg; L.JoinT = Tt; L.bOk = true; }
 		});
 		int32 NC = 0;
 		for (FRDR14Link& L : CL)

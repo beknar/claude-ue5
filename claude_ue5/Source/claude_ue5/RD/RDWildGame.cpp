@@ -80,14 +80,15 @@ void ARDDungeonGenerator::StartWild()
 	TSharedPtr<FRDWildWorld, ESPMode::ThreadSafe> W = Wild;
 	const TArray<FRDWildBiome> Biomes = WildBiomes;
 	const TArray<FRDWildPoiKind> Pois = WildPoiKinds; const float Fill = WildPoiFill;
-	const bool bPortSea = bPortWaterOpen;          // (the list of 2026-11-11: Graymourne's harbour open to the sea)
+	const bool bPortSea = bPortWaterOpen;
+	const bool bTerr15 = bVillageTerraces15;          // (the list of 2026-11-20: the villages' terraces)          // (the list of 2026-11-11: Graymourne's harbour open to the sea)
 	const TArray<FRDWildSiteKind> Sites = WildSiteKinds; const float SFill = WildSiteFill;          // (the list of 2026-11-12: the structures)
 	// (the list of 2026-11-14: the biomes' scenery and the dry channels)
 	const TArray<FRDWildSceneryKind> Scen = WildSceneryKinds; const float NFill = WildSceneryFill; const TArray<FString> Chans = WildChannelRules;
-	WildStream->Init = Async(EAsyncExecution::Thread, [W, Biomes, Seed, Pois, Fill, bPortSea, Sites, SFill, Scen, NFill, Chans]()
+	WildStream->Init = Async(EAsyncExecution::Thread, [W, Biomes, Seed, Pois, Fill, bPortSea, bTerr15, Sites, SFill, Scen, NFill, Chans]()
 	{
 		W->PoiKinds = Pois; W->PoiFill = Fill; W->SiteKinds = Sites; W->SiteFill = SFill; W->SceneryKinds = Scen; W->SceneryFill = NFill; W->ChannelRules = Chans;
-		W->bPortSea = bPortSea; W->Init(Seed, Biomes);
+		W->bPortSea = bPortSea; W->bTerraces15 = bTerr15; W->Init(Seed, Biomes);
 	});
 	UE_LOG(LogRDWild, Log, TEXT("RDWILD the world asked for (seed %u, %d biomes)"), Seed, Biomes.Num());
 }

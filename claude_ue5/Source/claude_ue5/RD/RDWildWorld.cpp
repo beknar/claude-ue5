@@ -820,7 +820,14 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 		}
 		if (D < 170.0) { Road = 0.f; Cobble = 0.f; }
 	}
-	if (Out) { Out->Water = Water; Out->WaterKind = Kind; Out->Road = Road; Out->Cobble = Cobble; Out->Chan = Road > 0.3f ? 0.f : Chan; Out->ChanKind = ChanKind; }
+	// (the list of 2026-11-20's seventh phase: the villages' terraces, level ground cut into the slope (RDList15f.cpp))
+	float Terr = 0.f;
+	if (bTerraces15 && bTerracesReady && !bTerraceGroundOff && !FRDWNoTerrace::On())
+	{
+		H = ApplyTerrace(X, Y, H, Terr);
+		if (Terr >= 1.f) { Water = -1e9f; Kind = 0; }
+	}
+	if (Out) { Out->Terrace = Terr; Out->Water = Water; Out->WaterKind = Kind; Out->Road = Road; Out->Cobble = Cobble; Out->Chan = Road > 0.3f ? 0.f : Chan; Out->ChanKind = ChanKind; }
 	return H;
 }
 
@@ -921,7 +928,7 @@ float FRDWildWorld::Height(double X, double Y) const
 	const float Hf = Feature(X, Y, H, &Fs);
 	const float Lf = PortLift(X, Y);
 	// (the farms' ridge-and-furrow, as Sample adds it: what she walks on and what the places' props stand on)
-	if (Fw <= 0.2f || Fs.WaterKind != 0 || Fs.Road >= 0.1f || Hf < 0.5f) return Hf + Lf;
+	if (Fw <= 0.2f || Fs.WaterKind != 0 || Fs.Road >= 0.1f || Hf < 0.5f || Fs.Terrace > 0.f) return Hf + Lf;
 	FRDWFarm Fm; FarmAt(X, Y, Fw, Fm);
 	return Hf + Lf + Fm.Ridge * (1.f - RDWSmooth(0.02f, 0.1f, Fs.Road));
 }
@@ -1016,7 +1023,7 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 	if (Fs.WaterKind != 0) { Water = Fs.Water; Kind = Fs.WaterKind; }
 	else if (Kind == 5 && H >= Water) { Water = -1e9f; Kind = 0; }
 	// (the list of 2026-11-14: a dry channel's bed, sand and gravel washed down it)
-	O.Chan = Fs.Chan; O.ChanKind = Fs.ChanKind;
+	O.Chan = Fs.Chan; O.ChanKind = Fs.ChanKind; O.Terrace = Fs.Terrace;
 	if (Fs.Chan > 0.f) Sand = FMath::Max(Sand, Fs.Chan * 0.85f);
 	if (C < 0.f && H < 0.f && Kind == 0) { Water = 0.f; Kind = 1; }
 	if (Kind == 0 && H < 0.f && C < 0.02f) { Water = 0.f; Kind = 1; }
@@ -1027,7 +1034,7 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 	float Field = 0.f;
 	O.FieldCell = FIntPoint(MIN_int32, MIN_int32); O.FieldCrop = -1; O.FieldAng = 0.f; O.FarmKind = 0; O.StripW = 0.f; O.StripOff = 0.f; O.FieldStage = 0;
 	// (the ground before the port's lift, as Height's test (PR #50's review: one was before the lift and one after))
-	if (Farm > 0.2f && Fs.Road < 0.1f && Fs.WaterKind == 0 && H - Lift >= 0.5f)
+	if (Farm > 0.2f && Fs.Road < 0.1f && Fs.WaterKind == 0 && H - Lift >= 0.5f && Fs.Terrace <= 0.f)
 	{
 		FRDWFarm Fm; FarmAt(X, Y, Farm, Fm);
 		// (ridge-and-furrow: "ploughing left each strip as a raised ridge" (Height adds the same: what she walks on))
@@ -1467,6 +1474,9 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 	Seed = InSeed; Biomes = InBiomes;
 	{ FScopeLock Lk(&SiteCache->Lock); SiteCache->Cells.Reset(); }
 	{ FScopeLock Lk(&PlaceCache2->Lock); PlaceCache2->Cells.Reset(); }
+	{ FScopeLock Lk(&TerraceCache->Lock); TerraceCache->Cells.Reset(); }
+	++TerraceGen;
+	bTerracesReady = false;
 	{ FScopeLock Lk(&SceneryCache->Lock); SceneryCache->Cells.Reset(); }
 	BiomeIndex.Reset();
 	for (int32 I = 0; I < Biomes.Num(); ++I) BiomeIndex.Add(Biomes[I].Name, I);
@@ -1517,6 +1527,7 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 	MakeMinorRoads();
 	MakeCrossroads();
 	MakeSigns();
+	bTerracesReady = true;          // (the list of 2026-11-20: the villages' terraces from here on)
 	bReady = true;
 	InitSeconds = FPlatformTime::Seconds() - T0;
 }
@@ -1730,8 +1741,10 @@ void FRDWildWorld::PlacesIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 	PlaceCache2->Cells.Add(Cell, MoveTemp(Mine));
 }
 
+int32 GRDW15Refused[3] = { 0, 0, 0 }; int32 GRDW15SlotHist[16] = {};          // (the list of 2026-11-20: the villages the terraces' rules refused, for the probe)
 void FRDWildWorld::PlacesInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 {
+	const FRDWNoTerrace NoTerrace;          // (the list of 2026-11-20: places are placed on the land without the villages' terraces)
 	const double X0 = Xs + Cell.X * PlaceCellM, Y0 = Yw + Cell.Y * PlaceCellM;
 	for (int32 Ti = 0; Ti < Towns.Num(); ++Ti)
 	{
@@ -1753,7 +1766,26 @@ void FRDWildWorld::PlacesInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 	{
 		FVector2D Va(X0 + (0.25 + 0.5 * Rand01(Cell.X, Cell.Y, Seed + 132u)) * PlaceCellM, Y0 + (0.25 + 0.5 * Rand01(Cell.X, Cell.Y, Seed + 133u)) * PlaceCellM);
 		// (its houses stand on a ring 23 to 34 m out: the ring clear of the road, not only its middle (PR #91's review))
-		auto RingOff = [this](const FVector2D& C) { for (int32 Q = 0; Q < 8; ++Q) { FRDWSample Sr; Sample(C.X + FMath::Cos(Q * PI / 4.0) * 36.0, C.Y + FMath::Sin(Q * PI / 4.0) * 36.0, Sr, false); if (Sr.Road > 0.05f) return false; } return true; };
+		// (the list of 2026-11-20: with terraces its houses stand on rings at 36 and 60 m, the outer reaching 68 m)
+		auto RingOff = [this](const FVector2D& C)
+		{
+			const int32 Nq = bTerraces15 ? 12 : 8;
+			for (const double Rr : bTerraces15 ? TArray<double>{ (double)VillageInnerRingM, (double)VillageOuterRingM } : TArray<double>{ 36.0 })
+				for (int32 Q = 0; Q < Nq; ++Q) { FRDWSample Sr; Sample(C.X + FMath::Cos(Q * 2.0 * PI / Nq) * Rr, C.Y + FMath::Sin(Q * 2.0 * PI / Nq) * Rr, Sr, false); if (Sr.Road > 0.05f) return false; }
+			return true;
+		};
+		// (one rule for a village's spot, the first one and any it steps to (PR #99's review: the terraces' search had copied it):
+		// 2600 m from a town, 600 m from a quest's place, off a road with its ring clear of roads, dry, 2 m over the sea, off lava,
+		// not in the arctic or on a glacier)
+		auto Eligible = [&](const FVector2D& Q, const FRDWSample& S)
+		{
+			double Dq; NearestTown(Q.X, Q.Y, Dq);
+			if (Dq < 2600.0 || S.Road > 0.1f || S.WaterKind != 0 || S.H < 2.f || S.Lava > 0.3f) return false;
+			const FString Qb = Biomes[S.Biome].Name;
+			if (Qb == TEXT("arctic regions") || Qb == TEXT("glacial")) return false;
+			for (const FRDWildPlace& Qp : QuestPlaces) if (FVector2D::Distance(Qp.At, Q) < 600.0) return false;
+			return RingOff(Q);
+		};
 		FRDWSample Sv; Sample(Va.X, Va.Y, Sv, false);
 		if (Sv.Road > 0.1f || !RingOff(Va))
 			for (const double Dd : { 70.0, 120.0 })
@@ -1768,24 +1800,40 @@ void FRDWildWorld::PlacesInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 				if (bMoved) break;
 			}
 		// (the towns and quests' distances after any step (PR #91's review))
-		double Dv; NearestTown(Va.X, Va.Y, Dv);
-		bool bOk = Dv >= 2600.0 && Sv.Road <= 0.1f && RingOff(Va);
-		for (const FRDWildPlace& Q : QuestPlaces) if (FVector2D::Distance(Q.At, Va) < 600.0) bOk = false;
-		if (bOk)
+		bool bOk = Eligible(Va, Sv);
+		FRDWildPlace V;
+		V.Id = ((Cell.X & 0x3FF) << 14) | ((Cell.Y & 0x3FF) << 4) | 0;
+		V.Kind = RDWKinds[0]; V.At = Va;
+		V.Name = NameFor(V.Kind, Hash(Cell.X, Cell.Y, Seed + 134u));
+		V.Yaw = Rand01(Cell.X, Cell.Y, Seed + 135u) * 360.f;
+		// (the list of 2026-11-20: on a slope its pads are cut into it. A slot whose pad would stand more than TerraceMaxStepM off the
+		// land, or in water, has no house; where fewer than VillageHousesMin slots can be built it tries 70, 140 and 210 m round (8
+		// ways), by the same rule, and is not placed only where none will do (refused outright, 809 of 2757 villages went). The pads
+		// its test kept go into the world's record of its terraces)
+		TArray<FRDWPad> Pads;
+		if (bOk && bTerraces15 && VillageSlots(V, &Pads) < VillageHousesMin)
 		{
-			const FString Vb = Biomes[Sv.Biome].Name;
-			bOk = Sv.WaterKind == 0 && Sv.H >= 2.f && Sv.Road <= 0.1f && Sv.Lava <= 0.3f && Vb != TEXT("arctic regions") && Vb != TEXT("glacial");
+			bool bFound = false;
+			for (const double Dd : { 70.0, 140.0, 210.0 })
+				for (int32 Tr = 0; Tr < 8 && !bFound; ++Tr)
+				{
+					const FVector2D Q = Va + FVector2D(FMath::Cos(Tr * PI / 4.0), FMath::Sin(Tr * PI / 4.0)) * Dd;
+					FRDWSample Sq; Sample(Q.X, Q.Y, Sq, false);
+					if (!Eligible(Q, Sq)) continue;
+					FRDWildPlace Vq = V; Vq.At = Q;
+					TArray<FRDWPad> Pq;
+					if (VillageSlots(Vq, &Pq) >= VillageHousesMin) { Va = Q; Sv = Sq; V.At = Q; Pads = MoveTemp(Pq); bFound = true; }
+				}
+			if (!bFound) { bOk = false; FPlatformAtomics::InterlockedIncrement(&GRDW15Refused[2]); }
 		}
 		if (bOk)
 		{
-			FRDWildPlace V;
-			V.Id = ((Cell.X & 0x3FF) << 14) | ((Cell.Y & 0x3FF) << 4) | 0;
-			V.Kind = RDWKinds[0]; V.At = Va; V.H = Sv.H; V.Biome = Sv.Biome; V.Tier = TierAt(Va.X, Va.Y);
-			V.Name = NameFor(V.Kind, Hash(Cell.X, Cell.Y, Seed + 134u));
-			V.Yaw = Rand01(Cell.X, Cell.Y, Seed + 135u) * 360.f;
+			V.H = Sv.H; V.Biome = Sv.Biome; V.Tier = TierAt(Va.X, Va.Y);
 			Out.Add(V); Village = Va;
+			if (bTerraces15) StoreTerraces(Cell, &V, &Pads);          // (the list of 2026-11-20: its pads as placed, in the same pass)
 		}
 	}
+	if (bTerraces15 && Village.X > 1e17) StoreTerraces(Cell, nullptr, nullptr);          // (no village: none to hold)
 	// ---- the cell's other place: 30 % of the cells (2.5 times the 4 km cells' 48 %), 48 % within 1 km of a road between towns ("add
 	// more along the roads between the cities"); never a village (the village has its own draw), 400 m or more from it
 	const FVector2D At(X0 + (0.2 + 0.6 * Rand01(Cell.X, Cell.Y, Seed + 122u)) * PlaceCellM, Y0 + (0.2 + 0.6 * Rand01(Cell.X, Cell.Y, Seed + 123u)) * PlaceCellM);
@@ -2067,11 +2115,13 @@ void FRDWildWorld::PoisIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 	{
 		const FIntPoint Pc = PlaceCellOf(At.X, At.Y);
 		const double Cx0 = Xs + Pc.X * PlaceCellM, Cy0 = Yw + Pc.Y * PlaceCellM;
-		const int32 Dx0 = At.X - Cx0 < 90.0 ? -1 : 0, Dx1 = Cx0 + PlaceCellM - At.X < 90.0 ? 1 : 0;
-		const int32 Dy0 = At.Y - Cy0 < 90.0 ? -1 : 0, Dy1 = Cy0 + PlaceCellM - At.Y < 90.0 ? 1 : 0;
+		// (the list of 2026-11-20 (PR #99's review): 120 m from a village with terraces (its outer pads and their ramps reach about 100 m))
+		const double Keep = bTerraces15 ? 120.0 : 90.0;
+		const int32 Dx0 = At.X - Cx0 < Keep ? -1 : 0, Dx1 = Cx0 + PlaceCellM - At.X < Keep ? 1 : 0;
+		const int32 Dy0 = At.Y - Cy0 < Keep ? -1 : 0, Dy1 = Cy0 + PlaceCellM - At.Y < Keep ? 1 : 0;
 		TArray<FRDWildPlace> Ps;
 		for (int32 I = Dx0; I <= Dx1; ++I) for (int32 J = Dy0; J <= Dy1; ++J) PlacesIn(Pc + FIntPoint(I, J), Ps);
-		for (const FRDWildPlace& P : Ps) if (FVector2D::Distance(P.At, At) < 90.0) return;
+		for (const FRDWildPlace& P : Ps) if (FVector2D::Distance(P.At, At) < (P.Kind == TEXT("village") ? Keep : 90.0)) return;
 	}
 	// (the kinds of the region, beside the road or off it; landmarks in one cell in nine)
 	const FString Bn = Biomes.IsValidIndex(S.Biome) ? Biomes[S.Biome].Name : FString();

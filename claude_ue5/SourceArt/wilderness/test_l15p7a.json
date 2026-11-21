@@ -1,0 +1,455 @@
+{
+ "tag": "l15p7a",
+ "plan": [
+  "terrace15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "terrace15",
+   "ok": true,
+   "visits": [
+    {
+     "name": "Hawkby",
+     "pads": 16,
+     "houses_planned": 15,
+     "pad_spread_m": 28.3,
+     "houses": 15,
+     "fits": [
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.1,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.8,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.3,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.8,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.9,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.0,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.5,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.7,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.8,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.9,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.6,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.2,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.0,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.4,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.0,
+       "ground_off_cm": 0.0
+      }
+     ],
+     "walks": [
+      {
+       "to_door": true,
+       "f": "door",
+       "in": [
+        true,
+        true
+       ],
+       "inside": true,
+       "feet_over_floor_cm": 1.8
+      },
+      {
+       "to_door": true,
+       "f": "door",
+       "in": [
+        true,
+        true
+       ],
+       "inside": true,
+       "feet_over_floor_cm": 2.2
+      }
+     ]
+    },
+    {
+     "name": "Marshmere",
+     "pads": 12,
+     "houses_planned": 11,
+     "pad_spread_m": 7.1,
+     "houses": 11,
+     "fits": [
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.9,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.9,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.6,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.1,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.5,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.5,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.4,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.6,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.7,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.4,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.7,
+       "ground_off_cm": 0.0
+      }
+     ],
+     "walks": [
+      {
+       "to_door": true,
+       "f": "door",
+       "in": [
+        true,
+        true
+       ],
+       "inside": true,
+       "feet_over_floor_cm": 2.4
+      },
+      {
+       "to_door": true,
+       "f": "door",
+       "in": [
+        true,
+        true
+       ],
+       "inside": true,
+       "feet_over_floor_cm": 2.2
+      }
+     ]
+    },
+    {
+     "name": "Coldham",
+     "pads": 13,
+     "houses_planned": 12,
+     "pad_spread_m": 5.6,
+     "houses": 12,
+     "fits": [
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.5,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.1,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.6,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.1,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.5,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.9,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.8,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.3,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.3,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.7,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.1,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.3,
+       "ground_off_cm": 0.0
+      }
+     ],
+     "walks": [
+      {
+       "to_door": true,
+       "f": "door",
+       "in": [
+        true,
+        true
+       ],
+       "inside": true,
+       "feet_over_floor_cm": 2.6
+      },
+      {
+       "to_door": true,
+       "f": "door",
+       "in": [
+        true,
+        true
+       ],
+       "inside": true,
+       "feet_over_floor_cm": 3.1
+      }
+     ]
+    },
+    {
+     "name": "Ironholt",
+     "pads": 15,
+     "houses_planned": 14,
+     "pad_spread_m": 5.5,
+     "houses": 14,
+     "fits": [
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.2,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.6,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.7,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.4,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.8,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.5,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.8,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.2,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.4,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.8,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.8,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.1,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 3.3,
+       "ground_off_cm": 0.0
+      },
+      {
+       "on_pad": true,
+       "floor_off_cm": 2.5,
+       "ground_off_cm": 0.0
+      }
+     ],
+     "walks": [
+      {
+       "to_door": true,
+       "f": "door",
+       "in": [
+        true,
+        true
+       ],
+       "inside": true,
+       "feet_over_floor_cm": 1.8
+      },
+      {
+       "to_door": true,
+       "f": "door",
+       "in": [
+        true,
+        true
+       ],
+       "inside": true,
+       "feet_over_floor_cm": 3.5
+      }
+     ]
+    }
+   ],
+   "candidates": [
+    [
+     "Hawkby",
+     28.3
+    ],
+    [
+     "Marshmere",
+     7.1
+    ],
+    [
+     "Coldham",
+     5.6
+    ],
+    [
+     "Ironholt",
+     5.5
+    ],
+    [
+     "Ashwell",
+     4.8
+    ],
+    [
+     "Hawkham",
+     4.6
+    ],
+    [
+     "Hawkmere",
+     4.2
+    ],
+    [
+     "Hollowwick",
+     2.7
+    ],
+    [
+     "Redmere",
+     2.3
+    ],
+    [
+     "Windholt",
+     2.1
+    ]
+   ],
+   "walls_laid": [
+    733,
+    231
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_l15p7a_terrace15_0.png",
+  "wd_l15p7a_terrace15_1.png",
+  "wd_l15p7a_terrace15_2.png",
+  "wd_l15p7a_terrace15_3.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

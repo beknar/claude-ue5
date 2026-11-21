@@ -400,12 +400,15 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 	// (steps before the door where the ground outside lies lower than the sill)
 	{
 		const float Drop = Base - WildGroundZ(DoorMid + Outw * 70.f);
+		// (the list of 2026-11-20 (item 29): down 26 cm a step until the ground, as the houses' (RDWild10.cpp))
 		if (Drop > 30.f)
-			for (int32 K = 0, N = FMath::Min(FMath::CeilToInt(Drop / 28.f), 6); K < N; ++K)
+			for (int32 K = 0; K < 24; ++K)
 			{
-				const float Top = Base - Drop * K / N, Depth = 42.f;
+				const float Depth = 42.f;
 				const FVector W = DoorMid + Outw * (Depth * (K + 0.5f) + 8.f);
-				const float Z0 = WildGroundZ(W) - 20.f;
+				const float G = WildGroundZ(W), Top = Base - 26.f * K;
+				if (K > 0 && Top <= G + 15.f) break;
+				const float Z0 = G - 20.f;
 				Mesh(RDWF11Cube(), FTransform(Rot, FVector(W.X, W.Y, (Top + Z0) * 0.5f), FVector(Depth / 100.f, 2.f, FMath::Max(Top - Z0, 5.f) / 100.f)), true, WildPlinthMaterial);
 			}
 	}

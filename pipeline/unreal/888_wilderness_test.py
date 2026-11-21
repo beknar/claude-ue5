@@ -3528,6 +3528,107 @@ def step_houses10():
         and abs(v["feet_over_floor_cm"]) < 15 and v["plants_in_room"] == 0 and v["door_after"] < 0.05 for v in done)
     step_result("houses10", ok, **res)
 
+def step_terrace15():
+    """the list of 2026-11-20's seventh phase (items 26, 29): at the four villages nearest Brokenspire whose land under their pads spans
+    most (of the ten nearest): 8 to 15 houses, each on its pad (the house's middle within its pad), its floor and the ground under
+    its room within 15 cm of the pad's height; the retaining walls laid where the land stands off a pad; at two houses of each, her
+    walk from 3.5 m out in at a door (F opens it) to the room's middle, her feet on its floor; a picture of each village from its square
+    and of a wall"""
+    g = G["gen"]; res = {"visits": []}; quiet(True)
+    yield from wait_ready(90)
+    near = sorted([p for p in places_near(0, 0, 25000) if p["kind"] == "village"], key=lambda p: math.hypot(p["x"], p["y"]))[:10]
+    def pads_of(p):
+        out = []
+        for l in g.get_village_terraces15(unreal.Vector2D(p["x"], p["y"])):
+            f = str(l).split("|")
+            if f[0] == "pad": out.append({"kind": int(f[1]), "x": float(f[2]) * 100, "y": float(f[3]) * 100, "yaw": float(f[4]), "hx": float(f[5]) * 100, "hy": float(f[6]) * 100, "z": float(f[7])})
+        return out
+    cand = []
+    for p in near:
+        pd = pads_of(p)
+        if pd: cand.append((max(pd, key=lambda q: q["z"])["z"] - min(pd, key=lambda q: q["z"])["z"], p, pd))
+    cand.sort(key=lambda c: -c[0])
+    res["candidates"] = [(c[1]["name"], round(c[0] / 100, 1)) for c in cand]
+    w0 = g.get_terrace_walls15()
+    for spread, p, pd in cand[:4]:
+        v = {"name": p["name"], "pads": len(pd), "houses_planned": sum(1 for q in pd if q["kind"] == 1), "pad_spread_m": round(spread / 100, 1)}
+        g.wild_drop_all(); g.wild_put_her(p["x"], p["y"]); yield from wait_chunks(30, 50); yield from rwait(2.0)
+        hs, ds = wild_houses()
+        hs = [h for h in hs if math.hypot(h["x"] / 100.0 - p["x"], h["y"] / 100.0 - p["y"]) < 75.0]
+        v["houses"] = len(hs)
+        fits = []
+        for h in hs:
+            q = min([q for q in pd if q["kind"] == 1], key=lambda q: math.hypot(q["x"] - h["x"], q["y"] - h["y"]))
+            on_pad = math.hypot(q["x"] - h["x"], q["y"] - h["y"]) < 100
+            # (the ground under the room: 9 points of it)
+            gz = [g.wild_ground_z(V(h["x"] + math.cos(math.radians(h["yaw"])) * h["hx"] * i * 0.8 - math.sin(math.radians(h["yaw"])) * h["hy"] * j * 0.8,
+                                    h["y"] + math.sin(math.radians(h["yaw"])) * h["hx"] * i * 0.8 + math.cos(math.radians(h["yaw"])) * h["hy"] * j * 0.8, 0)) for i in (-1, 0, 1) for j in (-1, 0, 1)]
+            fits.append({"on_pad": on_pad, "floor_off_cm": round(h["floor"] - q["z"], 1), "ground_off_cm": round(max(abs(z - q["z"]) for z in gz), 1)})
+        v["fits"] = fits
+        # (PR #99's review: each wall measured, not counted: its foot under the lower ground and its top over the higher, its pad's height
+        # the pad's, and the land it holds back the ground in play there (1.2 m out from the pad's edge))
+        vid = next((int(str(l).split("|")[1]) for l in g.get_village_terraces15(unreal.Vector2D(p["x"], p["y"])) if str(l).startswith("village|")), None)
+        wl = [[float(x) for x in str(l).split("|")[1:]] for l in g.get_terrace_wall_lines15() if str(l).split("|")[0] == str(vid)]
+        bad = []
+        for x_, y_, zl, zh, pz, lz, lx, ly in wl:
+            gz = g.wild_ground_z(V(lx, ly, 0))
+            if not (zl <= min(pz, lz) - 40 and zh >= max(pz, lz) + 5 and abs(gz - lz) <= 30 and any(abs(pz - q["z"]) < 2 for q in pd)): bad.append([round(x_), round(y_), round(zl), round(zh), round(pz), round(lz), round(gz)])
+        v["walls"] = len(wl); v["walls_bad"] = bad[:6]; v["walls_bad_n"] = len(bad); v["wall_height_max_cm"] = round(max([w[3] - w[2] for w in wl], default=0))
+        # (two houses walked into from 3.5 m out, by a door)
+        walks = []
+        for h in hs[:2]:
+            dd = [d for d in ds if math.hypot(d["x"] - h["x"], d["y"] - h["y"]) < max(h["hx"], h["hy"]) * 1.6]
+            if not dd: walks.append({"door": None}); continue
+            d = dd[0]; out = V(d["x"] - h["x"], d["y"] - h["y"], 0); n_ = math.hypot(out.x, out.y) or 1.0; out = V(out.x / n_, out.y / n_, 0)
+            st = V(d["x"] + out.x * 350, d["y"] + out.y * 350, 0)
+            put(st, yaw=math.degrees(math.atan2(-out.y, -out.x)), z=g.wild_ground_z(st)); yield from rwait(0.8)
+            r0 = yield from walk_to(V(d["x"] + out.x * 110, d["y"] + out.y * 110, 0), 8.0, 40.0)
+            yield from rwait(0.3); f = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(1.6)
+            r1 = yield from walk_to(V(d["x"] - out.x * 150, d["y"] - out.y * 150, 0), 6.0)
+            r2 = yield from walk_to(V(h["x"], h["y"], 0), 6.0, 90.0); yield from rwait(0.6)
+            q = G["pawn"].get_actor_location(); hh = G["pawn"].get_component_by_class(unreal.CapsuleComponent).get_scaled_capsule_half_height()
+            walks.append({"to_door": r0, "f": f, "in": [r1, r2], "inside": in_house(h, q), "feet_over_floor_cm": round(q.z - hh - h["floor"], 1)})
+        v["walks"] = walks
+        # (pictures: from the square toward the houses, and toward its biggest drop's wall)
+        sq = [q for q in pd if q["kind"] == 0][0]
+        put(V(sq["x"], sq["y"], 0), yaw=0.0, z=g.wild_ground_z(V(sq["x"], sq["y"], 0))); G["pawn"].set_actor_hidden_in_game(True)
+        lo = min([q for q in pd if q["kind"] == 1], key=lambda q: q["z"])
+        yw = math.degrees(math.atan2(lo["y"] - sq["y"], lo["x"] - sq["x"]))
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=yw)); yield from rwait(1.5)
+        shot(f"terrace15_{len(res['visits'])}", "1280x720"); yield from rwait(1.2)
+        # (a retaining wall: the house pad whose long side stands farthest over the land, from 12 m out on the land below it)
+        best = None
+        for q in pd:
+            if q["kind"] != 1: continue
+            c, s_ = math.cos(math.radians(q["yaw"])), math.sin(math.radians(q["yaw"]))
+            for sg in (1, -1):
+                nx, ny = -s_ * sg, c * sg
+                pt = V(q["x"] + nx * (q["hy"] + 150), q["y"] + ny * (q["hy"] + 150), 0)
+                dz = q["z"] - g.wild_ground_z(pt)
+                if best is None or dz > best[0]: best = (dz, q, nx, ny)
+        if best and best[0] > 80:
+            dz, q, nx, ny = best
+            st = V(q["x"] + nx * (q["hy"] + 1200), q["y"] + ny * (q["hy"] + 1200), 0)
+            put(st, yaw=0.0, z=g.wild_ground_z(st)); G["pawn"].set_actor_hidden_in_game(True)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=0, yaw=math.degrees(math.atan2(-ny, -nx)))); yield from rwait(1.5)
+            shot(f"terrace15_wall{len(res['visits'])}", "1280x720"); v["wall_shot_drop_cm"] = round(dz); yield from rwait(1.2)
+        # (the whole village from 110 m out on its downhill side (its outer houses reach 63 m))
+        lo2 = min(pd, key=lambda q: q["z"]); ang = math.atan2(lo2["y"] - sq["y"], lo2["x"] - sq["x"])
+        st = V(sq["x"] + math.cos(ang) * 11000, sq["y"] + math.sin(ang) * 11000, 0)
+        put(st, yaw=0.0, z=g.wild_ground_z(st)); G["pawn"].set_actor_hidden_in_game(True)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4, yaw=math.degrees(ang) + 180.0)); yield from rwait(1.8)
+        shot(f"terrace15_far{len(res['visits'])}", "1280x720"); yield from rwait(1.2)
+        G["pawn"].set_actor_hidden_in_game(False)
+        res["visits"].append(v)
+    w1 = g.get_terrace_walls15(); res["walls_laid"] = [w1.x - w0.x, w1.y - w0.y]
+    g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    quiet(False)
+    vs = res["visits"]
+    ok = len(vs) >= 3 and res["walls_laid"][0] > 0 and all(
+        8 <= v["houses"] <= 15 and v["houses"] == v["houses_planned"] and v["walls_bad_n"] == 0 and all(f["on_pad"] and abs(f["floor_off_cm"]) <= 15 and f["ground_off_cm"] <= 15 for f in v["fits"])
+        and all(w.get("inside") and abs(w["feet_over_floor_cm"]) < 15 for w in v["walks"]) and len(v["walks"]) == 2 for v in vs)
+    step_result("terrace15", ok, **res)
+
 def step_tower10():
     """the Old Watchtower climbed: she walks in at its doorway from the road, up its spiral by her own movement to the second storey's
     top, onto its floor (it holds her there); a picture from the top"""
@@ -6685,7 +6786,7 @@ STEPS = {"summon15": step_summon15, "roads14": step_roads14, "density14": step_d
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)
-STEPS.update({"hearth15": step_hearth15})
+STEPS.update({"hearth15": step_hearth15, "terrace15": step_terrace15})
 STEPS["horse15"] = step_horse15
 SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
 def saves_snapshot():

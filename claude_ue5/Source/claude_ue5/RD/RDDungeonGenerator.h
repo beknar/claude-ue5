@@ -1929,6 +1929,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") TObjectPtr<UMaterialInterface> WildPlinthMaterial = nullptr;
 	/** a house with its door, floor and furniture; false if the mesh is not a wild house's */
 	bool FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm, uint32 Salt);
+	// ---- the list of 2026-11-20's seventh phase (RDList15f.cpp): the villages' terraces
+	/** a village's houses and square on level pads cut into the slope, its retaining walls and buttresses; 8 to 15 houses (the
+	 *  world's: FRDWildWorld::bTerraces15, a new world's version) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bVillageTerraces15 = false;
+	UPROPERTY(Transient) TObjectPtr<UStaticMesh> TerraceCube15 = nullptr;
+	void LayTerraceWalls15(ARDWildChunk* C, const struct FRDWTerraces& T);
+	int32 TerraceWalls15 = 0, TerraceButtresses15 = 0;
+	/** the walls laid, "village|x|y|z bottom|z top|pad z|land z|land x|land y" (cm; the land read 1.2 m out from the pad's edge) */
+	TArray<FString> TerraceWallLines15;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetTerraceWallLines15() const { return TerraceWallLines15; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetVillageTerraces15(FVector2D AtM) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FIntPoint GetTerraceWalls15() const { return FIntPoint(TerraceWalls15, TerraceButtresses15); }
 	/** the Old Watchtower climbed: its doorway open (hidden boxes round its ring, not its quarters' collision), a spiral stair up to
 	 *  a floor at the second storey's top */
 	void FitWildTower(ARDWildChunk* C, const FVector& Mid, float Z0, float Hs, float DoorYaw, float KeptYaw = -1e6f);

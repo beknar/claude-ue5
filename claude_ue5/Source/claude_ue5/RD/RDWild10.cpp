@@ -141,15 +141,18 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 		const float Drop = Base - WildGroundZ(Fr);
 		if (Drop > 30.f)
 		{
-			const int32 N = FMath::Min(FMath::CeilToInt(Drop / 28.f), 6);
+			// (the list of 2026-11-20 (item 29, "stairs that do not reach all the way to the ground"): at most six steps of the drop at one
+			// point 60 cm out, the flight ended in the air wherever the ground fell further or the drop was over 1.7 m. Now 26 cm a step
+			// down from the sill, on until the next tread would be within 15 cm of the ground under it (24 at most: 6.2 m))
 			const FVector Mid = (D.Pivot + Lead) * Sc;
-			for (int32 K = 0; K < N; ++K)
+			for (int32 K = 0; K < 24; ++K)
 			{
-				const float Top = Base - Drop * K / N;
 				const float Depth = 42.f;
 				const FVector Lc = FVector(Mid.X, Mid.Y, 0.f) + Outw * (Depth * (K + 0.5f) + 8.f);
 				const FVector W = RDW10At(O, Yaw, Lc.X, Lc.Y, 0.f);
-				const float Z0 = WildGroundZ(W) - 20.f;
+				const float G = WildGroundZ(W), Top = Base - 26.f * K;
+				if (K > 0 && Top <= G + 15.f) break;
+				const float Z0 = G - 20.f;
 				Mesh(RDW10Cube(), FTransform(FRotator(0.f, Yaw + (bXWall ? 0.f : 90.f), 0.f), FVector(W.X, W.Y, (Top + Z0) * 0.5f), FVector(Depth / 100.f, 2.f, FMath::Max(Top - Z0, 5.f) / 100.f)), true, WildPlinthMaterial);
 			}
 		}

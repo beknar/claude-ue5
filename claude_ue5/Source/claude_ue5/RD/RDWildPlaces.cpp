@@ -181,6 +181,20 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 			for (int32 I = 0; I < 5; ++I)
 				Put(TEXT("bones"), Rm + Sd * ((I - 2) * 1.6f + R.FRandRange(-0.3f, 0.3f)) + Fw * R.FRandRange(-1.2f, 1.2f), P.Yaw + R.FRandRange(-60.f, 60.f) + (I % 2 ? 180.f : 0.f), 1.f, 2.f, false);
 		}
+		else if (P.Kind == TEXT("village") && Wild->bTerraces15)
+		{
+			// (the list of 2026-11-20's seventh phase: its houses on their pads (the world's own layout, its terraces cut under them), the
+			// well, hay and cart on its square, its retaining walls)
+			const TSharedPtr<const FRDWTerraces> T = Wild->TerracesAt(P.At.X, P.At.Y);
+			if (T.IsValid() && T->VillageId == P.Id)
+			{
+				for (const FRDWPad& Pd : T->Pads) if (Pd.Kind == 1) Put(TEXT("house"), Pd.C, Pd.Yaw, 1.f, 25.f);
+				Put(TEXT("well"), P.At, R.FRandRange(0.f, 360.f));
+				Ring(3, 9.f, 25.f, [&](const FVector2D& At, float Yaw) { Put(TEXT("hay"), At, Yaw + R.FRandRange(-40.f, 40.f), 1.f, 5.f); });
+				Put(TEXT("cart"), P.At + FVector2D(6.f, -5.f), R.FRandRange(0.f, 360.f));
+				LayTerraceWalls15(C, *T);
+			}
+		}
 		else if (P.Kind == TEXT("village"))
 		{
 			// (the houses with their insides are laid at their doors' height for her: larger, so the ring is wider (the same draws))
