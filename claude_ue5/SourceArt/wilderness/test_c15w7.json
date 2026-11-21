@@ -1,5 +1,5 @@
 {
- "tag": "c15w6",
+ "tag": "c15w7",
  "plan": [
   "caves15"
  ],
@@ -21,7 +21,6 @@
       2.5,
       1.15
      ],
-     "mouth_now": "on|416982|-143264|5047|-0.391|0.921|cave:0_-1|1",
      "level": "caves",
      "cave": [
       "cave:0_-1",
@@ -34,6 +33,12 @@
       1,
       1,
       1
+     ],
+     "allowed": [
+      "Half_Creature_04",
+      "Half_Creature_05",
+      "Parasite_Slider",
+      "Rat"
      ],
      "kinds": [
       "Half_Creature_04",
@@ -61,7 +66,6 @@
       2.5,
       1.31
      ],
-     "mouth_now": "on|-1058303|2221795|1051|0.500|0.866|cave:-2_3|2",
      "level": "caves",
      "cave": [
       "cave:-2_3",
@@ -74,6 +78,12 @@
       2,
       2,
       2
+     ],
+     "allowed": [
+      "Half_Creature_04",
+      "Half_Creature_05",
+      "Parasite_Slider",
+      "Rat"
      ],
      "kinds": [
       "Half_Creature_04",
@@ -91,6 +101,7 @@
     }
    ],
    "game3b": {
+    "saved_before": true,
     "load": true,
     "seed": 695913554,
     "landmark": [
@@ -110,17 +121,18 @@
      "1"
     ],
     "tower_from_save_m": 24.7,
-    "run_nearest_m": 24.99
+    "run_nearest_m": 24.92,
+    "back_loaded": true
    }
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
  "shots": [
-  "wd_c15w6_caves15_mouth_t1.png",
-  "wd_c15w6_caves15_hall_t1.png",
-  "wd_c15w6_caves15_mouth_t2.png",
-  "wd_c15w6_caves15_hall_t2.png",
-  "wd_c15w6_caves15_game3b_tower.png"
+  "wd_c15w7_caves15_mouth_t1.png",
+  "wd_c15w7_caves15_hall_t1.png",
+  "wd_c15w7_caves15_mouth_t2.png",
+  "wd_c15w7_caves15_hall_t2.png",
+  "wd_c15w7_caves15_game3b_tower.png"
  ],
  "error": null,
  "saves_put_back": 1,

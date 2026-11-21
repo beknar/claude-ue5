@@ -7388,7 +7388,7 @@ def step_stuck13():
 STEPS.update({"curses13": step_curses13, "dungeon13": step_dungeon13, "finalback13": step_finalback13, "stuck13": step_stuck13})
 
 
-def step_cave15():
+def cave15_inner():
     """the list of 2026-11-20's ninth phase (item 23), on the cave level (-lv caves): its key and tier from the game instance (a test's
     default when no tower sent her: cave:test, tier 1), every tier of the level the one game tier; no prison cells or arena in its
     sets; its monsters the wilds' kinds of its tier and none excluded; the first hall without the castle's carpet, dais, throne,
@@ -7480,6 +7480,13 @@ def step_cave15():
           and floors and sum(1 for f in floors if f is not None and abs(f) < 40) >= 0.85 * len(floors) and len(walls) >= 2
           and all(w_["reached_m"] <= w_["wall_m"] for w_ in walls))
     step_result("cave15", ok, **res)
+def step_cave15():
+    """the cave level's step (cave15_inner), its quiet put back in a finally (PR #101's review)"""
+    try:
+        yield from cave15_inner()
+    finally:
+        try: quiet(False)
+        except Exception: pass
 STEPS.update({"cave15": step_cave15})
 
 def view_owner():

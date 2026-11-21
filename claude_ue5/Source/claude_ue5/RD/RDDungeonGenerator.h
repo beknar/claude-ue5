@@ -1991,13 +1991,19 @@ public:
 	FVector CaveMouthAt15 = FVector::ZeroVector, CaveMouthOut15 = FVector::ForwardVector;
 	FIntPoint CaveCell15 = FIntPoint(INT32_MAX, INT32_MAX);
 	void LayCaveMouth15(class UStaticMeshComponent* Tower, const FVector2D& SiteM);
-	bool CaveMouthNear15(const FVector& From) const;
+	bool CaveMouthNear15(const FVector& From, float Reach = 450.f) const;
+	/** the mouth takes F: within reach and nearer than every other wild thing F reaches (PR #101's review) */
+	bool CaveMouthFirst15(const FVector& From, float Reach = 450.f) const;
 	/** into the tower's cave: her way back before its mouth, its key and tier into the game instance (DescendToCatacombs) */
 	bool EnterCave15();
 	/** the cave level's key and tier from the game instance (BeginPlay, before anything reads them) */
 	void ApplyCave15();
 	/** the cave's kinds at a game tier: the wilds' kinds whose band holds it (else the nearest tier below with any), none excluded */
 	void CaveKinds15(int32 GameTier, TArray<int32>& Out) const;
+	mutable int32 CaveKindsTier15 = -1;
+	mutable TArray<int32> CaveKindsCache15;
+	/** the landmarks' cell (one tower in each square of this side, m): the towers' placing and the caves' keys */
+	static constexpr double WildLandmarkCellM = 6000.0;
 	/** tests: "on|x|y|z|out x|out y|key|tier" of the mouth standing, or "off" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FString GetCaveMouth15() const;
 	/** tests: into the cave of the tower standing, as F at its mouth does (false: none, or refused) */

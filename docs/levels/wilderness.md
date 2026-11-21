@@ -910,7 +910,7 @@ Every kind of ruin and structure (54) holds "@recipe|1|1|0.3" in its chest's thi
 ### The caves under the landmark towers (item 23; `935`, C++ `RD/RDList15h.cpp`)
 
 - **A mouth at every tower's foot**: the landmark tower (one in each 6 km square of the open lands) has a round rock arch 13 m across between two of its buttresses, a dark half disc inside it, laid with the tower and gone with it. F before it ("go down into the cave") takes her into [the caves](caves.md), the cave level every tower shares: its key the tower's cell, its tier the region's at the tower, its way back 6 m before the mouth.
-- **Measured** (`888 caves15 -Light`, `test_c15w6.json`): two towers (tiers 1 and 2, 4.4 and 24.6 km out) entered and come back from; the user's save game3b's tower (24.7 m from where it was made) has its cave, and she stops at its foot when she runs at it.
+- **Measured** (`888 caves15 -Light`, `test_c15w7.json`): two towers (tiers 1 and 2, 4.4 and 24.6 km out) entered and come back from; the user's save game3b's tower (24.7 m from where it was made) has its cave, and she stops at its foot when she runs at it.
 
 ## Limits
 

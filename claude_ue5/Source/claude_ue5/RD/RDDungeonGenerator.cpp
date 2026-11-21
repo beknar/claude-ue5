@@ -634,7 +634,9 @@ FName ARDDungeonGenerator::TomeSpellOf(FIntPoint Section, int32 Index, int32 Pic
 	// the spell of that tier's place (Slot: the dungeons' tiers in the chain's order); with no spell placed, as before)
 	if (Spells.ContainsByPredicate([](const FRDSpellDef& S) { return S.Slot > 0; }))
 	{
-		const int32 Want = FMath::Max(ChainIndexHere(), 0) * 5 + Tier;
+		// (the list of 2026-11-20's ninth phase (PR #101's review): a cave is in no chain, its place is its game tier's (ChainIndexHere's
+		// -1 gave every cave the castle's tiers 1 to 3))
+		const int32 Want = bCave15 ? GlobalTier(Tier) : FMath::Max(ChainIndexHere(), 0) * 5 + Tier;
 		// (the list of 2026-11-12's seventh phase: for the Rogue, the art of the place until she knows it: its manual)
 		for (const FRDSecondaryDef& D : Secondaries)
 			if (D.Slot == Want && D.Hero == CurrentHero && !(PlayerCombat && PlayerCombat->GetSecondaryRank(D.Name) > 0)) return D.Name;
@@ -1572,7 +1574,7 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 	if (bMounted) { DismountHorse(); return TEXT("dismount"); }
 	if (LootPiles.Num() > 0 && TakeLootNear(From, 260.f)) return TEXT("loot");
 	// (the list of 2026-11-20's ninth phase: a landmark tower's cave mouth)
-	if (bWild && CaveMouthNear15(From) && EnterCave15()) return TEXT("cave");
+	if (bWild && CaveMouthFirst15(From) && EnterCave15()) return TEXT("cave");
 	// (the list of 2026-11-16: a wild table or a farmhouse's oven when it is the nearest of everything F reaches out there (PR #82's
 	// review: the scenery's uses and the points of interest, asked first, took F from a nearer table))
 	if (bWild) { FName Sk; if (WildStationFirst14(From, Sk)) { const FString St = OpenStation14(Sk); if (!St.IsEmpty()) return St; } }
@@ -1686,7 +1688,7 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 	const ARDLootPile* Lp = nullptr; float LpD = 260.f;
 	for (const ARDLootPile* P : LootPiles) if (IsValid(P)) { const float D = FVector::Dist2D(P->GetActorLocation(), From); if (D < LpD) { LpD = D; Lp = P; } }
 	if (bMounted) return TEXT("get off your horse");          // (the eighth phase)
-	if (!Lp && bWild && CaveMouthNear15(From)) return TEXT("go down into the cave");          // (the list of 2026-11-20's ninth phase)
+	if (!Lp && bWild && CaveMouthFirst15(From, MaxDistance)) return TEXT("go down into the cave");          // (the list of 2026-11-20's ninth phase)
 	if (!Lp && bWild) { FName Sk; if (WildStationFirst14(From, Sk)) return StationWords14(Sk); }          // (the list of 2026-11-16)
 	if (!Lp && bWild && WildSceneryFirst(From)) { const FString Ws = WildSceneryDescribe(From); if (!Ws.IsEmpty()) return Ws; }          // (the list of 2026-11-14: the nearest)
 	if (!Lp && bWild) { const FString Wp = WildPoiDescribe(From); if (!Wp.IsEmpty()) return Wp; }          // (the seventh phase)

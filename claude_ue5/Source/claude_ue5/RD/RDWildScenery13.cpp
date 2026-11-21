@@ -1228,7 +1228,7 @@ void ARDDungeonGenerator::TickWildLandmark13(float Dt, const FVector& Her)
 	const FVector2D H2 = FVector2D(Her) / 100.0;
 	const double Reach = WildLandmarkKm * 1000.0;
 	if (WildLandmark.IsValid() && FVector2D::Distance(WildLandmarkAt, H2) <= Reach) return;
-	constexpr double LmCell = 6000.0;
+	constexpr double LmCell = WildLandmarkCellM;          // (one place for it: the caves' keys are its cells)
 	const int32 Ci = FMath::FloorToInt(H2.X / LmCell), Cj = FMath::FloorToInt(H2.Y / LmCell);
 	double Best = Reach; FVector2D Site(1e12, 1e12); bool bGot = false;
 	for (int32 I = Ci - 2; I <= Ci + 2; ++I) for (int32 J = Cj - 2; J <= Cj + 2; ++J)

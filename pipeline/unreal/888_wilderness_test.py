@@ -6871,12 +6871,38 @@ def travel15(level, start, sec=90):
     G["travel_until"] = 0; refresh(); yield from wait(2.0)
 
 
+def cave_allowed15(mons, excl, tier):
+    """the kinds a cave of a game tier holds, as the game works them out (CaveKinds15): the banded kinds of that tier, else of the
+    nearest tier below with any; none excluded (PR #101's review: the test's set was every banded kind)"""
+    for t in range(max(1, tier), 0, -1):
+        s = {str(d.name) for d in mons if d.wild_tier_max > 0 and d.wild_tier_min <= t <= d.wild_tier_max and d.weight > 0 and not any(e in str(d.name) for e in excl)}
+        if s: return s
+    return set()
+
+
 def step_caves15():
     """item 23: the caves under the landmark towers. Two towers of different tiers (looked for along four lines out of Brokenspire,
-    6 to 70 km): at each the mouth's prompt from before it and a picture of it; F takes her down (the cave level, its key the
+    6 to 100 km): at each the mouth's prompt from before it and a picture of it; F takes her down (the cave level, its key the
     tower's cell, its tier the tower's region's, every tier of the level that one); the first hall pictured, its monsters the wilds'
-    kinds of that tier; the Escape menu's way back puts her before the mouth (within 3 m of where the game said)"""
-    g = G["gen"]; res = {"visits": []}; seen = set(); quiet(True)
+    kinds of that tier; the Escape menu's way back puts her before the mouth (within 3 m of where the game said). Then the user's
+    save game3b, where it is on this machine: the tower by it has its cave and stops her (the game she was in saved first and loaded
+    back after). The quiet and her hidden body are put back in a finally (PR #101's review)"""
+    res = {"visits": []}
+    try:
+        yield from caves15_body(res)
+    finally:
+        try: quiet(False)
+        except Exception: pass
+        try: G["pawn"].set_actor_hidden_in_game(False)
+        except Exception: pass
+    g3 = res.get("game3b", {})
+    ok = (len([v for v in res["visits"] if v.get("ok")]) >= 2 and len({v["tier"] for v in res["visits"] if v.get("ok")}) >= 2
+          and (g3.get("absent") or (g3.get("mouth", ["off"])[0] == "on" and (g3.get("run_nearest_m") or 0) > 17.0 and g3.get("back_loaded"))))
+    step_result("caves15", ok, **res)
+
+
+def caves15_body(res):
+    g = G["gen"]; seen = set(); quiet(True)
     cands = [(math.cos(math.radians(a)) * km * 1000.0, math.sin(math.radians(a)) * km * 1000.0) for km in (6, 22, 45, 70, 100) for a in (20, 110, 200, 290)]
     for (x, y) in cands:
         if len(seen) >= 2: break
@@ -6887,14 +6913,14 @@ def step_caves15():
         mx, my, mz, ox, oy, ckey, tier = float(m[1]), float(m[2]), float(m[3]), float(m[4]), float(m[5]), m[6], int(m[7])
         v = {"tier": tier, "key": ckey, "mouth_m": [round(mx / 100), round(my / 100)]}
         # (a picture of the mouth from 22 m out, her body hidden)
-        g.wild_put_her((mx + ox * 2200) / 100.0, (my + oy * 2200) / 100.0); yield from wait_chunks(20, 30); ground_put((mx + ox * 2200) / 100.0, (my + oy * 2200) / 100.0); yield from rwait(2.0)
+        px, py = (mx + ox * 2200) / 100.0, (my + oy * 2200) / 100.0
+        g.wild_put_her(px, py); yield from wait_chunks(20, 30); ground_put(px, py); yield from rwait(2.0)
         G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=8, yaw=math.degrees(math.atan2(-oy, -ox))))
         G["pawn"].set_actor_hidden_in_game(True); yield from rwait(2.0); shot(f"caves15_mouth_t{tier}", "1280x720"); yield from rwait(1.0); G["pawn"].set_actor_hidden_in_game(False)
         # (before the mouth: the prompt, then F)
         ground_put((mx + ox * 250) / 100.0, (my + oy * 250) / 100.0); yield from rwait(1.0)
         hp_ = G["pawn"].get_actor_location()
         v["prompt"] = str(g.describe_nearest(hp_, 300.0)); v["her_from_mouth_m"] = [round(math.hypot(hp_.x - mx, hp_.y - my) / 100, 2), round((hp_.z - mz) / 100, 2)]
-        v["mouth_now"] = str(g.get_cave_mouth15())
         if "cave" not in v["prompt"]: res["visits"].append(v); continue
         yield from travel15("caves", lambda: G["pawn"] and cb().simulate_key(key("F"), True))
         try: cb().simulate_key(key("F"), False)
@@ -6905,11 +6931,10 @@ def step_caves15():
         cave = str(g.get_cave15()).split("|"); v["cave"] = cave
         v["global_tiers"] = [g.global_tier(t) for t in range(1, 4)]
         yield from wait(2.0)
-        mons = g.get_editor_property("monsters"); excl = [str(e) for e in g.get_editor_property("cave_exclude15")]
-        allowed = {str(d.name) for d in mons if d.wild_tier_max > 0 and not any(e in str(d.name) for e in excl)}
+        allowed = cave_allowed15(g.get_editor_property("monsters"), [str(e) for e in g.get_editor_property("cave_exclude15")], tier)
         here = sorted({str(mo.get_editor_property("monster_name")) for mo in g.get_monsters()})
-        v["kinds"] = here; v["kinds_off"] = [k for k in here if k not in allowed]
-        G["pawn"].set_actor_hidden_in_game(False); yield from rwait(1.0); shot(f"caves15_hall_t{tier}", "1280x720"); yield from rwait(1.0)
+        v["allowed"] = sorted(allowed); v["kinds"] = here; v["kinds_off"] = [k for k in here if k not in allowed]
+        yield from rwait(1.0); shot(f"caves15_hall_t{tier}", "1280x720"); yield from rwait(1.0)
         gi = G["gi"]; v["return_town"] = str(gi.get_editor_property("return_town")); ra = gi.get_editor_property("return_at")
         lines = [str(l) for l in g.get_menu_lines()]; v["return_line"] = next((l for l in lines if "Return to" in l), None)
         def back():
@@ -6928,52 +6953,56 @@ def step_caves15():
         v["back"] = {"from_return_at_m": round(dist2(p, ra) / 100, 2), "from_mouth_m": round(math.hypot(p.x - mx, p.y - my) / 100, 2)}
         v["ok"] = (cave[0] == ckey and int(cave[1]) == tier and all(t == tier for t in v["global_tiers"]) and here and not v["kinds_off"]
                    and v["back"]["from_return_at_m"] < 3.0 and v["back"]["from_mouth_m"] < 10.0)
-        res["visits"].append(v); seen.add(tier)
+        res["visits"].append(v)
+        if v["ok"]: seen.add(tier)
     # (the user's save game3b (the packaged game's, copied in and taken out after): loaded, she stands where it was made (its At, read
     # from the file: (4183.1, -1425.9) m, 4.4 km from Brokenspire on the farms) in today's world; the tower nearest, its mouth, a
-    # picture from 60 m, and she runs at the tower's middle from 40 m out and must stop at its wall (its 18.7 m foot))
-    g3 = {}
+    # picture from 60 m, and she runs at the tower's middle from 40 m out and must stop at its wall (its 18.7 m foot). The game she was
+    # in is saved first and loaded back after (PR #101's review: the batch's later steps ran in the user's game))
+    g3 = {}; res["game3b"] = g3
     src = os.path.join(os.environ.get("LOCALAPPDATA", ""), "claude_ue5", "Saved", "SaveGames", "save_game3b_f17369.sav")
+    if not os.path.isfile(src):
+        g3["absent"] = "no save game3b at " + src; return
     dst = os.path.join(SAVES, "save_game3b_f17369.sav"); copied = False
-    if os.path.isfile(src):
-        try:
-            os.makedirs(SAVES, exist_ok=True)
-            if not os.path.isfile(dst): open(dst, "wb").write(open(src, "rb").read()); copied = True
-            g3["load"] = G["gen"].load_game_from("save_game3b_f17369"); yield from until_loaded13(); yield from wait_ready(90)
-            g = G["gen"]; g3["seed"] = G["gi"].get_editor_property("wild_seed")
-            at = (4183.1, -1425.9)
-            g.wild_put_her(*at); yield from wait_chunks(30, 50); ground_put(*at); yield from rwait(3.0)
-            lm = str(g.get_wild_landmark()).split("|"); m = str(g.get_cave_mouth15()).split("|")
-            g3["landmark"] = lm; g3["mouth"] = m
-            if lm[0] == "on":
-                tx, ty = float(lm[1]), float(lm[2])
-                g3["tower_from_save_m"] = round(math.hypot(tx / 100 - at[0], ty / 100 - at[1]), 1)
-                if m[0] == "on":
-                    ox, oy = float(m[4]), float(m[5])
-                    vx, vy = (tx + ox * 6000) / 100.0, (ty + oy * 6000) / 100.0
-                    g.wild_put_her(vx, vy); yield from wait_chunks(20, 30); ground_put(vx, vy); yield from rwait(2.0)
-                    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=12, yaw=math.degrees(math.atan2(-oy, -ox))))
-                    G["pawn"].set_actor_hidden_in_game(True); yield from rwait(2.0); shot("caves15_game3b_tower", "1280x720"); yield from rwait(1.0); G["pawn"].set_actor_hidden_in_game(False)
-                # (the run at it from the side away from the mouth)
-                wx, wy = (tx - (float(m[4]) if m[0] == "on" else 1.0) * 4000) / 100.0, (ty - (float(m[5]) if m[0] == "on" else 0.0) * 4000) / 100.0
-                g.wild_put_her(wx, wy); yield from wait_chunks(20, 30); ground_put(wx, wy); yield from rwait(1.0)
-                pawn = G["pawn"]; t0 = now(); nearest = 1e9
-                while now() - t0 < 9.0:
-                    L_ = pawn.get_actor_location(); d = V(tx - L_.x, ty - L_.y, 0); dn = max(math.hypot(d.x, d.y), 1.0)
-                    pawn.add_movement_input(V(d.x / dn, d.y / dn, 0), 1.0); yield
-                    nearest = min(nearest, dn)
-                g3["run_nearest_m"] = round(nearest / 100, 2)
-        except Exception as e:
-            g3["error"] = str(e)
-        finally:
-            if copied and os.path.isfile(dst): os.remove(dst)
-    else:
-        g3["error"] = "no save game3b at " + src
-    res["game3b"] = g3
-    quiet(False)
-    ok = (len([v for v in res["visits"] if v.get("ok")]) >= 2 and len({v["tier"] for v in res["visits"] if v.get("ok")}) >= 2
-          and g3.get("mouth", ["off"])[0] == "on" and (g3.get("run_nearest_m") or 0) > 17.0)
-    step_result("caves15", ok, **res)
+    back_slot = "save_caves15_back"
+    try:
+        os.makedirs(SAVES, exist_ok=True)
+        if not os.path.isfile(dst): open(dst, "wb").write(open(src, "rb").read()); copied = True
+        g3["saved_before"] = G["gen"].save_game_now(back_slot, "test", "caves15 back")
+        g3["load"] = G["gen"].load_game_from("save_game3b_f17369"); yield from until_loaded13(); yield from wait_ready(90)
+        g = G["gen"]; g3["seed"] = G["gi"].get_editor_property("wild_seed")
+        at = (4183.1, -1425.9)
+        g.wild_put_her(*at); yield from wait_chunks(30, 50); ground_put(*at); yield from rwait(3.0)
+        lm = str(g.get_wild_landmark()).split("|"); m = str(g.get_cave_mouth15()).split("|")
+        g3["landmark"] = lm; g3["mouth"] = m
+        if lm[0] == "on":
+            tx, ty = float(lm[1]), float(lm[2])
+            g3["tower_from_save_m"] = round(math.hypot(tx / 100 - at[0], ty / 100 - at[1]), 1)
+            ox, oy = (float(m[4]), float(m[5])) if m[0] == "on" else (1.0, 0.0)
+            vx, vy = (tx + ox * 6000) / 100.0, (ty + oy * 6000) / 100.0
+            g.wild_put_her(vx, vy); yield from wait_chunks(20, 30); ground_put(vx, vy); yield from rwait(2.0)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=12, yaw=math.degrees(math.atan2(-oy, -ox))))
+            G["pawn"].set_actor_hidden_in_game(True); yield from rwait(2.0); shot("caves15_game3b_tower", "1280x720"); yield from rwait(1.0); G["pawn"].set_actor_hidden_in_game(False)
+            # (the run at it from the side away from the mouth)
+            wx, wy = (tx - ox * 4000) / 100.0, (ty - oy * 4000) / 100.0
+            g.wild_put_her(wx, wy); yield from wait_chunks(20, 30); ground_put(wx, wy); yield from rwait(1.0)
+            pawn = G["pawn"]; t0 = now(); nearest = 1e9
+            while now() - t0 < 9.0:
+                L_ = pawn.get_actor_location(); d = V(tx - L_.x, ty - L_.y, 0); dn = max(math.hypot(d.x, d.y), 1.0)
+                pawn.add_movement_input(V(d.x / dn, d.y / dn, 0), 1.0); yield
+                nearest = min(nearest, dn)
+            g3["run_nearest_m"] = round(nearest / 100, 2)
+    except Exception as e:
+        g3["error"] = str(e)
+    finally:
+        if copied and os.path.isfile(dst): os.remove(dst)
+    # (the game she was in, loaded back)
+    try:
+        if g3.get("saved_before"):
+            g3["back_loaded"] = G["gen"].load_game_from(back_slot); yield from until_loaded13(); yield from wait_ready(90)
+    finally:
+        bf = os.path.join(SAVES, back_slot + ".sav")
+        if os.path.isfile(bf): os.remove(bf)
 
 
 STEPS = {"summon15": step_summon15, "roads14": step_roads14, "density14": step_density14, "discover14": step_discover14, "cities14": step_cities14, "save14": step_save14, "storm14": step_storm14, "locks14": step_locks14, "npc14": step_npc14, "farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,

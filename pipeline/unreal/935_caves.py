@@ -37,6 +37,15 @@ def solid(path):
     """a copy of a pack's mesh whose collision is its own faces (the pack's rocks have no simple shapes: walked through)"""
     name = path.rsplit("/", 1)[1]
     dst = SOLID + "/" + name
+    # (made again when the pack's mesh no longer matches the copy (PR #101's review: a re-run kept a stale copy): its box and vertices)
+    if eal.does_asset_exist(dst):
+        src_m, dst_m = unreal.load_asset(path), unreal.load_asset(dst)
+        sig = lambda m: (m.get_num_vertices(0), [round(v, 1) for v in (m.get_bounding_box().min.x, m.get_bounding_box().min.y, m.get_bounding_box().min.z, m.get_bounding_box().max.x, m.get_bounding_box().max.y, m.get_bounding_box().max.z)])
+        if sig(src_m) != sig(dst_m):
+            del src_m, dst_m
+            assert eal.delete_asset(dst), dst
+        else:
+            del src_m, dst_m
     if not eal.does_asset_exist(dst):
         assert eal.duplicate_asset(path, dst), dst
     m = unreal.load_asset(dst)
@@ -97,9 +106,10 @@ def tinted(name, parent, tint):
 def dark_material():
     """an unlit near-black for the mouth's inside (no light reaches it from the open)"""
     path = MATS + "/M_RD_CaveDark"
-    if eal.does_asset_exist(path): return unreal.load_asset(path)
     MEL = unreal.MaterialEditingLibrary
-    m = unreal.AssetToolsHelpers.get_asset_tools().create_asset("M_RD_CaveDark", MATS, unreal.Material, unreal.MaterialFactoryNew())
+    # (its graph made again on every run, in place (PR #101's review: an existing one was returned as it was))
+    m = unreal.load_asset(path) if eal.does_asset_exist(path) else unreal.AssetToolsHelpers.get_asset_tools().create_asset("M_RD_CaveDark", MATS, unreal.Material, unreal.MaterialFactoryNew())
+    MEL.delete_all_material_expressions(m)
     m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
     c = MEL.create_material_expression(m, unreal.MaterialExpressionConstant3Vector, -300, 0)
     c.set_editor_property("constant", unreal.LinearColor(0.004, 0.004, 0.005, 1.0))
