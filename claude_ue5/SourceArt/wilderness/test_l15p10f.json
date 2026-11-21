@@ -1,0 +1,42 @@
+{
+ "tag": "l15p10f",
+ "plan": [
+  "night15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "night15",
+   "ok": true,
+   "village": "Windholt",
+   "noon": {
+    "lights": 24,
+    "on": 0
+   },
+   "dusk": {
+    "lights": 24,
+    "on": 24
+   },
+   "late": {
+    "lights": 24,
+    "on": 0
+   },
+   "forced": true,
+   "camped": true,
+   "smoke": [
+    {
+     "height_m": 35.0,
+     "foot_over_fire_m": 1.2
+    }
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_l15p10f_night15_village.png",
+  "wd_l15p10f_night15_camp.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

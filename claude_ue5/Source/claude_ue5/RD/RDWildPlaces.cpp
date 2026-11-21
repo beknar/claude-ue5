@@ -126,7 +126,7 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 			Put(TEXT("fence"), P.At + Fw * 13.f - Sd * 4.f, P.Yaw + 70.f + R.FRandRange(-10.f, 10.f), 1.f, 25.f);
 			Put(TEXT("hay"), P.At + Fw * 10.f + Sd * 8.f, P.Yaw, 1.f, 5.f);
 		}
-		else if (P.Quest == TEXT("patrol"))
+		else if (P.Quest == TEXT("patrol") || P.Kind == TEXT("lookout"))          // (the list of 2026-11-20's tenth phase: a region's lookout is the same tower)
 		{
 			// (the captain's "The Lost Patrol": a ruined watchtower, Brokenspire's round tower's quarters (Castle Forge, 882's
 			// Town.TowerRing*: their origin the ring's middle) two storeys whole and a third broken, its fallen stones; the five
@@ -167,18 +167,26 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 			static const TCHAR Low[4] = { TEXT('B'), TEXT('A'), TEXT('E'), TEXT('A') };
 			static const TCHAR Mid[4] = { TEXT('D'), TEXT('A'), TEXT('C'), TEXT('E') };
 			for (int32 K = 0; K < 4; ++K) Quarter(Low[K], Y0 + 90.f * K, Z0);
-			for (int32 K = 0; K < 4; ++K) Quarter(Mid[K], Y0 + 90.f * K, Z0 + Hs);
+			// (the list of 2026-11-20's tenth phase: a region's lookout is whole and four storeys high, its top open behind a parapet; the Old
+			// Watchtower two and a broken third)
+			const bool bLookout = P.Kind == TEXT("lookout");
+			const int32 Storeys = bLookout ? 4 : 2;
+			for (int32 St = 1; St < Storeys; ++St) for (int32 K = 0; K < 4; ++K) Quarter(Mid[(K + St - 1) % 4], Y0 + 90.f * K, Z0 + St * Hs);
 			const int32 Kept = R.RandRange(0, 3);
-			Quarter(TEXT('E'), Y0 + 90.f * Kept, Z0 + 2.f * Hs);
-			Quarter(TEXT('A'), Y0 + 90.f * ((Kept + 1) % 4), Z0 + 2.f * Hs);
-			if (bWildHouseInsides) FitWildTower(C, FVector(P.At.X * 100.0, P.At.Y * 100.0, 0.0), Z0, Hs, P.Yaw, Y0 + 90.f * Kept);
+			if (!bLookout)
+			{
+				Quarter(TEXT('E'), Y0 + 90.f * Kept, Z0 + 2.f * Hs);
+				Quarter(TEXT('A'), Y0 + 90.f * ((Kept + 1) % 4), Z0 + 2.f * Hs);
+			}
+			if (bWildHouseInsides) FitWildTower(C, FVector(P.At.X * 100.0, P.At.Y * 100.0, 0.0), Z0, Hs, P.Yaw, bLookout ? -1e6f : Y0 + 90.f * Kept, Storeys);
+			if (bLookout) NoteLookoutTop15(P, FVector(P.At.X * 100.0, P.At.Y * 100.0, 0.0), Z0 + Storeys * Hs);
 			for (int32 I = 0; I < 3; ++I)
 			{
 				const float A = FMath::DegreesToRadians(P.Yaw + 120.f + 60.f * I + R.FRandRange(-15.f, 15.f)), D = R.FRandRange(8.f, 12.f);
 				Put(TEXT("ruin"), P.At + FVector2D(FMath::Cos(A), FMath::Sin(A)) * D, R.FRandRange(0.f, 360.f), 0.45f, 20.f);
 			}
 			const FVector2D Rm = WildQuestRemainsAt(P), Fw(FMath::Cos(FMath::DegreesToRadians(P.Yaw)), FMath::Sin(FMath::DegreesToRadians(P.Yaw))), Sd(-Fw.Y, Fw.X);
-			for (int32 I = 0; I < 5; ++I)
+			for (int32 I = 0; I < 5 && P.Quest == TEXT("patrol"); ++I)          // (the patrol's dead: the Old Watchtower's only)
 				Put(TEXT("bones"), Rm + Sd * ((I - 2) * 1.6f + R.FRandRange(-0.3f, 0.3f)) + Fw * R.FRandRange(-1.2f, 1.2f), P.Yaw + R.FRandRange(-60.f, 60.f) + (I % 2 ? 180.f : 0.f), 1.f, 2.f, false);
 		}
 		else if (P.Kind == TEXT("village") && Wild->bTerraces15)

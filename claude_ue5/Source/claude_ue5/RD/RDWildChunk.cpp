@@ -384,6 +384,8 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 		const FIntPoint S0 = W.SiteCellOf(X0, Y0) - FIntPoint(1, 1), S1 = W.SiteCellOf(X0 + Cm, Y0 + Cm) + FIntPoint(1, 1);
 		for (int32 Ci = S0.X; Ci <= S1.X; ++Ci) for (int32 Cj = S0.Y; Cj <= S1.Y; ++Cj) W.SitesIn(FIntPoint(Ci, Cj), Sites);
 		for (const FRDWildPlace& P : Sites) if (P.At.X >= X0 && P.At.X < X0 + Cm && P.At.Y >= Y0 && P.At.Y < Y0 + Cm) D.Places.Add(P);
+		// (the list of 2026-11-20's tenth phase: the regions' lookouts whose point is in it)
+		W.LookoutsIn(X0, Y0, X0 + Cm, Y0 + Cm, D.Places);
 		// (the list of 2026-11-14: the biomes' scenery whose point is in it, from the cells round it too (one by water stands on its
 		// shore, up to 400 m from its cell))
 		TArray<FRDWildPlace> Scen;

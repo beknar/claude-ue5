@@ -418,3 +418,10 @@ A continent of 150 x 150 km round Brokenspire (300 x 300 km until the list of 20
 - **Picture a pack's piece alone before using it**: the Cave pack's arch A is a quarter of a round arch (its foot at its own X -624, its top at X 35); placed as a whole arch it was half of one, mirrored the wrong way two horns. The mouth is the piece and its mirror (`bCaveMouthMirror15`).
 - **One level for many places**: its key and tier from the game instance at BeginPlay, before anything reads them (`ApplyCave15`), and `MapTier`'s cap makes every tier of the level one game tier (base tier - 1, cap tier).
 - **A wall test runs her at walls, not at what a trace meets first**: a trace from a hall's middle met a column, and she slid round it 5 m past the "wall". The test keeps the walls' own mesh (the boxes' `Cube`).
+## Landmarks and lookouts (the list of 2026-11-20's tenth phase: `936`, `RD/RDList15i.cpp`, `888 lookout15,landmarks15,night15`)
+
+- **A new layer of places stands clear of every other, not the other way round**: the lookouts are worked out per region's cell after everything else (places, structures, points of interest, scenery, farmsteads, 150 m from each), so no village or ruin moves; their ids sit in a range of their own (`LookoutIdBase`) that `FindPlace` reads first.
+- **A hilltop is the high ground round about**: the highest point within 1.2 km of a spot was a mountainside 220 m under a peak, and a climbed local summit could be a knoll in a basin (1 thing in view). The test climbs, then moves to any higher ground within 1.5 km and climbs again.
+- **A light inside a shut house is not seen**: the rooms' lights were on (measured) and the dusk picture showed dark houses; a lamp over the door reads as a lived-in house.
+- **Two of a kind per region**: one landmark a region's cell was hidden by ridges from mountain hilltops; two, each in its half of the cell, gave 9 or more in view from every summit tried.
+- **A tower that shows the land needs an open top**: the Old Watchtower's broken third storey held the camera against her (the top's picture was black); a lookout is whole with a parapet.

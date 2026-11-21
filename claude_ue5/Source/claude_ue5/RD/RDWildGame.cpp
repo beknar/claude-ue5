@@ -73,6 +73,7 @@ void ARDDungeonGenerator::StartWild()
 		}
 		for (const int32 Id : GI->WildFound) WildFound.Add(Id);
 	}
+	LoadLookouts15();          // (the list of 2026-11-20's tenth phase: the lookouts climbed and the places they marked)
 	if (WildFound.Num() == 0) WildFound.Add(FRDWildWorld::TownIdBase);      // (Brokenspire: known from the start)
 	// (the list of 2026-11-16's eleventh phase: a save of an older world: the captain's wild quests (the den, the patrol), their places
 	// moved, given back to him to take again; she is told once she stands in the square)

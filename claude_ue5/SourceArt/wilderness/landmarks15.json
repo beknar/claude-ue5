@@ -1,0 +1,24 @@
+{
+  "_": "the regions' landmarks (the list of 2026-11-20's tenth phase, idea 1: 'each region gets one or two tall silhouettes of its own'; 936_landmarks15.py). One in each region's cell (the world's CellM) whose biome a kind names; the open lands (grasslands, meadows, plains, savannahs, cold steppes, farms, burned plain, tundras, highland moorland) keep their broken towers. main: the piece, its height (m) and sink (m); extra: over its top (a plume, a beam, a lamp), its height and width (m), shown by night only or always, its material",
+  "km": 22.0,
+  "kinds": [
+    {"kind": "great tree", "biomes": ["pine forests", "temperate autumn forests", "boreal pine forest", "temperate aspen", "taigas", "marshes", "wetlands"],
+     "main": "/Game/Cave/Scanned_Foliage/Foliage/EuropeanBeech/Meshes/SM_EuropeanBeech_XL_01", "height": 95, "sink": 1.0},
+    {"kind": "smoking crater", "biomes": ["volcanoes", "volcanic tundra", "geothermal caldera"],
+     "main": "/Game/Cave/Asset/Rock/F/SM_Rock_F", "height": 60, "sink": 8.0,
+     "extra": "/Engine/BasicShapes/Cylinder", "extra_height": 320, "extra_width": 45, "night": false, "material": "smoke"},
+    {"kind": "beacon stone", "biomes": ["mountains", "mountains and peaks", "glacial", "arctic regions", "hills", "canyons", "canyon networks", "mesas"],
+     "main": "/Game/Cave/Asset/Rock/B/SM_Rock_B", "height": 42, "sink": 3.0,
+     "extra": "/Engine/BasicShapes/Cylinder", "extra_height": 700, "extra_width": 5, "night": true, "material": "beam"},
+    {"kind": "lighthouse", "biomes": ["coastal regions", "rocky coastal"],
+     "main": "/Game/RandomDungeon/Wild13/Kit/SM_N13_Lighthouse", "height": 48, "sink": 0.5,
+     "extra": "/Engine/BasicShapes/Sphere", "extra_height": 7, "extra_width": 7, "night": true, "material": "lamp"}
+  ],
+  "materials": {
+    "smoke": {"blend": "translucent", "color": [0.22, 0.21, 0.20], "opacity": 0.32},
+    "beam": {"blend": "additive", "color": [0.55, 0.75, 1.0], "emissive": 6.0},
+    "lamp": {"blend": "additive", "color": [1.0, 0.78, 0.45], "emissive": 30.0}
+  },
+  "camp_smoke": {"mesh": "/Engine/BasicShapes/Cylinder", "material": "smoke", "width": 2.5, "height": 35},
+  "house_lights": {"on": true, "candelas": 60}
+}

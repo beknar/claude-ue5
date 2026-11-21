@@ -226,6 +226,8 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 	TickWildStorm13(Dt, Her);
 	TickWildAurora13(Dt, Her);
 	TickWildLandmark13(Dt, Her);
+	// (the list of 2026-11-20's tenth phase: the lookouts, the regions' landmarks, the houses' lights by night: RDList15i.cpp)
+	TickLookouts15(Her); TickRegionLandmarks15(Her); TickHouseLights15(Her);
 	// (the ninth phase: the tide's skins at its level)
 	if (WildTideSkins.Num() > 0)
 	{
@@ -1233,13 +1235,10 @@ void ARDDungeonGenerator::TickWildLandmark13(float Dt, const FVector& Her)
 	double Best = Reach; FVector2D Site(1e12, 1e12); bool bGot = false;
 	for (int32 I = Ci - 2; I <= Ci + 2; ++I) for (int32 J = Cj - 2; J <= Cj + 2; ++J)
 	{
-		const uint32 Hh = FRDWildWorld::Hash(I, J, Wild->Seed + 913u);
-		const FVector2D S((I + 0.2 + 0.6 * ((Hh & 1023u) / 1023.0)) * LmCell, (J + 0.2 + 0.6 * (((Hh >> 10) & 1023u) / 1023.0)) * LmCell);
+		FVector2D S;
+		if (!WildTowerSite13(I, J, S)) continue;
 		const double D = FVector2D::Distance(S, H2);
 		if (D > Best) continue;
-		FRDWSample Sq; Wild->Sample(S.X, S.Y, Sq, false);
-		if (Sq.WaterKind != 0 || Sq.Road > 0.1f || Sq.Lava > 0.05f || !WildLandmarkBiomes.Contains(Wild->BiomeName(Sq.Biome))) continue;
-		double Dt2 = 1e12; Wild->NearestTown(S.X, S.Y, Dt2); if (Dt2 < 1500.0) continue;
 		Best = D; Site = S; bGot = true;
 	}
 	if (!bGot)
@@ -1263,6 +1262,18 @@ void ARDDungeonGenerator::TickWildLandmark13(float Dt, const FVector& Her)
 	Lm->SetWorldLocation(FVector(Site.X * 100.0, Site.Y * 100.0, Wild->ToZ(Wild->Height(Site.X, Site.Y)) - 200.f));
 	Lm->SetWorldRotation(FRotator(0.f, (float)(FRDWildWorld::Hash((int32)Site.X, (int32)Site.Y, Wild->Seed) % 360u), 0.f));
 	LayCaveMouth15(Lm, Site);          // (the list of 2026-11-20's ninth phase: its cave's mouth at its foot)
+}
+
+bool ARDDungeonGenerator::WildTowerSite13(int32 I, int32 J, FVector2D& S) const
+{
+	// (a 6 km square's tower: its spot from the square's hash; none on water, a road or lava, outside the open lands, or within 1.5 km of a
+	// town (the list of 2026-11-20's tenth phase: one rule for the nearest, laid whole, and the far ones laid as silhouettes))
+	const uint32 Hh = FRDWildWorld::Hash(I, J, Wild->Seed + 913u);
+	S = FVector2D((I + 0.2 + 0.6 * ((Hh & 1023u) / 1023.0)) * WildLandmarkCellM, (J + 0.2 + 0.6 * (((Hh >> 10) & 1023u) / 1023.0)) * WildLandmarkCellM);
+	FRDWSample Sq; Wild->Sample(S.X, S.Y, Sq, false);
+	if (Sq.WaterKind != 0 || Sq.Road > 0.1f || Sq.Lava > 0.05f || !WildLandmarkBiomes.Contains(Wild->BiomeName(Sq.Biome))) return false;
+	double Dt2 = 1e12; Wild->NearestTown(S.X, S.Y, Dt2);
+	return Dt2 >= 1500.0;
 }
 
 FString ARDDungeonGenerator::GetWildLandmark() const

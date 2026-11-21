@@ -1,0 +1,843 @@
+{
+ "tag": "l15p10e",
+ "plan": [
+  "landmarks15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "landmarks15",
+   "ok": true,
+   "regions": {
+    "temperate autumn forests": [
+     {
+      "at_m": [
+       11653,
+       -38849
+      ],
+      "ground_m": 192.3,
+      "laid": 50,
+      "in_view": 43,
+      "kinds": [
+       "great tree",
+       "smoking crater",
+       "tower"
+      ],
+      "things": [
+       {
+        "kind": "great tree",
+        "km": 3.85,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "great tree",
+        "km": 4.85,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "great tree",
+        "km": 4.98,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "great tree",
+        "km": 5.42,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "tower",
+        "km": 6.42,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "great tree",
+        "km": 6.46,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "great tree",
+        "km": 6.78,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "tower",
+        "km": 7.54,
+        "seen": true,
+        "extra": 0
+       }
+      ],
+      "extra_day": [
+       "great tree:0",
+       "lighthouse:1",
+       "smoking crater:2"
+      ],
+      "extra_night": [
+       "great tree:0",
+       "lighthouse:2",
+       "smoking crater:2"
+      ]
+     },
+     {
+      "at_m": [
+       11653,
+       -34849
+      ],
+      "ground_m": 185.9,
+      "laid": 50,
+      "in_view": 47,
+      "kinds": [
+       "great tree",
+       "smoking crater",
+       "tower"
+      ],
+      "things": [
+       {
+        "kind": "great tree",
+        "km": 1.98,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "tower",
+        "km": 2.99,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "great tree",
+        "km": 3.69,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "tower",
+        "km": 4.55,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "great tree",
+        "km": 5.22,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "great tree",
+        "km": 6.04,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "tower",
+        "km": 7.64,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "great tree",
+        "km": 8.2,
+        "seen": true,
+        "extra": 0
+       }
+      ]
+     },
+     {
+      "at_m": [
+       8103,
+       -37499
+      ],
+      "ground_m": 199.0,
+      "laid": 50,
+      "in_view": 46,
+      "kinds": [
+       "great tree",
+       "smoking crater",
+       "tower"
+      ],
+      "things": [
+       {
+        "kind": "great tree",
+        "km": 1.65,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "great tree",
+        "km": 2.62,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "great tree",
+        "km": 4.8,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "tower",
+        "km": 5.17,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "great tree",
+        "km": 5.43,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "tower",
+        "km": 6.81,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "tower",
+        "km": 7.41,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "great tree",
+        "km": 7.48,
+        "seen": true,
+        "extra": 0
+       }
+      ]
+     }
+    ],
+    "volcanoes": [
+     {
+      "at_m": [
+       61775,
+       -56268
+      ],
+      "ground_m": 1123.8,
+      "laid": 39,
+      "in_view": 28,
+      "kinds": [
+       "beacon stone",
+       "great tree",
+       "lighthouse",
+       "tower"
+      ],
+      "things": [
+       {
+        "kind": "smoking crater",
+        "km": 2.45,
+        "seen": false,
+        "extra": 2
+       },
+       {
+        "kind": "beacon stone",
+        "km": 4.54,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "tower",
+        "km": 5.43,
+        "seen": false,
+        "extra": 0
+       },
+       {
+        "kind": "lighthouse",
+        "km": 6.56,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "tower",
+        "km": 7.27,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "beacon stone",
+        "km": 8.28,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "tower",
+        "km": 8.42,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "beacon stone",
+        "km": 8.78,
+        "seen": true,
+        "extra": 1
+       }
+      ],
+      "extra_day": [
+       "beacon stone:1",
+       "great tree:0",
+       "lighthouse:1",
+       "smoking crater:2"
+      ],
+      "extra_night": [
+       "beacon stone:2",
+       "great tree:0",
+       "lighthouse:2",
+       "smoking crater:2"
+      ]
+     },
+     {
+      "at_m": [
+       47440,
+       -52892
+      ],
+      "ground_m": 1928.3,
+      "laid": 43,
+      "in_view": 16,
+      "kinds": [
+       "beacon stone",
+       "great tree",
+       "lighthouse",
+       "smoking crater",
+       "tower"
+      ],
+      "things": [
+       {
+        "kind": "beacon stone",
+        "km": 2.91,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 4.29,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "lighthouse",
+        "km": 4.81,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "tower",
+        "km": 5.72,
+        "seen": false,
+        "extra": 0
+       },
+       {
+        "kind": "lighthouse",
+        "km": 6.43,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 6.67,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 7.14,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "lighthouse",
+        "km": 7.34,
+        "seen": true,
+        "extra": 1
+       }
+      ]
+     },
+     {
+      "at_m": [
+       45112,
+       -53225
+      ],
+      "ground_m": 2261.2,
+      "laid": 43,
+      "in_view": 22,
+      "kinds": [
+       "beacon stone",
+       "great tree",
+       "lighthouse",
+       "smoking crater",
+       "tower"
+      ],
+      "things": [
+       {
+        "kind": "beacon stone",
+        "km": 3.4,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 5.53,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "lighthouse",
+        "km": 5.59,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 5.67,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "great tree",
+        "km": 5.95,
+        "seen": false,
+        "extra": 0
+       },
+       {
+        "kind": "beacon stone",
+        "km": 5.99,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "lighthouse",
+        "km": 6.54,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 6.57,
+        "seen": false,
+        "extra": 1
+       }
+      ]
+     }
+    ],
+    "mountains": [
+     {
+      "at_m": [
+       10000,
+       -300
+      ],
+      "ground_m": 1466.6,
+      "laid": 36,
+      "in_view": 17,
+      "kinds": [
+       "beacon stone",
+       "tower"
+      ],
+      "things": [
+       {
+        "kind": "tower",
+        "km": 4.45,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "tower",
+        "km": 4.98,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "beacon stone",
+        "km": 5.41,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "tower",
+        "km": 5.61,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "tower",
+        "km": 5.63,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "beacon stone",
+        "km": 7.74,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "tower",
+        "km": 7.94,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "tower",
+        "km": 9.52,
+        "seen": true,
+        "extra": 0
+       }
+      ],
+      "extra_day": [
+       "beacon stone:1"
+      ],
+      "extra_night": [
+       "beacon stone:2"
+      ]
+     },
+     {
+      "at_m": [
+       11271,
+       -2429
+      ],
+      "ground_m": 1397.3,
+      "laid": 48,
+      "in_view": 29,
+      "kinds": [
+       "beacon stone",
+       "tower"
+      ],
+      "things": [
+       {
+        "kind": "beacon stone",
+        "km": 1.5,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "tower",
+        "km": 2.35,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "beacon stone",
+        "km": 2.93,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "tower",
+        "km": 6.18,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "tower",
+        "km": 7.16,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "beacon stone",
+        "km": 7.29,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 7.49,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "tower",
+        "km": 8.44,
+        "seen": true,
+        "extra": 0
+       }
+      ]
+     },
+     {
+      "at_m": [
+       11997,
+       4565
+      ],
+      "ground_m": 1494.2,
+      "laid": 51,
+      "in_view": 12,
+      "kinds": [
+       "beacon stone",
+       "tower"
+      ],
+      "things": [
+       {
+        "kind": "beacon stone",
+        "km": 2.4,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 5.2,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 7.2,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 7.5,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 7.72,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 8.03,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "tower",
+        "km": 8.18,
+        "seen": true,
+        "extra": 0
+       },
+       {
+        "kind": "beacon stone",
+        "km": 8.3,
+        "seen": false,
+        "extra": 1
+       }
+      ]
+     }
+    ],
+    "coastal regions": [
+     {
+      "at_m": [
+       -22541,
+       -505
+      ],
+      "ground_m": 281.9,
+      "laid": 43,
+      "in_view": 14,
+      "kinds": [
+       "beacon stone",
+       "lighthouse",
+       "tower"
+      ],
+      "things": [
+       {
+        "kind": "beacon stone",
+        "km": 2.03,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 2.34,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "lighthouse",
+        "km": 5.03,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 5.32,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 6.8,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 7.3,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 7.6,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 7.94,
+        "seen": true,
+        "extra": 1
+       }
+      ],
+      "extra_day": [
+       "beacon stone:1",
+       "lighthouse:1"
+      ],
+      "extra_night": [
+       "beacon stone:2",
+       "lighthouse:2"
+      ]
+     },
+     {
+      "at_m": [
+       -18037,
+       3376
+      ],
+      "ground_m": 394.6,
+      "laid": 49,
+      "in_view": 9,
+      "kinds": [
+       "beacon stone",
+       "lighthouse",
+       "tower"
+      ],
+      "things": [
+       {
+        "kind": "beacon stone",
+        "km": 2.07,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 3.98,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 4.34,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 4.43,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "tower",
+        "km": 4.58,
+        "seen": false,
+        "extra": 0
+       },
+       {
+        "kind": "beacon stone",
+        "km": 7.05,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 7.19,
+        "seen": false,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 7.33,
+        "seen": false,
+        "extra": 1
+       }
+      ]
+     },
+     {
+      "at_m": [
+       -24171,
+       -5014
+      ],
+      "ground_m": 1268.7,
+      "laid": 43,
+      "in_view": 30,
+      "kinds": [
+       "beacon stone",
+       "lighthouse",
+       "tower"
+      ],
+      "things": [
+       {
+        "kind": "beacon stone",
+        "km": 2.16,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "lighthouse",
+        "km": 4.48,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 5.24,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "lighthouse",
+        "km": 5.32,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 5.4,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 6.05,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "beacon stone",
+        "km": 6.46,
+        "seen": true,
+        "extra": 1
+       },
+       {
+        "kind": "lighthouse",
+        "km": 6.63,
+        "seen": true,
+        "extra": 1
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_l15p10e_landmarks15_temperate_day.png",
+  "wd_l15p10e_landmarks15_temperate_night.png",
+  "wd_l15p10e_landmarks15_volcanoes_day.png",
+  "wd_l15p10e_landmarks15_volcanoes_night.png",
+  "wd_l15p10e_landmarks15_mountains_day.png",
+  "wd_l15p10e_landmarks15_mountains_night.png",
+  "wd_l15p10e_landmarks15_coastal_day.png",
+  "wd_l15p10e_landmarks15_coastal_night.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

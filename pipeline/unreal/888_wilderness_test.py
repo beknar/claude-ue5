@@ -7005,13 +7005,218 @@ def caves15_body(res):
         if os.path.isfile(bf): os.remove(bf)
 
 
+def seen15(g, eye, tx, ty, top_z):
+    """a line of sight over the world's ground (the chunks reach 2 km, the far land has no collision): the ground every 250 m along the
+    line from her eyes (cm) to a thing's top (x, y in m, z in cm) stays under the line"""
+    ex, ey = eye.x / 100.0, eye.y / 100.0
+    d = math.hypot(tx - ex, ty - ey); n = max(4, int(d / 250.0))
+    for k in range(1, n):
+        f = k / n; px, py = ex + (tx - ex) * f, ey + (ty - ey) * f
+        s = str(g.get_wild_sample_at(V(px * 100.0, py * 100.0, 0))).split("|")
+        if len(s) < 2: continue
+        gz = float(s[1]); lz = eye.z + (top_z - eye.z) * f
+        if gz > lz: return False
+    return True
+
+
+def hilltop15(g, x, y, r=1200.0, step=150.0):
+    """a hilltop: from the highest dry ground within r of a point (m), climbed to the summit (each step to the highest of its eight
+    neighbours 100 m out, until none is higher: a local summit, not a slope under higher ground (the first mountain run's "hilltops"
+    stood 220 m under a peak 1.5 km off))"""
+    def h_at(px, py):
+        s = str(g.get_wild_sample_at(V(px * 100.0, py * 100.0, 0))).split("|")
+        return None if len(s) < 6 or s[5] != "0" else float(s[0])
+    best = None
+    for i in range(-int(r / step), int(r / step) + 1):
+        for j in range(-int(r / step), int(r / step) + 1):
+            px, py = x + i * step, y + j * step
+            h = h_at(px, py)
+            if h is not None and (best is None or h > best[2]): best = (px, py, h)
+    if not best: return None
+    # (and the high ground round about: a knoll in a basin is a summit too (it saw one thing); any higher ground within 1.5 km is gone to
+    # and climbed again, until none is)
+    for _round in range(6):
+        for _ in range(60):
+            nb = [(best[0] + 100.0 * math.cos(k * math.pi / 4), best[1] + 100.0 * math.sin(k * math.pi / 4)) for k in range(8)]
+            hs = [(px, py, h_at(px, py)) for px, py in nb]
+            up = max((t for t in hs if t[2] is not None), key=lambda t: t[2], default=None)
+            if not up or up[2] <= best[2]: break
+            best = up
+        ring = [(best[0] + rr * math.cos(k * math.pi / 8), best[1] + rr * math.sin(k * math.pi / 8)) for rr in (500.0, 1000.0, 1500.0) for k in range(16)]
+        hs = [(px, py, h_at(px, py)) for px, py in ring]
+        up = max((t for t in hs if t[2] is not None), key=lambda t: t[2], default=None)
+        if not up or up[2] <= best[2] + 5.0: break
+        best = up
+    return best
+
+
+def step_landmarks15():
+    """idea 1 (the list of 2026-11-20's tenth phase): from three hilltops in each of four regions (forest, volcanoes, mountains, coast)
+    the tall things in view counted: the regions' landmarks laid round her (a great tree, a smoking crater, a beacon stone, a lighthouse)
+    and the open lands' broken towers, each within 22 km with a line of sight over the ground to its top; at least three from each
+    hilltop; a picture toward the nearest by day and by night (the beam and the lamp shown by night only, measured)"""
+    g = G["gen"]; res = {"regions": {}}; h0 = g.get_town_hour()
+    quiet(True)
+    try:
+        for bn in ("temperate autumn forests", "volcanoes", "mountains", "coastal regions"):
+            pt = find_biome_point(bn, 140)
+            if not pt: res["regions"][bn] = None; continue
+            hills = []; tops = []
+            for k, (ox, oy) in enumerate(((0.0, 0.0), (2500.0, 0.0), (0.0, 2500.0), (-2500.0, 0.0), (0.0, -2500.0), (2500.0, 2500.0))):
+                if len(hills) >= 3: break
+                top = hilltop15(g, pt[0] + ox, pt[1] + oy)
+                if not top or any(math.hypot(top[0] - t[0], top[1] - t[1]) < 1500.0 for t in tops): continue
+                tops.append(top); k = len(hills)
+                g.wild_put_her(top[0], top[1]); yield from wait_chunks(30, 50); ground_put(top[0], top[1]); yield from rwait(4.5)
+                me = G["pawn"].get_actor_location(); eye = V(me.x, me.y, me.z + 70.0)
+                things = []
+                for l in g.get_region_landmarks15():
+                    f = str(l).split("|")
+                    tx, ty, tz = float(f[1]), float(f[2]), float(f[4])
+                    km = math.hypot(tx - me.x / 100.0, ty - me.y / 100.0) / 1000.0
+                    if km > 22.0: continue
+                    things.append({"kind": f[0], "km": round(km, 2), "seen": seen15(g, eye, tx, ty, tz), "extra": int(f[6]), "at": [tx, ty]})
+                vis = [t for t in things if t["seen"]]
+                h = {"at_m": [round(top[0]), round(top[1])], "ground_m": round(top[2], 1), "laid": len(things), "in_view": len(vis),
+                     "kinds": sorted({t["kind"] for t in vis}), "things": [{k_: v_ for k_, v_ in t.items() if k_ != "at"} for t in sorted(things, key=lambda t: t["km"])[:8]]}
+                if k == 0 and vis:
+                    near = min(vis, key=lambda t: t["km"])
+                    yaw = math.degrees(math.atan2(near["at"][1] - me.y / 100.0, near["at"][0] - me.x / 100.0))
+                    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=4, yaw=yaw))
+                    G["pawn"].set_actor_hidden_in_game(True)
+                    for hr, tag in ((13.0, "day"), (23.0, "night")):
+                        g.set_town_hour(hr); yield from rwait(3.0)
+                        h["extra_" + tag] = sorted({str(l).split("|")[0] + ":" + str(l).split("|")[6] for l in g.get_region_landmarks15() if str(l).split("|")[0] != "tower"})
+                        shot(f"landmarks15_{bn.split()[0]}_{tag}", "1280x720"); yield from rwait(1.2)
+                    g.set_town_hour(h0); G["pawn"].set_actor_hidden_in_game(False)
+                hills.append(h)
+            res["regions"][bn] = hills
+    finally:
+        try: g.set_town_hour(h0); G["pawn"].set_actor_hidden_in_game(False)
+        except Exception: pass
+        quiet(False)
+    # (the extras by night only: no beam or lamp shown (2) by day where one stands; the crater's smoke is shown always)
+    ok_view = all(r is not None and len(r) >= 3 and all(h["in_view"] >= 3 for h in r) for r in res["regions"].values())
+    # (a beam or a lamp is hidden by day and shown by night; the crater's smoke stands always)
+    nightly = ("beacon stone", "lighthouse")
+    ok_night = all("extra_day" not in h or (not any(e in h["extra_day"] for e in (n + ":2" for n in nightly))
+                                             and all((n + ":2") in h["extra_night"] for n in nightly if (n + ":1") in h["extra_day"])) for r in res["regions"].values() if r for h in r)
+    step_result("landmarks15", ok_view and ok_night, **res)
+
+
+def step_lookout15():
+    """idea 2 (the list of 2026-11-20's tenth phase): the nearest region's lookout from a point 5 km out of Brokenspire: found as she comes
+    (within 120 m), its tower laid with its top's height; she is put at its top (the stair is 888 tower10's): the places of its region
+    (its cell) are marked on her map, counted, every one in that cell and none outside it, the map draws them (its known places) and
+    none can be travelled to (not found); climbed again marks nothing more; the marks are in the game instance (kept with a save)"""
+    g = G["gen"]; res = {}
+    quiet(True)
+    try:
+        g.wild_put_her(5000.0, 2000.0); yield from wait_chunks(30, 50); ground_put(5000.0, 2000.0); yield from rwait(2.0)
+        ls = [str(l).split("|") for l in g.get_lookouts15(12.0)]
+        res["lookouts_12km"] = len(ls)
+        if not ls: step_result("lookout15", False, **res); return
+        me = G["pawn"].get_actor_location()
+        L = min(ls, key=lambda f: math.hypot(float(f[2]) - me.x / 100.0, float(f[3]) - me.y / 100.0))
+        lid, lx, ly = int(L[0]), float(L[2]), float(L[3])
+        res["lookout"] = {"name": L[1], "at_m": [round(lx), round(ly)], "cell": [int(L[7]), int(L[8])], "tier": int(L[9])}
+        g.wild_put_her(lx + 60.0, ly); yield from wait_chunks(30, 50); ground_put(lx + 60.0, ly); yield from rwait(2.5)
+        f = next(str(l).split("|") for l in g.get_lookouts15(1.0) if int(str(l).split("|")[0]) == lid)
+        res["found_near"] = f[6] == "1"; top = float(f[4]); res["top_z"] = top
+        res["ground_z"] = float(str(g.get_wild_sample_at(V(lx * 100, ly * 100, 0))).split("|")[1])
+        # (a picture of it from 30 m)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=10, yaw=180.0)); G["pawn"].set_actor_hidden_in_game(True)
+        g.wild_put_her(lx + 30.0, ly); yield from wait_chunks(10, 10); ground_put(lx + 30.0, ly); yield from rwait(2.0); shot("lookout15_tower", "1280x720"); yield from rwait(1.0)
+        G["pawn"].set_actor_hidden_in_game(False)
+        known0 = set(int(i) for i in g.get_wild_known_ids15())
+        marked0 = len(g.get_wild_marked15())
+        # (at its top: her capsule over its middle, 1.2 m over the second storey's top)
+        if top > 0:
+            G["pawn"].set_actor_location(V(lx * 100.0, ly * 100.0, top + 120.0), False, True); yield from rwait(2.5)
+        res["her_over_top_cm"] = round(G["pawn"].get_actor_location().z - top)
+        res["marked_here"] = g.get_last_lookout_marked15()
+        lines = [str(l).split("|") for l in g.get_wild_marked_lines15()]
+        res["marked_total"] = len(lines)
+        res["marked_kinds"] = sorted({l[1] for l in lines})
+        cell = res["lookout"]["cell"]
+        res["outside_cell"] = [l for l in lines if [int(l[5]), int(l[6])] != cell][:5]
+        known = set(int(i) for i in g.get_wild_known_ids15())
+        res["drawn"] = sum(1 for l in lines if int(l[0]) in known)
+        res["found_marked"] = sum(1 for l in lines if l[7] == "1")
+        res["new_known"] = len(known - known0)
+        msgs = [str(m) for m in cb().get_message_log()]
+        res["told"] = [m for m in msgs if "From the top of" in m][-1:]
+        # (again: nothing more)
+        G["pawn"].set_actor_location(V(lx * 100.0 + 2000.0, ly * 100.0, top), False, True); yield from rwait(1.0)
+        G["pawn"].set_actor_location(V(lx * 100.0, ly * 100.0, top + 120.0), False, True); yield from rwait(2.0)
+        res["marked_again"] = len(g.get_wild_marked15()) - res["marked_total"]
+        res["in_game_instance"] = len(G["gi"].get_editor_property("wild_marked15"))
+        # (the view from its top)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=45.0)); yield from rwait(1.0); shot("lookout15_top", "1280x720"); yield from rwait(1.0)
+    finally:
+        try: G["pawn"].set_actor_hidden_in_game(False)
+        except Exception: pass
+        quiet(False)
+    ok = (res.get("found_near") and res.get("top_z", -1) > res.get("ground_z", 0) + 400 and res.get("marked_here", 0) > 0 and res["marked_here"] == res["marked_total"] - marked0
+          and not res["outside_cell"] and res["drawn"] == res["marked_total"] and res["found_marked"] == 0 and res["marked_again"] == 0
+          and res["in_game_instance"] >= res["marked_total"] and res["told"])
+    step_result("lookout15", ok, **res)
+
+
 STEPS = {"summon15": step_summon15, "roads14": step_roads14, "density14": step_density14, "discover14": step_discover14, "cities14": step_cities14, "save14": step_save14, "storm14": step_storm14, "locks14": step_locks14, "npc14": step_npc14, "farmanimals14": step_farmanimals14, "sleep14": step_sleep14, "recipes14": step_recipes14, "tables14": step_tables14, "horse14": step_horse14, "collide14": step_collide14, "scenery13": step_scenery13, "land13": step_land13, "list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "sites12": step_sites12, "quests12": step_quests12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)
 STEPS.update({"hearth15": step_hearth15, "terrace15": step_terrace15, "villages15": step_villages15})
 STEPS["horse15"] = step_horse15
-STEPS["caves15"] = step_caves15
+STEPS["caves15"] = step_caves15; STEPS["landmarks15"] = step_landmarks15; STEPS["lookout15"] = step_lookout15
+def step_night15():
+    """idea 1's night (the list of 2026-11-20's tenth phase): a village's houses lit from dusk until bed (each house's light on at 19:30,
+    off at noon and at 23:00, counted round the village), and a travellers' camp's column of smoke over its fire (its mesh beside the
+    fire, 35 m tall); pictures of the village at dusk and of the camp by night"""
+    g = G["gen"]; res = {}; h0 = g.get_town_hour(); quiet(True)
+    try:
+        vs = sorted([str(l).split("|") for l in g.get_wild_places_near(V(0, 0, 0), 9000.0) if str(l).split("|")[1] == "village"], key=lambda p: math.hypot(float(p[3]), float(p[4])))
+        if vs:
+            vx, vy = float(vs[0][3]), float(vs[0][4]); res["village"] = vs[0][2]
+            g.wild_put_her(vx + 90.0, vy); yield from wait_chunks(30, 50); ground_put(vx + 90.0, vy); yield from rwait(8.0)
+            def lights(): return [str(l).split("|") for l in g.get_house_lights15(unreal.Vector2D(vx, vy), 120.0)]
+            for hr, tag in ((12.0, "noon"), (19.5, "dusk"), (23.0, "late")):
+                g.set_town_hour(hr); yield from rwait(3.0)
+                L = lights(); res[tag] = {"lights": len(L), "on": sum(1 for l in L if l[3] == "1")}
+                if tag == "dusk":
+                    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=180.0)); G["pawn"].set_actor_hidden_in_game(True); yield from rwait(1.5)
+                    shot("night15_village", "1280x720"); yield from rwait(1.0); G["pawn"].set_actor_hidden_in_game(False)
+        # (a camp: the captain's den lies beside a road)
+        g.set_town_hour(10.0)
+        den = wq().get("wild:wolves"); rd = (den["x"], den["y"]) if den else (900.0, 0.0)
+        g.wild_drop_all(); g.wild_put_her(rd[0], rd[1]); yield from wait_chunks(30, 50); yield from rwait(1.0)
+        res["forced"] = g.force_wild_travellers(); yield from rwait(1.5)
+        g.set_town_hour(22.5); yield from rwait(14.0)
+        cp = None
+        for l in g.get_wild_traveller_lines():
+            p = str(l).split("|")
+            if p[0] == "group" and p[6] == "1": cp = V(float(p[10]), float(p[11]), float(p[12])); break
+        res["camped"] = cp is not None
+        if cp:
+            sm = []
+            for ch in GS.get_all_actors_of_class(G["w"], unreal.RDWildChunk):
+                for c in ch.get_components_by_class(unreal.StaticMeshComponent):
+                    m = c.get_editor_property("static_mesh")
+                    if m and m.get_name() == "Cylinder" and dist2(c.get_world_location(), cp) < 300:
+                        bb = m.get_bounding_box(); sz = c.get_world_transform().scale3d.z
+                        sm.append({"height_m": round((bb.max.z - bb.min.z) * sz / 100.0, 1), "foot_over_fire_m": round((c.get_world_location().z + bb.min.z * sz - cp.z) / 100.0, 1)})
+            res["smoke"] = sm
+            G["pawn"].set_actor_location(V(cp.x + 2500, cp.y, cp.z + 300), False, True); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=8, yaw=180.0))
+            G["pawn"].set_actor_hidden_in_game(True); yield from rwait(2.0); shot("night15_camp", "1280x720"); yield from rwait(1.2); G["pawn"].set_actor_hidden_in_game(False)
+    finally:
+        try: g.set_town_hour(h0); G["pawn"].set_actor_hidden_in_game(False)
+        except Exception: pass
+        quiet(False)
+    ok = (res.get("dusk", {}).get("lights", 0) >= 8 and res["dusk"]["on"] == res["dusk"]["lights"] and res.get("noon", {}).get("on", 1) == 0 and res.get("late", {}).get("on", 1) == 0
+          and res.get("camped") and len(res.get("smoke", [])) == 1 and 30 <= res["smoke"][0]["height_m"] <= 40)
+    step_result("night15", ok, **res)
+STEPS["night15"] = step_night15
 SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
 def saves_snapshot():
     """the save folder's files and their bytes: put back at the end, the tests' own new saves deleted (PR #61's review)"""

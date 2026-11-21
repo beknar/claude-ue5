@@ -2008,12 +2008,63 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FString GetCaveMouth15() const;
 	/** tests: into the cave of the tower standing, as F at its mouth does (false: none, or refused) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") bool DebugEnterCave15() { return EnterCave15(); }
+	// ---- the list of 2026-11-20's tenth phase (RDList15i.cpp): landmarks and lookouts (ideas 1 and 2)
+	/** the lookouts' tops laid (their place id -> middle x, y and the second storey's top z, cm), those she has climbed, and the places
+	 *  their tops marked on her map (seen, not found: drawn at half strength, no travel), the last two kept with the game */
+	TMap<int32, FVector> WildLookoutTops15;
+	TSet<int32> LookoutsClimbed15, WildMarked15;
+	float LookoutLook15 = 0.f;
+	int32 LastLookoutMarked15 = 0;
+	void NoteLookoutTop15(const struct FRDWildPlace& P, const FVector& Mid, float TopZ);
+	void TickLookouts15(const FVector& Her);
+	int32 ClimbLookout15(const struct FRDWildPlace& L);
+	void LoadLookouts15();
+	/** tests: the lookouts within Km of her, "id|name|x m|y m|top z cm (-1: not laid)|climbed|found|cell x|cell y|tier" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetLookouts15(float Km) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") bool IsWildMarked15(int32 Id) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<int32> GetWildMarked15() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") int32 GetLastLookoutMarked15() const { return LastLookoutMarked15; }
+	/** tests: the marked places, "id|kind|name|x m|y m|region cell x|cell y|found"; the ids the map draws (WildKnownPlaces) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetWildMarkedLines15() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<int32> GetWildKnownIds15() const;
+	/** the regions' landmarks: lines "kind|biomes;...|main mesh|main height m|extra mesh|extra height m|extra width m|extra by night
+	 *  only (0/1)|extra material|main sink m" (indices into the two lists; -1 none), from SourceArt/wilderness/landmarks15.json (936) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> RegionLandmarkLines15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<TObjectPtr<UStaticMesh>> RegionLandmarkMeshes15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<TObjectPtr<UMaterialInterface>> RegionLandmarkMats15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float RegionLandmarkKm15 = 22.f;
+	struct FRegionLandmark15 { int32 Line = -1; FVector2D At = FVector2D::ZeroVector; float Z = 0.f, TopZ = 0.f, Yaw = 0.f; bool bExtraNight = false;
+		TWeakObjectPtr<class UStaticMeshComponent> Main, Extra; };
+	TMap<FIntVector, FRegionLandmark15> RegionLandmarks15;
+	/** the open lands' far towers (a 6 km square's -> its tower, laid as seen from afar; the nearest is WildLandmark) */
+	TMap<FIntPoint, TWeakObjectPtr<class UStaticMeshComponent>> FarTowers15;
+	/** a 6 km square's broken tower's spot (TickWildLandmark13's rule, shared): false where it has none */
+	bool WildTowerSite13(int32 I, int32 J, FVector2D& S) const;
+	float RegionLandmarkLook15 = 0.f;
+	bool RegionLandmarkOf15(FIntPoint Cell, int32 Slot, FRegionLandmark15& Out) const;
+	void LayRegionLandmark15(FRegionLandmark15& Lm);
+	void TickRegionLandmarks15(const FVector& Her);
+	/** tests: the landmarks laid round her, "kind|x m|y m|ground z|top z (cm)|main laid|extra (0 none, 1 hidden, 2 shown)" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetRegionLandmarks15() const;
+	/** the travellers' camps' smoke (a column over the fire, its width and height in m as X and Z) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TObjectPtr<UStaticMesh> CampSmokeMesh15 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TObjectPtr<UMaterialInterface> CampSmokeMat15 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FVector CampSmokeSize15 = FVector(3.f, 3.f, 40.f);
+	/** the villages' houses lit by night (from dusk to the household's bed, and before dawn) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bHouseLights15 = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float HouseLightCandelas15 = 60.f;
+	TArray<TWeakObjectPtr<class UPointLightComponent>> HouseLights15;
+	float HouseLightLook15 = 0.f;
+	class UPointLightComponent* AddHouseLight15(ARDWildChunk* C, const FVector& RoomC, const FVector& DoorOut, bool bDoor);
+	void TickHouseLights15(const FVector& Her);
+	/** tests: the houses' lights within RadiusM of a point (m), "x|y|z|on|candelas" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetHouseLights15(FVector2D AtM, float RadiusM) const;
 	/** tests: the cave level's "key|tier|base|cap|title" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FString GetCave15() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FIntPoint GetTerraceWalls15() const { return FIntPoint(TerraceWalls15, TerraceButtresses15); }
 	/** the Old Watchtower climbed: its doorway open (hidden boxes round its ring, not its quarters' collision), a spiral stair up to
 	 *  a floor at the second storey's top */
-	void FitWildTower(ARDWildChunk* C, const FVector& Mid, float Z0, float Hs, float DoorYaw, float KeptYaw = -1e6f);
+	void FitWildTower(ARDWildChunk* C, const FVector& Mid, float Z0, float Hs, float DoorYaw, float KeptYaw = -1e6f, int32 Storeys = 2);
 	/** the nearest wild door within Reach of a point (its chunk and index), F's */
 	ARDWildChunk* WildDoorNear(const FVector& From, float Reach, int32& Index) const;
 	FString WildDoorDescribe(const FVector& From) const;

@@ -291,6 +291,13 @@ void ARDDungeonGenerator::WildKnownPlaces(TArray<FRDWildPlace>& Out) const
 		FRDWildPlace P;
 		if (Wild->FindPlace(Id, P)) Out.Add(P);
 	}
+	// (the list of 2026-11-20's tenth phase: the places a lookout's top marked: seen, not found (half strength, no travel there))
+	for (const int32 Id : WildMarked15)
+	{
+		if (WildFound.Contains(Id)) continue;
+		FRDWildPlace P;
+		if (Wild->FindPlace(Id, P)) Out.Add(P);
+	}
 	// (a quest's place while its quest is taken: the captain said where; not found, so no travel there)
 	for (const FRDWildPlace& Q : Wild->QuestPlaces)
 		if (!WildFound.Contains(Q.Id) && IsWildQuestShown(Q.Id)) Out.Add(Q);
