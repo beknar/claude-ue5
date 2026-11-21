@@ -2073,6 +2073,36 @@ public:
 	void TickHouseLights15(float Dt, const FVector& Her);
 	/** tests: the houses' lights within RadiusM of a point (m), "x|y|z|on|candelas" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetHouseLights15(FVector2D AtM, float RadiusM) const;
+	// ---- the list of 2026-11-20's eleventh phase (RDList15j.cpp): named roaming monsters and the map's danger (ideas 3 and 9)
+	/** a cell's roamer: its id ((cell x << 10) | cell y), name, kind (an index into Monsters; -1 none), tiers, its round (middle m, radius m,
+	 *  phase), when it is out (0 always, 1 by night, 2 in storms) and its ring */
+	struct FRoamer15 { int32 Id = 0; FString Name; int32 Kind = -1, Tier = 1, RegionTier = 1; FVector2D C = FVector2D::ZeroVector; float Radius = 500.f, Phase = 0.f; uint8 When = 0; FName Ring; };
+	mutable TMap<FIntPoint, FRoamer15> RoamerCache15;
+	TMap<int32, TWeakObjectPtr<class ARDMonster>> Roamers15;
+	float RoamerLook15 = 0.f;
+	/** the roamers' data (938 from SourceArt/wilderness/roamers15.json): their names and epithets, their rings (items of weight 0 on every
+	 *  map), the share of the regions' cells with one, how far over the region's tier, their hit points' factor, the round's time, and how
+	 *  near she must be for one to be laid */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> RoamerNames15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> RoamerEpithets15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FName> RoamerRings15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float RoamerChance15 = 0.6f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") int32 RoamerTierUp15 = 4;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float RoamerHp15 = 2.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float RoamerRoundSeconds15 = 900.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float RoamerReachM15 = 2500.f;
+	bool RoamerOf15(FIntPoint Cell, FRoamer15& Out) const;
+	FVector2D RoamerAt15(const FRoamer15& R) const;
+	bool RoamerOut15(const FRoamer15& R) const;
+	void TickRoamers15(float Dt, const FVector& Her);
+	/** a roamer's death: kept for the game, its ring dropped once; false when it was no roamer */
+	bool OnRoamerKilled15(class ARDMonster* Monster);
+	void DrawRoamerMarks15(TFunctionRef<void(const FVector2D& AtM, const FString& Name)> Each) const;
+	/** tests: the roamers of the cells within Km, "id|name|kind|tier|region tier|when|round x|y|radius|now x|y|laid|seen|slain|ring|monster x|y (cm)|out now" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetRoamers15(float Km) const;
+	/** the major roads' colour by tier (a band of five tiers a colour), and tests' read of what the map draws */
+	static FLinearColor RoadTierColor15(int32 Tier);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetRoadTiers15(float Km) const;
 	/** tests: the cave level's "key|tier|base|cap|title" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FString GetCave15() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FIntPoint GetTerraceWalls15() const { return FIntPoint(TerraceWalls15, TerraceButtresses15); }

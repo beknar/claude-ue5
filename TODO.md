@@ -25,6 +25,12 @@ Built and compiled, but no test has run it yet:
 - [ ] **Not measured**: the lookout's stair climbed on foot to its new top (the test puts her there; the stair is the Old Watchtower's, walked by `tower10` at two storeys); a save and load keeping the marks; the landmarks' collision walked into (the great tree's is the scanned beech's own); the places of the world before and after compared with the probe (nothing else's code changed: the lookouts and landmarks are layers of their own).
 - [ ] **Limits**: the houses' windows do not glow (a lamp over the door and a light in the room); the plume and the beam are plain see-through and glowing columns; the giant tree is the scanned beech grown to 95 m.
 
+## The list of 2026-11-20's eleventh phase: roamers and the roads by tier
+
+- [x] **Named roamers, their rings, the roads by tier** ([the wilderness](docs/levels/wilderness.md)): `888 roamers15 -Light`.
+- [ ] **Not measured**: a roamer of the storms out in a storm; a roamer fought by her blows (the test strikes it with a test's blow); the rings' worth worn (their amounts are their kinds' strongest times 1.4 to 1.8, not balanced in play).
+- [ ] **Limits**: a roamer is a wild kind with more hit points and a name, no look of its own; a round is a circle; the minimap shows no skulls (the big map does).
+
 ## The list of 2026-11-14 ([docs/improvements13.txt](docs/improvements13.txt))
 
 The biomes' scenery, in phases with a PR each (the user's choices: every item to full depth; [the wilderness](docs/levels/wilderness.md#the-list-of-2026-11-14-the-biomes-scenery)). Done: phase 1, the framework (placing, laying, uses, hazards, herds, ambushes, the dry channels, swales, tracks and crossroads, the far storms) and the grasslands', meadows' and plains' 22 kinds; phase 2, the farms', savannahs', cold steppes' and burned plain's 29 kinds, the fields' stages, their channels, the whiteout and dust weather and the grass fires' smoke; phase 3, the five forests' 37 kinds, the needles' quiet floor, clearings, bogs and pits, the holloways; phase 4, the hills' and moorland's 18 kinds, the chalk figure, the moors' mist; phase 5, the mountains', peaks' and glaciers' 28 kinds, rockfall, avalanches, scree, cornices, crevasses, thin air.

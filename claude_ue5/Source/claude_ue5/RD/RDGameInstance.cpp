@@ -17,7 +17,7 @@ void URDGameInstance::NewGame(FName Hero)
 	CirclesFound = { FName(TEXT("Brokenspire")) };
 	TownLooted.Reset(); CastleTiers.Reset(); CastleStartLooted.Reset(); GuardsDead.Reset(); HerPiles.Reset();
 	Dungeons.Reset(); ReturnAt = FVector::ZeroVector; ReturnYaw = 0.f; ReturnTown.Reset();
-	CaveKey15.Reset(); CaveTier15 = 0; WildMarked15.Reset(); WildLookoutsClimbed15.Reset();          // (the list of 2026-11-20's ninth phase (PR #101's review): no cave carried into a new game)
+	CaveKey15.Reset(); CaveTier15 = 0; WildMarked15.Reset(); WildLookoutsClimbed15.Reset(); RoamersSeen15.Reset(); RoamersSlain15.Reset();          // (the list of 2026-11-20's ninth phase (PR #101's review): no cave carried into a new game)
 	bOldWorld = false;          // (the list of 2026-11-16: an older save's give-back is not the new game's (PR #89's review))
 	Arrive.Reset();
 	TownHour = -1.f; TownDay = 1;

@@ -1,0 +1,64 @@
+{
+ "tag": "l15p11e",
+ "plan": [
+  "roamers15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "roamers15",
+   "ok": true,
+   "roamers_40km": 46,
+   "by_when": [
+    29,
+    7,
+    10
+   ],
+   "roamer": {
+    "name": "Old Morrow the Ravager",
+    "kind": "Dardan",
+    "tier": 6,
+    "region_tier": 2,
+    "radius": 379.0,
+    "ring": "Stormborn Signet"
+   },
+   "laid": true,
+   "walked_m": 17.9,
+   "from_round_m": 9.5,
+   "seen": true,
+   "found_actor": 1,
+   "slain": true,
+   "prompt": "take the stormborn signet",
+   "f": [
+    "loot"
+   ],
+   "ring_taken": 1,
+   "laid_again": false,
+   "saved": true,
+   "load": true,
+   "after_load": {
+    "slain": true,
+    "laid": false,
+    "seen": true
+   },
+   "night_roamer": "Morwen the Gloomhide",
+   "night_at_noon": false,
+   "night_at_23": true,
+   "road_segments": 315,
+   "road_bands": [
+    0,
+    1
+   ],
+   "road_colour_wrong": 0
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_l15p11e_roamers15_roamer.png",
+  "wd_l15p11e_roamers15_map.png",
+  "wd_l15p11e_roamers15_roads.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

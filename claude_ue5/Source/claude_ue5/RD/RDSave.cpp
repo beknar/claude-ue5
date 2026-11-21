@@ -185,7 +185,7 @@ void URDSaveGame::DropOldWorld(URDGameInstance* GI, int32 FromVersion)
 {
 	if (!GI) return;
 	GI->WildRevealKeys.Reset(); GI->WildRevealBits.Reset(); GI->WildFound.Reset(); GI->WildKilled.Reset();
-	GI->WildMarked15.Reset(); GI->WildLookoutsClimbed15.Reset();          // (the list of 2026-11-20's tenth phase: the lookouts' marks, by the old ids)
+	GI->WildMarked15.Reset(); GI->WildLookoutsClimbed15.Reset(); GI->RoamersSeen15.Reset(); GI->RoamersSlain15.Reset();          // (the list of 2026-11-20's tenth phase: the lookouts' marks, by the old ids)
 	// (the structures' quests (wq12:<site>...) by the old places' ids, the captain's (wild:...) by the old places: their counters gone;
 	// the captain's quests given back to him (StartWild, which has the quests' table: bOldWorld))
 	TArray<FString> Gone;

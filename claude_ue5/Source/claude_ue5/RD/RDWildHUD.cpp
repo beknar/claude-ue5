@@ -115,7 +115,27 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 		In.Reset(); W.RoadsIn(Vw, false, In);
 		const float Wr = FMath::Clamp((float)(9.0 / Mpp), 2.f, 4.f) * Sc;
 		for (const int32 Ri : In) Lines(W.Roads[Ri].P, FLinearColor(0.13f, 0.11f, 0.09f, 0.95f), Wr + 2.f * Sc);
-		for (const int32 Ri : In) Lines(W.Roads[Ri].P, FLinearColor(0.80f, 0.76f, 0.66f, 1.f), Wr);
+		// (the list of 2026-11-20's eleventh phase (idea 9, "the danger shown on the map"): a major road in its tier's colour, segment by
+		// segment (the tier read at each drawn segment's middle); its pale stone line kept when the colours are off)
+		if (Gen->RoamerNames15.Num() == 0) { for (const int32 Ri : In) Lines(W.Roads[Ri].P, FLinearColor(0.80f, 0.76f, 0.66f, 1.f), Wr); }
+		else
+			for (const int32 Ri : In)
+			{
+				const TArray<FVector2D>& P = W.Roads[Ri].P;
+				FVector2D Last(-1e9f, -1e9f), LastW(0, 0); bool bHave = false;
+				for (int32 K = 0; K < P.Num(); ++K)
+				{
+					const FVector2D S = ToS(P[K]);
+					if (bHave && FVector2D::DistSquared(S, Last) < 16.f && K + 1 < P.Num()) continue;
+					const bool bIn = S.X > A.X && S.X < B.X && S.Y > A.Y && S.Y < B.Y;
+					if (bHave && (bIn || (Last.X > A.X && Last.X < B.X && Last.Y > A.Y && Last.Y < B.Y)))
+					{
+						const FVector2D Mw = (LastW + P[K]) * 0.5;
+						DrawLine(Last.X, Last.Y, S.X, S.Y, ARDDungeonGenerator::RoadTierColor15(W.TierAt(Mw.X, Mw.Y)), Wr);
+					}
+					Last = S; LastW = P[K]; bHave = true;
+				}
+			}
 	}
 	// the fog
 	{
@@ -153,6 +173,30 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 			const FVector2D Tp(S.X - Tw * 0.5f, S.Y + Ic + 2.f * Sc);
 			UI.Text(Nm, FLinearColor(0.f, 0.f, 0.f, 0.75f), Tp.X + 1.5f * Sc, Tp.Y + 1.5f * Sc, Small, Ts, bTown ? ERDType::Title : ERDType::Label);
 			UI.Text(Nm, bFound ? FLinearColor(0.98f, 0.94f, 0.84f, 1.f) : FLinearColor(0.85f, 0.82f, 0.74f, 0.8f), Tp.X, Tp.Y, Small, Ts, bTown ? ERDType::Title : ERDType::Label);
+		}
+	}
+	// (the list of 2026-11-20's eleventh phase: the roamers she has seen and not slain, a skull at their rounds, named)
+	Gen->DrawRoamerMarks15([&](const FVector2D& AtM, const FString& Nm)
+	{
+		const FVector2D S = ToS(AtM);
+		if (S.X < A.X || S.X > B.X || S.Y < A.Y || S.Y > B.Y) return;
+		const float Ic = 15.f * Sc;
+		UI.Fit(TEXT("wmap_lair"), S - FVector2D(Ic), S + FVector2D(Ic), FLinearColor(1.f, 0.35f, 0.30f, 1.f));
+		float Tw, Th; UI.TextSize(Nm, Tw, Th, Small, Sc * 0.9f, ERDType::Label);
+		UI.Text(Nm, FLinearColor(0.f, 0.f, 0.f, 0.75f), S.X - Tw * 0.5f + 1.5f * Sc, S.Y + Ic + 3.5f * Sc, Small, Sc * 0.9f, ERDType::Label);
+		UI.Text(Nm, FLinearColor(1.f, 0.55f, 0.48f, 1.f), S.X - Tw * 0.5f, S.Y + Ic + 2.f * Sc, Small, Sc * 0.9f, ERDType::Label);
+	});
+	// (and the roads' key: the tiers' colours, in the sheet's bottom left (in its top left it lay over the map's title))
+	if (Gen->RoamerNames15.Num() > 0)
+	{
+		const float Kw = 22.f * Sc, Kh = 8.f * Sc, Kx = A.X + 12.f * Sc, Ky = B.Y - 34.f * Sc - (6 * (Kh + 6.f * Sc) + 20.f * Sc);          // (its last row clear of the scroll's edge)
+		Box(FVector2D(Kx - 6.f * Sc, Ky - 6.f * Sc), FVector2D(Kx + 132.f * Sc, Ky + 6 * (Kh + 6.f * Sc) + 20.f * Sc), FLinearColor(0.f, 0.f, 0.f, 0.45f));
+		UI.Text(TEXT("ROADS BY TIER"), FLinearColor(0.98f, 0.94f, 0.84f, 1.f), Kx, Ky, Small, Sc * 0.8f, ERDType::Label);
+		for (int32 Band = 0; Band < 6; ++Band)
+		{
+			const float Y = Ky + 18.f * Sc + Band * (Kh + 6.f * Sc);
+			Box(FVector2D(Kx, Y), FVector2D(Kx + Kw, Y + Kh), ARDDungeonGenerator::RoadTierColor15(Band * 5 + 1));
+			UI.Text(FString::Printf(TEXT("%d - %d"), Band * 5 + 1, Band * 5 + 5), FLinearColor(0.95f, 0.92f, 0.84f, 1.f), Kx + Kw + 8.f * Sc, Y - 3.f * Sc, Small, Sc * 0.75f, ERDType::Label);
 		}
 	}
 	// (the list of 2026-11-16: her horse)
