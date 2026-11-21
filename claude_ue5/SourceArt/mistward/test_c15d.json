@@ -1,0 +1,160 @@
+{
+ "tag": "c15d",
+ "plan": [
+  "cave15"
+ ],
+ "level": "caves",
+ "steps": [
+  {
+   "step": "cave15",
+   "ok": true,
+   "cave": [
+    "cave:test",
+    "1",
+    "0",
+    "1",
+    "The Cave beneath the Broken Tower"
+   ],
+   "global_tiers": [
+    1,
+    1,
+    1
+   ],
+   "switches": {
+    "cave15": true,
+    "final_boss_on": false,
+    "max_tier": 3,
+    "town_level": "/Game/RandomDungeon/Maps/brokenspire"
+   },
+   "allowed": [
+    "Half_Creature_04",
+    "Half_Creature_05",
+    "Parasite_Slider",
+    "Rat"
+   ],
+   "hall": {
+    "room": 24,
+    "kind": "Great hall",
+    "x": [
+     -1550,
+     1550
+    ],
+    "y": [
+     -1550,
+     1550
+    ]
+   },
+   "castle_hall_pieces": {},
+   "open2": true,
+   "kinds_start": [
+    "Half_Creature_04",
+    "Half_Creature_05",
+    "Parasite_Slider"
+   ],
+   "kinds_ring": [
+    "Half_Creature_04",
+    "Half_Creature_05",
+    "Parasite_Slider",
+    "Rat"
+   ],
+   "rooms": {
+    "Guard room": 28,
+    "Vault": 5,
+    "Library": 10,
+    "Hallway junction": 44,
+    "Storeroom": 32,
+    "Forge": 8,
+    "Treasury": 8,
+    "Fountain of speed": 5,
+    "Barracks": 25,
+    "Trap gauntlet": 3,
+    "Kitchen": 8,
+    "Fountain of mana": 3,
+    "Crypt": 18,
+    "Armory": 14,
+    "Great hall": 5,
+    "Chapel": 8,
+    "Shrine": 5,
+    "Torture chamber": 12,
+    "Healing fountain": 4
+   },
+   "floors_rel": [
+    -0.0,
+    -0.0,
+    -0.0,
+    -0.0,
+    -0.0,
+    -0.0,
+    -0.0,
+    -0.0,
+    59.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    59.0,
+    0.0,
+    59.0,
+    59.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "walls_m": [
+    {
+     "way": 0,
+     "wall_m": 14.75,
+     "reached_m": 14.39,
+     "hit": "Cube"
+    },
+    {
+     "way": 90,
+     "wall_m": 14.75,
+     "reached_m": 14.39,
+     "hit": "Cube"
+    },
+    {
+     "way": 180,
+     "wall_m": 14.75,
+     "reached_m": 14.39,
+     "hit": "Cube"
+    },
+    {
+     "way": 270,
+     "wall_m": 14.75,
+     "reached_m": 14.39,
+     "hit": "Cube"
+    }
+   ],
+   "off_kinds": []
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_c15d_cave15_hall.png",
+  "mw_c15d_cave15_tier2.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

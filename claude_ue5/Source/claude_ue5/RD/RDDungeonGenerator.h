@@ -1958,6 +1958,52 @@ public:
 	TArray<FString> TerraceWallLines15;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetTerraceWallLines15() const { return TerraceWallLines15; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetVillageTerraces15(FVector2D AtM) const;
+	// ---- the list of 2026-11-20's ninth phase (RDList15h.cpp): the caves under the landmark towers (item 23)
+	/** the cave level (935): every landmark tower's cave is this one level, its key ("cave:<i>_<j>", the tower's 6 km cell) and its
+	 *  tier (the region's, FRDWildWorld::TierAt at the tower) read from the game instance as play begins; all its tiers are that one
+	 *  game tier (DungeonTierBase tier - 1, DungeonTierCap tier); no key chain, final boss, arena, cells or bosses' unique rewards */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bCave15 = false;
+	/** the cave's monsters: the wilds' kinds of its game tier whose names hold none of these parts (people with firearms, machines) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> CaveExclude15;
+	/** a test's or a play from the editor's: the tier when no tower sent her (0: 1) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") int32 CaveDefaultTier15 = 1;
+	/** the wilds (brokenspire): the cave level, the mouth laid at every landmark tower's foot (a rock arch and its dark inside) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FString CaveLevel15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TObjectPtr<UStaticMesh> CaveMouthMesh15 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FVector CaveMouthScale15 = FVector(1.f);
+	/** the mouth's frame: at the tower's foot (CaveFootRadius15 out from its middle, between two buttresses at CaveGapDeg15 of the
+	 *  tower's own frame), its X out from the tower; the arch's place and turn in it, the dark slab's place and scale (a cube's) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float CaveFootRadius15 = 1870.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float CaveGapDeg15 = 36.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FVector CaveMouthOffset15 = FVector::ZeroVector;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float CaveMouthYaw15 = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FVector CaveDarkOffset15 = FVector::ZeroVector;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FVector CaveDarkScale15 = FVector(0.2f, 3.f, 4.f);
+	/** the arch is half an arch (the pack's is a quarter round): its mirror across the mouth's middle closes it; the dark piece's turn
+	 *  (a cylinder stood on its side across the mouth: pitch 90) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bCaveMouthMirror15 = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FRotator CaveDarkTurn15 = FRotator::ZeroRotator;
+	TWeakObjectPtr<class UStaticMeshComponent> CaveMouthB15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TObjectPtr<UStaticMesh> CaveDarkMesh15 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TObjectPtr<UMaterialInterface> CaveDarkMaterial15 = nullptr;
+	TWeakObjectPtr<class UStaticMeshComponent> CaveMouth15, CaveDark15;
+	/** the mouth's place, its way out (unit, cm) and its tower's cell; set with the landmark */
+	FVector CaveMouthAt15 = FVector::ZeroVector, CaveMouthOut15 = FVector::ForwardVector;
+	FIntPoint CaveCell15 = FIntPoint(INT32_MAX, INT32_MAX);
+	void LayCaveMouth15(class UStaticMeshComponent* Tower, const FVector2D& SiteM);
+	bool CaveMouthNear15(const FVector& From) const;
+	/** into the tower's cave: her way back before its mouth, its key and tier into the game instance (DescendToCatacombs) */
+	bool EnterCave15();
+	/** the cave level's key and tier from the game instance (BeginPlay, before anything reads them) */
+	void ApplyCave15();
+	/** the cave's kinds at a game tier: the wilds' kinds whose band holds it (else the nearest tier below with any), none excluded */
+	void CaveKinds15(int32 GameTier, TArray<int32>& Out) const;
+	/** tests: "on|x|y|z|out x|out y|key|tier" of the mouth standing, or "off" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FString GetCaveMouth15() const;
+	/** tests: into the cave of the tower standing, as F at its mouth does (false: none, or refused) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") bool DebugEnterCave15() { return EnterCave15(); }
+	/** tests: the cave level's "key|tier|base|cap|title" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FString GetCave15() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FIntPoint GetTerraceWalls15() const { return FIntPoint(TerraceWalls15, TerraceButtresses15); }
 	/** the Old Watchtower climbed: its doorway open (hidden boxes round its ring, not its quarters' collision), a spiral stair up to
 	 *  a floor at the second storey's top */

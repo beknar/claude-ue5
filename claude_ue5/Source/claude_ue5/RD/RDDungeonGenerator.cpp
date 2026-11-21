@@ -725,6 +725,8 @@ void ARDDungeonGenerator::MonsterKindsFor(FIntPoint Section, TArray<int32>& Out)
 {
 	Out.Reset();
 	const int32 Tier = TierOf(Section);
+	// (the list of 2026-11-20's ninth phase: a cave's beasts are the wilds' kinds of its game tier)
+	if (bCave15) { CaveKinds15(GlobalTier(Tier), Out); if (Out.Num() > 0) return; }
 	const bool bTiers = MaxTier > 0 && Monsters.ContainsByPredicate([](const FRDMonsterDef& D) { return D.Tier > 0; });
 	for (int32 I = 0; I < Monsters.Num(); ++I)
 		if (Monsters[I].Mesh && Monsters[I].Weight > 0.f && (!bTiers || Monsters[I].Tier == Tier)) Out.Add(I);
@@ -1416,7 +1418,8 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 				if (E.bBoss && I == 0) bBossKill = true;
 				// (a dungeon with no final boss: its last tier's boss is the dungeon's, and drops the next dungeon's key and map (the
 				// list of 2026-11-08b))
-				if (E.bBoss && I == 0 && !E.bFinal && !E.bThrone && MaxTier > 0 && E.Tier == MaxTier && !bFinalBossOn && Monster)
+				// (the list of 2026-11-20's ninth phase: a cave's boss gives the tier's loot and gold, none of the castle's unique rewards)
+				if (E.bBoss && I == 0 && !E.bFinal && !E.bThrone && MaxTier > 0 && E.Tier == MaxTier && !bFinalBossOn && Monster && !bCave15)
 				{
 					DropNextDungeonKey(Monster->GetActorLocation());
 					// (the rebalance to tier 25: this dungeon's ability for the Summoner, the Rogue and the Martial Artist is hers now:
@@ -1429,10 +1432,10 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 					TierNotice = E.bThrone ? FString(TEXT("THE USURPER IS SLAIN")) : FString::Printf(TEXT("THE BOSS OF TIER %d IS SLAIN"), E.Tier); TierNoticeTime = GetWorld()->GetTimeSeconds();
 					if (E.bThrone) RoomUses.FindOrAdd(TEXT("usurper"))++;
 					// (the third list: a slash of its tier for her weapons, when her hero takes slashes)
-					const FName Sl = GiveBossSlash(E.Tier, Monster ? Monster->GetActorLocation() : E.At);
+					const FName Sl = bCave15 ? NAME_None : GiveBossSlash(E.Tier, Monster ? Monster->GetActorLocation() : E.At);
 					if (!Sl.IsNone()) TierNotice += FString::Printf(TEXT("  -  THE %s IS YOURS"), *Sl.ToString().ToUpper());
 					// (the Martial Artist: a tier's boss (not a usurper) teaches her the next of her locked weapons, her chi attacks)
-					if (!E.bThrone)
+					if (!E.bThrone && !bCave15)
 						if (const FRDHeroDef* H = FindHero(CurrentHero); H && H->LockedWeapons.Num() > 0)
 						{
 							const int32 Before = WeaponsUnlocked;
@@ -1568,6 +1571,8 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 	// (the eighth phase: F off her horse; beside it, on it)
 	if (bMounted) { DismountHorse(); return TEXT("dismount"); }
 	if (LootPiles.Num() > 0 && TakeLootNear(From, 260.f)) return TEXT("loot");
+	// (the list of 2026-11-20's ninth phase: a landmark tower's cave mouth)
+	if (bWild && CaveMouthNear15(From) && EnterCave15()) return TEXT("cave");
 	// (the list of 2026-11-16: a wild table or a farmhouse's oven when it is the nearest of everything F reaches out there (PR #82's
 	// review: the scenery's uses and the points of interest, asked first, took F from a nearer table))
 	if (bWild) { FName Sk; if (WildStationFirst14(From, Sk)) { const FString St = OpenStation14(Sk); if (!St.IsEmpty()) return St; } }
@@ -1681,6 +1686,7 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 	const ARDLootPile* Lp = nullptr; float LpD = 260.f;
 	for (const ARDLootPile* P : LootPiles) if (IsValid(P)) { const float D = FVector::Dist2D(P->GetActorLocation(), From); if (D < LpD) { LpD = D; Lp = P; } }
 	if (bMounted) return TEXT("get off your horse");          // (the eighth phase)
+	if (!Lp && bWild && CaveMouthNear15(From)) return TEXT("go down into the cave");          // (the list of 2026-11-20's ninth phase)
 	if (!Lp && bWild) { FName Sk; if (WildStationFirst14(From, Sk)) return StationWords14(Sk); }          // (the list of 2026-11-16)
 	if (!Lp && bWild && WildSceneryFirst(From)) { const FString Ws = WildSceneryDescribe(From); if (!Ws.IsEmpty()) return Ws; }          // (the list of 2026-11-14: the nearest)
 	if (!Lp && bWild) { const FString Wp = WildPoiDescribe(From); if (!Wp.IsEmpty()) return Wp; }          // (the seventh phase)
@@ -1740,6 +1746,7 @@ void ARDDungeonGenerator::BeginPlay()
 		StartKeys = K; FSlateApplication::Get().RegisterInputPreProcessor(K);
 	}
 	SessionSeed = FixedSessionSeed != 0 ? FixedSessionSeed : (int32)(FDateTime::Now().GetTicks() & 0x7fffffff);
+	if (bCave15) ApplyCave15();          // (the list of 2026-11-20's ninth phase: the tower's key and tier, before anything reads them)
 	if (bRevealEffect && RevealPostMaterial)
 	{
 		RevealMID = UMaterialInstanceDynamic::Create(RevealPostMaterial, this);

@@ -153,11 +153,13 @@ void ARDSection::Plan(FRandomStream& R)
 			else
 			{
 				float Sum = 0.f;
-				for (const FW& K : Kinds) if (Used.FindRef(K.K) < K.Cap && !(bStart && K.K == ERDRoomKind::Hall)) Sum += K.W;
+				// (the list of 2026-11-20's ninth phase: a cave has no prison cells; the draw is made all the same)
+				const bool bNoCells = Generator->bCave15;
+				for (const FW& K : Kinds) if (Used.FindRef(K.K) < K.Cap && !(bStart && K.K == ERDRoomKind::Hall) && !(bNoCells && K.K == ERDRoomKind::Prison)) Sum += K.W;
 				float U = R.FRand() * Sum; const FW* Pick = &Kinds[0];
 				for (const FW& K : Kinds)
 				{
-					if (Used.FindRef(K.K) >= K.Cap || (bStart && K.K == ERDRoomKind::Hall)) continue;
+					if (Used.FindRef(K.K) >= K.Cap || (bStart && K.K == ERDRoomKind::Hall) || (bNoCells && K.K == ERDRoomKind::Prison)) continue;
 					U -= K.W; if (U <= 0.f) { Pick = &K; break; }
 				}
 				Rm.Kind = Pick->K; MinS = Pick->MinSize; MaxS = Pick->MaxSize;
@@ -1332,20 +1334,24 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 				if (!LaneFree(Rm, P, 80.f)) continue;
 				Center(TEXT("Column"), P, 0.f);
 			}
-		AddPieceAt(TEXT("Carpet"), Ctr, Ax, 1.f, true);
+		// (the list of 2026-11-20's ninth phase: a cave's first hall is a cavern: no carpet, dais, throne, banners or chandeliers, their
+		// lights kept)
+		const bool bCaveHall = Generator && Generator->bCave15;
+		if (!bCaveHall) AddPieceAt(TEXT("Carpet"), Ctr, Ax, 1.f, true);
 		const FVector Dais = Ctr + (bX ? FVector(Sz.X * 0.5f - 260.f, 0, 0) : FVector(0, Sz.Y * 0.5f - 260.f, 0));
 		const float DaisYaw = bX ? 180.f : -90.f;
+		if (!bCaveHall)
 		{
 			// the dais sits on the far wall; it is off the lane only when that wall has no door
 			const int32 Far = bX ? 1 : 3;
 			if (!Rm.bDoorSide[Far]) { Center(TEXT("Dais"), Dais, DaisYaw, true, true); const FRDPiece* D = this->Pc(TEXT("Dais")); Center(TEXT("Throne"), Dais + FVector(0, 0, D ? D->Size.Z : 0), DaisYaw, true, true); }
 		}
-		for (int32 Side = 0; Side < 4; ++Side)
+		for (int32 Side = 0; Side < 4 && !bCaveHall; ++Side)
 			for (const FVector& W : WallSlots(Rm, Side, 600.f, 120.f, 450.f))
 				AddPieceAt(TEXT("Banner"), W + FRotator(0, InwardYaw(Side), 0).RotateVector(FVector(12, 0, 0)) + FVector(0, 0, RH - 40.f), InwardYaw(Side), 1.f, true);
 		for (const FVector& Q : Quads)
 		{
-			Hang(TEXT("Chandelier"), Q, 0.f);
+			if (!bCaveHall) Hang(TEXT("Chandelier"), Q, 0.f);
 			AddLight(Q + FVector(0, 0, RH - 230.f), FLinearColor(1.f, 0.66f, 0.36f), 260.f, 2200.f, true, 0.06f);
 		}
 		for (const FVector& Cn : { FVector(B.Min.X + 150, B.Min.Y + 150, GetActorLocation().Z), FVector(B.Max.X - 150, B.Min.Y + 150, GetActorLocation().Z), FVector(B.Min.X + 150, B.Max.Y - 150, GetActorLocation().Z), FVector(B.Max.X - 150, B.Max.Y - 150, GetActorLocation().Z) })

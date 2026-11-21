@@ -1,0 +1,128 @@
+{
+ "tag": "c15w6",
+ "plan": [
+  "caves15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "caves15",
+   "ok": true,
+   "visits": [
+    {
+     "tier": 1,
+     "key": "cave:0_-1",
+     "mouth_m": [
+      4170,
+      -1433
+     ],
+     "prompt": "go down into the cave",
+     "her_from_mouth_m": [
+      2.5,
+      1.15
+     ],
+     "mouth_now": "on|416982|-143264|5047|-0.391|0.921|cave:0_-1|1",
+     "level": "caves",
+     "cave": [
+      "cave:0_-1",
+      "1",
+      "0",
+      "1",
+      "The Cave beneath the Broken Tower"
+     ],
+     "global_tiers": [
+      1,
+      1,
+      1
+     ],
+     "kinds": [
+      "Half_Creature_04",
+      "Half_Creature_05",
+      "Parasite_Slider"
+     ],
+     "kinds_off": [],
+     "return_town": "the Broken Tower",
+     "return_line": "button|Return to the Broken Tower",
+     "back": {
+      "from_return_at_m": 0.0,
+      "from_mouth_m": 6.0
+     },
+     "ok": true
+    },
+    {
+     "tier": 2,
+     "key": "cave:-2_3",
+     "mouth_m": [
+      -10583,
+      22218
+     ],
+     "prompt": "go down into the cave",
+     "her_from_mouth_m": [
+      2.5,
+      1.31
+     ],
+     "mouth_now": "on|-1058303|2221795|1051|0.500|0.866|cave:-2_3|2",
+     "level": "caves",
+     "cave": [
+      "cave:-2_3",
+      "2",
+      "1",
+      "2",
+      "The Cave beneath the Broken Tower"
+     ],
+     "global_tiers": [
+      2,
+      2,
+      2
+     ],
+     "kinds": [
+      "Half_Creature_04",
+      "Half_Creature_05",
+      "Parasite_Slider"
+     ],
+     "kinds_off": [],
+     "return_town": "the Broken Tower",
+     "return_line": "button|Return to the Broken Tower",
+     "back": {
+      "from_return_at_m": 0.0,
+      "from_mouth_m": 6.01
+     },
+     "ok": true
+    }
+   ],
+   "game3b": {
+    "load": true,
+    "seed": 695913554,
+    "landmark": [
+     "on",
+     "417713",
+     "-144985",
+     "4708"
+    ],
+    "mouth": [
+     "on",
+     "416982",
+     "-143264",
+     "5047",
+     "-0.391",
+     "0.921",
+     "cave:0_-1",
+     "1"
+    ],
+    "tower_from_save_m": 24.7,
+    "run_nearest_m": 24.99
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_c15w6_caves15_mouth_t1.png",
+  "wd_c15w6_caves15_hall_t1.png",
+  "wd_c15w6_caves15_mouth_t2.png",
+  "wd_c15w6_caves15_hall_t2.png",
+  "wd_c15w6_caves15_game3b_tower.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

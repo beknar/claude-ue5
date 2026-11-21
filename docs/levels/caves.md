@@ -1,0 +1,32 @@
+# The caves (`caves`)
+
+The cave complex under every landmark tower of the wilderness: the user's list of 2026-11-20 ([improvements15.txt](../improvements15.txt), item 23: "a cave complex ... of the same Tier that the region is coded for"), its plan's ninth phase ([improvements15_plan.md](../improvements15_plan.md)). The user's choice: every landmark tower holds a cave entrance, one cave level serves them all, its tier set by where the entrance stands.
+
+## What it is
+
+- **The entrance**: the wilderness's landmark towers (a broken tower 182 m high and 37 m across at a fixed place in each 6 km square of the open lands, since the list of 2026-11-14) have a round rock arch 13 m across at their foot, between two of the five buttresses, a dark mouth inside it. F before it ("go down into the cave") takes her down.
+- **One level, every tower's cave**: `caves` is a Save As copy of `mistward_castle` (its heroes, balance, loot, traps, special rooms and bosses). The tower's 6 km cell is the cave's key (`cave:<i>_<j>`: its tiers opened, its first set's chests and its bosses kept under it, as each city's dungeon keeps its own), and the region's tier at the tower (`FRDWildWorld::TierAt`, the roads' tiers) is every tier of the level: its three tiers of sets open in order as the castle's do, each one the same game tier (`DungeonTierBase` the tier less one, `DungeonTierCap` the tier). The level reads both from the game instance as play begins (`ApplyCave15`); a save made in a cave keeps them.
+- **Its looks**: rock walls, rough ground and rock ceilings (the Cave pack's rock and ground materials, darkened, on the castle's walls', floors' and ceilings' boxes), the vaults over the rooms in the same rock, stalagmites for the halls' columns, a rock arch round each doorway, rock faces, stalagmites, boulders and stones by the walls, the light tinted cold and dim; each tier a floor 4.5 m below the last, joined by ramps (the catacombs' `bTierFloors`). The first hall is a cavern: none of the castle's carpet, dais, throne, banners or chandeliers.
+- **Its monsters**: the wilds' kinds whose wild tier band holds the cave's tier (the nearest tier below with any, else), none whose name marks a person with a firearm or a machine (`SourceArt/caves/cave15.json`'s `exclude`); their strength the tier's.
+- **The castle's own systems are off**: no prison cells, no arena, no key chain (no key needed to enter, none dropped), no final boss, and a tier's boss gives the tier's loot and gold but none of the castle's unique rewards (no slash, no chi attack, no later dungeon's ability).
+- **The way back**: the Escape menu's "Return to the Broken Tower" puts her 6 m before the mouth she went in by, facing away from the tower.
+
+## How it was built
+
+- `935 saveas` (the copy; the editor quits), `935` (the level: brokenspire's monsters with their wild bands copied as text, the Cave theme's pieces and props, the switches, the start section built again and saved), `935 wild` (on `brokenspire`: the cave level's path and the mouth's pieces and placing). Data: `SourceArt/caves/cave15.json`. C++: `RD/RDList15h.cpp` (the mouth, the way in, the level's key and tier, its kinds), the cave hall in `RDSection.cpp`, no cells or arena in `RDSection.cpp` / `RDMistward2.cpp`, the boss's rewards in `RDDungeonGenerator.cpp`.
+- **The pack's rock walls and ground slabs are blobs**: laid one a wall segment or a floor tile they left the void showing between them (the first pictures: black between round floor slabs). The walls, floors and ceilings are boxes of the castle's pieces' sizes in the pack's rock and ground; the rock walls stand along the walls as props.
+- **The world-aligned rock projects from above**: on the walls' faces it was a flat grey. The walls and ceilings take the pack's rock wall material (by UV, its tint darkened), the floors its world-aligned ground.
+- **The pack's arch is a quarter round**: the mouth is that piece and its mirror; its foot is at its own X -624 (placed the other way, the two halves stood as horns). Inside it, a dark half disc (the engine's cylinder on its side, half in the ground, in an unlit near-black).
+- **The tower's buttresses stand at 0, 72, ... degrees in Unreal as in Blender**: at +36 degrees the first mouths stood inside a buttress (the test stood her on its top, 28 m up); the gap is at -36 of the generator's frame (`CaveGapDeg15`).
+
+## Measured
+
+- `868 cave15 -lv caves` (`test_c15d.json`): the level's key and tier with no tower (cave:test, tier 1); its three tiers all the game's tier 1; no prison cells or arena among 245 rooms of five sets; the start set's and the ring's monsters all among the tier's allowed kinds (Half_Creature_04, Half_Creature_05, Parasite_Slider, Rat); none of the castle's hall pieces in the great hall; the rooms' floors traced at the set's height (36 of 40 tiles within 40 cm, the other four of one room 59 cm up: something standing on them); she ran at the great hall's walls four ways and stopped 0.36 m short of each; pictures of the first hall and a room of tier 2.
+- `888 caves15 -Light` (`test_c15w6.json`): towers looked for along four lines out of Brokenspire: the one 4.4 km out (tier 1, cell 0_-1) and one 24.6 km out (tier 2, cell -2_3); before each mouth the prompt "go down into the cave"; F opened the cave level with that tower's key and tier (all three tiers the tower's: 1, 1, 1 and 2, 2, 2), its monsters the tier's wild kinds (at tiers 1 and 2 both: the kinds whose bands reach 2 are the tier-1 kinds); the Escape menu's "Return to the Broken Tower" put her 0.0 m from where the game said, 6.0 m before the mouth; pictures of both mouths and both first halls.
+- **The user's save game3b**: loaded, she stood where it was made (4183, -1426 m, read from the file) in today's world: the tower nearest is 24.7 m away (the same tower the list of 2026-11-16's first phase measured, now with its cave: cell 0_-1, tier 1); she ran at its middle from 40 m on the side away from the mouth and stopped 24.9 m from it (its foot's buttresses).
+
+## Limits
+
+- The rooms are the castle's rooms in rock: rectangular, their furniture the castle's (beds, tables, shelves, a chapel's pews), with rock faces and stalagmites along the walls; the doors are the castle's doors inside rock arches. There are no water, chasms or natural passages.
+- Every tower's cave has the same first hall (the saved start section); the sets beyond it are new each visit, as the castle's are.
+- The way in is the mouth's F only: the map does not mark the caves, and no quest leads into one.

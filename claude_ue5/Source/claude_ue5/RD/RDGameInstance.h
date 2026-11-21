@@ -149,6 +149,9 @@ public:
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FVector ReturnAt = FVector::ZeroVector;
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float ReturnYaw = 0.f;
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString ReturnTown;
+	/** the list of 2026-11-20's ninth phase: the cave she went down into (its key, "cave:<i>_<j>") and its game tier */
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|List15") FString CaveKey15;
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|List15") int32 CaveTier15 = 0;
 	/** where she comes into the town: "" the town square (a new game), "castle" the castle's door (back from the castle),
 	 *  "portal" before the Mistgate (tests) */
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString Arrive;
