@@ -285,11 +285,14 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 	}
 	C->Houses.Add(Rec);
 	UE_LOG(LogRDWild10, Verbose, TEXT("RDWILDHOUSE %s at (%.0f, %.0f, %.0f): %d doors, %d furniture, %d plants cleared"), *Rec.Of, O.X, O.Y, O.Z, Rec.Doors, Rec.Furniture, Gone);
+	// (the list of 2026-11-20's tenth phase: its light by night, laid with the house (PR #102's review: laid from the households' queue, a
+	// village with no folk or no terraces had none))
+	if (C->Houses.Num() > 0) { const ARDWildChunk::FHouse& Hl = C->Houses.Last(); AddHouseLight15(C, Hl.RoomC15, Hl.DoorOut15, Hl.bDoor15); }
 	return true;
 }
 
 // ================================================================================================ the watchtower climbed
-void ARDDungeonGenerator::FitWildTower(ARDWildChunk* C, const FVector& Mid, float Z0, float Hs, float DoorYaw, float KeptYaw)
+void ARDDungeonGenerator::FitWildTower(ARDWildChunk* C, const FVector& Mid, float Z0, float Hs, float DoorYaw, float KeptYaw, int32 Storeys)
 {
 	if (!C) return;
 	const FRDPiece* Cp = Piece(TEXT("Town.Collider"));
@@ -318,10 +321,10 @@ void ARDDungeonGenerator::FitWildTower(ARDWildChunk* C, const FVector& Mid, floa
 				if (Zb - Za < 5.f) return;
 				Add(Cp, FTransform(FRotator(0, A, 0), FVector(P.X, P.Y, Za), FVector(0.6f, 0.62f, (Zb - Za) / 100.f)), true);
 			};
-			if (RDW10AngDiff(A, DoorYaw) < 11.25f) { Box(Z0 + 255.f, Z0 + 2.f * Hs); }
-			else Box(Z0, Z0 + 2.f * Hs);
+			if (RDW10AngDiff(A, DoorYaw) < 11.25f) { Box(Z0 + 255.f, Z0 + Storeys * Hs); }
+			else Box(Z0, Z0 + Storeys * Hs);
 			// (the broken third storey: its two quarters left standing (from KeptYaw, 180 degrees) (PR #43's review: walked through, she fell))
-			if (KeptYaw > -1e5f && FMath::Fmod(FMath::Fmod(A - KeptYaw, 360.f) + 360.f, 360.f) < 180.f) Box(Z0 + 2.f * Hs, Z0 + 3.f * Hs);
+			if (KeptYaw > -1e5f && FMath::Fmod(FMath::Fmod(A - KeptYaw, 360.f) + 360.f, 360.f) < 180.f) Box(Z0 + Storeys * Hs, Z0 + (Storeys + 1) * Hs);
 		}
 	// (the floor at the doorway: the ground's highest under the ring; the spiral from it to the second storey's top, clockwise from
 	// just past the door)
@@ -330,7 +333,7 @@ void ARDDungeonGenerator::FitWildTower(ARDWildChunk* C, const FVector& Mid, floa
 	const float Gf = Z0 + 2.f;
 	float Gmin = 1e9f;
 	for (int32 K = 0; K < 8; ++K) Gmin = FMath::Min(Gmin, WildGroundZ(Mid + FRotator(0, 45.f * K, 0).RotateVector(FVector(330.f, 0, 0))));
-	const float Top = Z0 + 2.f * Hs;
+	const float Top = Z0 + Storeys * Hs;
 	UMaterialInterface* Stone = nullptr;
 	if (const FRDPiece* Fs = Piece(TEXT("Floor_Stone"))) Stone = Fs->Material ? Fs->Material.Get() : (Fs->Mesh ? Fs->Mesh->GetMaterial(0) : nullptr);
 	// (a stone disc under the stair: the ground inside levelled)
@@ -401,6 +404,16 @@ void ARDDungeonGenerator::FitWildTower(ARDWildChunk* C, const FVector& Mid, floa
 				const FVector P = Mid + FRotator(0, A + 7.5f, 0).RotateVector(FVector(236.f, 0, 0));
 				UStaticMeshComponent* Wl = Add(Cp, FTransform(FRotator(0, A + 7.5f, 0), FVector(P.X, P.Y, Top), FVector(0.16f, 0.64f, 1.f)), false);
 				if (Wl && Stone) Wl->SetMaterial(0, Stone);
+			}
+		// (the list of 2026-11-20's tenth phase: a lookout's top is open (no storey kept over it): a parapet round its edge, 1.1 m high,
+		// for the view and against a fall)
+		if (Cp && KeptYaw <= -1e5f && Storeys > 2)
+			for (int32 J = 0; J < 32; ++J)
+			{
+				const float A = DoorYaw + 5.625f + 11.25f * J;
+				const FVector P = Mid + FRotator(0, A, 0).RotateVector(FVector(RMid, 0, 0));
+				UStaticMeshComponent* Pw = Add(Cp, FTransform(FRotator(0, A, 0), FVector(P.X, P.Y, Top), FVector(0.6f, 0.62f, 1.1f)), false);
+				if (Pw && Stone) Pw->SetMaterial(0, Stone);
 			}
 	}
 	WildTowerLines.Add(FString::Printf(TEXT("tower|%.0f|%.0f|%.0f|%.0f|%d|%.0f|%.0f|%.0f"), Mid.X, Mid.Y, Gf, Top, Pieces_, DoorYaw, Ys, KeptYaw));
@@ -744,6 +757,21 @@ void ARDDungeonGenerator::CampTravellers(FTraveller& T)
 		Lt->RegisterComponent();
 		Lt->SetRelativeLocation(FVector(0, 0, 60.f));
 		T.CampBits.Add(Lt);
+		// (the list of 2026-11-20's tenth phase (idea 1, "at night the camps show smoke"): a column of smoke over the fire, seen from afar)
+		if (CampSmokeMesh15)
+		{
+			UStaticMeshComponent* Sm = NewObject<UStaticMeshComponent>(C);
+			Sm->SetStaticMesh(CampSmokeMesh15);
+			if (CampSmokeMat15) for (int32 Si = 0; Si < CampSmokeMesh15->GetStaticMaterials().Num(); ++Si) Sm->SetMaterial(Si, CampSmokeMat15);
+			Sm->SetCollisionEnabled(ECollisionEnabled::NoCollision); Sm->SetCastShadow(false);
+			Sm->SetupAttachment(F);
+			Sm->RegisterComponent();
+			const FBox B = CampSmokeMesh15->GetBoundingBox();
+			const float Hz = CampSmokeSize15.Z * 100.f / FMath::Max(B.GetSize().Z, 1.f), Wx = CampSmokeSize15.X * 100.f / FMath::Max(B.GetSize().X, 1.f);
+			Sm->SetWorldScale3D(FVector(Wx, Wx, Hz));
+			Sm->SetWorldLocation(F->GetComponentLocation() + FVector(0, 0, 120.f - B.Min.Z * Hz));
+			T.CampBits.Add(Sm);
+		}
 	}
 	// (each sits on a log round the fire, facing it; the dead lie where they fell (the living are first in the group))
 	int32 Up = 0; for (const auto& F : T.Folk) if (F.IsValid() && !F->IsWildDead14()) ++Up;

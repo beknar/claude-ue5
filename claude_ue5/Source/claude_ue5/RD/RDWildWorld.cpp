@@ -1478,6 +1478,7 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 	++TerraceGen;
 	bTerracesReady = false;
 	{ FScopeLock Lk(&SceneryCache->Lock); SceneryCache->Cells.Reset(); }
+	{ FScopeLock Lk(&LookoutCache->Lock); LookoutCache->Cells.Reset(); }          // (the list of 2026-11-20's tenth phase)
 	BiomeIndex.Reset();
 	for (int32 I = 0; I < Biomes.Num(); ++I) BiomeIndex.Add(Biomes[I].Name, I);
 	if (Biomes.Num() == 0) { FRDWildBiome B; B.Name = TEXT("grasslands"); Biomes.Add(B); BiomeIndex.Add(B.Name, 0); }
@@ -1892,6 +1893,8 @@ bool FRDWildWorld::NearTownRoad(const FVector2D& P, double R) const
 bool FRDWildWorld::FindPlace(int32 Id, FRDWildPlace& Out) const
 {
 	TArray<FRDWildPlace> Ps;
+	// (the list of 2026-11-20's tenth phase: a lookout, its region's cell from its id)
+	if (Id >= LookoutIdBase && Id < TownIdBase) return LookoutOf(FIntPoint(((Id - LookoutIdBase) >> 10) & 0x3FF, (Id - LookoutIdBase) & 0x3FF), Out) && Out.Id == Id;
 	if (Id >= QuestIdBase && Id < TownIdBase)
 	{
 		if (!QuestPlaces.IsValidIndex(Id - QuestIdBase)) return false;

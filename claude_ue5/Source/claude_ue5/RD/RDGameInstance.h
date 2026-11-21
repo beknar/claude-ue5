@@ -152,6 +152,9 @@ public:
 	/** the list of 2026-11-20's ninth phase: the cave she went down into (its key, "cave:<i>_<j>") and its game tier */
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|List15") FString CaveKey15;
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|List15") int32 CaveTier15 = 0;
+	/** the tenth phase: the places the lookouts' tops marked on her map, and the lookouts climbed */
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> WildMarked15;
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> WildLookoutsClimbed15;
 	/** where she comes into the town: "" the town square (a new game), "castle" the castle's door (back from the castle),
 	 *  "portal" before the Mistgate (tests) */
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString Arrive;

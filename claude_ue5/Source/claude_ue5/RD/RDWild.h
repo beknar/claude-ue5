@@ -424,6 +424,19 @@ public:
 	void SceneryIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const;
 	TSharedPtr<FSiteCache> SceneryCache = MakeShared<FSiteCache>();
 	void SceneryInCell(FIntPoint Cell, TArray<FRDWildPlace>& Out) const;
+	/** the list of 2026-11-20's tenth phase (idea 2, RDList15i.cpp): a lookout in each region's cell (CellM), a watchtower on dry, gentle
+	 *  ground off the roads, fields and water, 1.5 km from a town and 150 m from every other place, structure, point of interest and
+	 *  scenery (so nothing else moves); places of kind "lookout", ids LookoutIdBase + (cell x << 10 | cell y), in the quests' range above
+	 *  their own; worked out once a cell, behind a lock (none: Id 0) */
+	static constexpr int32 LookoutIdBase = (1 << 29) + (1 << 28);
+	FIntPoint LookoutCellOf(double X, double Y) const { return FIntPoint(FMath::FloorToInt((X - Xs) / CellM), FMath::FloorToInt((Y - Yw) / CellM)); }
+	bool LookoutOf(FIntPoint Cell, FRDWildPlace& Out) const;
+	void LookoutsIn(double X0, double Y0, double X1, double Y1, TArray<FRDWildPlace>& Out) const;
+	/** a point R metres from every place, structure, point of interest, scenery, farmstead and quest's place (and, asked, every lookout):
+	 *  the layers of the list of 2026-11-20's tenth phase stand clear of all of them (PR #102's review) */
+	bool ClearOfPlaces15(const FVector2D& S, double R, bool bLookouts) const;
+	struct FLookoutCache { FCriticalSection Lock; TMap<FIntPoint, FRDWildPlace> Cells; };
+	TSharedPtr<FLookoutCache> LookoutCache = MakeShared<FLookoutCache>();
 	/** where two roads meet (Init): the crossroads a scenery kind of Place "crossroads" stands at */
 	TArray<FVector2D> Crossroads;
 	/** the dry channels cut into the land (Init, from ChannelRules): arroyos and creek beds, slot canyons, crevasses, fissures; each a
