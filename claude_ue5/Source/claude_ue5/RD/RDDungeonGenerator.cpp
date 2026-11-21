@@ -1851,6 +1851,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 	if (bPaused) return;
 	TickAllies(Dt);
 	TickCarrySummons();
+	if (bVillageFolk15 && WildVillageFolk15.Num() > 0) TickVillageFolk15();          // (the list of 2026-11-20: the villagers far off left still)
 	TickDungeonKeys();
 	// input: F interacts, M toggles the map
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))

@@ -1936,6 +1936,18 @@ public:
 	UPROPERTY(Transient) TObjectPtr<UStaticMesh> TerraceCube15 = nullptr;
 	void LayTerraceWalls15(ARDWildChunk* C, const struct FRDWTerraces& T);
 	int32 TerraceWalls15 = 0, TerraceButtresses15 = 0;
+	// ---- the list of 2026-11-20's eighth phase (RDList15g.cpp): the villages lived in
+	/** each village house a household of 2 to 5 (items 27, 28: "the small villages are not inhabited"): their beds, their day (the farm
+	 *  folk's: work, home, asleep), their lines; dormant beyond 250 m */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bVillageFolk15 = false;
+	/** the villagers' lines, "<role>|<line>" (villager, villagewoman, child, any; {village} its name), from SourceArt/wilderness/village15.json */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> WildVillageLines15;
+	TArray<TWeakObjectPtr<class ARDTownsfolk>> WildVillageFolk15;
+	float VillageFolkCheckAt15 = 0.f;
+	void LayVillageHousehold15(ARDWildChunk* C, const FRDWildPlace& P, int32 HouseK, int32 HouseIdx);
+	void TickVillageFolk15();
+	/** a test's: the villagers of the village named, "title|house|x|y|z|asleep|in bed|indoors|dormant|beds of the house" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") TArray<FString> GetVillageFolk15(const FString& Village) const;
 	/** the walls laid, "village|x|y|z bottom|z top|pad z|land z|land x|land y" (cm; the land read 1.2 m out from the pad's edge) */
 	TArray<FString> TerraceWallLines15;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetTerraceWallLines15() const { return TerraceWallLines15; }

@@ -77,7 +77,9 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 	if (bInside)
 	{
 		// (the house on the room's highest ground: the floor over every bit of it, no grass or earth through the boards)
-		FVector Loc = Mid0; Loc.Z = Gmax + 2.f;
+		// (10 cm over it (the list of 2026-11-20): on a village's terrace the ground under a room is level, and a floor 2 cm over it showed
+		// the ground's grass through its boards; the plinth closes the gap, a step any foot takes)
+		FVector Loc = Mid0; Loc.Z = Gmax + 10.f;
 		Sm->SetWorldLocation(Loc);
 		T = Sm->GetComponentTransform();
 	}
@@ -135,6 +137,11 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 		Dr.OpenYaw = Dr.OutYaw;
 		Dr.Out = T.TransformVectorNoScale(Outw);
 		C->Doors.Add(Dr);
+		if (!Rec.bDoor15)          // (the list of 2026-11-20: its first door, for a household's way in and out)
+		{
+			const FVector Ow = Dr.Out.GetSafeNormal2D(), Out = Dr.At + Ow * 140.f, In = Dr.At - Ow * 160.f;
+			Rec.DoorOut15 = FVector(Out.X, Out.Y, WildGroundZ(Out)); Rec.DoorIn15 = FVector(In.X, In.Y, Base + 1.f); Rec.bDoor15 = true;
+		}
 		++Rec.Doors;
 		// (a step or two before a door where the ground outside lies lower than the sill)
 		const FVector Fr = T.TransformPosition(D.Pivot + Lead + Outw * (60.f / Sc));
@@ -220,7 +227,7 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 	if (const FRDPiece* Bp = Piece(TEXT("Bed")))
 	{
 		BedY = Mx.Y - Bp->Size.Y * 0.5f - 25.f;
-		Put(TEXT("Bed"), Xb + Ds * (Bp->Size.X * 0.5f + 6.f), BedY, Face);
+		if (Put(TEXT("Bed"), Xb + Ds * (Bp->Size.X * 0.5f + 6.f), BedY, Face)) Rec.Beds15.Add(FTransform(FRotator(0.f, Yaw + Face, 0.f), RDW10At(O, Yaw, Xb + Ds * (Bp->Size.X * 0.5f + 6.f), BedY, 1.f)));          // (the list of 2026-11-20: its household's)
 		if (const FRDPiece* Cp = Piece(TEXT("Chest"))) PutBox(TEXT("Chest"), Xb + Ds * (Bp->Size.X + 14.f + Cp->Size.X * 0.5f), BedY, Face, TEXT("chest"));
 	}
 	Put(TEXT("TableLong"), Xb + Ds * W * 0.55f, Mn.Y + (Mx.Y - Mn.Y) * 0.32f, 0.f);

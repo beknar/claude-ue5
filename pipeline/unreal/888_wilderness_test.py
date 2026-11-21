@@ -3629,6 +3629,76 @@ def step_terrace15():
         and all(w.get("inside") and abs(w["feet_over_floor_cm"]) < 15 for w in v["walks"]) and len(v["walks"]) == 2 for v in vs)
     step_result("terrace15", ok, **res)
 
+def step_villages15():
+    """the list of 2026-11-20's eighth phase (items 27, 28): at the ten villages nearest Brokenspire, 8 to 15 houses each and 2 to 5
+    people to a house (by day); at three of them by night (the hour sped from 20:00 until they are in, then 23:00) each indoors in its
+    own house and asleep, in its own bed where the house has one for it; a village 400 m off dormant (no tick) and one she stands in
+    not; the frame rate in a village's square against the same chunks 400 m from it; pictures of a village by day and of a sleeper"""
+    g = G["gen"]; res = {"villages": []}; quiet(True); w = G["w"]
+    yield from wait_ready(90)
+    near = sorted([p for p in places_near(0, 0, 25000) if p["kind"] == "village"], key=lambda p: math.hypot(p["x"], p["y"]))[:10]
+    def folk(name):
+        out = []
+        for l in g.get_village_folk15(name):
+            f = str(l).split("|")
+            out.append({"title": f[0], "house": int(f[1]), "x": float(f[2]), "y": float(f[3]), "z": float(f[4]), "asleep": f[5] == "1", "inbed": f[6] == "1", "indoors": f[7] == "1", "dormant": f[8] == "1", "hasbed": f[9] == "1"})
+        return out
+    def fps(sec):
+        n = 0; t0 = time.time(); worst = 0.0; last = t0
+        while time.time() - t0 < sec:
+            yield; t = time.time(); worst = max(worst, t - last); last = t; n += 1
+        return {"fps": round(n / sec, 1), "worst_ms": round(worst * 1000)}
+    try:
+        g.set_town_hour(11.0)
+        for i, p in enumerate(near):
+            g.wild_drop_all(); g.wild_put_her(p["x"], p["y"]); yield from wait_chunks(30, 50); yield from rwait(2.0)
+            hs, _ds = wild_houses(); hs = [h for h in hs if math.hypot(h["x"] / 100.0 - p["x"], h["y"] / 100.0 - p["y"]) < 75.0]
+            fl = folk(p["name"])
+            per = {}
+            for f in fl: per[f["house"]] = per.get(f["house"], 0) + 1
+            v = {"name": p["name"], "houses": len(hs), "people": len(fl), "per_house": sorted(per.values()), "houses_with_people": len(per), "dormant_here": sum(1 for f in fl if f["dormant"])}
+            if i == 0:
+                v["fps_square"] = yield from fps(10.0)
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=0.0)); yield from rwait(1.0); shot("villages15_day", "1280x720"); yield from rwait(1.2)
+                put(V(p["x"] * 100 + 40000, p["y"] * 100, 0), yaw=180.0, z=g.wild_ground_z(V(p["x"] * 100 + 40000, p["y"] * 100, 0))); yield from rwait(3.0)
+                v["fps_400m_off"] = yield from fps(10.0)
+                # (400 m off, its chunk still loaded: every one of its folk beyond 250 m of her dormant (at 1.5 km the chunk was gone))
+                yield from rwait(1.5)
+                fo = folk(p["name"]); v["dormant_from_400m"] = [sum(1 for f in fo if f["dormant"]), len(fo)]
+            if i < 3:
+                # (the night: home from half past eight, asleep at nine)
+                g.wild_drop_all(); g.wild_put_her(p["x"], p["y"]); yield from wait_chunks(30, 50); yield from rwait(2.0)
+                g.set_town_hour(20.0); GS.set_global_time_dilation(w, 4.0)
+                t0 = time.time()
+                while time.time() - t0 < 50.0:
+                    yield from rwait(1.0)
+                    if all(f["indoors"] for f in folk(p["name"])): break
+                GS.set_global_time_dilation(w, 1.0)
+                g.set_town_hour(23.0); yield from rwait(3.0)
+                nt = folk(p["name"])
+                v["night"] = {"people": len(nt), "indoors": sum(1 for f in nt if f["indoors"]), "asleep": sum(1 for f in nt if f["asleep"]),
+                              "in_bed": sum(1 for f in nt if f["inbed"]), "with_bed": sum(1 for f in nt if f["hasbed"]),
+                              "in_own_house": sum(1 for f in nt if any(math.hypot(f["x"] - h["x"], f["y"] - h["y"]) < max(h["hx"], h["hy"]) + 50 for h in hs))}
+                if i == 0:
+                    sl = next((f for f in nt if f["inbed"]), None)
+                    if sl:
+                        # (from the middle of the sleeper's house, looking at it)
+                        hh_ = min(hs, key=lambda h: math.hypot(h["x"] - sl["x"], h["y"] - sl["y"]))
+                        yw_ = math.degrees(math.atan2(sl["y"] - hh_["y"], sl["x"] - hh_["x"]))
+                        put(V(hh_["x"], hh_["y"], 0), yaw=yw_, z=hh_["floor"]); G["pawn"].set_actor_hidden_in_game(True)
+                        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-20, yaw=yw_)); yield from rwait(1.5)
+                        shot("villages15_sleeper", "1280x720"); yield from rwait(1.2); G["pawn"].set_actor_hidden_in_game(False)
+                g.set_town_hour(11.0); yield from rwait(1.0)
+            res["villages"].append(v)
+    finally:
+        GS.set_global_time_dilation(w, 1.0); G["pawn"].set_actor_hidden_in_game(False); g.set_town_hour(11.0)
+        g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40); quiet(False)
+    vs = res["villages"]
+    ok = len(vs) == 10 and all(8 <= v["houses"] <= 15 and v["houses_with_people"] == v["houses"] and all(2 <= n <= 5 for n in v["per_house"]) and v["dormant_here"] == 0 for v in vs) \
+        and all(v["night"]["indoors"] == v["night"]["people"] and v["night"]["asleep"] == v["night"]["people"] and v["night"]["in_bed"] == v["night"]["with_bed"] and v["night"]["in_own_house"] == v["night"]["people"] for v in vs[:3]) \
+        and vs[0]["dormant_from_400m"][0] == vs[0]["dormant_from_400m"][1] > 0 and vs[0]["fps_square"]["fps"] >= 0.75 * vs[0]["fps_400m_off"]["fps"]
+    step_result("villages15", ok, **res)
+
 def step_tower10():
     """the Old Watchtower climbed: she walks in at its doorway from the road, up its spiral by her own movement to the second storey's
     top, onto its floor (it holds her there); a picture from the top"""
@@ -6786,7 +6856,7 @@ STEPS = {"summon15": step_summon15, "roads14": step_roads14, "density14": step_d
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 STEPS.update(STEPS13)
-STEPS.update({"hearth15": step_hearth15, "terrace15": step_terrace15})
+STEPS.update({"hearth15": step_hearth15, "terrace15": step_terrace15, "villages15": step_villages15})
 STEPS["horse15"] = step_horse15
 SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
 def saves_snapshot():
