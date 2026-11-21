@@ -1228,7 +1228,7 @@ void ARDDungeonGenerator::TickWildLandmark13(float Dt, const FVector& Her)
 	const FVector2D H2 = FVector2D(Her) / 100.0;
 	const double Reach = WildLandmarkKm * 1000.0;
 	if (WildLandmark.IsValid() && FVector2D::Distance(WildLandmarkAt, H2) <= Reach) return;
-	constexpr double LmCell = 6000.0;
+	constexpr double LmCell = WildLandmarkCellM;          // (one place for it: the caves' keys are its cells)
 	const int32 Ci = FMath::FloorToInt(H2.X / LmCell), Cj = FMath::FloorToInt(H2.Y / LmCell);
 	double Best = Reach; FVector2D Site(1e12, 1e12); bool bGot = false;
 	for (int32 I = Ci - 2; I <= Ci + 2; ++I) for (int32 J = Cj - 2; J <= Cj + 2; ++J)
@@ -1242,7 +1242,13 @@ void ARDDungeonGenerator::TickWildLandmark13(float Dt, const FVector& Her)
 		double Dt2 = 1e12; Wild->NearestTown(S.X, S.Y, Dt2); if (Dt2 < 1500.0) continue;
 		Best = D; Site = S; bGot = true;
 	}
-	if (!bGot) { if (UStaticMeshComponent* Lm = WildLandmark.Get()) Lm->DestroyComponent(); WildLandmark.Reset(); WildLandmarkAt = FVector2D(1e12, 1e12); return; }
+	if (!bGot)
+	{
+		if (UStaticMeshComponent* Lm = WildLandmark.Get()) Lm->DestroyComponent();
+		WildLandmark.Reset(); WildLandmarkAt = FVector2D(1e12, 1e12);
+		LayCaveMouth15(nullptr, FVector2D::ZeroVector);          // (its mouth goes with it)
+		return;
+	}
 	UStaticMeshComponent* Lm = WildLandmark.Get();
 	if (!Lm)
 	{
@@ -1256,6 +1262,7 @@ void ARDDungeonGenerator::TickWildLandmark13(float Dt, const FVector& Her)
 	WildLandmarkAt = Site;
 	Lm->SetWorldLocation(FVector(Site.X * 100.0, Site.Y * 100.0, Wild->ToZ(Wild->Height(Site.X, Site.Y)) - 200.f));
 	Lm->SetWorldRotation(FRotator(0.f, (float)(FRDWildWorld::Hash((int32)Site.X, (int32)Site.Y, Wild->Seed) % 360u), 0.f));
+	LayCaveMouth15(Lm, Site);          // (the list of 2026-11-20's ninth phase: its cave's mouth at its foot)
 }
 
 FString ARDDungeonGenerator::GetWildLandmark() const

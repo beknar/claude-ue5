@@ -7387,6 +7387,108 @@ def step_stuck13():
     step_result("stuck13", all(isinstance(v, dict) and v.get("frames") and v["frames"][-1][1] < 3.0 for v in res.values()), **res)
 STEPS.update({"curses13": step_curses13, "dungeon13": step_dungeon13, "finalback13": step_finalback13, "stuck13": step_stuck13})
 
+
+def cave15_inner():
+    """the list of 2026-11-20's ninth phase (item 23), on the cave level (-lv caves): its key and tier from the game instance (a test's
+    default when no tower sent her: cave:test, tier 1), every tier of the level the one game tier; no prison cells or arena in its
+    sets; its monsters the wilds' kinds of its tier and none excluded; the first hall without the castle's carpet, dais, throne,
+    banners or chandeliers; the rooms' floors traced at the set's height; the rock walls stop a trace; pictures of the first hall and
+    of a room of tier 2"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True); res = {}
+    cave = str(g.get_cave15()).split("|")
+    res["cave"] = cave; tier = int(cave[1])
+    res["global_tiers"] = [g.global_tier(t) for t in range(1, 4)]
+    res["switches"] = {"cave15": g.get_editor_property("cave15"), "final_boss_on": g.get_editor_property("final_boss_on"), "max_tier": g.get_editor_property("max_tier"),
+                       "town_level": str(g.get_editor_property("town_level"))}
+    excl = [str(x) for x in g.get_editor_property("cave_exclude15")]
+    mons = g.get_editor_property("monsters")
+    allowed = {str(m.name) for m in mons if m.wild_tier_max > 0 and m.wild_tier_min <= tier <= m.wild_tier_max and m.weight > 0 and not any(x in str(m.name) for x in excl)}
+    res["allowed"] = sorted(allowed)
+    S0 = I2(0, 0)
+    # (the first hall: none of the castle's hall pieces among the set's instances)
+    pcs = g.get_editor_property("pieces")
+    banned = {}
+    for n in ("Carpet", "Dais", "Throne", "Banner", "Chandelier"):
+        p = pcs.get(unreal.Name(n))
+        if p and p.mesh: banned[p.mesh.get_name()] = n
+    S = g.get_section(S0); found = {}
+    # (the great hall's own box: the room of the start set nearest its middle; the throne rooms and chapels keep their thrones and
+    # banners (the first run counted them))
+    sc_ = g.get_start_room_center()
+    hall = min(range(S.get_num_rooms()), key=lambda i: dist2(S.get_room_center(i), sc_))
+    ht_ = S.get_room_tiles(hall); ht_ = ht_[0] if isinstance(ht_, tuple) else ht_
+    hx = (min(p.x for p in ht_) - 200, max(p.x for p in ht_) + 200); hy = (min(p.y for p in ht_) - 200, max(p.y for p in ht_) + 200)
+    res["hall"] = {"room": hall, "kind": str(S.get_room_kind(hall)), "x": [round(v) for v in hx], "y": [round(v) for v in hy]}
+    def in_hall(L): return hx[0] <= L.x <= hx[1] and hy[0] <= L.y <= hy[1]
+    for cc in S.get_components_by_class(unreal.StaticMeshComponent):
+        sm = cc.get_editor_property("static_mesh")
+        if not sm or sm.get_name() not in banned: continue
+        if isinstance(cc, unreal.InstancedStaticMeshComponent):
+            n_ = sum(1 for i in range(cc.get_instance_count()) if in_hall(cc.get_instance_transform(i, True).translation))
+        else:
+            n_ = 1 if in_hall(cc.get_world_location()) else 0
+        if n_: found[banned[sm.get_name()]] = found.get(banned[sm.get_name()], 0) + n_
+    res["castle_hall_pieces"] = found
+    # (the start set's monsters before any clear, then tier 2's ring)
+    yield from wait(1.0)
+    def kinds_here():
+        return sorted({str(m.get_editor_property("monster_name")) for m in g.get_monsters() if alive(m)})
+    k1 = kinds_here()
+    g.debug_clear_section(S0, 0, g.get_start_room_center()); yield from wait(0.5)
+    res["open2"] = g.is_tier_open(2)
+    rooms = {}; floors = []; walls = []
+    for sc in [S0] + [I2(x, y) for x in range(-1, 2) for y in range(-1, 2) if not (x == 0 and y == 0)][:4]:
+        if sc != S0: g.generate_section_now(sc); yield from built(sc)
+        Sx = g.get_section(sc)
+        if not Sx: continue
+        base = Sx.get_actor_location().z
+        for ri in range(Sx.get_num_rooms()):
+            kname = str(Sx.get_room_kind(ri)); rooms[kname] = rooms.get(kname, 0) + 1
+        r_ = Sx.get_room_tiles(0); tl_ = r_[0] if isinstance(r_, tuple) else r_
+        for p in tl_[:8]:
+            fz = floor_z(p.x + 20, p.y + 20, top=base + 150.0)
+            floors.append(None if fz is None else round(fz - base, 1))
+    yield from wait(1.0)
+    # (the walls stop her: from the great hall's middle, each way a trace meets a wall within 25 m she runs at it 7 s and must stand
+    # before it, never past its face)
+    hc = g.get_start_room_center(); pawn = G["pawn"]
+    for a in range(0, 360, 45):
+        d = V(math.cos(math.radians(a)), math.sin(math.radians(a)), 0)
+        h_ = unreal.SystemLibrary.line_trace_single(G["w"], V(hc.x, hc.y, hc.z + 120), V(hc.x + d.x * 2500, hc.y + d.y * 2500, hc.z + 120), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [pawn], unreal.DrawDebugTrace.NONE, True)
+        t_ = h_.to_tuple() if h_ else None
+        if not (t_ and t_[0]): continue
+        hit_d = dist2(t_[4], hc); cm_ = t_[10]
+        comp = cm_.get_editor_property("static_mesh").get_name() if cm_ and isinstance(cm_, unreal.StaticMeshComponent) and cm_.get_editor_property("static_mesh") else "?"
+        if comp != "Cube": continue          # (a wall's box: a column or a rock face she slides round)
+        put(V(hc.x, hc.y, hc.z + 100), yaw=a); yield from wait(0.3)
+        t0 = now(); far = 0.0
+        while now() - t0 < 7.0:
+            pawn.add_movement_input(d, 1.0); yield
+            L_ = pawn.get_actor_location(); far = max(far, (L_.x - hc.x) * d.x + (L_.y - hc.y) * d.y)
+        walls.append({"way": a, "wall_m": round(hit_d / 100, 2), "reached_m": round(far / 100, 2), "hit": comp})
+        if len(walls) >= 4: break
+    k2 = kinds_here()
+    res["kinds_start"] = k1; res["kinds_ring"] = k2; res["rooms"] = rooms; res["floors_rel"] = floors; res["walls_m"] = walls
+    res["off_kinds"] = [k for k in set(k1) | set(k2) if k not in allowed]
+    # (pictures: the first hall from her eyes, then a room of the ring)
+    put(g.get_start_room_center(), 0.0); yield from wait(1.5); shot("cave15_hall"); yield from rwait(1.0)
+    S2 = g.get_section(I2(1, 0)) or g.get_section(I2(-1, 0))
+    if S2: put(S2.get_room_center(0), 0.0); yield from wait(1.5); shot("cave15_tier2"); yield from rwait(1.0)
+    quiet(False)
+    ok = (cave[0].startswith("cave:") and all(t == tier for t in res["global_tiers"]) and res["switches"]["cave15"] and not res["switches"]["final_boss_on"]
+          and not any(("Prison" in k) or ("Arena" in k) for k in rooms) and not found and (k1 or k2) and not res["off_kinds"]
+          and floors and sum(1 for f in floors if f is not None and abs(f) < 40) >= 0.85 * len(floors) and len(walls) >= 2
+          and all(w_["reached_m"] <= w_["wall_m"] for w_ in walls))
+    step_result("cave15", ok, **res)
+def step_cave15():
+    """the cave level's step (cave15_inner), its quiet put back in a finally (PR #101's review)"""
+    try:
+        yield from cave15_inner()
+    finally:
+        try: quiet(False)
+        except Exception: pass
+STEPS.update({"cave15": step_cave15})
+
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""
     if G.get("gen"): return G["gen"]

@@ -1,0 +1,13 @@
+{
+  "_": "the caves under the landmark towers (the list of 2026-11-20's ninth phase, item 23; 935_caves.py). exclude: parts of a wild kind's name kept out of the caves (people with firearms, machines); themes: the cave level's tiers' looks; light: the dungeon light tint and its share",
+  "title": "The Cave beneath the Broken Tower",
+  "max_tier": 3,
+  "exclude": ["Soldier", "Medic", "Gunner", "Drinker", "Chicken", "Tank", "Exterminator", "Kratos", "Cyber", "Mech", "Robot", "Trooper"],
+  "light": [0.62, 0.70, 0.95],
+  "light_share": 0.55,
+  "props": ["Cave.Face_A", "Cave.Face_B", "Cave.Face_C", "Cave.Stone_A", "Cave.Stone_B", "Cave.Mite_A", "Cave.Mite_B", "Cave.Mite_C", "Cave.Boulder", "Cave.Face_A", "Cave.Stone_C", "Cave.Face_B"],
+  "prop_spacing": 330.0,
+  "prop_chance": 0.6,
+  "rock_tint": [0.30, 0.29, 0.27],
+  "ground_tint": [0.32, 0.29, 0.25]
+}

@@ -1394,12 +1394,14 @@ void ARDSection::AssignSpecialRooms()
 		// (the great hall's set keeps its first room: she starts beside it)
 		if (bStart && FVector::Dist2D(TileWorld(Rm.Lane), Generator->GetStartRoomCenter()) < 1500.f) continue;
 		float Sum = 0.f;
-		for (const FW& K : Kinds) if (!Used.Contains(K.K) && Side >= K.MinSide) Sum += K.W;
+		// (the list of 2026-11-20's ninth phase: a cave has no arena (the castle's))
+		auto Off = [this](ERDRoomKind K) { return Generator->bCave15 && K == ERDRoomKind::Arena; };
+		for (const FW& K : Kinds) if (!Used.Contains(K.K) && Side >= K.MinSide && !Off(K.K)) Sum += K.W;
 		if (Sum <= 0.f) continue;
 		float X = V * Sum;
 		for (const FW& K : Kinds)
 		{
-			if (Used.Contains(K.K) || Side < K.MinSide) continue;
+			if (Used.Contains(K.K) || Side < K.MinSide || Off(K.K)) continue;
 			X -= K.W;
 			if (X <= 0.f) { Rm.Kind = K.K; Used.Add(K.K); break; }
 		}

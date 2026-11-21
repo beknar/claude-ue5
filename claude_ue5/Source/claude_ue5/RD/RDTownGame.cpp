@@ -960,6 +960,14 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 				if (!Level.IsEmpty() && DescendToCatacombs(P->GetActorLocation(), P->GetActorRotation().Yaw, Level)) return;
 				UE_LOG(LogRDTownGame, Warning, TEXT("RDTOWN -RDTownGo=%s refused: %s"), *Go, Level.IsEmpty() ? TEXT("no such town's dungeon") : bTownTraveling ? TEXT("already travelling") : TEXT("the way down refused it"));
 			}
+			// (-RDTownGo=cave[:<tier>]: the list of 2026-11-20's ninth phase, the packaged game's test of the cave level: down into it
+			// from where she stands, as a tower's mouth takes her (its key "cave:go", its tier given or 1); she comes back where she stood)
+			else if (Go.StartsWith(TEXT("cave")))
+			{
+				GI->CaveKey15 = TEXT("cave:go"); GI->CaveTier15 = Go.Contains(TEXT(":")) ? FMath::Clamp(FCString::Atoi(*Go.Mid(5)), 1, GameTierMax) : 1;
+				if (!CaveLevel15.IsEmpty() && DescendToCatacombs(P->GetActorLocation(), P->GetActorRotation().Yaw, CaveLevel15)) { GI->ReturnTown = TEXT("the Broken Tower"); return; }
+				UE_LOG(LogRDTownGame, Warning, TEXT("RDTOWN -RDTownGo=%s refused: %s"), *Go, CaveLevel15.IsEmpty() ? TEXT("no cave level") : TEXT("the way down refused it"));
+			}
 			// (-RDTownGo=town:<name>: out to a wilderness town (Vel Morrath: "town:velmorrath"), the packaged game's test of the
 			// city: once the wilds are ready, by the map's fast travel; her mark written once it is built round her)
 			else if (Go.StartsWith(TEXT("town:")) && bWild) GI->TownGoTown = Go.Mid(5);
