@@ -635,7 +635,9 @@ public:
 	struct FHouse { FVector C = FVector::ZeroVector; FVector2D H = FVector2D::ZeroVector; float Yaw = 0.f; int32 Doors = 0; int32 Furniture = 0; int32 PropsGone = 0; bool bLit = false; float FloorZ = 0.f; FString Of;
 		// (the list of 2026-11-20's eighth phase: its beds (each bed's middle on the floor, its yaw: the foot +X) and its first door, outside
 		// on the ground and inside on the floor, for a household (RDList15g.cpp))
-		TArray<FTransform> Beds15; FVector DoorOut15 = FVector::ZeroVector, DoorIn15 = FVector::ZeroVector; bool bDoor15 = false; };
+		TArray<FTransform> Beds15; FVector DoorOut15 = FVector::ZeroVector, DoorIn15 = FVector::ZeroVector; bool bDoor15 = false;
+	FVector RoomC15 = FVector::ZeroVector;          // (the room's middle, on the floor (PR #100's review: its mesh's origin is not it))
+	};
 	TArray<FHouse> Houses;
 	/** ground kept clear of plants (a house's inside): its middle and half sizes (cm, the chunk's frame) and its yaw; the near grass
 	 *  made as she comes leaves it out */

@@ -139,7 +139,6 @@ public:
 	void SetWildFarmHome(const FVector& DoorOut, const FVector& In) { WildDoorOut = DoorOut; WildIn = In; bWildFarm = true; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List14") bool IsWildIndoors() const { return bWildIndoors; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") bool IsInBed() const { return bInBed; }
-	bool HasBed15() const { return bHasBed; }          // (the list of 2026-11-20: a village's household member with a bed of its own)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") bool HasBed() const { return bHasBed; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") FVector GetBedAt() const { return BedAt; }
 	/** the lines it has (its def's and its role's: tests) and how many different it has said */

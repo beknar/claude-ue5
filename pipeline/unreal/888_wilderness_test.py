@@ -3641,7 +3641,7 @@ def step_villages15():
         out = []
         for l in g.get_village_folk15(name):
             f = str(l).split("|")
-            out.append({"title": f[0], "house": int(f[1]), "x": float(f[2]), "y": float(f[3]), "z": float(f[4]), "asleep": f[5] == "1", "inbed": f[6] == "1", "indoors": f[7] == "1", "dormant": f[8] == "1", "hasbed": f[9] == "1"})
+            out.append({"title": f[0], "house": int(f[1]), "x": float(f[2]), "y": float(f[3]), "z": float(f[4]), "asleep": f[5] == "1", "inbed": f[6] == "1", "indoors": f[7] == "1", "dormant": f[8] == "1", "hasbed": f[9] == "1", "rx": float(f[10]), "ry": float(f[11])})
         return out
     def fps(sec):
         n = 0; t0 = time.time(); worst = 0.0; last = t0
@@ -3678,7 +3678,8 @@ def step_villages15():
                 nt = folk(p["name"])
                 v["night"] = {"people": len(nt), "indoors": sum(1 for f in nt if f["indoors"]), "asleep": sum(1 for f in nt if f["asleep"]),
                               "in_bed": sum(1 for f in nt if f["inbed"]), "with_bed": sum(1 for f in nt if f["hasbed"]),
-                              "in_own_house": sum(1 for f in nt if any(math.hypot(f["x"] - h["x"], f["y"] - h["y"]) < max(h["hx"], h["hy"]) + 50 for h in hs))}
+                              # (each in its own house: the house whose room is its household's (PR #100's review: any house counted))
+                              "in_own_house": sum(1 for f in nt if hs and in_house(min(hs, key=lambda h: math.hypot(h["x"] - f["rx"], h["y"] - f["ry"])), V(f["x"], f["y"], 0), 50.0))}
                 if i == 0:
                     sl = next((f for f in nt if f["inbed"]), None)
                     if sl:

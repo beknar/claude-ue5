@@ -1944,7 +1944,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> WildVillageLines15;
 	TArray<TWeakObjectPtr<class ARDTownsfolk>> WildVillageFolk15;
 	float VillageFolkCheckAt15 = 0.f;
+	/** the households waiting to be laid, one a frame after the village's pieces (PR #100's review: a village's 30 to 75 people in one
+	 *  frame were a hitch, and the square's props, laid after them, came down on them) */
+	struct FVillageHouseQ15 { TWeakObjectPtr<ARDWildChunk> Chunk; FRDWildPlace P; int32 HouseK = 0; FVector RoomC = FVector::ZeroVector; };
+	TArray<FVillageHouseQ15> VillageHouseQueue15;
 	void LayVillageHousehold15(ARDWildChunk* C, const FRDWildPlace& P, int32 HouseK, int32 HouseIdx);
+	/** once a second: a wild person (a farm's, a village's, a traveller, a structure's) beyond 250 m of her stops its day (its body still
+	 *  posed when seen); one a frame from the households' queue */
 	void TickVillageFolk15();
 	/** a test's: the villagers of the village named, "title|house|x|y|z|asleep|in bed|indoors|dormant|beds of the house" */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") TArray<FString> GetVillageFolk15(const FString& Village) const;
@@ -2689,6 +2695,11 @@ public:
 	TArray<FRDWildFarmRec> WildFarms;
 	/** the list of 2026-11-16's seventh phase (RDList14f.cpp): a farm's family member given its home in the farmhouse and its own bed (the K-th) if there is one */
 	void SetWildFarmFolkHome14(class ARDTownsfolk* T, const FRDWildFarmRec& Rec, const FVector& DoorOut, const FVector& HouseIn, int32 K);
+	/** the list of 2026-11-20: a wild household member's home (its door outside, its place inside side by side with the others, its K-th
+	 *  bed if there is one), a farm's or a village's */
+	void SetWildFolkHome15(class ARDTownsfolk* T, const TArray<FTransform>& Beds, const FVector& DoorOut, const FVector& HouseIn, int32 K);
+	/** the wilds' townsfolk bodies by kind: grown men, grown women, children (the defs with a mesh and no town of their own) */
+	void WildBodyPools15(TArray<int32>& Men, TArray<int32>& Women, TArray<int32>& Kids) const;
 	/** the seventh phase's second part (RDList14g.cpp): a farm animal's kill key (from its farm's id and its place in the farm's
 	 *  plan), whether it was killed in this game, and the farm animals her blows and bolts reach */
 	int64 FarmAnimalKey14(const FRDWildFarmRec& Rec, int32 Slot, int32 K) const;

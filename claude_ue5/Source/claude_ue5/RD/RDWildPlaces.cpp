@@ -195,7 +195,8 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 					const int32 H0 = C->Houses.Num();
 					Put(TEXT("house"), Pd.C, Pd.Yaw, 1.f, 25.f);
 					// (the list of 2026-11-20's eighth phase: its household)
-					if (bVillageFolk15 && C->Houses.Num() > H0) LayVillageHousehold15(C, P, HouseK, C->Houses.Num() - 1);
+					// (queued: laid one a frame after the village's pieces and walls (PR #100's review), found again by its room's middle)
+					if (bVillageFolk15 && C->Houses.Num() > H0) VillageHouseQueue15.Add({ C, P, HouseK, C->Houses.Last().RoomC15 });
 					++HouseK;
 				}
 				Put(TEXT("well"), P.At, R.FRandRange(0.f, 360.f));

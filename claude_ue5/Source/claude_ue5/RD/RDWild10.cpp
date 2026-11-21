@@ -86,6 +86,7 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 	const float Base = T.GetLocation().Z;
 	const FVector O = FVector(T.GetLocation().X, T.GetLocation().Y, Base);
 	ARDWildChunk::FHouse Rec; Rec.C = O; Rec.H = RoomH; Rec.Yaw = Yaw; Rec.FloorZ = Base + 1.f; Rec.Of = Sm->GetStaticMesh()->GetName();
+	Rec.RoomC15 = RDW10At(O, Yaw, RoomC.X, RoomC.Y, 1.f);
 	auto Mesh = [&](UStaticMesh* M, const FTransform& W, bool bCollide, UMaterialInterface* Mat = nullptr) -> UStaticMeshComponent*
 	{
 		if (!M) return nullptr;

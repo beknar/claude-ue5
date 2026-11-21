@@ -8,14 +8,20 @@
 
 void ARDDungeonGenerator::SetWildFarmFolkHome14(ARDTownsfolk* T, const FRDWildFarmRec& Rec, const FVector& DoorOut, const FVector& HouseIn, int32 K)
 {
+	SetWildFolkHome15(T, Rec.Beds14, DoorOut, HouseIn, K);
+}
+
+void ARDDungeonGenerator::SetWildFolkHome15(ARDTownsfolk* T, const TArray<FTransform>& Beds, const FVector& DoorOut, const FVector& HouseIn, int32 K)
+{
+	// (one rule for a farm's family and a village's household (PR #100's review: the village's had copied it))
 	if (!T) return;
 	// (each its own place inside, side by side across the door's way: two of a household at one spot stood in each other)
 	const FVector Out = (DoorOut - HouseIn).GetSafeNormal2D(), Side(-Out.Y, Out.X, 0.f);
 	const FVector In = HouseIn + Side * ((K % 4) - 1.5f) * 55.f;
 	T->SetWildFarmHome(FVector(DoorOut.X, DoorOut.Y, DoorOut.Z + 94.f), FVector(In.X, In.Y, In.Z + 92.f));
-	if (!Rec.Beds14.IsValidIndex(K)) return;
+	if (!Beds.IsValidIndex(K)) return;
 	// (its bed's top under where it lies, traced (the mattress), its middle a little toward the foot (the town's AssignTownBeds))
-	const FTransform& B = Rec.Beds14[K];
+	const FTransform& B = Beds[K];
 	const FVector Lie = B.GetLocation() + B.GetRotation().GetForwardVector() * 15.f;
 	float Top = B.GetLocation().Z + 55.f;
 	FHitResult Hit;
@@ -31,13 +37,13 @@ static constexpr float RDFarmHomeFrom = 20.5f, RDFarmHomeTo = 6.f, RDFarmSleepFr
 ARDTownsfolk* ARDDungeonGenerator::WildSleeperNear14(const FVector& From) const
 {
 	ARDTownsfolk* Best = nullptr; float Bd = 200.f;
-	for (const FRDWildFarmRec& F : WildFarms)
-		for (const TWeakObjectPtr<ARDTownsfolk>& W : F.Folk)
-			if (ARDTownsfolk* T = W.Get(); IsValid(T) && T->IsSleeping())
-			{
-				const float D = FVector::Dist2D(T->GetActorLocation(), From);
-				if (D < Bd && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Bd = D; Best = T; }
-			}
+	// (the farms' families and the villages' households (PR #100's review: a village's sleeper was never named))
+	for (ARDTownsfolk* T : WildPeople14())
+		if (IsValid(T) && T->IsSleeping())
+		{
+			const float D = FVector::Dist2D(T->GetActorLocation(), From);
+			if (D < Bd && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Bd = D; Best = T; }
+		}
 	return Best;
 }
 

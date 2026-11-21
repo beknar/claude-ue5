@@ -1,0 +1,151 @@
+{
+ "tag": "l15p8s1",
+ "plan": [
+  "stream"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "stream",
+   "ok": true,
+   "mem_start": 20217.0,
+   "census_start": {
+    "actors": 628,
+    "top": {
+     "RDLootPile": 284,
+     "RDMonster": 205,
+     "RDWildChunk": 64,
+     "RDTownsfolk": 27,
+     "RDWildAnimal": 19,
+     "WorldSettings": 1,
+     "Brush": 1,
+     "PostProcessVolume": 1,
+     "ExponentialHeightFog": 1,
+     "RDDungeonGenerator": 1,
+     "PlayerStart": 1,
+     "SkeletalMeshActor": 1
+    },
+    "lists": {
+     "loot_piles": 284
+    }
+   },
+   "mem_far": 20863.0,
+   "census_far": {
+    "actors": 612,
+    "top": {
+     "RDLootPile": 283,
+     "RDMonster": 196,
+     "RDWildChunk": 64,
+     "RDTownsfolk": 30,
+     "RDWildAnimal": 10,
+     "WorldSettings": 1,
+     "Brush": 1,
+     "PostProcessVolume": 1,
+     "ExponentialHeightFog": 1,
+     "RDDungeonGenerator": 1,
+     "PlayerStart": 1,
+     "SkeletalMeshActor": 1
+    },
+    "lists": {
+     "loot_piles": 283
+    }
+   },
+   "mem_back": 20935.0,
+   "census_back": {
+    "actors": 688,
+    "top": {
+     "RDLootPile": 321,
+     "RDMonster": 220,
+     "RDWildChunk": 72,
+     "RDTownsfolk": 27,
+     "RDWildAnimal": 19,
+     "WorldSettings": 1,
+     "Brush": 1,
+     "PostProcessVolume": 1,
+     "ExponentialHeightFog": 1,
+     "RDDungeonGenerator": 1,
+     "PlayerStart": 1,
+     "SkeletalMeshActor": 1
+    },
+    "lists": {
+     "loot_piles": 321
+    }
+   },
+   "max_chunks": 72,
+   "outside_square": 0,
+   "samples": [
+    {
+     "y": 2600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 20219
+    },
+    {
+     "y": 4100.0,
+     "chunks": 59,
+     "near": 4,
+     "mem": 20450
+    },
+    {
+     "y": 5600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 20820
+    },
+    {
+     "y": 7100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21087
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 20863
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 20863
+    },
+    {
+     "y": 7100.0,
+     "chunks": 67,
+     "near": 4,
+     "mem": 20836
+    },
+    {
+     "y": 5600.0,
+     "chunks": 68,
+     "near": 4,
+     "mem": 20805
+    },
+    {
+     "y": 4100.0,
+     "chunks": 67,
+     "near": 4,
+     "mem": 20803
+    },
+    {
+     "y": 2600.0,
+     "chunks": 66,
+     "near": 4,
+     "mem": 20930
+    }
+   ],
+   "dropped": 376,
+   "built": 384,
+   "active_km2_max": 4.5,
+   "compute_ms": 121.9,
+   "build_ms_max": 121.2,
+   "out_growth_mb": 646.0,
+   "back_growth_mb": 72.0
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

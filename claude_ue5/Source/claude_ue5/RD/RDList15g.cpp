@@ -3,18 +3,29 @@
 // per building": each village house (phase 7 lays 8 to 15 on their terraces) a household of 2 to 5. Beds where the room has room (the
 // farmhouses' way: along its walls, clear of everything in it), a work place each (the square, before their door, by the well), their
 // day the farm folk's (RDList14f.cpp: out at six, home at half past eight, asleep from nine in their own bed), the villagers' lines,
-// counted by the wild people's rules (hurt, killed and kept dead, looted, seeing a lock picked), and still beyond 250 m.
+// counted by the wild people's rules (hurt, killed and kept dead, looted, seeing a lock picked). The households are laid one a frame
+// after the village's pieces (VillageHouseQueue15), and every wild person beyond 250 m of her stops its day.
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDWild.h"
 #include "RD/RDTown.h"
 #include "Components/StaticMeshComponent.h"
-#include "Components/SkeletalMeshComponent.h"
 #include "ProceduralMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 DEFINE_LOG_CATEGORY_STATIC(LogRDList15g, Log, All);
 
 static constexpr float RDV15DormantCm = 25000.f;
+
+void ARDDungeonGenerator::WildBodyPools15(TArray<int32>& Men, TArray<int32>& Women, TArray<int32>& Kids) const
+{
+	for (int32 I = 0; I < Townsfolk.Num(); ++I)
+	{
+		const FRDTownsfolkDef& Df = Townsfolk[I];
+		if (!Df.Mesh || !Df.Town.IsEmpty()) continue;
+		if (Df.Role == ERDTownRole::Child) Kids.Add(I);
+		else if (Df.Role == ERDTownRole::Townsfolk) (Df.Name.ToString().Contains(TEXT("woman")) ? Women : Men).Add(I);
+	}
+}
 
 void ARDDungeonGenerator::LayVillageHousehold15(ARDWildChunk* C, const FRDWildPlace& P, int32 HouseK, int32 HouseIdx)
 {
@@ -24,7 +35,8 @@ void ARDDungeonGenerator::LayVillageHousehold15(ARDWildChunk* C, const FRDWildPl
 	const uint32 Hh = FRDWildWorld::Hash(P.Id, 640 + HouseK, Wild->Seed);
 	const int32 N = 2 + (int32)(Hh % 4u);
 	// ---- its beds: the house's own and as many more as the household needs, along the room's walls (30 cm apart, the head to the wall),
-	// clear of the door's way and of everything in the room (an overlap test from 30 cm over the floor, the farmhouses' way)
+	// clear of the door's way and of everything in the room (an overlap test from 30 cm over the floor, the farmhouses' way). The room
+	// round its own middle (PR #100's review: its mesh's origin is not the room's middle, and tries on one side stood in the wall)
 	if (const FRDPiece* Bp = Piece(TEXT("Bed")); Bp && Bp->Mesh)
 	{
 		const float Bx = (float)Bp->Size.X, By = (float)Bp->Size.Y, Bz = (float)Bp->Size.Z;
@@ -37,7 +49,7 @@ void ARDDungeonGenerator::LayVillageHousehold15(ARDWildChunk* C, const FRDWildPl
 		for (const FBd& T : Tries)
 		{
 			if (Hs.Beds15.Num() >= N) break;
-			const FVector L = Hs.C + Rr.RotateVector(FVector(T.X, T.Y, 0.f));
+			const FVector L = Hs.RoomC15 + Rr.RotateVector(FVector(T.X, T.Y, 0.f));
 			const FVector Lf(L.X, L.Y, Hs.FloorZ + 1.f);
 			if (FVector::Dist2D(Lf, Hs.DoorIn15) < FMath::Max(Bx, By) * 0.5f + 190.f) continue;          // (not in the door's way or its leaf's swing)
 			const float Y2 = Hs.Yaw + T.YawL;
@@ -56,13 +68,7 @@ void ARDDungeonGenerator::LayVillageHousehold15(ARDWildChunk* C, const FRDWildPl
 	}
 	// ---- its people: two grown-ups (a man and a woman), then children and grown-ups by the house's own hash
 	TArray<int32> Men, Women, Kids;
-	for (int32 I = 0; I < Townsfolk.Num(); ++I)
-	{
-		const FRDTownsfolkDef& Df = Townsfolk[I];
-		if (!Df.Mesh || !Df.Town.IsEmpty()) continue;
-		if (Df.Role == ERDTownRole::Child) Kids.Add(I);
-		else if (Df.Role == ERDTownRole::Townsfolk) (Df.Name.ToString().Contains(TEXT("woman")) ? Women : Men).Add(I);
-	}
+	WildBodyPools15(Men, Women, Kids);
 	const FVector2D Sq = P.At;
 	const FVector DoorOut = Hs.DoorOut15, Ow = (Hs.DoorOut15 - Hs.DoorIn15).GetSafeNormal2D();
 	FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -73,11 +79,10 @@ void ARDDungeonGenerator::LayVillageHousehold15(ARDWildChunk* C, const FRDWildPl
 		const TArray<int32>& Pool = Body == 2 ? Kids : Body == 1 ? Women : Men;
 		if (Pool.Num() == 0) continue;
 		const int32 D = Pool[(int32)((Hk >> 4) % (uint32)Pool.Num())];
-		// (where it works by day: the first at the square, the second before the door, a child by the well, another grown-up at the square)
-		FVector2D At; float Yaw; const TCHAR* Work = nullptr; const TCHAR* Prop = nullptr;
-		const float A = FMath::DegreesToRadians((float)(Hk % 360u));
 		// (spread out: a third of the grown-ups at the square, the rest before their own door (each its own side of it); half the children
 		// round the well, half before their house (all of a village's men in the square and its children round the well were a crowd))
+		FVector2D At; float Yaw; const TCHAR* Work = nullptr; const TCHAR* Prop = nullptr;
+		const float A = FMath::DegreesToRadians((float)(Hk % 360u));
 		const FVector2D Door2 = FVector2D(DoorOut.X, DoorOut.Y) / 100.f, Ow2(Ow.X, Ow.Y), Sd2(-Ow.Y, Ow.X);
 		const bool bSquare = Body == 2 ? (Hk & 16u) != 0u : (K != 1 && (Hk >> 5) % 3u == 0u);
 		if (bSquare)
@@ -92,46 +97,52 @@ void ARDDungeonGenerator::LayVillageHousehold15(ARDWildChunk* C, const FRDWildPl
 			Yaw = FMath::RadiansToDegrees(FMath::Atan2(Sq.Y - At.Y, Sq.X - At.X));
 			if (K == 1) { Work = TEXT("Scatter"); Prop = TEXT("Bowl"); } else if (Body != 2) Work = TEXT("Talk");
 		}
+		// (a spot clear of the square's well, hay and cart and the walls, laid before the households (PR #100's review: spawned before them,
+		// a villager could stand in the hay all day): its own spot, else a few round it)
+		for (int32 Tr = 0; Tr < 8; ++Tr)
+		{
+			const FVector2D Q = At + (Tr == 0 ? FVector2D::ZeroVector : FVector2D(FMath::Cos(Tr * PI / 3.5f), FMath::Sin(Tr * PI / 3.5f)) * (0.8f + 0.3f * Tr));
+			const float Gz = WildGroundZ(FVector(Q.X * 100.0, Q.Y * 100.0, 0.0));
+			if (WildSpotFree14(C, FVector(Q.X * 100.0, Q.Y * 100.0, Gz + 100.f), 0.f, FVector(35.f, 35.f, 70.f))) { At = Q; break; }
+		}
 		const FVector W(At.X * 100.0, At.Y * 100.0, WildGroundZ(FVector(At.X * 100.0, At.Y * 100.0, 0.0)) + 92.f);
 		ARDTownsfolk* T = GetWorld()->SpawnActor<ARDTownsfolk>(ARDTownsfolk::StaticClass(), FTransform(FRotator(0, Yaw, 0), W), Sp);
 		if (!T) continue;
 		T->Init(this, nullptr, D, W, Yaw, 0.f, HashCombine((uint32)P.Id, (uint32)(HouseK * 8 + K) * 7919u + 17u));
 		const TCHAR* LineRole = Body == 2 ? TEXT("child") : Body == 1 ? TEXT("villagewoman") : TEXT("villager");
-		T->SetTitle(FString::Printf(TEXT("%s of %s"), Body == 2 ? TEXT("a child") : Body == 1 ? TEXT("a villager") : TEXT("a villager"), *P.Name));
-		// (home in the house at night: each its own place inside, side by side across the door's way (two at one spot stood in each other)),
-		// its own bed (the K-th) if the house has one for it)
-		const FVector Side(-Ow.Y, Ow.X, 0.f);
-		const FVector In = Hs.DoorIn15 + Side * ((K % 4) - 1.5f) * 55.f;
-		T->SetWildFarmHome(FVector(DoorOut.X, DoorOut.Y, DoorOut.Z + 94.f), FVector(In.X, In.Y, In.Z + 92.f));
-		if (Hs.Beds15.IsValidIndex(K))
-		{
-			const FTransform& B = Hs.Beds15[K];
-			const FVector Lie = B.GetLocation() + B.GetRotation().GetForwardVector() * 15.f;
-			float Top = B.GetLocation().Z + 55.f;
-			FHitResult Hit; FCollisionQueryParams Qp(SCENE_QUERY_STAT(RDVillageBed15), false); Qp.AddIgnoredActor(T);
-			if (GetWorld()->LineTraceSingleByChannel(Hit, Lie + FVector(0, 0, 200.f), Lie - FVector(0, 0, 20.f), ECC_Visibility, Qp)) Top = Hit.Location.Z;
-			T->SetBed(FVector(Lie.X, Lie.Y, Top), B.Rotator().Yaw);
-		}
+		T->SetTitle(FString::Printf(TEXT("%s of %s"), Body == 2 ? TEXT("a child") : TEXT("a villager"), *P.Name));
+		SetWildFolkHome15(T, Hs.Beds15, DoorOut, Hs.DoorIn15, K);
 		if (Work) T->SetStandWork(Work, Prop ? FName(Prop) : NAME_None);
 		for (const FString& L : WildVillageLines15)
 		{
 			FString Who, Line;
 			if (!L.Split(TEXT("|"), &Who, &Line)) continue;
-			if (Who == LineRole || Who == TEXT("any") || (Body != 2 && Who == TEXT("grown"))) T->OwnLines.Add(Line.Replace(TEXT("{village}"), *P.Name));
+			if (Who == LineRole || Who == TEXT("any")) T->OwnLines.Add(Line.Replace(TEXT("{village}"), *P.Name));
 		}
-		T->Tags.Add(FName(*FString::Printf(TEXT("RDVillage15|%s|%d"), *P.Name, HouseK)));
+		T->Tags.Add(FName(*FString::Printf(TEXT("RDVillage15|%s|%d|%.0f|%.0f"), *P.Name, HouseK, Hs.RoomC15.X, Hs.RoomC15.Y)));
 		C->Props.Add(T);
 		WildVillageFolk15.Add(T);
 		// (killed in this game, it lies dead: its key from the village's id and its house (kind 3: a village's household))
 		KeepWildFolk14(T, WildFolkKey14(3, ((int64)P.Id << 4) | (HouseK & 15), K));
 	}
-	WildVillageFolk15.RemoveAll([](const TWeakObjectPtr<ARDTownsfolk>& W) { return !W.IsValid(); });
 }
 
 void ARDDungeonGenerator::TickVillageFolk15()
 {
-	// (once a second: a villager beyond 250 m of her stands still, its body unposed (a village is 30 to 75 people, and the chunks hold the
-	// villages 2 km round her); within it, it lives its day again, the hour read afresh)
+	// (one household a frame from the queue: its house found again in its chunk by the room's middle)
+	while (VillageHouseQueue15.Num() > 0)
+	{
+		const FVillageHouseQ15 Q = VillageHouseQueue15[0];
+		VillageHouseQueue15.RemoveAt(0);
+		ARDWildChunk* C = Q.Chunk.Get();
+		if (!IsValid(C)) continue;
+		const int32 Hi = C->Houses.IndexOfByPredicate([&Q](const ARDWildChunk::FHouse& H) { return FVector::Dist2D(H.RoomC15, Q.RoomC) < 10.f; });
+		if (Hi >= 0) { LayVillageHousehold15(C, Q.P, Q.HouseK, Hi); break; }
+	}
+	// (once a second: a wild person beyond 250 m of her stops its day (no tick); its body is left to pose as the engine poses what is seen
+	// (PR #100's review: its skeletal tick switched off too, a village laid off screen and looked at from 300 m stood in its reference
+	// pose); the dead are left alone (their death pose is set on their first tick). Every kind of the wilds' people, not the villagers
+	// alone (the review: the farms' families and the travellers kept ticking at any distance))
 	const UWorld* W = GetWorld();
 	if (!W || W->GetTimeSeconds() < VillageFolkCheckAt15) return;
 	VillageFolkCheckAt15 = W->GetTimeSeconds() + 1.f;
@@ -139,20 +150,18 @@ void ARDDungeonGenerator::TickVillageFolk15()
 	if (!Her) return;
 	const FVector L = Her->GetActorLocation();
 	WildVillageFolk15.RemoveAll([](const TWeakObjectPtr<ARDTownsfolk>& Wk) { return !Wk.IsValid(); });
-	for (const TWeakObjectPtr<ARDTownsfolk>& Wk : WildVillageFolk15)
+	for (ARDTownsfolk* T : WildPeople14())
 	{
-		ARDTownsfolk* T = Wk.Get();
-		if (!T) continue;
+		if (!IsValid(T) || T->IsWildDead14()) continue;
 		const bool bFar = FVector::Dist2D(T->GetActorLocation(), L) > RDV15DormantCm;
 		if (T->IsActorTickEnabled() == !bFar) continue;
 		T->SetActorTickEnabled(!bFar);
-		TInlineComponentArray<USkeletalMeshComponent*> Sk(T);
-		for (USkeletalMeshComponent* S : Sk) S->SetComponentTickEnabled(!bFar);
 	}
 }
 
 TArray<FString> ARDDungeonGenerator::GetVillageFolk15(const FString& Village) const
 {
+	// ("title|house|x|y|z|asleep|in bed|indoors|dormant|has a bed|its house's room middle x|y")
 	TArray<FString> Out;
 	for (const TWeakObjectPtr<ARDTownsfolk>& Wk : WildVillageFolk15)
 	{
@@ -161,10 +170,10 @@ TArray<FString> ARDDungeonGenerator::GetVillageFolk15(const FString& Village) co
 		FString Tag;
 		for (const FName& G : T->Tags) if (G.ToString().StartsWith(TEXT("RDVillage15|"))) { Tag = G.ToString(); break; }
 		TArray<FString> Pt; Tag.ParseIntoArray(Pt, TEXT("|"));
-		if (Pt.Num() < 3 || Pt[1] != Village) continue;
+		if (Pt.Num() < 5 || Pt[1] != Village) continue;
 		const FVector L = T->GetActorLocation();
-		Out.Add(FString::Printf(TEXT("%s|%s|%.0f|%.0f|%.0f|%d|%d|%d|%d|%d"), *T->Title, *Pt[2], L.X, L.Y, L.Z, T->IsSleeping() ? 1 : 0, T->IsInBed() ? 1 : 0,
-			T->IsWildIndoors() ? 1 : 0, T->IsActorTickEnabled() ? 0 : 1, T->HasBed15() ? 1 : 0));
+		Out.Add(FString::Printf(TEXT("%s|%s|%.0f|%.0f|%.0f|%d|%d|%d|%d|%d|%s|%s"), *T->Title, *Pt[2], L.X, L.Y, L.Z, T->IsSleeping() ? 1 : 0, T->IsInBed() ? 1 : 0,
+			T->IsWildIndoors() ? 1 : 0, T->IsActorTickEnabled() ? 0 : 1, T->HasBed() ? 1 : 0, *Pt[3], *Pt[4]));
 	}
 	return Out;
 }
