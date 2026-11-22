@@ -1,0 +1,182 @@
+{
+ "tag": "l15p15i",
+ "plan": [
+  "stories15",
+  "stories15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "stories15",
+   "ok": true,
+   "pedlar": {
+    "prompt": "talk to a travelling pedlar",
+    "f": "gift",
+    "gold": 0,
+    "said": "A travelling pedlar:  \"Fine goods, cheap! Here, a sample, to remember me by.\""
+   },
+   "met": [
+    "a travelling pedlar"
+   ],
+   "courier_came_m": 3.6,
+   "courier": {
+    "prompt": "talk to a courier",
+    "f": "gift",
+    "gold": 12,
+    "said": "+12 gold  (from a courier) / A courier:  \"WARRIOR? You are the warrior they speak of? A letter for you, from a travelling pedlar: \"Word travels. They say WARRIOR clears the wilds of beasts. Keep safe, and take this for your trouble.\"\"",
+    "sender": "a travelling pedlar",
+    "log": [
+     "on",
+     "done"
+    ]
+   },
+   "chased_pursuers": 3,
+   "chased": {
+    "prompt": "talk to a fleeing traveller",
+    "f": "gift",
+    "gold": 15,
+    "said": "+15 gold  (from a fleeing traveller) / A fleeing traveller:  \"You saved my life. Take this, it's all I have.\"",
+    "alive": true,
+    "log": [
+     "on",
+     "saved",
+     "done"
+    ]
+   },
+   "cart": {
+    "prompt": "talk to a stranded carter",
+    "f": "gift",
+    "gold": 10,
+    "said": "+10 gold  (from a stranded carter) / A stranded carter:  \"Bless you! Here, for your trouble.\"",
+    "mend": {
+     "prompt": "help lift the cart",
+     "f": "mend"
+    },
+    "log": [
+     "on",
+     "mended",
+     "done"
+    ]
+   },
+   "rival_place": "Abandoned wagon",
+   "rival_won": [
+    "on",
+    "won"
+   ],
+   "rival_lost": [
+    "on",
+    "lost"
+   ],
+   "rival_took_s": 34.5,
+   "after_rival": {
+    "prompt": "talk to Varka the Swift",
+    "piles": 0
+   },
+   "rival": {
+    "met": 2,
+    "won": 1,
+    "lost": 1
+   },
+   "engaged": [
+    "roam_story_cart",
+    "roam_story_chased",
+    "roam_story_courier",
+    "roam_story_rival"
+   ],
+   "put_back": true
+  },
+  {
+   "step": "stories15",
+   "ok": true,
+   "pedlar": {
+    "prompt": "talk to a travelling pedlar",
+    "f": "gift",
+    "gold": 0,
+    "said": ""
+   },
+   "met": [
+    "a travelling pedlar"
+   ],
+   "courier_came_m": 3.7,
+   "courier": {
+    "prompt": "talk to a courier",
+    "f": "gift",
+    "gold": 12,
+    "said": "A courier:  \"WARRIOR? You are the warrior they speak of? A letter for you, from a travelling pedlar: \"I heard what you did on the road. If you pass my way again, the kettle is on. Here is a little something.\"\"",
+    "sender": "a travelling pedlar",
+    "log": [
+     "on",
+     "done"
+    ]
+   },
+   "chased_pursuers": 3,
+   "chased": {
+    "prompt": "talk to a fleeing traveller",
+    "f": "gift",
+    "gold": 15,
+    "said": "",
+    "alive": true,
+    "log": [
+     "on",
+     "saved",
+     "done"
+    ]
+   },
+   "cart": {
+    "prompt": "talk to a stranded carter",
+    "f": "gift",
+    "gold": 10,
+    "said": "",
+    "mend": {
+     "prompt": "help lift the cart",
+     "f": "mend"
+    },
+    "log": [
+     "on",
+     "mended",
+     "done"
+    ]
+   },
+   "rival_place": "A body clutching a map",
+   "rival_won": [
+    "on",
+    "won"
+   ],
+   "rival_lost": [
+    "on",
+    "lost"
+   ],
+   "rival_took_s": 26.3,
+   "after_rival": {
+    "prompt": "talk to Varka the Swift",
+    "piles": 0
+   },
+   "rival": {
+    "met": 2,
+    "won": 1,
+    "lost": 1
+   },
+   "engaged": [
+    "roam_story_cart",
+    "roam_story_chased",
+    "roam_story_courier",
+    "roam_story_rival"
+   ],
+   "put_back": true
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_l15p15i_stories15_courier.png",
+  "wd_l15p15i_stories15_chased.png",
+  "wd_l15p15i_stories15_cart.png",
+  "wd_l15p15i_stories15_rival.png",
+  "wd_l15p15i_stories15_courier.png",
+  "wd_l15p15i_stories15_chased.png",
+  "wd_l15p15i_stories15_cart.png",
+  "wd_l15p15i_stories15_rival.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

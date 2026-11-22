@@ -29,10 +29,11 @@ void ARDDungeonGenerator::RecordMet15(const FString& Who)
 	while (GI->MetPeople15.Num() > 8) GI->MetPeople15.RemoveAt(0);
 }
 
-ARDTownsfolk* ARDDungeonGenerator::SpawnStoryFolk15(const FString& Def, const FVector2D& AtCm, float Yaw, uint32 Seed, const FString& Title, const TArray<FString>& Lines)
+ARDTownsfolk* ARDDungeonGenerator::SpawnWildRoamFolk15(const FString& Def, const FVector2D& AtCm, float Yaw, uint32 Seed, const FString& Title, const TArray<FString>& Lines, bool bFallback)
 {
+	// (a person of the director's on the wild ground: its def by name (else, when bFallback, a townsman), among the roaming people)
 	int32 D = Townsfolk.IndexOfByPredicate([&](const FRDTownsfolkDef& X) { return X.Mesh && X.Name.ToString() == Def; });
-	if (D < 0) D = Townsfolk.IndexOfByPredicate([&](const FRDTownsfolkDef& X) { return X.Mesh && X.Name.ToString().StartsWith(TEXT("Townsman")); });
+	if (D < 0 && bFallback) D = Townsfolk.IndexOfByPredicate([&](const FRDTownsfolkDef& X) { return X.Mesh && X.Name.ToString().StartsWith(TEXT("Townsman")); });
 	if (D < 0 || !GetWorld()) return nullptr;
 	const FVector Q(AtCm.X, AtCm.Y, WildGroundZ(FVector(AtCm.X, AtCm.Y, 0.f)) + 92.f);
 	FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -77,10 +78,12 @@ int32 ARDDungeonGenerator::MakeStory15(const FRDWildPoiKind& K, const FVector2D&
 		// (a letter from someone she has met, to her by her name)
 		const FString Sender = GI->MetPeople15.Num() > 0 ? GI->MetPeople15.Last() : StoryDefaultSender15;
 		const FString Letter = StoryLetters15.Num() > 0 ? StoryLetters15[Rs.RandRange(0, StoryLetters15.Num() - 1)] : FString(TEXT("Safe travels."));
-		const FString Hero = CurrentHero.ToString();
+		// (her hero's shown name: the def's name is a key ("MartialArtist") (PR #107's review))
+		const FRDHeroDef* Hd = FindHero(CurrentHero);
+		const FString Hero = Hd && !Hd->Title.IsEmpty() ? Hd->Title : CurrentHero.ToString();
 		TArray<FString> Say;
 		Say.Add(FString::Printf(TEXT("%s? You are the %s they speak of? A letter for you, from %s: \"%s\""), *Hero, *Hero.ToLower(), *Sender, *Letter.Replace(TEXT("{hero}"), *Hero)));
-		ARDTownsfolk* T = SpawnStoryFolk15(K.Folk, At, Yaw, Rs.GetUnsignedInt(), K.Title, Say);
+		ARDTownsfolk* T = SpawnWildRoamFolk15(K.Folk, At, Yaw, Rs.GetUnsignedInt(), K.Title, Say, true);
 		if (!T) return 0;
 		Gift(T, true);
 		RDStoryWalk15(T, H + (FVector(At.X, At.Y, H.Z) - H).GetSafeNormal2D() * 250.f);          // (up to her, 2.5 m short)
@@ -88,7 +91,7 @@ int32 ARDDungeonGenerator::MakeStory15(const FRDWildPoiKind& K, const FVector2D&
 	}
 	else if (S.Kind == TEXT("chased"))
 	{
-		ARDTownsfolk* T = SpawnStoryFolk15(K.Folk, At, Yaw, Rs.GetUnsignedInt(), K.Title, Lines);
+		ARDTownsfolk* T = SpawnWildRoamFolk15(K.Folk, At, Yaw, Rs.GetUnsignedInt(), K.Title, Lines, true);
 		if (!T) return 0;
 		Gift(T, false);          // (nothing to give until it is safe)
 		RDStoryWalk15(T, H);
@@ -100,7 +103,7 @@ int32 ARDDungeonGenerator::MakeStory15(const FRDWildPoiKind& K, const FVector2D&
 		{
 			const FRDMonsterDef& Def = Monsters[Kinds[Rs.RandRange(0, Kinds.Num() - 1)]];
 			const FVector2D Back = (FVector2D(At) - FVector2D(H)).GetSafeNormal();
-			for (int32 I = 0; I < FMath::Max(StoryPursuers15, 1); ++I)
+			for (int32 I = 0; I < DifficultyCount(FMath::Max(StoryPursuers15, 1)); ++I)          // (hell's quarter more, as every spawner (PR #107's review))
 			{
 				const FVector2D Q = FVector2D(At) + Back.GetRotated(Rs.FRandRange(-30.f, 30.f)) * Rs.FRandRange(1500.f, 2200.f);
 				if (ARDMonster* M = SpawnWildMonsterAt(Def, FVector(Q.X, Q.Y, WildGroundZ(FVector(Q.X, Q.Y, 0.f))), Yaw, (int32)Rs.GetUnsignedInt(), Wild->TierAt(Q.X / 100.0, Q.Y / 100.0), 1.f, FString()))
@@ -123,11 +126,16 @@ int32 ARDDungeonGenerator::MakeStory15(const FRDWildPoiKind& K, const FVector2D&
 		C->RegisterComponent();
 		const float* Ks = WildPieceScale.Find(FName(*Ms[0]->GetName()));
 		S.CartYaw = Yaw + 90.f;
-		C->SetWorldTransform(FTransform(FRotator(0.f, S.CartYaw, StoryCartTilt15), S.At + FVector(0, 0, -10.f), FVector(Ks ? *Ks : 1.f)));
+		// (by its box, not its origin (PR #107's review): its middle on the point, its lowest corner 10 cm into the ground, tipped)
+		C->SetWorldTransform(FTransform(FRotator(0.f, S.CartYaw, StoryCartTilt15), S.At, FVector(Ks ? *Ks : 1.f)));
+		{
+			const FBox B = C->Bounds.GetBox();
+			C->AddWorldOffset(FVector(S.At.X - B.GetCenter().X, S.At.Y - B.GetCenter().Y, S.At.Z - 10.f - B.Min.Z));
+		}
 		S.Cart = C;
 		const FVector2D Toward = (FVector2D(H) - FVector2D(At)).GetSafeNormal();
 		const FVector2D Side = FVector2D(At) + FVector2D(-Toward.Y, Toward.X) * 320.f;          // (beside it, not between her and it: there F talked to him, not to the cart)
-		ARDTownsfolk* T = SpawnStoryFolk15(K.Folk, Side, Yaw, Rs.GetUnsignedInt(), K.Title, Lines);
+		ARDTownsfolk* T = SpawnWildRoamFolk15(K.Folk, Side, Yaw, Rs.GetUnsignedInt(), K.Title, Lines, true);
 		if (!T) { C->DestroyComponent(); return 0; }
 		Gift(T, false);          // (it gives once the cart is up)
 		S.Person = T;
@@ -136,17 +144,19 @@ int32 ARDDungeonGenerator::MakeStory15(const FRDWildPoiKind& K, const FVector2D&
 	{
 		// (a place laid ahead of her (the kind's Place), the rival from its far side, as far again as she is)
 		FRDWildPoiKind Pk = K; Pk.Folk.Reset(); Pk.Animals.Reset();
-		const int32 Before = WildPoiLive.Num();
 		if (MakeWildEncounter11(Pk, At, Rs) == 0) return 0;
-		const FRDWildPoiLive* L = nullptr;
-		for (int32 I = WildPoiLive.Num() - 1; I >= 0 && I >= Before - 1; --I) if (FVector::Dist2D(WildPoiLive[I].At, S.At) < 2000.f) { L = &WildPoiLive[I]; break; }
+		// (the place just laid, by its id (the laid counter MakeWildEncounter11 took): a search by index missed it when old entries were
+		// taken out first (PR #107's review))
+		const int32 Nth = GI->Counters.FindRef(TEXT("wild:laid"));
+		const int32 NewId = (1 << 29) + (1 << 25) + (Nth & 0xFFFFF);
+		const FRDWildPoiLive* L = WildPoiLive.FindByPredicate([NewId](const FRDWildPoiLive& X) { return X.Id == NewId; });
 		if (!L) return 0;
 		S.PoiId = L->Id; S.At = L->At; S.Detail = WildPoiKinds.IsValidIndex(L->Kind) ? WildPoiKinds[L->Kind].Title : FString(TEXT("the place"));
 		const FVector2D Away = (FVector2D(S.At) - FVector2D(H)).GetSafeNormal();
 		const FVector2D From = FVector2D(S.At) + Away * FMath::Max(FVector2D::Distance(FVector2D(S.At), FVector2D(H)) * StoryRivalLead15, 1500.f);
 		const int32 Met = GI->Counters.FindRef(TEXT("rival15:met"));
 		TArray<FString> Say; Say.Add(Met == 0 ? StoryRivalHello15 : StoryRivalAgain15);
-		ARDTownsfolk* T = SpawnStoryFolk15(StoryRivalDef15, From, Yaw + 180.f, Rs.GetUnsignedInt(), StoryRivalName15, Say);
+		ARDTownsfolk* T = SpawnWildRoamFolk15(StoryRivalDef15, From, Yaw + 180.f, Rs.GetUnsignedInt(), StoryRivalName15, Say, true);
 		if (!T) return 0;
 		T->bWildGiven = true;          // (a rival gives nothing)
 		RDStoryWalk15(T, S.At);
@@ -191,9 +201,17 @@ void ARDDungeonGenerator::TickStories15(float Dt, const FVector& Her)
 			}
 			else if (S.Kind == TEXT("chased"))
 			{
-				int32 Alive = 0;
-				for (const TWeakObjectPtr<ARDMonster>& M : S.Pursuers) if (M.IsValid() && !M->IsDead()) ++Alive;
-				if (!T) End(TEXT("gone"), FString());
+				// (each pursuer seen dead is killed; one gone unkilled (taken away for distance) is no saving (PR #107's review))
+				int32 Alive = 0, Lost = 0;
+				S.PursuerKilled.SetNum(S.Pursuers.Num());
+				for (int32 P = 0; P < S.Pursuers.Num(); ++P)
+				{
+					const ARDMonster* M = S.Pursuers[P].Get();
+					if (M && M->IsDead()) S.PursuerKilled[P] = true;
+					else if (M) ++Alive;
+					else if (!S.PursuerKilled[P]) ++Lost;
+				}
+				if (!T || Lost > 0) End(TEXT("gone"), FString());
 				else if (T->IsWildDead14()) End(TEXT("failed"), FString::Printf(TEXT("%s did not get away"), *RDStoryTitle15(S.Title)));
 				else if (Alive == 0)
 				{
@@ -202,6 +220,11 @@ void ARDDungeonGenerator::TickStories15(float Dt, const FVector& Her)
 					if (T->OwnLines.Num() > 1) T->OwnLines.RemoveAt(0);          // (its first line was its cry for help)
 					End(TEXT("saved"), FString::Printf(TEXT("%s is safe: speak with them"), *RDStoryTitle15(S.Title)));
 				}
+			}
+			else if (S.Kind == TEXT("cart"))
+			{
+				if (!T) End(TEXT("gone"), FString());          // (the carter taken away, or killed: PR #107's review)
+				else if (T->IsWildDead14()) End(TEXT("failed"), FString());
 			}
 			else if (S.Kind == TEXT("rival"))
 			{
@@ -223,7 +246,10 @@ void ARDDungeonGenerator::TickStories15(float Dt, const FVector& Her)
 		}
 		else if (S.State == TEXT("saved") || S.State == TEXT("mended"))
 		{
-			if (T && T->bWildGiven) { RecordMet15(T->Title); End(TEXT("done"), FString()); }
+			// (GiveWildGift has recorded them as met)
+			if (!T) End(TEXT("gone"), FString());
+			else if (T->IsWildDead14()) End(TEXT("failed"), FString());
+			else if (T->bWildGiven) End(TEXT("done"), FString());
 		}
 		// (gone when ended and she is 150 m off, or begun and she 400 m off)
 		const bool bEnded = S.State != TEXT("on") && S.State != TEXT("saved") && S.State != TEXT("mended");
@@ -243,7 +269,7 @@ bool ARDDungeonGenerator::StoryCartFirst15(const FVector& From, float& Best, int
 	// (the rewards' nearest, its eighth kind: a cart off its wheel (2.2 m of its middle))
 	bool bAny = false;
 	for (const FStory15& S : Stories15)
-		if (S.Kind == TEXT("cart") && S.State == TEXT("on") && S.Cart.IsValid())
+		if (S.Kind == TEXT("cart") && S.State == TEXT("on") && S.Cart.IsValid() && S.Person.IsValid() && !S.Person->IsWildDead14())
 		{
 			const float D = FVector::Dist2D(S.At, From) - 150.f;          // (from its side, not its middle: it is 3 m long)
 			if (D < Best && FMath::Abs(S.At.Z - From.Z) < 300.f) { Best = FMath::Max(D, 0.f); Kind = 8; Id = S.Id; bAny = true; }
@@ -285,6 +311,26 @@ TArray<FString> ARDDungeonGenerator::GetStories15() const
 		Out.Add(TEXT("met|") + FString::Join(GI->MetPeople15, TEXT("~")));
 	}
 	return Out;
+}
+
+void ARDDungeonGenerator::ForgetStories15()
+{
+	// (tests: the stories going ended and taken away, their log, the people met, the rival's counts and the places it emptied)
+	URDGameInstance* GI = URDGameInstance::Of(this);
+	for (FStory15& S : Stories15)
+	{
+		if (ARDTownsfolk* T = S.Person.Get()) T->Destroy();
+		if (UStaticMeshComponent* C = S.Cart.Get()) C->DestroyComponent();
+		for (const TWeakObjectPtr<ARDMonster>& M : S.Pursuers) if (ARDMonster* Mm = M.Get()) Mm->Destroy();
+	}
+	Stories15.Reset(); StoryLog15.Reset();
+	if (GI)
+	{
+		GI->MetPeople15.Reset();
+		GI->Counters.Remove(TEXT("rival15:met")); GI->Counters.Remove(TEXT("rival15:won")); GI->Counters.Remove(TEXT("rival15:lost"));
+		for (const int64 Key : StoryUsedKeys15) GI->WildKilled.Remove(Key);
+	}
+	StoryUsedKeys15.Reset();
 }
 
 ARDMonster* ARDDungeonGenerator::GetStoryPursuer15(int32 Id, int32 N) const

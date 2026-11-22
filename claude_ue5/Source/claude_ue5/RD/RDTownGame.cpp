@@ -1354,7 +1354,7 @@ void ARDDungeonGenerator::TickTownTour(float RealDt)
 
 // ================================================================================================ F in the town
 /** a title that says its own article ("a townswoman on the road to ...") is said as it is; another takes "the" */
-static FString RDTTheTitle(const FString& T, bool bCap) { const bool bArt = T.StartsWith(TEXT("a ")) || T.StartsWith(TEXT("an ")); return bArt ? (bCap ? T.Left(1).ToUpper() + T.Mid(1) : T) : (bCap ? TEXT("The ") : TEXT("the ")) + T; }
+static FString RDTTheTitle(const FString& T, bool bCap) { const bool bArt = T.StartsWith(TEXT("a ")) || T.StartsWith(TEXT("an ")) || (T.Len() > 0 && FChar::IsUpper(T[0]));          /* (a name takes no article: "the Varka the Swift", PR #107's run) */ return bArt ? (bCap ? T.Left(1).ToUpper() + T.Mid(1) : T) : (bCap ? TEXT("The ") : TEXT("the ")) + T; }
 /** a role F wakes to serve at night: a quest's giver or a keeper of a service */
 static bool RDTServes(ERDTownRole R)
 {

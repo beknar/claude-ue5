@@ -39,7 +39,11 @@ namespace
 void ARDDungeonGenerator::MarkWildPoiUsed15(int32 Id)
 {
 	// (the list of 2026-11-20's fifteenth phase: a place her rival reached first, used for good as if she had)
-	if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->WildKilled.AddUnique(RDPoiUsedKey(Id));
+	const int64 Key = RDPoiUsedKey(Id);
+	if (URDGameInstance* GI = URDGameInstance::Of(this); GI && !GI->WildKilled.Contains(Key)) { GI->WildKilled.Add(Key); StoryUsedKeys15.Add(Key); }
+	// (what it held, already lying there as a pile, goes with it (PR #107's review: she could take it after the rival had))
+	for (ARDLootPile* Lp : LootPiles) if (IsValid(Lp) && Lp->WildKey == Key) Lp->Destroy();
+	LootPiles.RemoveAll([](const TObjectPtr<ARDLootPile>& Lp) { return !IsValid(Lp); });
 }
 
 bool ARDDungeonGenerator::IsWildPoiUsed(int32 Id) const

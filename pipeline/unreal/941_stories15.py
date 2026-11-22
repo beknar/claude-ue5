@@ -27,6 +27,8 @@ def run():
         d.set_editor_property("gift_gold", int(k["gold"])); d.set_editor_property("place", k.get("place", "")); d.set_editor_property("story15", k["story"])
         kinds.append(d)
     g.set_editor_property("wild_poi_kinds", kinds)
+    pieces = {str(k) for k in g.get_editor_property("wild_pieces").keys()}
+    assert any(n.startswith("cart") for n in pieces), "no cart piece in the places' table: the cart story would never come"
     r = J["rival"]
     assert r["def"] in defs, ("no townsfolk body", r["def"])
     for p, v in (("story_letters15", J["letters"]), ("story_default_sender15", J["default_sender"]), ("story_pursuers15", int(J["pursuers"])),

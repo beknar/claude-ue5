@@ -93,22 +93,13 @@ int32 ARDDungeonGenerator::MakeWildEncounter11(const FRDWildPoiKind& K, const FV
 	// ---- a person on the way, with their line and their gift
 	if (!K.Folk.IsEmpty())
 	{
-		const int32 D = Townsfolk.IndexOfByPredicate([&](const FRDTownsfolkDef& X) { return X.Mesh && X.Name.ToString() == K.Folk; });
-		if (D >= 0)
+		const float Yaw = Rs.FRandRange(0.f, 360.f);
+		TArray<FString> Lines; K.Text.ParseIntoArray(Lines, TEXT("|"), true);
+		const uint32 Seed = Rs.GetUnsignedInt();
+		if (ARDTownsfolk* T = SpawnWildRoamFolk15(K.Folk, At, Yaw, Seed, K.Title, Lines, false))          // (one spawn for the director's people, the stories' too)
 		{
-			const float Yaw = Rs.FRandRange(0.f, 360.f);
-			const FVector Q(At.X, At.Y, WildGroundZ(FVector(At.X, At.Y, 0.f)) + 92.f);
-			FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			if (ARDTownsfolk* T = GetWorld()->SpawnActor<ARDTownsfolk>(ARDTownsfolk::StaticClass(), FTransform(FRotator(0, Yaw, 0), Q), Sp))
-			{
-				T->Init(this, nullptr, D, Q, Yaw, 0.f, Rs.GetUnsignedInt());
-				T->SetTitle(K.Title);
-				TArray<FString> Lines; K.Text.ParseIntoArray(Lines, TEXT("|"), true);
-				T->OwnLines = Lines;
-				T->WildGift = K.Gift; T->WildGiftGold = K.GiftGold;
-				WildRoamFolk.Add(T);
-				++Made;
-			}
+			T->WildGift = K.Gift; T->WildGiftGold = K.GiftGold;
+			++Made;
 		}
 	}
 	return Made;

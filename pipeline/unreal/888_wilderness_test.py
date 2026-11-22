@@ -7762,7 +7762,8 @@ def step_stories15():
     a pedlar met first (someone she has met); the courier comes up to her by name with a letter from the pedlar and its gift; one chased,
     its pursuers killed (test blows as hers), safe, its thanks and gift; a cart off its wheel lifted by F, the carter's gift; the rival
     raced twice: she there first (won), she waiting (the rival first: lost); pictures of each"""
-    g = G["gen"]; res = {}; quiet(True)
+    g = G["gen"]; res = {}; quiet(True); gold_got = [0]
+    g.forget_stories15()          # (from no story, no one met, no rival met)
     def wait_story(kind, sec=12.0):
         t0 = time.time()
         while time.time() - t0 < sec:
@@ -7782,10 +7783,11 @@ def step_stories15():
         px, py, pz = pos
         G["pawn"].set_actor_location(V(px + 120.0, py, pz + 10.0), False, True); yield from rwait(0.6)
         pr = str(g.describe_nearest(G["pawn"].get_actor_location(), 300.0))
-        gold0 = g.get_gold()
+        gold0 = g.get_gold(); before = [str(m).split("|", 1)[-1] for m in list(cb().get_message_log())]
         f = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.6)
+        gold_got[0] += g.get_gold() - gold0
         # (what was said, from the log of messages (the gift's gold line comes after the words and replaces them on the HUD))
-        return {"prompt": pr, "f": f, "gold": g.get_gold() - gold0, "said": " / ".join(str(m).split("|", 1)[-1] for m in list(cb().get_message_log()) if "letter" in str(m) or "safe" in str(m) or "wheel" in str(m) or "Bless" in str(m) or "saved my life" in str(m))[:500]}
+        return {"prompt": pr, "f": f, "gold": g.get_gold() - gold0, "said": " / ".join(m for m in [str(x).split("|", 1)[-1] for x in list(cb().get_message_log())] if m not in before)[:500]}          # (only what this press said: PR #107's review)
     def look_at(pos, name):
         # (from 8 m off on her side, facing it, her body hidden: from where she stood (45 to 70 m) the first pictures were grass)
         px, py, pz = pos; me = G["pawn"].get_actor_location()
@@ -7810,6 +7812,8 @@ def step_stories15():
             r = yield from speak_to(tuple([ped.get_actor_location().x, ped.get_actor_location().y, ped.get_actor_location().z]))
             res["pedlar"] = r
         res["met"] = stories15_lines(g)[3]
+        # (30 m on from the pedlar: the courier comes up to her, and the pedlar beside them would take F (the nearest does))
+        me = G["pawn"].get_actor_location(); ground_put(me.x / 100.0 + 30.0, me.y / 100.0); yield from rwait(1.0)
         # ---- the courier
         g.force_wild_encounter("roam_story_courier"); s = yield from wait_story("courier")
         if s:
@@ -7865,18 +7869,28 @@ def step_stories15():
             t0 = time.time()
             while time.time() - t0 < 120 and "lost" not in logged(s["id"]) and "won" not in logged(s["id"]): yield from rwait(1.0)
             res["rival_lost"] = logged(s["id"]); res["rival_took_s"] = round(time.time() - t0, 1)
+            # (the place the rival emptied: nothing of it left to take (PR #107's review: its pile had stayed))
+            ground_put(s["x"] / 100.0 + 1.0, s["y"] / 100.0); yield from rwait(1.5)
+            res["after_rival"] = {"prompt": str(g.describe_nearest(G["pawn"].get_actor_location(), 300.0)),
+                                  "piles": len([lp for lp in g.get_editor_property("loot_piles") if lp and math.hypot(lp.get_actor_location().x - s["x"], lp.get_actor_location().y - s["y"]) < 800.0])}
         res["rival"] = stories15_lines(g)[2]
         res["engaged"] = sorted({str(l).split("|")[2] for l in g.get_wild_encounter_lines() if str(l).split("|")[1:2] == ["met"] and "story" in str(l)})
     finally:
         try: G["pawn"].set_actor_hidden_in_game(False)
         except Exception: pass
+        # (what the step changed put back: the stories and their people, the people met, the rival's counts and places, the gifts' gold)
+        try:
+            G["gen"].forget_stories15()
+            if gold_got[0]: G["gen"].add_gold(-int(gold_got[0]), "test")
+            res["put_back"] = True
+        except Exception as e: res["put_back"] = str(e)
         quiet(False)
     c, ch, ca = res.get("courier", {}), res.get("chased", {}), res.get("cart", {})
     ok = ("a travelling pedlar" in res.get("met", [])
           and c.get("f") == "gift" and "a travelling pedlar" in c.get("said", "") and c.get("gold", 0) > 0 and "done" in c.get("log", [])
           and res.get("chased_pursuers", 0) >= 1 and ch.get("alive") and ch.get("f") == "gift" and ch.get("gold", 0) > 0 and "saved" in ch.get("log", []) and "done" in ch.get("log", [])
           and ca.get("mend", {}).get("f") == "mend" and "lift the cart" in ca.get("mend", {}).get("prompt", "") and ca.get("f") == "gift" and ca.get("gold", 0) > 0 and "done" in ca.get("log", [])
-          and "won" in res.get("rival_won", []) and "lost" in res.get("rival_lost", []) and res.get("rival", {}).get("won", 0) >= 1 and res["rival"].get("lost", 0) >= 1
+          and "won" in res.get("rival_won", []) and "lost" in res.get("rival_lost", []) and res.get("after_rival", {}).get("piles", 1) == 0 and "take" not in res.get("after_rival", {}).get("prompt", "take") and "the Varka" not in res.get("after_rival", {}).get("prompt", "") and res.get("rival", {}).get("won", 0) >= 1 and res["rival"].get("lost", 0) >= 1
           and len(res.get("engaged", [])) == 4)
     step_result("stories15", ok, **res)
 STEPS["stories15"] = step_stories15
