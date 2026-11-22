@@ -56,6 +56,7 @@ const TArray<ARDTownsfolk*>& ARDDungeonGenerator::WildPeople14() const
 		for (const TWeakObjectPtr<ARDTownsfolk>& W : WildRoamFolk) Add(W);
 		for (const FTraveller& G : WildTravellers) for (const TWeakObjectPtr<ARDTownsfolk>& W : G.Folk) Add(W);
 		for (const TWeakObjectPtr<ARDTownsfolk>& W : WildVillageFolk15) Add(W);          // (the list of 2026-11-20: the villages' households)
+		for (const TWeakObjectPtr<ARDTownsfolk>& W : WildReclaimFolk15) Add(W);          // (its fourteenth phase: the waypoints' traders, the settlers)
 	}
 	return WildPeopleCache14;
 }

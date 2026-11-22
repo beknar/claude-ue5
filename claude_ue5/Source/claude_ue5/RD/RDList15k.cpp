@@ -215,6 +215,7 @@ bool ARDDungeonGenerator::RewardFirst15(const FVector& From, int32& Kind, int32&
 	// (a buried chest is reached from 2.8 m (it is wider), but only when nothing nearer was found (PR #104's review: its slack over a nearer find))
 	for (const auto& Kv : ChestsLaid15) { const float D = FVector::Dist2D(Kv.Value.At, From); if (D < (Kind < 0 ? 280.f : Best) && FMath::Abs(Kv.Value.At.Z - From.Z) < 300.f) { Best = D; Kind = 2; Id = Kv.Key; } }
 	for (const auto& Kv : ContractSignsLaid15) { const float D = FVector::Dist2D(Kv.Value.At, From); if (D < Best && FMath::Abs(Kv.Value.At.Z - From.Z) < 250.f) { Best = D; Kind = 3; Id = Kv.Key; } }          // (the thirteenth phase: a contract's sign)
+	ReclaimFirst15(From, Best, Kind, Id);          // (the fourteenth phase: a waypoint's trader and tent, a settler)
 	if (Kind < 0) return false;
 	FVector Sa; FName Sk;
 	if (WildStationNear14(From, Sa, Sk) && FVector::Dist2D(Sa, From) < Best) return false;
@@ -222,7 +223,9 @@ bool ARDDungeonGenerator::RewardFirst15(const FVector& From, int32& Kind, int32&
 	if (const FRDWildPoiLive* P = WildPoiNear(From, 320.f); P && FVector::Dist2D(P->At, From) < Best) return false;
 	int32 Di = -1;
 	if (const ARDWildChunk* C = bWildHouseInsides ? WildDoorNear(From, 190.f, Di) : nullptr; C && C->Doors.IsValidIndex(Di) && FVector::Dist2D(C->Doors[Di].At, From) < Best) return false;
-	if (const ARDTownsfolk* T = WildFolkForF(From); T && FVector::Dist2D(T->GetActorLocation(), From) < Best) return false;
+	// (a person nearer takes F, but not a waypoint's own trader or a settler: their F is the reward's (the store, a word). Listed with the
+	// wilds' people since PR #106's review, the trader took F as a plain person and barked)
+	if (const ARDTownsfolk* T = WildFolkForF(From); T && !WildReclaimFolk15.Contains(T) && FVector::Dist2D(T->GetActorLocation(), From) < Best) return false;
 	return true;
 }
 
@@ -231,7 +234,7 @@ FString ARDDungeonGenerator::RewardDescribe15(const FVector& From) const
 	int32 K, Id;
 	if (!RewardFirst15(From, K, Id)) return FString();
 	if (K == 0) { const FRewardLaid15* R = CollectiblesLaid15.Find(Id); return R ? FString::Printf(TEXT("take the %s"), *R->Item.ToString().ToLower()) : FString(); }
-	return K == 1 ? FString(TEXT("take the old map")) : K == 3 ? FString(TEXT("read the signs")) : FString(TEXT("dig up the buried chest"));
+	return K == 1 ? FString(TEXT("take the old map")) : K == 3 ? FString(TEXT("read the signs")) : K == 4 ? FString(TEXT("trade with the travelling trader")) : K == 5 ? FString(TEXT("rest in the tent until morning")) : K == 6 ? FString(TEXT("talk to the settler")) : FString(TEXT("dig up the buried chest"));
 }
 
 FString ARDDungeonGenerator::RewardInteract15(const FVector& From)
@@ -240,6 +243,9 @@ FString ARDDungeonGenerator::RewardInteract15(const FVector& From)
 	if (!RewardFirst15(From, K, Id) || !PlayerCombat) return FString();
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	if (K == 3) return ReadContractSign15(Id);
+	if (K == 4) return OpenTownPanel(TEXT("store")) ? FString(TEXT("store")) : FString();
+	if (K == 5) return RestAtCamp15(Id);
+	if (K == 6) return TalkSettler15(Id);
 	if (K == 0)
 	{
 		FRewardLaid15 R = CollectiblesLaid15.FindAndRemoveChecked(Id); DropReward15(R);

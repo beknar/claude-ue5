@@ -7630,6 +7630,121 @@ def step_contracts15():
           and res.get("after_kill") == "done" and res.get("claim") and res.get("gold") == res.get("gold_promised") and res.get("after_claim") == "paid")
     step_result("contracts15", ok, **res)
 STEPS["contracts15"] = step_contracts15
+def reclaim15_lines(g, km):
+    camps, ruins, day = [], [], None
+    for l in g.get_reclaim15(km):
+        p = str(l).split("|")
+        if p[0] == "camp": camps.append({"id": int(p[1]), "name": p[2], "kind": p[3], "x": float(p[4]), "y": float(p[5]), "n": int(p[6]), "day": int(p[7]), "laid": p[8] == "1",
+                                         "folk": int(p[9]), "tent": (float(p[10]), float(p[11]), float(p[12])), "trader": (float(p[13]), float(p[14]), float(p[15])), "dead": int(p[16])})
+        elif p[0] == "ruin": ruins.append({"id": int(p[1]), "name": p[2], "x": float(p[3]), "y": float(p[4]), "laid": p[6] == "1", "folk": int(p[7])})
+        elif p[0] == "day": day = int(p[1])
+    return camps, ruins, day
+
+
+def step_reclaim15():
+    """idea 6 (the list of 2026-11-20's fourteenth phase): the nearest plain lair or hollow cleared by killing its monsters (test blows as
+    hers): recorded on the day; its waypoint laid (fire, tent, cart, a trader): F at the trader opens the store, F at the tent rests her to
+    morning (whole again, the day on); days skipped: the nearest ordinary ruin resettled, its settlers there and no guardians, a settler
+    talks; the big map shows the region's share reclaimed; pictures of the waypoint and the settlers; everything put back"""
+    g = G["gen"]; res = {}; quiet(True); fought = []
+    try:
+        g.wild_put_her(6000.0, -2000.0); yield from wait_ready(90); yield from wait_chunks(30, 50); yield from rwait(1.0)
+        camps, _r, day0 = reclaim15_lines(g, 6.0)
+        me = G["pawn"].get_actor_location()
+        camps = sorted([c for c in camps if c["day"] < 0], key=lambda c: math.hypot(c["x"] - me.x / 100, c["y"] - me.y / 100))
+        res["camps_6km"] = len(camps); res["day0"] = day0
+        cp = None; fought = []
+        for c in camps[:6]:
+            g.wild_put_her(c["x"] + 40.0, c["y"]); yield from wait_chunks(30, 50); ground_put(c["x"] + 40.0, c["y"]); yield from rwait(2.5)
+            fought.append(c["id"])
+            killed = 0
+            for _k in range(4):
+                ms = [m for m in g.get_monsters() if m and not m.is_dead() and not m.is_ally() and m.get_wild_key() // 16 == c["id"]]          # (its own monsters only, by their kill keys)
+                if not ms: break
+                for m in ms: m.apply_damage(1.0e7, G["pawn"]); killed += 1
+                yield from rwait(1.5)
+            # (the camp's clear is looked for once a second: waited for up to 8 s, its kills kept read with it)
+            t0 = time.time(); c2 = None
+            while time.time() - t0 < 8.0:
+                c2 = next((x for x in reclaim15_lines(g, 1.0)[0] if x["id"] == c["id"]), None)
+                if c2 and c2["day"] >= 0: break
+                yield from rwait(0.5)
+            res.setdefault("tried", []).append({"name": c["name"], "monsters": c["n"], "killed": killed, "kills_kept": c2["dead"] if c2 else None, "day": c2["day"] if c2 else None,
+                                                "left": [m.get_wild_key() for m in g.get_monsters() if m and not m.is_dead() and m.get_wild_key() // 16 == c["id"]]})
+            if c2 and c2["day"] >= 0: cp = c2; break
+        if cp is None:
+            step_result("reclaim15", False, **res); return
+        res["camp"] = {"name": cp["name"], "kind": cp["kind"], "monsters": cp["n"], "cleared_day": cp["day"]}
+        t0 = time.time()
+        while time.time() - t0 < 10:
+            cp = next(x for x in reclaim15_lines(g, 1.0)[0] if x["id"] == cp["id"])
+            if cp["laid"]: break
+            yield
+        res["waypoint"] = {"laid": cp["laid"], "trader": cp["folk"]}
+        # (its picture from 15 m)
+        ground_put(cp["x"] + 15.0, cp["y"] + 4.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=math.degrees(math.atan2(-4.0, -15.0)))); G["pawn"].set_actor_hidden_in_game(True); yield from rwait(1.5)
+        shot("reclaim15_waypoint", "1280x720"); yield from rwait(1.0); G["pawn"].set_actor_hidden_in_game(False)
+        # (the trader: F opens the store)
+        tx, ty, tz = cp["trader"]
+        G["pawn"].set_actor_location(V(tx + 120.0, ty, tz + 20.0), False, True); yield from rwait(0.8)
+        res["trader_prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 300.0))
+        res["trader_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.5)
+        res["store_lines"] = len([p for p in panel() if p[0] == "buy"]) if g.is_town_panel_open() else 0
+        g.close_town_panel(); yield from rwait(0.3)
+        # (the tent: rest until morning, whole again)
+        cb().set_health(cb().get_max_health() * 0.5); hp0 = cb().get_health(); d0 = g.get_town_day(); h0 = str(g.get_town_clock())
+        ex_, ey_, ez_ = cp["tent"]
+        G["pawn"].set_actor_location(V(ex_ + 60.0, ey_, ez_ + 100.0), False, True); yield from rwait(0.8)
+        res["tent_prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 300.0))
+        res["tent_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.5)
+        res["rest"] = {"hp": [round(hp0, 1), round(cb().get_health(), 1), round(cb().get_max_health(), 1)], "day": [d0, g.get_town_day()], "clock": [h0, str(g.get_town_clock())]}
+        # (days skipped: a ruin resettled)
+        g.skip_days15(4); yield from rwait(2.5)
+        _c, ruins, day1 = reclaim15_lines(g, 1.0); res["day_after_skip"] = day1
+        res["resettled"] = [r["name"] for r in ruins]
+        if ruins:
+            r = ruins[0]
+            res["ruin_from_camp_km"] = round(math.hypot(r["x"] - cp["x"], r["y"] - cp["y"]) / 1000.0, 2)
+            g.wild_put_her(r["x"] + 25.0, r["y"]); yield from wait_chunks(30, 50); ground_put(r["x"] + 25.0, r["y"]); yield from rwait(3.0)
+            r2 = next((x for x in reclaim15_lines(g, 1.0)[1] if x["id"] == r["id"]), r)
+            res["ruin"] = {"name": r["name"], "laid": r2["laid"], "settlers": r2["folk"]}
+            res["ruin_monsters"] = len([m for m in g.get_monsters() if m and not m.is_dead() and not m.is_ally() and math.hypot(m.get_actor_location().x / 100.0 - r["x"], m.get_actor_location().y / 100.0 - r["y"]) < 40.0])
+            ground_put(r["x"] + 12.0, r["y"]); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=180.0)); G["pawn"].set_actor_hidden_in_game(True); yield from rwait(1.5)
+            shot("reclaim15_settlers", "1280x720"); yield from rwait(1.0); G["pawn"].set_actor_hidden_in_game(False)
+            # (a settler: F, a word)
+            for a in range(0, 360, 45):
+                ground_put(r["x"] + 1.6 * math.cos(math.radians(a)), r["y"] + 1.6 * math.sin(math.radians(a))); yield from rwait(0.3)
+                pr = str(g.describe_nearest(G["pawn"].get_actor_location(), 300.0))
+                if "settler" in pr:
+                    res["settler_prompt"] = pr; res["settler_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.4)
+                    res["settler_said"] = str(cb().get_editor_property("message"))[:120]
+                    # (a picture from where she spoke, 5 m back, at the fire: the settlers can stand inside the ruin's broken walls, hidden from outside)
+                    bx, by = r["x"] + 5.0 * math.cos(math.radians(a)), r["y"] + 5.0 * math.sin(math.radians(a))
+                    ground_put(bx, by); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=a + 180.0)); G["pawn"].set_actor_hidden_in_game(True); yield from rwait(1.5)
+                    shot("reclaim15_settlers_near", "1280x720"); yield from rwait(1.0); G["pawn"].set_actor_hidden_in_game(False)
+                    break
+        # (the big map: the region's share reclaimed)
+        g.wild_put_her(cp["x"] + 40.0, cp["y"]); yield from wait_chunks(30, 50); yield from rwait(1.0)
+        g.set_map_open(True); yield from rwait(1.0); t0 = time.time()
+        while time.time() - t0 < 20 and map_state()["asked"] > 0: yield
+        yield from rwait(1.0)
+        res["shares"] = [str(s_) for s_ in G["pc"].get_hud().get_reclaim_shares_drawn15()]
+        shot("reclaim15_map", "1600x900"); yield from rwait(1.5); g.set_map_open(False)
+    finally:
+        try: G["pawn"].set_actor_hidden_in_game(False); G["gen"].set_map_open(False); G["gen"].close_town_panel()
+        except Exception: pass
+        try: G["gen"].forget_reclaim15(fought if "fought" in dir() else []); res["put_back"] = True
+        except Exception as e: res["put_back"] = str(e)
+        quiet(False)
+    rs = res.get("rest", {})
+    ok = (res.get("camp") and res["waypoint"]["laid"] and res["waypoint"]["trader"] == 1
+          and "trader" in res.get("trader_prompt", "") and res.get("trader_f") == "store" and res.get("store_lines", 0) > 0
+          and "rest" in res.get("tent_prompt", "") and res.get("tent_f") == "rest" and rs.get("hp", [0, 0, 1])[1] == rs.get("hp", [0, 0, 1])[2] and rs.get("clock", ["", ""])[1].startswith("07")
+          and rs.get("day", [0, 0])[1] >= rs.get("day", [0, 0])[0]
+          and res.get("resettled") and res.get("ruin", {}).get("laid") and res["ruin"]["settlers"] >= 2 and res.get("ruin_monsters") == 0 and res.get("settler_f") == "talk"
+          and any("camps reclaimed" in s_ for s_ in res.get("shares", [])))
+    step_result("reclaim15", ok, **res)
+STEPS["reclaim15"] = step_reclaim15
 SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
 def saves_snapshot():
     """the save folder's files and their bytes: put back at the end, the tests' own new saves deleted (PR #61's review)"""
