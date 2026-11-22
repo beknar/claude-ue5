@@ -1013,6 +1013,8 @@ public:
 	static void KeepWindowLimits();
 	/** -RDMarkFile=<path>: where a packaged game's test reads where the game got ("castle|<map>|<hero>", "town|<name>|<hero>") */
 	void WriteTestMark(const FString& Kind, const FString& Where) const;
+	/** the list of 2026-11-20's eighteenth phase: the packaged game's runs of the wilds (-RDTownGo=horse, village, cavetower) */
+	void TickGo15(APawn* P);
 
 	// ---- mistward_castle, the list of 2026-10-31b (docs/improvements5.txt; RDMistward5.cpp, pipeline/unreal/879): each a
 	// switch, off on the other levels

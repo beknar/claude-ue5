@@ -137,6 +137,12 @@ public static class RDWin {
     @{ name = "heaven_fortress"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:heaven", "-RDAllKeys", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "heaven_fortress" },
     # (2026-11-21: the caves under the landmark towers (935): down into the cave level at tier 12 from where she stands)
     @{ name = "caves"; args = @("-RDStartHero=Warrior", "-RDTownGo=cave:12", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "caves" },
+# (2026-11-22, the list of 2026-11-20's eighteenth phase: the wilds' runs (RD/RDList15q.cpp): her horse called, mounted and ridden 15 s
+# 3 km out ("horse|<metres>|<still mounted>"); the nearest village reached by the map's travel, its households standing ("village|<name>|
+# <people>"); the nearest broken tower, into its cave by its mouth as F takes her (the caves level's own mark))
+@{ name = "horse"; args = @("-RDStartHero=Warrior", "-RDTownGo=horse", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "horse|*|1|Warrior*" },
+@{ name = "village"; args = @("-RDStartHero=Warrior", "-RDTownGo=village", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "village|*|*|Warrior*" },
+@{ name = "cavetower"; args = @("-RDStartHero=Warrior", "-RDTownGo=cavetower", "-RDMarkFile=$mark"); secs = 180; castle = $true; map = "caves" },
               @{ name = "ashenreach"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:ashenreach", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Ashenreach|Warrior*" },
               @{ name = "graymourne"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:graymourne", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Graymourne|Warrior*" },
               # (2026-11-10: the last two cities by fast travel too, Kethrys Spire and Heaven: their dungeons were run, the cities not)
