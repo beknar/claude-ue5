@@ -1,0 +1,26 @@
+{
+  "_": "story encounters (the list of 2026-11-20's fifteenth phase, idea 8; 941_stories15.py): the encounter director's roaming kinds that play a story (C++ RD/RDList15n.cpp). kinds: name, title (who they are), story (courier, chased, cart, rival), weight against the director's other kinds, folk (a townsfolk def's name: the person), text (their lines split by |: the chased's and the carter's first is their plea, the rest after), gift (Item|min|max|chance joined by ;) and gold, place (the rival's: the points of interest one is laid from). letters: a courier's letter ({hero} her hero). rival: her rival's name, body and lines.",
+  "kinds": [
+    {"name": "roam_story_courier", "title": "a courier", "story": "courier", "weight": 0.2, "folk": "Militia1", "text": "", "gift": "Small Healing Potion|1|1|1;Travel Cake|1|2|0.6", "gold": 12},
+    {"name": "roam_story_chased", "title": "a fleeing traveller", "story": "chased", "weight": 0.2, "folk": "Refugee2",
+     "text": "Help! They're right behind me!|You saved my life. Take this, it's all I have.|I'll not travel this road alone again.", "gift": "Small Healing Potion|1|2|1;Hardtack|1|2|0.7", "gold": 15},
+    {"name": "roam_story_cart", "title": "a stranded carter", "story": "cart", "weight": 0.2, "folk": "Townsman2",
+     "text": "The wheel's off and I can't lift her alone. Lend a hand?|Bless you! Here, for your trouble.|She'll hold to the next town, I reckon.", "gift": "Jerky|1|3|1;Iron Ingot|1|1|0.4", "gold": 10},
+    {"name": "roam_story_rival", "title": "a rival", "story": "rival", "weight": 0.15, "folk": "", "text": "", "gift": "", "gold": 0,
+     "place": "abandoned_camp,lost_body,hidden_cache,bandit_cache,broken_wagon,frozen_corpse"}
+  ],
+  "letters": [
+    "I heard what you did on the road. If you pass my way again, the kettle is on. Here is a little something.",
+    "Word travels. They say {hero} clears the wilds of beasts. Keep safe, and take this for your trouble.",
+    "You helped me once and I have not forgotten. This should keep you on your feet."
+  ],
+  "default_sender": "the elder of Brokenspire",
+  "pursuers": 3,
+  "cart_tilt": 14,
+  "rival": {"name": "Varka the Swift", "def": "Militia2",
+            "hello": "Another treasure-seeker? Then we race. Whatever lies ahead is mine.",
+            "again": "You again! Race you to it.",
+            "won": "Ha! Too slow. Better luck next time.",
+            "lost": "Curse your legs! Next time, it's mine.",
+            "lead": 1.0, "reach_m": 8}
+}

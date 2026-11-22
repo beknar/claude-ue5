@@ -1118,6 +1118,8 @@ struct FRDWildPoiKind
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Folk;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Gift;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 GiftGold = 0;
+	/** the list of 2026-11-20's fifteenth phase (RDList15n.cpp): a story the director plays out ("courier", "chased", "cart", "rival") */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Story15;
 };
 
 /** the list of 2026-11-08b's sixth phase: how a secondary ability is used */

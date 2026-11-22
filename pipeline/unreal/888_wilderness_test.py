@@ -7745,6 +7745,155 @@ def step_reclaim15():
           and any("camps reclaimed" in s_ for s_ in res.get("shares", [])))
     step_result("reclaim15", ok, **res)
 STEPS["reclaim15"] = step_reclaim15
+def stories15_lines(g):
+    st, log, rival, met = [], [], None, []
+    for l in g.get_stories15():
+        p = str(l).split("|")
+        if p[0] == "story": st.append({"kind": p[1], "id": int(p[2]), "state": p[3], "x": float(p[4]), "y": float(p[5]), "p": (float(p[6]), float(p[7]), float(p[8])),
+                                       "alive": p[9] == "1", "given": p[10] == "1", "pursuers": int(p[11]), "detail": p[12]})
+        elif p[0] == "log": log.append({"kind": p[1], "id": int(p[2]), "state": p[3], "detail": p[4] if len(p) > 4 else ""})
+        elif p[0] == "rival": rival = {"met": int(p[1]), "won": int(p[2]), "lost": int(p[3])}
+        elif p[0] == "met": met = [x for x in p[1].split("~") if x]
+    return st, log, rival, met
+
+
+def step_stories15():
+    """idea 8 (the list of 2026-11-20's fifteenth phase): each story sent by the director's hook (ForceWildEncounter) and played to its end:
+    a pedlar met first (someone she has met); the courier comes up to her by name with a letter from the pedlar and its gift; one chased,
+    its pursuers killed (test blows as hers), safe, its thanks and gift; a cart off its wheel lifted by F, the carter's gift; the rival
+    raced twice: she there first (won), she waiting (the rival first: lost); pictures of each"""
+    g = G["gen"]; res = {}; quiet(True); gold_got = [0]
+    g.forget_stories15()          # (from no story, no one met, no rival met)
+    def wait_story(kind, sec=12.0):
+        t0 = time.time()
+        while time.time() - t0 < sec:
+            st, _l, _r, _m = stories15_lines(g)
+            s_ = [x for x in st if x["kind"] == kind and x["state"] in ("on",)]
+            if s_: return s_[-1]
+            yield
+        return None
+    def story(sid):
+        return next((x for x in stories15_lines(g)[0] if x["id"] == sid), None)
+    def logged(sid):
+        return [x["state"] for x in stories15_lines(g)[1] if x["id"] == sid]
+    def speak_to(pos, sid=None):
+        if sid is not None:
+            s_ = story(sid)
+            if s_: pos = s_["p"]
+        px, py, pz = pos
+        G["pawn"].set_actor_location(V(px + 120.0, py, pz + 10.0), False, True); yield from rwait(0.6)
+        pr = str(g.describe_nearest(G["pawn"].get_actor_location(), 300.0))
+        gold0 = g.get_gold(); before = [str(m).split("|", 1)[-1] for m in list(cb().get_message_log())]
+        f = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.6)
+        gold_got[0] += g.get_gold() - gold0
+        # (what was said, from the log of messages (the gift's gold line comes after the words and replaces them on the HUD))
+        return {"prompt": pr, "f": f, "gold": g.get_gold() - gold0, "said": " / ".join(m for m in [str(x).split("|", 1)[-1] for x in list(cb().get_message_log())] if m not in before)[:500]}          # (only what this press said: PR #107's review)
+    def look_at(pos, name):
+        # (from 8 m off on her side, facing it, her body hidden: from where she stood (45 to 70 m) the first pictures were grass)
+        px, py, pz = pos; me = G["pawn"].get_actor_location()
+        dx, dy = me.x - px, me.y - py; dl = math.hypot(dx, dy) or 1.0
+        ground_put(px / 100.0 + dx / dl * 8.0, py / 100.0 + dy / dl * 8.0); yield from rwait(0.6)
+        me = G["pawn"].get_actor_location()
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=math.degrees(math.atan2(py - me.y, px - me.x)))); G["pawn"].set_actor_hidden_in_game(True); yield from rwait(1.2)
+        shot(name, "1280x720"); yield from rwait(1.5); G["pawn"].set_actor_hidden_in_game(False)
+    try:
+        g.wild_put_her(7000.0, -1500.0); yield from wait_ready(90); yield from wait_chunks(30, 50); ground_put(7000.0, -1500.0); yield from rwait(2.0)
+        # ---- someone met: a pedlar on the way, spoken to
+        g.force_wild_encounter("roam_pedlar"); yield from rwait(2.0)
+        ped = None
+        t0 = time.time()
+        while time.time() - t0 < 10 and ped is None:
+            for i in range(60):
+                p = g.get_wild_person14(i) if hasattr(g, "get_wild_person14") else None
+                if p is None: break
+                if "pedlar" in str(p.get_editor_property("title")): ped = p
+            yield
+        if ped:
+            r = yield from speak_to(tuple([ped.get_actor_location().x, ped.get_actor_location().y, ped.get_actor_location().z]))
+            res["pedlar"] = r
+        res["met"] = stories15_lines(g)[3]
+        # (30 m on from the pedlar: the courier comes up to her, and the pedlar beside them would take F (the nearest does))
+        me = G["pawn"].get_actor_location(); ground_put(me.x / 100.0 + 30.0, me.y / 100.0); yield from rwait(1.0)
+        # ---- the courier
+        g.force_wild_encounter("roam_story_courier"); s = yield from wait_story("courier")
+        if s:
+            yield from rwait(2.0)
+            t0 = time.time()
+            while time.time() - t0 < 40:
+                s = story(s["id"]) or s
+                me = G["pawn"].get_actor_location()
+                if math.hypot(s["p"][0] - me.x, s["p"][1] - me.y) < 450.0: break
+                yield from rwait(0.5)
+            res["courier_came_m"] = round(math.hypot(s["p"][0] - me.x, s["p"][1] - me.y) / 100.0, 1)
+            yield from look_at(s["p"], "stories15_courier")
+            r = yield from speak_to(s["p"], s["id"]); yield from rwait(1.0)
+            res["courier"] = dict(r, sender=s["detail"], log=logged(s["id"]))
+        # ---- one chased
+        g.force_wild_encounter("roam_story_chased"); s = yield from wait_story("chased")
+        if s:
+            yield from rwait(2.5); s = story(s["id"]) or s
+            yield from look_at(s["p"], "stories15_chased")
+            res["chased_pursuers"] = s["pursuers"]
+            for n in range(6):
+                m = g.get_story_pursuer15(s["id"], n)
+                if m and not m.is_dead(): m.apply_damage(1.0e7, G["pawn"])
+            yield from rwait(2.0)
+            s = story(s["id"]) or s
+            r = yield from speak_to(s["p"], s["id"]); yield from rwait(1.0)
+            res["chased"] = dict(r, alive=s["alive"], log=logged(s["id"]))
+        # ---- the cart
+        g.force_wild_encounter("roam_story_cart"); s = yield from wait_story("cart")
+        if s:
+            yield from rwait(1.5)
+            yield from look_at((s["x"], s["y"], s["p"][2]), "stories15_cart")
+            cx, cy = s["x"], s["y"]; me = G["pawn"].get_actor_location()
+            dx, dy = me.x - cx, me.y - cy; dl = math.hypot(dx, dy) or 1.0
+            G["pawn"].set_actor_location(V(cx + dx / dl * 230.0, cy + dy / dl * 230.0, s["p"][2] + 10.0), False, True); yield from rwait(0.6)
+            mend = {"prompt": str(g.describe_nearest(G["pawn"].get_actor_location(), 300.0)), "f": str(g.interact_nearest(G["pawn"].get_actor_location()))}
+            yield from rwait(1.0)
+            s = story(s["id"]) or s
+            r = yield from speak_to(s["p"], s["id"]); yield from rwait(1.0)
+            res["cart"] = dict(r, mend=mend, log=logged(s["id"]))
+        # ---- the rival, won: she runs (is put) to the place at once
+        g.force_wild_encounter("roam_story_rival"); s = yield from wait_story("rival")
+        if s:
+            res["rival_place"] = s["detail"]
+            yield from rwait(1.0)
+            yield from look_at(s["p"], "stories15_rival")
+            ground_put(s["x"] / 100.0 + 2.0, s["y"] / 100.0); yield from rwait(2.0)
+            res["rival_won"] = logged(s["id"])
+        # ---- the rival, lost: she waits where she is
+        g.wild_put_her(7400.0, -1500.0); yield from wait_chunks(30, 50); ground_put(7400.0, -1500.0); yield from rwait(2.0)
+        g.force_wild_encounter("roam_story_rival"); s = yield from wait_story("rival")
+        if s:
+            t0 = time.time()
+            while time.time() - t0 < 120 and "lost" not in logged(s["id"]) and "won" not in logged(s["id"]): yield from rwait(1.0)
+            res["rival_lost"] = logged(s["id"]); res["rival_took_s"] = round(time.time() - t0, 1)
+            # (the place the rival emptied: nothing of it left to take (PR #107's review: its pile had stayed))
+            ground_put(s["x"] / 100.0 + 1.0, s["y"] / 100.0); yield from rwait(1.5)
+            res["after_rival"] = {"prompt": str(g.describe_nearest(G["pawn"].get_actor_location(), 300.0)),
+                                  "piles": len([lp for lp in g.get_editor_property("loot_piles") if lp and math.hypot(lp.get_actor_location().x - s["x"], lp.get_actor_location().y - s["y"]) < 800.0])}
+        res["rival"] = stories15_lines(g)[2]
+        res["engaged"] = sorted({str(l).split("|")[2] for l in g.get_wild_encounter_lines() if str(l).split("|")[1:2] == ["met"] and "story" in str(l)})
+    finally:
+        try: G["pawn"].set_actor_hidden_in_game(False)
+        except Exception: pass
+        # (what the step changed put back: the stories and their people, the people met, the rival's counts and places, the gifts' gold)
+        try:
+            G["gen"].forget_stories15()
+            if gold_got[0]: G["gen"].add_gold(-int(gold_got[0]), "test")
+            res["put_back"] = True
+        except Exception as e: res["put_back"] = str(e)
+        quiet(False)
+    c, ch, ca = res.get("courier", {}), res.get("chased", {}), res.get("cart", {})
+    ok = ("a travelling pedlar" in res.get("met", [])
+          and c.get("f") == "gift" and "a travelling pedlar" in c.get("said", "") and c.get("gold", 0) > 0 and "done" in c.get("log", [])
+          and res.get("chased_pursuers", 0) >= 1 and ch.get("alive") and ch.get("f") == "gift" and ch.get("gold", 0) > 0 and "saved" in ch.get("log", []) and "done" in ch.get("log", [])
+          and ca.get("mend", {}).get("f") == "mend" and "lift the cart" in ca.get("mend", {}).get("prompt", "") and ca.get("f") == "gift" and ca.get("gold", 0) > 0 and "done" in ca.get("log", [])
+          and "won" in res.get("rival_won", []) and "lost" in res.get("rival_lost", []) and res.get("after_rival", {}).get("piles", 1) == 0 and "take" not in res.get("after_rival", {}).get("prompt", "take") and "the Varka" not in res.get("after_rival", {}).get("prompt", "") and res.get("rival", {}).get("won", 0) >= 1 and res["rival"].get("lost", 0) >= 1
+          and len(res.get("engaged", [])) == 4)
+    step_result("stories15", ok, **res)
+STEPS["stories15"] = step_stories15
 SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
 def saves_snapshot():
     """the save folder's files and their bytes: put back at the end, the tests' own new saves deleted (PR #61's review)"""

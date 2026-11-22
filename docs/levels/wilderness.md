@@ -947,6 +947,15 @@ Every kind of ruin and structure (54) holds "@recipe|1|1|0.3" in its chest's thi
 - **The map**: each region (a 7 km cell) with a camp cleared shows its share, "this region: N of M camps reclaimed", under the cleared camp's mark.
 - **Measured** (`888 reclaim15 -Light`, `test_l15p14f.json`, after PR #106's review: run twice in one play, the first putting back what it did): two camps within 6 km of a point 6.3 km from Brokenspire; the Wyrm Lair's three monsters killed (test blows as hers), cleared on day 1, its waypoint laid with its trader; F at the trader opened the store (25 lines), F at the tent rested her from 70 to 140 hit points, 08:06 on day 1 to 07:00 on day 2; four days skipped: the Ruins of Oakdale, 4.4 km off, resettled, four settlers by their fire inside its walls (pictured), none of its guardians, a settler's word by F; the map's "this region: 1 of 1 camps reclaimed" (a 7 km cell, two camps in 6 km: not cross-checked); all put back after.
 
+### Story encounters (idea 8 of [wilderness_ideas.md](../wilderness_ideas.md); `941`, C++ `RD/RDList15n.cpp`)
+
+- **Four stories among the encounter director's kinds** (`SourceArt/wilderness/stories15.json`, weights 0.15 to 0.2 against its others):
+  - **A courier** comes up to her and waits beside her. He has a letter for her by her hero's name, from someone she has met: the last person of the wilds who gave her something or whom she helped, else Brokenspire's elder. He gives 12 gold and a potion.
+  - **Someone chased** runs to her with three of the land's monsters after them. Once all three are dead and the person is alive, they are safe and give 15 gold and things. If they die, the story is lost.
+  - **A carter** stands beside a cart tipped off its wheel. F at the cart lifts it ("help lift the cart"), then the carter gives 10 gold and things.
+  - **Her rival, Varka the Swift**, makes for a point of interest laid ahead of her, from as far beyond it as she is short of it. If she comes within 8 m of it first, it is hers. If Varka gets there first, its things are gone (used for good, its pile taken away: none was left, measured) and Varka says so. The meetings, wins and losses are counted for the game, and Varka's first line differs from the later ones.
+- **Measured** (`888 stories15 -Light`, `test_l15p15i.json`, after PR #107's review: run twice in one play, the first putting back what it did): each sent by the director's hook and met ("met" in its log). A pedlar spoken to first, kept as someone met. The courier came to 4 m of her with "Warrior? ... A letter for you, from a travelling pedlar" and gave 12 gold. The chased traveller's three pursuers were killed, the traveller was safe and gave 15 gold. The cart was lifted by F and the carter gave 10 gold. Varka was raced twice: won when she was put at the place at once, lost after 28 s when she waited 60 m off; met 2, won 1, lost 1. Pictures of each taken from 8 m and looked at.
+
 ## Limits
 
 What is not there yet, and what has not been tested, is listed in [TODO.md](../../TODO.md). In short:

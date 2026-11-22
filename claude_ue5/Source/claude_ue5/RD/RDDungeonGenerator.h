@@ -2153,6 +2153,39 @@ public:
 	float LastingHealth15() const;
 	float LastingMana15() const;
 	void AddPlaceItem15(const FVector& BoxAt, int64 BoxKey, TArray<FName>& Got);
+	// ---- the list of 2026-11-20's fifteenth phase (RDList15n.cpp): story encounters (idea 8), from SourceArt/wilderness/stories15.json (941)
+	/** the courier's letters ("{hero}" her hero's name), who a letter is from when she has met no one, the pursuers of one chased, the
+	 *  cart's tilt off its wheel, her rival (name, body, lines met first and again, said when it wins and when she does), how far beyond
+	 *  the place the rival starts (times her distance) and how near the place she must come first (cm) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> StoryLetters15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FString StoryDefaultSender15 = TEXT("the elder of Brokenspire");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") int32 StoryPursuers15 = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float StoryCartTilt15 = 14.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FString StoryRivalName15 = TEXT("Varka the Swift");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FString StoryRivalDef15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FString StoryRivalHello15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FString StoryRivalAgain15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FString StoryRivalWon15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FString StoryRivalLost15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float StoryRivalLead15 = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float StoryRivalReachCm15 = 800.f;
+	struct FStory15 { FName Kind; int32 Id = 0, PoiId = -1; FVector At = FVector::ZeroVector; float Since = 0.f, CartYaw = 0.f; FString Title, Detail, State;
+		TWeakObjectPtr<class ARDTownsfolk> Person; TArray<TWeakObjectPtr<class ARDMonster>> Pursuers; TArray<bool> PursuerKilled; TWeakObjectPtr<class UStaticMeshComponent> Cart; };
+	TArray<FStory15> Stories15;
+	TArray<FString> StoryLog15;
+	int32 StoriesMade15 = 0;
+	void RecordMet15(const FString& Who);
+	class ARDTownsfolk* SpawnWildRoamFolk15(const FString& Def, const FVector2D& AtCm, float Yaw, uint32 Seed, const FString& Title, const TArray<FString>& Lines, bool bFallback);
+	TArray<int64> StoryUsedKeys15;
+	int32 MakeStory15(const FRDWildPoiKind& K, const FVector2D& At, FRandomStream& Rs);
+	void TickStories15(float Dt, const FVector& Her);
+	bool StoryCartFirst15(const FVector& From, float& Best, int32& Kind, int32& Id) const;
+	FString MendStoryCart15(int32 Id);
+	void MarkWildPoiUsed15(int32 Id);
+	/** tests: the stories going and their log (see RDList15n.cpp), and one chased's pursuer */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetStories15() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") class ARDMonster* GetStoryPursuer15(int32 Id, int32 N) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") void ForgetStories15();
 	// ---- the list of 2026-11-20's fourteenth phase (RDList15m.cpp): camps cleared that change the world (idea 6)
 	/** the days after a camp is cleared before its nearest ruin within ReclaimRuinKm15 is resettled (0: off), the waypoint's trader's body
 	 *  (a townsfolk def's name's start) and lines, the settlers' lines (940 from SourceArt/wilderness/reclaim15.json) */
