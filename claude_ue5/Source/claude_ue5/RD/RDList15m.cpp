@@ -12,6 +12,7 @@
 #include "RD/RDGameInstance.h"
 #include "RD/RDCombat.h"
 #include "RD/RDTown.h"
+#include "RD/RDMonster.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/PointLightComponent.h"
 #include "NiagaraFunctionLibrary.h"
@@ -23,15 +24,6 @@ DEFINE_LOG_CATEGORY_STATIC(LogRDList15m, Log, All);
 bool ARDDungeonGenerator::IsClearableCamp15(const FRDWildPlace& P) const
 {
 	return (P.Kind == TEXT("lair") || P.Kind == TEXT("spawn")) && P.Quest.IsEmpty() && P.Site < 0 && P.Town < 0 && P.Id < FRDWildWorld::QuestIdBase;
-}
-
-int32 ARDDungeonGenerator::WildPlaceMonsterCount15(const FRDWildPlace& P) const
-{
-	// (SpawnWildMonsters' own draws on the place's stream: the kind first (one draw whatever the range), then the number; a lair 3 to 5,
-	// a hollow 2 or 3)
-	FRandomStream R((int32)FRDWildWorld::Hash(P.Id, 91, Wild->Seed));
-	R.RandRange(0, 0);
-	return P.Kind == TEXT("lair") ? R.RandRange(3, 5) : R.RandRange(2, 3);
 }
 
 bool ARDDungeonGenerator::CampCleared15(const FRDWildPlace& P) const
@@ -57,6 +49,7 @@ void ARDDungeonGenerator::TickReclaim15(float Dt, const FVector& Her)
 	ReclaimLook15 -= Dt;
 	if (ReclaimLook15 > 0.f || !IsWildReady() || ReclaimDays15 <= 0.f) return;
 	ReclaimLook15 = 1.f;
+	WildReclaimFolk15.RemoveAll([](const TWeakObjectPtr<ARDTownsfolk>& W) { return !W.IsValid(); });
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	if (!GI) return;
 	const FVector2D H2(Her.X / 100.0, Her.Y / 100.0);
@@ -74,7 +67,7 @@ void ARDDungeonGenerator::TickReclaim15(float Dt, const FVector& Her)
 			if (!GI->CampsCleared15.Contains(P.Id) && CampCleared15(P))
 			{
 				GI->CampsCleared15.Add(P.Id); GI->CampsClearedDay15.Add(TownDay);
-				ReclaimShareCache15.Reset();
+				ReclaimShareCache15.Reset(); ReclaimMarksFor15 = -1;
 				if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("%s is cleared: travellers will camp here, and in a few days people may settle the ruins nearby"), *P.Name));
 				UE_LOG(LogRDList15m, Log, TEXT("RDRECLAIM15 %s cleared on day %d"), *P.Name, TownDay);
 				WildAutosave(TEXT("found"));
@@ -85,9 +78,8 @@ void ARDDungeonGenerator::TickReclaim15(float Dt, const FVector& Her)
 	}
 	for (const int32 Id : WantCamps) if (!CampsLaid15.Contains(Id)) { FRDWildPlace P; if (Wild->FindPlace(Id, P)) LayCampWaypoint15(P); }
 	for (const int32 Id : WantRuins) if (!RuinsLaid15.Contains(Id)) { FRDWildPlace P; if (Wild->FindPlace(Id, P)) LayRuinFolk15(P); }
-	auto Drop = [](FReclaimLaid15& L) { for (TWeakObjectPtr<USceneComponent>& C : L.Comps) if (C.IsValid()) C->DestroyComponent(); for (TWeakObjectPtr<AActor>& A : L.Folk) if (A.IsValid()) A->Destroy(); };
-	for (auto It = CampsLaid15.CreateIterator(); It; ++It) if (!WantCamps.Contains(It.Key()) && FVector2D::Distance(It.Value().At2, H2) > 350.0) { Drop(It.Value()); It.RemoveCurrent(); }
-	for (auto It = RuinsLaid15.CreateIterator(); It; ++It) if (!WantRuins.Contains(It.Key()) && FVector2D::Distance(It.Value().At2, H2) > 350.0) { Drop(It.Value()); It.RemoveCurrent(); }
+	for (auto It = CampsLaid15.CreateIterator(); It; ++It) if (!WantCamps.Contains(It.Key()) && FVector2D::Distance(It.Value().At2, H2) > 350.0) { DropReclaim15(It.Value()); It.RemoveCurrent(); }
+	for (auto It = RuinsLaid15.CreateIterator(); It; ++It) if (!WantRuins.Contains(It.Key()) && FVector2D::Distance(It.Value().At2, H2) > 350.0) { DropReclaim15(It.Value()); It.RemoveCurrent(); }
 	// (the days since each camp was cleared: its nearest ordinary ruin resettled once ReclaimDays15 have passed)
 	for (int32 I = 0; I < GI->CampsCleared15.Num(); ++I)
 	{
@@ -97,14 +89,27 @@ void ARDDungeonGenerator::TickReclaim15(float Dt, const FVector& Her)
 		FRDWildPlace C; FRDWildPlace Got; FVector2D At;
 		if (!Wild->FindPlace(Id, C)) continue;
 		if (!FindNearestWildPlace(C.At.X, C.At.Y, ReclaimRuinKm15, [&](const FRDWildPlace& P, FVector2D& A)
-			{ if (P.Kind != TEXT("ruins") || !P.Quest.IsEmpty() || P.Site >= 0 || P.Id >= FRDWildWorld::QuestIdBase || GI->RuinsResettled15.Contains(P.Id)) return false; A = P.At; return true; }, Got, At))
+			{
+				// (an ordinary ruin on dry ground (no water kind: the submerged town's middle lies in the water), measured by its middle (PR #106's review))
+				if (P.Kind != TEXT("ruins") || !P.Quest.IsEmpty() || P.Site >= 0 || P.Id >= FRDWildWorld::QuestIdBase || GI->RuinsResettled15.Contains(P.Id)) return false;
+				const int32 Rk = WildRuinKindOf(P);
+				if (Rk >= 0 && WildRuinKinds[Rk].bWater) return false;
+				A = WildRuinCentre(P); return true;
+			}, Got, At))
 		{
 			UE_LOG(LogRDList15m, Log, TEXT("RDRECLAIM15 %s: no ordinary ruin within %.1f km to resettle"), *C.Name, ReclaimRuinKm15);
 			continue;
 		}
 		GI->RuinsResettled15.Add(Got.Id);
 		// (its guardians gone for good: every key of its place's monsters taken, as kills kept)
-		for (int32 K = 0; K < 16; ++K) GI->WildKilled.Add((int64)Got.Id * 16 + K);
+		for (int32 K = 0; K < 16; ++K)
+		{
+			const int64 Key = (int64)Got.Id * 16 + K;
+			if (!GI->WildKilled.Contains(Key)) { GI->WildKilled.Add(Key); GI->ReclaimKeys15.Add(Key); }
+		}
+		// (those already standing in a loaded chunk go too (PR #106's review): settlers are never laid among living guardians)
+		for (ARDMonster* M : GetMonsters())
+			if (IsValid(M) && !M->IsDead() && M->WildKey >= (int64)Got.Id * 16 && M->WildKey < (int64)Got.Id * 16 + 16) M->Destroy();
 		ReclaimShareCache15.Reset();
 		if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("Word on the road: with %s cleared, a family has settled the %s"), *C.Name, *Got.Name));
 		UE_LOG(LogRDList15m, Log, TEXT("RDRECLAIM15 %s resettled on day %d (%s cleared on day %d)"), *Got.Name, TownDay, *C.Name, GI->CampsClearedDay15[I]);
@@ -148,11 +153,11 @@ void ARDDungeonGenerator::LayCampWaypoint15(const FRDWildPlace& P)
 	Put(TEXT("cart"), Cart, Yaw + 90.f, 0, 2.f);
 	for (int32 K = 0; K < 2; ++K) if (UStaticMeshComponent* Lg = Put(TEXT("log"), Fire + (K ? Rt : -Rt) * 2.2 - Fw * 1.5, Yaw + 90.f, K, 0.f)) Lg->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	L.TentAt = Ground(Tent - Rt * 2.2);          // (its door's side, toward the fire)
-	// (the trader by his cart, facing the fire)
+	// (the trader by his cart, facing the fire: it lies at Yaw + 90 from him (PR #106's review: he stood with his back to it))
 	const FVector2D TraderAt = Cart + Rt * 2.0;
-	if (ARDTownsfolk* T = SpawnReclaimFolk15(TraderAt, Yaw - 90.f, (uint32)P.Id * 7u + 1u, ReclaimTraderDef15, TEXT("a travelling trader"), ReclaimTraderLines15))
+	if (ARDTownsfolk* T = SpawnReclaimFolk15(TraderAt, Yaw + 90.f, (uint32)P.Id * 7u + 1u, ReclaimTraderDef15, TEXT("a travelling trader"), ReclaimTraderLines15))
 	{
-		L.Folk.Add(T); L.TraderAt = T->GetActorLocation();
+		L.Folk.Add(T); L.Trader = T; L.TraderAt = T->GetActorLocation();
 	}
 	CampsLaid15.Add(P.Id, L);
 	UE_LOG(LogRDList15m, Log, TEXT("RDRECLAIM15 the waypoint at %s laid (%d pieces, %s)"), *P.Name, L.Comps.Num(), L.Folk.Num() ? TEXT("a trader") : TEXT("no trader"));
@@ -172,6 +177,7 @@ ARDTownsfolk* ARDDungeonGenerator::SpawnReclaimFolk15(const FVector2D& At, float
 	T->SetTitle(Title);
 	T->OwnLines = Lines;
 	T->bWildGiven = true;
+	WildReclaimFolk15.Add(T);          // (one of the wilds' people: hurt, cowering, witnesses, prey (PR #106's review))
 	return T;
 }
 
@@ -219,19 +225,25 @@ void ARDDungeonGenerator::LayRuinFolk15(const FRDWildPlace& P)
 
 bool ARDDungeonGenerator::ReclaimFirst15(const FVector& From, float& Best, int32& Kind, int32& Id) const
 {
-	// (the rewards' nearest, its fifth and sixth kinds: a waypoint's trader (2 m) and its tent (2.5 m))
+	// (the rewards' nearest, its fifth and sixth kinds: a waypoint's trader (2 m, where he stands and alive) and its tent (within the rewards'
+	// reach, 2.2 m))
 	bool bAny = false;
 	for (const auto& Kv : CampsLaid15)
 	{
 		const FReclaimLaid15& L = Kv.Value;
-		if (!L.TraderAt.IsZero()) { const float D = FVector::Dist2D(L.TraderAt, From); if (D < FMath::Min(Best, 200.f) && FMath::Abs(L.TraderAt.Z - From.Z) < 250.f) { Best = D; Kind = 4; Id = Kv.Key; bAny = true; } }
+		if (const ARDTownsfolk* T = L.Trader.Get(); T && !T->IsWildDead14())
+		{
+			const FVector Ta = T->GetActorLocation();
+			const float D = FVector::Dist2D(Ta, From);
+			if (D < FMath::Min(Best, 200.f) && FMath::Abs(Ta.Z - From.Z) < 250.f) { Best = D; Kind = 4; Id = Kv.Key; bAny = true; }
+		}
 		const float Dt = FVector::Dist2D(L.TentAt, From);
-		if (Dt < FMath::Min(Best, 250.f) && FMath::Abs(L.TentAt.Z - From.Z) < 300.f) { Best = Dt; Kind = 5; Id = Kv.Key; bAny = true; }
+		if (Dt < Best && FMath::Abs(L.TentAt.Z - From.Z) < 300.f) { Best = Dt; Kind = 5; Id = Kv.Key; bAny = true; }
 	}
 	// (and the settlers of a resettled ruin (2 m): a word each; the key is the ruin's id x 8 + the settler)
 	for (const auto& Kv : RuinsLaid15)
 		for (int32 K = 0; K < Kv.Value.Folk.Num(); ++K)
-			if (const AActor* A = Kv.Value.Folk[K].Get())
+			if (const ARDTownsfolk* A = Cast<ARDTownsfolk>(Kv.Value.Folk[K].Get()); A && !A->IsWildDead14())
 			{
 				const float D = FVector::Dist2D(A->GetActorLocation(), From);
 				if (D < FMath::Min(Best, 200.f) && FMath::Abs(A->GetActorLocation().Z - From.Z) < 250.f) { Best = D; Kind = 6; Id = Kv.Key * 8 + K; bAny = true; }
@@ -263,22 +275,27 @@ FString ARDDungeonGenerator::RestAtCamp15(int32 Id)
 	return TEXT("rest");
 }
 
-void ARDDungeonGenerator::ForgetReclaim15()
+void ARDDungeonGenerator::ForgetReclaim15(const TArray<int32>& CampIds)
 {
-	// (tests: the camps cleared and the ruins resettled forgotten (the resettled ruins' guardians back), the laid waypoints and settlers gone)
+	// (tests: the camps cleared and the ruins resettled forgotten (only the guardians' keys a resettling added come back: her own kills
+	// stay), the kills of the camps the test names (every one it fought at, cleared or not), the laid waypoints and settlers gone)
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	if (GI)
 	{
-		for (const int32 Id : GI->RuinsResettled15) for (int32 K = 0; K < 16; ++K) GI->WildKilled.Remove((int64)Id * 16 + K);
-		for (const int32 Id : GI->CampsCleared15) for (int32 K = 0; K < 16; ++K) GI->WildKilled.Remove((int64)Id * 16 + K);          // (its monsters back: else it is cleared again at the next look)
+		for (const int64 Key : GI->ReclaimKeys15) GI->WildKilled.Remove(Key);
+		for (const int32 Id : CampIds) for (int32 K = 0; K < 16; ++K) GI->WildKilled.Remove((int64)Id * 16 + K);
+		GI->ReclaimKeys15.Reset();
 		GI->CampsCleared15.Reset(); GI->CampsClearedDay15.Reset(); GI->CampsResettledFrom15.Reset(); GI->RuinsResettled15.Reset();
 	}
-	for (TMap<int32, FReclaimLaid15>* Mp : { &CampsLaid15, &RuinsLaid15 })
-	{
-		for (auto& Kv : *Mp) { for (TWeakObjectPtr<USceneComponent>& C : Kv.Value.Comps) if (C.IsValid()) C->DestroyComponent(); for (TWeakObjectPtr<AActor>& A : Kv.Value.Folk) if (A.IsValid()) A->Destroy(); }
-		Mp->Reset();
-	}
-	ReclaimShareCache15.Reset();
+	for (TMap<int32, FReclaimLaid15>* Mp : { &CampsLaid15, &RuinsLaid15 }) { for (auto& Kv : *Mp) DropReclaim15(Kv.Value); Mp->Reset(); }
+	ReclaimShareCache15.Reset(); ReclaimMarksFor15 = -1;
+}
+
+void ARDDungeonGenerator::DropReclaim15(FReclaimLaid15& L)
+{
+	for (TWeakObjectPtr<USceneComponent>& C : L.Comps) if (C.IsValid()) C->DestroyComponent();
+	for (TWeakObjectPtr<AActor>& A : L.Folk) if (A.IsValid()) A->Destroy();
+	L.Comps.Reset(); L.Folk.Reset();
 }
 
 void ARDDungeonGenerator::SkipDays15(int32 Days)
@@ -294,16 +311,19 @@ void ARDDungeonGenerator::DrawReclaimShares15(TFunctionRef<void(const FVector2D&
 	// (each region's cell with a camp cleared: its share of the camps there, at the cell's middle)
 	const URDGameInstance* GI = URDGameInstance::Of(this);
 	if (!GI || !IsWildReady() || GI->CampsCleared15.Num() == 0) return;
-	TMap<FIntPoint, int32> Cleared;
-	TMap<FIntPoint, FVector2D> Where;
-	for (const int32 Id : GI->CampsCleared15) { FRDWildPlace P; if (Wild->FindPlace(Id, P)) { const FIntPoint Cl = Wild->LookoutCellOf(P.At.X, P.At.Y); Cleared.FindOrAdd(Cl)++; Where.FindOrAdd(Cl, P.At); } }
-	for (const auto& Kv : Cleared)
+	// (at the region's first cleared camp, under its mark: a region's cell is wider than the map's view at its first zoom, and its middle was
+	// out of it in the first test. The lines kept until the camps cleared change: a place found by id copies its cell's list (PR #106's review))
+	if (ReclaimMarksFor15 != GI->CampsCleared15.Num())
 	{
-		// (at the region's first cleared camp, under its mark: a region's cell is wider than the map's view at its first zoom, and its middle
-		// was out of it in the first test)
-		const int32 All = ReclaimCampsInCell15(Kv.Key);
-		Each(Where[Kv.Key] + FVector2D(0.0, 0.0), FString::Printf(TEXT("this region: %d of %d camps reclaimed"), Kv.Value, FMath::Max(All, Kv.Value)));
+		ReclaimMarksFor15 = GI->CampsCleared15.Num();
+		ReclaimMarks15.Reset();
+		TMap<FIntPoint, int32> Cleared;
+		TMap<FIntPoint, FVector2D> Where;
+		for (const int32 Id : GI->CampsCleared15) { FRDWildPlace P; if (Wild->FindPlace(Id, P)) { const FIntPoint Cl = Wild->LookoutCellOf(P.At.X, P.At.Y); Cleared.FindOrAdd(Cl)++; Where.FindOrAdd(Cl, P.At); } }
+		for (const auto& Kv : Cleared)
+			ReclaimMarks15.Add(TPair<FVector2D, FString>(Where[Kv.Key], FString::Printf(TEXT("this region: %d of %d camps reclaimed"), Kv.Value, FMath::Max(ReclaimCampsInCell15(Kv.Key), Kv.Value))));
 	}
+	for (const TPair<FVector2D, FString>& M : ReclaimMarks15) Each(M.Key, M.Value);
 }
 
 int32 ARDDungeonGenerator::ReclaimCampsInCell15(FIntPoint Cell) const
@@ -321,7 +341,7 @@ int32 ARDDungeonGenerator::ReclaimCampsInCell15(FIntPoint Cell) const
 
 TArray<FString> ARDDungeonGenerator::GetReclaim15(float Km) const
 {
-	// (tests: "camp|id|name|kind|x|y|monsters|cleared day (-1)|laid|trader|tent x|y|z|trader x|y|z (cm)" for the camps within Km, "ruin|id|name|x|y|resettled|
+	// (tests: "camp|id|name|kind|x|y|monsters|cleared day (-1)|laid|trader|tent x|y|z|trader x|y|z (cm)|its monsters' kills kept" for the camps within Km, "ruin|id|name|x|y|resettled|
 	// laid|settlers" for the resettled ruins, "day|n")
 	TArray<FString> Out;
 	const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
@@ -335,8 +355,11 @@ TArray<FString> ARDDungeonGenerator::GetReclaim15(float Km) const
 	{
 		if (!IsClearableCamp15(P) || FVector2D::Distance(P.At, H2) > Km * 1000.0) continue;
 		const FReclaimLaid15* L = CampsLaid15.Find(P.Id);
-		Out.Add(FString::Printf(TEXT("camp|%d|%s|%s|%.1f|%.1f|%d|%d|%d|%d|%.0f|%.0f|%.0f|%.0f|%.0f|%.0f"), P.Id, *P.Name, *P.Kind, P.At.X, P.At.Y, WildPlaceMonsterCount15(P), CampClearedDay15(P.Id),
-			L ? 1 : 0, L ? L->Folk.Num() : 0, L ? L->TentAt.X : 0.0, L ? L->TentAt.Y : 0.0, L ? L->TentAt.Z : 0.0, L ? L->TraderAt.X : 0.0, L ? L->TraderAt.Y : 0.0, L ? L->TraderAt.Z : 0.0));
+		const int32 N = WildPlaceMonsterCount15(P);
+		int32 Dead = 0;
+		for (int32 I = 0; I < N; ++I) Dead += GI->WildKilled.Contains((int64)P.Id * 16 + I) ? 1 : 0;
+		Out.Add(FString::Printf(TEXT("camp|%d|%s|%s|%.1f|%.1f|%d|%d|%d|%d|%.0f|%.0f|%.0f|%.0f|%.0f|%.0f|%d"), P.Id, *P.Name, *P.Kind, P.At.X, P.At.Y, N, CampClearedDay15(P.Id),
+			L ? 1 : 0, L ? L->Folk.Num() : 0, L ? L->TentAt.X : 0.0, L ? L->TentAt.Y : 0.0, L ? L->TentAt.Z : 0.0, L ? L->TraderAt.X : 0.0, L ? L->TraderAt.Y : 0.0, L ? L->TraderAt.Z : 0.0, Dead));
 	}
 	for (const int32 Id : GI->RuinsResettled15)
 	{

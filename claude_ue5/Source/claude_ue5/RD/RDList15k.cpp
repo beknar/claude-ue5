@@ -223,7 +223,9 @@ bool ARDDungeonGenerator::RewardFirst15(const FVector& From, int32& Kind, int32&
 	if (const FRDWildPoiLive* P = WildPoiNear(From, 320.f); P && FVector::Dist2D(P->At, From) < Best) return false;
 	int32 Di = -1;
 	if (const ARDWildChunk* C = bWildHouseInsides ? WildDoorNear(From, 190.f, Di) : nullptr; C && C->Doors.IsValidIndex(Di) && FVector::Dist2D(C->Doors[Di].At, From) < Best) return false;
-	if (const ARDTownsfolk* T = WildFolkForF(From); T && FVector::Dist2D(T->GetActorLocation(), From) < Best) return false;
+	// (a person nearer takes F, but not a waypoint's own trader or a settler: their F is the reward's (the store, a word). Listed with the
+	// wilds' people since PR #106's review, the trader took F as a plain person and barked)
+	if (const ARDTownsfolk* T = WildFolkForF(From); T && !WildReclaimFolk15.Contains(T) && FVector::Dist2D(T->GetActorLocation(), From) < Best) return false;
 	return true;
 }
 

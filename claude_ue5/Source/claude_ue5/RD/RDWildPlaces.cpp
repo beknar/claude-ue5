@@ -308,20 +308,13 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	FRandomStream R((int32)FRDWildWorld::Hash(P.Id, 91, Wild->Seed));
 	const bool bLair = P.Kind == TEXT("lair") && P.Quest.IsEmpty();
-	int32 Kind = Kinds[R.RandRange(0, Kinds.Num() - 1)];
-	int32 N = bLair ? R.RandRange(3, 5) : R.RandRange(2, 3);
-	// (the list of 2026-11-12: a ruin's guardians, its kind's number, after the draws)
-	if (const int32 Rk = P.Kind == TEXT("ruins") && P.Quest.IsEmpty() ? WildRuinKindOf(P) : -1; Rk >= 0) N = WildRuinKinds[Rk].Guards;
-	if (WildSiteKinds.IsValidIndex(P.Site)) N = WildSiteKinds[P.Site].Guards;          // (a structure's)
-	if (WildSceneryKinds.IsValidIndex(P.Scenery)) N = WildSceneryKinds[P.Scenery].Guards;          // (a scenery's, the list of 2026-11-14)
-	// (the list of 2026-11-11: hell's quarter more, after the draw: the place's other draws keep their order; the kills are kept
-	// by number, so the extra ones come last)
-	N = DifficultyCount(N);
+	int32 KindPick = 0;
+	int32 N = WildPlaceDraws15(P, R, Kinds.Num(), KindPick);          // (its kind's and number's draws and every rule on the number: one function, the camps' "cleared" too)
+	int32 Kind = Kinds[KindPick];
 	// (the captain's quests: the den's pack of ripper dogs, the nearest the castle's monsters come to wolves, at tier 1's
 	// strength; the watchtower's three of what killed the patrol)
 	if (!P.Quest.IsEmpty())
 	{
-		N = WildQuestMonsters(P);
 		if (P.Quest == TEXT("wolves"))
 		{
 			// (by name: the ripper dogs, else any wolf, hound or dog; with none the place's own kind, said in the log (PR #25's
@@ -406,4 +399,27 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 		C->Props.Add(M);
 		++WildMonstersSpawned;
 	}
+}
+
+int32 ARDDungeonGenerator::WildPlaceDraws15(const FRDWildPlace& P, FRandomStream& R, int32 KindsNum, int32& KindPick) const
+{
+	// (a place's monsters: the kind's draw (one whatever its range), then the number; a ruin's, structure's or scenery's guardians by their
+	// kind, hell's quarter more after the draws (the kills are kept by number, so the extra ones come last), a quest's its own. The spawner
+	// and the camps' "cleared" (PR #106's review: a hand copy had left out the difficulty) read it alike)
+	const bool bLair = P.Kind == TEXT("lair") && P.Quest.IsEmpty();
+	KindPick = R.RandRange(0, FMath::Max(KindsNum, 1) - 1);
+	int32 N = bLair ? R.RandRange(3, 5) : R.RandRange(2, 3);
+	if (const int32 Rk = P.Kind == TEXT("ruins") && P.Quest.IsEmpty() ? WildRuinKindOf(P) : -1; Rk >= 0) N = WildRuinKinds[Rk].Guards;
+	if (WildSiteKinds.IsValidIndex(P.Site)) N = WildSiteKinds[P.Site].Guards;
+	if (WildSceneryKinds.IsValidIndex(P.Scenery)) N = WildSceneryKinds[P.Scenery].Guards;
+	N = DifficultyCount(N);
+	if (!P.Quest.IsEmpty()) N = WildQuestMonsters(P);
+	return N;
+}
+
+int32 ARDDungeonGenerator::WildPlaceMonsterCount15(const FRDWildPlace& P) const
+{
+	FRandomStream R((int32)FRDWildWorld::Hash(P.Id, 91, Wild->Seed));
+	int32 K = 0;
+	return WildPlaceDraws15(P, R, 1, K);
 }

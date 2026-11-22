@@ -2161,7 +2161,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FString ReclaimTraderDef15 = TEXT("Townsman");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> ReclaimTraderLines15;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> ReclaimSettlerLines15;
-	struct FReclaimLaid15 { FVector2D At2 = FVector2D::ZeroVector, FireAt = FVector2D::ZeroVector; FVector TentAt = FVector::ZeroVector, TraderAt = FVector::ZeroVector; TArray<TWeakObjectPtr<USceneComponent>> Comps; TArray<TWeakObjectPtr<AActor>> Folk; };
+	struct FReclaimLaid15 { FVector2D At2 = FVector2D::ZeroVector, FireAt = FVector2D::ZeroVector; FVector TentAt = FVector::ZeroVector, TraderAt = FVector::ZeroVector; TArray<TWeakObjectPtr<USceneComponent>> Comps; TArray<TWeakObjectPtr<AActor>> Folk; TWeakObjectPtr<class ARDTownsfolk> Trader; };
+	TArray<TWeakObjectPtr<class ARDTownsfolk>> WildReclaimFolk15;
+	mutable TArray<TPair<FVector2D, FString>> ReclaimMarks15;
+	mutable int32 ReclaimMarksFor15 = -1;
+	static void DropReclaim15(FReclaimLaid15& L);
+	int32 WildPlaceDraws15(const struct FRDWildPlace& P, FRandomStream& R, int32 KindsNum, int32& KindPick) const;
 	TMap<int32, FReclaimLaid15> CampsLaid15, RuinsLaid15;
 	mutable TMap<FIntPoint, int32> ReclaimShareCache15;
 	float ReclaimLook15 = 0.f;
@@ -2181,7 +2186,7 @@ public:
 	int32 ReclaimCampsInCell15(FIntPoint Cell) const;
 	/** tests: the days passed at once; the camps within Km and the resettled ruins (see RDList15m.cpp) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") void SkipDays15(int32 Days);
-	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") void ForgetReclaim15();
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") void ForgetReclaim15(const TArray<int32>& CampIds);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetReclaim15(float Km) const;
 	// ---- the list of 2026-11-20's thirteenth phase (RDList15l.cpp): monster contracts (idea 5)
 	/** the beasts, "name|kind|hp|tier up|weakness|offer|sign~sign~sign" (939 from SourceArt/wilderness/contracts15.json), how many a

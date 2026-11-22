@@ -135,6 +135,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetMarkShare() const;
 	/** the list of 2026-11-20's thirteenth phase: a contract's beast whose weakness she has learned takes this share more from her blows */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") float WeakShare15 = 0.f;
+	/** tests: the key its kill is kept under in the wilds (place x 16 + n; -1 none) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") int64 GetWildKey() const { return WildKey; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetExposedShare() const;
 	float LostHerUntil = -100.f, MarkUntil = -100.f, MarkShare = 0.f, ExposedUntil = -100.f, ExposedShare = 0.f;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetBlindShare() const;

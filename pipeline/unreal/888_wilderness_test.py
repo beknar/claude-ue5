@@ -7635,7 +7635,7 @@ def reclaim15_lines(g, km):
     for l in g.get_reclaim15(km):
         p = str(l).split("|")
         if p[0] == "camp": camps.append({"id": int(p[1]), "name": p[2], "kind": p[3], "x": float(p[4]), "y": float(p[5]), "n": int(p[6]), "day": int(p[7]), "laid": p[8] == "1",
-                                         "folk": int(p[9]), "tent": (float(p[10]), float(p[11]), float(p[12])), "trader": (float(p[13]), float(p[14]), float(p[15]))})
+                                         "folk": int(p[9]), "tent": (float(p[10]), float(p[11]), float(p[12])), "trader": (float(p[13]), float(p[14]), float(p[15])), "dead": int(p[16])})
         elif p[0] == "ruin": ruins.append({"id": int(p[1]), "name": p[2], "x": float(p[3]), "y": float(p[4]), "laid": p[6] == "1", "folk": int(p[7])})
         elif p[0] == "day": day = int(p[1])
     return camps, ruins, day
@@ -7646,25 +7646,31 @@ def step_reclaim15():
     hers): recorded on the day; its waypoint laid (fire, tent, cart, a trader): F at the trader opens the store, F at the tent rests her to
     morning (whole again, the day on); days skipped: the nearest ordinary ruin resettled, its settlers there and no guardians, a settler
     talks; the big map shows the region's share reclaimed; pictures of the waypoint and the settlers; everything put back"""
-    g = G["gen"]; res = {}; quiet(True)
+    g = G["gen"]; res = {}; quiet(True); fought = []
     try:
         g.wild_put_her(6000.0, -2000.0); yield from wait_ready(90); yield from wait_chunks(30, 50); yield from rwait(1.0)
         camps, _r, day0 = reclaim15_lines(g, 6.0)
         me = G["pawn"].get_actor_location()
         camps = sorted([c for c in camps if c["day"] < 0], key=lambda c: math.hypot(c["x"] - me.x / 100, c["y"] - me.y / 100))
         res["camps_6km"] = len(camps); res["day0"] = day0
-        cp = None
+        cp = None; fought = []
         for c in camps[:6]:
             g.wild_put_her(c["x"] + 40.0, c["y"]); yield from wait_chunks(30, 50); ground_put(c["x"] + 40.0, c["y"]); yield from rwait(2.5)
+            fought.append(c["id"])
             killed = 0
             for _k in range(4):
-                ms = [m for m in g.get_monsters() if m and not m.is_dead() and not m.is_ally() and math.hypot(m.get_actor_location().x / 100.0 - c["x"], m.get_actor_location().y / 100.0 - c["y"]) < 40.0]
+                ms = [m for m in g.get_monsters() if m and not m.is_dead() and not m.is_ally() and m.get_wild_key() // 16 == c["id"]]          # (its own monsters only, by their kill keys)
                 if not ms: break
                 for m in ms: m.apply_damage(1.0e7, G["pawn"]); killed += 1
                 yield from rwait(1.5)
-            yield from rwait(2.0)
-            c2 = next((x for x in reclaim15_lines(g, 1.0)[0] if x["id"] == c["id"]), None)
-            res.setdefault("tried", []).append({"name": c["name"], "monsters": c["n"], "killed": killed, "day": c2["day"] if c2 else None})
+            # (the camp's clear is looked for once a second: waited for up to 8 s, its kills kept read with it)
+            t0 = time.time(); c2 = None
+            while time.time() - t0 < 8.0:
+                c2 = next((x for x in reclaim15_lines(g, 1.0)[0] if x["id"] == c["id"]), None)
+                if c2 and c2["day"] >= 0: break
+                yield from rwait(0.5)
+            res.setdefault("tried", []).append({"name": c["name"], "monsters": c["n"], "killed": killed, "kills_kept": c2["dead"] if c2 else None, "day": c2["day"] if c2 else None,
+                                                "left": [m.get_wild_key() for m in g.get_monsters() if m and not m.is_dead() and m.get_wild_key() // 16 == c["id"]]})
             if c2 and c2["day"] >= 0: cp = c2; break
         if cp is None:
             step_result("reclaim15", False, **res); return
@@ -7727,7 +7733,7 @@ def step_reclaim15():
     finally:
         try: G["pawn"].set_actor_hidden_in_game(False); G["gen"].set_map_open(False); G["gen"].close_town_panel()
         except Exception: pass
-        try: G["gen"].forget_reclaim15(); res["put_back"] = True
+        try: G["gen"].forget_reclaim15(fought if "fought" in dir() else []); res["put_back"] = True
         except Exception as e: res["put_back"] = str(e)
         quiet(False)
     rs = res.get("rest", {})
