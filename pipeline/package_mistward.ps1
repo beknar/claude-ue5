@@ -137,6 +137,12 @@ public static class RDWin {
     @{ name = "heaven_fortress"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:heaven", "-RDAllKeys", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "heaven_fortress" },
     # (2026-11-21: the caves under the landmark towers (935): down into the cave level at tier 12 from where she stands)
     @{ name = "caves"; args = @("-RDStartHero=Warrior", "-RDTownGo=cave:12", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "caves" },
+# (2026-11-22, the list of 2026-11-20's eighteenth phase: the wilds' runs (RD/RDList15q.cpp): her horse called, mounted and ridden 15 s
+# 3 km out ("horse|<metres>|<still mounted>"); the nearest village reached by the map's travel, its households standing ("village|<name>|
+# <people>"); the nearest broken tower, into its cave by its mouth as F takes her (the caves level's own mark))
+@{ name = "horse"; args = @("-RDStartHero=Warrior", "-RDTownGo=horse", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "horse|*|1|Warrior*"; minM = 20; saves = $true },
+@{ name = "village"; args = @("-RDStartHero=Warrior", "-RDTownGo=village", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "village|*|*|Warrior*"; saves = $true },
+@{ name = "cavetower"; args = @("-RDStartHero=Warrior", "-RDTownGo=cavetower", "-RDMarkFile=$mark"); secs = 180; castle = $true; map = "caves"; saves = $true },
               @{ name = "ashenreach"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:ashenreach", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Ashenreach|Warrior*" },
               @{ name = "graymourne"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:graymourne", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Graymourne|Warrior*" },
               # (2026-11-10: the last two cities by fast travel too, Kethrys Spire and Heaven: their dungeons were run, the cities not)
@@ -159,8 +165,9 @@ public static class RDWin {
         # (the display run's "saved" must come from this run: the settings files are taken away first (put back at the end))
         if ($run.window) { foreach ($g in $gus) { if (Test-Path $g) { Remove-Item $g -Force } } }
         if ($run.console) { foreach ($f in @($ctest, [IO.Path]::ChangeExtension($ctest, "png"))) { if (Test-Path $f) { Remove-Item $f -Force } } }
-        if ($run.wild) {
-            if (Test-Path $wtest) { Remove-Item $wtest -Force }
+        if ($run.wild -and (Test-Path $wtest)) { Remove-Item $wtest -Force }
+        # (PR #110's review: the wilds' runs autosave too (the horse owned, a village found): their saves are taken and put back as the walk's)
+        if ($run.wild -or $run.saves) {
             # (PR #64's review: a kept folder left over is a run stopped before it put them back (killed, the machine short of
             #  memory): it holds the player's saves and the save folders the test's, so it is kept and taken as the player's)
             if (Test-Path $savesKept) { "    the player's saves kept by a run that was stopped: put back from $savesKept at the end" }
@@ -206,6 +213,9 @@ public static class RDWin {
         # (the city's run: the town writes its mark once the wilderness town is built round her, "town|<name>|<hero>")
         $pat = if ($run.want) { $run.want } else { "castle|$(if ($run.map) { $run.map } else { '*' })|Warrior*" }
         if ($run.castle) { $ok = $ok -and $where -like $pat }
+        # (PR #110's review: a ride of 0 m mounted had passed: the horse's metres, "horse|<m>|<mounted>", at least minM)
+        if ($run.minM) { $f = $where.Split('|'); $ok = $ok -and $f.Count -ge 3 -and [double]$f[1] -ge $run.minM }
+        if ($run.saves -and $savesTaken) { & $putSaves; $savesTaken = $false; "    the game's saves put back as they were" }
         if ($run.console) {
             # (its self-test's lines: "check|<name>|ok/FAILED|<measured>", the last "result|ok")
             $lines = if (Test-Path $ctest) { @(Get-Content $ctest -Encoding UTF8) } else { @() }

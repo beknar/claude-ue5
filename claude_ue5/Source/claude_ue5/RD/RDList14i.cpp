@@ -142,9 +142,9 @@ bool ARDDungeonGenerator::WildWayBlocked14(const FVector& A, const FVector& B, f
 	// (a test that stops at its first hit (PR #87's review: a multi trace sorted every hit, per monster and per step): the people, the
 	// animals and the piles (dynamic objects too) ignored by a list made once a frame; her and the monsters are pawns, not queried)
 	if (!GetWorld()) return false;
-	if (WildPassFrame14 != GFrameCounter)
+	if (WildPassFrame14 != GFrameCounter || WildPassGC14 != WildGCCycle14())          // (and after a garbage collection: RDList14h.cpp)
 	{
-		WildPassFrame14 = GFrameCounter;
+		WildPassFrame14 = GFrameCounter; WildPassGC14 = WildGCCycle14();
 		WildPass14.Reset();
 		for (ARDTownsfolk* T : WildPeople14()) if (IsValid(T)) WildPass14.Add(T);
 		for (const FRDWildFarmRec& F : WildFarms) for (const TWeakObjectPtr<ARDTownAnimal>& An : F.Animals) if (An.IsValid()) WildPass14.Add(An.Get());

@@ -971,6 +971,8 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 			// (-RDTownGo=town:<name>: out to a wilderness town (Vel Morrath: "town:velmorrath"), the packaged game's test of the
 			// city: once the wilds are ready, by the map's fast travel; her mark written once it is built round her)
 			else if (Go.StartsWith(TEXT("town:")) && bWild) GI->TownGoTown = Go.Mid(5);
+			// (the list of 2026-11-20's eighteenth phase: the wilds' runs, played once the wilds are ready (RDList15q.cpp))
+			else if ((Go == TEXT("horse") || Go == TEXT("village") || Go == TEXT("cavetower")) && bWild) { GI->Go15 = Go; GI->Go15Stage = 0; GI->Go15Try = 0; GI->Go15At = 0.f; }
 			else UE_LOG(LogRDTownGame, Warning, TEXT("RDTOWN -RDTownGo=%s: not a way this level has"), *Go);
 		}
 	if (bTown && bTownPlaced)
@@ -990,6 +992,7 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 				GI->TownGoMark.Reset();
 			}
 		}
+	if (bWild && P) TickGo15(P);          // (the eighteenth phase: a packaged run of the wilds, step by step)
 	// the Mistgate: walked into, Mistward Castle opens
 	if (bTown && bTownHome && S && !bTownTraveling && !S->MistgateAt.IsZero() && FVector::Dist2D(P->GetActorLocation(), S->MistgateAt) < 170.f
 		&& !(PlayerCombat && PlayerCombat->IsDead()))

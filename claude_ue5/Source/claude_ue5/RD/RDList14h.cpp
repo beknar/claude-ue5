@@ -42,13 +42,24 @@ void ARDDungeonGenerator::KeepWildFolk14(ARDTownsfolk* T, int64 Key)
 	if (bWildFolkHurt14 && IsWildFolkDead14(Key)) T->LayWildDead14();
 }
 
+uint64 ARDDungeonGenerator::WildGCCycle14()
+{
+	// (the package of 2026-11-22: a garbage collection at the end of the world's tick freed people destroyed in it while the frame's list
+	// still held them, and the HUD's prompt drawn after it read one (WildFolkForF: "Assertion failed: Index >= 0"; a Shipping game's
+	// access violation). The lists of plain pointers made once a frame are made again after every collection)
+	static uint64 Count = 0;
+	static const FDelegateHandle Hook = FCoreUObjectDelegates::GetPostGarbageCollect().AddLambda([] { ++Count; });
+	(void)Hook;
+	return Count;
+}
+
 const TArray<ARDTownsfolk*>& ARDDungeonGenerator::WildPeople14() const
 {
 	// (gathered once a frame (PR #86's review: every monster's foe, every bolt and shot gathered it again); the four lists hold
 	// nobody twice; a caller checks IsValid, as one destroyed in the frame stays listed until the next)
-	if (WildPeopleFrame14 != GFrameCounter)
+	if (WildPeopleFrame14 != GFrameCounter || WildPeopleGC14 != WildGCCycle14())
 	{
-		WildPeopleFrame14 = GFrameCounter;
+		WildPeopleFrame14 = GFrameCounter; WildPeopleGC14 = WildGCCycle14();
 		WildPeopleCache14.Reset();
 		auto Add = [&](const TWeakObjectPtr<ARDTownsfolk>& W) { if (ARDTownsfolk* T = W.Get(); IsValid(T)) WildPeopleCache14.Add(T); };
 		for (const FRDWildFarmRec& F : WildFarms) for (const TWeakObjectPtr<ARDTownsfolk>& W : F.Folk) Add(W);

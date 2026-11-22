@@ -55,6 +55,12 @@ Built and compiled, but no test has run it yet:
 - [ ] **Not measured**: a story met by the director's own pick (the test sends each by its hook); one chased killed (its "failed"); her own fight with the pursuers (test blows as hers); a save and load mid-story (stories are not saved: one going ends with the play).
 - [ ] **Limits**: someone met is a person of the wilds who gave or was helped (not the towns' people, the contracts' boards or quest givers); the rival walks, it never runs or fights; the cart is lifted at once by F (no strength needed).
 
+## The list of 2026-11-20's eighteenth phase: the Shipping package
+
+- [x] **The Shipping package with a full cook (10,659 packages, 26 GB in `builds\list15`) and its 21 runs** (`pipeline/package_mistward.ps1 -Test`): the menu, the town, the castle, the five cities and their six dungeons, the caves, her horse called by the player's call and ridden (`horse|31|1`: 31 m in 15 s, still mounted; 20 m at least), a village found by the map's discovery 300 m off it and reached by its travel (`village|Windholt|50`; the run found a crash of the people list after a garbage collection, fixed), a cave entered by F at a broken tower's mouth (the caves level's mark), the display, the console and the 20-minute wild walk (3.85 km, 6.5 GB at most, no crash).
+- [ ] **Not measured**: the horse's gallop in the package (the run holds forward only: 31 m in 15 s is a walk, the mount included); pictures of the package beyond the console's (Shipping takes none: a Development package from the same cook would).
+- [ ] **Limits**: the full cook needs `DefaultEditor.ini`'s `[CookSettings]` garbage collection on a 32 GB machine.
+
 ## The list of 2026-11-20's seventeenth phase: preparing for regions
 
 - [x] **Warm gear and a warm meal against the cold, the heat by day, the regions' herbs and meals** ([the wilderness](docs/levels/wilderness.md)): `888 climate15 -Light`.

@@ -1223,15 +1223,9 @@ void ARDDungeonGenerator::TickWildLandmark13(float Dt, const FVector& Her)
 	const double Reach = WildLandmarkKm * 1000.0;
 	constexpr double LmCell = WildLandmarkCellM;          // (one place for it: the caves' keys are its cells)
 	const int32 Ci = FMath::FloorToInt(H2.X / LmCell), Cj = FMath::FloorToInt(H2.Y / LmCell);
-	double Best = Reach; FVector2D Site(1e12, 1e12); bool bGot = false;
-	for (int32 I = Ci - 2; I <= Ci + 2; ++I) for (int32 J = Cj - 2; J <= Cj + 2; ++J)
-	{
-		FVector2D S;
-		if (!WildTowerSite13(I, J, S)) continue;
-		const double D = FVector2D::Distance(S, H2);
-		if (D > Best) continue;
-		Best = D; Site = S; bGot = true;
-	}
+	FVector2D Site(1e12, 1e12); double Best = Reach;
+	bool bGot = NearestTowerSite15(H2, 2, Site, Best) && Best <= Reach;          // (one scan of the squares: PR #110's review)
+	if (!bGot) { Site = FVector2D(1e12, 1e12); Best = Reach; }
 	// (the list of 2026-11-20's tenth phase: the one standing is kept while she is within reach of it and no other is 500 m nearer (PR #102's
 	// review: with the far towers standing she could walk from one to the next and find no cave's mouth there))
 	if (WildLandmark.IsValid() && bGot && (FVector2D::Distance(Site, WildLandmarkAt) < 1.0
