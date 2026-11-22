@@ -2153,6 +2153,30 @@ public:
 	float LastingHealth15() const;
 	float LastingMana15() const;
 	void AddPlaceItem15(const FVector& BoxAt, int64 BoxKey, TArray<FName>& Got);
+	// ---- the list of 2026-11-20's seventeenth phase (RDList15p.cpp): preparing for regions (idea 7), from SourceArt/wilderness/climate15.json (943)
+	/** the armour sets' warmth against the cold and coolness in the heat ("set|warm|cool"; cool below 0: hotter), the hot regions and the
+	 *  hours their heat comes on, how long it takes to sap her, the regions' herbs ("item|biome;biome") in their resource points' piles */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> ClimateGear15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> WildHeatBiomes15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float HeatFrom15 = 10.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float HeatTo15 = 17.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float HeatSeconds15 = 90.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> ClimateHerbs15;
+	struct FClimateMeter15 { float V = 0.f, BiteAt = 0.f, OutSince = -1.f, SaidAt = -100.f; bool bTold = false; int32 Bites = 0; };
+	FClimateMeter15 WildColdMeter15, WildHeatMeter15;
+	bool bWildHotNow15 = false;
+	FString WildHeatWhy15;
+	mutable TMap<FName, FVector2D> ClimateGearMap15;
+	mutable int32 ClimateGearFor15 = -1;
+	void GearClimate15(float& Warm, float& Cool) const;
+	float ColdRate15() const;
+	float HeatRate15() const;
+	void StepClimateMeter15(FClimateMeter15& M, bool bIn, bool bSay, float Step, float Rate, float Seconds, float Now, const TCHAR* Start, const TCHAR* Bite, const TCHAR* End);
+	void StepHeat15(const struct FRDWSample& Qs, bool bInTown, const FVector& Her, float Now);
+	void AddClimateHerb15(const struct FRDWildPlace& P, TArray<FName>& Got) const;
+	/** tests: the cold and the heat (see RDList15p.cpp); both from nothing */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FString GetWildClimate15() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") void ResetClimate15();
 	// ---- the list of 2026-11-20's sixteenth phase (RDList15o.cpp, RDList14k.cpp): waystones and crossroads posts (idea 9 in part)
 	/** the waystones (the world's, one a region's cell) and the crossroads posts laid in play (941... 942 sets them), the stone's height (m) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bWaystones15 = false;

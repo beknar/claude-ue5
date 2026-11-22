@@ -1,0 +1,166 @@
+{
+ "tag": "l15p17c",
+ "plan": [
+  "climate15",
+  "climate15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "climate15",
+   "ok": true,
+   "cold_at": [
+    59319.10468427484,
+    -9013.535347245408
+   ],
+   "cold_state": {
+    "cold": 10.5,
+    "cold_now": true,
+    "cold_rate": 1.0,
+    "warm_gear": 0.0,
+    "warm_buff": 0.0,
+    "heat": 0.0,
+    "hot_now": false,
+    "heat_rate": 1.0,
+    "cool_gear": 0.0,
+    "cool_buff": 0.0,
+    "why": "not here",
+    "bites": 0
+   },
+   "cold_bare": 0.996,
+   "wore": true,
+   "cold_gear": 0.378,
+   "warm_gear": 0.6,
+   "off": "None",
+   "ate": true,
+   "cold_stew": 0.399,
+   "warm_buff": 0.6,
+   "wore_again": true,
+   "cold_gear_stew": 0.094,
+   "stew_said": "You put on the bear warrior’s armour:  blows take 35% less,  you move 12% slower / Ate the frostleaf stew:  +4 HP a second for 15 s,  the cold comes on 60% slower for 300 s",
+   "heat_biome": "savannahs",
+   "heat_at": [
+    -8000.000000000007,
+    -13856.406460551016
+   ],
+   "heat_state": {
+    "cold": 0.0,
+    "cold_now": false,
+    "cold_rate": 0.1,
+    "warm_gear": 0.6,
+    "warm_buff": 0.6,
+    "heat": 1.8,
+    "hot_now": true,
+    "heat_rate": 1.2,
+    "cool_gear": -0.2,
+    "cool_buff": 0.0,
+    "why": "",
+    "bites": 0
+   },
+   "heat_day_bare": 1.139,
+   "drank": true,
+   "heat_day_cooler": 0.374,
+   "cool_buff": 0.6,
+   "heat_night": 0.0,
+   "night_why": "night",
+   "items": [
+    "Frostleaf",
+    "Frostleaf Stew",
+    "Sandroot",
+    "Sandroot Cooler"
+   ],
+   "oven_recipes": [
+    "Frostleaf Stew",
+    "Sandroot Cooler"
+   ],
+   "herb_regions": [
+    "Frostleaf|arctic regions;glacial;mountains and peaks;tundras;cold steppes;taigas",
+    "Sandroot|canyons;canyon networks;mesas;savannahs;burned plain"
+   ],
+   "put_back": {
+    "worn": true,
+    "effects": null
+   }
+  },
+  {
+   "step": "climate15",
+   "ok": true,
+   "cold_at": [
+    59319.10468427484,
+    -9013.535347245408
+   ],
+   "cold_state": {
+    "cold": 2.5,
+    "cold_now": true,
+    "cold_rate": 1.0,
+    "warm_gear": 0.0,
+    "warm_buff": 0.0,
+    "heat": 0.0,
+    "hot_now": false,
+    "heat_rate": 1.0,
+    "cool_gear": 0.0,
+    "cool_buff": 0.0,
+    "why": "not here",
+    "bites": 0
+   },
+   "cold_bare": 0.925,
+   "wore": true,
+   "cold_gear": 0.373,
+   "warm_gear": 0.6,
+   "off": "None",
+   "ate": true,
+   "cold_stew": 0.374,
+   "warm_buff": 0.6,
+   "wore_again": true,
+   "cold_gear_stew": 0.094,
+   "stew_said": "You put on the bear warrior’s armour:  blows take 35% less,  you move 12% slower / Hares dart about in the grass ahead",
+   "heat_biome": "savannahs",
+   "heat_at": [
+    -8000.000000000007,
+    -13856.406460551016
+   ],
+   "heat_state": {
+    "cold": 0.0,
+    "cold_now": false,
+    "cold_rate": 0.1,
+    "warm_gear": 0.6,
+    "warm_buff": 0.6,
+    "heat": 4.2,
+    "hot_now": true,
+    "heat_rate": 1.2,
+    "cool_gear": -0.2,
+    "cool_buff": 0.0,
+    "why": "",
+    "bites": 0
+   },
+   "heat_day_bare": 1.124,
+   "drank": true,
+   "heat_day_cooler": 0.399,
+   "cool_buff": 0.6,
+   "heat_night": 0.0,
+   "night_why": "night",
+   "items": [
+    "Frostleaf",
+    "Frostleaf Stew",
+    "Sandroot",
+    "Sandroot Cooler"
+   ],
+   "oven_recipes": [
+    "Frostleaf Stew",
+    "Sandroot Cooler"
+   ],
+   "herb_regions": [
+    "Frostleaf|arctic regions;glacial;mountains and peaks;tundras;cold steppes;taigas",
+    "Sandroot|canyons;canyon networks;mesas;savannahs;burned plain"
+   ],
+   "put_back": {
+    "worn": true,
+    "effects": null
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log, Content Browser",
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

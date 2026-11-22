@@ -1153,9 +1153,7 @@ bool URDCombatComponent::UseItem(FName Name)
 	// (the list of 2026-11-16's sixth phase: an advanced potion's or meal's buff besides)
 	if (AddBuff14(It))
 	{
-		const float P = It.BuffAmount * 100.f;
-		const FString Bw = It.BuffKind == TEXT("resist") ? FString::Printf(TEXT("blows on you %.0f%% less"), P) : It.BuffKind == TEXT("might") ? FString::Printf(TEXT("your blows %.0f%% more"), P)
-			: It.BuffKind == TEXT("speed") ? FString::Printf(TEXT("%.0f%% faster"), P) : FString::Printf(TEXT("%.0f%% of your hit points a second"), P);
+		const FString Bw = BuffWords15(It.BuffKind, It.BuffAmount, MaxHealth);          // (one wording for every reader)
 		SetMessage(Message + TEXT(",  ") + Bw + FString::Printf(TEXT(" for %.0f s"), It.BuffSeconds));
 	}
 	int32& N = Carried.FindOrAdd(Name);

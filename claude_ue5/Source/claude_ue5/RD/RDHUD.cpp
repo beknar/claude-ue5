@@ -326,19 +326,16 @@ void ARDHUD::DrawCombat(float Sc)
 			for (int32 I = Ef.Num() - 1; I >= 0; --I)
 			{
 				const URDCombatComponent::FEffect& E = Ef[I];
-				const bool bSpeed = E.Kind == ERDItemKind::Speed;
-				// (the list of 2026-11-16's sixth phase: an elixir's or a meal's resistance and might too)
-				const FString T = bSpeed ? FString::Printf(TEXT("SPEED +%.0f%%  %.0fs"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
-				                : E.Kind == ERDItemKind::Armour ? FString::Printf(TEXT("RESIST +%.0f%%  %.0fs"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
-				                : E.Kind == ERDItemKind::Weapon ? FString::Printf(TEXT("MIGHT +%.0f%%  %.0fs"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
-				                         : FString::Printf(TEXT("REGEN +%.1f/s  %.0fs"), E.Amount * Cb->GetMaxHealth(), FMath::CeilToFloat(E.Left));
-				const FName Ic = bSpeed ? FName(TEXT("chip_speed")) : E.Kind == ERDItemKind::Armour ? FName(TEXT("elixir_ironhide")) : E.Kind == ERDItemKind::Weapon ? FName(TEXT("elixir_might")) : FName(TEXT("chip_regen"));
+				const bool bSpeed = E.Kind == ERDItemKind::Speed, bWarm = E.Kind == ERDItemKind::Warmth, bCool = E.Kind == ERDItemKind::Cooling;
+				const FString T = URDCombatComponent::EffectWords15(E, Cb->GetMaxHealth(), true);          // (one wording for every reader: PR #109's review)
+				const FName Ic = Cb->EffectIcon15(E);
 				float Tw, Th; UI.TextSize(T, Tw, Th, Small, Sc, ERDType::Label);
 				const float Iw = UI.Has(Ic) ? Th + 14.f * Sc : 0.f;           // (its picture before the text)
 				const float Up = Ext * 1.6f;
 				const FVector2D C1(X, A.Y - 8.f * Sc - Up), C0(X - Tw - 16.f * Sc - Iw, A.Y - 8.f * Sc - Th - 8.f * Sc - Up);
-				Box(C0, C1, bSpeed ? FLinearColor(0.10f, 0.22f, 0.30f, 0.85f) : FLinearColor(0.12f, 0.26f, 0.12f, 0.85f));
-				Frame(C0, C1, bSpeed ? RDCyan : FLinearColor(0.45f, 0.9f, 0.45f), 1.f * Sc);
+				// (a warm buff in amber, a cool one in pale blue: not the regeneration's green (PR #109's review))
+				Box(C0, C1, bSpeed || bCool ? FLinearColor(0.10f, 0.22f, 0.30f, 0.85f) : bWarm ? FLinearColor(0.30f, 0.18f, 0.06f, 0.85f) : FLinearColor(0.12f, 0.26f, 0.12f, 0.85f));
+				Frame(C0, C1, bSpeed ? RDCyan : bCool ? FLinearColor(0.6f, 0.85f, 1.f) : bWarm ? FLinearColor(1.f, 0.7f, 0.3f) : FLinearColor(0.45f, 0.9f, 0.45f), 1.f * Sc);
 				if (Iw > 0.f) UI.Fit(Ic, C0 + FVector2D(4.f * Sc, -6.f * Sc), FVector2D(C0.X + Iw, C1.Y + 6.f * Sc));
 				UI.Text(T, FLinearColor::White, C0.X + 8.f * Sc + Iw, C0.Y + 4.f * Sc, Small, Sc, ERDType::Label);
 				X = C0.X - 8.f * Sc;
@@ -1721,10 +1718,7 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 	const float Hp = Cb ? Cb->GetMaxHealth() : 100.f, Mp = Cb ? Cb->GetMaxMana() : 0.f;
 	// (the list of 2026-11-16's sixth phase: an advanced potion's or meal's buff besides)
 	const FString Buff = It.BuffKind.IsNone() || It.BuffAmount <= 0.f ? FString()
-		: FString::Printf(TEXT("  Then for %.0f s: %s."), It.BuffSeconds, *(It.BuffKind == TEXT("resist") ? FString::Printf(TEXT("blows on you %.0f%% less"), It.BuffAmount * 100.f)
-			: It.BuffKind == TEXT("might") ? FString::Printf(TEXT("your blows %.0f%% more"), It.BuffAmount * 100.f)
-			: It.BuffKind == TEXT("speed") ? FString::Printf(TEXT("you move %.0f%% faster"), It.BuffAmount * 100.f)
-			: FString::Printf(TEXT("%.1f HP a second"), It.BuffAmount * Hp)));
+		: FString::Printf(TEXT("  Then for %.0f s: %s."), It.BuffSeconds, *URDCombatComponent::BuffWords15(It.BuffKind, It.BuffAmount, Hp));          // (one wording for every reader: PR #109's review)
 	switch (It.Kind)
 	{
 	case ERDItemKind::Healing: return FString::Printf(TEXT("Restores %.0f%% of your hit points  (%.0f HP)"), It.Amount * 100.f, It.Amount * Hp) + Buff;
@@ -2533,10 +2527,7 @@ void ARDHUD::DrawInventory(float Sc)
 		                          : FString::Printf(TEXT("Shield  %s,  slung (it takes nothing with this weapon%s)"), *Ws.ToString(), Cb->IsTorchHeld() ? TEXT(" or the torch") : TEXT("")), RDCyan, Sc * 1.05f);
 	}
 	for (const URDCombatComponent::FEffect& E : Cb->GetEffects())
-		Para(E.Kind == ERDItemKind::Speed ? FString::Printf(TEXT("Speed +%.0f%%: %.0f s left"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
-		     : E.Kind == ERDItemKind::Armour ? FString::Printf(TEXT("Blows on you %.0f%% less: %.0f s left"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
-		     : E.Kind == ERDItemKind::Weapon ? FString::Printf(TEXT("Your blows %.0f%% more: %.0f s left"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
-		                                 : FString::Printf(TEXT("Regenerating %.1f HP/s: %.0f s left"), E.Amount * Cb->GetMaxHealth(), FMath::CeilToFloat(E.Left)), RDCyan, Sc);
+		Para(URDCombatComponent::EffectWords15(E, Cb->GetMaxHealth(), false), RDCyan, Sc);
 	// ---- the keys, and what was done last
 	const float Fy = B.Y - 92.f * Sc;
 	if (bDivider) UI.Fit(TEXT("divider"), FVector2D(A.X + Pd, Fy - 20.f * Sc), FVector2D(B.X - Pd, Fy + 20.f * Sc));

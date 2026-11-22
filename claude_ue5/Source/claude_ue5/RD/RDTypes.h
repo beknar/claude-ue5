@@ -825,7 +825,11 @@ enum class ERDItemKind : uint8
 	Light,
 	/** the list of 2026-11-16's sixth phase: a recipe found: read from the inventory, it teaches how to make its Teaches (kept for
 	 *  the game in URDGameInstance::KnownRecipes) and is used up */
-	Recipe
+	Recipe,
+	/** the list of 2026-11-20's seventeenth phase: a buff's kind among her effects only (a warm meal's: the cold builds up more slowly;
+	 *  a cool drink's: the heat does), never an item's own kind */
+	Warmth UMETA(Hidden),
+	Cooling UMETA(Hidden)
 };
 
 /** the list of 2026-11-08b's eighth phase (913): the ridable horse: its meshes (her bay, the stable's grey), its clips (made in

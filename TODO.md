@@ -55,6 +55,12 @@ Built and compiled, but no test has run it yet:
 - [ ] **Not measured**: a story met by the director's own pick (the test sends each by its hook); one chased killed (its "failed"); her own fight with the pursuers (test blows as hers); a save and load mid-story (stories are not saved: one going ends with the play).
 - [ ] **Limits**: someone met is a person of the wilds who gave or was helped (not the towns' people, the contracts' boards or quest givers); the rival walks, it never runs or fights; the cart is lifted at once by F (no strength needed).
 
+## The list of 2026-11-20's seventeenth phase: preparing for regions
+
+- [x] **Warm gear and a warm meal against the cold, the heat by day, the regions' herbs and meals** ([the wilderness](docs/levels/wilderness.md)): `888 climate15 -Light`.
+- [ ] **Not measured**: the meals cooked at an oven (their recipes are on the maps; the test eats them given); the herbs found in a resource point's pile; the heat's bite (past 90 s); the shade under a roof or rock (the test stood in the open); hotter in plate.
+- [ ] **Limits**: a tree's crown gives no shade (its leaves have no collision); martial_arts has no cooler recipe (no berries there); a drink of water is the cooler, not the water itself.
+
 ## The list of 2026-11-20's sixteenth phase: waystones and crossroads posts
 
 - [x] **Waystones found, lit and travelled to; the crossroads posts** ([the wilderness](docs/levels/wilderness.md)): `888 waystones15 -Light`.

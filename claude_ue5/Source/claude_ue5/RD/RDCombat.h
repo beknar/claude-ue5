@@ -310,6 +310,14 @@ public:
 	// off; wearing the one she has on takes it off.
 	/** puts the set on (or takes it off when she wears it): false when she does not carry it or it was not made for her */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool WearArmour(FName Item);
+	/** the list of 2026-11-20's seventeenth phase: the strongest warm (ERDItemKind::Warmth) or cool (Cooling) buff on her */
+	float GetClimateBuff15(ERDItemKind K) const;
+	/** tests: the effects an item put on her taken off (a step puts back what it changed) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") int32 RemoveEffectsOf15(FName Item) { const int32 N = Effects.RemoveAll([Item](const FEffect& E) { return E.Item == Item; }); UpdateWalkSpeed(); return N; }
+	/** a buff's words (an item's), an effect's on her (the chip's or the inventory's line), the chip's picture: one place for every reader */
+	static FString BuffWords15(FName Kind, float Amount, float MaxHealth);
+	static FString EffectWords15(const FEffect& E, float MaxHealth, bool bChip);
+	FName EffectIcon15(const FEffect& E) const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void TakeOffArmour();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") FName GetWornArmour() const { return WornArmour; }
 	/** the share of a blow her armour takes off (0: none) */

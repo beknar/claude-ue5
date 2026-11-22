@@ -77,7 +77,51 @@ static ERDItemKind RDBuffKind14(FName B, bool& bOk)
 	if (B == TEXT("might")) return ERDItemKind::Weapon;
 	if (B == TEXT("speed")) return ERDItemKind::Speed;
 	if (B == TEXT("regen")) return ERDItemKind::Food;
+	if (B == TEXT("warm")) return ERDItemKind::Warmth;          // (the list of 2026-11-20's seventeenth phase)
+	if (B == TEXT("cool")) return ERDItemKind::Cooling;
 	bOk = false; return ERDItemKind::Food;
+}
+
+FString URDCombatComponent::BuffWords15(FName Kind, float Amount, float MaxHealth)
+{
+	// (what a buff does, in words: the item's text, the message on using it (PR #109's review: four chains of these kept apart))
+	const float P = Amount * 100.f;
+	if (Kind == TEXT("resist")) return FString::Printf(TEXT("blows on you %.0f%% less"), P);
+	if (Kind == TEXT("might")) return FString::Printf(TEXT("your blows %.0f%% more"), P);
+	if (Kind == TEXT("speed")) return FString::Printf(TEXT("you move %.0f%% faster"), P);
+	if (Kind == TEXT("warm")) return FString::Printf(TEXT("the cold comes on %.0f%% slower"), P);
+	if (Kind == TEXT("cool")) return FString::Printf(TEXT("the heat comes on %.0f%% slower"), P);
+	return FString::Printf(TEXT("%.1f HP a second"), Amount * MaxHealth);
+}
+
+FString URDCombatComponent::EffectWords15(const FEffect& E, float MaxHealth, bool bChip)
+{
+	// (an effect on her: the status panel's chip (short, capitals) or the inventory's line)
+	const float L = FMath::CeilToFloat(E.Left), P = E.Amount * 100.f;
+	switch (E.Kind)
+	{
+	case ERDItemKind::Speed: return bChip ? FString::Printf(TEXT("SPEED +%.0f%%  %.0fs"), P, L) : FString::Printf(TEXT("Speed +%.0f%%: %.0f s left"), P, L);
+	case ERDItemKind::Armour: return bChip ? FString::Printf(TEXT("RESIST +%.0f%%  %.0fs"), P, L) : FString::Printf(TEXT("Blows on you %.0f%% less: %.0f s left"), P, L);
+	case ERDItemKind::Weapon: return bChip ? FString::Printf(TEXT("MIGHT +%.0f%%  %.0fs"), P, L) : FString::Printf(TEXT("Your blows %.0f%% more: %.0f s left"), P, L);
+	case ERDItemKind::Warmth: return bChip ? FString::Printf(TEXT("WARM %.0f%%  %.0fs"), P, L) : FString::Printf(TEXT("Warm: the cold %.0f%% slower: %.0f s left"), P, L);
+	case ERDItemKind::Cooling: return bChip ? FString::Printf(TEXT("COOL %.0f%%  %.0fs"), P, L) : FString::Printf(TEXT("Cool: the heat %.0f%% slower: %.0f s left"), P, L);
+	default: return bChip ? FString::Printf(TEXT("REGEN +%.1f/s  %.0fs"), E.Amount * MaxHealth, L) : FString::Printf(TEXT("Regenerating %.1f HP/s: %.0f s left"), E.Amount * MaxHealth, L);
+	}
+}
+
+FName URDCombatComponent::EffectIcon15(const FEffect& E) const
+{
+	// (the chip's picture: the kind's own, a warm or cool buff its meal's (PR #109's review: they fell to the regeneration's))
+	switch (E.Kind)
+	{
+	case ERDItemKind::Speed: return TEXT("chip_speed");
+	case ERDItemKind::Armour: return TEXT("elixir_ironhide");
+	case ERDItemKind::Weapon: return TEXT("elixir_might");
+	case ERDItemKind::Warmth: case ERDItemKind::Cooling:
+		if (Generator) { const int32 Ix = Generator->FindItem(E.Item); if (Ix >= 0 && !Generator->Items[Ix].Icon.IsNone()) return Generator->Items[Ix].Icon; }
+		return TEXT("chip_regen");
+	default: return TEXT("chip_regen");
+	}
 }
 
 bool URDCombatComponent::AddBuff14(const FRDItemDef& It)
