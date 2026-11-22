@@ -16,16 +16,21 @@ DEFINE_LOG_CATEGORY_STATIC(LogRDList15p, Log, All);
 
 void ARDDungeonGenerator::GearClimate15(float& Warm, float& Cool) const
 {
-	// (the armour she wears: its warmth against the cold and its coolness in the heat (heavy plate's below 0: hotter))
+	// (the armour she wears: its warmth against the cold and its coolness in the heat (heavy plate's below 0: hotter); the table parsed once
+	// (PR #109's review: every look split its twenty lines))
 	Warm = Cool = 0.f;
 	if (!PlayerCombat) return;
-	const FString Worn = PlayerCombat->GetWornArmour().ToString();
-	if (Worn.IsEmpty() || Worn == TEXT("None")) return;
-	for (const FString& L : ClimateGear15)
+	if (ClimateGearFor15 != ClimateGear15.Num())
 	{
-		TArray<FString> F; L.ParseIntoArray(F, TEXT("|"), false);
-		if (F.Num() >= 3 && F[0] == Worn) { Warm = FCString::Atof(*F[1]); Cool = FCString::Atof(*F[2]); return; }
+		ClimateGearFor15 = ClimateGear15.Num();
+		ClimateGearMap15.Reset();
+		for (const FString& L : ClimateGear15)
+		{
+			TArray<FString> F; L.ParseIntoArray(F, TEXT("|"), false);
+			if (F.Num() >= 3) ClimateGearMap15.Add(FName(*F[0]), FVector2D(FCString::Atof(*F[1]), FCString::Atof(*F[2])));
+		}
 	}
+	if (const FVector2D* G = ClimateGearMap15.Find(PlayerCombat->GetWornArmour())) { Warm = (float)G->X; Cool = (float)G->Y; }
 }
 
 float ARDDungeonGenerator::ColdRate15() const
@@ -42,22 +47,44 @@ float ARDDungeonGenerator::HeatRate15() const
 	return FMath::Clamp(1.f - Cool - Buff, 0.1f, 1.5f);
 }
 
-void ARDDungeonGenerator::TickHeat15(float Dt, const FVector& Her)
+void ARDDungeonGenerator::StepClimateMeter15(FClimateMeter15& M, bool bIn, bool bSay, float Step, float Rate, float Seconds, float Now, const TCHAR* Start, const TCHAR* Bite, const TCHAR* End)
 {
-	HeatLook15 -= Dt;
-	if (HeatLook15 > 0.f || !IsWildReady() || !PlayerCombat || WildHeatBiomes15.Num() == 0) return;
-	const float Step = 0.5f - HeatLook15;          // (the time since the last look)
-	HeatLook15 = 0.5f;
+	// (the cold's and the heat's one meter: in it, it rises by Step x Rate (to 60 s past Seconds), told once past Seconds, a bite every 15 s
+	// after; out of it, it falls four times as fast, and its told state ends only after 2 s out (PR #109's review: an arch's shade or a
+	// flickering bank of a stream every half second said both lines and put the bite off for good); a line at most every 10 s)
+	if (!PlayerCombat) return;
+	auto Say = [&](const TCHAR* T) { if (Now - M.SaidAt >= 10.f) { PlayerCombat->ShowMessage(T); M.SaidAt = Now; } };
+	if (bIn)
+	{
+		M.OutSince = -1.f;
+		M.V = FMath::Min(M.V + Step * Rate, Seconds + 60.f);
+		if (M.V > Seconds && !M.bTold) { M.bTold = true; M.BiteAt = Now + 15.f; Say(Start); }
+		if (M.bTold && M.V > Seconds && Now >= M.BiteAt && !PlayerCombat->IsDead())
+		{
+			M.BiteAt = Now + 15.f;
+			PlayerCombat->HurtByTrap(0.03f, 0.2f, 1.f, Bite);
+			++M.Bites;
+		}
+		return;
+	}
+	M.V = FMath::Max(0.f, M.V - 4.f * Step);
+	if (M.OutSince < 0.f) M.OutSince = Now;
+	if (M.bTold && Now - M.OutSince >= 2.f) { M.bTold = false; if (bSay) Say(End); }
+}
+
+void ARDDungeonGenerator::StepHeat15(const FRDWSample& Qs, bool bInTown, const FVector& Her, float Now)
+{
+	// (the heat, from the cold's look's sample: in the hot regions by day, away from a town, water over the ground (not a hot spring: PR #109's
+	// review: a dry bank's sample named the river under it) and shade)
+	if (WildHeatBiomes15.Num() == 0) return;
 	const UWorld* W = GetWorld();
-	const float Now = W ? W->GetTimeSeconds() : 0.f;
-	FRDWSample Qs; Wild->Sample(Her.X / 100.0, Her.Y / 100.0, Qs, false);
 	const bool bHotLand = WildHeatBiomes15.Contains(Wild->BiomeName(Qs.Biome));
 	const bool bDay = TownHour >= HeatFrom15 && TownHour < HeatTo15;
 	WildHeatWhy15.Reset();
 	if (!bHotLand) WildHeatWhy15 = TEXT("not here");
 	else if (!bDay) WildHeatWhy15 = TEXT("night");
-	else if (IsInLoadedTown(Her)) WildHeatWhy15 = TEXT("town");
-	else if (Qs.WaterKind != 0) WildHeatWhy15 = TEXT("water");
+	else if (bInTown) WildHeatWhy15 = TEXT("town");
+	else if (Qs.WaterKind != 0 && Qs.WaterKind != 6 && Qs.Water > Qs.H) WildHeatWhy15 = TEXT("water");
 	else
 	{
 		// (shade: something solid over her head within 30 m (a rock, an arch, a roof, a ruin's wall leaning over))
@@ -66,21 +93,8 @@ void ARDDungeonGenerator::TickHeat15(float Dt, const FVector& Her)
 		if (W && W->LineTraceSingleByChannel(Hit, Her + FVector(0, 0, 90.f), Her + FVector(0, 0, 3000.f), ECC_Visibility, Qp)) WildHeatWhy15 = TEXT("shade");
 	}
 	bWildHotNow15 = WildHeatWhy15.IsEmpty();
-	if (!bWildHotNow15)
-	{
-		if (bWildHeatTold15 && bHotLand) PlayerCombat->ShowMessage(TEXT("You cool off"));
-		bWildHeatTold15 = false;
-		WildHeat15 = FMath::Max(0.f, WildHeat15 - 4.f * Step);
-		return;
-	}
-	WildHeat15 = FMath::Min(WildHeat15 + Step * HeatRate15(), HeatSeconds15 + 60.f);
-	if (WildHeat15 > HeatSeconds15 && !bWildHeatTold15) { bWildHeatTold15 = true; WildHeatBiteAt15 = Now + 15.f; PlayerCombat->ShowMessage(TEXT("The sun beats down. Find shade or water")); }
-	if (bWildHeatTold15 && WildHeat15 > HeatSeconds15 && Now >= WildHeatBiteAt15 && !PlayerCombat->IsDead())
-	{
-		WildHeatBiteAt15 = Now + 15.f;
-		PlayerCombat->HurtByTrap(0.03f, 0.2f, 1.f, TEXT("The heat saps you. Your head swims"));
-		++HeatBites15;
-	}
+	StepClimateMeter15(WildHeatMeter15, bWildHotNow15, bHotLand, 0.5f, HeatRate15(), HeatSeconds15, Now, TEXT("The sun beats down. Find shade or water"),
+		TEXT("The heat saps you. Your head swims"), TEXT("You cool off"));
 }
 
 void ARDDungeonGenerator::AddClimateHerb15(const FRDWildPlace& P, TArray<FName>& Got) const
@@ -101,14 +115,14 @@ FString ARDDungeonGenerator::GetWildClimate15() const
 	// (tests: "cold|<cold s>|<cold now>|<cold rate>|<warm gear>|<warm buff>|heat|<heat s>|<hot now>|<heat rate>|<cool gear>|<cool buff>|<why>|<bites>")
 	float Warm, Cool; GearClimate15(Warm, Cool);
 	return FString::Printf(TEXT("cold|%.2f|%d|%.2f|%.2f|%.2f|heat|%.2f|%d|%.2f|%.2f|%.2f|%s|%d"), WildCold, bWildColdNow ? 1 : 0, ColdRate15(), Warm,
-		PlayerCombat ? PlayerCombat->GetClimateBuff15(ERDItemKind::Warmth) : 0.f, WildHeat15, bWildHotNow15 ? 1 : 0, HeatRate15(), Cool,
-		PlayerCombat ? PlayerCombat->GetClimateBuff15(ERDItemKind::Cooling) : 0.f, *WildHeatWhy15, HeatBites15);
+		PlayerCombat ? PlayerCombat->GetClimateBuff15(ERDItemKind::Warmth) : 0.f, WildHeatMeter15.V, bWildHotNow15 ? 1 : 0, HeatRate15(), Cool,
+		PlayerCombat ? PlayerCombat->GetClimateBuff15(ERDItemKind::Cooling) : 0.f, *WildHeatWhy15, WildHeatMeter15.Bites);
 }
 
 void ARDDungeonGenerator::ResetClimate15()
 {
 	// (tests: the cold and the heat from nothing)
-	WildCold = 0.f; bWildColdTold = false; WildHeat15 = 0.f; bWildHeatTold15 = false; HeatBites15 = 0;
+	WildColdMeter15 = FClimateMeter15(); WildHeatMeter15 = FClimateMeter15(); WildCold = 0.f; bWildColdTold = false;
 }
 
 float URDCombatComponent::GetClimateBuff15(ERDItemKind K) const

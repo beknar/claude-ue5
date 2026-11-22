@@ -14,11 +14,11 @@
     {"item": "Sandroot", "biomes": ["canyons", "canyon networks", "mesas", "savannahs", "burned plain"]}
   ],
   "items": [
-    {"name": "Frostleaf", "like": "Herbs"},
-    {"name": "Sandroot", "like": "Herbs"},
-    {"name": "Frostleaf Stew", "like": "Travel Cake", "amount": 0.03, "seconds": 15, "buff": ["warm", 0.6, 300],
+    {"name": "Frostleaf", "like": "Herbs", "icon": "frostleaf", "looks": "A pale mountain herb rimed with frost. Cooked with meat at an oven, it keeps the cold off."},
+    {"name": "Sandroot", "like": "Herbs", "icon": "sandroot", "looks": "A gnarled desert root, dusty with sand. Cooked with berries at an oven, it keeps the heat off."},
+    {"name": "Frostleaf Stew", "like": "Travel Cake", "icon": "frostleaf_stew", "looks": "A hot stew of meat and frostleaf: the cold comes on far more slowly for five minutes.", "amount": 0.03, "seconds": 15, "buff": ["warm", 0.6, 300],
      "parts": [["meat", ["Raw Meat", "Jerky", "Well Done Steak"], 1], ["frostleaf", ["Frostleaf"], 2]]},
-    {"name": "Sandroot Cooler", "like": "Travel Cake", "amount": 0.02, "seconds": 10, "buff": ["cool", 0.6, 300],
+    {"name": "Sandroot Cooler", "like": "Travel Cake", "icon": "sandroot_cooler", "looks": "Cool water steeped with sandroot and berries: the heat comes on far more slowly for five minutes.", "amount": 0.02, "seconds": 10, "buff": ["cool", 0.6, 300],
      "parts": [["sandroot", ["Sandroot"], 2], ["berries", ["Wild Berries", "Wild Plums", "Grapes"], 1]]}
   ],
   "maps": ["brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress", "caves", "martial_arts"]

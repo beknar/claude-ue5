@@ -2162,14 +2162,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float HeatTo15 = 17.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float HeatSeconds15 = 90.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> ClimateHerbs15;
-	float WildHeat15 = 0.f, WildHeatBiteAt15 = 0.f, HeatLook15 = 0.f;
-	bool bWildHotNow15 = false, bWildHeatTold15 = false;
-	int32 HeatBites15 = 0;
+	struct FClimateMeter15 { float V = 0.f, BiteAt = 0.f, OutSince = -1.f, SaidAt = -100.f; bool bTold = false; int32 Bites = 0; };
+	FClimateMeter15 WildColdMeter15, WildHeatMeter15;
+	bool bWildHotNow15 = false;
 	FString WildHeatWhy15;
+	mutable TMap<FName, FVector2D> ClimateGearMap15;
+	mutable int32 ClimateGearFor15 = -1;
 	void GearClimate15(float& Warm, float& Cool) const;
 	float ColdRate15() const;
 	float HeatRate15() const;
-	void TickHeat15(float Dt, const FVector& Her);
+	void StepClimateMeter15(FClimateMeter15& M, bool bIn, bool bSay, float Step, float Rate, float Seconds, float Now, const TCHAR* Start, const TCHAR* Bite, const TCHAR* End);
+	void StepHeat15(const struct FRDWSample& Qs, bool bInTown, const FVector& Her, float Now);
 	void AddClimateHerb15(const struct FRDWildPlace& P, TArray<FName>& Got) const;
 	/** tests: the cold and the heat (see RDList15p.cpp); both from nothing */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FString GetWildClimate15() const;

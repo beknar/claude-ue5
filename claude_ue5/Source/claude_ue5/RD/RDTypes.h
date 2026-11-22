@@ -828,8 +828,8 @@ enum class ERDItemKind : uint8
 	Recipe,
 	/** the list of 2026-11-20's seventeenth phase: a buff's kind among her effects only (a warm meal's: the cold builds up more slowly;
 	 *  a cool drink's: the heat does), never an item's own kind */
-	Warmth,
-	Cooling
+	Warmth UMETA(Hidden),
+	Cooling UMETA(Hidden)
 };
 
 /** the list of 2026-11-08b's eighth phase (913): the ridable horse: its meshes (her bay, the stable's grey), its clips (made in

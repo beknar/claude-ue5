@@ -227,7 +227,7 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 	TickWildAurora13(Dt, Her);
 	TickWildLandmark13(Dt, Her);
 	// (the list of 2026-11-20's tenth phase: the lookouts, the regions' landmarks, the houses' lights by night: RDList15i.cpp)
-	TickLookouts15(Dt, Her); TickRegionLandmarks15(Dt, Her); TickHouseLights15(Dt, Her); TickRoamers15(Dt, Her); TickRewards15(Dt, Her); TickContracts15(Dt, Her); TickReclaim15(Dt, Her); TickStories15(Dt, Her); TickWaystones15(Dt, Her); TickCrossPosts15(Dt, Her); TickHeat15(Dt, Her);          // (the eleventh and twelfth phases: RDList15j.cpp, RDList15k.cpp)
+	TickLookouts15(Dt, Her); TickRegionLandmarks15(Dt, Her); TickHouseLights15(Dt, Her); TickRoamers15(Dt, Her); TickRewards15(Dt, Her); TickContracts15(Dt, Her); TickReclaim15(Dt, Her); TickStories15(Dt, Her); TickWaystones15(Dt, Her); TickCrossPosts15(Dt, Her);          // (the eleventh and twelfth phases: RDList15j.cpp, RDList15k.cpp)
 	// (the ninth phase: the tide's skins at its level)
 	if (WildTideSkins.Num() > 0)
 	{
@@ -299,27 +299,19 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 		}
 		const bool bWarm = !WildWarmWhy.IsEmpty();
 		bWildColdNow = bColdLand && !bWarm;
-		if (!bWildColdNow)
-		{
-			if (bWarm && bWildColdTold) PlayerCombat->ShowMessage(TEXT("The warmth comes back into your hands"));
-			bWildColdTold = false;
-			WildCold = FMath::Max(0.f, WildCold - 2.f);
-		}
-		else
-		{
-			WildCold = FMath::Min(WildCold + 0.5f * ColdRate15(), WildColdSeconds + 60.f);          // (the list of 2026-11-20's seventeenth phase: slower in warm gear and with a warm meal)
-			if (WildCold > WildColdSeconds && !bWildColdTold) { bWildColdTold = true; WildColdBiteAt = Now + 15.f; PlayerCombat->ShowMessage(TEXT("You are cold to the bone. Find a fire or shelter")); }
-		}
+		// (the list of 2026-11-20's seventeenth phase: one meter for the cold and the heat (PR #109's review): slower in warm gear and with a
+		// warm meal; out of it 2 s before its told state ends, a line at most every 10 s)
+		// (its value and told state are the cold's own fields, which a rest or a shelter sets back: taken in and written back each look)
+		WildColdMeter15.V = WildCold; WildColdMeter15.bTold = bWildColdTold;
+		StepClimateMeter15(WildColdMeter15, bWildColdNow, bWarm, 0.5f, ColdRate15(), WildColdSeconds, Now, TEXT("You are cold to the bone. Find a fire or shelter"),
+			TEXT("The cold bites. Your fingers will not close"), TEXT("The warmth comes back into your hands"));
+		WildCold = WildColdMeter15.V; bWildColdTold = WildColdMeter15.bTold;
+		// (the heat, from the same sample)
+		StepHeat15(Qs, bInTown, Her, Now);
 	}
 	// ---- the sixth phase: what calls back, told when it does
 	for (int32 Ei = WildSceneryEchoes.Num() - 1; Ei >= 0; --Ei)
 		if (Now >= WildSceneryEchoes[Ei].Key) { PlayerCombat->ShowMessage(WildSceneryEchoes[Ei].Value); ++WildEchoesHeard; WildSceneryEchoes.RemoveAt(Ei); }
-	// ---- the tenth phase: the cold's bite
-	if (bWildColdNow && bWildColdTold && WildCold > WildColdSeconds && Now >= WildColdBiteAt && !PlayerCombat->IsDead())
-	{
-		WildColdBiteAt = Now + 15.f;
-		PlayerCombat->HurtByTrap(0.03f, 0.2f, 1.f, TEXT("The cold bites. Your fingers will not close"));
-	}
 	// ---- the hazards' bursts of dust put out, then taken away
 	for (int32 Bi = WildSceneryBursts.Num() - 1; Bi >= 0; --Bi)
 	{

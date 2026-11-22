@@ -5,7 +5,9 @@ seventeenth phase: preparing for regions (C++ RD/RDList15p.cpp). From SourceArt/
   first (by name); a map without a "like" takes the first map's
 - `data`: brokenspire's: the armour sets' warmth and coolness (each set checked against its items), the hot regions and hours, the
   regions' herbs (each region checked against its biomes)
-Run `items` after 928 and 929 (which write the maps' items anew). Args: [items,data]   (no argument: both)"""
+- `icons <dir>`: their pictures (rdm4_ui_gen.py / rdm4_ui_cut.py --export <dir>, ui_art.json's frostleaf, sandroot, frostleaf_stew, sandroot_cooler)
+  into every map's UI art
+Run `items` after 928 and 929 (which write the maps' items anew). Args: [items,data,icons] [<dir>]   (no argument: items,data)"""
 import sys, os, json, gc, unreal
 MAPS = "/Game/RandomDungeon/Maps/"
 SA = r"E:\code\claude-ue5\claude_ue5\SourceArt\wilderness"
@@ -13,6 +15,7 @@ les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); eas = unreal.get
 eal = unreal.EditorAssetLibrary
 J = json.load(open(os.path.join(SA, "climate15.json"), encoding="utf-8"))
 PARTS = (sys.argv[1] if len(sys.argv) > 1 else "items,data").split(",")
+ICONS = sys.argv[2] if len(sys.argv) > 2 else ""
 REPORT = []
 TEMPLATE = {}
 
@@ -42,6 +45,9 @@ def items(g):
         d.set_editor_property("name", X["name"]); d.set_editor_property("weight", 0.0); d.set_editor_property("tiers", []); d.set_editor_property("found_max", 1)
         if "amount" in X: d.set_editor_property("amount", float(X["amount"]))
         if "seconds" in X: d.set_editor_property("seconds", float(X["seconds"]))
+        # (a picture and words of its own (PR #109's review: the copy kept its like's, the herbs Herbs' and the meals the Travel Cake's))
+        if X.get("icon"): d.set_editor_property("icon", unreal.Name(X["icon"]))
+        if X.get("looks"): d.set_editor_property("looks", X["looks"])
         if X.get("buff"):
             d.set_editor_property("buff_kind", unreal.Name(X["buff"][0])); d.set_editor_property("buff_amount", float(X["buff"][1])); d.set_editor_property("buff_seconds", float(X["buff"][2]))
         added.append(d)
@@ -82,7 +88,33 @@ def data(g):
     return f"{len(J['gear'])} sets, {len(J['heat']['biomes'])} hot regions {J['heat']['from']}-{J['heat']['to']} h, {len(J['herbs'])} herbs"
 
 
+def icons(src):
+    src = os.path.abspath(src)
+    names = [x["icon"] for x in J["items"] if x.get("icon") and os.path.exists(os.path.join(src, f"{x['icon']}.png"))]
+    assert len(names) == len([x for x in J["items"] if x.get("icon")]), f"943 icons: not every picture in {src} (rdm4_ui_cut.py --export)"
+    at = unreal.AssetToolsHelpers.get_asset_tools()
+    tex = {}
+    for n in names:
+        tk = unreal.AssetImportTask(); tk.set_editor_property("filename", os.path.join(src, f"{n}.png")); tk.set_editor_property("destination_path", "/Game/RandomDungeon/UI")
+        tk.set_editor_property("destination_name", f"T_RDM4_{n}"); tk.set_editor_property("replace_existing", True); tk.set_editor_property("automated", True); tk.set_editor_property("save", False)
+        at.import_asset_tasks([tk])
+        t = unreal.load_asset(f"/Game/RandomDungeon/UI/T_RDM4_{n}")
+        t.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_EDITOR_ICON); t.set_editor_property("lod_group", unreal.TextureGroup.TEXTUREGROUP_UI)
+        t.set_editor_property("never_stream", True); t.set_editor_property("srgb", True)
+        eal.save_loaded_asset(t, False); tex[n] = t
+    def fn(g):
+        ua = g.get_editor_property("ui_art")
+        for n, t in tex.items():
+            art = unreal.RDUIArt(); art.set_editor_property("texture", t)
+            art.set_editor_property("border", unreal.Vector4(0, 0, 0, 0)); art.set_editor_property("inner", unreal.Vector4(0, 0, 1, 1))
+            ua[unreal.Name(n)] = art
+        g.set_editor_property("ui_art", ua)
+        return ", ".join(tex)
+    each(fn, "icons", J["maps"])
+
+
 if "items" in PARTS: each(items, "items", J["maps"])
 if "data" in PARTS: each(data, "data", ["brokenspire"])
+if "icons" in PARTS: icons(ICONS)
 for l in REPORT: print("CLIMATE15", l)
 gc.collect()

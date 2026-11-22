@@ -8003,7 +8003,8 @@ def step_climate15():
         yield from rwait(secs)
         b = climate15_state(g)[key]; dt = clock() - t0
         return round((b - a) / max(dt, 0.01), 3)
-    worn0 = str(cb().get_worn_armour()); hour0 = g.get_town_hour() if hasattr(g, "get_town_hour") else 12.0
+    worn0 = str(cb().get_worn_armour()); hour0 = g.get_town_hour(); added = {}
+    counts0 = {n: cb().get_item_count(n) for n in ("Bear Warrior\u2019s Armour", "Frostleaf Stew", "Sandroot Cooler")}
     try:
         yield from wait_ready(90)
         g.set_town_hour(12.0)
@@ -8014,12 +8015,17 @@ def step_climate15():
             g.wild_put_her(cp[0], cp[1]); yield from wait_chunks(30, 50); ground_put(cp[0], cp[1]); yield from rwait(2.0)
             res["cold_state"] = climate15_state(g)
             res["cold_bare"] = yield from rate("cold")
-            cb().add_item("Bear Warrior\u2019s Armour", 1); res["wore"] = cb().wear_armour("Bear Warrior\u2019s Armour"); yield from rwait(0.5)
+            # (the armour alone, then off; the stew alone; both: the stew's own share measured, not under the floor (PR #109's review))
+            cb().add_item("Bear Warrior\u2019s Armour", 1); added["Bear Warrior\u2019s Armour"] = 1
+            res["wore"] = cb().wear_armour("Bear Warrior\u2019s Armour"); yield from rwait(0.5)
             res["cold_gear"] = yield from rate("cold"); res["warm_gear"] = climate15_state(g)["warm_gear"]
-            cb().add_item("Frostleaf Stew", 1); res["ate"] = cb().use_item("Frostleaf Stew"); yield from rwait(0.5)
-            res["cold_gear_stew"] = yield from rate("cold"); res["warm_buff"] = climate15_state(g)["warm_buff"]
+            cb().wear_armour("Bear Warrior\u2019s Armour"); yield from rwait(0.5)          # (off: wearing the set worn takes it off)
+            res["off"] = str(cb().get_worn_armour())
+            cb().add_item("Frostleaf Stew", 1); added["Frostleaf Stew"] = 1; res["ate"] = cb().use_item("Frostleaf Stew"); yield from rwait(0.5)
+            res["cold_stew"] = yield from rate("cold"); res["warm_buff"] = climate15_state(g)["warm_buff"]
+            res["wore_again"] = cb().wear_armour("Bear Warrior\u2019s Armour"); yield from rwait(0.5)
+            res["cold_gear_stew"] = yield from rate("cold")
             res["stew_said"] = " / ".join(str(m).split("|", 1)[-1] for m in list(cb().get_message_log())[:2])[:200]
-            if str(cb().get_worn_armour()) != worn0: cb().wear_armour("Bear Warrior\u2019s Armour")          # (off again)
         # ---- the heat
         hp_ = None
         for bn in ("savannahs", "mesas", "canyons", "burned plain"):
@@ -8035,7 +8041,8 @@ def step_climate15():
                 ground_put(hp_[0] + 15.0 * (k + 1), hp_[1]); yield from rwait(1.0)
             res["heat_state"] = climate15_state(g)
             res["heat_day_bare"] = yield from rate("heat")
-            cb().add_item("Sandroot Cooler", 1); res["drank"] = cb().use_item("Sandroot Cooler"); yield from rwait(0.5)
+            cb().wear_armour("Bear Warrior\u2019s Armour") if str(cb().get_worn_armour()) == "Bear Warrior\u2019s Armour" else None; yield from rwait(0.3)          # (bare for the heat)
+            cb().add_item("Sandroot Cooler", 1); added["Sandroot Cooler"] = 1; res["drank"] = cb().use_item("Sandroot Cooler"); yield from rwait(0.5)
             res["heat_day_cooler"] = yield from rate("heat"); res["cool_buff"] = climate15_state(g)["cool_buff"]
             g.set_town_hour(23.0); yield from rwait(1.0)
             res["heat_night"] = yield from rate("heat"); res["night_why"] = climate15_state(g)["why"]
@@ -8046,14 +8053,22 @@ def step_climate15():
         res["herb_regions"] = [str(x) for x in g.get_editor_property("climate_herbs15")]
     finally:
         try:
+            # (what the step changed put back (PR #109's review): the meals' effects off, the armour she wore before on again (the Bear set
+            # off), only the items it added taken away, the meters and the hour)
+            for it in ("Frostleaf Stew", "Sandroot Cooler"): cb().remove_effects_of15(it)
+            if str(cb().get_worn_armour()) == "Bear Warrior\u2019s Armour" and worn0 != "Bear Warrior\u2019s Armour": cb().wear_armour("Bear Warrior\u2019s Armour")
+            if worn0 not in ("", "None") and str(cb().get_worn_armour()) != worn0: cb().wear_armour(worn0)
+            for it, n in added.items():
+                extra = cb().get_item_count(it) - counts0.get(it, 0)
+                if extra > 0: cb().remove_item(it, extra)
             g.reset_climate15(); g.set_town_hour(hour0)
-            for it in ("Bear Warrior\u2019s Armour", "Frostleaf Stew", "Sandroot Cooler"): cb().remove_item(it, 99)
-            res["put_back"] = True
+            res["put_back"] = {"worn": str(cb().get_worn_armour()) == worn0 or (worn0 in ("", "None") and str(cb().get_worn_armour()) in ("", "None")), "effects": len(list(cb().get_effects())) if hasattr(cb(), "get_effects") else None}
         except Exception as e: res["put_back"] = str(e)
         quiet(False)
     cb_, cg, cs = res.get("cold_bare", 0), res.get("cold_gear", 0), res.get("cold_gear_stew", 0)
     hb, hc, hn = res.get("heat_day_bare", 0), res.get("heat_day_cooler", 0), res.get("heat_night", 1)
-    ok = (cb_ > 0.5 and res.get("wore") and abs(cg / cb_ - 0.4) < 0.08 and res.get("ate") and abs(cs / cb_ - 0.1) < 0.05
+    cst = res.get("cold_stew", 0)
+    ok = (cb_ > 0.5 and res.get("wore") and abs(cg / cb_ - 0.4) < 0.08 and res.get("ate") and abs(cst / cb_ - 0.4) < 0.08 and abs(cs / cb_ - 0.1) < 0.05
           and hb > 0.5 and res.get("drank") and abs(hc / hb - 0.4) < 0.08 and hn <= 0.0 and res.get("night_why") == "night"
           and len(res.get("items", [])) == 4 and len(res.get("oven_recipes", [])) == 2)
     step_result("climate15", ok, **res)
