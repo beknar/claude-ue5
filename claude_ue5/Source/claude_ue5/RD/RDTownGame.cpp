@@ -1874,8 +1874,10 @@ void ARDDungeonGenerator::BuildTownLines()
 		TownTitle = TEXT("The quest board"); TownSub = TEXT("bounties posted by the townsfolk and the watch");
 		if (TownBody.IsEmpty()) TownBody = TEXT("Notes pinned over notes, some fresh, some faded. A few still ask for help, and one promises coin.");
 		// (Brokenspire's bounties are Brokenspire's: a small town's board has only old notices)
+		// (the list of 2026-11-20's thirteenth phase: every wild town's board posts its contracts)
+		const int32 Posted = !bWild ? 0 : AddContractLines15([&](const FString& Act, const FString& Label, const FString& Tag, const FString& Detail, bool bOn, const FString& Arg) { Add(FName(*Act), Label, Tag, Detail, bOn, Arg); });
 		if (bTownHome || Quests.ContainsByPredicate([&](const FRDQuestDef& Q) { return Q.Giver == TEXT("Board") && Q.Town == HereQ; })) QuestLinesOf(TEXT("Board"));
-		else Add(TEXT("none"), TEXT("Only faded notices"), FString(), TEXT("Lost cats, a cart for sale, a wedding long past. Nothing asks for your sword here."), false);
+		else if (Posted == 0) Add(TEXT("none"), TEXT("Only faded notices"), FString(), TEXT("Lost cats, a cart for sale, a wedding long past. Nothing asks for your sword here."), false);
 		Add(TEXT("bye"), TEXT("Step away"), FString(), FString());
 	}
 	else if (TownPanel == TEXT("store"))
@@ -2048,6 +2050,7 @@ bool ARDDungeonGenerator::ActivateTownEntry(int32 Line)
 	else if (E.Act == TEXT("swaphorse")) { bOk = SwapHorse(); if (bOk) CloseTownPanel(); }
 	else if (E.Act == TEXT("callhorse")) { bOk = CallHorse(); if (bOk) { SetTownNote(TEXT("Your horse comes")); CloseTownPanel(); } }
 	else if (E.Act == TEXT("collect")) bOk = TownCollectTrade15(E.Arg);          // (the twelfth phase)
+	else if (E.Act == TEXT("contract") || E.Act == TEXT("claim")) bOk = TownContract15(E.Act, E.Arg);          // (the thirteenth phase)
 	else if (E.Act == TEXT("donate")) { AddGold(-5, TEXT("an offering")); TownCount(TEXT("offerings")); SetTownNote(TEXT("The priest bows his head: \"They will eat tonight.\"")); bOk = true; }
 	else if (E.Act == TEXT("deposit")) bOk = TownDeposit(E.Arg);
 	else if (E.Act == TEXT("withdraw")) bOk = TownWithdraw(FCString::Atoi(*E.Arg));

@@ -172,16 +172,24 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 			UI.Text(Nm, bFound ? FLinearColor(0.98f, 0.94f, 0.84f, 1.f) : FLinearColor(0.85f, 0.82f, 0.74f, 0.8f), Tp.X, Tp.Y, Small, Ts, bTown ? ERDType::Title : ERDType::Label);
 		}
 	}
-	// (the list of 2026-11-20's eleventh phase: the roamers she has seen and not slain, a skull at their rounds, named)
-	Gen->DrawRoamerMarks15([&](const FVector2D& AtM, const FString& Nm)
+	// (a named mark: an icon and its name under it, shadowed; one helper for the roamers' and the contracts' (PR #105's review))
+	auto NamedMark = [&](const FVector2D& AtM, const FString& Nm, float IconPx, const FLinearColor& IconCol, const FLinearColor& TextCol) -> bool
 	{
 		const FVector2D S = ToS(AtM);
-		if (S.X < A.X || S.X > B.X || S.Y < A.Y || S.Y > B.Y) return;
-		const float Ic = 15.f * Sc;
-		UI.Fit(TEXT("wmap_lair"), S - FVector2D(Ic), S + FVector2D(Ic), FLinearColor(1.f, 0.35f, 0.30f, 1.f));
+		if (S.X < A.X || S.X > B.X || S.Y < A.Y || S.Y > B.Y) return false;
+		const float Ic = IconPx * Sc;
+		UI.Fit(TEXT("wmap_lair"), S - FVector2D(Ic), S + FVector2D(Ic), IconCol);
 		float Tw, Th; UI.TextSize(Nm, Tw, Th, Small, Sc * 0.9f, ERDType::Label);
 		UI.Text(Nm, FLinearColor(0.f, 0.f, 0.f, 0.75f), S.X - Tw * 0.5f + 1.5f * Sc, S.Y + Ic + 3.5f * Sc, Small, Sc * 0.9f, ERDType::Label);
-		UI.Text(Nm, FLinearColor(1.f, 0.55f, 0.48f, 1.f), S.X - Tw * 0.5f, S.Y + Ic + 2.f * Sc, Small, Sc * 0.9f, ERDType::Label);
+		UI.Text(Nm, TextCol, S.X - Tw * 0.5f, S.Y + Ic + 2.f * Sc, Small, Sc * 0.9f, ERDType::Label);
+		return true;
+	};
+	// (the list of 2026-11-20's eleventh phase: the roamers she has seen and not slain, a skull at their rounds, named)
+	Gen->DrawRoamerMarks15([&](const FVector2D& AtM, const FString& Nm) { NamedMark(AtM, Nm, 15.f, FLinearColor(1.f, 0.35f, 0.30f, 1.f), FLinearColor(1.f, 0.55f, 0.48f, 1.f)); });
+	// (the list of 2026-11-20's thirteenth phase: the contracts taken, the next sign or the lair, in gold)
+	Gen->DrawContractMarks15([&](const FVector2D& AtM, const FString& Nm)
+	{
+		if (NamedMark(AtM, Nm, 14.f, FLinearColor(1.f, 0.82f, 0.30f, 1.f), FLinearColor(1.f, 0.86f, 0.45f, 1.f))) ContractMarksDrawn15.Add(FString::Printf(TEXT("%.0f|%.0f|%s"), AtM.X, AtM.Y, *Nm));
 	});
 	// (and the roads' key: the tiers' colours, in the sheet's bottom left (in its top left it lay over the map's title))
 	if (Gen->bRoadTiers15)

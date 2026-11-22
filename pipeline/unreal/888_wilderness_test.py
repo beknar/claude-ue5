@@ -7520,6 +7520,116 @@ def step_rewards15():
           and pl.get("ring_after_0") == 1 and pl.get("f1") == "container" and pl.get("ring_after_1") == 1)
     step_result("rewards15", ok, **res)
 STEPS["rewards15"] = step_rewards15
+def contracts15_lines(g):
+    out = []
+    for l in g.get_contracts15():
+        p = str(l).split("|")
+        out.append({"id": int(p[0]), "town": p[1], "name": p[2], "kind": p[3], "tier": int(p[4]), "state": p[5], "signs": int(p[6]),
+                    "lair": (float(p[7]), float(p[8])), "sign": [(float(p[9]), float(p[10])), (float(p[11]), float(p[12])), (float(p[13]), float(p[14]))],
+                    "gold": int(p[15]), "laid": p[16] == "1", "weak": float(p[17])})
+    return out
+
+
+def step_contracts15():
+    """idea 5 (the list of 2026-11-20's thirteenth phase): a contract taken at Brokenspire's board (two posted), its next sign marked on the
+    big map; the beast struck at its lair with a test blow before its signs are read; the three signs read by F on the way (the map's mark
+    moved to the lair); the beast struck again with the same blow: it takes the weakness's share more; killed by her, the contract done;
+    its bounty claimed at the board (her gold measured); pictures of a sign and the beast"""
+    g = G["gen"]; res = {}; quiet(True)
+    try:
+        T = towns(); b = T.get("Brokenspire", {"x": 0.0, "y": 0.0})
+        g.wild_put_her(b["x"] + 20.0, b["y"]); yield from wait_ready(90); yield from wait_chunks(30, 50); yield from rwait(4.0)
+        res["board_opened"] = g.open_town_panel("board", -1); yield from rwait(0.5)
+        posted = [p for p in panel() if p[0] in ("contract", "claim", "none") and "Contract" in p[1]]
+        res["posted"] = [p[1] for p in posted]
+        li = line_of("contract", "Contract")
+        res["took"] = g.activate_town_entry(li) if li >= 0 else None; yield from rwait(0.5)
+        g.close_town_panel(); yield from rwait(0.3)
+        mine = [c for c in contracts15_lines(g) if c["town"] == "Brokenspire"]
+        res["board"] = [{k: c[k] for k in ("id", "name", "kind", "tier", "state", "gold")} for c in mine]
+        c = next((c for c in mine if c["state"] == "taken"), None)
+        if c is None:
+            step_result("contracts15", False, **res); return
+        cid = c["id"]
+        res["lair_km"] = round(math.hypot(c["lair"][0] - b["x"], c["lair"][1] - b["y"]) / 1000.0, 2)
+        def marks_at(x, y):
+            g.set_map_open(True); g.set_wild_map_view(x, y, 30.0)
+            t0 = time.time()
+            while time.time() - t0 < 20 and map_state()["asked"] > 0: yield
+            yield from rwait(1.0)
+            return [str(m) for m in G["pc"].get_hud().get_contract_marks_drawn15()]
+        # ---- the beast at its lair, its weakness not known: one test blow
+        def at_beast():
+            lx, ly = c["lair"]
+            g.wild_put_her(lx + 25.0, ly); yield from wait_chunks(30, 50); ground_put(lx + 25.0, ly); yield from rwait(2.5)
+            t0 = time.time()
+            while time.time() - t0 < 10 and not g.get_contract_beast15(cid): yield
+            return g.get_contract_beast15(cid)
+        m = yield from at_beast()
+        res["beast_laid"] = m is not None
+        if m:
+            res["beast"] = {"hp": round(m.get_max_health(), 1), "weak": m.get_editor_property("weak_share15")}
+            res["blow_before"] = round(g.test_hit11(m, 20.0, "None"), 2)
+        # (the wilds' map, out of the town (in it M opens the town's own map, which draws nothing far off): the next sign marked)
+        res["mark_before"] = yield from marks_at(*c["sign"][0])
+        shot("contracts15_map", "1600x900"); yield from rwait(1.0); g.set_map_open(False); yield from rwait(0.5)
+        # ---- the three signs, read by F in the order of the way
+        reads = []
+        for i, (sx, sy) in enumerate(c["sign"]):
+            g.wild_put_her(sx + 20.0, sy); yield from wait_chunks(30, 50); ground_put(sx + 20.0, sy); yield from rwait(1.5)
+            if i == 0:
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-20, yaw=180.0)); G["pawn"].set_actor_hidden_in_game(True); yield from rwait(1.0)
+                ground_put(sx + 6.0, sy); yield from rwait(1.5); shot("contracts15_sign", "1280x720"); yield from rwait(1.0); G["pawn"].set_actor_hidden_in_game(False)
+            ground_put(sx + 1.0, sy); yield from rwait(0.8)
+            pr = str(g.describe_nearest(G["pawn"].get_actor_location(), 300.0))
+            f = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.5)
+            reads.append({"prompt": pr, "f": f, "message": str(cb().get_editor_property("message"))[:160]})
+        res["reads"] = reads
+        c2 = next(x for x in contracts15_lines(g) if x["id"] == cid)
+        res["signs_read"] = c2["signs"]
+        res["mark_after"] = yield from marks_at(*c["lair"])
+        g.set_map_open(False); yield from rwait(0.5)
+        # ---- the beast again: the same blow, its weakness known
+        m = yield from at_beast()
+        if m:
+            res["weak_after"] = round(m.get_editor_property("weak_share15"), 2)
+            res["blow_after"] = round(g.test_hit11(m, 20.0, "None"), 2)
+            p = G["pawn"].get_actor_location(); ml = m.get_actor_location()
+            G["pawn"].set_actor_location(V(ml.x + 700.0, ml.y, ml.z + 100.0), False, True); yield from rwait(0.8)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=180.0)); yield from rwait(1.0)
+            shot("contracts15_beast", "1280x720"); yield from rwait(1.0)
+            g.test_hit11(m, 1.0e7, "None"); yield from rwait(1.5)
+        c3 = next(x for x in contracts15_lines(g) if x["id"] == cid)
+        res["after_kill"] = c3["state"]
+        # ---- the bounty at the board
+        g.wild_put_her(b["x"] + 20.0, b["y"]); yield from wait_ready(90); yield from wait_chunks(30, 50); yield from rwait(3.0)
+        g.open_town_panel("board", -1); yield from rwait(0.5)
+        li = line_of("claim", "")
+        gold0 = g.get_gold()
+        res["claim"] = g.activate_town_entry(li) if li >= 0 else None; yield from rwait(0.5)
+        res["gold"] = g.get_gold() - gold0
+        g.close_town_panel()
+        res["after_claim"] = next(x for x in contracts15_lines(g) if x["id"] == cid)["state"]
+        res["gold_promised"] = c["gold"]
+    finally:
+        try: G["pawn"].set_actor_hidden_in_game(False); G["gen"].set_map_open(False)
+        except Exception: pass
+        # (what the step changed put back for the steps after it: the contract as before it was taken, the bounty's gold)
+        try:
+            if "c" in dir() and c: G["gen"].forget_contract15(c["id"])
+            if res.get("gold"): G["gen"].add_gold(-int(res["gold"]), "test")
+            res["put_back"] = True
+        except Exception as e: res["put_back"] = str(e)
+        quiet(False)
+    ratio = res["blow_after"] / res["blow_before"] if res.get("blow_before") else 0
+    res["ratio"] = round(ratio, 3)
+    ok = (len(res.get("posted", [])) == 2 and res.get("took") and res.get("beast_laid")
+          and any("Signs of" in m for m in res.get("mark_before", [])) and any("lair" in m for m in res.get("mark_after", []))
+          and all(r["f"] == "sign" and "read the signs" in r["prompt"] for r in res.get("reads", [])) and res.get("signs_read") == 3
+          and res.get("beast", {}).get("weak") == 0 and abs(res.get("weak_after", 0) - 0.75) < 0.01 and abs(ratio - 1.75) < 0.02
+          and res.get("after_kill") == "done" and res.get("claim") and res.get("gold") == res.get("gold_promised") and res.get("after_claim") == "paid")
+    step_result("contracts15", ok, **res)
+STEPS["contracts15"] = step_contracts15
 SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
 def saves_snapshot():
     """the save folder's files and their bytes: put back at the end, the tests' own new saves deleted (PR #61's review)"""

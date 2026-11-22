@@ -40,6 +40,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetRoadsDrawn15() const { return RoadsDrawn15; }
 	/** the twelfth phase: a treasure map's picture drawn beside the big map in its last frame */
 	bool TreasureShown15 = false;
+	/** the thirteenth phase: the contracts' marks drawn on the big map in its last frame ("x|y|name", metres) */
+	TArray<FString> ContractMarksDrawn15;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetContractMarksDrawn15() const { return ContractMarksDrawn15; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") bool IsTreasureShown15() const { return TreasureShown15; }
 	/** the wilderness's minimap: the region's line it drew under it (tests) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") FString GetBiomeLabelDrawn() const { return BiomeLabelDrawn; }

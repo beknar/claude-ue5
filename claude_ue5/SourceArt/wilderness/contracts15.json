@@ -1,0 +1,32 @@
+{
+  "_": "monster contracts (the list of 2026-11-20's thirteenth phase, idea 5; 939_contracts15.py). Each wild town's board posts per_board of these beasts (by the town's hash): kind the monster's name on brokenspire, hp its health's factor, tier_up tiers over its lair's land, weakness what the three signs teach (it then takes weak_share more from her blows), offer the board's words, signs the three signs on the way to its lair, read in order of the way. gold: the bounty at tier 1, 35 % more a tier",
+  "per_board": 2,
+  "weak_share": 0.75,
+  "gold": 80,
+  "beasts": [
+    {"name": "The Gloamhound", "kind": "Devourer", "hp": 2.5, "tier_up": 2,
+     "weakness": "it guards its left flank, where an old spear wound never closed",
+     "offer": "A hound the size of a pony takes sheep by night and was seen dragging a shepherd.",
+     "signs": ["Paw prints wide as a plate, sunk deep: the beast is heavy, and it limps.", "A sheep's carcass, opened from the left: it turns to bite on its right side only.", "A broken spearhead in the mud, black with old blood: its left flank was pierced long ago."]},
+    {"name": "Old Quillmaw", "kind": "Pangolin", "hp": 3.0, "tier_up": 2,
+     "weakness": "its belly is soft under the scales, bared when it rears",
+     "offer": "Something armoured digs under the fences and takes the goats. Arrows glance off it.",
+     "signs": ["Burrows torn under a fence, and scales shed in the dirt, hard as iron.", "A goat's horn snapped clean: it rears to strike, then rolls.", "Pale belly-hair caught on a thorn bush at the height of a man's knee: soft, where the scales end."]},
+    {"name": "The Bog Troll of the Mere", "kind": "Troll", "hp": 3.0, "tier_up": 2,
+     "weakness": "fresh cuts do not close on it while its hide is dry",
+     "offer": "A troll waylays carts on the low road and has killed two drovers.",
+     "signs": ["Footprints a yard long, filled with water: it keeps to the wet.", "A cart smashed, and a troll's blood dried to scab on the wheel: its wounds close in the wet.", "Its old bed of reeds, left to dry: where it dries out, it heals no more."]},
+    {"name": "Silkwidow", "kind": "Spider", "hp": 2.5, "tier_up": 2,
+     "weakness": "its joints are thin where the legs meet the body",
+     "offer": "Travellers vanish on the forest track. Webs as thick as rope hang between the trees.",
+     "signs": ["Webs strung across the track at a man's height, sticky and fresh.", "A wrapped body in the branches, and a leg shed with the moult: its joints are thin.", "Its moulted skin, split at the joints: strike where the legs meet the body."]},
+    {"name": "Redclaw", "kind": "Fantasy_Animal_raptor_mount", "hp": 2.5, "tier_up": 3,
+     "weakness": "it overreaches when it leaps, and its neck is open",
+     "offer": "A raptor gone wild from a lord's stable runs down riders on the plains.",
+     "signs": ["Three-toed tracks far apart: it runs, and leaps.", "A horse brought down by the neck in one bound: it leaps at the throat.", "A rider's broken lance with feathers on its point: the beast leapt onto it, and its neck was bared."]},
+    {"name": "The Carrion King", "kind": "Bug", "hp": 3.0, "tier_up": 2,
+     "weakness": "its shell is cracked across the back from an old fall",
+     "offer": "A beetle the size of a wagon feeds on the dead of the battlefields, and lately on the living.",
+     "signs": ["Bones picked clean and a trail of slime: it eats what others kill.", "A fallen rock with chips of black shell under it: it fell from the scarp.", "A shard of its back plate, split through: its shell is cracked across the back."]}
+  ]
+}

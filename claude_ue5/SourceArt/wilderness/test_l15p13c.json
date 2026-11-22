@@ -1,0 +1,158 @@
+{
+ "tag": "l15p13c",
+ "plan": [
+  "contracts15",
+  "contracts15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "contracts15",
+   "ok": true,
+   "board_opened": true,
+   "posted": [
+    "Contract: Silkwidow",
+    "Contract: Redclaw"
+   ],
+   "took": true,
+   "board": [
+    {
+     "id": 0,
+     "name": "Silkwidow",
+     "kind": "Spider",
+     "tier": 3,
+     "state": "taken",
+     "gold": 136
+    },
+    {
+     "id": 1,
+     "name": "Redclaw",
+     "kind": "Fantasy_Animal_raptor_mount",
+     "tier": 4,
+     "state": "open",
+     "gold": 164
+    }
+   ],
+   "lair_km": 5.31,
+   "beast_laid": true,
+   "beast": {
+    "hp": 352.0,
+    "weak": 0.0
+   },
+   "blow_before": 20.0,
+   "mark_before": [
+    "1349|845|Signs of Silkwidow"
+   ],
+   "reads": [
+    {
+     "prompt": "read the signs",
+     "f": "sign",
+     "message": "Webs strung across the track at a man's height, sticky and fresh.  (signs of Silkwidow: 1 of 3)"
+    },
+    {
+     "prompt": "read the signs",
+     "f": "sign",
+     "message": "A wrapped body in the branches, and a leg shed with the moult: its joints are thin.  (signs of Silkwidow: 2 of 3)"
+    },
+    {
+     "prompt": "read the signs",
+     "f": "sign",
+     "message": "Its moulted skin, split at the joints: strike where the legs meet the body.  You know Silkwidow now: its joints are thin where the legs meet the body (it takes "
+    }
+   ],
+   "signs_read": 3,
+   "mark_after": [
+    "4498|2817|Silkwidow's lair"
+   ],
+   "weak_after": 0.75,
+   "blow_after": 35.0,
+   "after_kill": "done",
+   "claim": true,
+   "gold": 136,
+   "after_claim": "paid",
+   "gold_promised": 136,
+   "put_back": true,
+   "ratio": 1.75
+  },
+  {
+   "step": "contracts15",
+   "ok": true,
+   "board_opened": true,
+   "posted": [
+    "Contract: Silkwidow",
+    "Contract: Redclaw"
+   ],
+   "took": true,
+   "board": [
+    {
+     "id": 0,
+     "name": "Silkwidow",
+     "kind": "Spider",
+     "tier": 3,
+     "state": "taken",
+     "gold": 136
+    },
+    {
+     "id": 1,
+     "name": "Redclaw",
+     "kind": "Fantasy_Animal_raptor_mount",
+     "tier": 4,
+     "state": "open",
+     "gold": 164
+    }
+   ],
+   "lair_km": 5.31,
+   "beast_laid": true,
+   "beast": {
+    "hp": 352.0,
+    "weak": 0.0
+   },
+   "blow_before": 20.0,
+   "mark_before": [
+    "1349|845|Signs of Silkwidow"
+   ],
+   "reads": [
+    {
+     "prompt": "read the signs",
+     "f": "sign",
+     "message": "Webs strung across the track at a man's height, sticky and fresh.  (signs of Silkwidow: 1 of 3)"
+    },
+    {
+     "prompt": "read the signs",
+     "f": "sign",
+     "message": "A wrapped body in the branches, and a leg shed with the moult: its joints are thin.  (signs of Silkwidow: 2 of 3)"
+    },
+    {
+     "prompt": "read the signs",
+     "f": "sign",
+     "message": "Its moulted skin, split at the joints: strike where the legs meet the body.  You know Silkwidow now: its joints are thin where the legs meet the body (it takes "
+    }
+   ],
+   "signs_read": 3,
+   "mark_after": [
+    "4498|2817|Silkwidow's lair"
+   ],
+   "weak_after": 0.75,
+   "blow_after": 35.0,
+   "after_kill": "done",
+   "claim": true,
+   "gold": 136,
+   "after_claim": "paid",
+   "gold_promised": 136,
+   "put_back": true,
+   "ratio": 1.75
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_l15p13c_contracts15_map.png",
+  "wd_l15p13c_contracts15_sign.png",
+  "wd_l15p13c_contracts15_beast.png",
+  "wd_l15p13c_contracts15_map.png",
+  "wd_l15p13c_contracts15_sign.png",
+  "wd_l15p13c_contracts15_beast.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}
