@@ -183,6 +183,18 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 		UI.Text(Nm, FLinearColor(0.f, 0.f, 0.f, 0.75f), S.X - Tw * 0.5f + 1.5f * Sc, S.Y + Ic + 3.5f * Sc, Small, Sc * 0.9f, ERDType::Label);
 		UI.Text(Nm, FLinearColor(1.f, 0.55f, 0.48f, 1.f), S.X - Tw * 0.5f, S.Y + Ic + 2.f * Sc, Small, Sc * 0.9f, ERDType::Label);
 	});
+	// (the list of 2026-11-20's thirteenth phase: the contracts taken, the next sign or the lair, in gold)
+	Gen->DrawContractMarks15([&](const FVector2D& AtM, const FString& Nm)
+	{
+		const FVector2D S = ToS(AtM);
+		if (S.X < A.X || S.X > B.X || S.Y < A.Y || S.Y > B.Y) return;
+		const float Ic = 14.f * Sc;
+		UI.Fit(TEXT("wmap_lair"), S - FVector2D(Ic), S + FVector2D(Ic), FLinearColor(1.f, 0.82f, 0.30f, 1.f));
+		float Tw, Th; UI.TextSize(Nm, Tw, Th, Small, Sc * 0.9f, ERDType::Label);
+		UI.Text(Nm, FLinearColor(0.f, 0.f, 0.f, 0.75f), S.X - Tw * 0.5f + 1.5f * Sc, S.Y + Ic + 3.5f * Sc, Small, Sc * 0.9f, ERDType::Label);
+		UI.Text(Nm, FLinearColor(1.f, 0.86f, 0.45f, 1.f), S.X - Tw * 0.5f, S.Y + Ic + 2.f * Sc, Small, Sc * 0.9f, ERDType::Label);
+		ContractMarksDrawn15.Add(FString::Printf(TEXT("%.0f|%.0f|%s"), AtM.X, AtM.Y, *Nm));
+	});
 	// (and the roads' key: the tiers' colours, in the sheet's bottom left (in its top left it lay over the map's title))
 	if (Gen->bRoadTiers15)
 	{

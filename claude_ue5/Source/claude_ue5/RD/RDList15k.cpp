@@ -241,6 +241,7 @@ bool ARDDungeonGenerator::RewardFirst15(const FVector& From, int32& Kind, int32&
 	for (const auto& Kv : MapsLaid15) { const float D = FVector::Dist2D(Kv.Value.At, From); if (D < Best && FMath::Abs(Kv.Value.At.Z - From.Z) < 250.f) { Best = D; Kind = 1; Id = Kv.Key; } }
 	// (a buried chest is reached from 2.8 m (it is wider), but only when nothing nearer was found (PR #104's review: its slack over a nearer find))
 	for (const auto& Kv : ChestsLaid15) { const float D = FVector::Dist2D(Kv.Value.At, From); if (D < (Kind < 0 ? 280.f : Best) && FMath::Abs(Kv.Value.At.Z - From.Z) < 300.f) { Best = D; Kind = 2; Id = Kv.Key; } }
+	for (const auto& Kv : ContractSignsLaid15) { const float D = FVector::Dist2D(Kv.Value.At, From); if (D < Best && FMath::Abs(Kv.Value.At.Z - From.Z) < 250.f) { Best = D; Kind = 3; Id = Kv.Key; } }          // (the thirteenth phase: a contract's sign)
 	if (Kind < 0) return false;
 	FVector Sa; FName Sk;
 	if (WildStationNear14(From, Sa, Sk) && FVector::Dist2D(Sa, From) < Best) return false;
@@ -257,7 +258,7 @@ FString ARDDungeonGenerator::RewardDescribe15(const FVector& From) const
 	int32 K, Id;
 	if (!RewardFirst15(From, K, Id)) return FString();
 	if (K == 0) { const FRewardLaid15* R = CollectiblesLaid15.Find(Id); return R ? FString::Printf(TEXT("take the %s"), *R->Item.ToString().ToLower()) : FString(); }
-	return K == 1 ? FString(TEXT("take the old map")) : FString(TEXT("dig up the buried chest"));
+	return K == 1 ? FString(TEXT("take the old map")) : K == 3 ? FString(TEXT("read the signs")) : FString(TEXT("dig up the buried chest"));
 }
 
 FString ARDDungeonGenerator::RewardInteract15(const FVector& From)
@@ -265,6 +266,7 @@ FString ARDDungeonGenerator::RewardInteract15(const FVector& From)
 	int32 K, Id;
 	if (!RewardFirst15(From, K, Id) || !PlayerCombat) return FString();
 	URDGameInstance* GI = URDGameInstance::Of(this);
+	if (K == 3) return ReadContractSign15(Id);
 	if (K == 0)
 	{
 		FRewardLaid15 R = CollectiblesLaid15.FindAndRemoveChecked(Id); RDK15Drop(R);

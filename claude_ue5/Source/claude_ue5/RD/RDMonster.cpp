@@ -277,6 +277,8 @@ bool ARDMonster::ApplyDamageEx(float Amount, AActor* From, const FVector* At, bo
 	Amount *= 1.f + GetExposedShare();
 	if (MarkUntil > 0.f && From && Section && Section->Generator && Section->Generator->GetPlayerCombat() && From == Section->Generator->GetPlayerCombat()->GetOwner())
 		Amount *= 1.f + GetMarkShare();
+	if (WeakShare15 > 0.f && From && Section && Section->Generator && Section->Generator->GetPlayerCombat() && From == Section->Generator->GetPlayerCombat()->GetOwner())
+		Amount *= 1.f + WeakShare15;          // (the list of 2026-11-20's thirteenth phase: a contract's beast, its weakness known)
 	Amount = CurseDamageIn(Amount, From);       // (the list of 2026-11-11: the Warlock's curses, the Sunder slash)
 	Health = FMath::Max(0.f, Health - Amount);
 	CurseAfterHit(Amount);

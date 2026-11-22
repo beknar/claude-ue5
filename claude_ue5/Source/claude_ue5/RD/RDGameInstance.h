@@ -167,6 +167,11 @@ public:
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> TreasureMaps15;
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> TreasuresDug15;
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<FString> PlaceItemsGiven15;
+	/** the thirteenth phase: the contracts taken, done (the beast killed by her) and paid (town x 16 + slot), the signs read (id x 4 + sign) */
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> ContractsTaken15;
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> ContractsDone15;
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> ContractsPaid15;
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> ContractSigns15;
 	/** where she comes into the town: "" the town square (a new game), "castle" the castle's door (back from the castle),
 	 *  "portal" before the Mistgate (tests) */
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString Arrive;
