@@ -1894,7 +1894,8 @@ bool FRDWildWorld::FindPlace(int32 Id, FRDWildPlace& Out) const
 {
 	TArray<FRDWildPlace> Ps;
 	// (the list of 2026-11-20's tenth phase: a lookout, its region's cell from its id)
-	if (Id >= LookoutIdBase && Id < TownIdBase) return LookoutOf(FIntPoint(((Id - LookoutIdBase) >> 10) & 0x3FF, (Id - LookoutIdBase) & 0x3FF), Out) && Out.Id == Id;
+	if (Id >= WaystoneIdBase && Id < TownIdBase) return WaystoneOf(FIntPoint(((Id - WaystoneIdBase) >> 10) & 0x3FF, (Id - WaystoneIdBase) & 0x3FF), Out) && Out.Id == Id;          // (the sixteenth phase)
+	if (Id >= LookoutIdBase && Id < WaystoneIdBase) return LookoutOf(FIntPoint(((Id - LookoutIdBase) >> 10) & 0x3FF, (Id - LookoutIdBase) & 0x3FF), Out) && Out.Id == Id;
 	if (Id >= QuestIdBase && Id < TownIdBase)
 	{
 		if (!QuestPlaces.IsValidIndex(Id - QuestIdBase)) return false;

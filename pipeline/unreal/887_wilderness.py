@@ -559,6 +559,8 @@ def symbols():
         art.set_editor_property("border", unreal.Vector4(0, 0, 0, 0)); art.set_editor_property("inner", unreal.Vector4(0, 0, 1, 1))
         ua[unreal.Name(n)] = art
     g.set_editor_property("ui_art", ua)
+    # (saved here: run alone (the list of 2026-11-20's sixteenth phase), the level was left unsaved and the art lost at its next load)
+    g.modify(); unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).save_current_level()
     REPORT.append(f"symbols: {len(files)}")
 
 

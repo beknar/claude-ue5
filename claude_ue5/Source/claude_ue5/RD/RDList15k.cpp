@@ -216,7 +216,8 @@ bool ARDDungeonGenerator::RewardFirst15(const FVector& From, int32& Kind, int32&
 	for (const auto& Kv : ChestsLaid15) { const float D = FVector::Dist2D(Kv.Value.At, From); if (D < (Kind < 0 ? 280.f : Best) && FMath::Abs(Kv.Value.At.Z - From.Z) < 300.f) { Best = D; Kind = 2; Id = Kv.Key; } }
 	for (const auto& Kv : ContractSignsLaid15) { const float D = FVector::Dist2D(Kv.Value.At, From); if (D < Best && FMath::Abs(Kv.Value.At.Z - From.Z) < 250.f) { Best = D; Kind = 3; Id = Kv.Key; } }          // (the thirteenth phase: a contract's sign)
 	ReclaimFirst15(From, Best, Kind, Id);
-	StoryCartFirst15(From, Best, Kind, Id);          // (the fifteenth phase: a cart off its wheel)          // (the fourteenth phase: a waypoint's trader and tent, a settler)
+	StoryCartFirst15(From, Best, Kind, Id);
+	WaystoneFirst15(From, Best, Kind, Id);          // (the sixteenth phase: a waystone)          // (the fifteenth phase: a cart off its wheel)          // (the fourteenth phase: a waypoint's trader and tent, a settler)
 	if (Kind < 0) return false;
 	FVector Sa; FName Sk;
 	if (WildStationNear14(From, Sa, Sk) && FVector::Dist2D(Sa, From) < Best) return false;
@@ -235,7 +236,7 @@ FString ARDDungeonGenerator::RewardDescribe15(const FVector& From) const
 	int32 K, Id;
 	if (!RewardFirst15(From, K, Id)) return FString();
 	if (K == 0) { const FRewardLaid15* R = CollectiblesLaid15.Find(Id); return R ? FString::Printf(TEXT("take the %s"), *R->Item.ToString().ToLower()) : FString(); }
-	return K == 1 ? FString(TEXT("take the old map")) : K == 3 ? FString(TEXT("read the signs")) : K == 4 ? FString(TEXT("trade with the travelling trader")) : K == 5 ? FString(TEXT("rest in the tent until morning")) : K == 6 ? FString(TEXT("talk to the settler")) : K == 8 ? FString(TEXT("help lift the cart")) : FString(TEXT("dig up the buried chest"));
+	return K == 1 ? FString(TEXT("take the old map")) : K == 3 ? FString(TEXT("read the signs")) : K == 4 ? FString(TEXT("trade with the travelling trader")) : K == 5 ? FString(TEXT("rest in the tent until morning")) : K == 6 ? FString(TEXT("talk to the settler")) : K == 8 ? FString(TEXT("help lift the cart")) : K == 9 ? WaystoneDescribe15(Id) : FString(TEXT("dig up the buried chest"));
 }
 
 FString ARDDungeonGenerator::RewardInteract15(const FVector& From)
@@ -248,6 +249,7 @@ FString ARDDungeonGenerator::RewardInteract15(const FVector& From)
 	if (K == 5) return RestAtCamp15(Id);
 	if (K == 6) return TalkSettler15(Id);
 	if (K == 8) return MendStoryCart15(Id);
+	if (K == 9) return LightWaystone15(Id);
 	if (K == 0)
 	{
 		FRewardLaid15 R = CollectiblesLaid15.FindAndRemoveChecked(Id); DropReward15(R);

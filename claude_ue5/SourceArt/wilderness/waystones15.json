@@ -1,0 +1,6 @@
+{
+  "_": "getting about (the list of 2026-11-20's sixteenth phase, idea 9 in part; 942_waystones15.py): the waystones (one beside a major road in each region's cell: the world's, RD/RDList15o.cpp) laid in play, their stone's height (m; a rune stone of the places' table's 'stone'), and the crossroads posts (an arm for each road out of a crossroads, in the road signs' lettering). Their map symbol is wild_symbols.py's wmap_waystone, imported by 887 symbols.",
+  "waystones": true,
+  "height_m": 2.6,
+  "crossroads_posts": true
+}

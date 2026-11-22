@@ -23,6 +23,18 @@ AActor* ARDDungeonGenerator::SpawnWildSign14(int32 K)
 {
 	if (!IsWildReady() || !Wild->Signs.IsValidIndex(K)) return nullptr;
 	const FRDWildWorld::FRDWildSign& S = Wild->Signs[K];
+	// (arm A along the post's +Y, arm B back along the road: turned half round)
+	TArray<FSignArm14> Arms;
+	Arms.Add(FSignArm14{ S.A, S.Am, 0.f });
+	if (!S.B.IsEmpty()) Arms.Add(FSignArm14{ S.B, S.Bm, 180.f });
+	return SpawnSignPost14(S.At, S.Yaw, Arms, FString::Printf(TEXT("sign14:%d"), K));
+}
+
+AActor* ARDDungeonGenerator::SpawnSignPost14(const FVector2D& AtM, float PostYaw, const TArray<FSignArm14>& Arms, const FString& Tag)
+{
+	// (a post and its painted arms, each turned about the post by its own yaw (its +Y along the way it points), stacked down from the top:
+	// the roads' signs and the list of 2026-11-20's sixteenth phase's crossroads posts alike)
+	if (!IsWildReady() || Arms.Num() == 0) return nullptr;
 	// (loaded once; missing, never asked again (PR #92's review: every sign near her asked every half second))
 	if (bSignMeshMissing14) return nullptr;
 	if (!SignPost14) SignPost14 = LoadObject<UStaticMesh>(nullptr, RDS14Post);
@@ -35,22 +47,20 @@ AActor* ARDDungeonGenerator::SpawnWildSign14(int32 K)
 	if (!A) return nullptr;
 	USceneComponent* Root = NewObject<USceneComponent>(A, TEXT("Root"));
 	A->SetRootComponent(Root); Root->RegisterComponent();
-	const float Z = Wild->ToZ(Wild->Height(S.At.X, S.At.Y));
-	A->SetActorTransform(FTransform(FRotator(0.f, S.Yaw, 0.f), FVector(S.At.X * 100.0, S.At.Y * 100.0, Z - 6.f)));
+	const float Z = Wild->ToZ(Wild->Height(AtM.X, AtM.Y));
+	A->SetActorTransform(FTransform(FRotator(0.f, PostYaw, 0.f), FVector(AtM.X * 100.0, AtM.Y * 100.0, Z - 6.f)));
 	A->Tags.Add(TEXT("RDWildSign14"));
-	A->Tags.Add(*FString::Printf(TEXT("sign14:%d"), K));
+	A->Tags.Add(*Tag);
 	UStaticMeshComponent* Pc = NewObject<UStaticMeshComponent>(A);
 	Pc->SetStaticMesh(Post); Pc->SetupAttachment(Root); Pc->RegisterComponent();
-	const int32 NArms = S.B.IsEmpty() ? 1 : 2;
-	for (int32 I = 0; I < NArms; ++I)
+	for (int32 I = 0; I < Arms.Num(); ++I)
 	{
-		const FString& Name = I == 0 ? S.A : S.B;
-		const float Dist = I == 0 ? S.Am : S.Bm;
+		const FSignArm14& Am = Arms[I];
 		const float Zc = RDS14ArmTop - I * RDS14ArmGap;
-		const float Ys = I == 0 ? 1.f : -1.f;          // (the second arm points back along the road: turned half round)
+		const FRotator Turn(0.f, Am.Yaw, 0.f);
 		UStaticMeshComponent* Ac = NewObject<UStaticMeshComponent>(A);
 		Ac->SetStaticMesh(Arm); Ac->SetupAttachment(Root);
-		Ac->SetRelativeTransform(FTransform(FRotator(0.f, I == 0 ? 0.f : 180.f, 0.f), FVector(0.f, 0.f, Zc - RDS14ArmMidZ), FVector(1.f, RDS14ArmSY, RDS14ArmSZ)));
+		Ac->SetRelativeTransform(FTransform(Turn, FVector(0.f, 0.f, Zc - RDS14ArmMidZ), FVector(1.f, RDS14ArmSY, RDS14ArmSZ)));
 		Ac->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		Ac->RegisterComponent();
 		// (a core inside the arm between its two faces' words: the arm turned half round let the far face's words show through it,
@@ -59,14 +69,14 @@ AActor* ARDDungeonGenerator::SpawnWildSign14(int32 K)
 		{
 			UStaticMeshComponent* Cc = NewObject<UStaticMeshComponent>(A);
 			Cc->SetStaticMesh(Cube); Cc->SetupAttachment(Root);
-			Cc->SetRelativeTransform(FTransform(FRotator::ZeroRotator, FVector(0.f, Ys * RDS14ArmMidY, Zc), FVector(0.02f, 0.85f, 0.22f)));
+			Cc->SetRelativeTransform(FTransform(Turn, Turn.RotateVector(FVector(0.f, RDS14ArmMidY, 0.f)) + FVector(0.f, 0.f, Zc), FVector(0.02f, 0.85f, 0.22f)));
 			if (UMaterialInterface* Mw = Ac->GetMaterial(0)) Cc->SetMaterial(0, Mw);
 			Cc->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			Cc->SetCastShadow(false);
 			Cc->RegisterComponent();
 		}
 		// (painted on both faces: the place's name over its distance, fitted to the arm's face, 90 x 22 cm)
-		const FString Text = FString::Printf(TEXT("%s\n%s"), *Name, *FRDWildWorld::SignDistText(Dist));
+		const FString Text = FString::Printf(TEXT("%s\n%s"), *Am.Name, *FRDWildWorld::SignDistText(Am.M));
 		for (int32 Side = -1; Side <= 1; Side += 2)
 		{
 			UTextRenderComponent* Tx = NewObject<UTextRenderComponent>(A);
@@ -80,8 +90,8 @@ AActor* ARDDungeonGenerator::SpawnWildSign14(int32 K)
 			Tx->SetTextRenderColor(FColor(236, 222, 186));          // (cream paint: dark letters on the plaque's dark wood could not be read)
 			Tx->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			Tx->ComponentTags.Add(TEXT("SignText14"));
-			// (a text faces its +X: the +X face's text turned 0, the -X face's half round)
-			Tx->SetRelativeTransform(FTransform(FRotator(0.f, Side > 0 ? 0.f : 180.f, 0.f), FVector(Side * 2.1f, Ys * RDS14ArmMidY, Zc)));
+			// (a text faces its +X: the +X face's text turned with the arm, the -X face's half round more)
+			Tx->SetRelativeTransform(FTransform(FRotator(0.f, Am.Yaw + (Side > 0 ? 0.f : 180.f), 0.f), Turn.RotateVector(FVector(Side * 2.1f, RDS14ArmMidY, 0.f)) + FVector(0.f, 0.f, Zc)));
 			Tx->RegisterComponent();
 		}
 	}

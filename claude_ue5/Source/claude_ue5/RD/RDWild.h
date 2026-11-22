@@ -437,6 +437,12 @@ public:
 	bool ClearOfPlaces15(const FVector2D& S, double R, bool bLookouts) const;
 	struct FLookoutCache { FCriticalSection Lock; TMap<FIntPoint, FRDWildPlace> Cells; };
 	TSharedPtr<FLookoutCache> LookoutCache = MakeShared<FLookoutCache>();
+	/** the list of 2026-11-20's sixteenth phase (RDList15o.cpp): a waystone beside the major road nearest each region's cell's middle, 12 m
+	 *  off it, 1.5 km from a town and 80 m from every other place; places of kind "waystone", ids WaystoneIdBase + (cell x << 10 | cell y),
+	 *  above the lookouts'; worked out once a cell (none: Id 0) */
+	static constexpr int32 WaystoneIdBase = (1 << 29) + (1 << 28) + (1 << 27);
+	bool WaystoneOf(FIntPoint Cell, FRDWildPlace& Out) const;
+	TSharedPtr<FLookoutCache> WaystoneCache = MakeShared<FLookoutCache>();
 	/** where two roads meet (Init): the crossroads a scenery kind of Place "crossroads" stands at */
 	TArray<FVector2D> Crossroads;
 	/** the dry channels cut into the land (Init, from ChannelRules): arroyos and creek beds, slot canyons, crevasses, fissures; each a
