@@ -1,5 +1,5 @@
 {
- "tag": "l15p12d",
+ "tag": "l15p12f",
  "plan": [
   "rewards15"
  ],
@@ -38,6 +38,7 @@
    "carried": 5,
    "marked_taken": 5,
    "temple": true,
+   "mana_line": -1,
    "trade_line": "Offer 5 Wind Feather: 10 hit points for good",
    "trade": true,
    "max_hp": [
@@ -69,6 +70,12 @@
     "wild_map"
    ],
    "picture_shown": true,
+   "shown_after_close": false,
+   "saved": true,
+   "load": true,
+   "held_after_load": true,
+   "picture_after_load_s": 5.8,
+   "shown_after_load": true,
    "chest_laid": true,
    "dig_prompt": "dig up the buried chest",
    "dig_f": "treasure",
@@ -100,10 +107,11 @@
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
  "shots": [
-  "wd_l15p12d_rewards15_map.png",
-  "wd_l15p12d_rewards15_chest.png"
+  "wd_l15p12f_rewards15_map.png",
+  "wd_l15p12f_rewards15_map_loaded.png",
+  "wd_l15p12f_rewards15_chest.png"
  ],
  "error": null,
- "saves_put_back": 1,
+ "saves_put_back": 2,
  "windows_shown_again": 2
 }

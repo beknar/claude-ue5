@@ -209,7 +209,6 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 			UI.Text(Cap, FLinearColor(0.98f, 0.94f, 0.84f, 1.f), Px, Py + Ph + 8.f * Sc, Small, Sc * 0.8f, ERDType::Label);
 			TreasureShown15 = true;
 		}
-		else TreasureShown15 = false;
 	}
 	// (the list of 2026-11-16: her horse)
 	{ FVector Ha; if (Gen->GetHorseMapAt(Ha)) { const FVector2D Hs = ToS(FVector2D(Ha.X / 100.0, Ha.Y / 100.0)); if (Hs.X > A.X && Hs.X < B.X && Hs.Y > A.Y && Hs.Y < B.Y) DrawHorseMark(Hs, Sc * 1.2f); } }

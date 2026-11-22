@@ -26,6 +26,12 @@
 DEFINE_LOG_CATEGORY_STATIC(LogRDList15k, Log, All);
 
 static constexpr double RDK15CollectCellM = 500.0;
+static void RDK15Drop(ARDDungeonGenerator::FRewardLaid15& R)
+{
+	if (R.Mesh.IsValid()) R.Mesh->DestroyComponent();
+	if (R.Lid.IsValid()) R.Lid->DestroyComponent();
+	if (R.Light.IsValid()) R.Light->DestroyComponent();
+}
 
 // ================================================================================================ the collectibles
 bool ARDDungeonGenerator::CollectibleOf15(FIntPoint Cell, FCollectible15& Out) const
@@ -60,6 +66,7 @@ void ARDDungeonGenerator::TickRewards15(float Dt, const FVector& Her)
 	RewardLook15 -= Dt;
 	if (RewardLook15 > 0.f || !IsWildReady()) return;
 	RewardLook15 = 0.5f;
+	if (WildReadySince15 < 0.f && GetWorld()) WildReadySince15 = GetWorld()->GetTimeSeconds();
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	const FVector2D H2(Her.X / 100.0, Her.Y / 100.0);
 	auto Glow = [this](const FVector& At, const FLinearColor& Col, float Scale) -> TPair<UStaticMeshComponent*, UPointLightComponent*>
@@ -80,7 +87,6 @@ void ARDDungeonGenerator::TickRewards15(float Dt, const FVector& Her)
 		L->SetWorldLocation(At + FVector(0, 0, 40.f));
 		return TPair<UStaticMeshComponent*, UPointLightComponent*>(M, L);
 	};
-	auto Drop = [](FRewardLaid15& R) { if (R.Mesh.IsValid()) R.Mesh->DestroyComponent(); if (R.Lid.IsValid()) R.Lid->DestroyComponent(); if (R.Light.IsValid()) R.Light->DestroyComponent(); };
 	// (the collectibles within 150 m, laid; gone past 250 m)
 	if (CollectibleKinds15.Num() > 0)
 	{
@@ -95,7 +101,7 @@ void ARDDungeonGenerator::TickRewards15(float Dt, const FVector& Her)
 			CollectiblesLaid15.Add(C.Id, R);
 		}
 		for (auto It = CollectiblesLaid15.CreateIterator(); It; ++It)
-			if (FVector::Dist2D(It.Value().At, Her) > 25000.f) { Drop(It.Value()); It.RemoveCurrent(); }
+			if (FVector::Dist2D(It.Value().At, Her) > 25000.f) { RDK15Drop(It.Value()); It.RemoveCurrent(); }
 	}
 	// (the quests' places (ids from QuestIdBase: the captain's den and watchtower, whose places move with each game's roads) are no ruins of chance)
 	// (the ruins within 150 m: a loose treasure map by the middle of some; the maps she holds: their buried chests within 300 m)
@@ -106,10 +112,7 @@ void ARDDungeonGenerator::TickRewards15(float Dt, const FVector& Her)
 		for (int32 I = P0.X; I <= P1.X; ++I) for (int32 J = P0.Y; J <= P1.Y; ++J) Wild->PlacesIn(FIntPoint(I, J), Ps);
 		for (const FRDWildPlace& P : Ps)
 		{
-			if (P.Kind != TEXT("ruins") || P.Id >= FRDWildWorld::QuestIdBase || FVector2D::Distance(P.At, H2) > 150.0 || MapsLaid15.Contains(P.Id) || (GI && GI->TreasureMapsTaken15.Contains(P.Id))) continue;
-			if (FRDWildWorld::Rand01(P.Id, 1810, Wild->Seed) >= TreasureMapChance15) continue;
-			FVector2D T; FString Lk;
-			if (!TreasureSpotOf15(P.Id, P.At, T, Lk)) continue;
+			if (FVector2D::Distance(P.At, H2) > 150.0 || MapsLaid15.Contains(P.Id) || (GI && GI->TreasureMapsTaken15.Contains(P.Id)) || !RuinHasMap15(P)) continue;
 			const FVector2D Mp = P.At + FVector2D(4.0, 0.0).GetRotated(FRDWildWorld::Rand01(P.Id, 1811, Wild->Seed) * 360.f);
 			const FVector At(Mp.X * 100.0, Mp.Y * 100.0, WildGroundZ(FVector(Mp.X * 100.0, Mp.Y * 100.0, 0.0)) + 25.f);
 			const auto G = Glow(At, FLinearColor(0.95f, 0.85f, 0.55f), 0.22f);
@@ -117,7 +120,7 @@ void ARDDungeonGenerator::TickRewards15(float Dt, const FVector& Her)
 			MapsLaid15.Add(P.Id, R);
 		}
 		for (auto It = MapsLaid15.CreateIterator(); It; ++It)
-			if (FVector::Dist2D(It.Value().At, Her) > 25000.f) { Drop(It.Value()); It.RemoveCurrent(); }
+			if (FVector::Dist2D(It.Value().At, Her) > 25000.f) { RDK15Drop(It.Value()); It.RemoveCurrent(); }
 		if (GI)
 			for (const int32 Mid : GI->TreasureMaps15)
 			{
@@ -141,7 +144,7 @@ void ARDDungeonGenerator::TickRewards15(float Dt, const FVector& Her)
 					UStaticMeshComponent* Body = Part(BodyMesh, Pc ? Pc->Adjust * W : W);
 					UStaticMeshComponent* Lid = nullptr;
 					if (Pc && Pc->Moving)
-						Lid = Part(Pc->Moving, FTransform(Pc->Adjust.GetRotation() * W.GetRotation(), W.TransformPosition(Pc->Hinge), Pc->Adjust.GetScale3D()));
+						Lid = Part(Pc->Moving, FTransform(W.GetRotation() * Pc->Adjust.GetRotation(), W.TransformPosition(Pc->Hinge), Pc->Adjust.GetScale3D()));          // (the piece's turn first, then the world's, as Adjust * W (PR #104's review))
 					float Top = Body->Bounds.GetBox().Max.Z;
 					if (Lid) Top = FMath::Max(Top, (float)Lid->Bounds.GetBox().Max.Z);
 					const FVector Down(0, 0, R.At.Z + 35.f - Top);
@@ -150,24 +153,57 @@ void ARDDungeonGenerator::TickRewards15(float Dt, const FVector& Her)
 				}
 				ChestsLaid15.Add(Mid, R);
 			}
+		if (GI)
+		{
+			for (int32 I = TreasurePictures15.Num() - 1; I >= 0; --I)
+				if (!GI->TreasureMaps15.Contains(TreasurePictures15[I].Id)) { TreasureTargets15.Remove(TreasurePictures15[I].Rt); TreasurePictures15.RemoveAt(I); }
+			if (GetWorld() && GetWorld()->GetTimeSeconds() - WildReadySince15 > 8.f)          // (the far land made round her first)
+				for (const int32 Mid : GI->TreasureMaps15)
+					if (!TreasurePictures15.ContainsByPredicate([Mid](const FTreasurePicture15& Tp) { return Tp.Id == Mid; }))
+					{
+						FRDWildPlace Rp; FVector2D T; FString Lk;
+						if (Wild->FindPlace(Mid, Rp) && TreasureSpotOf15(Mid, Rp.At, T, Lk)) DrawTreasureMap15(Mid, T, Lk);
+						break;          // (one a look)
+					}
+		}
 		for (auto It = ChestsLaid15.CreateIterator(); It; ++It)
-			if (FVector::Dist2D(It.Value().At, Her) > 40000.f || (GI && GI->TreasuresDug15.Contains(It.Key()))) { Drop(It.Value()); It.RemoveCurrent(); }
+			if (FVector::Dist2D(It.Value().At, Her) > 40000.f || (GI && GI->TreasuresDug15.Contains(It.Key()))) { RDK15Drop(It.Value()); It.RemoveCurrent(); }
 	}
+}
+
+bool ARDDungeonGenerator::RuinHasMap15(const FRDWildPlace& P) const
+{
+	// (an ordinary ruin, by its own hash, with a spot found: the quests' places (ids from QuestIdBase: the captain's den and watchtower, whose
+	// places move with each game's roads) are no ruins of chance)
+	if (P.Kind != TEXT("ruins") || P.Id >= FRDWildWorld::QuestIdBase || FRDWildWorld::Rand01(P.Id, 1810, Wild->Seed) >= TreasureMapChance15) return false;
+	return TreasureSpot15(P.Id, P.At) != nullptr;
 }
 
 bool ARDDungeonGenerator::TreasureSpotOf15(int32 RuinId, const FVector2D& RuinAt, FVector2D& Spot, FString& Landmark) const
 {
+	const FTreasureSpot15* T = TreasureSpot15(RuinId, RuinAt);
+	if (!T) return false;
+	Spot = T->Spot; Landmark = T->Landmark;
+	return true;
+}
+
+const ARDDungeonGenerator::FTreasureSpot15* ARDDungeonGenerator::TreasureSpot15(int32 RuinId, const FVector2D& RuinAt) const
+{
 	// (the nearest landmark within 20 km of the ruin: a region's landmark (two to a region's cell) or a broken tower; the spot 60 to 120 m
-	// from its foot, on dry gentle ground, a way of the ruin's own hash)
-	if (const TPair<FVector2D, FString>* Got = TreasureSpots15.Find(RuinId)) { Spot = Got->Key; Landmark = Got->Value; return !Landmark.IsEmpty(); }
-	double Best = 20000.0; FVector2D L(0, 0); FString Kind;
+	// from its foot, on dry gentle ground, a way of the ruin's own hash. Kept with the landmark itself, for the picture)
+	if (const FTreasureSpot15* Got = TreasureSpots15.Find(RuinId)) return Got->Landmark.IsEmpty() ? nullptr : Got;
+	double Best = 20000.0; FTreasureSpot15 T;
 	const FIntPoint Lc = Wild->LookoutCellOf(RuinAt.X, RuinAt.Y);
 	ParseRegionLandmarks15();
 	for (int32 I = -3; I <= 3; ++I) for (int32 J = -3; J <= 3; ++J) for (int32 Sl = 0; Sl < 2; ++Sl)
 	{
 		FRegionLandmark15 Lm;
 		if (RegionLandmarkOf15(Lc + FIntPoint(I, J), Sl, Lm) && FVector2D::Distance(Lm.At, RuinAt) < Best)
-		{ Best = FVector2D::Distance(Lm.At, RuinAt); L = Lm.At; Kind = RegionLandmarkParsed15.IsValidIndex(Lm.Line) ? RegionLandmarkParsed15[Lm.Line].Name : FString(TEXT("landmark")); }
+		{
+			Best = FVector2D::Distance(Lm.At, RuinAt);
+			T.LmAt = Lm.At; T.bTower = false; T.Cell = Lc + FIntPoint(I, J); T.Slot = Sl;
+			T.Landmark = RegionLandmarkParsed15.IsValidIndex(Lm.Line) ? RegionLandmarkParsed15[Lm.Line].Name : FString(TEXT("landmark"));
+		}
 	}
 	if (WildLandmarkMesh && WildLandmarkBiomes.Num() > 0)
 	{
@@ -175,26 +211,26 @@ bool ARDDungeonGenerator::TreasureSpotOf15(int32 RuinId, const FVector2D& RuinAt
 		for (int32 I = Ci - 4; I <= Ci + 4; ++I) for (int32 J = Cj - 4; J <= Cj + 4; ++J)
 		{
 			FVector2D S;
-			if (WildTowerSite13(I, J, S) && FVector2D::Distance(S, RuinAt) < Best) { Best = FVector2D::Distance(S, RuinAt); L = S; Kind = TEXT("broken tower"); }
+			if (WildTowerSite13(I, J, S) && FVector2D::Distance(S, RuinAt) < Best) { Best = FVector2D::Distance(S, RuinAt); T.LmAt = S; T.bTower = true; T.Landmark = TEXT("broken tower"); }
 		}
 	}
-	FVector2D Found(0, 0); bool bOk = false;
-	if (!Kind.IsEmpty())
+	bool bOk = false;
+	if (!T.Landmark.IsEmpty())
 		for (int32 Try = 0; Try < 12 && !bOk; ++Try)
 		{
-			const float A = (FRDWildWorld::Rand01(RuinId, 1813 + Try, Wild->Seed)) * 2.f * PI;
+			const float A = FRDWildWorld::Rand01(RuinId, 1813 + Try, Wild->Seed) * 2.f * PI;
 			const float D = 60.f + 60.f * FRDWildWorld::Rand01(RuinId, 1830 + Try, Wild->Seed);
-			const FVector2D Q = L + FVector2D(FMath::Cos(A), FMath::Sin(A)) * D;
+			const FVector2D Q = T.LmAt + FVector2D(FMath::Cos(A), FMath::Sin(A)) * D;
 			FRDWSample S; Wild->Sample(Q.X, Q.Y, S, false);
 			if (S.WaterKind != 0 || S.Road > 0.05f || S.Lava > 0.05f) continue;
 			const double H0 = Wild->Height(Q.X, Q.Y);
 			bool bSteep = false;
 			for (int32 K = 0; K < 4 && !bSteep; ++K) bSteep = FMath::Abs(Wild->Height(Q.X + 4.0 * FMath::Cos(K * PI / 2.0), Q.Y + 4.0 * FMath::Sin(K * PI / 2.0)) - H0) > 1.5;
-			if (!bSteep) { Found = Q; bOk = true; }
+			if (!bSteep) { T.Spot = Q; bOk = true; }
 		}
-	TreasureSpots15.Add(RuinId, TPair<FVector2D, FString>(Found, bOk ? Kind : FString()));
-	Spot = Found; Landmark = bOk ? Kind : FString();
-	return bOk;
+	if (!bOk) T.Landmark.Reset();
+	const FTreasureSpot15& Kept = TreasureSpots15.Add(RuinId, T);
+	return bOk ? &Kept : nullptr;
 }
 
 bool ARDDungeonGenerator::RewardFirst15(const FVector& From, int32& Kind, int32& Id) const
@@ -203,7 +239,8 @@ bool ARDDungeonGenerator::RewardFirst15(const FVector& From, int32& Kind, int32&
 	float Best = 220.f; Kind = -1; Id = -1;
 	for (const auto& Kv : CollectiblesLaid15) { const float D = FVector::Dist2D(Kv.Value.At, From); if (D < Best && FMath::Abs(Kv.Value.At.Z - From.Z) < 250.f) { Best = D; Kind = 0; Id = Kv.Key; } }
 	for (const auto& Kv : MapsLaid15) { const float D = FVector::Dist2D(Kv.Value.At, From); if (D < Best && FMath::Abs(Kv.Value.At.Z - From.Z) < 250.f) { Best = D; Kind = 1; Id = Kv.Key; } }
-	for (const auto& Kv : ChestsLaid15) { const float D = FVector::Dist2D(Kv.Value.At, From); if (D < Best + 60.f && FMath::Abs(Kv.Value.At.Z - From.Z) < 300.f) { Best = D; Kind = 2; Id = Kv.Key; } }
+	// (a buried chest is reached from 2.8 m (it is wider), but only when nothing nearer was found (PR #104's review: its slack over a nearer find))
+	for (const auto& Kv : ChestsLaid15) { const float D = FVector::Dist2D(Kv.Value.At, From); if (D < (Kind < 0 ? 280.f : Best) && FMath::Abs(Kv.Value.At.Z - From.Z) < 300.f) { Best = D; Kind = 2; Id = Kv.Key; } }
 	if (Kind < 0) return false;
 	FVector Sa; FName Sk;
 	if (WildStationNear14(From, Sa, Sk) && FVector::Dist2D(Sa, From) < Best) return false;
@@ -228,10 +265,9 @@ FString ARDDungeonGenerator::RewardInteract15(const FVector& From)
 	int32 K, Id;
 	if (!RewardFirst15(From, K, Id) || !PlayerCombat) return FString();
 	URDGameInstance* GI = URDGameInstance::Of(this);
-	auto Drop = [](FRewardLaid15& R) { if (R.Mesh.IsValid()) R.Mesh->DestroyComponent(); if (R.Lid.IsValid()) R.Lid->DestroyComponent(); if (R.Light.IsValid()) R.Light->DestroyComponent(); };
 	if (K == 0)
 	{
-		FRewardLaid15 R = CollectiblesLaid15.FindAndRemoveChecked(Id); Drop(R);
+		FRewardLaid15 R = CollectiblesLaid15.FindAndRemoveChecked(Id); RDK15Drop(R);
 		if (GI) GI->CollectiblesTaken15.AddUnique(Id);
 		PlayerCombat->AddItem(R.Item, 1);
 		PlayerCombat->ShowMessage(FString::Printf(TEXT("You find %s (%d carried): a temple takes %d of a kind for something that lasts"), *R.Item.ToString(), PlayerCombat->GetItemCount(R.Item), CollectibleTradeN15));
@@ -241,7 +277,7 @@ FString ARDDungeonGenerator::RewardInteract15(const FVector& From)
 	}
 	if (K == 1)
 	{
-		FRewardLaid15 R = MapsLaid15.FindAndRemoveChecked(Id); Drop(R);
+		FRewardLaid15 R = MapsLaid15.FindAndRemoveChecked(Id); RDK15Drop(R);
 		if (GI) { GI->TreasureMapsTaken15.AddUnique(Id); GI->TreasureMaps15.AddUnique(Id); }
 		FRDWildPlace P; FVector2D T; FString Lk;
 		if (Wild->FindPlace(Id, P) && TreasureSpotOf15(Id, P.At, T, Lk)) DrawTreasureMap15(Id, T, Lk);
@@ -252,7 +288,7 @@ FString ARDDungeonGenerator::RewardInteract15(const FVector& From)
 	}
 	// (the buried chest: the land's tier's things (CollectibleChestN15 of them, drawn by their weight among the items of that tier, on a
 	// stream of the map's own) and gold)
-	FRewardLaid15 R = ChestsLaid15.FindAndRemoveChecked(Id); Drop(R);
+	FRewardLaid15 R = ChestsLaid15.FindAndRemoveChecked(Id); RDK15Drop(R);
 	if (GI) { GI->TreasuresDug15.AddUnique(Id); GI->TreasureMaps15.Remove(Id); }
 	const int32 Tier = FMath::Clamp(Wild->TierAt(R.At.X / 100.0, R.At.Y / 100.0), 1, GameTierMax);
 	TArray<int32> Pool; float Sum = 0.f;
@@ -262,8 +298,9 @@ FString ARDDungeonGenerator::RewardInteract15(const FVector& From)
 	TArray<FName> Things;
 	for (int32 N = 0; N < TreasureChestItems15 && Pool.Num() > 0; ++N)
 	{
-		float U = Rs.FRand() * Sum;
-		for (const int32 I : Pool) { U -= Items[I].Weight; if (U <= 0.f) { Things.Add(Items[I].Name); break; } }
+		float U = Rs.FRand() * Sum; int32 Pick = Pool.Last();          // (a float sum's rounding can leave U over 0 after the last: it is the last)
+		for (const int32 I : Pool) { U -= Items[I].Weight; if (U <= 0.f) { Pick = I; break; } }
+		Things.Add(Items[Pick].Name);
 	}
 	const int32 Gold = FMath::RoundToInt(TreasureChestGold15 * (1.f + 0.35f * (Tier - 1)));
 	AddGold(Gold, TEXT("a buried chest"));
@@ -278,21 +315,44 @@ FString ARDDungeonGenerator::RewardInteract15(const FVector& From)
 
 void ARDDungeonGenerator::DrawTreasureMap15(int32 Id, const FVector2D& Spot, const FString& Landmark)
 {
-	// (the picture: from the spot 1.7 m up toward the landmark's top, taken now into a target of its own; the last four kept)
+	// (the picture: from the spot 1.7 m up toward the landmark, taken now into a target of its own. The landmark is laid for the moment of
+	// the picture when it is not standing (PR #104's review: 20 km off nothing of it stood, and the picture was the far land alone); the
+	// ground there is the far land's (the chunks reach 2 km))
 	if (!GetWorld()) return;
+	FRDWildPlace P;
+	const FTreasureSpot15* T = Wild->FindPlace(Id, P) ? TreasureSpot15(Id, P.At) : nullptr;
+	if (!T) return;
 	UTextureRenderTarget2D* Rt = UKismetRenderingLibrary::CreateRenderTarget2D(this, 512, 288, RTF_RGBA8_SRGB);
 	if (!Rt) return;
-	FVector2D Top = Spot; float TopZ = 0.f;
-	for (const auto& Kv : RegionLandmarks15) if (FVector2D::Distance(Kv.Value.At, Spot) < 200.0) { Top = Kv.Value.At; TopZ = Kv.Value.TopZ; }
-	if (TopZ <= 0.f)
+	TArray<UStaticMeshComponent*> Temp;
+	float TopZ = 0.f;
+	if (T->bTower)
 	{
-		// (a broken tower: its foot from the site rule, 182 m up)
-		const int32 Ci = FMath::FloorToInt(Spot.X / WildLandmarkCellM), Cj = FMath::FloorToInt(Spot.Y / WildLandmarkCellM);
-		for (int32 I = Ci - 1; I <= Ci + 1; ++I) for (int32 J = Cj - 1; J <= Cj + 1; ++J)
-		{ FVector2D S; if (WildTowerSite13(I, J, S) && FVector2D::Distance(S, Spot) < 200.0) { Top = S; TopZ = Wild->ToZ(Wild->Height(S.X, S.Y)) + 18000.f; } }
+		if (WildLandmark.IsValid() && FVector2D::Distance(WildLandmarkAt, T->LmAt) < 1.0) TopZ = WildLandmark->Bounds.GetBox().Max.Z;
+		else if (WildLandmarkMesh)
+		{
+			UStaticMeshComponent* C = NewObject<UStaticMeshComponent>(this);
+			C->SetStaticMesh(WildLandmarkMesh); C->SetMobility(EComponentMobility::Movable); C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			C->RegisterComponent();
+			C->SetWorldTransform(FTransform(FRotator(0.f, (float)(FRDWildWorld::Hash((int32)T->LmAt.X, (int32)T->LmAt.Y, Wild->Seed) % 360u), 0.f),
+				FVector(T->LmAt.X * 100.0, T->LmAt.Y * 100.0, Wild->ToZ(Wild->Height(T->LmAt.X, T->LmAt.Y)) - 200.f)));          // (as the nearest tower is laid)
+			TopZ = C->Bounds.GetBox().Max.Z; Temp.Add(C);
+		}
+	}
+	else
+	{
+		FRegionLandmark15 Lm;
+		if (const FRegionLandmark15* Laid = RegionLandmarks15.Find(FIntVector(T->Cell.X, T->Cell.Y, T->Slot)); Laid && Laid->TopZ > 0.f) TopZ = Laid->TopZ;
+		else if (RegionLandmarkOf15(T->Cell, T->Slot, Lm))
+		{
+			LayRegionLandmark15(Lm);
+			TopZ = Lm.TopZ;
+			if (UStaticMeshComponent* C = Lm.Main.Get()) Temp.Add(C);
+			if (UStaticMeshComponent* C = Lm.Extra.Get()) Temp.Add(C);
+		}
 	}
 	const FVector Eye(Spot.X * 100.0, Spot.Y * 100.0, Wild->ToZ(Wild->Height(Spot.X, Spot.Y)) + 170.f);
-	const FVector Look = TopZ > 0.f ? FVector(Top.X * 100.0, Top.Y * 100.0, TopZ * 0.5f + Eye.Z * 0.5f) : Eye + FVector(1000.f, 0, 0);
+	const FVector Look(T->LmAt.X * 100.0, T->LmAt.Y * 100.0, TopZ > 0.f ? TopZ * 0.5f + Eye.Z * 0.5f : Eye.Z);
 	USceneCaptureComponent2D* Cap = NewObject<USceneCaptureComponent2D>(this);
 	Cap->RegisterComponent();
 	FRotator Aim = (Look - Eye).Rotation(); Aim.Pitch = FMath::Clamp(Aim.Pitch, -5.f, 12.f);          // (aimed half way up a 182 m tower from 60 m the picture was the sky)
@@ -303,10 +363,11 @@ void ARDDungeonGenerator::DrawTreasureMap15(int32 Id, const FVector2D& Spot, con
 	Cap->bCaptureEveryFrame = false; Cap->bCaptureOnMovement = false;
 	Cap->CaptureScene();
 	Cap->DestroyComponent();
+	for (UStaticMeshComponent* C : Temp) C->DestroyComponent();
+	TreasurePictures15.RemoveAll([Id](const FTreasurePicture15& Tp) { return Tp.Id == Id; });
 	TreasurePictures15.Add(FTreasurePicture15{ Id, Rt, Landmark });
 	TreasureTargets15.Add(Rt);          // (held for the garbage collector: the struct's pointer is not seen by it)
-	while (TreasurePictures15.Num() > 4) { TreasureTargets15.Remove(TreasurePictures15[0].Rt); TreasurePictures15.RemoveAt(0); }
-	UE_LOG(LogRDList15k, Log, TEXT("RDTREASURE15 map %d: the spot (%.0f, %.0f) m by a %s, its picture taken"), Id, Spot.X, Spot.Y, *Landmark);
+	UE_LOG(LogRDList15k, Log, TEXT("RDTREASURE15 map %d: the spot (%.0f, %.0f) m by a %s, its picture taken (%s)"), Id, Spot.X, Spot.Y, *Landmark, Temp.Num() ? TEXT("its landmark laid for it") : TEXT("its landmark standing"));
 }
 
 UTextureRenderTarget2D* ARDDungeonGenerator::TreasurePictureToShow15(FString& Caption) const
@@ -336,7 +397,8 @@ void ARDDungeonGenerator::AddCollectibleTrades15(TFunctionRef<void(const FString
 		const bool bOn = Have >= CollectibleTradeN15;
 		const FString Tag = FString::Printf(TEXT("%d of %d"), FMath::Min(Have, CollectibleTradeN15), CollectibleTradeN15);
 		Add(TEXT("collect"), FString::Printf(TEXT("Offer %d %s: 10 hit points for good"), CollectibleTradeN15, *F[0]), Tag, TEXT("Your hit points' top raised by 10, in every land, for the rest of the game"), bOn, F[0] + TEXT("|hp"));
-		Add(TEXT("collect"), FString::Printf(TEXT("Offer %d %s: 10 mana for good"), CollectibleTradeN15, *F[0]), Tag, TEXT("Your mana's top raised by 10, in every land, for the rest of the game"), bOn, F[0] + TEXT("|mana"));
+		if (PlayerMaxMana > 0.f)          // (a hero with no mana gains nothing by it (PR #104's review))
+			Add(TEXT("collect"), FString::Printf(TEXT("Offer %d %s: 10 mana for good"), CollectibleTradeN15, *F[0]), Tag, TEXT("Your mana's top raised by 10, in every land, for the rest of the game"), bOn, F[0] + TEXT("|mana"));
 		if (!AngelTokenItem.IsNone())
 			Add(TEXT("collect"), FString::Printf(TEXT("Offer %d %s: an %s"), CollectibleTradeN15, *F[0], *AngelTokenItem.ToString()), Tag, TEXT("A token for a rank of one of your secondary abilities"), bOn, F[0] + TEXT("|token"));
 	}
@@ -348,6 +410,8 @@ bool ARDDungeonGenerator::TownCollectTrade15(const FString& Arg)
 	if (!PlayerCombat || !Arg.Split(TEXT("|"), &Item, &What)) return false;
 	const FName It(*Item);
 	if (PlayerCombat->GetItemCount(It) < CollectibleTradeN15) { SetTownNote(FString::Printf(TEXT("You need %d of them"), CollectibleTradeN15)); return false; }
+	if (What == TEXT("mana") && PlayerMaxMana <= 0.f) { SetTownNote(TEXT("You have no mana to raise")); return false; }
+	if (What != TEXT("hp") && What != TEXT("mana") && What != TEXT("token")) return false;
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	PlayerCombat->RemoveItem(It, CollectibleTradeN15);
 	if (What == TEXT("hp") && GI) { GI->LastingHealth15 += 10; PlayerCombat->RefreshMaxima(); SetTownNote(TEXT("The priest lays a hand on your brow: your hit points' top rises by 10")); }
@@ -361,10 +425,12 @@ float ARDDungeonGenerator::LastingHealth15() const { const URDGameInstance* GI =
 float ARDDungeonGenerator::LastingMana15() const { const URDGameInstance* GI = URDGameInstance::Of(this); return GI ? (float)GI->LastingMana15 : 0.f; }
 
 // ================================================================================================ named items tied to places
-void ARDDungeonGenerator::AddPlaceItem15(const FVector& BoxAt, TArray<FName>& Got)
+void ARDDungeonGenerator::AddPlaceItem15(const FVector& BoxAt, int64 BoxKey, TArray<FName>& Got)
 {
 	// (a structure's chest (the structure nearest the box within 120 m): the kind's named ring, in the first of its chests she opens)
-	if (!IsWildReady() || PlaceItems15.Num() == 0) return;
+	// (a structure's own chests only: their keys are (5 << 40) on; a farm's, a house's or a ruin's box beside a structure is not its chest
+	// (PR #104's review))
+	if (!IsWildReady() || PlaceItems15.Num() == 0 || BoxKey < (int64(5) << 40) || BoxKey >= (int64(6) << 40)) return;
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	if (!GI) return;
 	const FVector2D B2(BoxAt.X / 100.0, BoxAt.Y / 100.0);
@@ -409,10 +475,9 @@ TArray<FString> ARDDungeonGenerator::GetRewards15(float Km) const
 	for (int32 I = P0.X; I <= P1.X; ++I) for (int32 J = P0.Y; J <= P1.Y; ++J) Wild->PlacesIn(FIntPoint(I, J), Ps);
 	for (const FRDWildPlace& P : Ps)
 	{
-		if (P.Kind != TEXT("ruins") || P.Id >= FRDWildWorld::QuestIdBase || FVector2D::Distance(P.At, H2) > Km * 1000.0 || FRDWildWorld::Rand01(P.Id, 1810, Wild->Seed) >= TreasureMapChance15) continue;
-		FVector2D T; FString Lk;
-		if (!TreasureSpotOf15(P.Id, P.At, T, Lk)) continue;
-		Out.Add(FString::Printf(TEXT("m|%d|%.1f|%.1f|%d|%d|%.1f|%.1f|%s"), P.Id, P.At.X, P.At.Y, GI && GI->TreasureMapsTaken15.Contains(P.Id) ? 1 : 0, MapsLaid15.Contains(P.Id) ? 1 : 0, T.X, T.Y, *Lk));
+		if (FVector2D::Distance(P.At, H2) > Km * 1000.0 || !RuinHasMap15(P)) continue;
+		const FTreasureSpot15* T = TreasureSpot15(P.Id, P.At);
+		Out.Add(FString::Printf(TEXT("m|%d|%.1f|%.1f|%d|%d|%.1f|%.1f|%s"), P.Id, P.At.X, P.At.Y, GI && GI->TreasureMapsTaken15.Contains(P.Id) ? 1 : 0, MapsLaid15.Contains(P.Id) ? 1 : 0, T->Spot.X, T->Spot.Y, *T->Landmark));
 	}
 	if (GI) for (const int32 Mid : GI->TreasureMaps15) Out.Add(FString::Printf(TEXT("x|%d|%d|%d"), Mid, ChestsLaid15.Contains(Mid) ? 1 : 0, GI->TreasuresDug15.Contains(Mid) ? 1 : 0));
 	return Out;

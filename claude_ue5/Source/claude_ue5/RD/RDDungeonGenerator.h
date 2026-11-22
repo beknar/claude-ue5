@@ -2128,11 +2128,16 @@ public:
 	struct FRewardLaid15 { int32 Id = 0; FVector At = FVector::ZeroVector; FName Item; TWeakObjectPtr<class UStaticMeshComponent> Mesh, Lid; TWeakObjectPtr<class UPointLightComponent> Light; };
 	struct FTreasurePicture15 { int32 Id = 0; TObjectPtr<class UTextureRenderTarget2D> Rt = nullptr; FString Landmark; };
 	mutable TMap<FIntPoint, FCollectible15> CollectibleCache15;
-	mutable TMap<int32, TPair<FVector2D, FString>> TreasureSpots15;
+	/** a ruin's treasure spot: where to dig, the landmark's name, and the landmark itself (a region's: its cell and slot; a broken tower:
+	 *  its site) so the picture can lay it when it is not standing */
+	struct FTreasureSpot15 { FVector2D Spot = FVector2D::ZeroVector; FString Landmark; FVector2D LmAt = FVector2D::ZeroVector; bool bTower = false; FIntPoint Cell = FIntPoint::ZeroValue; int32 Slot = 0; };
+	mutable TMap<int32, FTreasureSpot15> TreasureSpots15;
+	const FTreasureSpot15* TreasureSpot15(int32 RuinId, const FVector2D& RuinAt) const;
+	bool RuinHasMap15(const struct FRDWildPlace& P) const;
 	TMap<int32, FRewardLaid15> CollectiblesLaid15, MapsLaid15, ChestsLaid15;
 	UPROPERTY(Transient) TArray<TObjectPtr<class UTextureRenderTarget2D>> TreasureTargets15;
 	TArray<FTreasurePicture15> TreasurePictures15;
-	float RewardLook15 = 0.f;
+	float RewardLook15 = 0.f, WildReadySince15 = -1.f;
 	FString LastChestDug15;
 	bool CollectibleOf15(FIntPoint Cell, FCollectible15& Out) const;
 	bool TreasureSpotOf15(int32 RuinId, const FVector2D& RuinAt, FVector2D& Spot, FString& Landmark) const;
@@ -2147,7 +2152,7 @@ public:
 	/** the hit points and mana a temple's trades added for good (the game instance's), for her maxima */
 	float LastingHealth15() const;
 	float LastingMana15() const;
-	void AddPlaceItem15(const FVector& BoxAt, TArray<FName>& Got);
+	void AddPlaceItem15(const FVector& BoxAt, int64 BoxKey, TArray<FName>& Got);
 	/** tests: the collectibles, the ruins' maps and the buried chests within Km (see RDList15k.cpp); the last chest dug "id|tier|gold|things" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetRewards15(float Km) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FString GetLastChestDug15() const { return LastChestDug15; }

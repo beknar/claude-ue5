@@ -7411,6 +7411,7 @@ def step_rewards15():
             g.wild_put_her(b["x"] + 20.0, b["y"]); yield from wait_ready(90); yield from wait_chunks(30, 50); yield from rwait(4.0)
             hp0 = cb().get_max_health(); lh0 = G["gi"].get_editor_property("lasting_health15")
             res["temple"] = g.open_town_panel("temple", -1); yield from rwait(0.5)
+            res["mana_line"] = line_of("collect", "mana")          # (the Warrior has no mana: no mana trade offered (PR #104's review))
             li = line_of("collect", "hit points")
             res["trade_line"] = panel()[li][1] if li >= 0 else None
             if li >= 0: res["trade"] = g.activate_town_entry(li); yield from rwait(0.5)
@@ -7441,6 +7442,18 @@ def step_rewards15():
             while time.time() - t0 < 20 and map_state()["asked"] > 0: yield
             yield from rwait(1.0); res["map_drawn"] = [a for a in drawn() if a.startswith(("wild_", "wmap_"))][:6]
             res["picture_shown"] = G["pc"].get_hud().is_treasure_shown15(); shot("rewards15_map", "1600x900"); yield from rwait(1.5); g.set_map_open(False)
+            yield from rwait(0.8); res["shown_after_close"] = G["pc"].get_hud().is_treasure_shown15()
+            # (a save and load: the map still held, its picture drawn again by the new generator)
+            res["saved"] = g.save_game_now("save_rewards15", "test", "rewards15")
+            res["load"] = g.load_game_from("save_rewards15"); yield from until_loaded13(); yield from wait_ready(90)
+            g = G["gen"]; quiet(True); g.set_editor_property("wild_locks14", False)          # (the loaded level's generator is new: the harness's switch again)
+            gi = GS.get_game_instance(G["w"]); res["held_after_load"] = mp["id"] in list(gi.get_editor_property("treasure_maps15"))
+            t0 = time.time()
+            while time.time() - t0 < 30 and not g.has_treasure_picture15(): yield
+            res["picture_after_load_s"] = round(time.time() - t0, 1) if g.has_treasure_picture15() else None
+            g.set_map_open(True); yield from rwait(1.0); t0 = time.time()
+            while time.time() - t0 < 20 and map_state()["asked"] > 0: yield
+            yield from rwait(1.0); res["shown_after_load"] = G["pc"].get_hud().is_treasure_shown15(); shot("rewards15_map_loaded", "1600x900"); yield from rwait(1.5); g.set_map_open(False)
             # (to the spot: the buried chest)
             g.wild_put_her(mp["sx"] + 25.0, mp["sy"]); yield from wait_chunks(30, 50); ground_put(mp["sx"] + 6.0, mp["sy"]); yield from rwait(2.0)
             G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-25, yaw=180.0)); G["pawn"].set_actor_hidden_in_game(True); yield from rwait(1.0)
@@ -7500,7 +7513,9 @@ def step_rewards15():
         quiet(False)
     pl = res.get("place", {})
     ok = (res.get("carried") == 5 and res.get("marked_taken", 0) >= 5 and res.get("trade") and res["max_hp"][1] > res["max_hp"][0] and res["lasting"][1] == res["lasting"][0] + 10
-          and res.get("map_f") == "map" and res.get("picture") and res.get("picture_shown") and res.get("chest_laid") and res.get("dig_f") == "treasure" and res.get("gold", 0) > 0
+          and res.get("mana_line") == -1 and round(res["max_hp"][1] - res["max_hp"][0], 1) == 10.0
+          and res.get("map_f") == "map" and res.get("picture") and res.get("picture_shown") and res.get("shown_after_close") is False
+          and res.get("held_after_load") and res.get("picture_after_load_s") is not None and res.get("shown_after_load") and res.get("chest_laid") and res.get("dig_f") == "treasure" and res.get("gold", 0) > 0
           and res.get("things_taken", 0) >= 1 and res.get("dug_kept")
           and pl.get("ring_after_0") == 1 and pl.get("f1") == "container" and pl.get("ring_after_1") == 1)
     step_result("rewards15", ok, **res)
