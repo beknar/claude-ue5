@@ -2125,7 +2125,7 @@ public:
 	/** each kind of structure's named item, "kind|item" (items of weight 0 on every map) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> PlaceItems15;
 	struct FCollectible15 { int32 Id = 0, Kind = -1; FVector2D At = FVector2D::ZeroVector; FName Item; FLinearColor Color = FLinearColor::White; };
-	struct FRewardLaid15 { int32 Id = 0; FVector At = FVector::ZeroVector; FName Item; TWeakObjectPtr<class UStaticMeshComponent> Mesh, Lid; TWeakObjectPtr<class UPointLightComponent> Light; };
+	struct FRewardLaid15 { int32 Id = 0; float TopZ = 0.f; FVector At = FVector::ZeroVector; FName Item; TWeakObjectPtr<class UStaticMeshComponent> Mesh, Lid; TWeakObjectPtr<class UPointLightComponent> Light; };
 	struct FTreasurePicture15 { int32 Id = 0; TObjectPtr<class UTextureRenderTarget2D> Rt = nullptr; FString Landmark; };
 	mutable TMap<FIntPoint, FCollectible15> CollectibleCache15;
 	/** a ruin's treasure spot: where to dig, the landmark's name, and the landmark itself (a region's: its cell and slot; a broken tower:
@@ -2153,6 +2153,37 @@ public:
 	float LastingHealth15() const;
 	float LastingMana15() const;
 	void AddPlaceItem15(const FVector& BoxAt, int64 BoxKey, TArray<FName>& Got);
+	// ---- the list of 2026-11-20's sixteenth phase (RDList15o.cpp, RDList14k.cpp): waystones and crossroads posts (idea 9 in part)
+	/** the waystones (the world's, one a region's cell) and the crossroads posts laid in play (941... 942 sets them), the stone's height (m) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bWaystones15 = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bCrossPosts15 = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float WaystoneHeight15 = 2.6f;
+	struct FSignArm14 { FString Name; float M = 0.f; float Yaw = 0.f; };
+	struct FCrossArm15 { FString Name; float M = 0.f; FVector2D Dir = FVector2D(1, 0); };
+	struct FCrossPost15 { FVector2D At = FVector2D::ZeroVector; bool bPlaced = false; TArray<FCrossArm15> Arms; };
+	TMap<int32, FRewardLaid15> WaystonesLaid15;
+	mutable TMap<int32, FCrossPost15> CrossPosts15;
+	TMap<int32, TWeakObjectPtr<AActor>> CrossPostActors15;
+	float WaystoneLook15 = 0.f, CrossLook15 = 0.f;
+	AActor* SpawnSignPost14(const FVector2D& AtM, float PostYaw, const TArray<FSignArm14>& Arms, const FString& Tag);
+	bool IsWaystoneLit15(int32 Id) const;
+	void TickWaystones15(float Dt, const FVector& Her);
+	void LayWaystone15(const struct FRDWildPlace& P);
+	void GlowWaystone15(int32 Id);
+	bool WaystoneFirst15(const FVector& From, float& Best, int32& Kind, int32& Id) const;
+	FString LightWaystone15(int32 Id);
+	FString WaystoneDescribe15(int32 Id) const;
+	bool CrossPostOf15(int32 Ci, FCrossPost15& Out) const;
+	void TickCrossPosts15(float Dt, const FVector& Her);
+	/** tests: the waystones within Km "id|name|x|y|found|lit|laid"; the crossroads posts within Km (see RDList15o.cpp) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetWaystones15(float Km) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetCrossPosts15(float Km) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") void ForgetWaystones15(const TArray<int32>& Ids);
+	void DropWaystonesAndPosts15();
+	void EnsureWaystoneVeto15() const;
+	void CrossroadsNear15(const FVector2D& P, double R, TArray<int32>& Out) const;
+	mutable TMultiMap<FIntPoint, int32> CrossHash15;
+	mutable int32 CrossHashFor15 = -1;
 	// ---- the list of 2026-11-20's fifteenth phase (RDList15n.cpp): story encounters (idea 8), from SourceArt/wilderness/stories15.json (941)
 	/** the courier's letters ("{hero}" her hero's name), who a letter is from when she has met no one, the pursuers of one chased, the
 	 *  cart's tilt off its wheel, her rival (name, body, lines met first and again, said when it wins and when she does), how far beyond

@@ -177,6 +177,19 @@ def lookout():
     return finish(f)
 
 
+def waystone():
+    # (the list of 2026-11-20's sixteenth phase: a waystone): a tall stone rounded at its top on a low plinth, a rune cut through it
+    f = canvas(); d = ImageDraw.Draw(f)
+    d.rounded_rectangle([0.34 * S, 0.10 * S, 0.66 * S, 0.84 * S], radius=int(0.16 * S), fill=IVORY)
+    rect(d, 0.22, 0.80, 0.78, 0.92)
+    f = cut(f, lambda m: (m.line([(0.50 * S, 0.24 * S), (0.50 * S, 0.66 * S)], fill=255, width=int(0.05 * S)),
+                          m.line([(0.50 * S, 0.36 * S), (0.40 * S, 0.28 * S)], fill=255, width=int(0.04 * S)),
+                          m.line([(0.50 * S, 0.36 * S), (0.60 * S, 0.28 * S)], fill=255, width=int(0.04 * S)),
+                          m.line([(0.50 * S, 0.52 * S), (0.40 * S, 0.60 * S)], fill=255, width=int(0.04 * S)),
+                          m.line([(0.50 * S, 0.52 * S), (0.60 * S, 0.60 * S)], fill=255, width=int(0.04 * S))))
+    return finish(f)
+
+
 def select():
     f = canvas(); d = ImageDraw.Draw(f)
     d.ellipse([0.08 * S, 0.08 * S, 0.92 * S, 0.92 * S], outline=(250, 214, 120, 255), width=int(0.06 * S))
@@ -198,11 +211,11 @@ if __name__ == "__main__":
     out = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else "wild_symbols")
     os.makedirs(out, exist_ok=True)
     for name, fn in (("town", town), ("city", city), ("village", village), ("house", house), ("camp", camp), ("spawn", spawn), ("ruins", ruins),
-                     ("ritual", ritual), ("cave", cave), ("lair", lair), ("farmstead", farmstead), ("horse", horse), ("lookout", lookout), ("select", select), ("fog", fog)):
+                     ("ritual", ritual), ("cave", cave), ("lair", lair), ("farmstead", farmstead), ("horse", horse), ("lookout", lookout), ("waystone", waystone), ("select", select), ("fog", fog)):
         fn().save(os.path.join(out, f"wmap_{name}.png"))
     # a contact sheet to look at
-    names = ["town", "city", "village", "house", "camp", "spawn", "ruins", "ritual", "cave", "lair", "farmstead", "horse", "lookout"]
-    sheet = Image.new("RGBA", (256 * 5, 256 * 3), (120, 126, 110, 255))          # (5 x 3: thirteen symbols)
+    names = ["town", "city", "village", "house", "camp", "spawn", "ruins", "ritual", "cave", "lair", "farmstead", "horse", "lookout", "waystone"]
+    sheet = Image.new("RGBA", (256 * 5, 256 * 3), (120, 126, 110, 255))          # (5 x 3: fourteen symbols)
     for i, n in enumerate(names): sheet.alpha_composite(Image.open(os.path.join(out, f"wmap_{n}.png")), ((i % 5) * 256, (i // 5) * 256))
     sheet.save(os.path.join(out, "_sheet.png"))
     print("WILDSYM", out, len(names) + 2)

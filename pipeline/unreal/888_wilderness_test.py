@@ -7894,6 +7894,97 @@ def step_stories15():
           and len(res.get("engaged", [])) == 4)
     step_result("stories15", ok, **res)
 STEPS["stories15"] = step_stories15
+def waystones15_lines(g, km):
+    out = []
+    for l in g.get_waystones15(km):
+        p = str(l).split("|")
+        out.append({"id": int(p[0]), "name": p[1], "x": float(p[2]), "y": float(p[3]), "found": p[4] == "1", "lit": p[5] == "1", "laid": p[6] == "1"})
+    return out
+
+
+def crossposts15_lines(g, km):
+    posts = {}
+    for l in g.get_cross_posts15(km):
+        p = str(l).split("|")
+        if p[0] == "post": posts[int(p[1])] = {"ci": int(p[1]), "x": float(p[2]), "y": float(p[3]), "laid": p[4] == "1", "arms": [], "n": int(p[5]), "texts": int(p[6])}
+        elif p[0] == "arm": posts[int(p[1])]["arms"].append({"name": p[2], "m": float(p[3]), "dx": float(p[4]), "dy": float(p[5])})
+    return posts
+
+
+def step_waystones15():
+    """idea 9 in part (the list of 2026-11-20's sixteenth phase): two waystones near found (as she comes within 40 m), one lit by F (its glow
+    pictured); from 8 km off the map's travel takes her to the lit one and refuses the unlit; the map draws its symbol; the nearest crossroads
+    post with two arms or more: each arm naming a town points the way to it (within 100 degrees of its bearing) along a road no shorter than
+    the straight line, the post laid with both faces of every arm's words (pictured); all put back"""
+    g = G["gen"]; res = {}; quiet(True)
+    try:
+        g.wild_put_her(7000.0, -1500.0); yield from wait_ready(90); yield from wait_chunks(30, 50); yield from rwait(1.0)
+        me = G["pawn"].get_actor_location()
+        ws = sorted(waystones15_lines(g, 25.0), key=lambda w: math.hypot(w["x"] - me.x / 100, w["y"] - me.y / 100))
+        res["waystones_25km"] = len(ws)
+        if len(ws) < 2: step_result("waystones15", False, **res); return
+        a, b = ws[0], ws[1]; a_b = [a, b]
+        # (the second found, not lit)
+        g.wild_put_her(b["x"] + 30.0, b["y"]); yield from wait_chunks(30, 50); ground_put(b["x"] + 30.0, b["y"]); yield from rwait(2.0)
+        res["b"] = next((w for w in waystones15_lines(g, 1.0) if w["id"] == b["id"]), None)
+        # (the first found and lit)
+        g.wild_put_her(a["x"] + 30.0, a["y"]); yield from wait_chunks(30, 50); ground_put(a["x"] + 30.0, a["y"]); yield from rwait(2.0)
+        res["a_found"] = next((w for w in waystones15_lines(g, 1.0) if w["id"] == a["id"]), None)
+        for ang in range(0, 360, 30):
+            ground_put(a["x"] + 1.4 * math.cos(math.radians(ang)), a["y"] + 1.4 * math.sin(math.radians(ang))); yield from rwait(0.3)
+            pr = str(g.describe_nearest(G["pawn"].get_actor_location(), 300.0))
+            if "waystone" in pr: break
+        res["light_prompt"] = pr
+        res["light_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(1.0)
+        res["a"] = next((w for w in waystones15_lines(g, 1.0) if w["id"] == a["id"]), None)
+        ground_put(a["x"] + 8.0, a["y"]); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4, yaw=180.0)); G["pawn"].set_actor_hidden_in_game(True); yield from rwait(1.5)
+        shot("waystones15_lit", "1280x720"); yield from rwait(1.5); G["pawn"].set_actor_hidden_in_game(False)
+        # (from 8 km off: the lit one travelled to, the unlit refused)
+        g.wild_put_her(a["x"] + 8000.0, a["y"]); yield from wait_chunks(30, 50); yield from rwait(1.0)
+        res["travel_a"] = g.wild_fast_travel(a["id"]); yield from wait_chunks(30, 50); yield from rwait(1.0)
+        me = G["pawn"].get_actor_location(); res["after_travel_m"] = round(math.hypot(me.x / 100 - a["x"], me.y / 100 - a["y"]), 1)
+        res["travel_b"] = g.wild_fast_travel(b["id"]); res["refusal_b"] = str(g.get_wild_map_state()).split("|")[10]
+        # (the map: its symbol drawn)
+        g.set_map_open(True); g.set_wild_map_view(a["x"], a["y"], 15.0); yield from rwait(1.0); t0 = time.time()
+        while time.time() - t0 < 20 and map_state()["asked"] > 0: yield
+        yield from rwait(1.0); res["map_symbol"] = "wmap_waystone" in drawn(); shot("waystones15_map", "1600x900"); yield from rwait(1.5); g.set_map_open(False)
+        # ---- the nearest crossroads post with two arms or more
+        T = towns()
+        posts = [p_ for p_ in crossposts15_lines(g, 25.0).values() if len(p_["arms"]) >= 2]
+        me = G["pawn"].get_actor_location()
+        posts.sort(key=lambda p_: math.hypot(p_["x"] - me.x / 100, p_["y"] - me.y / 100))
+        res["posts_25km"] = len(posts)
+        if posts:
+            p_ = posts[0]
+            checks = []
+            for arm in p_["arms"]:
+                t = T.get(arm["name"])
+                if not t: checks.append({"name": arm["name"], "town": False, "m": arm["m"]}); continue
+                bx, by = t["x"] - p_["x"], t["y"] - p_["y"]; bl = math.hypot(bx, by) or 1.0
+                ang = math.degrees(math.acos(max(-1.0, min(1.0, (bx * arm["dx"] + by * arm["dy"]) / bl))))
+                checks.append({"name": arm["name"], "town": True, "m": round(arm["m"]), "straight_m": round(bl), "angle": round(ang, 1)})
+            res["post"] = {"ci": p_["ci"], "arms": checks}
+            g.wild_put_her(p_["x"] + 12.0, p_["y"]); yield from wait_chunks(30, 50); ground_put(p_["x"] + 12.0, p_["y"]); yield from rwait(2.0)
+            p2 = crossposts15_lines(g, 1.0).get(p_["ci"])
+            res["post_laid"] = {"laid": p2["laid"], "arms": p2["n"], "texts": p2["texts"]} if p2 else None
+            ground_put(p_["x"] + 4.5, p_["y"] + 1.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=2, yaw=math.degrees(math.atan2(-1.0, -4.5)))); G["pawn"].set_actor_hidden_in_game(True); yield from rwait(1.5)
+            shot("waystones15_post", "1280x720"); yield from rwait(1.5); G["pawn"].set_actor_hidden_in_game(False)
+    finally:
+        try: G["pawn"].set_actor_hidden_in_game(False); G["gen"].set_map_open(False)
+        except Exception: pass
+        try: G["gen"].forget_waystones15([w_["id"] for w_ in (a_b if "a_b" in dir() else [])]); res["put_back"] = True          # (only the two it touched)
+        except Exception as e: res["put_back"] = str(e)
+        quiet(False)
+    pa = res.get("post", {}).get("arms", [])
+    towns_ok = [c for c in pa if c["town"]]
+    ok = (res.get("b", {}) and res["b"]["found"] and not res["b"]["lit"] and res.get("a_found", {}) and res["a_found"]["found"]
+          and "light the waystone" in res.get("light_prompt", "") and res.get("light_f") == "light" and res.get("a", {}) and res["a"]["lit"]
+          and res.get("travel_a") and res.get("after_travel_m", 999) < 45.0 and res.get("travel_b") is False and "not lit" in res.get("refusal_b", "")
+          and res.get("map_symbol")
+          and len(towns_ok) >= 1 and all(c["angle"] < 100.0 and c["m"] >= c["straight_m"] * 0.95 for c in towns_ok)
+          and res.get("post_laid") and res["post_laid"]["laid"] and res["post_laid"]["texts"] == 2 * res["post_laid"]["arms"])
+    step_result("waystones15", ok, **res)
+STEPS["waystones15"] = step_waystones15
 SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
 def saves_snapshot():
     """the save folder's files and their bytes: put back at the end, the tests' own new saves deleted (PR #61's review)"""

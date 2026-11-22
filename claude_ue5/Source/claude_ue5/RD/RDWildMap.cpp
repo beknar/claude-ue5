@@ -377,6 +377,8 @@ bool ARDDungeonGenerator::WildFastTravel(int32 PlaceId)
 	FRDWildPlace P;
 	if (!Wild->FindPlace(PlaceId, P)) { WildTravelRefusal = TEXT("no such place"); return false; }
 	if (!WildFound.Contains(PlaceId)) { WildTravelRefusal = FString::Printf(TEXT("You have not found %s yet"), *P.Name); if (PlayerCombat) PlayerCombat->ShowMessage(WildTravelRefusal); return false; }
+	// (the list of 2026-11-20's sixteenth phase: a waystone is travelled to once lit)
+	if (P.Kind == TEXT("waystone") && !IsWaystoneLit15(PlaceId)) { WildTravelRefusal = FString::Printf(TEXT("%s is not lit: light it to travel there"), *P.Name); if (PlayerCombat) PlayerCombat->ShowMessage(WildTravelRefusal); return false; }
 	if (IsWildCombat() && !bTravelForced) { WildTravelRefusal = TEXT("You cannot travel while enemies are near"); if (PlayerCombat) PlayerCombat->ShowMessage(WildTravelRefusal); return false; }
 	APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
 	if (!Her) return false;

@@ -1,0 +1,95 @@
+{
+ "tag": "l15p16d",
+ "plan": [
+  "waystones15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "waystones15",
+   "ok": true,
+   "waystones_25km": 6,
+   "b": {
+    "id": 939530249,
+    "name": "Grey Waystone",
+    "x": 5926.6,
+    "y": -7816.5,
+    "found": true,
+    "lit": false,
+    "laid": true
+   },
+   "a_found": {
+    "id": 939530250,
+    "name": "Dawn Waystone",
+    "x": 2663.8,
+    "y": -4999.3,
+    "found": true,
+    "lit": false,
+    "laid": true
+   },
+   "light_prompt": "light the waystone",
+   "light_f": "light",
+   "a": {
+    "id": 939530250,
+    "name": "Dawn Waystone",
+    "x": 2663.8,
+    "y": -4999.3,
+    "found": true,
+    "lit": true,
+    "laid": true
+   },
+   "travel_a": true,
+   "after_travel_m": 28.0,
+   "travel_b": false,
+   "refusal_b": "Grey Waystone is not lit: light it to travel there",
+   "map_symbol": true,
+   "posts_25km": 16,
+   "post": {
+    "ci": 2,
+    "arms": [
+     {
+      "name": "Briarham",
+      "town": false,
+      "m": 3260.0
+     },
+     {
+      "name": "Brokenspire",
+      "town": true,
+      "m": 5351,
+      "straight_m": 5297,
+      "angle": 47.1
+     },
+     {
+      "name": "Ashenreach",
+      "town": true,
+      "m": 38523,
+      "straight_m": 33316,
+      "angle": 33.2
+     },
+     {
+      "name": "Vel Morrath",
+      "town": true,
+      "m": 79682,
+      "straight_m": 49443,
+      "angle": 83.8
+     }
+    ]
+   },
+   "post_laid": {
+    "laid": true,
+    "arms": 4,
+    "texts": 8
+   },
+   "put_back": true
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "wd_l15p16d_waystones15_lit.png",
+  "wd_l15p16d_waystones15_map.png",
+  "wd_l15p16d_waystones15_post.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

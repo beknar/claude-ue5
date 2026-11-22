@@ -227,7 +227,7 @@ void ARDDungeonGenerator::TickWildScenery13(float Dt, const FVector& Her)
 	TickWildAurora13(Dt, Her);
 	TickWildLandmark13(Dt, Her);
 	// (the list of 2026-11-20's tenth phase: the lookouts, the regions' landmarks, the houses' lights by night: RDList15i.cpp)
-	TickLookouts15(Dt, Her); TickRegionLandmarks15(Dt, Her); TickHouseLights15(Dt, Her); TickRoamers15(Dt, Her); TickRewards15(Dt, Her); TickContracts15(Dt, Her); TickReclaim15(Dt, Her); TickStories15(Dt, Her);          // (the eleventh and twelfth phases: RDList15j.cpp, RDList15k.cpp)
+	TickLookouts15(Dt, Her); TickRegionLandmarks15(Dt, Her); TickHouseLights15(Dt, Her); TickRoamers15(Dt, Her); TickRewards15(Dt, Her); TickContracts15(Dt, Her); TickReclaim15(Dt, Her); TickStories15(Dt, Her); TickWaystones15(Dt, Her); TickCrossPosts15(Dt, Her);          // (the eleventh and twelfth phases: RDList15j.cpp, RDList15k.cpp)
 	// (the ninth phase: the tide's skins at its level)
 	if (WildTideSkins.Num() > 0)
 	{

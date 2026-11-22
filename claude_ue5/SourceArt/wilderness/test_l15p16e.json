@@ -1,0 +1,349 @@
+{
+ "tag": "l15p16e",
+ "plan": [
+  "waystones15",
+  "waystones15",
+  "roads14"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "waystones15",
+   "ok": true,
+   "waystones_25km": 2,
+   "b": {
+    "id": 939533322,
+    "name": "Elder Waystone",
+    "x": 26832.1,
+    "y": -2172.1,
+    "found": true,
+    "lit": false,
+    "laid": true
+   },
+   "a_found": {
+    "id": 939530249,
+    "name": "Grey Waystone",
+    "x": 5944.7,
+    "y": -7818.1,
+    "found": true,
+    "lit": false,
+    "laid": true
+   },
+   "light_prompt": "light the waystone",
+   "light_f": "light",
+   "a": {
+    "id": 939530249,
+    "name": "Grey Waystone",
+    "x": 5944.7,
+    "y": -7818.1,
+    "found": true,
+    "lit": true,
+    "laid": true
+   },
+   "travel_a": true,
+   "after_travel_m": 28.0,
+   "travel_b": false,
+   "refusal_b": "Elder Waystone is not lit: light it to travel there",
+   "map_symbol": true,
+   "posts_25km": 18,
+   "post": {
+    "ci": 5,
+    "arms": [
+     {
+      "name": "Brokenspire",
+      "town": true,
+      "m": 10358,
+      "straight_m": 9840,
+      "angle": 24.7
+     },
+     {
+      "name": "Ashenreach",
+      "town": true,
+      "m": 33506,
+      "straight_m": 30093,
+      "angle": 43.3
+     },
+     {
+      "name": "Vel Morrath",
+      "town": true,
+      "m": 74668,
+      "straight_m": 50203,
+      "angle": 92.7
+     }
+    ]
+   },
+   "post_laid": {
+    "laid": true,
+    "arms": 3,
+    "texts": 6
+   },
+   "put_back": true
+  },
+  {
+   "step": "waystones15",
+   "ok": true,
+   "waystones_25km": 2,
+   "b": {
+    "id": 939533322,
+    "name": "Elder Waystone",
+    "x": 26832.1,
+    "y": -2172.1,
+    "found": true,
+    "lit": false,
+    "laid": true
+   },
+   "a_found": {
+    "id": 939530249,
+    "name": "Grey Waystone",
+    "x": 5944.7,
+    "y": -7818.1,
+    "found": true,
+    "lit": false,
+    "laid": true
+   },
+   "light_prompt": "light the waystone",
+   "light_f": "light",
+   "a": {
+    "id": 939530249,
+    "name": "Grey Waystone",
+    "x": 5944.7,
+    "y": -7818.1,
+    "found": true,
+    "lit": true,
+    "laid": true
+   },
+   "travel_a": true,
+   "after_travel_m": 28.0,
+   "travel_b": false,
+   "refusal_b": "Elder Waystone is not lit: light it to travel there",
+   "map_symbol": true,
+   "posts_25km": 18,
+   "post": {
+    "ci": 5,
+    "arms": [
+     {
+      "name": "Brokenspire",
+      "town": true,
+      "m": 10358,
+      "straight_m": 9840,
+      "angle": 24.7
+     },
+     {
+      "name": "Ashenreach",
+      "town": true,
+      "m": 33506,
+      "straight_m": 30093,
+      "angle": 43.3
+     },
+     {
+      "name": "Vel Morrath",
+      "town": true,
+      "m": 74668,
+      "straight_m": 50203,
+      "angle": 92.7
+     }
+    ]
+   },
+   "post_laid": {
+    "laid": true,
+    "arms": 3,
+    "texts": 6
+   },
+   "put_back": true
+  },
+  {
+   "step": "roads14",
+   "ok": true,
+   "stats": "villages 2884 (2722 ways, 162 without, 444 cut off, 57 of them joined on), places 621 (374 lanes), structures 2514 (1596 lanes), farmsteads 51 (26 lanes), roads 4781|major 6|minor 4775|signs 5869|init 1.86 s",
+   "roads": {
+    "major": 6,
+    "minor": 4775
+   },
+   "majors": [
+    {
+     "road": "Brokenspire-Ashenreach",
+     "km": 43.9,
+     "samples": 41,
+     "beside_another": 0,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.21,
+     "fails": [],
+     "rise_m_median": 0.22
+    },
+    {
+     "road": "Ashenreach-Graymourne",
+     "km": 100.7,
+     "samples": 97,
+     "beside_another": 0,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.21,
+     "fails": [],
+     "rise_m_median": 0.22
+    },
+    {
+     "road": "Brokenspire-Vel Morrath",
+     "km": 85.0,
+     "samples": 75,
+     "beside_another": 1,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.21,
+     "fails": [],
+     "rise_m_median": 0.22
+    },
+    {
+     "road": "Ashenreach-Vel Morrath",
+     "km": 44.8,
+     "samples": 36,
+     "beside_another": 0,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.215,
+     "fails": [],
+     "rise_m_median": 0.22
+    },
+    {
+     "road": "Graymourne-Kethrys Spire",
+     "km": 46.1,
+     "samples": 39,
+     "beside_another": 0,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.215,
+     "fails": [],
+     "rise_m_median": 0.22
+    },
+    {
+     "road": "Kethrys Spire-Heaven",
+     "km": 33.0,
+     "samples": 21,
+     "beside_another": 0,
+     "cobbled_share": 1.0,
+     "rise_m_p10": 0.22,
+     "fails": [],
+     "rise_m_median": 0.22
+    }
+   ],
+   "villages": {
+    "near": 90,
+    "to_a_major_road": 89,
+    "share": 0.989,
+    "hops_max": 10,
+    "cut": {
+     "no_way": 1,
+     "broken": 0
+    }
+   },
+   "other_places": {
+    "ok": 10,
+    "none": 8
+   },
+   "minor_dirt_share": 1.0,
+   "signs_30km": {
+    "major": 25,
+    "minor": 644,
+    "fork": 458
+   },
+   "major_signs": [
+    {
+     "road": "Brokenspire-Ashenreach",
+     "signs": 21,
+     "on_its_line": 21,
+     "gap_max_m": 2000.0,
+     "wrong": 0,
+     "off_road_m_max": 12.1,
+     "expected": 21
+    },
+    {
+     "road": "Ashenreach-Graymourne",
+     "signs": 49,
+     "on_its_line": 49,
+     "gap_max_m": 2724.0,
+     "wrong": 0,
+     "off_road_m_max": 7.1,
+     "expected": 49
+    },
+    {
+     "road": "Brokenspire-Vel Morrath",
+     "signs": 27,
+     "on_its_line": 56,
+     "gap_max_m": 2000.0,
+     "wrong": 0,
+     "off_road_m_max": 12.0,
+     "expected": 42
+    },
+    {
+     "road": "Ashenreach-Vel Morrath",
+     "signs": 21,
+     "on_its_line": 35,
+     "gap_max_m": 2755.0,
+     "wrong": 0,
+     "off_road_m_max": 12.0,
+     "expected": 21
+    },
+    {
+     "road": "Graymourne-Kethrys Spire",
+     "signs": 22,
+     "on_its_line": 22,
+     "gap_max_m": 2136.0,
+     "wrong": 0,
+     "off_road_m_max": 7.1,
+     "expected": 22
+    },
+    {
+     "road": "Kethrys Spire-Heaven",
+     "signs": 15,
+     "on_its_line": 15,
+     "gap_max_m": 2976.0,
+     "wrong": 0,
+     "off_road_m_max": 7.0,
+     "expected": 15
+    }
+   ],
+   "minor_signs": {
+    "ok": 99,
+    "bad": 0,
+    "bad_first": [],
+    "forks": 27,
+    "forks_missing": 0
+   },
+   "laid": {
+    "near": 4,
+    "this": [
+     "0",
+     "89371",
+     "-200049",
+     "-1857",
+     "5",
+     "4",
+     "Ashenreach / 42 km;Ashenreach / 42 km;Brokenspire / 2.0 km;Brokenspire / 2.0 km;"
+    ],
+    "want": [
+     "Ashenreach / 42 km",
+     "Brokenspire / 2.0 km"
+    ],
+    "arms_ok": true
+   },
+   "minor_shot": {
+    "road": 368,
+    "dest": "Ashham"
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "wd_l15p16e_waystones15_lit.png",
+  "wd_l15p16e_waystones15_map.png",
+  "wd_l15p16e_waystones15_post.png",
+  "wd_l15p16e_waystones15_lit.png",
+  "wd_l15p16e_waystones15_map.png",
+  "wd_l15p16e_waystones15_post.png",
+  "wd_l15p16e_roads14_sign.png",
+  "wd_l15p16e_roads14_sign_back.png",
+  "wd_l15p16e_roads14_major.png",
+  "wd_l15p16e_roads14_map_near.png",
+  "wd_l15p16e_roads14_map_far.png",
+  "wd_l15p16e_roads14_minimap.png",
+  "wd_l15p16e_roads14_minor.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

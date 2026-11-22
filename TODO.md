@@ -55,6 +55,12 @@ Built and compiled, but no test has run it yet:
 - [ ] **Not measured**: a story met by the director's own pick (the test sends each by its hook); one chased killed (its "failed"); her own fight with the pursuers (test blows as hers); a save and load mid-story (stories are not saved: one going ends with the play).
 - [ ] **Limits**: someone met is a person of the wilds who gave or was helped (not the towns' people, the contracts' boards or quest givers); the rival walks, it never runs or fights; the cart is lifted at once by F (no strength needed).
 
+## The list of 2026-11-20's sixteenth phase: waystones and crossroads posts
+
+- [x] **Waystones found, lit and travelled to; the crossroads posts** ([the wilderness](docs/levels/wilderness.md)): `888 waystones15 -Light`.
+- [ ] **Not measured**: a save and load keeping the waystones lit; a crossroads post where a minor road's place is not a village; the posts' arms seen from every road (one picture).
+- [ ] **Limits**: a waystone's glow is a sphere and a light on its top; a region's cell with no major road, or one whose road is near a town, has no waystone; a post names at most four places.
+
 ## The list of 2026-11-14 ([docs/improvements13.txt](docs/improvements13.txt))
 
 The biomes' scenery, in phases with a PR each (the user's choices: every item to full depth; [the wilderness](docs/levels/wilderness.md#the-list-of-2026-11-14-the-biomes-scenery)). Done: phase 1, the framework (placing, laying, uses, hazards, herds, ambushes, the dry channels, swales, tracks and crossroads, the far storms) and the grasslands', meadows' and plains' 22 kinds; phase 2, the farms', savannahs', cold steppes' and burned plain's 29 kinds, the fields' stages, their channels, the whiteout and dust weather and the grass fires' smoke; phase 3, the five forests' 37 kinds, the needles' quiet floor, clearings, bogs and pits, the holloways; phase 4, the hills' and moorland's 18 kinds, the chalk figure, the moors' mist; phase 5, the mountains', peaks' and glaciers' 28 kinds, rockfall, avalanches, scree, cornices, crevasses, thin air.
