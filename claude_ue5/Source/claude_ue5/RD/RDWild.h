@@ -443,6 +443,8 @@ public:
 	static constexpr int32 WaystoneIdBase = (1 << 29) + (1 << 28) + (1 << 27);
 	bool WaystoneOf(FIntPoint Cell, FRDWildPlace& Out) const;
 	TSharedPtr<FLookoutCache> WaystoneCache = MakeShared<FLookoutCache>();
+	/** the generator's own layers a waystone keeps clear of (its region landmarks): set by it in play, asked on the game thread */
+	TFunction<bool(const FVector2D&)> WaystoneVeto;
 	/** where two roads meet (Init): the crossroads a scenery kind of Place "crossroads" stands at */
 	TArray<FVector2D> Crossroads;
 	/** the dry channels cut into the land (Init, from ChannelRules): arroyos and creek beds, slot canyons, crevasses, fissures; each a

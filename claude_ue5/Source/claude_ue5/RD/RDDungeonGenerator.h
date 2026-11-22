@@ -2178,7 +2178,12 @@ public:
 	/** tests: the waystones within Km "id|name|x|y|found|lit|laid"; the crossroads posts within Km (see RDList15o.cpp) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetWaystones15(float Km) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetCrossPosts15(float Km) const;
-	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") void ForgetWaystones15();
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") void ForgetWaystones15(const TArray<int32>& Ids);
+	void DropWaystonesAndPosts15();
+	void EnsureWaystoneVeto15() const;
+	void CrossroadsNear15(const FVector2D& P, double R, TArray<int32>& Out) const;
+	mutable TMultiMap<FIntPoint, int32> CrossHash15;
+	mutable int32 CrossHashFor15 = -1;
 	// ---- the list of 2026-11-20's fifteenth phase (RDList15n.cpp): story encounters (idea 8), from SourceArt/wilderness/stories15.json (941)
 	/** the courier's letters ("{hero}" her hero's name), who a letter is from when she has met no one, the pursuers of one chased, the
 	 *  cart's tilt off its wheel, her rival (name, body, lines met first and again, said when it wins and when she does), how far beyond

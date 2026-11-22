@@ -7923,7 +7923,7 @@ def step_waystones15():
         ws = sorted(waystones15_lines(g, 25.0), key=lambda w: math.hypot(w["x"] - me.x / 100, w["y"] - me.y / 100))
         res["waystones_25km"] = len(ws)
         if len(ws) < 2: step_result("waystones15", False, **res); return
-        a, b = ws[0], ws[1]
+        a, b = ws[0], ws[1]; a_b = [a, b]
         # (the second found, not lit)
         g.wild_put_her(b["x"] + 30.0, b["y"]); yield from wait_chunks(30, 50); ground_put(b["x"] + 30.0, b["y"]); yield from rwait(2.0)
         res["b"] = next((w for w in waystones15_lines(g, 1.0) if w["id"] == b["id"]), None)
@@ -7972,7 +7972,7 @@ def step_waystones15():
     finally:
         try: G["pawn"].set_actor_hidden_in_game(False); G["gen"].set_map_open(False)
         except Exception: pass
-        try: G["gen"].forget_waystones15(); res["put_back"] = True
+        try: G["gen"].forget_waystones15([w_["id"] for w_ in (a_b if "a_b" in dir() else [])]); res["put_back"] = True          # (only the two it touched)
         except Exception as e: res["put_back"] = str(e)
         quiet(False)
     pa = res.get("post", {}).get("arms", [])

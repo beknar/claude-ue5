@@ -65,12 +65,15 @@ bool FRDWildWorld::WaystoneOf(FIntPoint Cell, FRDWildPlace& Out) const
 					bool bSteep = false;
 					for (int32 K = 0; K < 8 && !bSteep; ++K) bSteep = FMath::Abs(Height(S.X + 4.0 * FMath::Cos(K * PI / 4.0), S.Y + 4.0 * FMath::Sin(K * PI / 4.0)) - H0) > 1.5;
 					if (bSteep) { ++Why[3]; continue; }
-					if (!ClearOfPlaces15(S, 60.0, true)) { ++Why[4]; continue; }
+					// (80 m from every other place, 15 m from a road sign, and clear of the generator's own layers (its region landmarks: the veto
+					// it gives, PR #108's review))
+					TArray<int32> Sn; SignsNear(S, 15.0, Sn);
+					if (!ClearOfPlaces15(S, 80.0, true) || Sn.Num() > 0 || (WaystoneVeto && WaystoneVeto(S))) { ++Why[4]; continue; }
 					L.Id = WaystoneIdBase + ((Cell.X & 0x3FF) << 10 | (Cell.Y & 0x3FF));
 					L.Kind = TEXT("waystone");
 					L.Name = FString::Printf(TEXT("%s Waystone"), RDO15Names[Hash(Cell.X, Cell.Y, Seed + 1952u) % UE_ARRAY_COUNT(RDO15Names)]);
 					L.At = S; L.H = (float)H0; L.Tier = TierAt(S.X, S.Y); L.Biome = Q.Biome;
-					L.Yaw = (float)FMath::RadiansToDegrees(FMath::Atan2(-D.X * Sd, D.Y * Sd));          // (its face to the road: its +Y toward it)
+					L.Yaw = (float)FMath::RadiansToDegrees(FMath::Atan2(-D.X * Sd, D.Y * Sd));          // (its +X toward the road, its +Y along it)
 					break;
 				}
 				if (L.Id != 0) break;
@@ -95,8 +98,10 @@ bool ARDDungeonGenerator::IsWaystoneLit15(int32 Id) const
 void ARDDungeonGenerator::TickWaystones15(float Dt, const FVector& Her)
 {
 	WaystoneLook15 -= Dt;
+	if (!bWaystones15 && WaystonesLaid15.Num() > 0) { for (auto& Kv : WaystonesLaid15) DropReward15(Kv.Value); WaystonesLaid15.Reset(); }
 	if (WaystoneLook15 > 0.f || !IsWildReady() || !bWaystones15) return;
 	WaystoneLook15 = 0.5f;
+	EnsureWaystoneVeto15();
 	const FVector2D H2(Her.X / 100.0, Her.Y / 100.0);
 	const FIntPoint C0 = Wild->LookoutCellOf(H2.X, H2.Y);
 	TSet<int32> Want;
@@ -160,8 +165,8 @@ bool ARDDungeonGenerator::WaystoneFirst15(const FVector& From, float& Best, int3
 	bool bAny = false;
 	for (const auto& Kv : WaystonesLaid15)
 	{
-		const float D = FVector::Dist2D(Kv.Value.At, From) - 40.f;          // (from its face: it is 80 cm thick)
-		if (D < Best && FMath::Abs(Kv.Value.At.Z - From.Z) < 300.f) { Best = FMath::Max(D, 0.f); Kind = 9; Id = Kv.Key; bAny = true; }
+		const float D = FVector::Dist2D(Kv.Value.At, From);          // (from its middle: 80 cm thick, she stands a metre off it; no slack over a nearer thing (PR #108's review))
+		if (D < Best && FMath::Abs(Kv.Value.At.Z - From.Z) < 300.f) { Best = D; Kind = 9; Id = Kv.Key; bAny = true; }
 	}
 	return bAny;
 }
@@ -180,7 +185,7 @@ FString ARDDungeonGenerator::LightWaystone15(int32 Id)
 	WildFound.Add(Id);
 	GlowWaystone15(Id);
 	if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("You light %s: travel here from the map"), *P.Name));
-	PlaySoundAt(TEXT("Player.Loot"), FVector(P.At.X * 100.0, P.At.Y * 100.0, 0.0));
+	if (const FRewardLaid15* Rl = WaystonesLaid15.Find(Id)) PlaySoundAt(TEXT("Player.Loot"), Rl->At);          // (at the stone, its ground's height (PR #108's review: at z 0))
 	UE_LOG(LogRDList15o, Log, TEXT("RDWAYSTONE15 %s lit (%d)"), *P.Name, Id);
 	WildAutosave(TEXT("found"));
 	return TEXT("light");
@@ -198,6 +203,7 @@ TArray<FString> ARDDungeonGenerator::GetWaystones15(float Km) const
 	const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
 	if (!Her || !IsWildReady()) return Out;
 	const FVector2D H2(Her->GetActorLocation().X / 100.0, Her->GetActorLocation().Y / 100.0);
+	EnsureWaystoneVeto15();
 	const int32 R = FMath::CeilToInt(Km * 1000.0 / Wild->CellM);
 	const FIntPoint C0 = Wild->LookoutCellOf(H2.X, H2.Y);
 	for (int32 I = -R; I <= R; ++I) for (int32 J = -R; J <= R; ++J)
@@ -209,16 +215,62 @@ TArray<FString> ARDDungeonGenerator::GetWaystones15(float Km) const
 	return Out;
 }
 
-void ARDDungeonGenerator::ForgetWaystones15()
+void ARDDungeonGenerator::EnsureWaystoneVeto15() const
 {
-	// (tests: the waystones lit and found forgotten, their glows out)
-	if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->WaystonesLit15.Reset();
-	for (auto It = WildFound.CreateIterator(); It; ++It) if (*It >= FRDWildWorld::WaystoneIdBase && *It < FRDWildWorld::TownIdBase) It.RemoveCurrent();
+	// (the generator's own layers a waystone keeps clear of: its region landmarks (two a region's cell), 80 m; set before any waystone is
+	// worked out and kept)
+	if (!Wild || Wild->WaystoneVeto) return;
+	Wild->WaystoneVeto = [this](const FVector2D& S)
+	{
+		ParseRegionLandmarks15();
+		const FIntPoint Lc = Wild->LookoutCellOf(S.X, S.Y);
+		for (int32 I = -1; I <= 1; ++I) for (int32 J = -1; J <= 1; ++J) for (int32 Sl = 0; Sl < 2; ++Sl)
+		{
+			FRegionLandmark15 Lm;
+			if (RegionLandmarkOf15(Lc + FIntPoint(I, J), Sl, Lm) && FVector2D::Distance(Lm.At, S) < 80.0) return true;
+		}
+		return false;
+	};
+}
+
+void ARDDungeonGenerator::ForgetWaystones15(const TArray<int32>& Ids)
+{
+	// (tests: the waystones named forgotten (unlit, not found), their glows out: only those the test touched (PR #108's review: every one of
+	// a played save's went))
+	URDGameInstance* GI = URDGameInstance::Of(this);
+	for (const int32 Id : Ids)
+	{
+		if (GI) GI->WaystonesLit15.Remove(Id);
+		WildFound.Remove(Id);
+		if (FRewardLaid15* R = WaystonesLaid15.Find(Id)) { DropReward15(*R); WaystonesLaid15.Remove(Id); }
+	}
+}
+
+void ARDDungeonGenerator::DropWaystonesAndPosts15()
+{
+	// (everything the two layers laid: with the wilds dropped (WildDropAll), or a switch turned off (PR #108's review))
 	for (auto& Kv : WaystonesLaid15) DropReward15(Kv.Value);
 	WaystonesLaid15.Reset();
+	for (auto& Kv : CrossPostActors15) if (Kv.Value.IsValid()) Kv.Value->Destroy();
+	CrossPostActors15.Reset();
 }
 
 // ================================================================================================ the crossroads posts
+void ARDDungeonGenerator::CrossroadsNear15(const FVector2D& P, double R, TArray<int32>& Out) const
+{
+	// (the world's crossroads hashed into 500 m cells once, then those within R of P)
+	if (CrossHashFor15 != Wild->Crossroads.Num())
+	{
+		CrossHash15.Reset();
+		for (int32 Ci = 0; Ci < Wild->Crossroads.Num(); ++Ci) CrossHash15.Add(FIntPoint(FMath::FloorToInt(Wild->Crossroads[Ci].X / 500.0), FMath::FloorToInt(Wild->Crossroads[Ci].Y / 500.0)), Ci);
+		CrossHashFor15 = Wild->Crossroads.Num();
+	}
+	const int32 N = FMath::CeilToInt(R / 500.0);
+	const FIntPoint C0(FMath::FloorToInt(P.X / 500.0), FMath::FloorToInt(P.Y / 500.0));
+	for (int32 I = -N; I <= N; ++I) for (int32 J = -N; J <= N; ++J)
+		for (auto It = CrossHash15.CreateConstKeyIterator(C0 + FIntPoint(I, J)); It; ++It)
+			if (FVector2D::Distance(Wild->Crossroads[It.Value()], P) <= R) Out.Add(It.Value());
+}
 bool ARDDungeonGenerator::CrossPostOf15(int32 Ci, FCrossPost15& Out) const
 {
 	if (const FCrossPost15* Got = CrossPosts15.Find(Ci)) { Out = *Got; return Got->Arms.Num() > 0; }
@@ -262,8 +314,13 @@ bool ARDDungeonGenerator::CrossPostOf15(int32 Ci, FCrossPost15& Out) const
 			}
 			else if (R.bMinor)
 			{
-				AddArm(R.Dest, BestS, -BestDir);          // (back along it to its place, as its own signs say)
-				AddArm(R.Up, (L - BestS) + R.UpM, BestDir);
+				// (back along it to its place, as its own signs say, unless its join's own sign stands right there naming it (PR #108's review:
+				// two posts naming one village 10 m apart); on toward what it joins only where it goes on past the crossroads: at its join
+				// its last segment points across the major road, whose own arms name the towns)
+				TArray<int32> Sn; Wild->SignsNear(X, 30.0, Sn);
+				const bool bJoinSign = Sn.ContainsByPredicate([&](int32 K) { return Wild->Signs[K].Kind == 2 && Wild->Signs[K].A == R.Dest; });
+				if (!bJoinSign) AddArm(R.Dest, BestS, -BestDir);
+				if (L - BestS > 40.0) AddArm(R.Up, (L - BestS) + R.UpM, BestDir);
 			}
 		}
 		// (the post 7 m from the crossroads, off every road: the first of eight ways that is dry and off the roads)
@@ -271,7 +328,8 @@ bool ARDDungeonGenerator::CrossPostOf15(int32 Ci, FCrossPost15& Out) const
 		{
 			const FVector2D P = X + FVector2D(FMath::Cos(K * PI / 4.0 + 0.4), FMath::Sin(K * PI / 4.0 + 0.4)) * 7.0;
 			FRDWSample S; Wild->Sample(P.X, P.Y, S, false);
-			if (S.WaterKind == 0 && S.Road < 0.05f) { C.At = P; C.bPlaced = true; break; }
+			TArray<int32> Sn; Wild->SignsNear(P, 5.0, Sn);
+			if (S.WaterKind == 0 && S.Road < 0.05f && Sn.Num() == 0 && Wild->ClearOfPlaces15(P, 12.0, false)) { C.At = P; C.bPlaced = true; break; }          // (off the signs and the crossroads' scenery's pieces (PR #108's review))
 		}
 		if (!C.bPlaced) C.Arms.Reset();
 		C.Arms.Sort([](const FCrossArm15& A, const FCrossArm15& B) { return A.M < B.M; });
@@ -287,14 +345,15 @@ void ARDDungeonGenerator::TickCrossPosts15(float Dt, const FVector& Her)
 	CrossLook15 -= Dt;
 	if (CrossLook15 > 0.f || !IsWildReady() || !bCrossPosts15) return;
 	CrossLook15 = 0.5f;
+	if (!bCrossPosts15 && CrossPostActors15.Num() > 0) { for (auto& Kv : CrossPostActors15) if (Kv.Value.IsValid()) Kv.Value->Destroy(); CrossPostActors15.Reset(); }
 	const FVector2D H2(Her.X / 100.0, Her.Y / 100.0);
 	TSet<int32> Want;
 	int32 Made = 0;
-	for (int32 Ci = 0; Ci < Wild->Crossroads.Num(); ++Ci)
+	TArray<int32> Near; CrossroadsNear15(H2, 330.0, Near);          // (by a hash of 500 m cells (PR #108's review: every crossroads of the continent twice a second))
+	for (const int32 Ci : Near)
 	{
 		const double D = FVector2D::Distance(Wild->Crossroads[Ci], H2);
-		if (D > 330.0) continue;
-		if (D < 330.0 && CrossPostActors15.Contains(Ci)) { Want.Add(Ci); continue; }
+		if (CrossPostActors15.Contains(Ci)) { Want.Add(Ci); continue; }
 		if (D > 250.0 || Made >= 2) continue;
 		FCrossPost15 C;
 		if (!CrossPostOf15(Ci, C)) continue;
@@ -313,9 +372,9 @@ TArray<FString> ARDDungeonGenerator::GetCrossPosts15(float Km) const
 	const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
 	if (!Her || !IsWildReady()) return Out;
 	const FVector2D H2(Her->GetActorLocation().X / 100.0, Her->GetActorLocation().Y / 100.0);
-	for (int32 Ci = 0; Ci < Wild->Crossroads.Num(); ++Ci)
+	TArray<int32> Near; CrossroadsNear15(H2, Km * 1000.0, Near);
+	for (const int32 Ci : Near)
 	{
-		if (FVector2D::Distance(Wild->Crossroads[Ci], H2) > Km * 1000.0) continue;
 		FCrossPost15 C;
 		if (!CrossPostOf15(Ci, C)) continue;
 		const TWeakObjectPtr<AActor>* A = CrossPostActors15.Find(Ci);

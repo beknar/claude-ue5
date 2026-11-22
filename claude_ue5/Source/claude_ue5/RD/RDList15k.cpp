@@ -215,9 +215,9 @@ bool ARDDungeonGenerator::RewardFirst15(const FVector& From, int32& Kind, int32&
 	// (a buried chest is reached from 2.8 m (it is wider), but only when nothing nearer was found (PR #104's review: its slack over a nearer find))
 	for (const auto& Kv : ChestsLaid15) { const float D = FVector::Dist2D(Kv.Value.At, From); if (D < (Kind < 0 ? 280.f : Best) && FMath::Abs(Kv.Value.At.Z - From.Z) < 300.f) { Best = D; Kind = 2; Id = Kv.Key; } }
 	for (const auto& Kv : ContractSignsLaid15) { const float D = FVector::Dist2D(Kv.Value.At, From); if (D < Best && FMath::Abs(Kv.Value.At.Z - From.Z) < 250.f) { Best = D; Kind = 3; Id = Kv.Key; } }          // (the thirteenth phase: a contract's sign)
-	ReclaimFirst15(From, Best, Kind, Id);
-	StoryCartFirst15(From, Best, Kind, Id);
-	WaystoneFirst15(From, Best, Kind, Id);          // (the sixteenth phase: a waystone)          // (the fifteenth phase: a cart off its wheel)          // (the fourteenth phase: a waypoint's trader and tent, a settler)
+	ReclaimFirst15(From, Best, Kind, Id);          // (the fourteenth phase: a waypoint's trader and tent, a settler)
+	StoryCartFirst15(From, Best, Kind, Id);          // (the fifteenth phase: a cart off its wheel)
+	WaystoneFirst15(From, Best, Kind, Id);          // (the sixteenth phase: a waystone)
 	if (Kind < 0) return false;
 	FVector Sa; FName Sk;
 	if (WildStationNear14(From, Sa, Sk) && FVector::Dist2D(Sa, From) < Best) return false;

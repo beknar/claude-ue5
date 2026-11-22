@@ -732,6 +732,7 @@ void ARDDungeonGenerator::WildDropAll()
 	WildAskTrim();
 	for (auto& Kv : WildChunks) if (Kv.Value) Kv.Value->Destroy();
 	DropWildSigns14();
+	DropWaystonesAndPosts15();          // (the list of 2026-11-20's sixteenth phase: the waystones and crossroads posts laid (PR #108's review))
 	WildDropped += WildChunks.Num();
 	WildChunks.Reset(); WildKept.Reset(); WildBuilding.Reset();
 }
