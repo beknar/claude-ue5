@@ -42,6 +42,9 @@ public:
 	bool TreasureShown15 = false;
 	/** the thirteenth phase: the contracts' marks drawn on the big map in its last frame ("x|y|name", metres) */
 	TArray<FString> ContractMarksDrawn15;
+	/** the fourteenth phase: the regions' shares reclaimed drawn on the big map in its last frame ("x|y|text", metres) */
+	TArray<FString> ReclaimSharesDrawn15;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetReclaimSharesDrawn15() const { return ReclaimSharesDrawn15; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetContractMarksDrawn15() const { return ContractMarksDrawn15; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") bool IsTreasureShown15() const { return TreasureShown15; }
 	/** the wilderness's minimap: the region's line it drew under it (tests) */

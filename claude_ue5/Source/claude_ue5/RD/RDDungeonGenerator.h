@@ -2153,6 +2153,36 @@ public:
 	float LastingHealth15() const;
 	float LastingMana15() const;
 	void AddPlaceItem15(const FVector& BoxAt, int64 BoxKey, TArray<FName>& Got);
+	// ---- the list of 2026-11-20's fourteenth phase (RDList15m.cpp): camps cleared that change the world (idea 6)
+	/** the days after a camp is cleared before its nearest ruin within ReclaimRuinKm15 is resettled (0: off), the waypoint's trader's body
+	 *  (a townsfolk def's name's start) and lines, the settlers' lines (940 from SourceArt/wilderness/reclaim15.json) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float ReclaimDays15 = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float ReclaimRuinKm15 = 3.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FString ReclaimTraderDef15 = TEXT("Townsman");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> ReclaimTraderLines15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> ReclaimSettlerLines15;
+	struct FReclaimLaid15 { FVector2D At2 = FVector2D::ZeroVector, FireAt = FVector2D::ZeroVector; FVector TentAt = FVector::ZeroVector, TraderAt = FVector::ZeroVector; TArray<TWeakObjectPtr<USceneComponent>> Comps; TArray<TWeakObjectPtr<AActor>> Folk; };
+	TMap<int32, FReclaimLaid15> CampsLaid15, RuinsLaid15;
+	mutable TMap<FIntPoint, int32> ReclaimShareCache15;
+	float ReclaimLook15 = 0.f;
+	int32 SettlerTalks15 = 0;
+	bool IsClearableCamp15(const struct FRDWildPlace& P) const;
+	int32 WildPlaceMonsterCount15(const struct FRDWildPlace& P) const;
+	bool CampCleared15(const struct FRDWildPlace& P) const;
+	int32 CampClearedDay15(int32 Id) const;
+	void TickReclaim15(float Dt, const FVector& Her);
+	void LayCampWaypoint15(const struct FRDWildPlace& P);
+	void LayRuinFolk15(const struct FRDWildPlace& P);
+	class ARDTownsfolk* SpawnReclaimFolk15(const FVector2D& At, float Yaw, uint32 Seed, const FString& Def, const FString& Title, const TArray<FString>& Lines);
+	bool ReclaimFirst15(const FVector& From, float& Best, int32& Kind, int32& Id) const;
+	FString RestAtCamp15(int32 Id);
+	FString TalkSettler15(int32 Key);
+	void DrawReclaimShares15(TFunctionRef<void(const FVector2D& AtM, const FString& Text)> Each) const;
+	int32 ReclaimCampsInCell15(FIntPoint Cell) const;
+	/** tests: the days passed at once; the camps within Km and the resettled ruins (see RDList15m.cpp) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") void SkipDays15(int32 Days);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") void ForgetReclaim15();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetReclaim15(float Km) const;
 	// ---- the list of 2026-11-20's thirteenth phase (RDList15l.cpp): monster contracts (idea 5)
 	/** the beasts, "name|kind|hp|tier up|weakness|offer|sign~sign~sign" (939 from SourceArt/wilderness/contracts15.json), how many a
 	 *  board posts, the share more her blows do once its signs are read, the bounty's gold at tier 1 (35 % more a tier) */

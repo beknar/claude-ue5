@@ -17,7 +17,7 @@ void URDGameInstance::NewGame(FName Hero)
 	CirclesFound = { FName(TEXT("Brokenspire")) };
 	TownLooted.Reset(); CastleTiers.Reset(); CastleStartLooted.Reset(); GuardsDead.Reset(); HerPiles.Reset();
 	Dungeons.Reset(); ReturnAt = FVector::ZeroVector; ReturnYaw = 0.f; ReturnTown.Reset();
-	CaveKey15.Reset(); CaveTier15 = 0; WildMarked15.Reset(); WildLookoutsClimbed15.Reset(); RoamersSeen15.Reset(); RoamersSlain15.Reset(); CollectiblesTaken15.Reset(); LastingHealth15 = LastingMana15 = 0; TreasureMapsTaken15.Reset(); TreasureMaps15.Reset(); TreasuresDug15.Reset(); PlaceItemsGiven15.Reset(); ContractsTaken15.Reset(); ContractsDone15.Reset(); ContractsPaid15.Reset(); ContractSigns15.Reset();          // (the list of 2026-11-20's ninth phase (PR #101's review): no cave carried into a new game)
+	CaveKey15.Reset(); CaveTier15 = 0; WildMarked15.Reset(); WildLookoutsClimbed15.Reset(); RoamersSeen15.Reset(); RoamersSlain15.Reset(); CollectiblesTaken15.Reset(); LastingHealth15 = LastingMana15 = 0; TreasureMapsTaken15.Reset(); TreasureMaps15.Reset(); TreasuresDug15.Reset(); PlaceItemsGiven15.Reset(); ContractsTaken15.Reset(); ContractsDone15.Reset(); ContractsPaid15.Reset(); ContractSigns15.Reset(); CampsCleared15.Reset(); CampsClearedDay15.Reset(); CampsResettledFrom15.Reset(); RuinsResettled15.Reset();          // (the list of 2026-11-20's ninth phase (PR #101's review): no cave carried into a new game)
 	bOldWorld = false;          // (the list of 2026-11-16: an older save's give-back is not the new game's (PR #89's review))
 	Arrive.Reset();
 	TownHour = -1.f; TownDay = 1;

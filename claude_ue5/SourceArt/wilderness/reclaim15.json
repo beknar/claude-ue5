@@ -1,0 +1,18 @@
+{
+  "_": "camps cleared that change the world (the list of 2026-11-20's fourteenth phase, idea 6; 940_reclaim15.py): days after a camp (a plain lair or hollow) is cleared before its nearest ordinary ruin within ruin_km is resettled; the waypoint's trader's body (a townsfolk def's name's start) and lines; the settlers' lines",
+  "days": 3,
+  "ruin_km": 6.0,
+  "trader_def": "Townsman",
+  "trader_lines": [
+    "Safe enough to camp here now, thanks to you. Have a look at what I carry.",
+    "I go from camp to camp. Wherever the beasts are gone, there's trade.",
+    "Rest by the fire if you need it. Nobody comes out of those woods any more."
+  ],
+  "settler_lines": [
+    "We came when we heard the lair was cleared. These old walls will do for a start.",
+    "My grandmother was born in this place, before it fell. We are taking it back.",
+    "The children sleep at night now. That is your doing.",
+    "We'll have a roof on before winter, and a field turned by spring.",
+    "Travellers stop here again. Some of them stay."
+  ]
+}

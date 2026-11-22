@@ -191,6 +191,17 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 	{
 		if (NamedMark(AtM, Nm, 14.f, FLinearColor(1.f, 0.82f, 0.30f, 1.f), FLinearColor(1.f, 0.86f, 0.45f, 1.f))) ContractMarksDrawn15.Add(FString::Printf(TEXT("%.0f|%.0f|%s"), AtM.X, AtM.Y, *Nm));
 	});
+	// (the list of 2026-11-20's fourteenth phase: each region with a camp cleared, its share reclaimed at its middle)
+	Gen->DrawReclaimShares15([&](const FVector2D& AtM, const FString& Txt)
+	{
+		const FVector2D S = ToS(AtM);
+		if (S.X < A.X || S.X > B.X || S.Y < A.Y || S.Y > B.Y) return;
+		float Tw, Th; UI.TextSize(Txt, Tw, Th, Small, Sc, ERDType::Label);
+		const float Ty = S.Y + 34.f * Sc;          // (under the camp's own mark and name)
+		Box(FVector2D(S.X - Tw * 0.5f - 6.f * Sc, Ty - 4.f * Sc), FVector2D(S.X + Tw * 0.5f + 6.f * Sc, Ty + Th + 4.f * Sc), FLinearColor(0.08f, 0.16f, 0.06f, 0.6f));
+		UI.Text(Txt, FLinearColor(0.70f, 1.f, 0.55f, 1.f), S.X - Tw * 0.5f, Ty, Small, Sc, ERDType::Label);
+		ReclaimSharesDrawn15.Add(FString::Printf(TEXT("%.0f|%.0f|%s"), AtM.X, AtM.Y, *Txt));
+	});
 	// (and the roads' key: the tiers' colours, in the sheet's bottom left (in its top left it lay over the map's title))
 	if (Gen->bRoadTiers15)
 	{

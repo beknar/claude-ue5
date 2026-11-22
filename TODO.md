@@ -43,6 +43,12 @@ Built and compiled, but no test has run it yet:
 - [ ] **Not measured**: a contract of another town's board (the board's lines are the same code: Brokenspire's was taken), and a small town's board with its contracts and no "faded notices" line; the beast fought by her own blows (the test strikes with a test blow, as hers); a save and load in the middle of a contract (its state is in the game instance's saved lists).
 - [ ] **Limits**: a sign is a glow, not tracks or a carcass laid; the weakness is a share of every blow of hers, not a part of the beast to strike; a board's two beasts are the same every game for a town (by the town's hash, from six), and a contract once paid is not posted again.
 
+## The list of 2026-11-20's fourteenth phase: camps cleared
+
+- [x] **Camps cleared, their waypoints, the ruins resettled, the share on the map** ([the wilderness](docs/levels/wilderness.md)): `888 reclaim15 -Light`.
+- [ ] **Not measured**: a camp cleared by her own fight; a hollow (the test's was a lair); a save and load keeping the camps and ruins; a region's share counted against the camps found by another way.
+- [ ] **Limits**: the waypoint's trader sells the town's stock; the settlers stand round their fire (no beds, no day of their own as phase 8's households have); the bandit structures (the palisade) are no camps to clear here: their chests and quests are the structures'.
+
 ## The list of 2026-11-14 ([docs/improvements13.txt](docs/improvements13.txt))
 
 The biomes' scenery, in phases with a PR each (the user's choices: every item to full depth; [the wilderness](docs/levels/wilderness.md#the-list-of-2026-11-14-the-biomes-scenery)). Done: phase 1, the framework (placing, laying, uses, hazards, herds, ambushes, the dry channels, swales, tracks and crossroads, the far storms) and the grasslands', meadows' and plains' 22 kinds; phase 2, the farms', savannahs', cold steppes' and burned plain's 29 kinds, the fields' stages, their channels, the whiteout and dust weather and the grass fires' smoke; phase 3, the five forests' 37 kinds, the needles' quiet floor, clearings, bogs and pits, the holloways; phase 4, the hills' and moorland's 18 kinds, the chalk figure, the moors' mist; phase 5, the mountains', peaks' and glaciers' 28 kinds, rockfall, avalanches, scree, cornices, crevasses, thin air.

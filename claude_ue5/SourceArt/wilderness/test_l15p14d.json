@@ -1,0 +1,81 @@
+{
+ "tag": "l15p14d",
+ "plan": [
+  "reclaim15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "reclaim15",
+   "ok": true,
+   "camps_6km": 2,
+   "day0": 1,
+   "tried": [
+    {
+     "name": "Wyrm Lair",
+     "monsters": 3,
+     "killed": 3,
+     "day": 1
+    }
+   ],
+   "camp": {
+    "name": "Wyrm Lair",
+    "kind": "lair",
+    "monsters": 3,
+    "cleared_day": 1
+   },
+   "waypoint": {
+    "laid": true,
+    "trader": 1
+   },
+   "trader_prompt": "trade with the travelling trader",
+   "trader_f": "store",
+   "store_lines": 25,
+   "tent_prompt": "rest in the tent until morning",
+   "tent_f": "rest",
+   "rest": {
+    "hp": [
+     70.0,
+     140.0,
+     140.0
+    ],
+    "day": [
+     1,
+     2
+    ],
+    "clock": [
+     "08:07",
+     "07:00"
+    ]
+   },
+   "day_after_skip": 6,
+   "resettled": [
+    "Ruins of Oakdale"
+   ],
+   "ruin_from_camp_km": 4.43,
+   "ruin": {
+    "name": "Ruins of Oakdale",
+    "laid": true,
+    "settlers": 4
+   },
+   "ruin_monsters": 0,
+   "settler_prompt": "talk to the settler",
+   "settler_f": "talk",
+   "settler_said": "A settler: \"We'll have a roof on before winter, and a field turned by spring.\"",
+   "shares": [
+    "6519|-3884|this region: 1 of 1 camps reclaimed"
+   ],
+   "put_back": true
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_l15p14d_reclaim15_waypoint.png",
+  "wd_l15p14d_reclaim15_settlers.png",
+  "wd_l15p14d_reclaim15_settlers_near.png",
+  "wd_l15p14d_reclaim15_map.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}
