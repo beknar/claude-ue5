@@ -176,6 +176,7 @@ void ARDDungeonGenerator::OpenWildBox(ARDWildChunk* C, int32 Index)
 	ResolveWildLoot14(Lines, D.At, D.Key);          // (the list of 2026-11-16's sixth phase: "@recipe")
 	FRandomStream R((int32)HashCombine(GetTypeHash(D.Key), 0xF00Du ^ (uint32)(IsWildReady() ? Wild->Seed : 0u)));
 	TArray<FName> Got = RollWildThings(Lines, R);
+	AddPlaceItem15(D.At, D.Key, Got);          // (the list of 2026-11-20's twelfth phase: a structure's named item, once)
 	if (Got.Num() == 0)
 		for (const FString& L : Lines)
 		{

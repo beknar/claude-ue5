@@ -699,6 +699,7 @@ void ARDHUD::DrawSummons(float Sc, const FVector2D& StatusA, float W, float Stat
 void ARDHUD::DrawHUD()
 {
 	Super::DrawHUD();
+	TreasureShown15 = false;          // (set again by the big map's drawing in this frame: closed, it said a picture was drawn (PR #104's review))
 	if (!Canvas) return;
 	if (!Gen) for (TActorIterator<ARDDungeonGenerator> It(GetWorld()); It; ++It) { Gen = *It; break; }
 	if (!Gen) return;

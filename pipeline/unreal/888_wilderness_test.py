@@ -7368,6 +7368,158 @@ def step_roamers15():
           and res.get("map_drawn", 0) > 0 and res.get("map_wrong", 1) == 0 and len(res.get("map_bands", [])) >= 2 and res.get("home_moved_m", 0) > 20 and res.get("from_home_m", 999) < 90)
     step_result("roamers15", ok, **res)
 STEPS["roamers15"] = step_roamers15
+def rewards15_lines(g, km):
+    c, m, x = [], [], []
+    for l in g.get_rewards15(km):
+        p = str(l).split("|")
+        if p[0] == "c": c.append({"id": int(p[1]), "item": p[2], "x": float(p[3]), "y": float(p[4]), "taken": p[5] == "1", "laid": p[6] == "1"})
+        elif p[0] == "m": m.append({"id": int(p[1]), "x": float(p[2]), "y": float(p[3]), "taken": p[4] == "1", "laid": p[5] == "1", "sx": float(p[6]), "sy": float(p[7]), "landmark": p[8]})
+        elif p[0] == "x": x.append({"id": int(p[1]), "laid": p[2] == "1", "dug": p[3] == "1"})
+    return c, m, x
+
+
+def step_rewards15():
+    """idea 4 (the list of 2026-11-20's twelfth phase): five collectibles of one kind taken by F where they lie (the region's kind, each once),
+    offered at Brokenspire's temple for 10 hit points (her top measured before and after, kept in the game instance); a ruin's loose map
+    taken (its picture beside the big map, pictured), the buried chest at its spot by its landmark dug up (gold and the tier's things, a
+    pile taken), its chest gone and dug for good; a structure's first chest gives its kind's named ring, a second chest of it does not"""
+    g = G["gen"]; res = {}; quiet(True)
+    try:
+        # ---- the collectibles: the kind with the most within 4 km of a point 6 km out
+        g.wild_put_her(6000.0, -2000.0); yield from wait_chunks(30, 50); ground_put(6000.0, -2000.0); yield from rwait(1.0)
+        cs, _m, _x = rewards15_lines(g, 4.0)
+        byk = {}
+        for c in cs:
+            if not c["taken"]: byk.setdefault(c["item"], []).append(c)
+        res["collectibles_4km"] = {k: len(v) for k, v in byk.items()}
+        kind = max(byk, key=lambda k: len(byk[k])) if byk else None
+        res["kind"] = kind; got = []
+        if kind:
+            n0 = cb().get_item_count(kind)
+            me = G["pawn"].get_actor_location()
+            for c in sorted(byk[kind], key=lambda c: math.hypot(c["x"] - me.x / 100, c["y"] - me.y / 100))[:5]:
+                g.wild_put_her(c["x"] + 30.0, c["y"]); yield from wait_chunks(20, 30); ground_put(c["x"] + 30.0, c["y"]); yield from rwait(1.5)
+                ground_put(c["x"] + 1.0, c["y"]); yield from rwait(1.0)
+                pr = str(g.describe_nearest(G["pawn"].get_actor_location(), 300.0))
+                f = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.5)
+                got.append({"prompt": pr, "f": f})
+            res["taken"] = got; res["carried"] = cb().get_item_count(kind) - n0
+            c2, _m, _x = rewards15_lines(g, 4.0)
+            res["marked_taken"] = sum(1 for c in c2 if c["taken"] and c["item"] == kind)
+            # (at Brokenspire's temple)
+            T = towns(); b = T.get("Brokenspire", {"x": 0.0, "y": 0.0})
+            g.wild_put_her(b["x"] + 20.0, b["y"]); yield from wait_ready(90); yield from wait_chunks(30, 50); yield from rwait(4.0)
+            hp0 = cb().get_max_health(); lh0 = G["gi"].get_editor_property("lasting_health15")
+            res["temple"] = g.open_town_panel("temple", -1); yield from rwait(0.5)
+            res["mana_line"] = line_of("collect", "mana")          # (the Warrior has no mana: no mana trade offered (PR #104's review))
+            li = line_of("collect", "hit points")
+            res["trade_line"] = panel()[li][1] if li >= 0 else None
+            if li >= 0: res["trade"] = g.activate_town_entry(li); yield from rwait(0.5)
+            g.close_town_panel() if hasattr(g, "close_town_panel") else None
+            res["max_hp"] = [round(hp0, 1), round(cb().get_max_health(), 1)]
+            res["lasting"] = [lh0, G["gi"].get_editor_property("lasting_health15")]
+            res["kind_left"] = cb().get_item_count(kind)
+        # ---- a treasure map
+        g.wild_put_her(6000.0, -2000.0); yield from wait_chunks(30, 50); yield from rwait(1.0)
+        _c, ms, _x = rewards15_lines(g, 15.0)
+        me = G["pawn"].get_actor_location()
+        ms = sorted([m for m in ms if not m["taken"]], key=lambda m: math.hypot(m["x"] - me.x / 100, m["y"] - me.y / 100))
+        res["maps_15km"] = len(ms)
+        if ms:
+            mp = ms[0]; res["map"] = {"ruin_m": [round(mp["x"]), round(mp["y"])], "spot_m": [round(mp["sx"]), round(mp["sy"])], "landmark": mp["landmark"]}
+            g.wild_put_her(mp["x"] + 20.0, mp["y"]); yield from wait_chunks(30, 50); ground_put(mp["x"] + 20.0, mp["y"]); yield from rwait(2.0)
+            took = None
+            for a in range(0, 360, 30):
+                for rr in (4.0, 3.0, 5.0):
+                    qx, qy = mp["x"] + rr * math.cos(math.radians(a)), mp["y"] + rr * math.sin(math.radians(a))
+                    ground_put(qx, qy); yield from rwait(0.2)
+                    if "old map" in str(g.describe_nearest(G["pawn"].get_actor_location(), 300.0)):
+                        took = str(g.interact_nearest(G["pawn"].get_actor_location())); break
+                if took: break
+            res["map_f"] = took; yield from rwait(1.0)
+            res["picture"] = g.has_treasure_picture15()
+            g.set_map_open(True); yield from rwait(1.0); t0 = time.time()
+            while time.time() - t0 < 20 and map_state()["asked"] > 0: yield
+            yield from rwait(1.0); res["map_drawn"] = [a for a in drawn() if a.startswith(("wild_", "wmap_"))][:6]
+            res["picture_shown"] = G["pc"].get_hud().is_treasure_shown15(); shot("rewards15_map", "1600x900"); yield from rwait(1.5); g.set_map_open(False)
+            yield from rwait(0.8); res["shown_after_close"] = G["pc"].get_hud().is_treasure_shown15()
+            # (a save and load: the map still held, its picture drawn again by the new generator)
+            res["saved"] = g.save_game_now("save_rewards15", "test", "rewards15")
+            res["load"] = g.load_game_from("save_rewards15"); yield from until_loaded13(); yield from wait_ready(90)
+            g = G["gen"]; quiet(True); g.set_editor_property("wild_locks14", False)          # (the loaded level's generator is new: the harness's switch again)
+            gi = GS.get_game_instance(G["w"]); res["held_after_load"] = mp["id"] in list(gi.get_editor_property("treasure_maps15"))
+            t0 = time.time()
+            while time.time() - t0 < 30 and not g.has_treasure_picture15(): yield
+            res["picture_after_load_s"] = round(time.time() - t0, 1) if g.has_treasure_picture15() else None
+            g.set_map_open(True); yield from rwait(1.0); t0 = time.time()
+            while time.time() - t0 < 20 and map_state()["asked"] > 0: yield
+            yield from rwait(1.0); res["shown_after_load"] = G["pc"].get_hud().is_treasure_shown15(); shot("rewards15_map_loaded", "1600x900"); yield from rwait(1.5); g.set_map_open(False)
+            # (to the spot: the buried chest)
+            g.wild_put_her(mp["sx"] + 25.0, mp["sy"]); yield from wait_chunks(30, 50); ground_put(mp["sx"] + 6.0, mp["sy"]); yield from rwait(2.0)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-25, yaw=180.0)); G["pawn"].set_actor_hidden_in_game(True); yield from rwait(1.0)
+            shot("rewards15_chest", "1280x720"); yield from rwait(1.0); G["pawn"].set_actor_hidden_in_game(False)
+            _c, _m, xs = rewards15_lines(g, 1.0); res["chest_laid"] = any(x["id"] == mp["id"] and x["laid"] for x in xs)
+            ground_put(mp["sx"] + 1.5, mp["sy"]); yield from rwait(0.6)
+            res["dig_prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 300.0))
+            gold0 = g.get_gold()
+            res["dig_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(1.0)
+            res["dug"] = str(g.get_last_chest_dug15()); res["gold"] = g.get_gold() - gold0
+            things = [t for t in res["dug"].split("|")[3].split(",") if t] if res["dug"].count("|") >= 3 else []
+            n_before = {t: cb().get_item_count(t) for t in set(things)}
+            for _k in range(3):
+                f = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.5)
+                if f != "loot": break
+            res["things_taken"] = sum(cb().get_item_count(t) - n_before[t] for t in n_before)
+            _c, _m, xs = rewards15_lines(g, 1.0); res["dug_kept"] = not any(x["id"] == mp["id"] and not x["dug"] for x in xs)
+        # ---- a structure's named ring: its kind's first chest gives it, a chest of a second structure of that kind (each holds one) does not
+        tried = []
+        def site_chest(kd, ox, oy, not_id=None):
+            f = str(g.find_wild_site(kd, "None", ox, oy, 60.0))
+            if not f: return None
+            sid, cx, cy, yw, nm = f.split("|", 4)
+            if not_id is not None and int(sid) == not_id: return None
+            return int(sid), float(cx), float(cy)
+        def open_site(sid, cx, cy):
+            g.wild_put_her(cx + 40.0, cy); yield from wait_chunks(30, 50); ground_put(cx + 40.0, cy); yield from rwait(2.0)
+            boxes, _f, _b = box_lines()
+            mine = [b_ for b_ in boxes if (5 << 40) <= b_["key"] < (6 << 40) and math.hypot(b_["x"] / 100.0 - cx, b_["y"] / 100.0 - cy) < 70.0 and not b_["looted"] and not b_["locked"]]
+            tried.append([sid, len(mine)])
+            if not mine: return None
+            b_ = mine[0]
+            G["pawn"].set_actor_location(V(b_["x"] + 110.0, b_["y"], b_["z"] + 100.0), False, True); yield from rwait(0.6)
+            f0 = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.8)
+            for _k in range(3):
+                ff = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.4)
+                if ff != "loot": break
+            return f0
+        for kd in ("cabin", "waystation", "logging", "palisade", "watchtower", "smugglers", "mine", "village"):
+            a = site_chest(kd, 0.0, 0.0)
+            if not a: continue
+            ring = next((str(l).split("|")[1] for l in g.get_editor_property("place_items15") if str(l).split("|")[0] == kd), None)
+            n0 = cb().get_item_count(ring)
+            f0 = yield from open_site(*a)
+            if f0 is None: continue
+            r = {"kind": kd, "ring": ring, "first": a[0], "f0": f0, "ring_after_0": cb().get_item_count(ring) - n0}
+            b = site_chest(kd, a[1] + 20000.0, a[2], a[0]) or site_chest(kd, a[1] - 20000.0, a[2], a[0])
+            if b:
+                f1 = yield from open_site(*b)
+                r.update({"second": b[0], "f1": f1, "ring_after_1": cb().get_item_count(ring) - n0})
+            res["place"] = r
+            break
+        res["place_tried"] = tried
+    finally:
+        try: G["pawn"].set_actor_hidden_in_game(False); G["gen"].set_map_open(False)
+        except Exception: pass
+        quiet(False)
+    pl = res.get("place", {})
+    ok = (res.get("carried") == 5 and res.get("marked_taken", 0) >= 5 and res.get("trade") and res["max_hp"][1] > res["max_hp"][0] and res["lasting"][1] == res["lasting"][0] + 10
+          and res.get("mana_line") == -1 and round(res["max_hp"][1] - res["max_hp"][0], 1) == 10.0
+          and res.get("map_f") == "map" and res.get("picture") and res.get("picture_shown") and res.get("shown_after_close") is False
+          and res.get("held_after_load") and res.get("picture_after_load_s") is not None and res.get("shown_after_load") and res.get("chest_laid") and res.get("dig_f") == "treasure" and res.get("gold", 0) > 0
+          and res.get("things_taken", 0) >= 1 and res.get("dug_kept")
+          and pl.get("ring_after_0") == 1 and pl.get("f1") == "container" and pl.get("ring_after_1") == 1)
+    step_result("rewards15", ok, **res)
+STEPS["rewards15"] = step_rewards15
 SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
 def saves_snapshot():
     """the save folder's files and their bytes: put back at the end, the tests' own new saves deleted (PR #61's review)"""

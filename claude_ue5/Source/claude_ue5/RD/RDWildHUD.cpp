@@ -2,6 +2,7 @@
 // rivers and roads as lines, the fog over what she has not seen, the places' symbols and names, her arrow, a scroll's edge round
 // it) and the minimap (the ground round her, the places near, the monsters after her). Inside a town's walls the town's own
 // maps are drawn instead (ARDHUD::DrawHUD).
+#include "Engine/TextureRenderTarget2D.h"
 #include "RD/RDHUD.h"
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDWild.h"
@@ -193,6 +194,20 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 			const float Y = Ky + 18.f * Sc + Band * (Kh + 6.f * Sc);
 			Box(FVector2D(Kx, Y), FVector2D(Kx + Kw, Y + Kh), ARDDungeonGenerator::RoadTierColor15(Band * 5 + 1));
 			UI.Text(FString::Printf(TEXT("%d - %d"), Band * 5 + 1, Band * 5 + 5), FLinearColor(0.95f, 0.92f, 0.84f, 1.f), Kx + Kw + 8.f * Sc, Y - 3.f * Sc, Small, Sc * 0.75f, ERDType::Label);
+		}
+	}
+	// (the list of 2026-11-20's twelfth phase: the treasure map she holds, its picture beside the sheet where there is room, else over its
+	// bottom right)
+	{
+		FString Cap;
+		if (UTextureRenderTarget2D* Rt = Gen->TreasurePictureToShow15(Cap))
+		{
+			const float Pw = FMath::Min(360.f * Sc, FMath::Max(Canvas->ClipX - B0.X - 40.f * Sc, 220.f * Sc)), Ph = Pw * 288.f / 512.f;
+			const float Px = B0.X + 20.f * Sc + Pw < Canvas->ClipX ? B0.X + 20.f * Sc : B.X - Pw - 10.f * Sc, Py = B0.Y - Ph - 60.f * Sc;
+			Box(FVector2D(Px - 6.f * Sc, Py - 6.f * Sc), FVector2D(Px + Pw + 6.f * Sc, Py + Ph + 34.f * Sc), FLinearColor(0.10f, 0.08f, 0.06f, 0.92f));
+			DrawTexture(Rt, Px, Py, Pw, Ph, 0.f, 0.f, 1.f, 1.f, FLinearColor(1.f, 0.93f, 0.80f, 1.f), BLEND_Opaque);
+			UI.Text(Cap, FLinearColor(0.98f, 0.94f, 0.84f, 1.f), Px, Py + Ph + 8.f * Sc, Small, Sc * 0.8f, ERDType::Label);
+			TreasureShown15 = true;
 		}
 	}
 	// (the list of 2026-11-16: her horse)
