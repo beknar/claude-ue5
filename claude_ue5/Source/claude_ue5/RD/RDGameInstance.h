@@ -179,6 +179,8 @@ public:
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> RuinsResettled15;
 	/** the kills' keys a resettling added (the ruin's guardians gone): only these a test's put-back takes out */
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int64> ReclaimKeys15;
+	/** the fifteenth phase: the people of the wilds she has met (who gave her something, whom she helped), the newest last: a courier's letter comes from one */
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<FString> MetPeople15;
 	/** where she comes into the town: "" the town square (a new game), "castle" the castle's door (back from the castle),
 	 *  "portal" before the Mistgate (tests) */
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString Arrive;

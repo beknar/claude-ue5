@@ -118,6 +118,8 @@ bool ARDDungeonGenerator::GiveWildGift(ARDTownsfolk* T)
 {
 	// (false: nothing given (no one to give to yet), the gift kept for the next time (PR #50's review: "gift" was said for it))
 	if (!T || !PlayerCombat || T->bWildGiven) return false;
+	// (the list of 2026-11-20's fifteenth phase: someone met, for a courier's letter; a courier is no one to write from)
+	if (!Stories15.ContainsByPredicate([T](const FStory15& S) { return S.Kind == TEXT("courier") && S.Person.Get() == T; })) RecordMet15(T->Title);
 	TArray<FString> Lines; T->WildGift.ParseIntoArray(Lines, TEXT(";"), true);
 	FRandomStream R((int32)HashCombine(T->GetUniqueID(), 0x61F7u));
 	TArray<FName> Got = RollWildThings(Lines, R);

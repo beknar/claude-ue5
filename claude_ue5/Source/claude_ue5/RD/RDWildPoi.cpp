@@ -36,6 +36,12 @@ namespace
 	}
 }
 
+void ARDDungeonGenerator::MarkWildPoiUsed15(int32 Id)
+{
+	// (the list of 2026-11-20's fifteenth phase: a place her rival reached first, used for good as if she had)
+	if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->WildKilled.AddUnique(RDPoiUsedKey(Id));
+}
+
 bool ARDDungeonGenerator::IsWildPoiUsed(int32 Id) const
 {
 	const URDGameInstance* GI = URDGameInstance::Of(this);
@@ -268,7 +274,8 @@ void ARDDungeonGenerator::TickWildEncounters(float Dt, const FVector& Her)
 	const int32 Tier = Wild->TierAt(At.X / 100.0, At.Y / 100.0);
 	int32 Made = 0;
 	// (the list of 2026-11-11: a point of interest laid ahead of her, a herd, a person on the way (RDWild11.cpp))
-	if (!K.Place.IsEmpty() || !K.Animals.IsEmpty() || !K.Folk.IsEmpty()) Made = MakeWildEncounter11(K, At, Rs);
+	if (!K.Story15.IsEmpty()) Made = MakeStory15(K, At, Rs);          // (the list of 2026-11-20's fifteenth phase: a story played out)
+	else if (!K.Place.IsEmpty() || !K.Animals.IsEmpty() || !K.Folk.IsEmpty()) Made = MakeWildEncounter11(K, At, Rs);
 	else if (K.Monsters > 0 && Monsters.Num() > 0)
 	{
 		ARDSection* Ws_ = EnsureWildSection();

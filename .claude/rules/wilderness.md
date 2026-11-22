@@ -452,3 +452,10 @@ A continent of 150 x 150 km round Brokenspire (300 x 300 km until the list of 20
 - **A label at a region's middle is off the map's first view** (a 7 km cell): draw it at the thing it is about.
 - **A test that kills a camp's monsters puts their kills back**, or the camp is cleared again at the next look after the put-back.
 - **PR #106's review**: a check of "all its monsters dead" counts as the spawner counts, through one function (`WildPlaceDraws15`: a hand copy had left out hell's extra ones); a place handed to others clears what already stands there (a resettled ruin's living guardians); a pick among ruins leaves out the water kinds and measures by the ruin's middle; people laid by a new layer join the wilds' people (`WildPeople14`), and a rule that gives F to a nearer person must then pass over its own (the trader barked instead of trading); keys added to a game-long list are added once and recorded, so a put-back takes out only its own; what a map draws every frame from ids is kept until they change; a test that fights at several camps puts back every one's kills, and kills only a camp's own monsters (their `GetWildKey`); a clear looked for once a second is waited for, not read once (one run read it too soon: not cleared, then cleared in the next run).
+## Story encounters (the list of 2026-11-20's fifteenth phase: `941`, `RD/RDList15n.cpp`, `888 stories15`)
+
+- **F at someone walking misses**: a test aims at where the person stands now (its story's line read again), and a story's person stops once it has come to her or is safe.
+- **What stands between her and the thing takes F**: the carter between her and the cart was talked to (he barked); he stands beside it.
+- **The HUD's last line is the last message**: a gift's gold line came after the courier's words and replaced them. Read the log of messages (`GetMessageLog`), all of it.
+- **F at someone with a gift returns "gift"**, not "talk": a condition written for "talk" failed a run whose every story had played to its end.
+- **Picture a thing in the wilds from near it**: from where she stood (45 to 70 m) a story's pictures were grass. The test stands 8 m off, facing it.
