@@ -1017,6 +1017,20 @@ public:
 	void TickGo15(APawn* P);
 	/** the nearest landmark tower's site within Ring of the 6 km squares round a point (metres): the landmark laid, the treasure maps' landmark, the package's run */
 	bool NearestTowerSite15(const FVector2D& FromM, int32 Ring, FVector2D& SiteM, double& DistM) const;
+	/** the list of 2026-11-22's first phase (RDList16.cpp): -RDPerf=<file>: the frame rate measured in every city (its square and a
+	 *  street) and every biome (its nearest site to Brokenspire), each settled 20 s and measured 15 s, one line a place */
+	void TickPerf16(APawn* P);
+	struct FPerf16Place { FString Kind, Name; FVector2D SiteM = FVector2D::ZeroVector; float Hour = 12.f; bool bFixed = false; FVector At = FVector::ZeroVector; float Yaw = 0.f; };
+	TArray<FPerf16Place> Perf16Places;
+	/** -RDPerfPlaces=<file>: an earlier run's "place|..." lines, replayed exactly (kind|name|hour as the key) */
+	TMap<FString, FPerf16Place> Perf16Replay;
+	FString Perf16File, Perf16Shots;
+	int32 Perf16Index = -1, Perf16Stage = 0;
+	float Perf16T = 0.f, Perf16Ready = 0.f;
+	bool bPerf16Read = false;
+	TArray<float> Perf16Frames;
+	double Perf16Game = 0.0, Perf16Draw = 0.0, Perf16Rhi = 0.0, Perf16Gpu = 0.0;
+	FVector Perf16From = FVector::ZeroVector;
 
 	// ---- mistward_castle, the list of 2026-10-31b (docs/improvements5.txt; RDMistward5.cpp, pipeline/unreal/879): each a
 	// switch, off on the other levels
