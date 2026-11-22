@@ -1015,6 +1015,8 @@ public:
 	void WriteTestMark(const FString& Kind, const FString& Where) const;
 	/** the list of 2026-11-20's eighteenth phase: the packaged game's runs of the wilds (-RDTownGo=horse, village, cavetower) */
 	void TickGo15(APawn* P);
+	/** the nearest landmark tower's site within Ring of the 6 km squares round a point (metres): the landmark laid, the treasure maps' landmark, the package's run */
+	bool NearestTowerSite15(const FVector2D& FromM, int32 Ring, FVector2D& SiteM, double& DistM) const;
 
 	// ---- mistward_castle, the list of 2026-10-31b (docs/improvements5.txt; RDMistward5.cpp, pipeline/unreal/879): each a
 	// switch, off on the other levels
@@ -3084,7 +3086,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List14") int32 LastWildFolkGold14 = 0;
 	/** every person of the wilds' lists (the farms', the structures' and scenery's, the director's, the travellers') */
 	const TArray<class ARDTownsfolk*>& WildPeople14() const;
-	mutable TArray<class ARDTownsfolk*> WildPeopleCache14; mutable uint64 WildPeopleFrame14 = MAX_uint64;
+	mutable TArray<class ARDTownsfolk*> WildPeopleCache14; mutable uint64 WildPeopleFrame14 = MAX_uint64, WildPeopleGC14 = MAX_uint64;
+	/** the garbage collections so far (the frame's lists of plain pointers are gathered again after one: the package of 2026-11-22) */
+	static uint64 WildGCCycle14();
 	/** a person a wild monster at From may take for its foe: it can die, it is out in the open, in sight, within WildFolkNearHerCm14 of her */
 	bool IsWildPrey14(const class ARDTownsfolk* T, const FVector& From) const;
 	FString WildFolkLootOf14(const class ARDTownsfolk* T, float& Health, int32& GoldLo, int32& GoldHi) const;
@@ -3125,7 +3129,7 @@ public:
 	/** the world's static and dynamic pieces between A and B (a line, or a ball of Radius swept), people, animals, pawns and piles
 	 *  passed over: the wilds' sight lines and the people's steps */
 	bool WildWayBlocked14(const FVector& A, const FVector& B, float Radius, const AActor* Skip) const;
-	mutable TArray<AActor*> WildPass14; mutable uint64 WildPassFrame14 = MAX_uint64;
+	mutable TArray<AActor*> WildPass14; mutable uint64 WildPassFrame14 = MAX_uint64, WildPassGC14 = MAX_uint64;
 	/** the floor under a person's step at At (its feet at FeetZ): a farmhouse's over the ground, else the ground */
 	float WildFloorZ14(const FVector& At, float FeetZ) const;
 	/** the heroes who pick a wild lock and who break one (931 from locks14.json); a hostile person calms down after she has been

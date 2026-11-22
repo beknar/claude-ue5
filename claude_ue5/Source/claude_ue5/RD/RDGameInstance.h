@@ -186,7 +186,7 @@ public:
 	/** the eighteenth phase: a packaged game's run of the wilds (-RDTownGo=horse, village, cavetower; RDList15q.cpp): its way, its step, when
 	 *  it goes on, and what it carries between its steps (not saved) */
 	FString Go15, Go15Name;
-	int32 Go15Stage = 0;
+	int32 Go15Stage = 0, Go15Try = 0, Go15Id = 0;
 	float Go15At = 0.f, Go15T0 = 0.f;
 	FVector Go15From = FVector::ZeroVector;
 	/** where she comes into the town: "" the town square (a new game), "castle" the castle's door (back from the castle),

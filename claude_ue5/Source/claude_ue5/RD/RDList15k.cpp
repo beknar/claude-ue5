@@ -180,12 +180,8 @@ const ARDDungeonGenerator::FTreasureSpot15* ARDDungeonGenerator::TreasureSpot15(
 	}
 	if (WildLandmarkMesh && WildLandmarkBiomes.Num() > 0)
 	{
-		const int32 Ci = FMath::FloorToInt(RuinAt.X / WildLandmarkCellM), Cj = FMath::FloorToInt(RuinAt.Y / WildLandmarkCellM);
-		for (int32 I = Ci - 4; I <= Ci + 4; ++I) for (int32 J = Cj - 4; J <= Cj + 4; ++J)
-		{
-			FVector2D S;
-			if (WildTowerSite13(I, J, S) && FVector2D::Distance(S, RuinAt) < Best) { Best = FVector2D::Distance(S, RuinAt); T.LmAt = S; T.bTower = true; T.Landmark = TEXT("broken tower"); }
-		}
+		FVector2D S; double D;          // (one scan of the squares: PR #110's review)
+		if (NearestTowerSite15(RuinAt, 4, S, D) && D < Best) { Best = D; T.LmAt = S; T.bTower = true; T.Landmark = TEXT("broken tower"); }
 	}
 	bool bOk = false;
 	if (!T.Landmark.IsEmpty())

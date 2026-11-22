@@ -57,7 +57,7 @@ Built and compiled, but no test has run it yet:
 
 ## The list of 2026-11-20's eighteenth phase: the Shipping package
 
-- [x] **The Shipping package with a full cook (10,659 packages, 26 GB in `builds\list15`) and its 21 runs** (`pipeline/package_mistward.ps1 -Test`): the menu, the town, the castle, the five cities and their six dungeons, the caves, her horse ridden (`horse|31|1`: 31 m in 15 s, still mounted), a village reached by the map's travel (`village|Windholt|50`), a cave entered by F at a broken tower's mouth (the caves level's mark), the display, the console and the 20-minute wild walk (3.85 km, 6.5 GB at most, no crash).
+- [x] **The Shipping package with a full cook (10,659 packages, 26 GB in `builds\list15`) and its 21 runs** (`pipeline/package_mistward.ps1 -Test`): the menu, the town, the castle, the five cities and their six dungeons, the caves, her horse called by the player's call and ridden (`horse|31|1`: 31 m in 15 s, still mounted; 20 m at least), a village found by the map's discovery 300 m off it and reached by its travel (`village|Windholt|50`; the run found a crash of the people list after a garbage collection, fixed), a cave entered by F at a broken tower's mouth (the caves level's mark), the display, the console and the 20-minute wild walk (3.85 km, 6.5 GB at most, no crash).
 - [ ] **Not measured**: the horse's gallop in the package (the run holds forward only: 31 m in 15 s is a walk, the mount included); pictures of the package beyond the console's (Shipping takes none: a Development package from the same cook would).
 - [ ] **Limits**: the full cook needs `DefaultEditor.ini`'s `[CookSettings]` garbage collection on a 32 GB machine.
 
