@@ -14,6 +14,7 @@
 #include "RD/RDWild.h"
 #include "RD/RDSection.h"
 #include "RD/RDCombat.h"
+#include "RD/RDGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -30,6 +31,12 @@
 #include "UnrealClient.h"
 #include "Engine/World.h"
 DEFINE_LOG_CATEGORY_STATIC(LogRDList16, Log, All);
+
+bool URDGameInstance::IsPerfRun16()
+{
+	FString F;
+	return FParse::Value(FCommandLine::Get(), TEXT("RDPerf="), F) && !F.IsEmpty();
+}
 
 namespace
 {

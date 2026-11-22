@@ -673,7 +673,7 @@ void ARDDungeonGenerator::BeginTownPlay()
 		int32 Want = StartSeed;
 		if (GI)
 		{
-			if (GI->TownSeed == 0) GI->TownSeed = bTownNewSeed && FixedSessionSeed == 0 ? (int32)(FDateTime::Now().GetTicks() % 2000000000) + 1 : StartSeed;
+			if (GI->TownSeed == 0) GI->TownSeed = URDGameInstance::IsPerfRun16() ? URDGameInstance::PerfSeed16 : bTownNewSeed && FixedSessionSeed == 0 ? (int32)(FDateTime::Now().GetTicks() % 2000000000) + 1 : StartSeed;
 			Want = GI->TownSeed;
 			for (const int32 K : GI->TownLooted) LootedContainers.Add(FIntVector(0, 0, K));
 			for (const int32 T : GI->CastleTiers) TiersOpened.AddUnique(T);
