@@ -432,3 +432,10 @@ A continent of 150 x 150 km round Brokenspire (300 x 300 km until the list of 20
 - **A struct read from Python is a view of the live value**: `get_editor_property("home_at")` read before and after 40 s gave the same numbers (0 m moved) while the log showed it walking; copy the numbers before waiting.
 - **Measure what the map draws, not the function it calls**: the roads' colours are read back from the HUD's own drawing (`ARDHUD::GetRoadsDrawn15`), each against the tier where it was drawn.
 - **PR #103's review**: a weight-0 item is never drawn at random, but every "best of its kind" picker must leave it out too (Aurorim's reward, the final show's kit); a death that is no doing of hers gives no unique reward; a feature's switch is its own (`bRoadTiers15`), not another feature's data; one clipper for every line on the map; every map of the game includes `martial_arts`.
+## Rewards that last (the list of 2026-11-20's twelfth phase: `938`, `RD/RDList15k.cpp`, `888 rewards15`)
+
+- **A place's kind is not its whole meaning**: the captain's quest places (the den and the old watchtower, ids from `QuestIdBase`) are listed by `PlacesIn` as ruins, and both runs' treasure maps came from the watchtower, whose place moves with each game's roads. A rule for ordinary ruins leaves the quest ids out.
+- **A container piece is its body and its lid**: the Chest piece's mesh is the body alone; laid alone it read as an empty frame in the grass. Lay the `Moving` part on its `Hinge` with the piece's `Adjust`.
+- **A capture aimed at a tall thing's middle from near is the sky**: from 60 to 120 m half way up a 182 m tower the map's picture held nothing else. The pitch is capped (12 degrees).
+- **A picture taken before the map's tiles are made shows the world**: the first run's map picture had no map while the HUD's flag said the picture was drawn. Wait as `map` does (`map_state()["asked"]`) and look at the picture.
+- **Every structure holds one chest**: "a second chest of the kind" is a second structure of the kind (found from 20 km off).

@@ -1,0 +1,109 @@
+{
+ "tag": "l15p12d",
+ "plan": [
+  "rewards15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "rewards15",
+   "ok": true,
+   "collectibles_4km": {
+    "Wind Feather": 46,
+    "Frost Rune": 8
+   },
+   "kind": "Wind Feather",
+   "taken": [
+    {
+     "prompt": "take the wind feather",
+     "f": "collectible"
+    },
+    {
+     "prompt": "take the wind feather",
+     "f": "collectible"
+    },
+    {
+     "prompt": "take the wind feather",
+     "f": "collectible"
+    },
+    {
+     "prompt": "take the wind feather",
+     "f": "collectible"
+    },
+    {
+     "prompt": "take the wind feather",
+     "f": "collectible"
+    }
+   ],
+   "carried": 5,
+   "marked_taken": 5,
+   "temple": true,
+   "trade_line": "Offer 5 Wind Feather: 10 hit points for good",
+   "trade": true,
+   "max_hp": [
+    140.0,
+    150.0
+   ],
+   "lasting": [
+    0,
+    10
+   ],
+   "kind_left": 0,
+   "maps_15km": 3,
+   "map": {
+    "ruin_m": [
+     7349,
+     5880
+    ],
+    "spot_m": [
+     3902,
+     4135
+    ],
+    "landmark": "broken tower"
+   },
+   "map_f": "map",
+   "picture": true,
+   "map_drawn": [
+    "wmap_select",
+    "wmap_ruins",
+    "wild_map"
+   ],
+   "picture_shown": true,
+   "chest_laid": true,
+   "dig_prompt": "dig up the buried chest",
+   "dig_f": "treasure",
+   "dug": "377476|1|60|Desert Hero’s Armour,Longbow,Village Shield (red)",
+   "gold": 60,
+   "things_taken": 2,
+   "dug_kept": true,
+   "place": {
+    "kind": "cabin",
+    "ring": "Trapper's Knot Ring",
+    "first": 134389817,
+    "f0": "container",
+    "ring_after_0": 1,
+    "second": 134447161,
+    "f1": "container",
+    "ring_after_1": 1
+   },
+   "place_tried": [
+    [
+     134389817,
+     1
+    ],
+    [
+     134447161,
+     1
+    ]
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_l15p12d_rewards15_map.png",
+  "wd_l15p12d_rewards15_chest.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

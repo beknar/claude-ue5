@@ -31,6 +31,12 @@ Built and compiled, but no test has run it yet:
 - [ ] **Not measured**: a roamer of the storms out in a storm; a roamer fought by her blows (the test strikes it with a test's blow); the rings' worth worn (their amounts are their kinds' strongest times 1.4 to 1.8, not balanced in play).
 - [ ] **Limits**: a roamer is a wild kind with more hit points and a name, no look of its own; a round is a circle; the minimap shows no skulls (the big map does).
 
+## The list of 2026-11-20's twelfth phase: rewards that last
+
+- [x] **Collectibles and the temple's trade, treasure maps and their chests, the structures' named rings** ([the wilderness](docs/levels/wilderness.md)): `888 rewards15 -Light`.
+- [ ] **Not measured**: the mana and Angel Token trades (the hit points' was made); a save and load keeping what was taken, dug and given (all in the game instance's saved lists); the collectibles of the other five kinds laid in their regions (counted near Brokenspire: Wind Feather and Frost Rune); a map whose spot is by a region's landmark (the test's were by broken towers).
+- [ ] **Limits**: a collectible is a glowing sphere, not a model of its own; a collectible's picture is a crafting material's; the map's picture is taken at the moment it is found (the hour and weather of then) and lives in that play (a loaded game has the map but no picture until it is found again: the picture is not saved); the test counted two of the chest's three things taken (it counts the items she carries; the Longbow, a weapon, may have joined her weapons instead: not checked).
+
 ## The list of 2026-11-14 ([docs/improvements13.txt](docs/improvements13.txt))
 
 The biomes' scenery, in phases with a PR each (the user's choices: every item to full depth; [the wilderness](docs/levels/wilderness.md#the-list-of-2026-11-14-the-biomes-scenery)). Done: phase 1, the framework (placing, laying, uses, hazards, herds, ambushes, the dry channels, swales, tracks and crossroads, the far storms) and the grasslands', meadows' and plains' 22 kinds; phase 2, the farms', savannahs', cold steppes' and burned plain's 29 kinds, the fields' stages, their channels, the whiteout and dust weather and the grass fires' smoke; phase 3, the five forests' 37 kinds, the needles' quiet floor, clearings, bogs and pits, the holloways; phase 4, the hills' and moorland's 18 kinds, the chalk figure, the moors' mist; phase 5, the mountains', peaks' and glaciers' 28 kinds, rockfall, avalanches, scree, cornices, crevasses, thin air.

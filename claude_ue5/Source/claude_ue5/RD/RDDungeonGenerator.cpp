@@ -1576,6 +1576,7 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 	if (LootPiles.Num() > 0 && TakeLootNear(From, 260.f)) return TEXT("loot");
 	// (the list of 2026-11-20's ninth phase: a landmark tower's cave mouth)
 	if (bWild && CaveMouthFirst15(From) && EnterCave15()) return TEXT("cave");
+	if (bWild) { const FString Rw = RewardInteract15(From); if (!Rw.IsEmpty()) return Rw; }          // (the twelfth phase: a collectible, a map, a buried chest)
 	// (the list of 2026-11-16: a wild table or a farmhouse's oven when it is the nearest of everything F reaches out there (PR #82's
 	// review: the scenery's uses and the points of interest, asked first, took F from a nearer table))
 	if (bWild) { FName Sk; if (WildStationFirst14(From, Sk)) { const FString St = OpenStation14(Sk); if (!St.IsEmpty()) return St; } }
@@ -1690,6 +1691,7 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 	for (const ARDLootPile* P : LootPiles) if (IsValid(P)) { const float D = FVector::Dist2D(P->GetActorLocation(), From); if (D < LpD) { LpD = D; Lp = P; } }
 	if (bMounted) return TEXT("get off your horse");          // (the eighth phase)
 	if (!Lp && bWild && CaveMouthFirst15(From, MaxDistance)) return TEXT("go down into the cave");          // (the list of 2026-11-20's ninth phase)
+	if (!Lp && bWild) { const FString Rw = RewardDescribe15(From); if (!Rw.IsEmpty()) return Rw; }          // (the twelfth phase)
 	if (!Lp && bWild) { FName Sk; if (WildStationFirst14(From, Sk)) return StationWords14(Sk); }          // (the list of 2026-11-16)
 	if (!Lp && bWild && WildSceneryFirst(From)) { const FString Ws = WildSceneryDescribe(From); if (!Ws.IsEmpty()) return Ws; }          // (the list of 2026-11-14: the nearest)
 	if (!Lp && bWild) { const FString Wp = WildPoiDescribe(From); if (!Wp.IsEmpty()) return Wp; }          // (the seventh phase)

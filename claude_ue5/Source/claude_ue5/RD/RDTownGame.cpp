@@ -1947,6 +1947,8 @@ void ARDDungeonGenerator::BuildTownLines()
 		const int32 Cost = FMath::RoundToInt(20.f * RDTierPrice(T));
 		Add(TEXT("bless"), TEXT("Ask for a blessing"), FString::Printf(TEXT("%d g"), Cost), TEXT("For ten minutes: your blows 10% stronger, 10% less of each blow reaches you. It goes with you into the castle."), Gold >= Cost);
 		Add(TEXT("donate"), TEXT("Give an offering"), TEXT("5 g"), TEXT("For the refugees' bread"), Gold >= 5);
+		// (the list of 2026-11-20's twelfth phase: the wilds' collectibles offered for something that lasts)
+		AddCollectibleTrades15([&](const FString& Act, const FString& Label, const FString& Tag, const FString& Detail, bool bOn, const FString& Arg) { Add(FName(*Act), Label, Tag, Detail, bOn, Arg); });
 		Add(TEXT("bye"), TEXT("Leave"), FString(), FString());
 	}
 	else if (TownPanel == TEXT("stable"))
@@ -2045,6 +2047,7 @@ bool ARDDungeonGenerator::ActivateTownEntry(int32 Line)
 	else if (E.Act == TEXT("buyhorse")) { bOk = BuyHorse(); if (bOk) CloseTownPanel(); }
 	else if (E.Act == TEXT("swaphorse")) { bOk = SwapHorse(); if (bOk) CloseTownPanel(); }
 	else if (E.Act == TEXT("callhorse")) { bOk = CallHorse(); if (bOk) { SetTownNote(TEXT("Your horse comes")); CloseTownPanel(); } }
+	else if (E.Act == TEXT("collect")) bOk = TownCollectTrade15(E.Arg);          // (the twelfth phase)
 	else if (E.Act == TEXT("donate")) { AddGold(-5, TEXT("an offering")); TownCount(TEXT("offerings")); SetTownNote(TEXT("The priest bows his head: \"They will eat tonight.\"")); bOk = true; }
 	else if (E.Act == TEXT("deposit")) bOk = TownDeposit(E.Arg);
 	else if (E.Act == TEXT("withdraw")) bOk = TownWithdraw(FCString::Atoi(*E.Arg));

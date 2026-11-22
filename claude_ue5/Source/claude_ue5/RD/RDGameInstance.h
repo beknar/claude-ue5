@@ -158,6 +158,15 @@ public:
 	/** the eleventh phase: the roamers she has seen (their rounds on her map) and slain (dead for the game, their rings given) */
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> RoamersSeen15;
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> RoamersSlain15;
+	/** the twelfth phase: the collectibles taken, the hit points and mana bought with them for good, the ruins' maps taken, the maps held
+	 *  (their chests not dug), the chests dug, the structures' kinds whose named item was given */
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> CollectiblesTaken15;
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") int32 LastingHealth15 = 0;
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") int32 LastingMana15 = 0;
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> TreasureMapsTaken15;
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> TreasureMaps15;
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> TreasuresDug15;
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<FString> PlaceItemsGiven15;
 	/** where she comes into the town: "" the town square (a new game), "castle" the castle's door (back from the castle),
 	 *  "portal" before the Mistgate (tests) */
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString Arrive;

@@ -2108,6 +2108,50 @@ public:
 	/** the major roads' colour by tier (a band of five tiers a colour), and tests' read of what the map draws */
 	static FLinearColor RoadTierColor15(int32 Tier);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetRoadTiers15(float Km) const;
+	// ---- the list of 2026-11-20's twelfth phase (RDList15k.cpp): rewards that last (idea 4)
+	/** the collectibles' kinds, "item|biome;biome...|r,g,b" (938 from SourceArt/wilderness/rewards15.json), the share of the 500 m grid's
+	 *  cells with one, and how many of a kind a temple takes for 10 hit points, 10 mana or an Angel Token */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> CollectibleKinds15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float CollectibleChance15 = 0.3f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") int32 CollectibleTradeN15 = 5;
+	/** the ruins' loose treasure maps (the share of ruins with one), the buried chest's things and gold, its mesh; the glow of what lies
+	 *  to be taken (a mesh and a material with a "Color") */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float TreasureMapChance15 = 0.4f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") int32 TreasureChestItems15 = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float TreasureChestGold15 = 60.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TObjectPtr<UStaticMesh> TreasureChestMesh15 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TObjectPtr<UStaticMesh> RewardGlowMesh15 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TObjectPtr<UMaterialInterface> RewardGlowMat15 = nullptr;
+	/** each kind of structure's named item, "kind|item" (items of weight 0 on every map) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> PlaceItems15;
+	struct FCollectible15 { int32 Id = 0, Kind = -1; FVector2D At = FVector2D::ZeroVector; FName Item; FLinearColor Color = FLinearColor::White; };
+	struct FRewardLaid15 { int32 Id = 0; FVector At = FVector::ZeroVector; FName Item; TWeakObjectPtr<class UStaticMeshComponent> Mesh, Lid; TWeakObjectPtr<class UPointLightComponent> Light; };
+	struct FTreasurePicture15 { int32 Id = 0; TObjectPtr<class UTextureRenderTarget2D> Rt = nullptr; FString Landmark; };
+	mutable TMap<FIntPoint, FCollectible15> CollectibleCache15;
+	mutable TMap<int32, TPair<FVector2D, FString>> TreasureSpots15;
+	TMap<int32, FRewardLaid15> CollectiblesLaid15, MapsLaid15, ChestsLaid15;
+	UPROPERTY(Transient) TArray<TObjectPtr<class UTextureRenderTarget2D>> TreasureTargets15;
+	TArray<FTreasurePicture15> TreasurePictures15;
+	float RewardLook15 = 0.f;
+	FString LastChestDug15;
+	bool CollectibleOf15(FIntPoint Cell, FCollectible15& Out) const;
+	bool TreasureSpotOf15(int32 RuinId, const FVector2D& RuinAt, FVector2D& Spot, FString& Landmark) const;
+	void TickRewards15(float Dt, const FVector& Her);
+	bool RewardFirst15(const FVector& From, int32& Kind, int32& Id) const;
+	FString RewardDescribe15(const FVector& From) const;
+	FString RewardInteract15(const FVector& From);
+	void DrawTreasureMap15(int32 Id, const FVector2D& Spot, const FString& Landmark);
+	class UTextureRenderTarget2D* TreasurePictureToShow15(FString& Caption) const;
+	void AddCollectibleTrades15(TFunctionRef<void(const FString& Act, const FString& Label, const FString& Tag, const FString& Detail, bool bOn, const FString& Arg)> Add) const;
+	bool TownCollectTrade15(const FString& Arg);
+	/** the hit points and mana a temple's trades added for good (the game instance's), for her maxima */
+	float LastingHealth15() const;
+	float LastingMana15() const;
+	void AddPlaceItem15(const FVector& BoxAt, TArray<FName>& Got);
+	/** tests: the collectibles, the ruins' maps and the buried chests within Km (see RDList15k.cpp); the last chest dug "id|tier|gold|things" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetRewards15(float Km) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FString GetLastChestDug15() const { return LastChestDug15; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") bool HasTreasurePicture15() const { FString C; return TreasurePictureToShow15(C) != nullptr; }
 	/** tests: the cave level's "key|tier|base|cap|title" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FString GetCave15() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FIntPoint GetTerraceWalls15() const { return FIntPoint(TerraceWalls15, TerraceButtresses15); }

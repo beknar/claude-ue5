@@ -38,6 +38,9 @@ public:
 	/** the list of 2026-11-20's eleventh phase: the major roads' segments the big map drew by tier in its last frame, "x m|y m|r|g|b" (tests: the map itself, PR #103's review) */
 	TArray<FString> RoadsDrawn15;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetRoadsDrawn15() const { return RoadsDrawn15; }
+	/** the twelfth phase: a treasure map's picture drawn beside the big map in its last frame */
+	bool TreasureShown15 = false;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") bool IsTreasureShown15() const { return TreasureShown15; }
 	/** the wilderness's minimap: the region's line it drew under it (tests) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") FString GetBiomeLabelDrawn() const { return BiomeLabelDrawn; }
 	FString BiomeLabelDrawn;
