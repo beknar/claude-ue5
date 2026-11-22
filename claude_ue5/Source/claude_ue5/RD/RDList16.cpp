@@ -157,7 +157,9 @@ void ARDDungeonGenerator::TickPerf16(APawn* P)
 	case 1:
 	{
 		// (the world round her built: the city (for a city's places), the chunks asked and made, the dungeon's set; then placed)
-		const bool bBusy = (bWild && (WildInFlight.Num() > 0 || WildBuilding.Num() > 0)) || bTownLoading || bTownTraveling || !S || S->IsBuilding()
+		// (out in the wilds there is no town section: the section is waited for only where there is one to build, a city's or a hall's)
+		const bool bNeedS = bCity || !bWild;
+		const bool bBusy = (bWild && (WildInFlight.Num() > 0 || WildBuilding.Num() > 0)) || bTownLoading || bTownTraveling || (bNeedS && (!S || S->IsBuilding())) || (S && S->IsBuilding())
 			|| (bCity && TownName != Pl.Name);
 		if (Perf16T > RDPerf16Give) { Next(TEXT("the world round her was not built in 240 s")); return; }
 		if (bBusy) { Perf16Ready = 0.f; return; }
