@@ -21,6 +21,7 @@ def run():
             assert "|" not in f and "~" not in f, f
         lines.append("|".join([b["name"], b["kind"], f"{b['hp']:g}", str(int(b["tier_up"])), b["weakness"], b["offer"], "~".join(b["signs"])]))
     assert g.get_editor_property("reward_glow_mesh15"), "run 938 data first (the glow)"
+    assert int(J["per_board"]) <= len(lines), ("a board would post one beast twice", J["per_board"], len(lines))
     g.set_editor_property("contracts15", lines)
     g.set_editor_property("contracts_per_board15", int(J["per_board"]))
     g.set_editor_property("contract_weak_share15", float(J["weak_share"]))

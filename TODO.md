@@ -40,7 +40,7 @@ Built and compiled, but no test has run it yet:
 ## The list of 2026-11-20's thirteenth phase: monster contracts
 
 - [x] **Contracts on the boards, the signs, the weakness, the bounty** ([the wilderness](docs/levels/wilderness.md)): `888 contracts15 -Light`.
-- [ ] **Not measured**: a contract of another town's board (the board's lines are the same code: Brokenspire's was taken); the beast fought by her own blows (the test strikes with a test blow, as hers); a save and load in the middle of a contract (its state is in the game instance's saved lists).
+- [ ] **Not measured**: a contract of another town's board (the board's lines are the same code: Brokenspire's was taken), and a small town's board with its contracts and no "faded notices" line; the beast fought by her own blows (the test strikes with a test blow, as hers); a save and load in the middle of a contract (its state is in the game instance's saved lists).
 - [ ] **Limits**: a sign is a glow, not tracks or a carcass laid; the weakness is a share of every blow of hers, not a part of the beast to strike; a board's two beasts are the same every game for a town (by the town's hash, from six), and a contract once paid is not posted again.
 
 ## The list of 2026-11-14 ([docs/improvements13.txt](docs/improvements13.txt))

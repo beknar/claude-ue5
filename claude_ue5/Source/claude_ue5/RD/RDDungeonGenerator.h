@@ -2173,10 +2173,10 @@ public:
 	bool ContractOf15(int32 Id, FContract15& Out) const;
 	int32 ContractSignsRead15(int32 Id) const;
 	int32 ContractGoldOf15(const FContract15& C) const;
-	void AddContractLines15(TFunctionRef<void(const FString& Act, const FString& Label, const FString& Tag, const FString& Detail, bool bOn, const FString& Arg)> Add) const;
+	int32 AddContractLines15(TFunctionRef<void(const FString& Act, const FString& Label, const FString& Tag, const FString& Detail, bool bOn, const FString& Arg)> Add) const;
 	bool TownContract15(FName Act, const FString& Arg);
 	void TickContracts15(float Dt, const FVector& Her);
-	static void RDContractDrop15(FRewardLaid15& R);
+	static void DropReward15(FRewardLaid15& R);          // (a laid reward's mesh, lid and light, the rewards' and the contracts')
 	void MakeGlow15(FRewardLaid15& R, const FVector& At, const FLinearColor& Col, float Scale);
 	FString ReadContractSign15(int32 Key);
 	bool OnContractKilled15(class ARDMonster* Monster, bool bHers);
@@ -2184,6 +2184,7 @@ public:
 	/** tests: every board's contracts (see RDList15l.cpp), and a contract's beast while it is out */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetContracts15() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") class ARDMonster* GetContractBeast15(int32 Id) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") void ForgetContract15(int32 Id);
 	/** tests: the collectibles, the ruins' maps and the buried chests within Km (see RDList15k.cpp); the last chest dug "id|tier|gold|things" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") TArray<FString> GetRewards15(float Km) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FString GetLastChestDug15() const { return LastChestDug15; }

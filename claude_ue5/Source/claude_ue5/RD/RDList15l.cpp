@@ -42,8 +42,9 @@ void ARDDungeonGenerator::ParseContracts15() const
 
 int32 ARDDungeonGenerator::ContractTownHere15() const
 {
-	// (the town she is in: Brokenspire (its plan 0) or the wild town of its name)
-	if (!Wild) return -1;
+	// (the town she is in: Brokenspire (its plan 0) or the wild town of its name; none while the world is made (PR #105's review: its Init runs
+	// on a worker))
+	if (!Wild || !IsWildReady()) return -1;
 	if (bTownHome) return Wild->Towns.IndexOfByPredicate([](const FRDWildTown& T) { return T.Style == 0; });
 	return Wild->Towns.IndexOfByPredicate([&](const FRDWildTown& T) { return T.Name == TownName; });
 }
@@ -51,10 +52,11 @@ int32 ARDDungeonGenerator::ContractTownHere15() const
 bool ARDDungeonGenerator::ContractOf15(int32 Id, FContract15& Out) const
 {
 	if (const FContract15* Got = ContractCache15.Find(Id)) { Out = *Got; return Got->Line >= 0; }
+	if (!Wild || !IsWildReady()) return false;          // (not cached: asked again once the world is made (PR #105's review))
 	FContract15 C; C.Id = Id; C.Town = Id / 16;
 	ParseContracts15();
 	const int32 Slot = Id % 16, N = ContractKinds15.Num();
-	if (Wild && Wild->Towns.IsValidIndex(C.Town) && N > 0 && Slot < ContractsPerBoard15)
+	if (Wild->Towns.IsValidIndex(C.Town) && N > 0 && Slot < FMath::Min(ContractsPerBoard15, N))          // (never more slots than beasts: one would come twice)
 	{
 		const FRDWildTown& T = Wild->Towns[C.Town];
 		// (the board's beasts: one by the town's hash, the next ones after it, never one twice on a board)
@@ -109,11 +111,12 @@ int32 ARDDungeonGenerator::ContractSignsRead15(int32 Id) const
 	return N;
 }
 
-void ARDDungeonGenerator::AddContractLines15(TFunctionRef<void(const FString& Act, const FString& Label, const FString& Tag, const FString& Detail, bool bOn, const FString& Arg)> Add) const
+int32 ARDDungeonGenerator::AddContractLines15(TFunctionRef<void(const FString& Act, const FString& Label, const FString& Tag, const FString& Detail, bool bOn, const FString& Arg)> Add) const
 {
 	const int32 Town = ContractTownHere15();
-	if (Town < 0 || Contracts15.Num() == 0) return;
+	if (Town < 0 || Contracts15.Num() == 0) return 0;
 	const URDGameInstance* GI = URDGameInstance::Of(this);
+	int32 Lines = 0;
 	for (int32 Slot = 0; Slot < ContractsPerBoard15; ++Slot)
 	{
 		const int32 Id = Town * 16 + Slot;
@@ -121,6 +124,7 @@ void ARDDungeonGenerator::AddContractLines15(TFunctionRef<void(const FString& Ac
 		if (!ContractOf15(Id, C) || (GI && GI->ContractsPaid15.Contains(Id))) continue;
 		const FContractKind15& K = ContractKinds15[C.Line];
 		const int32 Gold = ContractGoldOf15(C);
+		++Lines;
 		const double Km = FVector2D::Distance(C.Lair, Wild->Towns[Town].Site) / 1000.0;
 		if (GI && GI->ContractsDone15.Contains(Id))
 			Add(TEXT("claim"), FString::Printf(TEXT("Claim the bounty on %s"), *K.Name), FString::Printf(TEXT("%d g"), Gold), TEXT("The beast is dead: the board pays what it promised."), true, FString::FromInt(Id));
@@ -131,6 +135,7 @@ void ARDDungeonGenerator::AddContractLines15(TFunctionRef<void(const FString& Ac
 			Add(TEXT("contract"), FString::Printf(TEXT("Contract: %s"), *K.Name), FString::Printf(TEXT("tier %d  ·  %d g"), C.Tier, Gold),
 				FString::Printf(TEXT("%s Its lair lies %.1f km out."), *K.Offer, Km), true, FString::FromInt(Id));
 	}
+	return Lines;
 }
 
 int32 ARDDungeonGenerator::ContractGoldOf15(const FContract15& C) const
@@ -151,6 +156,7 @@ bool ARDDungeonGenerator::TownContract15(FName Act, const FString& Arg)
 		GI->ContractsTaken15.AddUnique(Id);
 		SetTownNote(FString::Printf(TEXT("You take the contract on %s. Its signs are marked on your map: read them on the way to learn its weakness."), *K.Name));
 		TownCount(TEXT("contracts_taken"));
+		WildAutosave(TEXT("found"));          // (as every find (PR #105's review))
 		return true;
 	}
 	if (Act == TEXT("claim"))
@@ -161,6 +167,7 @@ bool ARDDungeonGenerator::TownContract15(FName Act, const FString& Arg)
 		AddGold(Gold, TEXT("a contract's bounty"));
 		SetTownNote(FString::Printf(TEXT("The bounty on %s: %d gold."), *K.Name, Gold));
 		TownCount(TEXT("contracts_paid"));
+		WildAutosave(TEXT("found"));
 		return true;
 	}
 	return false;
@@ -211,7 +218,7 @@ void ARDDungeonGenerator::TickContracts15(float Dt, const FVector& Her)
 		if (M && !M->IsDead()) M->WeakShare15 = ContractSignsRead15(Id) >= 3 ? ContractWeakShare15 : 0.f;
 	}
 	for (auto It = ContractSignsLaid15.CreateIterator(); It; ++It)
-		if (!WantSigns.Contains(It.Key())) { RDContractDrop15(It.Value()); It.RemoveCurrent(); }
+		if (!WantSigns.Contains(It.Key())) { DropReward15(It.Value()); It.RemoveCurrent(); }
 	for (auto It = ContractBeasts15.CreateIterator(); It; ++It)
 	{
 		ARDMonster* M = It.Value().Get();
@@ -222,7 +229,7 @@ void ARDDungeonGenerator::TickContracts15(float Dt, const FVector& Her)
 	}
 }
 
-void ARDDungeonGenerator::RDContractDrop15(FRewardLaid15& R)
+void ARDDungeonGenerator::DropReward15(FRewardLaid15& R)
 {
 	if (R.Mesh.IsValid()) R.Mesh->DestroyComponent();
 	if (R.Lid.IsValid()) R.Lid->DestroyComponent();
@@ -254,7 +261,7 @@ FString ARDDungeonGenerator::ReadContractSign15(int32 Key)
 	FContract15 C;
 	const int32 Id = Key / 4, S = Key % 4;
 	if (!GI || !ContractOf15(Id, C) || S > 2) return FString();
-	if (FRewardLaid15* R = ContractSignsLaid15.Find(Key)) { RDContractDrop15(*R); ContractSignsLaid15.Remove(Key); }
+	if (FRewardLaid15* R = ContractSignsLaid15.Find(Key)) { DropReward15(*R); ContractSignsLaid15.Remove(Key); }
 	GI->ContractSigns15.AddUnique(Key);
 	const FContractKind15& K = ContractKinds15[C.Line];
 	const int32 N = ContractSignsRead15(Id);
@@ -262,6 +269,7 @@ FString ARDDungeonGenerator::ReadContractSign15(int32 Key)
 		PlayerCombat->ShowMessage(N >= 3 ? FString::Printf(TEXT("%s  You know %s now: %s (it takes %d%% more from your blows)"), *K.Signs[S], *K.Name, *K.Weak, FMath::RoundToInt(ContractWeakShare15 * 100.f))
 			: FString::Printf(TEXT("%s  (signs of %s: %d of 3)"), *K.Signs[S], *K.Name, N));
 	UE_LOG(LogRDList15l, Log, TEXT("RDCONTRACT15 %s: sign %d read (%d of 3)"), *K.Name, S, N);
+	WildAutosave(TEXT("found"));
 	return TEXT("sign");
 }
 
@@ -322,6 +330,15 @@ TArray<FString> ARDDungeonGenerator::GetContracts15() const
 				C.Lair.X, C.Lair.Y, C.Sign[0].X, C.Sign[0].Y, C.Sign[1].X, C.Sign[1].Y, C.Sign[2].X, C.Sign[2].Y, ContractGoldOf15(C), M && !M->IsDead() ? 1 : 0, M ? M->WeakShare15 : 0.f));
 		}
 	return Out;
+}
+
+void ARDDungeonGenerator::ForgetContract15(int32 Id)
+{
+	// (tests: the contract as it was before it was taken, its beast gone)
+	URDGameInstance* GI = URDGameInstance::Of(this);
+	if (GI) { GI->ContractsTaken15.Remove(Id); GI->ContractsDone15.Remove(Id); GI->ContractsPaid15.Remove(Id); for (int32 S = 0; S < 3; ++S) GI->ContractSigns15.Remove(Id * 4 + S); }
+	for (int32 S = 0; S < 3; ++S) if (FRewardLaid15* R = ContractSignsLaid15.Find(Id * 4 + S)) { DropReward15(*R); ContractSignsLaid15.Remove(Id * 4 + S); }
+	if (TWeakObjectPtr<ARDMonster>* B = ContractBeasts15.Find(Id)) { if (ARDMonster* M = B->Get()) M->Destroy(); ContractBeasts15.Remove(Id); }
 }
 
 ARDMonster* ARDDungeonGenerator::GetContractBeast15(int32 Id) const

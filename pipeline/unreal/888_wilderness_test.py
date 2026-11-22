@@ -7539,7 +7539,7 @@ def step_contracts15():
     try:
         T = towns(); b = T.get("Brokenspire", {"x": 0.0, "y": 0.0})
         g.wild_put_her(b["x"] + 20.0, b["y"]); yield from wait_ready(90); yield from wait_chunks(30, 50); yield from rwait(4.0)
-        res["temple"] = g.open_town_panel("board", -1); yield from rwait(0.5)
+        res["board_opened"] = g.open_town_panel("board", -1); yield from rwait(0.5)
         posted = [p for p in panel() if p[0] in ("contract", "claim", "none") and "Contract" in p[1]]
         res["posted"] = [p[1] for p in posted]
         li = line_of("contract", "Contract")
@@ -7614,6 +7614,12 @@ def step_contracts15():
     finally:
         try: G["pawn"].set_actor_hidden_in_game(False); G["gen"].set_map_open(False)
         except Exception: pass
+        # (what the step changed put back for the steps after it: the contract as before it was taken, the bounty's gold)
+        try:
+            if "c" in dir() and c: G["gen"].forget_contract15(c["id"])
+            if res.get("gold"): G["gen"].add_gold(-int(res["gold"]), "test")
+            res["put_back"] = True
+        except Exception as e: res["put_back"] = str(e)
         quiet(False)
     ratio = res["blow_after"] / res["blow_before"] if res.get("blow_before") else 0
     res["ratio"] = round(ratio, 3)

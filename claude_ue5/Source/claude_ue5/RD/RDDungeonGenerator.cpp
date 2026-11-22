@@ -1391,8 +1391,8 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 	if (bHers) ++MonstersKilled;
 	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDCOMBAT %s killed (%d)%s"), Monster ? *Monster->MonsterName.ToString() : TEXT("?"), MonstersKilled, bHers ? TEXT("") : TEXT(" (not by her)"));
 	if (bHers && Secondaries.Num() > 0) SecondaryOnKill(Monster);          // (the sixth phase: the wilds' feathers, the soul harvest)
-	if (bWild && Roamers15.Num() > 0) OnRoamerKilled15(Monster, bHers);
-	if (bWild && ContractBeasts15.Num() > 0) OnContractKilled15(Monster, bHers);          // (the thirteenth phase: a contract's beast)          // (the list of 2026-11-20's eleventh phase: a named roamer's death and ring)
+	if (bWild && Roamers15.Num() > 0) OnRoamerKilled15(Monster, bHers);          // (the list of 2026-11-20's eleventh phase: a named roamer's death and ring)
+	if (bWild && ContractBeasts15.Num() > 0) OnContractKilled15(Monster, bHers);          // (the thirteenth phase: a contract's beast)
 	// (Brokenspire: its gold, the quests' counters)
 	if (bHers && (bTown || bTownLink))
 	{
