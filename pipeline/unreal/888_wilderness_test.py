@@ -7985,6 +7985,79 @@ def step_waystones15():
           and res.get("post_laid") and res["post_laid"]["laid"] and res["post_laid"]["texts"] == 2 * res["post_laid"]["arms"])
     step_result("waystones15", ok, **res)
 STEPS["waystones15"] = step_waystones15
+def climate15_state(g):
+    p = str(g.get_wild_climate15()).split("|")
+    return {"cold": float(p[1]), "cold_now": p[2] == "1", "cold_rate": float(p[3]), "warm_gear": float(p[4]), "warm_buff": float(p[5]),
+            "heat": float(p[7]), "hot_now": p[8] == "1", "heat_rate": float(p[9]), "cool_gear": float(p[10]), "cool_buff": float(p[11]), "why": p[12], "bites": int(p[13])}
+
+
+def step_climate15():
+    """idea 7 (the list of 2026-11-20's seventeenth phase): her drain measured by the world's clock: in the tundra's cold bare, in the Bear
+    Warrior's armour, and with the Frostleaf Stew eaten besides (the cold's build-up a second against bare); in the hot regions by day bare,
+    with the Sandroot Cooler drunk, and at night (none); the herbs, the meals and their oven recipes on the map; all put back"""
+    g = G["gen"]; res = {}; quiet(True)
+    def clock(): return unreal.GameplayStatics.get_time_seconds(G["w"])
+    def rate(key, secs=8.0):
+        g.reset_climate15(); yield from rwait(1.2)
+        a = climate15_state(g)[key]; t0 = clock()
+        yield from rwait(secs)
+        b = climate15_state(g)[key]; dt = clock() - t0
+        return round((b - a) / max(dt, 0.01), 3)
+    worn0 = str(cb().get_worn_armour()); hour0 = g.get_town_hour() if hasattr(g, "get_town_hour") else 12.0
+    try:
+        yield from wait_ready(90)
+        g.set_town_hour(12.0)
+        # ---- the cold
+        cp = find_biome_point("tundras", 160) or find_biome_point("arctic regions", 200)
+        res["cold_at"] = cp
+        if cp:
+            g.wild_put_her(cp[0], cp[1]); yield from wait_chunks(30, 50); ground_put(cp[0], cp[1]); yield from rwait(2.0)
+            res["cold_state"] = climate15_state(g)
+            res["cold_bare"] = yield from rate("cold")
+            cb().add_item("Bear Warrior\u2019s Armour", 1); res["wore"] = cb().wear_armour("Bear Warrior\u2019s Armour"); yield from rwait(0.5)
+            res["cold_gear"] = yield from rate("cold"); res["warm_gear"] = climate15_state(g)["warm_gear"]
+            cb().add_item("Frostleaf Stew", 1); res["ate"] = cb().use_item("Frostleaf Stew"); yield from rwait(0.5)
+            res["cold_gear_stew"] = yield from rate("cold"); res["warm_buff"] = climate15_state(g)["warm_buff"]
+            res["stew_said"] = " / ".join(str(m).split("|", 1)[-1] for m in list(cb().get_message_log())[:2])[:200]
+            if str(cb().get_worn_armour()) != worn0: cb().wear_armour("Bear Warrior\u2019s Armour")          # (off again)
+        # ---- the heat
+        hp_ = None
+        for bn in ("savannahs", "mesas", "canyons", "burned plain"):
+            hp_ = find_biome_point(bn, 160)
+            if hp_: res["heat_biome"] = bn; break
+        res["heat_at"] = hp_
+        if hp_:
+            g.wild_put_her(hp_[0], hp_[1]); yield from wait_chunks(30, 50); ground_put(hp_[0], hp_[1]); yield from rwait(2.0)
+            g.set_town_hour(13.0); yield from rwait(1.0)
+            # (out of any shade: a few steps until nothing is over her head)
+            for k in range(8):
+                if climate15_state(g)["why"] != "shade": break
+                ground_put(hp_[0] + 15.0 * (k + 1), hp_[1]); yield from rwait(1.0)
+            res["heat_state"] = climate15_state(g)
+            res["heat_day_bare"] = yield from rate("heat")
+            cb().add_item("Sandroot Cooler", 1); res["drank"] = cb().use_item("Sandroot Cooler"); yield from rwait(0.5)
+            res["heat_day_cooler"] = yield from rate("heat"); res["cool_buff"] = climate15_state(g)["cool_buff"]
+            g.set_town_hour(23.0); yield from rwait(1.0)
+            res["heat_night"] = yield from rate("heat"); res["night_why"] = climate15_state(g)["why"]
+        # ---- the herbs, meals and recipes on the map
+        names = {str(i.get_editor_property("name")) for i in g.get_editor_property("items")}
+        res["items"] = sorted(n for n in ("Frostleaf", "Sandroot", "Frostleaf Stew", "Sandroot Cooler") if n in names)
+        res["oven_recipes"] = sorted(str(r.get_editor_property("item")) for r in g.get_editor_property("recipes") if str(r.get_editor_property("station")) == "Oven" and str(r.get_editor_property("item")) in ("Frostleaf Stew", "Sandroot Cooler"))
+        res["herb_regions"] = [str(x) for x in g.get_editor_property("climate_herbs15")]
+    finally:
+        try:
+            g.reset_climate15(); g.set_town_hour(hour0)
+            for it in ("Bear Warrior\u2019s Armour", "Frostleaf Stew", "Sandroot Cooler"): cb().remove_item(it, 99)
+            res["put_back"] = True
+        except Exception as e: res["put_back"] = str(e)
+        quiet(False)
+    cb_, cg, cs = res.get("cold_bare", 0), res.get("cold_gear", 0), res.get("cold_gear_stew", 0)
+    hb, hc, hn = res.get("heat_day_bare", 0), res.get("heat_day_cooler", 0), res.get("heat_night", 1)
+    ok = (cb_ > 0.5 and res.get("wore") and abs(cg / cb_ - 0.4) < 0.08 and res.get("ate") and abs(cs / cb_ - 0.1) < 0.05
+          and hb > 0.5 and res.get("drank") and abs(hc / hb - 0.4) < 0.08 and hn <= 0.0 and res.get("night_why") == "night"
+          and len(res.get("items", [])) == 4 and len(res.get("oven_recipes", [])) == 2)
+    step_result("climate15", ok, **res)
+STEPS["climate15"] = step_climate15
 SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
 def saves_snapshot():
     """the save folder's files and their bytes: put back at the end, the tests' own new saves deleted (PR #61's review)"""

@@ -1,0 +1,83 @@
+{
+ "tag": "l15p17b",
+ "plan": [
+  "climate15"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "climate15",
+   "ok": true,
+   "cold_at": [
+    59319.10468427484,
+    -9013.535347245408
+   ],
+   "cold_state": {
+    "cold": 9.5,
+    "cold_now": true,
+    "cold_rate": 1.0,
+    "warm_gear": 0.0,
+    "warm_buff": 0.0,
+    "heat": 0.0,
+    "hot_now": false,
+    "heat_rate": 1.0,
+    "cool_gear": 0.0,
+    "cool_buff": 0.0,
+    "why": "not here",
+    "bites": 0
+   },
+   "cold_bare": 0.999,
+   "wore": true,
+   "cold_gear": 0.374,
+   "warm_gear": 0.6,
+   "ate": true,
+   "cold_gear_stew": 0.093,
+   "warm_buff": 0.6,
+   "stew_said": "Ate the frostleaf stew:  +4 HP a second for 15 s,  the cold 60% slower for 300 s / Ate the frostleaf stew:  +4 HP a second for 15 s",
+   "heat_biome": "savannahs",
+   "heat_at": [
+    -8000.000000000007,
+    -13856.406460551016
+   ],
+   "heat_state": {
+    "cold": 0.0,
+    "cold_now": false,
+    "cold_rate": 0.4,
+    "warm_gear": 0.0,
+    "warm_buff": 0.6,
+    "heat": 3.56,
+    "hot_now": true,
+    "heat_rate": 1.0,
+    "cool_gear": 0.0,
+    "cool_buff": 0.0,
+    "why": "",
+    "bites": 0
+   },
+   "heat_day_bare": 1.061,
+   "drank": true,
+   "heat_day_cooler": 0.399,
+   "cool_buff": 0.6,
+   "heat_night": 0.0,
+   "night_why": "night",
+   "items": [
+    "Frostleaf",
+    "Frostleaf Stew",
+    "Sandroot",
+    "Sandroot Cooler"
+   ],
+   "oven_recipes": [
+    "Frostleaf Stew",
+    "Sandroot Cooler"
+   ],
+   "herb_regions": [
+    "Frostleaf|arctic regions;glacial;mountains and peaks;tundras;cold steppes;taigas",
+    "Sandroot|canyons;canyon networks;mesas;savannahs;burned plain"
+   ],
+   "put_back": true
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 3
+}

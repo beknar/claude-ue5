@@ -2153,6 +2153,27 @@ public:
 	float LastingHealth15() const;
 	float LastingMana15() const;
 	void AddPlaceItem15(const FVector& BoxAt, int64 BoxKey, TArray<FName>& Got);
+	// ---- the list of 2026-11-20's seventeenth phase (RDList15p.cpp): preparing for regions (idea 7), from SourceArt/wilderness/climate15.json (943)
+	/** the armour sets' warmth against the cold and coolness in the heat ("set|warm|cool"; cool below 0: hotter), the hot regions and the
+	 *  hours their heat comes on, how long it takes to sap her, the regions' herbs ("item|biome;biome") in their resource points' piles */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> ClimateGear15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> WildHeatBiomes15;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float HeatFrom15 = 10.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float HeatTo15 = 17.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") float HeatSeconds15 = 90.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TArray<FString> ClimateHerbs15;
+	float WildHeat15 = 0.f, WildHeatBiteAt15 = 0.f, HeatLook15 = 0.f;
+	bool bWildHotNow15 = false, bWildHeatTold15 = false;
+	int32 HeatBites15 = 0;
+	FString WildHeatWhy15;
+	void GearClimate15(float& Warm, float& Cool) const;
+	float ColdRate15() const;
+	float HeatRate15() const;
+	void TickHeat15(float Dt, const FVector& Her);
+	void AddClimateHerb15(const struct FRDWildPlace& P, TArray<FName>& Got) const;
+	/** tests: the cold and the heat (see RDList15p.cpp); both from nothing */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") FString GetWildClimate15() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List15") void ResetClimate15();
 	// ---- the list of 2026-11-20's sixteenth phase (RDList15o.cpp, RDList14k.cpp): waystones and crossroads posts (idea 9 in part)
 	/** the waystones (the world's, one a region's cell) and the crossroads posts laid in play (941... 942 sets them), the stone's height (m) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bWaystones15 = false;

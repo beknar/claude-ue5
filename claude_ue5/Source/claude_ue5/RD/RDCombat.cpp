@@ -1155,7 +1155,8 @@ bool URDCombatComponent::UseItem(FName Name)
 	{
 		const float P = It.BuffAmount * 100.f;
 		const FString Bw = It.BuffKind == TEXT("resist") ? FString::Printf(TEXT("blows on you %.0f%% less"), P) : It.BuffKind == TEXT("might") ? FString::Printf(TEXT("your blows %.0f%% more"), P)
-			: It.BuffKind == TEXT("speed") ? FString::Printf(TEXT("%.0f%% faster"), P) : FString::Printf(TEXT("%.0f%% of your hit points a second"), P);
+			: It.BuffKind == TEXT("speed") ? FString::Printf(TEXT("%.0f%% faster"), P) : It.BuffKind == TEXT("warm") ? FString::Printf(TEXT("the cold %.0f%% slower"), P)
+			: It.BuffKind == TEXT("cool") ? FString::Printf(TEXT("the heat %.0f%% slower"), P) : FString::Printf(TEXT("%.0f%% of your hit points a second"), P);
 		SetMessage(Message + TEXT(",  ") + Bw + FString::Printf(TEXT(" for %.0f s"), It.BuffSeconds));
 	}
 	int32& N = Carried.FindOrAdd(Name);

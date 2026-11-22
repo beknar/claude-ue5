@@ -77,6 +77,8 @@ static ERDItemKind RDBuffKind14(FName B, bool& bOk)
 	if (B == TEXT("might")) return ERDItemKind::Weapon;
 	if (B == TEXT("speed")) return ERDItemKind::Speed;
 	if (B == TEXT("regen")) return ERDItemKind::Food;
+	if (B == TEXT("warm")) return ERDItemKind::Warmth;          // (the list of 2026-11-20's seventeenth phase)
+	if (B == TEXT("cool")) return ERDItemKind::Cooling;
 	bOk = false; return ERDItemKind::Food;
 }
 

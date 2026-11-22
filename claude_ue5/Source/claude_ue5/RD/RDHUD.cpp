@@ -331,6 +331,8 @@ void ARDHUD::DrawCombat(float Sc)
 				const FString T = bSpeed ? FString::Printf(TEXT("SPEED +%.0f%%  %.0fs"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
 				                : E.Kind == ERDItemKind::Armour ? FString::Printf(TEXT("RESIST +%.0f%%  %.0fs"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
 				                : E.Kind == ERDItemKind::Weapon ? FString::Printf(TEXT("MIGHT +%.0f%%  %.0fs"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
+				                : E.Kind == ERDItemKind::Warmth ? FString::Printf(TEXT("WARM %.0f%%  %.0fs"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))          // (the seventeenth phase)
+				                : E.Kind == ERDItemKind::Cooling ? FString::Printf(TEXT("COOL %.0f%%  %.0fs"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
 				                         : FString::Printf(TEXT("REGEN +%.1f/s  %.0fs"), E.Amount * Cb->GetMaxHealth(), FMath::CeilToFloat(E.Left));
 				const FName Ic = bSpeed ? FName(TEXT("chip_speed")) : E.Kind == ERDItemKind::Armour ? FName(TEXT("elixir_ironhide")) : E.Kind == ERDItemKind::Weapon ? FName(TEXT("elixir_might")) : FName(TEXT("chip_regen"));
 				float Tw, Th; UI.TextSize(T, Tw, Th, Small, Sc, ERDType::Label);
@@ -1724,6 +1726,8 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 		: FString::Printf(TEXT("  Then for %.0f s: %s."), It.BuffSeconds, *(It.BuffKind == TEXT("resist") ? FString::Printf(TEXT("blows on you %.0f%% less"), It.BuffAmount * 100.f)
 			: It.BuffKind == TEXT("might") ? FString::Printf(TEXT("your blows %.0f%% more"), It.BuffAmount * 100.f)
 			: It.BuffKind == TEXT("speed") ? FString::Printf(TEXT("you move %.0f%% faster"), It.BuffAmount * 100.f)
+			: It.BuffKind == TEXT("warm") ? FString::Printf(TEXT("the cold comes on %.0f%% slower"), It.BuffAmount * 100.f)
+			: It.BuffKind == TEXT("cool") ? FString::Printf(TEXT("the heat comes on %.0f%% slower"), It.BuffAmount * 100.f)
 			: FString::Printf(TEXT("%.1f HP a second"), It.BuffAmount * Hp)));
 	switch (It.Kind)
 	{
@@ -2536,6 +2540,8 @@ void ARDHUD::DrawInventory(float Sc)
 		Para(E.Kind == ERDItemKind::Speed ? FString::Printf(TEXT("Speed +%.0f%%: %.0f s left"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
 		     : E.Kind == ERDItemKind::Armour ? FString::Printf(TEXT("Blows on you %.0f%% less: %.0f s left"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
 		     : E.Kind == ERDItemKind::Weapon ? FString::Printf(TEXT("Your blows %.0f%% more: %.0f s left"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
+		     : E.Kind == ERDItemKind::Warmth ? FString::Printf(TEXT("Warm: the cold %.0f%% slower: %.0f s left"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
+		     : E.Kind == ERDItemKind::Cooling ? FString::Printf(TEXT("Cool: the heat %.0f%% slower: %.0f s left"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
 		                                 : FString::Printf(TEXT("Regenerating %.1f HP/s: %.0f s left"), E.Amount * Cb->GetMaxHealth(), FMath::CeilToFloat(E.Left)), RDCyan, Sc);
 	// ---- the keys, and what was done last
 	const float Fy = B.Y - 92.f * Sc;

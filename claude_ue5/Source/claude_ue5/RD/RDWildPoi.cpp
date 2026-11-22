@@ -82,7 +82,8 @@ void ARDDungeonGenerator::SpawnWildPoi(ARDWildChunk* C, const FRDWildPlace& P)
 	const bool bUsed = IsWildPoiUsed(P.Id);
 	if (!bUsed && (K.Use == TEXT("loot") || K.Use == TEXT("resource") || K.Use == TEXT("guarded")))
 	{
-		const TArray<FName> Got = RollWildThings(K.Things, R);
+		TArray<FName> Got = RollWildThings(K.Things, R);
+		if (K.Use == TEXT("resource")) AddClimateHerb15(P, Got);          // (the list of 2026-11-20's seventeenth phase: the region's herb, no draw)
 		if (Got.Num() > 0)
 		{
 			FVector At(P.At.X * 100.0 + 120.0, P.At.Y * 100.0, 0.0);

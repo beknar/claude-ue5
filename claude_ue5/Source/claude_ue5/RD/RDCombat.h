@@ -310,6 +310,8 @@ public:
 	// off; wearing the one she has on takes it off.
 	/** puts the set on (or takes it off when she wears it): false when she does not carry it or it was not made for her */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool WearArmour(FName Item);
+	/** the list of 2026-11-20's seventeenth phase: the strongest warm (ERDItemKind::Warmth) or cool (Cooling) buff on her */
+	float GetClimateBuff15(ERDItemKind K) const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void TakeOffArmour();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") FName GetWornArmour() const { return WornArmour; }
 	/** the share of a blow her armour takes off (0: none) */

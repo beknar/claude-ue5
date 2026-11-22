@@ -1,0 +1,25 @@
+{
+  "_": "preparing for regions (the list of 2026-11-20's seventeenth phase, idea 7; 943_climate15.py, C++ RD/RDList15p.cpp). gear: an armour set's warmth against the cold and coolness in the heat (the build-up's rate is 1 - gear - buff; cool below 0: hotter). heat: the hot regions, the hours the heat comes on, its seconds before it saps her. herbs: each region's herb in its resource points' piles. items: the herbs and the meals cooked from them (on every map; 'like' the item copied; buff [kind, amount, seconds]), recipes at the oven.",
+  "gear": [
+    ["Bear Warrior’s Armour", 0.6, -0.2], ["Broddi’s Dwarf Armour", 0.4, -0.25], ["Elephant Warrior’s Armour", 0.3, -0.1],
+    ["Plate Armour", 0.2, -0.25], ["Lady Knight’s Armour", 0.2, -0.25], ["Paladin’s Armour", 0.2, -0.25], ["Dark Knight’s Armour", 0.2, -0.25],
+    ["Epic Plate (Male)", 0.2, -0.25], ["Epic Plate (Female)", 0.2, -0.25],
+    ["Orc Warrior’s Armour", 0.3, 0.0], ["Orc Veteran’s Armour", 0.3, 0.0], ["Orc Skirmisher’s Armour", 0.3, 0.0], ["Orc Bruiser’s Armour", 0.3, 0.0],
+    ["Orc Raider’s Armour", 0.3, 0.0], ["Gnur’s Armour", 0.3, 0.0], ["Dardan’s Armour", 0.3, 0.0], ["Costalmed’s Armour", 0.35, -0.1],
+    ["Desert Hero’s Armour", 0.0, 0.5], ["Tiefling’s Armour", 0.0, 0.2], ["Orme’s Armour", 0.0, 0.2]
+  ],
+  "heat": {"biomes": ["canyons", "canyon networks", "mesas", "savannahs", "burned plain"], "from": 10, "to": 17, "seconds": 90},
+  "herbs": [
+    {"item": "Frostleaf", "biomes": ["arctic regions", "glacial", "mountains and peaks", "tundras", "cold steppes", "taigas"]},
+    {"item": "Sandroot", "biomes": ["canyons", "canyon networks", "mesas", "savannahs", "burned plain"]}
+  ],
+  "items": [
+    {"name": "Frostleaf", "like": "Herbs"},
+    {"name": "Sandroot", "like": "Herbs"},
+    {"name": "Frostleaf Stew", "like": "Travel Cake", "amount": 0.03, "seconds": 15, "buff": ["warm", 0.6, 300],
+     "parts": [["meat", ["Raw Meat", "Jerky", "Well Done Steak"], 1], ["frostleaf", ["Frostleaf"], 2]]},
+    {"name": "Sandroot Cooler", "like": "Travel Cake", "amount": 0.02, "seconds": 10, "buff": ["cool", 0.6, 300],
+     "parts": [["sandroot", ["Sandroot"], 2], ["berries", ["Wild Berries", "Wild Plums", "Grapes"], 1]]}
+  ],
+  "maps": ["brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress", "caves", "martial_arts"]
+}
