@@ -58,6 +58,7 @@ float ARDSection::FloorZAt(const FVector& P) const
 {
 	const float Base = GetActorLocation().Z;
 	const FIntPoint T = WorldToLocal(P);
+	if (Generator && Generator->bCave16) return Base + CaveFloorAt16(T);          // (the caves: each tile's own floor)
 	if (!IsStairTile(T) || !Generator) return Base;
 	const int32 Sd = StairSide[Idx(T)];
 	const float S = Generator->TileSize;
@@ -113,6 +114,8 @@ void ARDSection::Plan(FRandomStream& R)
 	Pickups.Reset();
 	Type.Init(0, N * N); Owner.Init(-1, N * N); Blocked.Init(0, N * N); CeilH.Init(0.f, N * N);
 	StairZ.Reset(); StairSide.Reset();
+	// (the caves of the list of 2026-11-22: a planner of their own, the kit's rooms and winding tunnels: RDCave16.cpp)
+	if (Generator->bCave16) { PlanCave16(R); return; }
 	// (the catacombs: the sides whose neighbour set is a tier shallower; their hallways climb to it)
 	bool StairSides[4] = { false, false, false, false };
 	const int32 StairL = FMath::Clamp(Generator->StairTiles, 2, Generator->BlockTiles / 2 - 1);
@@ -998,6 +1001,7 @@ float ARDSection::InwardYaw(int32 Side)
 
 void ARDSection::BuildShell(FRandomStream& R)
 {
+	if (Generator && Generator->bCave16) { ShellPrepare(R); CaveShell16(); return; }
 	ShellPrepare(R);
 	for (int32 X = 0; X < N; ++X) ShellColumn(R, X);
 	ShellCorners();
@@ -1287,6 +1291,7 @@ void ARDSection::EnsureAnvil()
 
 void ARDSection::Furnish(FRandomStream& R, int32 RI)
 {
+	if (Generator->bCave16) { CaveFurnish16(R, RI); return; }          // (the caves: RDCave16.cpp)
 	const FRoom& Rm = Rooms[RI];
 	const float S = Generator->TileSize, RH = Generator->RoomHeight;
 	const FBox2D B = RoomBox(Rm);
@@ -2126,6 +2131,13 @@ bool ARDSection::ContinueGenerate(double Budget)
 		return true;
 	}
 	// the shell first (floors, ceilings, walls), a few tile columns per frame, each frame's instances added at once
+	if (ShellX <= N && Generator->bCave16)
+	{
+		CaveShell16();          // (the caves: the kit's rooms, tunnels and caps at once)
+		ShellX = N + 1;
+		ShellMs += (FPlatformTime::Seconds() - T0) * 1000.0;
+		return false;
+	}
 	if (ShellX <= N)
 	{
 		while (FPlatformTime::Seconds() - T0 < Budget && ShellX <= N)
@@ -2208,6 +2220,7 @@ void ARDSection::BuildShellCensus(FRandomStream& R)
 {
 	// (the shell draws from the stream too: the same draws as BuildShell, nothing placed)
 	ShellPrepare(R);
+	if (Generator && Generator->bCave16) return;          // (the caves' shell draws nothing)
 	for (int32 X = 0; X < N; ++X) ShellColumn(R, X);
 }
 
@@ -2342,8 +2355,8 @@ FRDSectionMap ARDSection::BuildMapData() const
 	{
 		const FRoom& Rm = Rooms[RI];
 		FRDMapRect Rc; Rc.Min = G0 + Rm.Min; Rc.Max = G0 + Rm.Max; Rc.Kind = Rm.Kind; Rc.bCorridor = Rm.Kind == ERDRoomKind::Junction;
-		// (mistward: a shaped room's tiles)
-		if (Rm.Shape != 0)
+		// (mistward: a shaped room's tiles; the caves': every room's and tunnel's)
+		if (Rm.Shape != 0 || (Generator && Generator->bCave16))
 		{
 			Rc.Shape = GetRoomShape(RI);
 			for (int32 Y = Rm.Min.Y; Y < Rm.Max.Y; ++Y)
@@ -2590,6 +2603,7 @@ void ARDSection::UpdateSeals()
 		const FIntPoint Next = PortalNeighbour(I, Border, Out);
 		const int32 Kind = Generator->GetSealKind(Coord, Next);
 		if (Kind == 0) continue;
+		if (Generator->bCave16) { CaveSeal16(Border, Out, Kind); continue; }          // (the caves: the kit's cap across the tunnel)
 		// the piece's front (+X) faces back into this section; it stands just inside the border, across the hallway
 		const FRotator Yaw = (-Out).Rotation();
 		const FVector Across = FVector::CrossProduct(FVector::UpVector, Out);
