@@ -19,6 +19,7 @@ FName ARDDungeonGenerator::RecipeStationOf(const FRDRecipe& Rc, int32 Ix) const
 {
 	if (!Rc.Station.IsNone() || !bTables14) return Rc.Station;
 	if (!Items.IsValidIndex(Ix)) return NAME_None;
+	if (AnvilMade16.Contains(Items[Ix].Name)) return NAME_None;          // (the caves' linings: worked at the anvil whatever their kind (PR #117's review))
 	switch (Items[Ix].Kind)
 	{
 	case ERDItemKind::Healing: case ERDItemKind::Mana: case ERDItemKind::Speed: return FName(TEXT("Alchemist"));

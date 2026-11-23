@@ -309,7 +309,9 @@ def items():
         missing = []
         for x in X:
             like = next((i for i in its if str(i.name) == x["like"]), None)
-            if not like: missing.append(f"no {x['like']} to copy for {x['name']}"); continue
+            # (a map without the 'like' (not every map has every material): the first of the item's kind there)
+            if not like: like = next((i for i in its if str(i.kind).endswith("." + ITEM_KINDS[x["kind"]]) or ITEM_KINDS[x["kind"]] in str(i.kind)), None)
+            if not like: missing.append(f"no {x['like']} or any {x['kind']} to copy for {x['name']}"); continue
             it = unreal.RDItemDef()
             for k in ("kind", "amount", "seconds", "weight", "icon", "looks", "tiers", "found_max", "durability", "armour_weight", "armour_type"):
                 it.set_editor_property(k, like.get_editor_property(k))
@@ -336,6 +338,9 @@ def items():
                 rc.parts = ps; recs.append(rc)
         g.set_editor_property("items", its); g.set_editor_property("recipes", recs)
         g.set_editor_property("cave_items16", [unreal.Name(x["name"]) for x in X if x.get("cave")])
+        # (made at the anvil whatever their kind: a recipe with the anvil's station '' on a kind the tables would send to the
+        # alchemist (the linings, kind HEALING for their buff; PR #117's review))
+        g.set_editor_property("anvil_made16", [unreal.Name(x["name"]) for x in X if x.get("recipe") and x["recipe"][0] == "" and x["kind"] in ("HEALING", "MANA", "SPEED")])
         rg = []
         for r in regions:
             e = unreal.RDCaveRegion16(); e.set_editor_property("name", r["name"]); e.set_editor_property("biomes", r["biomes"]); e.set_editor_property("items", [unreal.Name(i) for i in r["items"]]); rg.append(e)
@@ -348,6 +353,7 @@ def items():
             e.set_editor_property("scale", unreal.Vector2D(*n["scale"])); e.set_editor_property("count", unreal.IntPoint(*n["count"]))
             e.set_editor_property("per_room", unreal.IntPoint(*n["per_room"])); e.set_editor_property("wall", bool(n["wall"]))
             if n.get("region"): e.set_editor_property("region", n["region"])
+            if n.get("material"): e.set_editor_property("material", unreal.load_asset(n["material"]))          # (the vein: the kit's rocks in dark iron (the first, a pack's crystal, was a caged lamp))
             nd.append(e)
         g.set_editor_property("cave_nodes16", nd)
         assert not missing, f"945 items: {missing}"
@@ -371,7 +377,10 @@ def icons():
     tex = {n: ui_texture(os.path.join(src, f"icon_{n}.png"), "/Game/RandomDungeon/UI/Caves16", f"T_Cave16_{n}") for n in found}
     def fn(g):
         ua = g.get_editor_property("ui_art")
-        for n, t in tex.items(): ua[unreal.Name(n)] = t
+        for n, t in tex.items():
+            art = unreal.RDUIArt(); art.set_editor_property("texture", t)
+            art.set_editor_property("border", unreal.Vector4(0, 0, 0, 0)); art.set_editor_property("inner", unreal.Vector4(0, 0, 1, 1))
+            ua[unreal.Name(n)] = art
         g.set_editor_property("ui_art", ua)
         return f"{len(tex)} pictures"
     each_map(T["maps"], fn, "icons")

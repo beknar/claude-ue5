@@ -489,6 +489,7 @@ TArray<FName> ARDDungeonGenerator::TownStock() const
 	for (const FRDItemDef& It : Items)
 	{
 		if (RDLowTier(It) > T) continue;
+		if (!CaveItemAllowed16(It)) continue;          // (the list of 2026-11-22's caves: their things are found or made, never sold (PR #117's review))
 		const bool bScroll = It.Kind == ERDItemKind::Scroll;
 		// (a scroll of the last two tiers the game has reached: by its copy's tier (910's), else none past tier 6)
 		const int32 Ti = RDReachedTier(It, T);
@@ -965,6 +966,8 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 			else if (Go.StartsWith(TEXT("cave")))
 			{
 				GI->CaveKey15 = TEXT("cave:go"); GI->CaveTier15 = Go.Contains(TEXT(":")) ? FMath::Clamp(FCString::Atoi(*Go.Mid(5)), 1, GameTierMax) : 1;
+				// (the caves' region (the list of 2026-11-22): the ground's where she stands, as a tower's mouth takes its own (PR #117's review))
+				GI->CaveBiome16 = Wild ? Wild->BiomeName(Wild->BiomeAt(P->GetActorLocation().X / 100.0, P->GetActorLocation().Y / 100.0)) : FString();
 				if (!CaveLevel15.IsEmpty() && DescendToCatacombs(P->GetActorLocation(), P->GetActorRotation().Yaw, CaveLevel15)) { GI->ReturnTown = TEXT("the Broken Tower"); return; }
 				UE_LOG(LogRDTownGame, Warning, TEXT("RDTOWN -RDTownGo=%s refused: %s"), *Go, CaveLevel15.IsEmpty() ? TEXT("no cave level") : TEXT("the way down refused it"));
 			}

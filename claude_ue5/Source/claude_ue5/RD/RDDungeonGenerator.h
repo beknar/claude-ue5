@@ -2068,6 +2068,33 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float CaveGodRayCandelas16 = 1500.f;
 	/** containers a room by its walls (the castle's chest, barrel and crate pieces): X to Y */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FIntPoint CaveContainers16 = FIntPoint(1, 3);
+	// ---- phase 10: the caves' treasures (RDCave16b.cpp; 945 items, treasure16.json)
+	/** the caves' own items (on every map): drawn by a container only in a cave, and there a cave's gear, rings, tomes and scrolls come
+	 *  from these alone (its potions, food, repair items and materials as anywhere) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FName> CaveItems16;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FRDCaveRegion16> CaveRegions16;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FRDCaveNode16> CaveNodes16;
+	/** the darksight's light on her (candelas) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float CaveDarksightCandelas16 = 60.f;
+	/** items made at the anvil whatever their kind (the caves' linings: a buff's vehicle of kind Healing, not the alchemist's) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FName> AnvilMade16;
+	/** for the tests: "<station>|<refusal>" of an item's recipe as the game reads it now ("none|..." without a recipe) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") FString GetCaveCraft16(FName Item) const;
+	/** for the tests: what a store of this level sells now */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FName> GetTownStock16() const { return TownStock(); }
+	/** whether a container may hold it here (the caves' own items, their regions' items) */
+	bool CaveItemAllowed16(const FRDItemDef& It) const;
+	/** the cave's region (by the tower's biome the game instance keeps; -1: none known) and its name for a test */
+	int32 CaveRegion16() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") FString GetCaveRegion16() const;
+	/** the veins and growths laid this session ((set x, set y, n): a set built again lays none twice) */
+	TSet<FIntVector> CaveNodesLaid16;
+	/** a test's: a set's veins and growths, "node|<item>|x|y|z|<on the wall>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetCaveNodes16(FIntPoint Section) const;
+	/** a test's: whether a container's draw at this tier would hold the item here (its kind, the cave's rules) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") bool CaveMayDraw16(FName Item) const;
+	/** a test's: the set at the start sets the region as the game instance would (a tower's biome) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") void SetCaveBiome16(const FString& Biome);
 	/** a test's: the set's dressing, "torches|<n>", "godrays|<n>", "dress|<mesh>|<instances>", "containers|<n>" */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetCaveDressing16(FIntPoint Section) const;
 	/** a test's: where a tier's boss would stand now ("<section x>|<section y>|<room>|<floor z>|<her distance>") and the rooms it was chosen

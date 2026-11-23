@@ -99,7 +99,7 @@ bool ARDDungeonGenerator::EnterCave15()
 	const FVector Back(B2.X, B2.Y, Wild->ToZ(Wild->Height(B2.X / 100.0, B2.Y / 100.0)) + 100.f);
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	const FString Key = FString::Printf(TEXT("cave:%d_%d"), CaveCell15.X, CaveCell15.Y);
-	if (GI && !bTravelDryRun) { GI->CaveKey15 = Key; GI->CaveTier15 = Tier; }
+	if (GI && !bTravelDryRun) { GI->CaveKey15 = Key; GI->CaveTier15 = Tier; GI->CaveBiome16 = Wild->BiomeName(Wild->BiomeAt(SiteM.X, SiteM.Y)); }
 	if (!DescendToCatacombs(Back, CaveMouthOut15.Rotation().Yaw, CaveLevel15)) return false;
 	if (GI && !bTravelDryRun) GI->ReturnTown = TEXT("the Broken Tower");          // (the way back's label)
 	LastTravel = TEXT("cave");

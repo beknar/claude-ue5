@@ -822,6 +822,7 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	TickSpells(Dt, Now);
 	TickScrollWeapon();          // (mistward: a scroll's weapon gone once its cast and bolts are done)
 	TickLightBurn15(Dt);          // (the list of 2026-11-20: the torch or ankh held lit burns down)
+	TickDarksight16();          // (the list of 2026-11-22's caves: the darksight's light on her)
 	// (the third list: the slashes' burning ground and pulls; quick slots for weapons found or spells learned)
 	if (SlashAreas.Num() > 0 || Echoes.Num() > 0) TickSlashAreas(Dt);          // (the Echo slash's hits too: they waited for an area that never came)
 	if (Generator->Secondaries.Num() > 0) TickSecondary(Dt);          // (the sixth phase's abilities)
@@ -1331,7 +1332,10 @@ bool URDCombatComponent::BeginRepair(FName Item)
 	if (GetRepairLines().Num() == 0)
 	{
 		RepairWith = NAME_None;
-		SetMessage(FString::Printf(TEXT("Nothing to mend: the %s mends armour and the weapons you found"), *Item.ToString().ToLower()));
+		const FString Only = Generator->Items[Ix].ArmourType.ToLower();
+		const bool bOnly = Only == TEXT("light") || Only == TEXT("medium") || Only == TEXT("heavy");          // (the caves' patch and chitin (PR #117's review))
+		SetMessage(bOnly ? FString::Printf(TEXT("Nothing to mend: the %s mends %s armour only"), *Item.ToString().ToLower(), *Only)
+		                 : FString::Printf(TEXT("Nothing to mend: the %s mends armour and the weapons you found"), *Item.ToString().ToLower()));
 		return false;
 	}
 	RepairCursor = 0;
@@ -1359,14 +1363,20 @@ TArray<FString> URDCombatComponent::GetRepairLines() const
 	const int32 Ix = Generator && !RepairWith.IsNone() ? Generator->FindItem(RepairWith) : -1;
 	if (Ix < 0) return Out;
 	const float Share = Generator->Items[Ix].Amount;
+	// (the list of 2026-11-22's caves: a patch or chitin for one armour weight ("light", "medium" in its ArmourType) mends only that
+	// weight's armour, and no weapon)
+	const FString Only = Generator->Items[Ix].ArmourType.ToLower();
+	const bool bOnly = Only == TEXT("light") || Only == TEXT("medium") || Only == TEXT("heavy");
+	const ERDArmourWeight OnlyW = Only == TEXT("light") ? ERDArmourWeight::Light : Only == TEXT("medium") ? ERDArmourWeight::Medium : ERDArmourWeight::Heavy;
 	for (const FName& N : CarriedOrder)
 	{
 		const float Full = GetGearDurability(N);          // (the list of 2026-11-10: a shield too)
 		if (Full <= 0.f) continue;
+		if (bOnly) { const int32 Ax = Generator->FindItem(N); if (Ax < 0 || Generator->Items[Ax].Kind != ERDItemKind::Armour || Generator->Items[Ax].ArmourWeight != OnlyW) continue; }
 		const float Left = GetArmourWear(N);
 		Out.Add(FString::Printf(TEXT("armour|%s|%.0f|%.0f|%.0f"), *N.ToString(), Left, Full, FMath::Min(Full, Left + Full * Share)));
 	}
-	for (int32 I = 0; I < Generator->Weapons.Num(); ++I)
+	for (int32 I = 0; I < Generator->Weapons.Num() && !bOnly; ++I)
 	{
 		const FRDWeaponDef& W = Generator->Weapons[I];
 		if (W.Durability <= 0.f) continue;

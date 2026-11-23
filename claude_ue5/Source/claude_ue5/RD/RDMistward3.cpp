@@ -131,7 +131,9 @@ FString ARDDungeonGenerator::RecipeRefusal(const FRDRecipe& Rc) const
 		if (!HasLooted(Rc.Item)) return FString::Printf(TEXT("You have not found a %s to forge one after"), *Rc.Item.ToString().ToLower());
 	}
 	// (the list of 2026-11-10: healing and mana potions are brewed only by the heroes named (the Mage and the Martial Artist))
-	if (PotionBrewers.Num() > 0 && Ix >= 0 && (Items[Ix].Kind == ERDItemKind::Healing || Items[Ix].Kind == ERDItemKind::Mana) && !PotionBrewers.Contains(CurrentHero))
+	// (the caves' draughts and linings heal nothing: a buff's vehicle, not a healing potion; the rule is for those (PR #117's review))
+	if (PotionBrewers.Num() > 0 && Ix >= 0 && (Items[Ix].Kind == ERDItemKind::Healing || Items[Ix].Kind == ERDItemKind::Mana) && !PotionBrewers.Contains(CurrentHero)
+		&& !(Items[Ix].Kind == ERDItemKind::Healing && Items[Ix].Amount <= 0.f && CaveItems16.Contains(Items[Ix].Name)))
 	{
 		// (who brews, by their heroes' titles, from the list itself (PR #38's review); one helper with the forge's (PR #40's))
 		return FString::Printf(TEXT("Only %s brew the %s"), *HeroesInWords(PotionBrewers), *Rc.Item.ToString().ToLower());

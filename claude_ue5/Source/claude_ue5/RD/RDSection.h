@@ -764,6 +764,11 @@ private:
 	TMap<TObjectPtr<UStaticMesh>, TObjectPtr<UInstancedStaticMeshComponent>> CaveDressIsm16;
 	TMap<FString, int32> CaveDressLaid16;
 	TArray<TArray<FIntPoint>> CaveRoomTiles16;
+	/** phase 10: the veins and growths of the set's kit rooms, after the dressing */
+	void CaveNodesSet16();
+public:
+	TArray<FString> CaveNodeLines16;
+private:
 	void CaveTorch16(const FTransform& At);
 	TArray<FString> CaveDressLines16;
 	int32 CaveContainers16 = 0;

@@ -659,6 +659,12 @@ public:
 	bool MapWheel15() const;
 	/** the list of 2026-11-20 (item 17): the torch or ankh held lit burns down (RDList15d.cpp) */
 	void TickLightBurn15(float Dt);
+	/** the list of 2026-11-22's caves (phase 10): the strongest effect of a buff's kind on her (0: none); the darksight's light on her */
+	float GetEffectMax16(ERDItemKind K) const;
+	void TickDarksight16();
+	UPROPERTY(Transient) TObjectPtr<class UPointLightComponent> DarkLight16 = nullptr;
+	/** a test's: the darksight's light's reach (cm; 0: none), the poison guarded share, the torch's burn rate */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") FString GetCaveBuffs16() const;
 	/** seconds of burning left on a torch or ankh (its durability; -1 it does not burn) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") float GetLightLeft15(FName Item) const;
 	/** the one rule (PR #97's review: it was written out four times): an item that burns down (a torch or the ankh, bLightBurn15,

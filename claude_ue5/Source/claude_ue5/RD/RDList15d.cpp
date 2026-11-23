@@ -72,7 +72,8 @@ void URDCombatComponent::TickLightBurn15(float Dt)
 	const int32 Ix = Generator->FindItem(TorchItem);
 	if (!IsBurningLight15(Ix)) return;
 	float& W = ArmourWear.FindOrAdd(TorchItem, Generator->Items[Ix].Durability);
-	W = FMath::Max(0.f, W - Dt);
+	// (the list of 2026-11-22's caves: blind-fish oil, it burns 1 + its Amount times as long)
+	W = FMath::Max(0.f, W - Dt / (1.f + GetEffectMax16(ERDItemKind::LampOil)));
 	if (W > 0.f) return;
 	// (burned down. One of several (a stack of torches shares this timer, PR #97's review) is used up and the next lit whole; the
 	// last stays, burned out, until a repair item restores it)
