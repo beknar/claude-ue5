@@ -2916,45 +2916,24 @@ def step_save():
 # ------------------------------------------------------------------------------------------------ the list of 2026-11-04
 SHOT_DIR = SHOTS
 def png_stats(path, box):
-    """mean and standard deviation of the luma (0-255) of a part of a PNG (zlib only: the editor's Python has no image library)"""
-    import zlib, struct
-    data = open(path, "rb").read(); pos = 8; w = h = 0; ct = 6; idat = b""
-    while pos + 8 <= len(data):
-        ln, typ = struct.unpack(">I4s", data[pos:pos + 8]); body = data[pos + 8:pos + 8 + ln]; pos += 12 + ln
-        if typ == b"IHDR": w, h, bd, ct = struct.unpack(">IIBB", body[:10])
-        elif typ == b"IDAT": idat += body
-        elif typ == b"IEND": break
-    bpp = 4 if ct == 6 else 3; raw = zlib.decompress(idat); stride = w * bpp
-    prev = bytearray(stride); x0, y0, x1, y1 = int(box[0] * w), int(box[1] * h), int(box[2] * w), int(box[3] * h)
-    vals = []; i = 0
-    for y in range(h):
-        f = raw[i]; line = bytearray(raw[i + 1:i + 1 + stride]); i += 1 + stride
-        for x in range(stride):
-            a = line[x - bpp] if x >= bpp else 0; b = prev[x]; c = prev[x - bpp] if x >= bpp else 0
-            if f == 1: line[x] = (line[x] + a) & 255
-            elif f == 2: line[x] = (line[x] + b) & 255
-            elif f == 3: line[x] = (line[x] + (a + b) // 2) & 255
-            elif f == 4:
-                p_ = a + b - c; pa, pb, pc = abs(p_ - a), abs(p_ - b), abs(p_ - c)
-                line[x] = (line[x] + (a if pa <= pb and pa <= pc else b if pb <= pc else c)) & 255
-        prev = line
-        if y0 <= y < y1 and y % 4 == 0:
-            for x in range(x0, x1, 4):
-                o = x * bpp; vals.append(0.2126 * line[o] + 0.7152 * line[o + 1] + 0.0722 * line[o + 2])
-    m = sum(vals) / max(len(vals), 1)
-    return m, (sum((v - m) ** 2 for v in vals) / max(len(vals), 1)) ** 0.5
-def rdpng():
-    """rd_png, the tests' shared PNG reader (884's too), loaded fresh each run"""
+    """mean and standard deviation of the luma (0-255) of a part of a PNG (rd_testkit's)"""
+    return kit().stats(path, box, 4)
+def _shared(name):
+    """a shared module of the tests and stages (pipeline/unreal), loaded fresh once a run"""
     import importlib, sys as _s
     d = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "..", "pipeline", "unreal")
     if d not in _s.path: _s.path.insert(0, d)
-    import rd_png
-    return importlib.reload(rd_png)
+    if name not in _SHARED: _SHARED[name] = importlib.reload(importlib.import_module(name))
+    return _SHARED[name]
+_SHARED = {}
+def kit():
+    """rd_testkit: the PNG reader and the frame counter 884 shares"""
+    return _shared("rd_testkit")
 
 
 def png_grid(path, box, nx, ny):
-    """the mean luma of each of nx x ny cells over a part of a PNG (one decoding: rd_png's)"""
-    return rdpng().grid(path, box, nx, ny, 2)
+    """the mean luma of each of nx x ny cells over a part of a PNG (one decoding: rd_testkit's)"""
+    return kit().grid(path, box, nx, ny, 2)
 def sky_edge(path):
     """the sky's sharpest change from one strip to the next down a picture of the horizon (the upper 42 %), taken where three
     columns in four agree (an arc's edge spans the picture; a tree or a blade of grass does not)"""
@@ -8322,27 +8301,6 @@ STEPS["lod16"] = step_lod16
 
 
 # ================================================================================================ the list of 2026-11-22's fourth phase
-def nanite_fps16(sec=8.0):
-    """the frames a second over sec of real time"""
-    n = 0; t0 = time.time()
-    while time.time() - t0 < sec: yield; n += 1
-    return round(n / (time.time() - t0), 1)
-
-
-def blend_shown16(m):
-    """the blend mode a material is drawn with: an instance's override (up its parents) before its base's"""
-    x = m
-    while isinstance(x, unreal.MaterialInstance):
-        try:
-            o = x.get_editor_property("base_property_overrides")
-            if o.get_editor_property("override_blend_mode"): return o.get_editor_property("blend_mode")
-        except Exception:
-            pass
-        x = x.get_editor_property("parent")
-    bm = m.get_base_material()
-    return bm.get_editor_property("blend_mode") if bm else unreal.BlendMode.BLEND_OPAQUE
-
-
 def step_nanite16():
     """Nanite foliage in the wilds (944 nanite_wild): every biome mesh's Nanite state and shape preservation, by kind; the trees,
     bushes, grass, flowers, reeds and crops all Nanite and voxelised, none with a see-through material Nanite. In three biomes (the
@@ -8353,7 +8311,18 @@ def step_nanite16():
     Ok: every plant kind's meshes Nanite and voxelised, no see-through mesh Nanite, every Nanite mesh's base materials with the Nanite
     usage saved (and the Voxels usage for a voxelised one), the three biomes measured with both pictures"""
     g = G["gen"]; res = {"biomes": {}}; quiet(True); w = UES.get_game_world(); hour0 = g.get_town_hour()
-    plants = ("tree", "bush", "grass", "flower", "reed", "crop")
+    import io, re
+    plants = ("tree", "bush", "grass", "flower", "reed", "crop"); rn = _shared("rd_nanite")
+    # (a usage the editor had to set as the map loaded is one not saved: the editor sets it in memory and the loaded flag reads true,
+    #  so the flags alone cannot tell; this session's log names each such material (PR #114's second review))
+    unsaved = {}
+    try:
+        for ln in io.open(os.path.join(unreal.Paths.project_log_dir(), "claude_ue5.log"), encoding="utf-8", errors="replace"):
+            if "needed to set usage flag" in ln:
+                mm = re.search(r"Material (\S+) needed to set usage flag (\w+)", ln)
+                if mm: unsaved.setdefault(mm.group(1), set()).add(mm.group(2))
+    except Exception as e_:
+        res["log_error"] = str(e_)
     try:
         kinds, seen = {}, set()
         for bm in g.get_editor_property("wild_biomes"):
@@ -8370,16 +8339,17 @@ def step_nanite16():
                     if ns.enabled and ns.get_editor_property("shape_preservation") == unreal.NaniteShapePreservation.VOXELIZE: d["voxel"] += 1
                 except Exception: pass
                 mats = [s.get_editor_property("material_interface") for s in m.get_editor_property("static_materials")] + [x for x in f.get_editor_property("materials") if x]
-                if ns.enabled and any(x and blend_shown16(x) not in (unreal.BlendMode.BLEND_OPAQUE, unreal.BlendMode.BLEND_MASKED) for x in mats): d["see_through_nanite"] += 1
+                if ns.enabled and rn.see_through(mats): d["see_through_nanite"] += 1
                 # (a base material without the usage its mesh needs is drawn in the engine's default material, the grey checker:
                 #  the autumn trees with Nanite foliage on before 869 saved the Voxels usage, 2026-11-23; read the saved flags)
-                vox = False
-                try: vox = ns.enabled and ns.get_editor_property("shape_preservation") == unreal.NaniteShapePreservation.VOXELIZE
-                except Exception: pass
+                vox = bool(rn.is_voxel(m))
                 for x in mats:
                     bb = x.get_base_material() if x else None
-                    if ns.enabled and bb and (not bb.get_editor_property("used_with_nanite") or (vox and not bb.get_editor_property("used_with_voxels"))):
-                        d["usage_missing"] += 1; res.setdefault("usage_missing", []).append(bb.get_path_name()); break
+                    if not (ns.enabled and bb): continue
+                    flags = unsaved.get(x.get_path_name(), set()) | unsaved.get(bb.get_path_name(), set())
+                    if (not bb.get_editor_property("used_with_nanite") or (vox and not bb.get_editor_property("used_with_voxels"))
+                            or "Nanite" in flags or (vox and "Voxels" in flags)):
+                        d["usage_missing"] += 1; res.setdefault("usage_missing", []).append(x.get_path_name()); break
         res["kinds"] = kinds
         g.set_town_hour(12.0)
         for bn in ("temperate autumn forests", "pine forests", "grasslands"):
@@ -8388,17 +8358,17 @@ def step_nanite16():
             g = G["gen"]; g.wild_drop_all(); g.wild_put_her(pt[0], pt[1]); yield from wait_chunks(40, 60); ground_put(*pt); yield from rwait(4.0)
             G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4, yaw=30.0)); G["pawn"].set_actor_hidden_in_game(True); yield from rwait(2.0)
             r = {"fps_on_each": []}
-            for k in range(3): r["fps_on_each"].append((yield from nanite_fps16()))
+            for k in range(3): r["fps_on_each"].append((yield from kit().frames(8.0))["fps"])
             r["fps_on"] = sorted(r["fps_on_each"])[1]
             tag = "nanite16_" + bn.replace(" ", "_")
             p_on = yield from shot_wait13(tag + "_on", "1280x720")
             unreal.SystemLibrary.execute_console_command(w, "r.Nanite 0"); yield from rwait(3.0)
             p_off = yield from shot_wait13(tag + "_off", "1280x720")
-            r["fps_off"] = yield from nanite_fps16()
+            r["fps_off"] = (yield from kit().frames(8.0))["fps"]
             unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1"); yield from rwait(2.0)
             G["pawn"].set_actor_hidden_in_game(False)
             r["pic_on"] = os.path.basename(p_on) if p_on else None; r["pic_off"] = os.path.basename(p_off) if p_off else None
-            if p_on and p_off: r["luma_diff"] = rdpng().luma_diff(p_on, p_off)
+            if p_on and p_off: r["luma_diff"] = kit().luma_diff(p_on, p_off)
             res["biomes"][bn] = r
     except Exception as e_:
         res["error"] = str(e_)

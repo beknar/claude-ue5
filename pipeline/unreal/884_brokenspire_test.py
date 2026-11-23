@@ -5677,12 +5677,19 @@ def town_lod16():
             "bands": [int(x) for x in f[5:10]], "dome": int(f[10])}
 
 
+def _shared(name):
+    """a shared module of the tests and stages (pipeline/unreal), loaded fresh once a run"""
+    import importlib, sys as _s
+    d = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "..", "pipeline", "unreal")
+    if d not in _s.path: _s.path.insert(0, d)
+    if name not in _SHARED: _SHARED[name] = importlib.reload(importlib.import_module(name))
+    return _SHARED[name]
+_SHARED = {}
+def kit():
+    """rd_testkit: the PNG reader and the frame counter 888 shares"""
+    return _shared("rd_testkit")
 def frames16(sec=10.0):
-    n = 0; t0 = time.time(); last = t0; dts = []
-    while time.time() - t0 < sec:
-        yield; t_ = time.time(); dts.append((t_ - last) * 1000.0); last = t_; n += 1
-    dts = sorted(dts[3:]) or [0.0]
-    return {"fps": round(n / (time.time() - t0), 1), "p95_ms": round(dts[min(len(dts) - 1, int(len(dts) * 0.95))], 1)}
+    return (yield from kit().frames(sec))
 
 
 def step_dist16():
@@ -5865,15 +5872,6 @@ STEPS.update({"dist16": step_dist16, "interior16": step_interior16})
 
 
 # ================================================================================================ the list of 2026-11-22's fifth phase
-def rdpng():
-    """rd_png, the tests' shared PNG reader (888's too), loaded fresh each run"""
-    import importlib, sys as _s
-    d = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "..", "pipeline", "unreal")
-    if d not in _s.path: _s.path.insert(0, d)
-    import rd_png
-    return importlib.reload(rd_png)
-
-
 def shot_file16(name, sec=12.0):
     """a picture taken and waited for on disk; its path or None"""
     fp = os.path.join(SHOTS, f"bs_{TAG}_{name}.png")
@@ -5928,7 +5926,7 @@ def step_nanite16():
             r["fps_off"] = (yield from frames16(6.0))["fps"]
             unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1"); yield from rwait(2.0)
             G["pawn"].set_actor_hidden_in_game(False)
-            if p_on and p_off: r["luma_diff"] = rdpng().luma_diff(p_on, p_off)
+            if p_on and p_off: r["luma_diff"] = kit().luma_diff(p_on, p_off)
     except Exception as e_:
         res["error"] = str(e_)
     finally:
