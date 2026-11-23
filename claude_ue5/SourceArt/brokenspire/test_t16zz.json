@@ -1,0 +1,97 @@
+{
+ "tag": "t16zz",
+ "plan": [
+  "nanite16"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "nanite16",
+   "ok": true,
+   "cities": {
+    "Brokenspire": {
+     "fps_on": 22.2,
+     "on_each": [
+      21.5,
+      22.2,
+      22.3
+     ],
+     "fps_off": 1.0,
+     "luma_diff": 0.29
+    },
+    "Vel Morrath": {
+     "fps_on": 22.4,
+     "on_each": [
+      16.1,
+      22.4,
+      22.9
+     ],
+     "fps_off": 1.2,
+     "luma_diff": 3.86
+    },
+    "Ashenreach": {
+     "fps_on": 22.4,
+     "on_each": [
+      19.9,
+      22.9,
+      22.4
+     ],
+     "fps_off": 1.1,
+     "luma_diff": 0.77
+    },
+    "Graymourne": {
+     "fps_on": 5.7,
+     "on_each": [
+      5.6,
+      5.7,
+      5.9
+     ],
+     "fps_off": 0.5,
+     "luma_diff": 0.98
+    },
+    "Kethrys Spire": {
+     "fps_on": 21.2,
+     "on_each": [
+      21.7,
+      21.2,
+      20.9
+     ],
+     "fps_off": 0.8,
+     "luma_diff": 1.98
+    },
+    "Heaven": {
+     "fps_on": 18.5,
+     "on_each": [
+      17.7,
+      18.5,
+      19.8
+     ],
+     "fps_off": 13.5,
+     "luma_diff": 1.54
+    }
+   },
+   "pieces": {
+    "meshes": 340,
+    "nanite": 331
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_t16zz_nanite16_Brokenspire_on.png",
+  "bs_t16zz_nanite16_Brokenspire_off.png",
+  "bs_t16zz_nanite16_Vel_Morrath_on.png",
+  "bs_t16zz_nanite16_Vel_Morrath_off.png",
+  "bs_t16zz_nanite16_Ashenreach_on.png",
+  "bs_t16zz_nanite16_Ashenreach_off.png",
+  "bs_t16zz_nanite16_Graymourne_on.png",
+  "bs_t16zz_nanite16_Graymourne_off.png",
+  "bs_t16zz_nanite16_Kethrys_Spire_on.png",
+  "bs_t16zz_nanite16_Kethrys_Spire_off.png",
+  "bs_t16zz_nanite16_Heaven_on.png",
+  "bs_t16zz_nanite16_Heaven_off.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

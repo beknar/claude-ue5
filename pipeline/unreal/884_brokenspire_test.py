@@ -5677,12 +5677,19 @@ def town_lod16():
             "bands": [int(x) for x in f[5:10]], "dome": int(f[10])}
 
 
+def _shared(name):
+    """a shared module of the tests and stages (pipeline/unreal), loaded fresh once a run"""
+    import importlib, sys as _s
+    d = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "..", "pipeline", "unreal")
+    if d not in _s.path: _s.path.insert(0, d)
+    if name not in _SHARED: _SHARED[name] = importlib.reload(importlib.import_module(name))
+    return _SHARED[name]
+_SHARED = {}
+def kit():
+    """rd_testkit: the PNG reader and the frame counter 888 shares"""
+    return _shared("rd_testkit")
 def frames16(sec=10.0):
-    n = 0; t0 = time.time(); last = t0; dts = []
-    while time.time() - t0 < sec:
-        yield; t_ = time.time(); dts.append((t_ - last) * 1000.0); last = t_; n += 1
-    dts = sorted(dts[3:]) or [0.0]
-    return {"fps": round(n / (time.time() - t0), 1), "p95_ms": round(dts[min(len(dts) - 1, int(len(dts) * 0.95))], 1)}
+    return (yield from kit().frames(sec))
 
 
 def step_dist16():
@@ -5862,6 +5869,79 @@ def step_interior16():
 
 
 STEPS.update({"dist16": step_dist16, "interior16": step_interior16})
+
+
+# ================================================================================================ the list of 2026-11-22's fifth phase
+def shot_file16(name, sec=12.0):
+    """a picture taken and waited for on disk; its path or None"""
+    fp = os.path.join(SHOTS, f"bs_{TAG}_{name}.png")
+    if os.path.exists(fp): os.remove(fp)
+    shot(name, "1280x720"); t0 = time.time(); last = -1
+    while time.time() - t0 < sec:
+        yield from rwait(0.4)
+        if os.path.exists(fp):
+            n = os.path.getsize(fp)
+            if n > 0 and n == last: return fp
+            last = n
+    return None
+
+
+def step_nanite16():
+    """Nanite in the cities (944 nanite_town): the share of the town's pieces' meshes that are Nanite. Two passes over the six cities'
+    squares at noon: first the frame rate with Nanite in each (three turns), nothing switched in the whole pass; then in each a picture
+    with Nanite and one with r.Nanite 0 (the meshes' fallbacks) from the same view (nothing missing or black: mean luma within 12), and
+    the fallbacks' frame rate once. The frame rates are recorded, not judged: in the editor r.Nanite 0 ran every city at about 1 a
+    second (t16t, 2026-11-23) and each switch slowed the turns after it (Heaven's 19, 11, 6), so the fallbacks are not the cities before
+    the change: that is the packaged game's MID run, at BEFORE's places. Ok: most of the pieces' meshes Nanite, every city's two
+    pictures within 12"""
+    g = G["gen"]; res = {"cities": {}}; quiet(True); w = UES.get_game_world(); hour0 = g.get_town_hour()
+    names = ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne", "Kethrys Spire", "Heaven")
+    def at_square(name):
+        yield from find_town(name)
+        sq = place("square")
+        if sq: put(sq, yaw=0.0)
+        yield from rwait(8.0)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=0.0)); G["pawn"].set_actor_hidden_in_game(True); yield from rwait(2.0)
+    try:
+        meshes, nan = set(), set()
+        for p in g.get_editor_property("pieces").values():
+            for m in (p.mesh, p.moving, p.moving2):
+                if not m: continue
+                meshes.add(m.get_path_name())
+                if m.get_editor_property("nanite_settings").enabled: nan.add(m.get_path_name())
+        res["pieces"] = {"meshes": len(meshes), "nanite": len(nan)}
+        g.set_town_hour(12.0)
+        for name in names:
+            yield from at_square(name)
+            on_ = []
+            for k in range(3): on_.append((yield from frames16(6.0))["fps"])
+            res["cities"][name] = {"fps_on": sorted(on_)[1], "on_each": on_}
+            G["pawn"].set_actor_hidden_in_game(False)
+        for name in names:
+            yield from at_square(name)
+            r = res["cities"][name]; tag = f"nanite16_{name.replace(' ', '_')}"
+            p_on = yield from shot_file16(tag + "_on")
+            unreal.SystemLibrary.execute_console_command(w, "r.Nanite 0"); yield from rwait(3.0)
+            p_off = yield from shot_file16(tag + "_off", 60.0)
+            r["fps_off"] = (yield from frames16(6.0))["fps"]
+            unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1"); yield from rwait(2.0)
+            G["pawn"].set_actor_hidden_in_game(False)
+            if p_on and p_off: r["luma_diff"] = kit().luma_diff(p_on, p_off)
+    except Exception as e_:
+        res["error"] = str(e_)
+    finally:
+        try:
+            unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1"); G["pawn"].set_actor_hidden_in_game(False); G["gen"].set_town_hour(hour0)
+        except Exception: pass
+        quiet(False)
+    cs = list(res["cities"].values())
+    pc = res.get("pieces", {})
+    ok = ("error" not in res and len(cs) == 6 and pc.get("nanite", 0) * 2 > pc.get("meshes", 1)
+          and all(c.get("luma_diff", 99) < 12.0 for c in cs))
+    step_result("nanite16", ok, **res)
+
+
+STEPS.update({"nanite16": step_nanite16})
 
 
 def run():

@@ -1,0 +1,135 @@
+{
+ "tag": "t16z",
+ "plan": [
+  "nanite16"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "nanite16",
+   "ok": true,
+   "biomes": {
+    "temperate autumn forests": {
+     "fps_on_each": [
+      26.7,
+      26.9,
+      26.6
+     ],
+     "fps_on": 26.7,
+     "fps_off": 31.9,
+     "pic_on": "wd_t16z_nanite16_temperate_autumn_forests_on.png",
+     "pic_off": "wd_t16z_nanite16_temperate_autumn_forests_off.png",
+     "luma_diff": 31.04
+    },
+    "pine forests": {
+     "fps_on_each": [
+      31.7,
+      31.5,
+      32.5
+     ],
+     "fps_on": 31.7,
+     "fps_off": 33.2,
+     "pic_on": "wd_t16z_nanite16_pine_forests_on.png",
+     "pic_off": "wd_t16z_nanite16_pine_forests_off.png",
+     "luma_diff": 10.67
+    },
+    "grasslands": {
+     "fps_on_each": [
+      30.5,
+      29.9,
+      30.4
+     ],
+     "fps_on": 30.4,
+     "fps_off": 32.8,
+     "pic_on": "wd_t16z_nanite16_grasslands_on.png",
+     "pic_off": "wd_t16z_nanite16_grasslands_off.png",
+     "luma_diff": 0.89
+    }
+   },
+   "kinds": {
+    "grass": {
+     "meshes": 19,
+     "nanite": 19,
+     "voxel": 19,
+     "see_through_nanite": 0,
+     "usage_missing": 0
+    },
+    "flower": {
+     "meshes": 5,
+     "nanite": 5,
+     "voxel": 5,
+     "see_through_nanite": 0,
+     "usage_missing": 0
+    },
+    "bush": {
+     "meshes": 12,
+     "nanite": 12,
+     "voxel": 12,
+     "see_through_nanite": 0,
+     "usage_missing": 0
+    },
+    "tree": {
+     "meshes": 35,
+     "nanite": 35,
+     "voxel": 35,
+     "see_through_nanite": 0,
+     "usage_missing": 0
+    },
+    "rock": {
+     "meshes": 19,
+     "nanite": 19,
+     "voxel": 0,
+     "see_through_nanite": 0,
+     "usage_missing": 0
+    },
+    "log": {
+     "meshes": 8,
+     "nanite": 8,
+     "voxel": 0,
+     "see_through_nanite": 0,
+     "usage_missing": 0
+    },
+    "litter": {
+     "meshes": 11,
+     "nanite": 11,
+     "voxel": 0,
+     "see_through_nanite": 0,
+     "usage_missing": 0
+    },
+    "crop": {
+     "meshes": 29,
+     "nanite": 29,
+     "voxel": 29,
+     "see_through_nanite": 0,
+     "usage_missing": 0
+    },
+    "reed": {
+     "meshes": 6,
+     "nanite": 6,
+     "voxel": 6,
+     "see_through_nanite": 0,
+     "usage_missing": 0
+    },
+    "ice": {
+     "meshes": 3,
+     "nanite": 3,
+     "voxel": 0,
+     "see_through_nanite": 0,
+     "usage_missing": 0
+    }
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "wd_t16z_nanite16_temperate_autumn_forests_on.png",
+  "wd_t16z_nanite16_temperate_autumn_forests_off.png",
+  "wd_t16z_nanite16_pine_forests_on.png",
+  "wd_t16z_nanite16_pine_forests_off.png",
+  "wd_t16z_nanite16_grasslands_on.png",
+  "wd_t16z_nanite16_grasslands_off.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

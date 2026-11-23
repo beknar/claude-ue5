@@ -44,14 +44,23 @@ def bases_of(mesh, mats=None):
     return out
 need = {}          # base material path -> (material, set of usage properties it needs)
 def want(b, prop): need.setdefault(b.get_path_name(), (b, set()))[1].add(prop)
+def voxels(mesh):
+    """a Nanite mesh kept as voxels far off (Nanite foliage, 944 nanite_wild): its materials need the Voxels usage too (the editor
+    set it in memory as brokenspire loaded: "needed to set usage flag Voxels", 2026-11-23; a package would draw them wrong)"""
+    ns = mesh.get_editor_property("nanite_settings")
+    try:
+        return ns.enabled and ns.get_editor_property("shape_preservation") == unreal.NaniteShapePreservation.VOXELIZE
+    except Exception:
+        return False
 def use(mesh, mats=None):
     """a mesh drawn through instanced meshes: its materials' bases get that usage, and the Nanite usage if the mesh is Nanite
     (the packaged town drew two of the wilderness's plants, Medieval_Lake_Village's MI_Leaves11 and MI_RiverBush01, in the
     default material: "missing usage flag Nanite", the Development package of 2026-11-06)"""
-    nan = mesh.get_editor_property("nanite_settings").enabled
+    nan = mesh.get_editor_property("nanite_settings").enabled; vox = voxels(mesh)
     for b in bases_of(mesh, mats):
         want(b, "used_with_instanced_static_meshes")
         if nan: want(b, "used_with_nanite")
+        if vox: want(b, "used_with_voxels")
 meshes, overrides, nwild, nmenu = set(), 0, 0, 0
 AR = unreal.AssetRegistryHelpers.get_asset_registry()
 DEP = unreal.AssetRegistryDependencyOptions(include_soft_package_references=True, include_hard_package_references=True, include_searchable_names=False,
@@ -83,7 +92,9 @@ def scan_refs(m_):
             nref["static"] += 1
             if m.get_editor_property("nanite_settings").enabled:
                 nref["nanite"] += 1
-                for b in bases_of(m): want(b, "used_with_nanite")
+                for b in bases_of(m):
+                    want(b, "used_with_nanite")
+                    if voxels(m): want(b, "used_with_voxels")
         elif isinstance(m, unreal.SkeletalMesh):
             nref["skeletal"] += 1
             cloth = len(m.get_editor_property("mesh_clothing_assets")) > 0
