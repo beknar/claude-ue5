@@ -1,0 +1,173 @@
+{
+ "tag": "t16r",
+ "plan": [
+  "loading16",
+  "lod16"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "loading16",
+   "ok": true,
+   "trips": [
+    {
+     "to": "Ashenreach",
+     "ok": true,
+     "waited_s": 5.3,
+     "covers": [
+      "level+travel|22.18|5.10|streamed|0"
+     ],
+     "luma_diff": 2.73,
+     "moved_m": 0.3
+    },
+    {
+     "to": "Brokenspire",
+     "ok": true,
+     "waited_s": 3.3,
+     "covers": [
+      "travel|6.46|2.91|streamed|0"
+     ],
+     "luma_diff": 1.21,
+     "moved_m": 0.0
+    },
+    {
+     "to": "Graymourne",
+     "ok": true,
+     "waited_s": 4.04,
+     "covers": [
+      "travel|7.44|3.67|streamed|0"
+     ],
+     "luma_diff": 7.59,
+     "moved_m": 24.0
+    },
+    {
+     "to": "Kethrys Spire",
+     "ok": true,
+     "waited_s": 5.13,
+     "covers": [
+      "travel|8.36|4.74|streamed|0"
+     ],
+     "luma_diff": 1.59,
+     "moved_m": 0.0
+    },
+    {
+     "to": "Brokenspire",
+     "ok": true,
+     "waited_s": 7.49,
+     "covers": [
+      "travel|10.66|7.10|streamed|0"
+     ],
+     "luma_diff": 0.37,
+     "moved_m": 0.0
+    }
+   ],
+   "compared": 4,
+   "wanting_at_lift": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "step": "lod16",
+   "ok": true,
+   "settled_on": true,
+   "on": {
+    "regrids": 0,
+    "in_flight": 0,
+    "swap_ms_max": 0.0,
+    "on": true,
+    "at_2m": 9,
+    "at_4m": 11,
+    "at_8m": 44,
+    "with_collision": 64,
+    "triangles": 484488
+   },
+   "seams": {
+    "pairs": 27,
+    "points": 13527,
+    "gap_cm": 56.4,
+    "past_skirt": 0,
+    "departure_cm": 57.0
+   },
+   "feet": {
+    "n": 2460,
+    "above_max_cm": 145.3,
+    "above_p95_cm": 21.0,
+    "below_max_cm": 162.0
+   },
+   "movers": {
+    "checked": 194,
+    "off": 0,
+    "names": ""
+   },
+   "pic_on": "E:\\code\\claude-ue5\\claude_ue5\\Saved\\Screenshots\\WindowsEditor\\wd_t16r_lod16_far_on.png",
+   "run_on": {
+    "m": 316,
+    "frames": 2608,
+    "p50": 33.6,
+    "p95": 42.2,
+    "p99": 57.7,
+    "max": 84.5
+   },
+   "on_after_run": {
+    "regrids": 13,
+    "in_flight": 0,
+    "swap_ms_max": 0.8,
+    "on": true,
+    "at_2m": 10,
+    "at_4m": 14,
+    "at_8m": 47,
+    "with_collision": 71,
+    "triangles": 548976
+   },
+   "movers_after_run": {
+    "checked": 232,
+    "off": 0,
+    "names": ""
+   },
+   "settled_off": true,
+   "off": {
+    "regrids": 13,
+    "in_flight": 0,
+    "swap_ms_max": 0.8,
+    "on": false,
+    "at_2m": 64,
+    "at_4m": 0,
+    "at_8m": 0,
+    "with_collision": 64,
+    "triangles": 2064000
+   },
+   "pic_off": "E:\\code\\claude-ue5\\claude_ue5\\Saved\\Screenshots\\WindowsEditor\\wd_t16r_lod16_far_off.png",
+   "run_off": {
+    "m": 317,
+    "frames": 2614,
+    "p50": 33.6,
+    "p95": 42.6,
+    "p99": 54.4,
+    "max": 91.4
+   },
+   "pictures_luma_diff": 6.51
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log, Content Browser",
+ "shots": [
+  "wd_t16r_loading16_0_lift.png",
+  "wd_t16r_loading16_0_late.png",
+  "wd_t16r_loading16_1_lift.png",
+  "wd_t16r_loading16_1_late.png",
+  "wd_t16r_loading16_2_lift.png",
+  "wd_t16r_loading16_2_late.png",
+  "wd_t16r_loading16_3_lift.png",
+  "wd_t16r_loading16_3_late.png",
+  "wd_t16r_loading16_4_lift.png",
+  "wd_t16r_loading16_4_late.png",
+  "wd_t16r_lod16_far_on.png",
+  "wd_t16r_lod16_far_off.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

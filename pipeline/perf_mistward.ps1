@@ -37,7 +37,12 @@ else {
     for ($i = 0; $i -lt $saveDirs.Count; $i++) { if (Test-Path $saveDirs[$i]) { Copy-Item $saveDirs[$i] (Join-Path $savesKept "$i") -Recurse } }
     for ($i = 0; $i -lt $gus.Count; $i++) { if (Test-Path $gus[$i]) { Copy-Item $gus[$i] (Join-Path $savesKept "gus$i.ini") } else { Set-Content -Path (Join-Path $savesKept "gus$i.none") -Value "" } }
 }
-for ($i = 0; $i -lt $gus.Count; $i++) { $k = Join-Path $savesKept "gus$i.ini"; $kept[$gus[$i]] = if (Test-Path $k) { , [byte[]][IO.File]::ReadAllBytes($k) } else { $null } }
+# (a kept folder the older script left (saves only, no gus<i> file): the settings now in place are the player's (PR #112's review: read as
+#  none, the player's settings file would have been deleted at the end))
+for ($i = 0; $i -lt $gus.Count; $i++) {
+    $k = Join-Path $savesKept "gus$i.ini"; $none = Join-Path $savesKept "gus$i.none"
+    $kept[$gus[$i]] = if (Test-Path $k) { , [byte[]][IO.File]::ReadAllBytes($k) } elseif (Test-Path $none) { $null } elseif (Test-Path $gus[$i]) { , [byte[]][IO.File]::ReadAllBytes($gus[$i]) } else { $null }
+}
 $bin = (Join-Path $Out "Windows\claude_ue5\Binaries\Win64").ToLower()
 $files = @()
 $bad = 0

@@ -639,13 +639,12 @@ public:
 	UPROPERTY(BlueprintReadOnly) bool bCollisionOn = false;
 	/** still being made over frames (the generator's WildBuilding): its near plants wait */
 	UPROPERTY(BlueprintReadOnly) bool bMaking = false;
-	/** the ground's collision (hidden, BlockAll); cooked on a worker unless she was running fast when it was asked; since the list of
-	 *  2026-11-22 only within WildCollisionM of her (none farther: nothing walks out there that needs it, see RDList16c.cpp) */
+	/** the ground's collision (hidden, BlockAll, the whole 2 m grid); cooked on a worker unless she was running fast when it was asked */
 	UPROPERTY() TObjectPtr<UProceduralMeshComponent> GroundCollision = nullptr;
 	/** the list of 2026-11-22's third phase: the drawn ground's every-n-th vertex (1, 2, 4), the ticket it was asked at (a ground-only job
 	 *  for an older chunk of the same place is not applied), a ground-only job on its way */
 	UPROPERTY(BlueprintReadOnly) int32 DrawEvery16 = 1;
-	int32 Ticket16 = 0;
+	int32 Ticket16 = 0, RegridSeq16 = 0;
 	bool bRegrid16 = false;
 	/** the list of 2026-11-10: its houses' doors (a leaf on its hinge: F opens and shuts it) and its houses (their insides) */
 	struct FDoor

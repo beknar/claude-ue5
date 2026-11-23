@@ -1,8 +1,8 @@
 // The user's list of 2026-11-22 (docs/improvements16.txt; the plan docs/improvements16_plan.md), its third phase: the wilds' ground in
 // levels of detail. A chunk's drawn ground takes every DrawEvery-th vertex of its 2 m grid by its nearest edge's distance from her (every
 // one within WildLod1M, every second within WildLod2M, every fourth beyond), its edges' skirts covering the slivers where neighbours of
-// two steps meet (RDWildDrawGround16); its collision (the whole 2 m grid) only within WildCollisionM, and at once under her and under
-// any wild monster that stands on a chunk without it. A chunk whose step or collision should change gets a ground-only job on the
+// two steps meet (RDWildDrawGround16); its collision the whole 2 m grid, on every chunk (collision only near her was measured and dropped:
+// the wild monsters stand on most chunks). A chunk whose step or collision should change gets a ground-only job on the
 // workers (the plants, water and places it has are left as they are) and its ground is swapped when the job is done.
 // rd.WildLod 0 draws every chunk at 2 m with its collision, as before (the tests' and the measures' comparison).
 #include "RD/RDDungeonGenerator.h"
@@ -20,7 +20,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogRDList16c, Log, All);
 
 namespace
 {
-	TAutoConsoleVariable<int32> CVarRDWildLod(TEXT("rd.WildLod"), 1, TEXT("The wilds' ground in levels of detail by distance, collision near her only (1), or every chunk at 2 m with collision (0)"));
+	TAutoConsoleVariable<int32> CVarRDWildLod(TEXT("rd.WildLod"), 1, TEXT("The wilds' ground in levels of detail by distance (1), or every chunk drawn at 2 m (0); every chunk keeps its collision either way"));
 }
 
 bool ARDDungeonGenerator::IsWildLod16() const { return CVarRDWildLod.GetValueOnGameThread() != 0; }
@@ -37,7 +37,7 @@ int32 ARDDungeonGenerator::WildDrawEveryFor16(double NearM, int32 Cur) const
 	if (!IsWildLod16()) return 1;
 	auto Want = [this](double D) { return D < WildLod1M16 ? 1 : D < WildLod2M16 ? 2 : 4; };
 	int32 W = Want(NearM);
-	// (finer at once; coarser only 40 m past the ring, or a chunk on the ring would be swapped back and forth)
+	// (finer at once; coarser only 80 m past the ring, or a chunk on the ring would be swapped back and forth)
 	if (Cur > 0 && W > Cur) W = FMath::Max(Cur, Want(NearM - 80.0));
 	return W;
 }
@@ -45,7 +45,7 @@ int32 ARDDungeonGenerator::WildDrawEveryFor16(double NearM, int32 Cur) const
 bool ARDDungeonGenerator::WildCollisionFor16(double NearM, bool bHas) const
 {
 	// (measured in 888 lod16: the wild monsters stand on 52 to 58 of the 64 chunks, so collision near her only saved six chunks' and cost a
-	// ground swap each time one changed: every chunk keeps its collision, as before; WildCollisionM16 is left for a later measure)
+	// ground swap each time one changed: every chunk keeps its collision, as before; TODO.md keeps the idea for a later measure)
 	return true;
 }
 
@@ -54,7 +54,10 @@ void ARDDungeonGenerator::AskWildRegrid16(ARDWildChunk* C, int32 Every, bool bCo
 	if (!C || !Wild.IsValid()) return;
 	TSharedPtr<FRDWChunkData, ESPMode::ThreadSafe> D = MakeShared<FRDWChunkData, ESPMode::ThreadSafe>();
 	D->Coord = C->Coord; D->ChunkM = WildChunkM; D->StepM = WildStepM; D->Ticket = C->Ticket16;
-	D->DrawEvery = Every; D->bCollision = bCollision; D->bGroundOnly = true; D->bSyncCollision = bNow;
+	// (each ask numbered: a slower job asked before a newer one (a put-down's at once) is not applied over it (PR #112's review); the 2 m
+	// collision copied only for a chunk that has none)
+	D->RegridSeq = ++C->RegridSeq16;
+	D->DrawEvery = Every; D->bCollision = bCollision && !C->GroundCollision; D->bGroundOnly = true; D->bSyncCollision = bNow;
 	WildTownHole(*D);
 	C->bRegrid16 = true;
 	++WildRegrids16;
@@ -72,15 +75,14 @@ void ARDDungeonGenerator::ApplyWildRegrid16(FRDWChunkData& D)
 	ARDWildChunk* C = Cp ? Cp->Get() : nullptr;
 	if (!IsValid(C)) return;
 	C->bRegrid16 = false;
-	// (asked for an older chunk of this place: the new one has its own ground)
-	if (C->Ticket16 != D.Ticket || C->bMaking) return;
+	// (asked for an older chunk of this place (the new one has its own ground), or before a newer ask of this chunk)
+	if (C->Ticket16 != D.Ticket || C->bMaking || D.RegridSeq != C->RegridSeq16) return;
 	const double T0 = FPlatformTime::Seconds();
 	C->Ground->CreateMeshSection_LinearColor(0, D.V, D.T, D.N, D.UV0, D.UV1, D.UV2, D.UV3, D.C, D.Tan, false);
 	if (WildGroundMaterial) C->Ground->SetMaterial(0, WildGroundMaterial);
 	C->Triangles = D.T.Num() / 3;
 	C->DrawEvery16 = D.DrawEvery;
 	if (D.bCollision && !C->GroundCollision) MakeWildCollision16(C, D.CV, D.CT, D.bSyncCollision);
-	else if (!D.bCollision && C->GroundCollision) { C->GroundCollision->DestroyComponent(); C->GroundCollision = nullptr; }
 	WildRegridMsMax16 = FMath::Max(WildRegridMsMax16, (FPlatformTime::Seconds() - T0) * 1000.0);
 }
 
@@ -88,7 +90,7 @@ void ARDDungeonGenerator::MakeWildCollision16(ARDWildChunk* C, const TArray<FVec
 {
 	// (she, the monsters, the camera and the traces stand on it as on the ground before: BlockAll, hidden, not in the scene)
 	if (!C || V.Num() == 0) return;
-	UProceduralMeshComponent* G = NewObject<UProceduralMeshComponent>(C, NAME_None);
+	UProceduralMeshComponent* G = NewObject<UProceduralMeshComponent>(C, TEXT("GroundCollision"));          // (by name: 888's skin step finds it so)
 	G->SetupAttachment(C->Ground);
 	G->bUseAsyncCooking = !bSync;
 	G->SetCollisionProfileName(TEXT("BlockAll"));
@@ -100,29 +102,9 @@ void ARDDungeonGenerator::MakeWildCollision16(ARDWildChunk* C, const TArray<FVec
 
 void ARDDungeonGenerator::TickWildLod16(const FVector2D& At)
 {
-	// (under her and the chunks round her: collision now, whatever the jobs (a put-down, a fast ride, a horse at the gallop))
-	const int32 Ic = FMath::FloorToInt(At.X / WildChunkM), Jc = FMath::FloorToInt(At.Y / WildChunkM);
-	for (int32 I = Ic - 1; I <= Ic + 1; ++I)
-		for (int32 J = Jc - 1; J <= Jc + 1; ++J)
-			if (TObjectPtr<ARDWildChunk>* Cp = WildChunks.Find(FIntPoint(I, J)); Cp && IsValid(*Cp) && !(*Cp)->bMaking && !(*Cp)->GroundCollision && !(*Cp)->bRegrid16)
-				AskWildRegrid16(*Cp, FMath::Min((*Cp)->DrawEvery16, WildDrawEveryFor16(WildChunkNearM16(FIntPoint(I, J), At), 0)), true, true);
-	// (once a second: the chunks a wild monster stands on, kept until the next look (PR review of the first test: kept one tick only, a
-	// chunk's collision was asked for and then let go again every second, and the ground was swapped 782 times in a 315 m run))
-	WildLodTimer16 -= FApp::GetDeltaTime();
-	if (WildLodTimer16 <= 0.f)
-	{
-		WildLodTimer16 = 1.f;
-		WildMonsterChunks16.Reset();
-		for (const ARDMonster* Mo : GetMonsters())
-		{
-			if (!IsValid(Mo) || Mo->IsDead()) continue;
-			const FVector L = Mo->GetActorLocation();
-			WildMonsterChunks16.Add(FIntPoint(FMath::FloorToInt(L.X / 100.0 / WildChunkM), FMath::FloorToInt(L.Y / 100.0 / WildChunkM)));
-		}
-	}
-	const TSet<FIntPoint>& Need = WildMonsterChunks16;
-	// (the rest by distance, the nearest first, a few jobs at a time)
-	struct FWant { double D; ARDWildChunk* C; int32 Every; bool bCol; };
+	// (each chunk's step by its distance, the nearest first, a few jobs at a time; every chunk keeps the collision it was made with
+	// (WildCollisionFor16: collision only near her was measured and dropped, PR #112))
+	struct FWant { double D; ARDWildChunk* C; int32 Every; };
 	TArray<FWant> Wants;
 	for (auto& Kv : WildChunks)
 	{
@@ -130,14 +112,13 @@ void ARDDungeonGenerator::TickWildLod16(const FVector2D& At)
 		if (!IsValid(C) || C->bMaking || C->bRegrid16) continue;
 		const double D = WildChunkNearM16(Kv.Key, At);
 		const int32 Ev = WildDrawEveryFor16(D, C->DrawEvery16);
-		const bool bCol = WildCollisionFor16(D, C->GroundCollision != nullptr) || Need.Contains(Kv.Key);
-		if (Ev != C->DrawEvery16 || bCol != (C->GroundCollision != nullptr)) Wants.Add({ Need.Contains(Kv.Key) ? -1.0 : D, C, Ev, bCol });
+		if (Ev != C->DrawEvery16 || !C->GroundCollision) Wants.Add({ D, C, Ev });
 	}
 	Wants.Sort([](const FWant& A, const FWant& B) { return A.D < B.D; });
 	for (const FWant& W : Wants)
 	{
 		if (WildRegridInFlight16 >= WildRegridMax16) break;
-		AskWildRegrid16(W.C, W.Every, W.bCol, false);
+		AskWildRegrid16(W.C, W.Every, true, false);
 	}
 }
 

@@ -46,6 +46,7 @@ struct FRDWChunkData
 	 *  ground-only job (bGroundOnly) computes the ground alone for a chunk standing (its level of detail or its collision changed) */
 	int32 DrawEvery = 1;
 	bool bCollision = true, bGroundOnly = false;
+	int32 RegridSeq = 0;
 	TArray<FVector> CV;
 	TArray<int32> CT;
 };

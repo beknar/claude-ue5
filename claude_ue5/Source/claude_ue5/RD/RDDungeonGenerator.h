@@ -1050,7 +1050,9 @@ public:
 	bool bCover16 = false;
 	FString Cover16Why;
 	double Cover16Start = 0.0, Cover16ReadyAt = -1.0;
-	int32 Cover16Steady = 0;
+	int32 Cover16Steady = 0, Cover16Frames = 0;
+	double Cover16FrameSum = 0.0;
+	float Cover16Health = -1.f;
 	TSharedPtr<class SWidget> Cover16Widget;
 	TArray<FString> Cover16Lines;
 
@@ -4137,11 +4139,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") FString GetWildSeams16() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") FString GetWildFootGaps16() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") FString GetWildMoversOffGround16() const;
-	double WildLod1M16 = 250.0, WildLod2M16 = 500.0, WildCollisionM16 = 500.0;
+	double WildLod1M16 = 250.0, WildLod2M16 = 500.0;
 	int32 WildRegridMax16 = 4, WildRegridInFlight16 = 0, WildRegrids16 = 0;
 	double WildRegridMsMax16 = 0.0;
-	float WildLodTimer16 = 0.f;
-	TSet<FIntPoint> WildMonsterChunks16;
 	TArray<TSharedPtr<struct FRDWChunkData, ESPMode::ThreadSafe>> WildRegridDone16;
 	void WildAutosave(const FString& Why);
 	// ---- the game saved to disk (RDSave.cpp)
