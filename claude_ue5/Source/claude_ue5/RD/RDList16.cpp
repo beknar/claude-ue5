@@ -143,6 +143,12 @@ void ARDDungeonGenerator::TickPerf16(APawn* P)
 	{
 		if (Why) RDPerf16Write(Perf16File, FString::Printf(TEXT("perf|%s|%s|%.0f|skipped|%s"), *Pl.Kind, *Pl.Name, Pl.Hour, Why));
 		++Perf16Index; Perf16Stage = 0; Perf16T = 0.f; Perf16Ready = 0.f;
+		// (a skipped biome's run is skipped too: it would run from the place before (BEFORE's glacial row))
+		if (Why && Pl.Kind == TEXT("biome") && Perf16Places.IsValidIndex(Perf16Index) && Perf16Places[Perf16Index].Kind == TEXT("run"))
+		{
+			RDPerf16Write(Perf16File, FString::Printf(TEXT("perf|run|%s|%.0f|skipped|its biome's stand was skipped"), *Pl.Name, Pl.Hour));
+			++Perf16Index;
+		}
 	};
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	const bool bCity = Pl.Kind == TEXT("square") || Pl.Kind == TEXT("street");

@@ -31,7 +31,7 @@ def read(path):
                 info["done"] = info.get("done", 0) + 1
             elif len(p) >= 6 and p[4] == "skipped":
                 rows.append({"kind": p[1], "name": p[2], "hour": float(p[3]), "skipped": p[5]})
-            elif len(p) >= 17:
+            elif len(p) >= 16:
                 rows.append({"kind": p[1], "name": p[2], "hour": float(p[3]), "fps": float(p[4]), "p95": float(p[5]), "p99": float(p[6]),
                              "game": float(p[7]), "draw": float(p[8]), "rhi": float(p[9]), "gpu": float(p[10]), "frames": int(p[11]),
                              "x": float(p[12]), "y": float(p[13]), "biome": p[14], "run": float(p[15])})
