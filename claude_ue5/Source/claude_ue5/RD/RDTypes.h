@@ -1722,6 +1722,8 @@ struct FRDCaveTunnel16
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> Mesh = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Segment = 1770.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Overlap = 200.f;
+	/** measured by 945 (the mesh's walkable half-width, straight); the tiles take 2.15 m either side of the line whatever it says (wider,
+	 *  the paths hugged the walls' feet on the bends; narrower, a diagonal's tiles touched only at their corners) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HalfWalk = 150.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float FloorZ = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Weight = 1.f;

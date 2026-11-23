@@ -2324,7 +2324,8 @@
    "overlap": 197.7,
    "height_var": 7.8,
    "half_walk": 625.0,
-   "floor_z": 7.3
+   "floor_z": 7.3,
+   "collide": "/Game/RandomDungeon/Caves16/SM_CaveTunnel_Large_C.SM_CaveTunnel_Large_C"
   },
   "medium": {
    "blueprint": "/Game/Hyper/Environment_Building/Cave/Tunnels/BP_Cave_Spline_Medium.BP_Cave_Spline_Medium_C",
@@ -2347,7 +2348,8 @@
    "overlap": 253.3,
    "height_var": 7.8,
    "half_walk": 300.0,
-   "floor_z": -0.3
+   "floor_z": -0.3,
+   "collide": "/Game/RandomDungeon/Caves16/SM_CaveTunnel_medium_C.SM_CaveTunnel_medium_C"
   },
   "small": {
    "blueprint": "/Game/Hyper/Environment_Building/Cave/Tunnels/BP_Cave_Spline_Small.BP_Cave_Spline_Small_C",
@@ -2370,7 +2372,8 @@
    "overlap": 197.2,
    "height_var": 7.8,
    "half_walk": 125.0,
-   "floor_z": 1.6
+   "floor_z": 1.6,
+   "collide": "/Game/RandomDungeon/Caves16/SM_CaveTunnel_Small_C.SM_CaveTunnel_Small_C"
   }
  },
  "cap": {

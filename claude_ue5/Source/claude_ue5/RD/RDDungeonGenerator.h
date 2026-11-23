@@ -2046,10 +2046,12 @@ public:
 	/** a fill light over each room (phase 8's: the kit's torches and god rays come with the dressing) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float CaveRoomLight16 = 3000.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FLinearColor CaveLightColor16 = FLinearColor(0.75f, 0.85f, 1.f);
-	/** a test's: the set's pieces, "room|<kind>|x|y|z|yaw|<tiles>" and "tunnel|<kind>|<from>|<to>|<length cm>|<segments>|x,y,z;x,y,z;..."
-	 *  (the tunnel's centreline every 2 m on its floor) and "cap|x|y|z|yaw" */
+	/** a test's: the set's pieces, "room|<index>|<kind>|x|y|z|yaw|<tiles>", "tunnel|<kind>|<its room index>|<from>|<to>|<length cm>|<pieces>|
+	 *  x,y,z;x,y,z;..." (the tunnel's centreline every 2 m on its floor; from / to a room's index, a portal's -1 - its index) and
+	 *  "cap|x|y|z|yaw" */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetCavePieces16(FIntPoint Section) const;
-	/** a test's: the tiles of a set she can stand on, "x|y|z|room" (world cm, the floor's height; room: the owner, tunnels 1000+) */
+	/** a test's: the tiles of a set she can stand on, "x|y|z|owner" (world cm, the floor's height; the owner: its Rooms index, a
+	 *  tunnel's its own Junction entry, as GetCavePieces16's tunnel lines say) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetCaveTiles16(FIntPoint Section) const;
 	/** a test's: the set seen from above (an orthographic capture Height cm over its floor looking down, the kit's colours unlit:
 	 *  the roofs over the camera are not drawn), written to a PNG; false if it could not be */

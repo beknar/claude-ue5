@@ -18,6 +18,7 @@
 #include "Engine/CollisionProfile.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
+#include "Misc/ScopeExit.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Kismet/KismetRenderingLibrary.h"
@@ -40,7 +41,8 @@ namespace
 	/** a smooth value noise over the grid (cells of 6 tiles) from the set's seed: the tunnels' cost, so they wind */
 	float RDC16Noise(int32 Seed, float X, float Y)
 	{
-		auto H = [Seed](int32 I, int32 J) { uint32 h = (uint32)(I * 73856093) ^ (uint32)(J * 19349663) ^ (uint32)(Seed * 83492791); h ^= h >> 13; h *= 0x5bd1e995; h ^= h >> 15; return (h & 0xffff) / 65535.f; };
+		// (unsigned before multiplying: a signed overflow is undefined, and a build could fold it otherwise and lay other routes)
+		auto H = [Seed](int32 I, int32 J) { uint32 h = (uint32)I * 73856093u ^ (uint32)J * 19349663u ^ (uint32)Seed * 83492791u; h ^= h >> 13; h *= 0x5bd1e995u; h ^= h >> 15; return (h & 0xffff) / 65535.f; };
 		const float Fx = X / 6.f, Fy = Y / 6.f;
 		const int32 I = FMath::FloorToInt(Fx), J = FMath::FloorToInt(Fy);
 		const float U = FMath::SmoothStep(0.f, 1.f, Fx - I), V = FMath::SmoothStep(0.f, 1.f, Fy - J);
@@ -79,26 +81,39 @@ namespace
 // ------------------------------------------------------------------------------------------------ the plan
 void ARDSection::PlanCave16(FRandomStream& R)
 {
-	// (a plan that leaves a room no tunnel reaches is laid again from the stream's next draws, at most 8 times: the same stream
-	// gives the same tries, so the census and a set built again agree)
-	// (each try its own stream from the set's: the best (no room cut off, then the most portals with a tunnel) laid again at the end)
-	const int32 Base = R.RandHelper(1 << 30);
-	auto Once = [&](int32 Try)
+	// (a plan that leaves a room no tunnel reaches is laid again, each try from its own stream off the set's: the best (no room cut
+	// off, then the most portals with a tunnel) is laid again at the end. In play the tries go one a frame (ContinueGenerate: the
+	// whole plan took 70 to 710 ms); the census and the editor's build take them at once. Both draw the same streams: the same cave)
+	CaveBase16 = R.RandHelper(1 << 30);
+	CaveTry16 = 0; CaveBestTry16 = 0; CaveBestScore16 = INT_MIN; CaveLastTry16 = -1; PlanMs16 = 0.0; PlanStepMs16 = 0.0;
+	if (bCaveSpread16) return;
+	while (CaveStep16()) {}
+}
+
+int32 ARDSection::CaveTryOnce16(int32 Try)
+{
+	Rooms.Reset(); Portals.Reset(); DoorEdges.Reset();
+	Type.Init(0, N * N); Owner.Init(-1, N * N); Blocked.Init(0, N * N); CeilH.Init(0.f, N * N);
+	FRandomStream RT(CaveBase16 + 7919 * Try);
+	const int32 Cut = PlanCaveOnce16(RT, Try);
+	return -1000 * Cut + 10 * Portals.Num();
+}
+
+bool ARDSection::CaveStep16()
+{
+	const double T0 = FPlatformTime::Seconds();
+	ON_SCOPE_EXIT { const double Ms = (FPlatformTime::Seconds() - T0) * 1000.0; PlanMs16 += Ms; PlanStepMs16 = FMath::Max(PlanStepMs16, Ms); };
+	if (CaveTry16 < 8)
 	{
-		Rooms.Reset(); Portals.Reset(); DoorEdges.Reset();
-		Type.Init(0, N * N); Owner.Init(-1, N * N); Blocked.Init(0, N * N); CeilH.Init(0.f, N * N);
-		FRandomStream RT(Base + 7919 * Try);
-		const int32 Cut = PlanCaveOnce16(RT, Try);
-		return -1000 * Cut + 10 * Portals.Num();
-	};
-	int32 Best = 0, BestScore = INT_MIN, Last = -1;
-	for (int32 Try = 0; Try < 8; ++Try)
-	{
-		const int32 Sc = Once(Try); Last = Try;
-		if (Sc > BestScore) { BestScore = Sc; Best = Try; }
-		if (Sc >= 40) break;          // (no room cut off and a portal on every side)
+		const int32 Sc = CaveTryOnce16(CaveTry16); CaveLastTry16 = CaveTry16;
+		if (Sc > CaveBestScore16) { CaveBestScore16 = Sc; CaveBestTry16 = CaveTry16; }
+		CaveTry16 = Sc >= 40 ? 8 : CaveTry16 + 1;          // (no room cut off and a portal on every side: done)
+		return true;
 	}
-	if (Best != Last) Once(Best);
+	if (CaveBestTry16 != CaveLastTry16) { CaveTryOnce16(CaveBestTry16); CaveLastTry16 = CaveBestTry16; }
+	UE_LOG(LogRDCave16, Log, TEXT("RDCAVE16 (%d,%d) planned in %.1f ms (try %d kept; %s, the longest step %.1f ms)"), Coord.X, Coord.Y, PlanMs16 + (FPlatformTime::Seconds() - T0) * 1000.0, CaveBestTry16,
+		bCaveSpread16 ? TEXT("a try a frame") : TEXT("at once"), PlanStepMs16);
+	return false;
 }
 
 int32 ARDSection::PlanCaveOnce16(FRandomStream& R, int32 Try)
@@ -132,31 +147,11 @@ int32 ARDSection::PlanCaveOnce16(FRandomStream& R, int32 Try)
 		}
 		return true;
 	};
-	auto Lay = [&](int32 K, FIntPoint At, int32 Turn, float Z, ERDRoomKind Kind) -> int32
-	{
-		const FRDCaveRoom16& E = Kit(K);
-		FCavePlace16 Pl; Pl.Kit = K; Pl.At = At; Pl.Turn = Turn; Pl.Z = Z; Pl.Used.Init(false, E.Joints.Num());
-		FRoom Rm; Rm.Kind = Kind; Rm.Min = FIntPoint(N, N); Rm.Max = FIntPoint(-1, -1);
-		const int32 RI = Rooms.Num();
-		TArray<FIntPoint> F; Footprint(K, At, Turn, 0, F);
-		for (const FIntPoint& T : F) if (In(T)) { Box[Idx(T)] = 1; BoxRoom[Idx(T)] = RI; }
-		for (int32 J = 0; J < E.Size.Y; ++J)
-			for (int32 I = 0; I < E.Size.X; ++I)
-			{
-				const int32 C = J * E.Size.X + I;
-				if (!E.Mask.IsValidIndex(C) || !E.Mask[C]) continue;
-				const FIntPoint T = At + RDC16Turn(FIntPoint(I, J) - E.Pivot, Turn);
-				if (!In(T)) continue;
-				Type[Idx(T)] = 1; Owner[Idx(T)] = (int16)RI; CaveZ16[Idx(T)] = Z + (E.Floor.IsValidIndex(C) ? E.Floor[C] : 0.f);
-				Rm.Min = FIntPoint(FMath::Min(Rm.Min.X, T.X), FMath::Min(Rm.Min.Y, T.Y)); Rm.Max = FIntPoint(FMath::Max(Rm.Max.X, T.X + 1), FMath::Max(Rm.Max.Y, T.Y + 1));
-			}
-		Rm.Lane = At; Rm.Block = (At.Y / B) * (N / B) + At.X / B;
-		Rooms.Add(Rm); CavePlaced16.Add(Pl);
-		return RI;
-	};
 	// an opening in the set's frame (cm, on the floor) and its way out of the room
 	auto Joint = [&](int32 RI, int32 J, FVector& At, FVector2D& Out)
 	{
+		// (worked out once a room: its place, its way out, the room's floor by it (a scan of the room's tiles))
+		if (CavePlaced16[RI].JAt.IsValidIndex(J)) { At = CavePlaced16[RI].JAt[J]; Out = CavePlaced16[RI].JOut[J]; return; }
 		const FCavePlace16& Pl = CavePlaced16[RI];
 		const FTransform& T = Kit(Pl.Kit).Joints[J];
 		const FVector2D P = RDC16Turn(FVector2D(T.GetLocation().X, T.GetLocation().Y), Pl.Turn) + FVector2D((Pl.At.X + 0.5f) * S, (Pl.At.Y + 0.5f) * S);
@@ -177,6 +172,30 @@ int32 ARDSection::PlanCaveOnce16(FRandomStream& R, int32 Try)
 				if (D < BestD) { BestD = D; Fz = E.Floor.IsValidIndex(C) ? E.Floor[C] : 0.f; }
 			}
 		if (BestD < 3.f * S) At.Z = FMath::Max(At.Z, Pl.Z + Fz);
+		if (CavePlaced16[RI].JAt.Num() == J) { CavePlaced16[RI].JAt.Add(At); CavePlaced16[RI].JOut.Add(Out); }
+	};
+	auto Lay = [&](int32 K, FIntPoint At, int32 Turn, float Z, ERDRoomKind Kind) -> int32
+	{
+		const FRDCaveRoom16& E = Kit(K);
+		FCavePlace16 Pl; Pl.Kit = K; Pl.At = At; Pl.Turn = Turn; Pl.Z = Z; Pl.Used.Init(false, E.Joints.Num());
+		FRoom Rm; Rm.Kind = Kind; Rm.Min = FIntPoint(N, N); Rm.Max = FIntPoint(-1, -1);
+		const int32 RI = Rooms.Num();
+		TArray<FIntPoint> F; Footprint(K, At, Turn, 0, F);
+		for (const FIntPoint& T : F) if (In(T)) { Box[Idx(T)] = 1; BoxRoom[Idx(T)] = RI; }
+		for (int32 J = 0; J < E.Size.Y; ++J)
+			for (int32 I = 0; I < E.Size.X; ++I)
+			{
+				const int32 C = J * E.Size.X + I;
+				if (!E.Mask.IsValidIndex(C) || !E.Mask[C]) continue;
+				const FIntPoint T = At + RDC16Turn(FIntPoint(I, J) - E.Pivot, Turn);
+				if (!In(T)) continue;
+				Type[Idx(T)] = 1; Owner[Idx(T)] = (int16)RI; CaveZ16[Idx(T)] = Z + (E.Floor.IsValidIndex(C) ? E.Floor[C] : 0.f);
+				Rm.Min = FIntPoint(FMath::Min(Rm.Min.X, T.X), FMath::Min(Rm.Min.Y, T.Y)); Rm.Max = FIntPoint(FMath::Max(Rm.Max.X, T.X + 1), FMath::Max(Rm.Max.Y, T.Y + 1));
+			}
+		Rm.Lane = At; Rm.Block = (At.Y / B) * (N / B) + At.X / B;
+		Rooms.Add(Rm); CavePlaced16.Add(Pl);
+		for (int32 J = 0; J < E.Joints.Num(); ++J) { FVector At2; FVector2D O2; Joint(RI, J, At2, O2); }
+		return RI;
 	};
 	// ---- the rooms
 	TArray<int32> Kinds; TArray<float> W; float Wsum = 0.f; int32 Stairs = -1;
@@ -233,15 +252,10 @@ int32 ARDSection::PlanCaveOnce16(FRandomStream& R, int32 Try)
 		const FIntPoint Other = Coord + SideDir[Sd];
 		const FIntPoint Lo(FMath::Min(Coord.X, Other.X), FMath::Min(Coord.Y, Other.Y));
 		const uint32 H = HashCombine(GetTypeHash(Lo), GetTypeHash(Sd < 2 ? 1 : 2)) ^ (uint32)G->StartSeed;
-		const int32 First = 1 + 2 * (H % 3);
-		TArray<int32> Ks = { First };
 		// (one a side: four rooms have about 13 openings; two a side took 7 of them and left the rooms' own joins none, rooms cut off)
-		for (int32 Kb : Ks)
-		{
-			const int32 Along = Kb * B + B / 2;
-			const FIntPoint P = Sd == 0 ? FIntPoint(0, Along) : Sd == 1 ? FIntPoint(N - 1, Along) : Sd == 2 ? FIntPoint(Along, 0) : FIntPoint(Along, N - 1);
-			if (!Portals.Contains(P)) Portals.Add(P);
-		}
+		const int32 Along = (1 + 2 * (H % 3)) * B + B / 2;
+		const FIntPoint P = Sd == 0 ? FIntPoint(0, Along) : Sd == 1 ? FIntPoint(N - 1, Along) : Sd == 2 ? FIntPoint(Along, 0) : FIntPoint(Along, N - 1);
+		if (!Portals.Contains(P)) Portals.Add(P);
 	}
 	// ---- the tunnels
 	auto TunnelKit = [&](bool bPortal) -> int32
@@ -291,29 +305,43 @@ int32 ARDSection::PlanCaveOnce16(FRandomStream& R, int32 Try)
 	{
 		Out.Reset();
 		if (!In(A) || !In(Bt)) return false;
+		// (the keep-out: every room's box and every tunnel's mesh grown by Grow tiles, by summed-area tables (a square's count in four
+		// reads; growing each tile by hand was most of the plan's time). Only a tunnel from the same room may come near this one, and
+		// only by that room: any other crossed it, and their meshes cut each other open to the void)
+		TArray<uint8> M0, MA, MB, MAB; M0.Init(0, N * N); MA.Init(0, N * N); MB.Init(0, N * N); MAB.Init(0, N * N);
+		for (int32 T = 0; T < N * N; ++T)
+		{
+			if (!Box[T]) continue;
+			if (Box[T] == 2 && RunEnds.IsValidIndex(RunOf[T]))
+			{
+				const FIntPoint E2 = RunEnds[RunOf[T]];
+				const bool bShareA = RouteFrom >= 0 && (E2.X == RouteFrom || E2.Y == RouteFrom), bShareB = RouteTo >= 0 && (E2.X == RouteTo || E2.Y == RouteTo);
+				if (bShareA && bShareB) { MAB[T] = 1; continue; }
+				if (bShareA) { MA[T] = 1; continue; }
+				if (bShareB) { MB[T] = 1; continue; }
+			}
+			M0[T] = 1;
+		}
+		auto Grown = [&](const TArray<uint8>& Mk, int32 G2, TArray<uint8>& Out2)
+		{
+			TArray<int32> Sat; Sat.Init(0, (N + 1) * (N + 1));
+			for (int32 Y = 0; Y < N; ++Y) for (int32 X = 0; X < N; ++X)
+				Sat[(Y + 1) * (N + 1) + X + 1] = Mk[Y * N + X] + Sat[Y * (N + 1) + X + 1] + Sat[(Y + 1) * (N + 1) + X] - Sat[Y * (N + 1) + X];
+			Out2.Init(0, N * N);
+			for (int32 Y = 0; Y < N; ++Y) for (int32 X = 0; X < N; ++X)
+			{
+				const int32 X0 = FMath::Max(X - G2, 0), Y0 = FMath::Max(Y - G2, 0), X1 = FMath::Min(X + G2, N - 1) + 1, Y1 = FMath::Min(Y + G2, N - 1) + 1;
+				Out2[Y * N + X] = (Sat[Y1 * (N + 1) + X1] - Sat[Y0 * (N + 1) + X1] - Sat[Y1 * (N + 1) + X0] + Sat[Y0 * (N + 1) + X0]) > 0;
+			}
+		};
+		TArray<uint8> G0, GA, GB, GAB;
+		Grown(M0, Grow, G0); Grown(MA, GrowTunnel, GA); Grown(MB, GrowTunnel, GB); Grown(MAB, GrowTunnel, GAB);
 		Block.Init(0, N * N);
 		for (int32 Y = 0; Y < N; ++Y) for (int32 X = 0; X < N; ++X)
 		{
-			const uint8 Bx = Box[Idx(FIntPoint(X, Y))];
-			if (!Bx) continue;
-			// (another tunnel's mesh is kept clear of this one's except near this one's ends: two tunnels leave a room from
-			// openings side by side, and the first one's keep-out covered the second's way out)
-			const int32 Gr = Bx == 2 ? GrowTunnel : Grow;
-			if (Gr < 0) continue;
-			for (int32 Dy = -Gr; Dy <= Gr; ++Dy) for (int32 Dx = -Gr; Dx <= Gr; ++Dx)
-			{
-				const FIntPoint T(X + Dx, Y + Dy);
-				if (!In(T)) continue;
-				// (only a tunnel from the same room may come near this one, and only by that room: any other crossed it, and their
-				// meshes cut each other open to the void)
-				if (Bx == 2 && RunEnds.IsValidIndex(RunOf[Idx(FIntPoint(X, Y))]))
-				{
-					const FIntPoint E2 = RunEnds[RunOf[Idx(FIntPoint(X, Y))]];
-					const bool bShareA = RouteFrom >= 0 && (E2.X == RouteFrom || E2.Y == RouteFrom), bShareB = RouteTo >= 0 && (E2.X == RouteTo || E2.Y == RouteTo);
-					if ((bShareA && FIntPoint(T - A).Size() <= Grow + 2) || (bShareB && FIntPoint(T - Bt).Size() <= Grow + 2)) continue;
-				}
-				Block[Idx(T)] = 1;
-			}
+			const int32 T = Y * N + X;
+			const bool bNearA = FIntPoint(FIntPoint(X, Y) - A).Size() <= Grow + 2, bNearB = FIntPoint(FIntPoint(X, Y) - Bt).Size() <= Grow + 2;
+			Block[T] = G0[T] || (GA[T] && !bNearA) || (GB[T] && !bNearB) || (GAB[T] && !bNearA && !bNearB);
 		}
 		// (the ends stand clear of their own rooms by then; the border's strip is open only at the ends)
 		Block[Idx(A)] = 0; Block[Idx(Bt)] = 0;
@@ -481,8 +509,7 @@ int32 ARDSection::PlanCaveOnce16(FRandomStream& R, int32 Try)
 		// mesh's tiles go into the keep-out for the next tunnels)
 		// (2.15 m whatever the tunnel: wider, the tile paths hugged the rocky feet of the walls on the bends; narrower, a diagonal's
 		// tiles touched only at their corners)
-		const float Walk = FMath::Min(FMath::Max(E.HalfWalk, 215.f), 215.f);
-		int32 DbgSkip = 0;
+		const float Walk = 215.f;
 		for (int32 I = 0; I < Line.Num(); I += 2)
 		{
 			const FVector& P = Line[I];
@@ -508,7 +535,7 @@ int32 ARDSection::PlanCaveOnce16(FRandomStream& R, int32 Try)
 				// where the room's floor stops short of the opening the bridge below joins them)
 				// (in the opening's own way: within 1.6 m of the line out of it, at most 4.5 m along; 1.7 m off it she stood on the wall's
 				// ledge)
-				if (bBesideRoom) { ++DbgSkip; continue; }          // (the openings' chains below join them)
+				if (bBesideRoom) continue;          // (the openings' chains below join them)
 				if (D <= Walk && Type[Idx(T)] == 0)
 				{
 					Type[Idx(T)] = 1; Owner[Idx(T)] = (int16)TI; CaveZ16[Idx(T)] = P.Z;
@@ -581,8 +608,11 @@ int32 ARDSection::PlanCaveOnce16(FRandomStream& R, int32 Try)
 				bDry = false;
 				if (K1 >= 0 && K2 >= 0 && Dig(PL, OL, Pf, Of, K1, Lo, SI, true, true))
 				{
-					Dig(Pt, Ot, PH, OH, K2, SI, Hi, true, true);
-					CavePlaced16[Lo].Used[JL] = CavePlaced16[Hi].Used[JH] = true; CavePlaced16[SI].Used[0] = CavePlaced16[SI].Used[1] = true;
+					// (the second checked again with the first laid (the dry runs saw neither): failed, the join is not made, the top's
+					// opening is capped, and the caller tries the rooms another way)
+					CavePlaced16[Lo].Used[JL] = true; CavePlaced16[SI].Used[0] = true;
+					if (!Dig(Pt, Ot, PH, OH, K2, SI, Hi, true, true)) return false;
+					CavePlaced16[Hi].Used[JH] = CavePlaced16[SI].Used[1] = true;
 					return true;
 				}
 				// (taken up: the last room laid, its tiles cleared)
@@ -630,6 +660,20 @@ int32 ARDSection::PlanCaveOnce16(FRandomStream& R, int32 Try)
 		if (Root(I) == Root(0)) continue;
 		++Cut; Rooms[I].Kind = ERDRoomKind::Junction;
 		for (int32 T = 0; T < N * N; ++T) if (Owner[T] == I) { Type[T] = 0; Owner[T] = -1; }
+	}
+	// (and a tunnel or stairs between cut rooms: an island of tiles the paths, the map and the discovery would still have seen)
+	for (const FCaveRun16& Run : CaveRuns16)
+	{
+		// (a room by its group; a stairs (laid after the rooms) by the room at its tunnels' other ends; a portal never)
+		auto KeptRoom = [&](int32 E) { return E >= 0 && E < NumRooms && Root(E) == Root(0); };
+		auto Kept = [&](int32 E)
+		{
+			if (E < NumRooms) return KeptRoom(E);
+			for (const FCaveRun16& R2 : CaveRuns16) if ((R2.From == E && KeptRoom(R2.To)) || (R2.To == E && KeptRoom(R2.From))) return true;
+			return false;
+		};
+		if (Kept(Run.From) || Kept(Run.To)) continue;
+		for (int32 T = 0; T < N * N; ++T) if (Owner[T] == Run.Room) { Type[T] = 0; Owner[T] = -1; }
 	}
 	// (the portals after the rooms' joins: a tunnel is a wall, and four portal tunnels laid first cut the set into quarters the
 	// joins could not cross)
@@ -723,9 +767,20 @@ void ARDSection::CaveShell16()
 		for (int32 I = 0; I < E.Roof.Num(); ++I) Mesh(E.Roof[I], (E.RoofAt.IsValidIndex(I) ? E.RoofAt[I] : FTransform::Identity) * T, true);
 	}
 	for (const FTransform& T : CaveCaps16) Mesh(Generator->CaveCap16, FTransform(T.GetRotation(), O + T.GetLocation()), true);
-	// the tunnels: the kit's mesh along each curve in overlapping pieces, as its Blueprint lays them
-	for (const FCaveRun16& Run : CaveRuns16)
+	CaveShellRun16 = 0; CaveShellPiece16 = 0;
+	if (!bShellSpread16) CaveShellPieces16(1e9);
+}
+
+bool ARDSection::CaveShellPieces16(double Budget)
+{
+	// the tunnels: the kit's mesh along each curve in overlapping pieces, as its Blueprint lays them; a piece's collision is cooked as
+	// it is made, so a set made in play lays them within the frame's budget (all at once a ring set's shell took 3 s in one frame)
+	UWorld* W = GetWorld();
+	if (!Generator || !W || !W->IsGameWorld()) return true;
+	const double T00 = FPlatformTime::Seconds();
+	for (; CaveShellRun16 < CaveRuns16.Num(); ++CaveShellRun16, CaveShellPiece16 = 0)
 	{
+		const FCaveRun16& Run = CaveRuns16[CaveShellRun16];
 		const FRDCaveTunnel16& E = Generator->CaveTunnels16[Run.Kit];
 		if (!E.Mesh || Run.Points.Num() < 2) continue;
 		TArray<float> Acc; Acc.Add(0.f);
@@ -742,8 +797,10 @@ void ARDSection::CaveShell16()
 		const float Advance = FMath::Max(E.Segment - E.Overlap, 400.f);
 		const int32 Ns = FMath::Max(1, FMath::RoundToInt(L / Advance));
 		const float Step = L / Ns;
-		for (int32 K = 0; K < Ns; ++K)
+		for (; CaveShellPiece16 < Ns; ++CaveShellPiece16)
 		{
+			if (FPlatformTime::Seconds() - T00 >= Budget) return false;
+			const int32 K = CaveShellPiece16;
 			const float D0 = K * Step - (K > 0 ? E.Overlap * 0.5f : 0.f), D1 = (K + 1) * Step + (K < Ns - 1 ? E.Overlap * 0.5f : 0.f);
 			FVector P0, T0, P1, T1; At(D0, P0, T0); At(D1, P1, T1);
 			const float Len = D1 - D0;
@@ -782,6 +839,7 @@ void ARDSection::CaveShell16()
 			}
 		}
 	}
+	return true;
 }
 
 // ------------------------------------------------------------------------------------------------ the rooms' light
@@ -800,17 +858,9 @@ void ARDSection::CaveFurnish16(FRandomStream& R, int32 RI)
 				Acc += FVector::Dist(Run.Points[I], Run.Points[I - 1]);
 				if (Acc < Next) continue;
 				Next += 2000.f;
-				UPointLightComponent* L = NewObject<UPointLightComponent>(this);
-				L->SetMobility(EComponentMobility::Movable);
-				L->SetupAttachment(RootComponent);
-				L->SetWorldLocation(GetActorLocation() + Run.Points[I] + FVector(0.f, 0.f, 400.f));
-				L->SetIntensityUnits(ELightUnits::Candelas);
-				L->SetIntensity(Generator->CaveRoomLight16 * 0.25f);
-				L->SetLightColor(Generator->CaveLightColor16);
-				L->SetAttenuationRadius(1800.f);
-				L->SetCastShadows(false);
-				L->RegisterComponent();
-				++NumLights;
+				// (through AddLight: built with the static build only (a census builds none, ActivateForPlay none again: every restart
+				// had added another set), saved with the level's start set, the dungeon's light tint on it)
+				AddLight(GetActorLocation() + Run.Points[I] + FVector(0.f, 0.f, 400.f), Generator->CaveLightColor16, Generator->CaveRoomLight16 * 0.25f, 1800.f, false, 0.f);
 			}
 		}
 		return;
@@ -820,17 +870,7 @@ void ARDSection::CaveFurnish16(FRandomStream& R, int32 RI)
 	const float S = Generator->TileSize;
 	const FBox2D B = RoomBox(Rooms[RI]);
 	const FVector At(GetActorLocation().X + (Pl.At.X + 0.5f) * S, GetActorLocation().Y + (Pl.At.Y + 0.5f) * S, GetActorLocation().Z + Pl.Z + 650.f);
-	UPointLightComponent* L = NewObject<UPointLightComponent>(this);
-	L->SetMobility(EComponentMobility::Movable);
-	L->SetupAttachment(RootComponent);
-	L->SetWorldLocation(At);
-	L->SetIntensityUnits(ELightUnits::Candelas);
-	L->SetIntensity(Generator->CaveRoomLight16);          // (candelas: a 60 m room needs thousands)
-	L->SetLightColor(Generator->CaveLightColor16);
-	L->SetAttenuationRadius(FMath::Max(B.GetSize().GetMax() * 0.75f, 1500.f));
-	L->SetCastShadows(false);
-	L->RegisterComponent();
-	++NumLights;
+	AddLight(At, Generator->CaveLightColor16, Generator->CaveRoomLight16, FMath::Max(B.GetSize().GetMax() * 0.75f, 1500.f), false, 0.f);          // (candelas: a 60 m room needs thousands)
 }
 
 // ------------------------------------------------------------------------------------------------ a way into a shut tier
@@ -940,4 +980,18 @@ bool ARDDungeonGenerator::CaptureAbove16(FIntPoint Section, const FString& Folde
 	UKismetRenderingLibrary::ExportRenderTarget(this, RT, Folder, File);
 	C->DestroyComponent();
 	return true;
+}
+
+float ARDSection::CaveFloorNear16(FIntPoint T) const
+{
+	// (her floor where she stands off the tiles (a room's rim, a tunnel's floor strip under its walls): the lowest of the walkable
+	// tiles within 4, else the set's lowest level: the safety net took the set's base and sent her back from a low room's edge)
+	if (In(T) && Type.IsValidIndex(Idx(T)) && Type[Idx(T)] != 0) return CaveFloorAt16(T);
+	float Lo = FLT_MAX;
+	for (int32 Dy = -4; Dy <= 4; ++Dy) for (int32 Dx = -4; Dx <= 4; ++Dx)
+	{
+		const FIntPoint U(T.X + Dx, T.Y + Dy);
+		if (In(U) && Type.IsValidIndex(Idx(U)) && Type[Idx(U)] != 0) Lo = FMath::Min(Lo, CaveFloorAt16(U));
+	}
+	return Lo < FLT_MAX ? Lo : -(Generator ? Generator->CaveLevelDrop16 : 428.f) - 300.f;
 }

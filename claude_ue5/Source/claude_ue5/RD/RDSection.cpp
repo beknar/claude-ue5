@@ -58,7 +58,7 @@ float ARDSection::FloorZAt(const FVector& P) const
 {
 	const float Base = GetActorLocation().Z;
 	const FIntPoint T = WorldToLocal(P);
-	if (Generator && Generator->bCave16) return Base + CaveFloorAt16(T);          // (the caves: each tile's own floor)
+	if (Generator && Generator->bCave16) return Base + CaveFloorNear16(T);          // (the caves: each tile's own floor, or the nearest's)
 	if (!IsStairTile(T) || !Generator) return Base;
 	const int32 Sd = StairSide[Idx(T)];
 	const float S = Generator->TileSize;
@@ -1001,7 +1001,7 @@ float ARDSection::InwardYaw(int32 Side)
 
 void ARDSection::BuildShell(FRandomStream& R)
 {
-	if (Generator && Generator->bCave16) { ShellPrepare(R); CaveShell16(); return; }
+	if (Generator && Generator->bCave16) { ShellPrepare(R); bShellSpread16 = false; CaveShell16(); return; }
 	ShellPrepare(R);
 	for (int32 X = 0; X < N; ++X) ShellColumn(R, X);
 	ShellCorners();
@@ -2098,7 +2098,10 @@ void ARDSection::BeginGenerate(ARDDungeonGenerator* InGenerator, FIntPoint InCoo
 		bBuilding = true;
 		return;
 	}
+	// (the caves in play: the plan's tries a frame each in ContinueGenerate, then the rest of this)
+	{ UWorld* W0 = GetWorld(); bCaveSpread16 = Generator->bCave16 && W0 && W0->IsGameWorld(); }
 	Plan(GenR);
+	if (bCaveSpread16) { ShellX = 0; bBuilding = true; return; }
 	ShellPrepare(GenR);
 	ShellX = 0;
 	AddDoors();
@@ -2130,11 +2133,23 @@ bool ARDSection::ContinueGenerate(double Budget)
 			Seed, TownBlds.Num(), Rooms.Num(), Doors.Num(), Containers.Num(), NumInstances, NumLights, GenerateMs, GenTicks, bEditorBuilt ? TEXT(" [editor]") : TEXT(""));
 		return true;
 	}
+	// (the caves in play: the plan a try a frame, then what BeginGenerate does after the plan)
+	if (bCaveSpread16)
+	{
+		if (CaveStep16()) return false;
+		bCaveSpread16 = false;
+		ShellPrepare(GenR);
+		ShellX = 0;
+		AddDoors();
+		RegisterMap();
+		return false;
+	}
 	// the shell first (floors, ceilings, walls), a few tile columns per frame, each frame's instances added at once
 	if (ShellX <= N && Generator->bCave16)
 	{
-		CaveShell16();          // (the caves: the kit's rooms, tunnels and caps at once)
-		ShellX = N + 1;
+		// (the caves: the kit's rooms and caps at once, then the tunnels' pieces within the frame's budget)
+		if (ShellX == 0) { bShellSpread16 = true; CaveShell16(); ShellX = 1; }
+		if (CaveShellPieces16(Budget)) ShellX = N + 1;
 		ShellMs += (FPlatformTime::Seconds() - T0) * 1000.0;
 		return false;
 	}
@@ -2255,6 +2270,7 @@ void ARDSection::ActivateForPlay()
 		UE_LOG(LogRandomDungeon, Log, TEXT("RDSECTION town activated for play: %d buildings, %d doors, %d containers"), TownBlds.Num(), Doors.Num(), Containers.Num());
 		return;
 	}
+	bCaveSpread16 = false;          // (the caves: the plan at once here, as the editor's build made it)
 	Plan(R);
 	BuildShell(R);
 	AddDoors();

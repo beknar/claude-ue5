@@ -7625,7 +7625,7 @@ def cave16_inner():
     order = [int(r[1]) for r in rooms if r[2] != "stairs"]
     for ri in order:
         tgt = room_target(ri)
-        if tgt is None: reached[ri] = "no tiles"; continue
+        if tgt is None: reached[ri] = "no tiles: cut off by the plan"; continue
         path = list(S.find_path_world(pawn.get_actor_location(), tgt)) or [tgt]
         t0 = time.time(); k = 0; last = pawn.get_actor_location(); lt = time.time(); stuck = False
         while time.time() - t0 < 120.0:
@@ -7658,6 +7658,30 @@ def cave16_inner():
         reached[ri] = {"ok": dist2(hp, tgt) < 250.0, "seconds": round(time.time() - t0, 1), "path_points": len(path), "stuck_at": [round(hp.x), round(hp.y), round(hp.z)] if stuck else None, "held_by": sweep}
         if not reached[ri]["ok"]: put(tgt); yield from wait(0.5)
     res["walk"] = reached
+    # ---- a set of the ring made in play as she nears it (the plan a try a frame, the tunnels' pieces a budget a frame): she stands on
+    # the start set's walkable tile nearest its east border; every frame's time while the game makes the set beyond, and its log line
+    import re as _re
+    logp = os.path.join(unreal.Paths.project_log_dir(), "claude_ue5.log")
+    n0_ = os.path.getsize(logp)
+    # (tier 2 opens once the start set is cleared: until then the sets beyond are not made)
+    g.debug_clear_section(S0, 0, g.get_start_room_center()); yield from wait(0.5)
+    res["open2"] = g.is_tier_open(2)
+    east = max(tiles, key=lambda t: float(t[0]))
+    put(V(float(east[0]), float(east[1]), float(east[2])), yaw=0.0)
+    S1 = I2(1, 0); dts = []; last = time.time(); t0_ = time.time()
+    while time.time() - t0_ < 40.0:
+        yield; now_ = time.time(); dts.append((now_ - last) * 1000.0); last = now_
+        if g.is_section_generated(S1) and g.get_section(S1) and not g.get_section(S1).is_building() and time.time() - t0_ > 5.0: break
+    tail = open(logp, encoding="utf-8", errors="replace").read()[n0_:]
+    m_ = _re.findall(r"RDCAVE16 \(1,0\) planned in ([0-9.]+) ms \(try (\d+) kept; ([a-z ]+), the longest step ([0-9.]+) ms\)", tail)
+    m2 = _re.findall(r"RDSECTION \(1,0\)[^\n]*shell ([0-9]+) ms \+ furnish ([0-9]+) ms over ([0-9]+) frames", tail)
+    res["ring_set"] = {"from": [round(float(east[0])), round(float(east[1]))], "plan": m_[-1] if m_ else None, "shell_furnish_frames": m2[-1] if m2 else None,
+                       "frames": len(dts), "worst_frame_ms": round(max(dts[2:] or [0]), 1), "frames_over_100ms": sum(1 for d in dts[2:] if d > 100.0),
+                       "built": bool(g.is_section_generated(S1)), "pieces": len(g.get_cave_pieces16(S1))}
+    # ---- the start set's lights again after a restart (PR #115's review: each restart had added another set of them)
+    n_l0 = len(S.get_components_by_class(unreal.PointLightComponent))
+    g.restart_play(0); yield from wait(1.5); refresh(); S = g.get_section(S0); pawn = G["pawn"]
+    res["lights_restart"] = [n_l0, len(S.get_components_by_class(unreal.PointLightComponent))]
     # ---- pictures: each kind of room from its middle, a tunnel along its middle
     seen = set()
     for r in rooms:
@@ -7674,7 +7698,7 @@ def cave16_inner():
     if blocked:
         a = V(*map(float, blocked[0][:3])); fz = floor_z(a.x, a.y, top=a.z + 400.0, bottom=a.z - 400.0)
         put(a, yaw=0.0, z=(fz if fz is not None else a.z) + 20.0); yield from wait(1.2); shot("cave16_blocked", "1280x720"); yield from wait(0.6)
-    ok = (len(rooms) >= 4 and len(tunnels) >= 3 and comps["spline"] > 0 and res["start"]["room"] >= 0
+    ok = (len(rooms) >= 4 and len(tunnels) >= 3 and comps["spline"] > 0 and res["start"]["room"] >= 0 and res["lights_restart"][0] == res["lights_restart"][1]
           and not holes and not floors_off and not blocked and all(isinstance(v, dict) and v["ok"] for v in reached.values()))
     step_result("cave16", ok, **res)
 def step_cave16():

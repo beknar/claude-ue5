@@ -4,6 +4,9 @@ The game lays the cave itself (C++ RD/RDCave16.cpp: rooms of the kit's sizes on 
 whose paths are tile paths) and draws it with the kit's meshes: its rooms' combined meshes, its tunnel meshes bent along splines
 (spline-mesh components, as the kit's BP_Cave_Spline_* do), its caps at dead ends and its stairs between heights.
 Parts:
+- collide: copies of the kit's tunnel meshes whose collision is a reduced LOD (a bent piece's collision is cooked in play)
+- level: the kit and bCave16 written onto the cave level's generator, its start set built again
+- measure: each room's walkable tiles and floor heights, each tunnel's floor, traced on the meshes
 - study: the kit's example map (Map_Example_Caves) read once: each room kind's mesh, size and connection points (the Blueprints'
   arrows, where a tunnel meets the room), the roof hole and god-ray points, the stairs' two ends, the tunnels' meshes, their
   cross-section and segment length (the spline's tangent), the cap; written to SourceArt/caves/hyper16.json for the game.
@@ -182,6 +185,31 @@ def measure():
     print("CAVE16 wrote", OUT)
 
 
+COLLIDE = "/Game/RandomDungeon/Caves16"
+
+
+def collide():
+    """copies of the kit's tunnel meshes whose collision is a reduced level of detail (a tenth of the triangles, LODForCollision 1):
+    a bent piece's collision is cooked in play from the mesh's triangles, at once (USplineMeshComponent::RecreateCollision), and the
+    kit's 20,000 to 30,000 took a ring set's shell 3 s in one frame. Their looks stay the kit's (Nanite draws LOD 0)"""
+    eal = unreal.EditorAssetLibrary; sms = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem)
+    kit = json.load(open(OUT, encoding="utf-8"))
+    for k, e in kit["tunnels"].items():
+        src = e["mesh"].split(".")[0]; dst = COLLIDE + "/" + src.rsplit("/", 1)[1] + "_C"
+        if CHECK: print("CAVE16 would copy", src, "->", dst); continue
+        if eal.does_asset_exist(dst): eal.delete_asset(dst)
+        m = eal.duplicate_asset(src, dst)
+        o = unreal.StaticMeshReductionOptions()
+        o.set_editor_property("auto_compute_lod_screen_size", False)
+        o.set_editor_property("reduction_settings", [unreal.StaticMeshReductionSettings(1.0, 1.0), unreal.StaticMeshReductionSettings(0.1, 0.01)])
+        n = sms.set_lods(m, o)
+        m.set_editor_property("lod_for_collision", 1)
+        eal.save_loaded_asset(m, only_if_is_dirty=False)
+        e["collide"] = m.get_path_name()
+        print("CAVE16 tunnel", k, "collision copy", dst, "| lods", n, "| triangles", sms.get_number_verts(m, 0), "->", sms.get_number_verts(m, 1), "vertices")
+    if not CHECK: open(OUT, "w", encoding="utf-8").write(json.dumps(kit, indent=1) + "\n")
+
+
 CAVES = "/Game/RandomDungeon/Maps/caves"
 WEIGHTS = {"small": 1.0, "medium": 0.8, "large": 0.45, "stairs": 0.0}
 # (the kit's small tunnel is drawn by none: its walkable way is 2 to 3 m wide and closed up where it bent (868 cave16: she stuck on its
@@ -225,7 +253,8 @@ def level():
         e = kit["tunnels"][k]
         t = unreal.RDCaveTunnel16()
         t.set_editor_property("kind", k)
-        t.set_editor_property("mesh", mesh(e["mesh"]))
+        # (its collision copy where 945 collide made one: the same looks, its collision a tenth of the triangles)
+        t.set_editor_property("mesh", mesh(e.get("collide") or e["mesh"]))
         t.set_editor_property("segment", e["segment"])
         t.set_editor_property("overlap", e["overlap"])
         # (the tunnel's own floor (measured, near its pivot) has gaps where the kit's example stands it on a ground of its own:
@@ -254,7 +283,7 @@ def level():
     del gen
 
 
-PARTS = {"study": study, "measure": measure, "level": level}
+PARTS = {"study": study, "measure": measure, "collide": collide, "level": level}
 for p in [a for a in ARGS if a in PARTS] or ["study"]:
     PARTS[p]()
 gc.collect()

@@ -1,0 +1,338 @@
+{
+ "tag": "c16r4",
+ "plan": [
+  "cave16",
+  "cave15"
+ ],
+ "level": "caves",
+ "steps": [
+  {
+   "step": "cave16",
+   "ok": true,
+   "pieces": {
+    "rooms": [
+     "large",
+     "small",
+     "small",
+     "small",
+     "small"
+    ],
+    "tunnels": [
+     "medium",
+     "medium",
+     "medium",
+     "medium",
+     "medium",
+     "medium",
+     "medium",
+     "medium"
+    ],
+    "caps": 4
+   },
+   "components": {
+    "spline": 86,
+    "rooms": 5
+   },
+   "room_collision": [
+    {
+     "mesh": "SM_Room_Large",
+     "at": [
+      150,
+      150,
+      0
+     ],
+     "enabled": "<CollisionEnabled.QUERY_AND_PHYSICS: 3>",
+     "profile": "BlockAll",
+     "mobility": "<ComponentMobility.STATIC: 0>",
+     "visible": true,
+     "bounds": [
+      2926,
+      3174,
+      834
+     ],
+     "trace": [
+      "<Struct 'Vector' (0x00000257F4FDD960) {x: 150.000000, y: 150.000000, z: 10.142148}>",
+      "<Struct 'Vector' (0x00000257F4FDE040) {x: -0.034831, y: -0.062730, z: 0.997423}>",
+      "None"
+     ]
+    },
+    {
+     "mesh": "SM_Room_Small",
+     "at": [
+      7350,
+      -6750,
+      0
+     ],
+     "enabled": "<CollisionEnabled.QUERY_AND_PHYSICS: 3>",
+     "profile": "BlockAll",
+     "mobility": "<ComponentMobility.STATIC: 0>",
+     "visible": true,
+     "bounds": [
+      1161,
+      1162,
+      702
+     ],
+     "trace": [
+      "<Struct 'Vector' (0x00000257F4FDDC30) {x: 7350.000000, y: -6750.000000, z: -0.979900}>",
+      "<Struct 'Vector' (0x00000257F4FDDC80) {x: 0.006081, y: 0.000370, z: 0.999981}>",
+      "None"
+     ]
+    },
+    {
+     "mesh": "SM_Room_Small",
+     "at": [
+      -7050,
+      -7350,
+      0
+     ],
+     "enabled": "<CollisionEnabled.QUERY_AND_PHYSICS: 3>",
+     "profile": "BlockAll",
+     "mobility": "<ComponentMobility.STATIC: 0>",
+     "visible": true,
+     "bounds": [
+      1162,
+      1161,
+      702
+     ],
+     "trace": [
+      "<Struct 'Vector' (0x00000257F4FDDE60) {x: -7050.000000, y: -7350.000000, z: -0.979900}>",
+      "<Struct 'Vector' (0x00000257F4FDDEB0) {x: -0.000370, y: 0.006081, z: 0.999981}>",
+      "None"
+     ]
+    }
+   ],
+   "walkable_tiles": 541,
+   "tile_groups": [
+    {
+     "tiles": 541,
+     "owners": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+     ]
+    }
+   ],
+   "start": {
+    "at": [
+     150,
+     150,
+     95
+    ],
+    "room": 0,
+    "moving": "<MovementMode.MOVE_WALKING: 1>",
+    "under_her": [
+     [
+      10,
+      1.0,
+      "StaticMeshComponent_20",
+      "SM_Room_Large"
+     ]
+    ],
+    "under_first_room": [
+     [
+      2549,
+      0.89,
+      "StaticMeshComponent_21",
+      "SM_Roof_Hole_01"
+     ]
+    ],
+    "player_starts": [
+     [
+      0,
+      0,
+      100
+     ]
+    ]
+   },
+   "passed_aside": 5,
+   "shell": {
+    "rays": 4400,
+    "holes": 0,
+    "holes_at": [],
+    "floor_off": 0,
+    "floor_off_at": [],
+    "blocked": 0,
+    "blocked_at": []
+   },
+   "fps_first_room": 43.5,
+   "walk": {
+    "0": {
+     "ok": true,
+     "seconds": 0.0,
+     "path_points": 1,
+     "stuck_at": null,
+     "held_by": null
+    },
+    "1": {
+     "ok": true,
+     "seconds": 32.8,
+     "path_points": 47,
+     "stuck_at": null,
+     "held_by": null
+    },
+    "2": {
+     "ok": true,
+     "seconds": 59.7,
+     "path_points": 83,
+     "stuck_at": null,
+     "held_by": null
+    },
+    "3": {
+     "ok": true,
+     "seconds": 67.4,
+     "path_points": 88,
+     "stuck_at": null,
+     "held_by": null
+    },
+    "4": {
+     "ok": true,
+     "seconds": 80.5,
+     "path_points": 106,
+     "stuck_at": null,
+     "held_by": null
+    }
+   },
+   "ring_set": {
+    "from": [
+     12450,
+     7350
+    ],
+    "plan": null,
+    "shell_furnish_frames": null,
+    "frames": 1828,
+    "worst_frame_ms": 76.1,
+    "frames_over_100ms": 0,
+    "built": false,
+    "pieces": 0
+   },
+   "lights_restart": [
+    37,
+    37
+   ]
+  },
+  {
+   "step": "cave15",
+   "ok": true,
+   "cave": [
+    "cave:test",
+    "1",
+    "0",
+    "1",
+    "The Cave beneath the Broken Tower"
+   ],
+   "global_tiers": [
+    1,
+    1,
+    1
+   ],
+   "switches": {
+    "cave15": true,
+    "final_boss_on": false,
+    "max_tier": 3,
+    "town_level": "/Game/RandomDungeon/Maps/brokenspire"
+   },
+   "allowed": [
+    "Half_Creature_04",
+    "Half_Creature_05",
+    "Parasite_Slider",
+    "Rat"
+   ],
+   "hall": {
+    "room": 0,
+    "kind": "Great hall",
+    "x": [
+     -2450,
+     2750
+    ],
+    "y": [
+     -2450,
+     2750
+    ]
+   },
+   "castle_hall_pieces": {},
+   "open2": true,
+   "kinds_start": [
+    "Rat"
+   ],
+   "kinds_ring": [
+    "Half_Creature_05",
+    "Parasite_Slider",
+    "Rat"
+   ],
+   "rooms": {
+    "Great hall": 1,
+    "Crypt": 20,
+    "Hallway junction": 36
+   },
+   "floors_rel": [
+    15.7,
+    12.0,
+    27.4,
+    9.0,
+    -2.3,
+    2.8,
+    22.8,
+    12.0,
+    8.2,
+    -0.1,
+    29.5,
+    -2.1,
+    -0.3,
+    -0.1,
+    -0.6,
+    -0.2,
+    -395.0,
+    -282.4,
+    -427.9,
+    -427.7,
+    -412.6,
+    -427.9,
+    -427.7,
+    -428.7,
+    8.4,
+    -0.8,
+    -0.5,
+    -0.5,
+    -0.8,
+    2.2,
+    -0.1,
+    0.8,
+    15.7,
+    12.0,
+    27.4,
+    9.0,
+    -2.3,
+    2.8,
+    22.8,
+    12.0
+   ],
+   "walls_m": [],
+   "off_kinds": [],
+   "cave16": true
+  }
+ ],
+ "windows_hidden": "Content Browser, Message Log",
+ "shots": [
+  "mw_c16r4_cave16_above.png",
+  "mw_c16r4_cave16_room_large.png",
+  "mw_c16r4_cave16_room_small.png",
+  "mw_c16r4_cave16_tunnel0_medium.png",
+  "mw_c16r4_cave16_tunnel1_medium.png",
+  "mw_c16r4_cave16_tunnel2_medium.png",
+  "mw_c16r4_cave15_hall.png",
+  "mw_c16r4_cave15_tier2.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}
