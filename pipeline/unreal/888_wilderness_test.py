@@ -8336,6 +8336,80 @@ def step_lod16():
 
 
 STEPS["lod16"] = step_lod16
+
+
+# ================================================================================================ the list of 2026-11-22's fourth phase
+def nanite_frames16(sec=8.0, reps=3):
+    """the frames with Nanite on and off (r.Nanite 0: every Nanite mesh drawn by its fallback, as the meshes were before), in turn"""
+    w = UES.get_game_world(); on_, off_ = [], []
+    try:
+        for k in range(reps):
+            unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1"); yield from rwait(2.0)
+            n = 0; t0 = time.time()
+            while time.time() - t0 < sec: yield; n += 1
+            on_.append(round(n / (time.time() - t0), 1))
+            unreal.SystemLibrary.execute_console_command(w, "r.Nanite 0"); yield from rwait(2.0)
+            n = 0; t0 = time.time()
+            while time.time() - t0 < sec: yield; n += 1
+            off_.append(round(n / (time.time() - t0), 1))
+    finally:
+        unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1")
+    return {"on": sorted(on_)[len(on_) // 2], "off": sorted(off_)[len(off_) // 2], "on_each": on_, "off_each": off_}
+
+
+def step_nanite16():
+    """Nanite foliage in the wilds (944 nanite_wild): every biome mesh's Nanite state and shape preservation (the trees, bushes, grass,
+    flowers, reeds and crops voxelised, the rest plain, none see-through made Nanite); in three biomes (the temperate autumn forests,
+    BEFORE's slowest, the pine forests and the grasslands) at noon, the frame rate with Nanite on and with r.Nanite 0 (the meshes' fallbacks,
+    as before), three turns each, and a picture each way from the same view. Ok: every mesh 944 chose Nanite is, and in each biome Nanite's
+    frame rate is no worse than the fallbacks' by more than 5 %"""
+    g = G["gen"]; res = {"biomes": {}}; quiet(True); w = UES.get_game_world()
+    try:
+        kinds = {}
+        for bm in g.get_editor_property("wild_biomes"):
+            for f in bm.get_editor_property("foliage"):
+                m = f.get_editor_property("mesh")
+                if not m: continue
+                ns = m.get_editor_property("nanite_settings")
+                k = str(f.get_editor_property("kind"))
+                d = kinds.setdefault(k, {"meshes": set(), "nanite": set(), "voxel": set()})
+                d["meshes"].add(m.get_path_name())
+                if ns.enabled: d["nanite"].add(m.get_path_name())
+                try:
+                    if "VOXEL" in str(ns.get_editor_property("shape_preservation")).upper(): d["voxel"].add(m.get_path_name())
+                except Exception: pass
+        res["kinds"] = {k: {"meshes": len(v["meshes"]), "nanite": len(v["nanite"]), "voxel": len(v["voxel"])} for k, v in kinds.items()}
+        g.set_town_hour(12.0)
+        for bn in ("temperate autumn forests", "pine forests", "grasslands"):
+            pt = find_biome_point(bn)
+            if not pt: res["biomes"][bn] = {"error": "not found"}; continue
+            g = G["gen"]; g.wild_drop_all(); g.wild_put_her(pt[0], pt[1]); yield from wait_chunks(40, 60); ground_put(*pt); yield from rwait(4.0)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4, yaw=30.0)); G["pawn"].set_actor_hidden_in_game(True); yield from rwait(2.0)
+            r = {}
+            r["pic_on"] = yield from shot_wait13("nanite16_" + bn.replace(" ", "_") + "_on", "1280x720")
+            unreal.SystemLibrary.execute_console_command(w, "r.Nanite 0"); yield from rwait(3.0)
+            r["pic_off"] = yield from shot_wait13("nanite16_" + bn.replace(" ", "_") + "_off", "1280x720")
+            unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1"); yield from rwait(2.0)
+            if r["pic_on"] and r["pic_off"]:
+                a, b = png_grid(r["pic_on"], (0, 0, 1, 1), 8, 6), png_grid(r["pic_off"], (0, 0, 1, 1), 8, 6)
+                r["luma_diff"] = round(sum(abs(a[j][i] - b[j][i]) for j in range(6) for i in range(8)) / 48.0, 2)
+            r["frames"] = yield from nanite_frames16()
+            G["pawn"].set_actor_hidden_in_game(False)
+            res["biomes"][bn] = r
+    except Exception as e_:
+        res["error"] = str(e_)
+    finally:
+        try:
+            unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1"); G["pawn"].set_actor_hidden_in_game(False)
+        except Exception: pass
+        quiet(False)
+    bs = [v for v in res["biomes"].values() if "frames" in v]
+    made = sum(v["nanite"] for v in res.get("kinds", {}).values())
+    ok = "error" not in res and len(bs) == 3 and made > 0 and all(v["frames"]["on"] >= 0.95 * v["frames"]["off"] for v in bs)
+    step_result("nanite16", ok, **res)
+
+
+STEPS["nanite16"] = step_nanite16
 SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
 def saves_snapshot():
     """the save folder's files and their bytes: put back at the end, the tests' own new saves deleted (PR #61's review)"""

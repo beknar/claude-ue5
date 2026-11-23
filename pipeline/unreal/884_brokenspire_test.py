@@ -5864,6 +5864,105 @@ def step_interior16():
 STEPS.update({"dist16": step_dist16, "interior16": step_interior16})
 
 
+# ================================================================================================ the list of 2026-11-22's fifth phase
+def png_grid16(path, nx=8, ny=6):
+    """the mean luma of each of nx x ny cells of a PNG (zlib only: the editor's Python has no image library), as 888's png_grid"""
+    import zlib, struct
+    data = open(path, "rb").read(); pos = 8; w = h = 0; ct = 6; idat = b""
+    while pos + 8 <= len(data):
+        ln, typ = struct.unpack(">I4s", data[pos:pos + 8]); body = data[pos + 8:pos + 8 + ln]; pos += 12 + ln
+        if typ == b"IHDR": w, h, bd, ct = struct.unpack(">IIBB", body[:10])
+        elif typ == b"IDAT": idat += body
+        elif typ == b"IEND": break
+    bpp = 4 if ct == 6 else 3; raw = zlib.decompress(idat); stride = w * bpp
+    prev = bytearray(stride); S = [[0.0] * nx for _ in range(ny)]; N = [[0] * nx for _ in range(ny)]; i = 0
+    for y in range(h):
+        f = raw[i]; line = bytearray(raw[i + 1:i + 1 + stride]); i += 1 + stride
+        for x in range(stride):
+            a = line[x - bpp] if x >= bpp else 0; b = prev[x]; c = prev[x - bpp] if x >= bpp else 0
+            if f == 1: line[x] = (line[x] + a) & 255
+            elif f == 2: line[x] = (line[x] + b) & 255
+            elif f == 3: line[x] = (line[x] + (a + b) // 2) & 255
+            elif f == 4:
+                p_ = a + b - c; pa, pb, pc = abs(p_ - a), abs(p_ - b), abs(p_ - c)
+                line[x] = (line[x] + (a if pa <= pb and pa <= pc else b if pb <= pc else c)) & 255
+        prev = line
+        if y % 4: continue
+        cy = min(ny - 1, y * ny // h)
+        for x in range(0, w, 4):
+            o = x * bpp; cx = min(nx - 1, x * nx // w)
+            S[cy][cx] += 0.2126 * line[o] + 0.7152 * line[o + 1] + 0.0722 * line[o + 2]; N[cy][cx] += 1
+    return [[S[j][i_] / max(N[j][i_], 1) for i_ in range(nx)] for j in range(ny)]
+
+
+def shot_file16(name, sec=12.0):
+    """a picture taken and waited for on disk; its path or None"""
+    fp = os.path.join(SHOTS, f"bs_{TAG}_{name}.png")
+    if os.path.exists(fp): os.remove(fp)
+    shot(name, "1280x720"); t0 = time.time(); last = -1
+    while time.time() - t0 < sec:
+        yield from rwait(0.4)
+        if os.path.exists(fp):
+            n = os.path.getsize(fp)
+            if n > 0 and n == last: return fp
+            last = n
+    return None
+
+
+def step_nanite16():
+    """Nanite in the cities (944 nanite_town): the share of the town's pieces' meshes that are Nanite, and those given LODs instead; in each
+    city's square at noon, a picture with Nanite on and with r.Nanite 0 (the fallbacks: as before) from the same view (nothing missing or
+    black: the two pictures' mean luma within 12), and the frame rate each way, three turns. Ok: most of the pieces' meshes Nanite, no city
+    picture changed past 12, and no city's frame rate with Nanite worse than the fallbacks' by more than 5 %"""
+    g = G["gen"]; res = {"cities": {}}; quiet(True); w = UES.get_game_world()
+    try:
+        meshes, nan = set(), set()
+        for p in g.get_editor_property("pieces").values():
+            m = p.mesh
+            if not m: continue
+            meshes.add(m.get_path_name())
+            if m.get_editor_property("nanite_settings").enabled: nan.add(m.get_path_name())
+        res["pieces"] = {"meshes": len(meshes), "nanite": len(nan)}
+        g.set_town_hour(12.0)
+        for name in ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne", "Kethrys Spire", "Heaven"):
+            yield from find_town(name); g = G["gen"]
+            sq = place("square")
+            if sq: put(sq, yaw=0.0)
+            yield from rwait(8.0)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=0.0)); G["pawn"].set_actor_hidden_in_game(True); yield from rwait(2.0)
+            r = {}
+            p_on = yield from shot_file16(f"nanite16_{name.replace(' ', '_')}_on")
+            unreal.SystemLibrary.execute_console_command(w, "r.Nanite 0"); yield from rwait(3.0)
+            p_off = yield from shot_file16(f"nanite16_{name.replace(' ', '_')}_off")
+            unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1"); yield from rwait(2.0)
+            if p_on and p_off:
+                a, b = png_grid16(p_on), png_grid16(p_off)
+                r["luma_diff"] = round(sum(abs(a[j][i] - b[j][i]) for j in range(6) for i in range(8)) / 48.0, 2)
+            G["pawn"].set_actor_hidden_in_game(False)
+            on_, off_ = [], []
+            for k in range(3):
+                unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1"); yield from rwait(1.5); on_.append((yield from frames16(6.0))["fps"])
+                unreal.SystemLibrary.execute_console_command(w, "r.Nanite 0"); yield from rwait(1.5); off_.append((yield from frames16(6.0))["fps"])
+            unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1")
+            r["fps_on"] = sorted(on_)[1]; r["fps_off"] = sorted(off_)[1]; r["on_each"] = on_; r["off_each"] = off_
+            res["cities"][name] = r
+    except Exception as e_:
+        res["error"] = str(e_)
+    finally:
+        try:
+            unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1"); G["pawn"].set_actor_hidden_in_game(False)
+        except Exception: pass
+        quiet(False)
+    cs = list(res["cities"].values())
+    pc = res.get("pieces", {})
+    ok = ("error" not in res and len(cs) == 6 and pc.get("nanite", 0) * 2 > pc.get("meshes", 1)
+          and all(c["fps_on"] >= 0.95 * c["fps_off"] and c.get("luma_diff", 99) < 12.0 for c in cs))
+    step_result("nanite16", ok, **res)
+
+
+STEPS.update({"nanite16": step_nanite16})
+
+
 def run():
     G["saves"] = saves_snapshot()
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
