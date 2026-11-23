@@ -592,3 +592,10 @@ Every city: Brokenspire, Vel Morrath, Ashenreach, Graymourne, Kethrys Spire and 
   - The batching measured: the town built again with the interiors in the town's batches (`rd.InteriorBatch 0`) ran its square at 7.8 a second in the editor's play window, against 23.0 batched by building (the rule hides only what is batched by building: in the town's batches every interior stayed drawn).
 
 Rebuild note (the list of 2026-11-22's sixth and seventh phases): C++ only; a city built in play takes the per-building batches (Brokenspire's saved section too, rebuilt with its new seed every game). Check with `884_brokenspire_test.ps1 interior16,dist16 <tag> 3600 -Light`.
+
+### Nanite in the cities (the list's fifth phase)
+
+- `944 nanite_town` makes the meshes of the town's pieces Nanite (332 meshes: 106 made, 217 already, 8 without a mesh); a mesh with a see-through material, which Nanite cannot draw (Heaven's six cars, its dome and its bus stop), gets LODs instead (LOD1 from 80 m, LOD2 from 200 m). `869` then marks the materials. 323 of the 332 are Nanite.
+- Measured in the editor's play window at noon in each square (`884 nanite16`): Brokenspire 25.0 a second, Vel Morrath 22.3, Ashenreach 23.4, Graymourne 5.1, Kethrys Spire 22.2, Heaven 19.1; each city's picture with `r.Nanite 0` (the fallbacks) within 1.8 in mean luma of Nanite's: nothing missing or drawn wrong. With the fallbacks every city but Heaven ran at 0.5 to 1.6 a second (Heaven 12.7), and each switch slowed the turns after it: in the editor the fallbacks are not the cities as they were, so the frame rates before and after are the packaged game's (BEFORE and MID in `docs/performance.md`).
+
+Rebuild note (the fifth phase): `944 nanite_town`, then `869`; check with `884_brokenspire_test.ps1 nanite16 <tag> 3600 -Light`.

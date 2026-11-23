@@ -5911,9 +5911,11 @@ def shot_file16(name, sec=12.0):
 
 def step_nanite16():
     """Nanite in the cities (944 nanite_town): the share of the town's pieces' meshes that are Nanite, and those given LODs instead; in each
-    city's square at noon, a picture with Nanite on and with r.Nanite 0 (the fallbacks: as before) from the same view (nothing missing or
-    black: the two pictures' mean luma within 12), and the frame rate each way, three turns. Ok: most of the pieces' meshes Nanite, no city
-    picture changed past 12, and no city's frame rate with Nanite worse than the fallbacks' by more than 5 %"""
+    city's square at noon, the frame rate with Nanite (three turns, before anything is switched), then a picture with Nanite and one with
+    r.Nanite 0 (the meshes' fallbacks) from the same view: nothing missing or black, the two pictures' mean luma within 12. The fallbacks'
+    frame rate is recorded, not judged: in the editor r.Nanite 0 ran every city at about 1 a second (t16t, 2026-11-23), and each switch
+    slowed the next turns (Heaven's 19, 11, 6), so it is not the cities before the change: that is the packaged game's MID run, at BEFORE's
+    places. Ok: most of the pieces' meshes Nanite, every city's two pictures within 12"""
     g = G["gen"]; res = {"cities": {}}; quiet(True); w = UES.get_game_world()
     try:
         meshes, nan = set(), set()
@@ -5931,20 +5933,18 @@ def step_nanite16():
             yield from rwait(8.0)
             G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=0.0)); G["pawn"].set_actor_hidden_in_game(True); yield from rwait(2.0)
             r = {}
+            on_ = []
+            for k in range(3): on_.append((yield from frames16(6.0))["fps"])
+            r["fps_on"] = sorted(on_)[1]; r["on_each"] = on_
             p_on = yield from shot_file16(f"nanite16_{name.replace(' ', '_')}_on")
             unreal.SystemLibrary.execute_console_command(w, "r.Nanite 0"); yield from rwait(3.0)
-            p_off = yield from shot_file16(f"nanite16_{name.replace(' ', '_')}_off")
+            p_off = yield from shot_file16(f"nanite16_{name.replace(' ', '_')}_off", 60.0)
+            r["fps_off"] = (yield from frames16(6.0))["fps"]
             unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1"); yield from rwait(2.0)
             if p_on and p_off:
                 a, b = png_grid16(p_on), png_grid16(p_off)
                 r["luma_diff"] = round(sum(abs(a[j][i] - b[j][i]) for j in range(6) for i in range(8)) / 48.0, 2)
             G["pawn"].set_actor_hidden_in_game(False)
-            on_, off_ = [], []
-            for k in range(3):
-                unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1"); yield from rwait(1.5); on_.append((yield from frames16(6.0))["fps"])
-                unreal.SystemLibrary.execute_console_command(w, "r.Nanite 0"); yield from rwait(1.5); off_.append((yield from frames16(6.0))["fps"])
-            unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1")
-            r["fps_on"] = sorted(on_)[1]; r["fps_off"] = sorted(off_)[1]; r["on_each"] = on_; r["off_each"] = off_
             res["cities"][name] = r
     except Exception as e_:
         res["error"] = str(e_)
@@ -5956,7 +5956,7 @@ def step_nanite16():
     cs = list(res["cities"].values())
     pc = res.get("pieces", {})
     ok = ("error" not in res and len(cs) == 6 and pc.get("nanite", 0) * 2 > pc.get("meshes", 1)
-          and all(c["fps_on"] >= 0.95 * c["fps_off"] and c.get("luma_diff", 99) < 12.0 for c in cs))
+          and all(c.get("luma_diff", 99) < 12.0 for c in cs))
     step_result("nanite16", ok, **res)
 
 

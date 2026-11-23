@@ -1077,3 +1077,10 @@ The tool's exit code is 1 for the 15 known unreadable pack files the asset regis
   - The far pictures differ by 7 in mean luma.
 
 Rebuild note 2n (the list of 2026-11-22's second and third phases): C++ only (`RDList16b.cpp`, `RDList16c.cpp`, `RDWildChunk.cpp`, `RDSkyFar.cpp`; the `MoviePlayer` module); check with `888_wilderness_test.ps1 allies16,loading16,caveport16,lod16 <tag> 3600 -Light`.
+
+### Nanite foliage (the list's fourth phase)
+
+- `944 nanite_wild` makes every mesh the biomes lay Nanite (147 meshes: 118 made, 29 already): the trees, bushes, grass, flowers, reeds and crops with the voxel shape preservation (Nanite foliage: the canopies and blades keep their outline as they are simplified, 106 meshes), the rocks, logs, litter and ice plain. A swaying material's world offset is bounded (`max_world_position_offset_displacement`), or Nanite culls a blade that has moved out of its box. `869` then marks the materials used with Nanite. `944 nanite_wild check` lists what it would change.
+- Measured in the editor's play window (`888 nanite16`, three turns each, Nanite on against `r.Nanite 0`, the meshes' fallbacks): the temperate autumn forests 31.8 against 32.6 a second, the pine forests 34.2 against 32.7, the grasslands 30.5 against 31.1: no faster, no slower there. The pictures: the grasslands within 2.8 in mean luma, the pine forests 12.2, the autumn forests 28: the voxelised canopies throw denser shadows on the ground than the fallbacks' (a fallback is not the mesh as it was before; the packaged game's MID run compares the places with BEFORE's).
+
+Rebuild note (the fourth phase): `944 nanite_wild`, then `869`; check with `888_wilderness_test.ps1 nanite16 <tag> 3600 -Light`.
