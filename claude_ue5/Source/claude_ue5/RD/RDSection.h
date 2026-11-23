@@ -480,6 +480,17 @@ public:
 	const TArray<FVector>& GetRampFeet() const { return TownRampFeet; }
 	const TArray<FVector>& GetRampTops() const { return TownRampTops; }
 
+	/** the list of 2026-11-22's seventh phase (RDList16e.cpp): a town building's interior (what TownFurnish lays in it) in instanced
+	 *  components of its own, keyed by building, mesh (or a piece's own material) and collision, so the engine's occlusion culling
+	 *  hides what its walls hide and the game's own rule can hide it whole; culled from 40 m (its small clutter from 25 m); its
+	 *  windows (their middle on the wall, their way out) for the rule's sight lines */
+	int32 Bld16 = -1;
+	TMap<FString, UInstancedStaticMeshComponent*> HismsBld16;
+	TMap<FString, TArray<FTransform>> PendingBld16;
+	TMap<int32, TArray<TWeakObjectPtr<UInstancedStaticMeshComponent>>> TownBldIsm16;
+	struct FTownWin16 { int32 Bld = -1; FVector At = FVector::ZeroVector, Out = FVector::ForwardVector; };
+	TArray<FTownWin16> TownWindows16;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Destroyed() override;

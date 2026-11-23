@@ -4089,6 +4089,45 @@ public:
 	bool WildStandableNear(FVector2D& Wm, double MaxM) const;
 	/** the wilds: put her down on dry ground within 200 m of Wm (metres), a town far behind her let go; never a town's travel */
 	bool WildPutDownNear(FVector2D Wm);
+	// ---- the list of 2026-11-22's seventh phase (RDList16e.cpp): the towns' interiors batched by building and hidden unless seen
+	static bool InteriorBatch16();
+	void TickTownInteriors16(float Dt);
+	/** tests: "<hide on>|<batch on>|<buildings>|<shown>|<hidden>|<people hidden>|<windows>|<interior batches>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") FString GetInteriors16() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") TArray<FString> GetInteriorLines16() const;
+	struct FTownInterior16
+	{
+		bool bNever = false, bShown = true, bSet = false;
+		uint8 Why = 1; int32 WhyWin = -1;
+		FVector2D A = FVector2D::ZeroVector, B = FVector2D::ZeroVector;
+		TArray<TWeakObjectPtr<class UInstancedStaticMeshComponent>> Ism;
+		struct FProp { TWeakObjectPtr<class USceneComponent> C; bool bHidden0 = false; };
+		TArray<FProp> Props;
+		TArray<TWeakObjectPtr<class USceneComponent>> Hearths;
+		TArray<int32> Doors, Windows;
+	};
+	TArray<FTownInterior16> TownInt16;
+	TWeakObjectPtr<class ARDSection> TownInteriorsFor16;
+	float TownInteriorTimer16 = 0.f;
+	int32 TownIntShown16 = 0, TownIntHidden16 = 0, TownIntPeopleHidden16 = 0;
+	// ---- the list of 2026-11-22's sixth phase (RDList16d.cpp): the towns' lights, people and Heaven's dome by distance
+	void TickTownLod16(float Dt);
+	static FName StreetLampTag16();
+	/** tests: "<on>|<lights>|<built to shadow>|<shadowing now>|<street lamps>|<people and animals: full|half|quarter|eighth|not drawn>|<dome drawn, -1 none>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") FString GetTownLod16() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") TArray<FString> GetTownLodLines16() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") TArray<FString> GetTownLightLines16() const;
+	/** one actor hidden by the distance rule or an interior's (by the reason's tag), shown again only if these rules hid it */
+	static void SetHidden16(AActor* A, FName Why, bool bHide);
+	struct FTownLight16 { TWeakObjectPtr<class UPointLightComponent> L; bool bShadows = false, bLamp = false; float Draw0 = 0.f, Fade0 = 0.f; };
+	TArray<FTownLight16> TownLights16;
+	TWeakObjectPtr<class ARDSection> TownLodFor16;
+	TWeakObjectPtr<class UStaticMeshComponent> TownDome16;
+	float TownLodTimer16 = 0.f;
+	int32 TownShadowing16 = 0;
+	int32 TownBands16[5] = { 0, 0, 0, 0, 0 };
+	bool bTownLodApplied16 = false;
+	int32 TownLodLightsSeen16 = -1;
 	// ---- the list of 2026-11-22's third phase (RDList16c.cpp): the wilds' ground in levels of detail, collision near her only
 	bool IsWildLod16() const;
 	double WildChunkNearM16(const FIntPoint& C, const FVector2D& At) const;

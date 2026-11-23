@@ -200,7 +200,8 @@ void ARDSection::HeavenSpotBuild(const FTownSpot& Sp)
 		// (its arm out over the street; one in three lit (the town's lights are many already))
 		AddPieceAt(TEXT("Heaven.StreetLight"), Sp.At, Sp.Yaw);
 		if (HashCombine(GetTypeHash(FIntPoint(FMath::RoundToInt(Sp.At.X), FMath::RoundToInt(Sp.At.Y))), 0x11u) % 3u == 0u)
-			AddLight(Sp.At + FRotator(0, Sp.Yaw, 0).RotateVector(FVector(260.f, 0, 0)) + FVector(0, 0, 740.f), FLinearColor(1.f, 0.9f, 0.75f), 220.f, 1700.f, false, 0.f);
+			if (UPointLightComponent* L = AddLight(Sp.At + FRotator(0, Sp.Yaw, 0).RotateVector(FVector(260.f, 0, 0)) + FVector(0, 0, 740.f), FLinearColor(1.f, 0.9f, 0.75f), 220.f, 1700.f, false, 0.f))
+				L->ComponentTags.Add(ARDDungeonGenerator::StreetLampTag16());          // (the list of 2026-11-22: a street lamp keeps its 90 m)
 		MarkBlocked(Sp.At, 0.f, FVector2D(90.f, 90.f), true);
 		return;
 	}

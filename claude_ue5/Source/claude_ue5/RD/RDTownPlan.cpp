@@ -158,7 +158,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 	TownInner = FIntRect(Ground.Min, Ground.Max);
 	TownBorder.Reset(); TownPaths.Reset(); TownRoadMask.Init(0, N * N); TownTowerDoors.Reset(); TownTowerMids.Reset();
 	TownWorks.Reset(); TownPens.Reset(); TownGardens.Reset(); TownSpits.Reset(); TownGrassClumps = 0; TownSmallBushes = 0;
-	TownOvens.Reset(); TownBeds.Reset(); TownFeet.Reset(); TownAdults2 = TownHomeKids = TownSquareKidsDropped = 0; TownFoods.Reset(); TownDummies.Reset(); TownPortcullis = -1; TownLevers.Reset(); TownPenGates.Reset(); TownLiftW.Reset(); bTownLiftOn = false;
+	TownOvens.Reset(); TownBeds.Reset(); TownFeet.Reset(); TownWindows16.Reset(); TownBldIsm16.Reset(); TownAdults2 = TownHomeKids = TownSquareKidsDropped = 0; TownFoods.Reset(); TownDummies.Reset(); TownPortcullis = -1; TownLevers.Reset(); TownPenGates.Reset(); TownLiftW.Reset(); bTownLiftOn = false;
 	CastleStairwell.Reset(); CastleStairRoom = -1; CastleStairFoot = CastleStairTop = FVector::ZeroVector;
 	// (a frame grid of what each tile is taken by: 0 free, 1 road, 2 square, 3 building or its margin, 4 kept clear, 9 outside)
 	TArray<uint8> Use; Use.Init(0, S * S);
@@ -1427,6 +1427,12 @@ void ARDSection::TownShellBuilding(int32 BI)
 				// (a burned house: the fire took this storey and all above it)
 				if (St >= Standing) break;
 				AddPiece(Nm, WallT(P, Sd.Out, Z));
+				// (the list of 2026-11-22's seventh phase: a window, its middle and its way out, for the interiors' sight lines)
+				if (!bDoor && !bBoarded && Nm != TownPiece(B, TEXT("Wall")))
+				{
+					FTownWin16 Wn; Wn.Bld = BI; Wn.At = WallT(P, Sd.Out, Z + 150.f).GetLocation(); Wn.Out = FRotator(0, Yaw0, 0).RotateVector(FVector(Sd.Out.X, Sd.Out.Y, 0));
+					TownWindows16.Add(Wn);
+				}
 				// (a window's sill stands out of the wall where its collision does not reach: a hidden box over the piece's
 				// whole bounds (the user's of 2026-11-02: she walked through the ledges))
 				if (Nm != TownPiece(B, TEXT("Wall")) && !bDoor) AddMeshBoundsCollider(Nm, WallT(P, Sd.Out, Z));
@@ -1620,6 +1626,9 @@ TArray<FVector> ARDSection::GetTownDoorPoints() const
 void ARDSection::TownFurnish(FRandomStream& R, int32 BI)
 {
 	const FTownBld& B = TownBlds[BI];
+	// (the list of 2026-11-22's seventh phase: what is laid in it is its interior, batched as its own (not the special shells'))
+	Bld16 = (BI == CastleBld || B.Kind == TK_Castle || B.Kind == TK_Cathedral || B.Kind == TK_Foundry || B.Kind == TK_Spire || B.Kind == TK_Research) ? -1 : BI;
+	ON_SCOPE_EXIT { Bld16 = -1; };
 	for (const int32 RI : B.Rooms) Furnish(R, RI);
 	if (B.Rooms.Num() == 0) return;
 	// what the trades add to the dungeon's furnishing: their service's piece (a counter, a basin, the stash's chest) by the wall

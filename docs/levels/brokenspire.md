@@ -555,3 +555,40 @@ The user's words: "horses when either walking or galloping move in an unnatural 
 10. The fourth reel (`renders/gamebar renders/Brokenspire4_2026-11-03_09-34_Showcase.mp4` and `_20MB`, 60 s, 1080p, after PR #15, the map from above): the package of step 6 built again (13.3 GB, the four runs ok, the town's peak 3.3 GB), recorded as the third (`... -Title Brokenspire4_2026-11-03_09-34_GameBar`), cut with `cut_recording.py ... Brokenspire4_2026-11-03_09-34 2 60` (+1.6 dB). Its contact sheet: the square and the elder's panel (0-12 s), a cook at her fire, the cows' pen, the sunflower garden (12-24 s), the map from above zoomed in on her (27 s), the castle's hall and the Mistgate (30-45 s), the castle under autoplay. Game Bar recorded the game at the first take (its file named after `claude_ue5`).
 
 11. The fifth reel (`renders/gamebar renders/Brokenspire7_2026-11-05_Showcase.mp4` and `_20MB`, 3 min 22 s, 1080p, the list of 2026-11-04 after PR #18): the package of step 6 built again (15.2 GB, the four runs ok, the town's peak 4.7 GB), `record_mistward_autoplay.ps1 -Recorder gamebar -Show7 -Heroes Warrior -Seconds 290 ... -Title Brokenspire7_2026-11-05_GameBar` (the showcase pilot, `RD/RDShow7.cpp`: its 17 beats with their captions, all done), cut with `cut_recording.py ... Brokenspire7_2026-11-05 2 202` (+7.3 dB). Game Bar recorded the game at the first take (2560 x 1440). Its contact sheet: the sky over the square, the cobbles, a trade's sign, a garden harvested, a pen's gate and its hens, the lit tavern and its food, the oven's panel (its first seconds a dark kitchen), the mill, the open ground, the portcullis stopping her and rising, the road out, the map (mostly fog: she has explored little), a deer, rain and a storm, the dusk, the moonlit night with stars, a save named "Meadows at dawn" and the Load page.
+
+## The list of 2026-11-22: the cities' lights, people and interiors by distance
+
+Every city: Brokenspire, Vel Morrath, Ashenreach, Graymourne, Kethrys Spire and Heaven.
+
+- **Lights by distance** (`RD/RDList16d.cpp`, four times a second, `rd.TownLod`):
+  - A town's point lights are drawn to 45 m, fading out from 35 m; they were drawn to 90 m.
+  - The street lamps (Heaven's, tagged `RDStreetLamp16`) keep their 90 m, so an avenue is not black beyond 45 m.
+  - A light built to cast shadows casts them only within 18 m of the camera (20 m to let go).
+  - The lights are gathered once the city is built: gathered while a wilderness city was still being built, they missed nearly all of it.
+- **People by distance:** the townsfolk and the town's animals are animated:
+  - at full rate under 15 m;
+  - every second frame to 40 m;
+  - every fourth frame to 80 m;
+  - every eighth frame to 110 m;
+  - beyond 110 m not drawn (hidden whole: a lantern or a held tool goes with them), their logic ticked ten times a second, so their day goes on (at once a second, a pen's push moved an animal through its fence).
+- **Heaven's shield dome** is drawn only while the camera is outside it.
+- **Interiors** (`RD/RDList16e.cpp`, the user's choice of all three options):
+  1. **Batched by building:** what `TownFurnish` lays in a building is batched by building (`RDSection::AddPiece`'s `Bld16`), culled from 40 m, its small clutter (under 40 cm round) from 25 m.
+  2. **Shown only when seen:** ten times a second, a building's interior (its batches, the lights and flames inside it, its hearth's fire and glow, its props and containers with each part's own hidden state kept, the townsfolk in it) is drawn only when the camera or she is inside it, a door of it is open or opening within 45 m, or a window of it within 45 m has a clear line from the camera on its outside. Each window is recorded in `TownShellBuilding`. A hidden interior whose door begins to open is shown in that frame.
+  3. **Nanite on the furniture and props** is the list's fifth phase.
+  - The special shells (the castle, the cathedral, the foundry, the spire, the research facility) and the burned houses are never hidden. `rd.InteriorHide`, `rd.InteriorBatch`, and `rd.InteriorWindows` (the window rule alone off, for the door's test) switch it.
+- **`884 dist16`**, at night in each city's square:
+  - No light casts a shadow beyond 20 m.
+  - Every light but the street lamps is drawn to 45 m; Heaven's 55 street lamps keep 90 m.
+  - Every person and animal is in its band (Brokenspire 176, Graymourne 222); 61 to 87 of those beyond 110 m moved within 20 s.
+  - The dome is not drawn from inside and is drawn from outside.
+  - The editor's play window read 23.6 FPS with the rules on against 19.4 off in Brokenspire, the other cities alike or better.
+- **`884 interior16`**:
+  - From Brokenspire's square, 90 of 130 interiors are hidden, with 773 interior batches.
+  - A home 35 m off, hidden, has its door opened and is shown in the door's first frame.
+  - She inside it: shown.
+  - From 20 m before its door: shown by a window whose line from the camera the test checks apart from the rule.
+  - Within 45 m of the square every home with a door is in sight of one of its windows, so the door's own test runs with the window rule off.
+  - The batching measured: the town built again with the interiors in the town's batches (`rd.InteriorBatch 0`) ran its square at 7.8 a second in the editor's play window, against 23.0 batched by building (the rule hides only what is batched by building: in the town's batches every interior stayed drawn).
+
+Rebuild note (the list of 2026-11-22's sixth and seventh phases): C++ only; a city built in play takes the per-building batches (Brokenspire's saved section too, rebuilt with its new seed every game). Check with `884_brokenspire_test.ps1 interior16,dist16 <tag> 3600 -Light`.

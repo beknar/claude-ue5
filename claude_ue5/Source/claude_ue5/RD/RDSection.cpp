@@ -578,6 +578,37 @@ bool ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollisio
 		return true;
 	}
 	if (!P->Mesh) return true;
+	// (the list of 2026-11-22's seventh phase: a town building's interior in components of its own (RDList16e.cpp))
+	if (Bld16 >= 0 && Generator && Generator->bTown && !P->bHidden && ARDDungeonGenerator::InteriorBatch16())
+	{
+		const bool bColB = P->bCollision && !bForceNoCollision;
+		// (small (clutter) and large placings of one mesh in separate batches: the cull and the shadow are the component's, and the first
+		// instance's size decided them for every later one (PR #113's review))
+		const bool bSmallB = P->Mesh->GetBounds().SphereRadius * (float)W.GetScale3D().GetMax() < 40.f;
+		const FString Key = FString::Printf(TEXT("%d|%s|%d|%d"), Bld16, P->Material ? *PcName(Name).ToString() : *P->Mesh->GetPathName(), bColB ? 1 : 0, bSmallB ? 1 : 0);
+		PendingBld16.FindOrAdd(Key).Add(W);
+		if (!HismsBld16.Contains(Key))
+		{
+			UInstancedStaticMeshComponent* H = NewObject<UInstancedStaticMeshComponent>(this, NAME_None, RF_Transactional);
+			H->SetStaticMesh(P->Mesh);
+			if (P->Material) for (int32 Sl = 0; Sl < P->Mesh->GetStaticMaterials().Num(); ++Sl) H->SetMaterial(Sl, P->Material);
+			H->SetMobility(EComponentMobility::Static);
+			H->SetupAttachment(RootComponent);
+			H->SetCollisionProfileName(bColB ? TEXT("BlockAll") : TEXT("NoCollision"));
+			if (!bColB) H->SetCanEverAffectNavigation(false);
+			// (culled: the small clutter (under 40 cm round: cups, books, candles, food) from 20 to 25 m, the rest from 35 to 40 m)
+			const bool bSmall = bSmallB;
+			if (P->CullDistance > 0.f) { H->SetCullDistances(FMath::RoundToInt(P->CullDistance * 0.8f), FMath::RoundToInt(P->CullDistance)); H->SetCastShadow(false); }
+			else H->SetCullDistances(bSmall ? 2000 : 3500, bSmall ? 2500 : 4000);
+			if (bSmall) H->SetCastShadow(false);
+			H->RegisterComponent();
+			AddInstanceComponent(H);
+			HismsBld16.Add(Key, H);
+			TownBldIsm16.FindOrAdd(Bld16).Add(H);
+		}
+		++NumInstances;
+		return true;
+	}
 	// (Brokenspire: a piece in a material of its own (a burned house's timbers) has its own instanced component, by name)
 	// (keyed by name and collision: a piece placed once as decor without collision and once as a wall gets two components,
 	// or the first call decided for both (the PR review's find); a hidden piece keeps the hidden path below)
@@ -635,7 +666,8 @@ void ARDSection::FlushInstances()
 	for (auto& KV : PendingNoCol) if (UInstancedStaticMeshComponent** H = HismsNoCol.Find(KV.Key)) (*H)->AddInstances(KV.Value, false, true);
 	for (auto& KV : PendingHidden) if (UInstancedStaticMeshComponent** H = HismsHidden.Find(KV.Key)) (*H)->AddInstances(KV.Value, false, true);
 	for (auto& KV : PendingMat) if (UInstancedStaticMeshComponent** H = HismsMat.Find(KV.Key)) (*H)->AddInstances(KV.Value, false, true);
-	Pending.Reset(); PendingNoCol.Reset(); PendingHidden.Reset(); PendingMat.Reset();
+	for (auto& KV : PendingBld16) if (UInstancedStaticMeshComponent** H = HismsBld16.Find(KV.Key)) (*H)->AddInstances(KV.Value, false, true);
+	Pending.Reset(); PendingNoCol.Reset(); PendingHidden.Reset(); PendingMat.Reset(); PendingBld16.Reset();
 }
 
 UPointLightComponent* ARDSection::AddLight(const FVector& Loc, const FLinearColor& Color, float Candelas, float Radius, bool bShadows, float Flicker)

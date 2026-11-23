@@ -901,7 +901,7 @@ void ARDDungeonGenerator::RebuildTown(int32 Seed)
 // ================================================================================================ every frame
 void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 {
-	if (bTown) { TickDayNight(Dt); TickTownLights(Dt); TickTownLife(Dt); TickTownSatellite(Dt); TickSky7(Dt, PC); if (PC && PC->GetPawn()) { TickWildLife(Dt, PC->GetPawn()->GetActorLocation()); if (bWild) TickWildEncounters(Dt, PC->GetPawn()->GetActorLocation()); TickHorse(Dt); TickWild10(Dt, PC->GetPawn()->GetActorLocation()); TickWild11(Dt, PC->GetPawn()->GetActorLocation()); if (bWild) { TickWildSites12(Dt, PC->GetPawn()->GetActorLocation()); TickWildQuests12(Dt, PC->GetPawn()->GetActorLocation()); TickWildRuins12(Dt, PC->GetPawn()->GetActorLocation()); TickWildScenery13(Dt, PC->GetPawn()->GetActorLocation()); } } }
+	if (bTown) { TickTownLod16(Dt); TickTownInteriors16(Dt); TickDayNight(Dt); TickTownLights(Dt); TickTownLife(Dt); TickTownSatellite(Dt); TickSky7(Dt, PC); if (PC && PC->GetPawn()) { TickWildLife(Dt, PC->GetPawn()->GetActorLocation()); if (bWild) TickWildEncounters(Dt, PC->GetPawn()->GetActorLocation()); TickHorse(Dt); TickWild10(Dt, PC->GetPawn()->GetActorLocation()); TickWild11(Dt, PC->GetPawn()->GetActorLocation()); if (bWild) { TickWildSites12(Dt, PC->GetPawn()->GetActorLocation()); TickWildQuests12(Dt, PC->GetPawn()->GetActorLocation()); TickWildRuins12(Dt, PC->GetPawn()->GetActorLocation()); TickWildScenery13(Dt, PC->GetPawn()->GetActorLocation()); } } }
 	APawn* P = PC ? PC->GetPawn() : nullptr;
 	if (!P) return;
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
@@ -1038,6 +1038,7 @@ void ARDDungeonGenerator::TickTownLights(float Dt)
 {
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	if (!S || S->TownBlds.Num() == 0) return;
+	if (S->IsBuilding()) return;          // (the list of 2026-11-22, PR #113's review: a wilderness city's lights gathered while it was built missed most)
 	TownLightsT -= Dt;
 	if (TownLightsFor.Get() == S && TownLightsT > 0.f) return;
 	TownLightsT = 1.f;
