@@ -1,0 +1,315 @@
+{
+ "tag": "t16k",
+ "plan": [
+  "interior16",
+  "dist16"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "interior16",
+   "ok": true,
+   "square": {
+    "hide": true,
+    "batch": true,
+    "buildings": 130,
+    "shown": 40,
+    "hidden": 90,
+    "people_hidden": 4,
+    "windows": 1497,
+    "batches": 773
+   },
+   "before_door": {
+    "shown": false,
+    "never": false,
+    "batches": 6,
+    "props": 1,
+    "doors": 1,
+    "windows": 20,
+    "why": "hidden",
+    "window": null
+   },
+   "door_alpha_before": 0.0,
+   "from_her_m": 35.5,
+   "home": {
+    "index": 82,
+    "door": 82
+   },
+   "swing": {
+    "first_open_frame": 0,
+    "first_shown_frame": 0,
+    "frames": [
+     [
+      0.56,
+      true
+     ],
+     [
+      0.96,
+      true
+     ],
+     [
+      1.0,
+      true
+     ],
+     [
+      1.0,
+      true
+     ],
+     [
+      1.0,
+      true
+     ],
+     [
+      1.0,
+      true
+     ],
+     [
+      1.0,
+      true
+     ],
+     [
+      1.0,
+      true
+     ]
+    ]
+   },
+   "inside": {
+    "shown": true,
+    "never": false,
+    "batches": 6,
+    "props": 1,
+    "doors": 1,
+    "windows": 20,
+    "why": "inside",
+    "window": null
+   },
+   "away": {
+    "shown": true,
+    "never": false,
+    "batches": 6,
+    "props": 1,
+    "doors": 1,
+    "windows": 20,
+    "why": "window",
+    "window": [
+     1650,
+     300,
+     152
+    ]
+   },
+   "away_window_clear": true,
+   "frames_rule_on": {
+    "median_fps": 18.7,
+    "each": [
+     18.7,
+     20.3,
+     15.0
+    ]
+   },
+   "frames_rule_off": {
+    "median_fps": 19.3,
+    "each": [
+     19.3,
+     19.6,
+     17.6
+    ]
+   }
+  },
+  {
+   "step": "dist16",
+   "ok": true,
+   "Brokenspire": {
+    "lod": {
+     "on": true,
+     "lights": 609,
+     "built_to_shadow": 48,
+     "shadowing": 0,
+     "street_lamps": 0,
+     "bands": [
+      3,
+      13,
+      47,
+      16,
+      97
+     ],
+     "dome": -1
+    },
+    "shadow_far": 0,
+    "draw_wrong": 0,
+    "people": 176,
+    "bands_wrong": 0,
+    "far_people": 97,
+    "far_moved": 61,
+    "frames_on": {
+     "fps": 23.6,
+     "p95_ms": 49.6
+    },
+    "frames_off": {
+     "fps": 19.4,
+     "p95_ms": 73.0
+    }
+   },
+   "Vel Morrath": {
+    "lod": {
+     "on": true,
+     "lights": 473,
+     "built_to_shadow": 59,
+     "shadowing": 0,
+     "street_lamps": 0,
+     "bands": [
+      9,
+      19,
+      28,
+      55,
+      106
+     ],
+     "dome": -1
+    },
+    "shadow_far": 0,
+    "draw_wrong": 0,
+    "people": 217,
+    "bands_wrong": 0,
+    "far_people": 103,
+    "far_moved": 86,
+    "frames_on": {
+     "fps": 23.4,
+     "p95_ms": 49.1
+    },
+    "frames_off": {
+     "fps": 22.8,
+     "p95_ms": 50.6
+    }
+   },
+   "Ashenreach": {
+    "lod": {
+     "on": true,
+     "lights": 434,
+     "built_to_shadow": 68,
+     "shadowing": 0,
+     "street_lamps": 0,
+     "bands": [
+      4,
+      19,
+      31,
+      20,
+      139
+     ],
+     "dome": -1
+    },
+    "shadow_far": 0,
+    "draw_wrong": 0,
+    "people": 213,
+    "bands_wrong": 0,
+    "far_people": 131,
+    "far_moved": 79,
+    "frames_on": {
+     "fps": 3.4,
+     "p95_ms": 642.2
+    },
+    "frames_off": {
+     "fps": 2.8,
+     "p95_ms": 676.3
+    }
+   },
+   "Graymourne": {
+    "lod": {
+     "on": true,
+     "lights": 385,
+     "built_to_shadow": 53,
+     "shadowing": 0,
+     "street_lamps": 0,
+     "bands": [
+      3,
+      11,
+      28,
+      25,
+      155
+     ],
+     "dome": -1
+    },
+    "shadow_far": 0,
+    "draw_wrong": 0,
+    "people": 222,
+    "bands_wrong": 0,
+    "far_people": 154,
+    "far_moved": 77,
+    "frames_on": {
+     "fps": 14.6,
+     "p95_ms": 95.2
+    },
+    "frames_off": {
+     "fps": 15.6,
+     "p95_ms": 90.6
+    }
+   },
+   "Kethrys Spire": {
+    "lod": {
+     "on": true,
+     "lights": 474,
+     "built_to_shadow": 54,
+     "shadowing": 0,
+     "street_lamps": 0,
+     "bands": [
+      4,
+      19,
+      19,
+      21,
+      154
+     ],
+     "dome": -1
+    },
+    "shadow_far": 0,
+    "draw_wrong": 0,
+    "people": 217,
+    "bands_wrong": 0,
+    "far_people": 149,
+    "far_moved": 89,
+    "frames_on": {
+     "fps": 21.1,
+     "p95_ms": 54.1
+    },
+    "frames_off": {
+     "fps": 20.6,
+     "p95_ms": 55.1
+    }
+   },
+   "Heaven": {
+    "lod": {
+     "on": true,
+     "lights": 551,
+     "built_to_shadow": 38,
+     "shadowing": 0,
+     "street_lamps": 55,
+     "bands": [
+      2,
+      15,
+      20,
+      20,
+      74
+     ],
+     "dome": 0
+    },
+    "shadow_far": 0,
+    "draw_wrong": 0,
+    "people": 131,
+    "bands_wrong": 0,
+    "far_people": 73,
+    "far_moved": 53,
+    "frames_on": {
+     "fps": 16.3,
+     "p95_ms": 79.7
+    },
+    "frames_off": {
+     "fps": 16.4,
+     "p95_ms": 80.1
+    },
+    "dome_inside": 0,
+    "dome_outside": 1
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

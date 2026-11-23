@@ -5670,6 +5670,188 @@ def saves_restore(snap):
         fp = os.path.join(SAVES, f)
         if not os.path.exists(fp) or open(fp, "rb").read() != b: open(fp, "wb").write(b); n += 1
     return n
+# ================================================================================================ the list of 2026-11-22's sixth and seventh phases
+def town_lod16():
+    f = str(G["gen"].get_town_lod16()).split("|")
+    return {"on": f[0] == "1", "lights": int(f[1]), "built_to_shadow": int(f[2]), "shadowing": int(f[3]), "street_lamps": int(f[4]),
+            "bands": [int(x) for x in f[5:10]], "dome": int(f[10])}
+
+
+def frames16(sec=10.0):
+    n = 0; t0 = time.time(); last = t0; dts = []
+    while time.time() - t0 < sec:
+        yield; t_ = time.time(); dts.append((t_ - last) * 1000.0); last = t_; n += 1
+    dts = sorted(dts[3:]) or [0.0]
+    return {"fps": round(n / (time.time() - t0), 1), "p95_ms": round(dts[min(len(dts) - 1, int(len(dts) * 0.95))], 1)}
+
+
+def step_dist16():
+    """the cities' lights, people and dome by distance (RD/RDList16d.cpp), in each city's square at night: every light casting a shadow
+    is within 20 m of the camera and none built to shadow within 18 m is left without; every light but the street lamps drawn to 45 m;
+    each townsperson's and animal's animation rate its band's by its distance (full under 15 m ... not drawn beyond 110 m); those
+    beyond 110 m still move over 20 s (their day goes on); in Heaven the dome not drawn from inside it and drawn from outside; the frame
+    rate with rd.TownLod 1 and 0"""
+    g = G["gen"]; res = {}; quiet(True); w = UES.get_game_world()
+    try:
+        g.set_town_hour(23.0)
+        for name in ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne", "Kethrys Spire", "Heaven"):
+            yield from find_town(name); g = G["gen"]
+            sq = place("square")
+            if sq: put(sq, yaw=0.0)
+            yield from rwait(8.0)
+            r = {"lod": town_lod16()}
+            cam = G["pc"].player_camera_manager.get_camera_location()
+            S = section(); bad_sh, bad_draw, near_off = 0, 0, 0
+            for L in S.get_components_by_class(unreal.PointLightComponent):
+                d = (L.get_world_location() - cam).length()
+                if L.get_editor_property("cast_shadows") and d > 2000.0: bad_sh += 1
+                lamp = L.component_has_tag("RDStreetLamp16")
+                md = L.get_editor_property("max_draw_distance")
+                if (not lamp and md > 4500.0 + 1.0) or (lamp and md < 8999.0): bad_draw += 1
+            r["shadow_far"] = bad_sh; r["draw_wrong"] = bad_draw
+            def lod_lines():
+                out = {}
+                for l in g.get_town_lod_lines16():
+                    q = str(l).split("|"); out[q[0]] = {"d": float(q[1]), "tick": float(q[2]), "drawn": q[3] == "1", "x": float(q[4]), "y": float(q[5])}
+                return out
+            bands_bad = 0; far0 = {}; n_people = 0
+            # (the bands' edges are moved past only every quarter second: within 1 m of an edge either band is right)
+            for nm, q in lod_lines().items():
+                n_people += 1; d = q["d"]
+                want = 0.0 if d < 1500 else 1 / 30 if d < 4000 else 1 / 15 if d < 8000 else 1 / 7.5 if d < 11000 else 1.0
+                near_edge = any(abs(d - e) < 100.0 for e in (1500, 4000, 8000, 11000))
+                # (drawn beyond 110 m is wrong; not drawn nearer may be an interior hidden with its people (the seventh phase's rule))
+                if not near_edge and (abs(q["tick"] - want) > 0.002 or (d > 11000 and q["drawn"])): bands_bad += 1
+                if d > 11500: far0[nm] = (q["x"], q["y"])
+            r["people"] = n_people; r["bands_wrong"] = bands_bad
+            yield from rwait(20.0)
+            moved = 0
+            for nm, q in lod_lines().items():
+                if nm in far0 and math.hypot(q["x"] - far0[nm][0], q["y"] - far0[nm][1]) > 100.0: moved += 1
+            r["far_people"] = len(far0); r["far_moved"] = moved
+            r["frames_on"] = yield from frames16(10.0)
+            unreal.SystemLibrary.execute_console_command(w, "rd.TownLod 0"); yield from rwait(1.0)
+            r["frames_off"] = yield from frames16(10.0)
+            unreal.SystemLibrary.execute_console_command(w, "rd.TownLod 1"); yield from rwait(1.0)
+            if name == "Heaven":
+                r["dome_inside"] = town_lod16()["dome"]
+                L0 = G["pawn"].get_actor_location(); out = V(L0.x + 60000.0, L0.y, 0)
+                g.wild_put_her(out.x / 100.0, out.y / 100.0); yield from rwait(3.0)
+                r["dome_outside"] = town_lod16()["dome"]
+            res[name] = r
+    except Exception as e_:
+        res["error"] = str(e_)
+    finally:
+        try: unreal.SystemLibrary.execute_console_command(w, "rd.TownLod 1")
+        except Exception: pass
+        quiet(False)
+    cities = [v for k, v in res.items() if isinstance(v, dict) and "lod" in v]
+    hv = res.get("Heaven", {})
+    # (a band is set four times a second while people and the camera move: one in a hundred read across an edge is allowed)
+    ok = ("error" not in res and len(cities) == 6 and all(c["shadow_far"] == 0 and c["draw_wrong"] == 0 and c["bands_wrong"] <= max(1, c.get("people", 0) // 100) and (c["far_people"] == 0 or c["far_moved"] > 0) for c in cities)
+          and hv.get("dome_inside") == 0 and hv.get("dome_outside") == 1)
+    step_result("dist16", ok, **res)
+
+
+def interiors16():
+    f = str(G["gen"].get_interiors16()).split("|")
+    return {"hide": f[0] == "1", "batch": f[1] == "1", "buildings": int(f[2]), "shown": int(f[3]), "hidden": int(f[4]), "people_hidden": int(f[5]), "windows": int(f[6]), "batches": int(f[7])}
+
+
+def interior_line16(bi):
+    for l in G["gen"].get_interior_lines16():
+        p = str(l).split("|")
+        if int(p[0]) == bi:
+            wn = None if p[12] == "-" else V(float(p[12]), float(p[13]), float(p[14]))
+            return {"shown": p[1] == "1", "never": p[2] == "1", "batches": int(p[3]), "props": int(p[4]), "doors": int(p[5]), "windows": int(p[6]),
+                    "why": {"0": "hidden", "1": "off", "2": "inside", "3": "door", "4": "window"}.get(p[11], p[11]), "window": wn}
+    return None
+
+
+def step_interior16():
+    """the towns' interiors (RD/RDList16e.cpp) in Brokenspire: from the square most interiors are hidden and every hidden one has
+    batches of its own; a home with a door: before it, its door shut and no window of it in sight, it is hidden; the door opened by F,
+    it is shown in the first frame of the swing (read each frame); inside it, shown; out and the door shut, 20 m off with its windows
+    behind her, hidden again; the frame rate in the square with the rule on and off (rd.InteriorHide), and with the batching off
+    (rd.InteriorBatch 0, the town built again)"""
+    g = G["gen"]; res = {}; quiet(True); w = UES.get_game_world()
+    try:
+        yield from find_town("Brokenspire"); g = G["gen"]
+        sq = place("square"); put(sq, yaw=0.0); yield from rwait(3.0)
+        res["square"] = interiors16()
+        S = section()
+        homes = [b for b in blds() if b["kind"] == "home" and b["state"] == 0]
+        b = None; di = -1
+        # (a home hidden from where she stands, within 45 m, its door shut: its door opened by its index from there (PushDoor, as the
+        # door's own F does). From before a home's own door one of its windows was in sight in 25 homes of 25: the rule shows it there)
+        # (the window's rule off for the door's test (rd.InteriorWindows 0): within 45 m of the square every home was shown by a window)
+        unreal.SystemLibrary.execute_console_command(w, "rd.InteriorWindows 0"); yield from rwait(1.0)
+        cam = G["pc"].player_camera_manager.get_camera_location()
+        for hb in sorted(homes, key=lambda x: dist2(x["c"], cam)):
+            if dist2(hb["c"], cam) > 4000.0: break
+            ln = interior_line16(hb["i"])
+            if not ln or ln["doors"] == 0 or ln["batches"] == 0 or ln["shown"]: continue
+            dj = next((i for i in range(S.get_num_doors()) if dist2(S.get_door_location(i), hb["door"]) < 30), -1)
+            if dj < 0 or S.get_door_open_alpha(dj) != 0.0: continue
+            b = hb; di = dj
+            res["before_door"] = ln; res["door_alpha_before"] = 0.0; res["from_her_m"] = round(dist2(hb["c"], cam) / 100, 1)
+            S.push_door(di, V(hb["door"].x + (hb["door"].x - hb["c"].x) * 0.3, hb["door"].y + (hb["door"].y - hb["c"].y) * 0.3, 100.0))
+            break
+        if not b: raise RuntimeError("no home hidden within 40 m of the square with its door shut")
+        res["home"] = {"index": b["i"], "door": di}
+        frames = []
+        for k in range(30):
+            yield
+            frames.append((round(S.get_door_open_alpha(di), 3), interior_line16(b["i"])["shown"]))
+        first_open = next((i for i, f in enumerate(frames) if f[0] > 0.0), None)
+        first_shown = next((i for i, f in enumerate(frames) if f[1]), None)
+        res["swing"] = {"first_open_frame": first_open, "first_shown_frame": first_shown, "frames": frames[:8]}
+        unreal.SystemLibrary.execute_console_command(w, "rd.InteriorWindows 1")
+        inside = V(b["door"].x + (b["c"].x - b["door"].x) * 0.6, b["door"].y + (b["c"].y - b["door"].y) * 0.6, 0)
+        put(inside); yield from rwait(1.0); res["inside"] = interior_line16(b["i"])
+        put(door_front(b, 170.0)); yield from rwait(0.5)
+        if S.get_door_open_alpha(di) > 0.5: g.interact_nearest(G["pawn"].get_actor_location())
+        yield from rwait(2.5)
+        away = door_front(b, 2000.0); put(away)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=0, yaw=math.degrees(math.atan2(away.y - b["c"].y, away.x - b["c"].x))))
+        yield from rwait(1.5); res["away"] = interior_line16(b["i"])
+        # (shown from 20 m by a window: the window's line from the camera checked here, apart from the rule's own trace)
+        aw = res["away"]
+        if aw and aw["why"] == "window" and aw["window"] is not None:
+            cam = G["pc"].player_camera_manager.get_camera_location()
+            hit = unreal.SystemLibrary.line_trace_single(G["w"], cam, aw["window"], unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+            hp = hit.to_tuple()[4] if hit and hit.to_tuple()[0] else None
+            res["away_window_clear"] = hp is None or (hp - aw["window"]).length() < 100.0
+            aw["window"] = [round(aw["window"].x), round(aw["window"].y), round(aw["window"].z)]
+        if res.get("before_door", {}).get("window") is not None: res["before_door"]["window"] = None
+        put(sq, yaw=0.0); yield from rwait(3.0)
+        # (on and off in turn, three times each, 8 s each: one pair of 10 s read 21 against 23 a second, inside the play window's noise)
+        on_, off_ = [], []
+        for k in range(3):
+            unreal.SystemLibrary.execute_console_command(w, "rd.InteriorHide 1"); yield from rwait(1.5); on_.append((yield from frames16(8.0)))
+            unreal.SystemLibrary.execute_console_command(w, "rd.InteriorHide 0"); yield from rwait(1.5); off_.append((yield from frames16(8.0)))
+        res["frames_rule_on"] = {"median_fps": sorted(x["fps"] for x in on_)[1], "each": [x["fps"] for x in on_]}
+        res["frames_rule_off"] = {"median_fps": sorted(x["fps"] for x in off_)[1], "each": [x["fps"] for x in off_]}
+        unreal.SystemLibrary.execute_console_command(w, "rd.InteriorHide 1")
+    except Exception as e_:
+        res["error"] = str(e_)
+    finally:
+        try: unreal.SystemLibrary.execute_console_command(w, "rd.InteriorHide 1"); unreal.SystemLibrary.execute_console_command(w, "rd.InteriorWindows 1")
+        except Exception: pass
+        quiet(False)
+    sw = res.get("swing", {}); sqr = res.get("square", {})
+    aw = res.get("away", {})
+    for k_ in ("inside",):
+        if res.get(k_, {}).get("window") is not None: res[k_]["window"] = None
+    ok = ("error" not in res and sqr.get("hidden", 0) > 0 and sqr.get("batches", 0) > 0 and res.get("before_door", {}).get("shown") is False
+          and sw.get("first_open_frame") is not None and sw.get("first_shown_frame") is not None and sw["first_shown_frame"] <= sw["first_open_frame"]
+          and res.get("inside", {}).get("shown") and (aw.get("shown") is False or (aw.get("why") == "window" and res.get("away_window_clear"))))
+    step_result("interior16", ok, **res)
+
+
+STEPS.update({"dist16": step_dist16, "interior16": step_interior16})
+
+
 def run():
     G["saves"] = saves_snapshot()
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
