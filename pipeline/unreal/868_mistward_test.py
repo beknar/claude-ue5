@@ -7684,6 +7684,8 @@ def cave16_inner():
     # (tier 1's: the rooms she walked to are explored)
     pk = [str(x) for x in g.get_boss_room_pick16(1)]
     res["boss_pick"] = pk[:1]; cands = [c.split("|") for c in pk if c.startswith("cand|")]
+    # (the pick against the very list it chose from (heights in the world); no pick fails the check (PR #116's review))
+    res["boss_deepest"] = False
     if pk and not pk[0].startswith("cand|") and cands:
         f_ = float(pk[0].split("|")[3]); res["boss_deepest"] = all(float(c[4]) >= f_ - 1.0 for c in cands)
     # ---- the start set's lights again after a restart (PR #115's review: each restart had added another set of them)
@@ -7709,7 +7711,7 @@ def cave16_inner():
     dsum = res.get("dressing", {})
     ok = (len(rooms) >= 4 and len(tunnels) >= 3 and comps["spline"] > 0 and res["start"]["room"] >= 0 and res["lights_restart"][0] == res["lights_restart"][1]
           and dsum.get("torches_rooms", 0) > 0 and dsum.get("torches_tunnels", 0) > 0 and dsum.get("containers", 0) >= len(rooms) - 1
-          and sum(v for k_, v in dsum.items() if k_.startswith("dress|")) > 0 and res.get("boss_deepest", True)
+          and sum(v for k_, v in dsum.items() if k_.startswith("dress|")) > 0 and res.get("boss_deepest") is True
           and not holes and not floors_off and not blocked and all(isinstance(v, dict) and v["ok"] for v in reached.values()))
     step_result("cave16", ok, **res)
 def step_cave16():
@@ -7729,6 +7731,10 @@ def cave16chase_inner():
     tunnels = [p.split("|") for p in pcs if p.startswith("tunnel|")]
     mons = [m for m in g.get_monsters() if alive(m) and S.room_at(m.get_actor_location()) >= 0]
     res["monsters"] = len(mons)
+    # (a tunnel from a monster's room that turns 30 degrees or more within its first 40 m: she stands just past the turn)
+    def turn_at(pts, k):
+        a_ = math.atan2(pts[k].y - pts[0].y, pts[k].x - pts[0].x); b_ = math.atan2(pts[min(k + 6, len(pts) - 1)].y - pts[k].y, pts[min(k + 6, len(pts) - 1)].x - pts[k].x)
+        return abs((math.degrees(b_ - a_) + 180.0) % 360.0 - 180.0)
     picked = None
     for m in mons:
         ri = S.room_at(m.get_actor_location())
@@ -7736,23 +7742,33 @@ def cave16chase_inner():
             if int(t[3]) == ri or int(t[4]) == ri:
                 pts = [V(*map(float, q.split(","))) for q in t[7].split(";")]
                 if int(t[4]) == ri: pts = list(reversed(pts))
-                if len(pts) > 12: picked = (m, ri, pts); break
+                for k in range(5, min(20, len(pts) - 7)):
+                    if turn_at(pts, k) >= 30.0: picked = (m, ri, pts, k + 6, turn_at(pts, k)); break
+            if picked: break
         if picked: break
     if not picked:
         step_result("cave16chase", False, error="no monster in a room with a tunnel", **res); return
-    m, ri, pts = picked
-    her = pts[10]                     # (20 m along the tunnel from its room's opening)
+    m, ri, pts, k_her, bend = picked
+    her = pts[k_her]                  # (past the tunnel's bend from its room's opening)
     put(her, yaw=math.degrees(math.atan2(pts[0].y - her.y, pts[0].x - her.x)), z=her.z)
-    m0 = m.get_actor_location(); walked = 0.0; last = m0; t0 = time.time(); reach = None
-    while time.time() - t0 < 40.0:
+    m.apply_damage(0.01, pawn)        # (provoked, as a blow provokes: it comes for her, not by chance)
+    def off_line(p_):
+        return min(math.hypot(p_.x - q.x, p_.y - q.y) for q in pts[:k_her + 1])
+    # (100 s: a rat walks under a metre a second (46 m took it past 40 s))
+    m0 = m.get_actor_location(); walked = 0.0; last = m0; t0 = time.time(); reach = None; worst_off = 0.0; in_room = 0
+    while time.time() - t0 < 100.0:
         yield
         if not alive(m): break
         p_ = m.get_actor_location(); walked += dist2(p_, last); last = p_
+        if S.room_at(p_) == ri: in_room += 1
+        else: worst_off = max(worst_off, off_line(p_))
         if dist2(p_, pawn.get_actor_location()) < 300.0: reach = round(time.time() - t0, 1); break
-    res.update({"monster": str(m.get_editor_property("monster_name")), "room": ri, "start_m": round(dist2(m0, her) / 100.0, 1), "reached_s": reach,
-                "walked_m": round(walked / 100.0, 1), "straight_m": round(dist2(m0, her) / 100.0, 1)})
+    res.update({"monster": str(m.get_editor_property("monster_name")), "room": ri, "bend_deg": round(bend), "reached_s": reach,
+                "walked_m": round(walked / 100.0, 1), "straight_m": round(dist2(m0, her) / 100.0, 1), "worst_off_line_m": round(worst_off / 100.0, 1)})
     quiet(True)
-    step_result("cave16chase", reach is not None, **res)
+    # (it came to her down the tunnel through a bend of 30 degrees or more, never farther than 7 m off the tunnel's line, and it went
+    # farther than the straight line (round the bend): the tunnel's own way (PR #116's review))
+    step_result("cave16chase", reach is not None and bend >= 30.0 and worst_off <= 700.0 and walked > dist2(m0, her) * 1.02, **res)
 def step_cave16chase():
     try:
         yield from cave16chase_inner()

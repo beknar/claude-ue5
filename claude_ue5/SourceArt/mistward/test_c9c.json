@@ -1,5 +1,5 @@
 {
- "tag": "c9b",
+ "tag": "c9c",
  "plan": [
   "cave16",
   "cave16chase",
@@ -52,8 +52,8 @@
       834
      ],
      "trace": [
-      "<Struct 'Vector' (0x000001EC75FC5E10) {x: 150.000000, y: 150.000000, z: 10.142148}>",
-      "<Struct 'Vector' (0x000001EC75FC64F0) {x: -0.034831, y: -0.062730, z: 0.997423}>",
+      "<Struct 'Vector' (0x000001C7FE5C60E0) {x: 150.000000, y: 150.000000, z: 10.142148}>",
+      "<Struct 'Vector' (0x000001C7FE5C67C0) {x: -0.034831, y: -0.062730, z: 0.997423}>",
       "None"
      ]
     },
@@ -74,8 +74,8 @@
       702
      ],
      "trace": [
-      "<Struct 'Vector' (0x000001EC75FC60E0) {x: 7350.000000, y: -6750.000000, z: -0.979900}>",
-      "<Struct 'Vector' (0x000001EC75FC6130) {x: 0.006081, y: 0.000370, z: 0.999981}>",
+      "<Struct 'Vector' (0x000001C7FE5C63B0) {x: 7350.000000, y: -6750.000000, z: -0.979900}>",
+      "<Struct 'Vector' (0x000001C7FE5C6400) {x: 0.006081, y: 0.000370, z: 0.999981}>",
       "None"
      ]
     },
@@ -96,8 +96,8 @@
       702
      ],
      "trace": [
-      "<Struct 'Vector' (0x000001EC75FC6310) {x: -7050.000000, y: -7350.000000, z: -0.979900}>",
-      "<Struct 'Vector' (0x000001EC75FC6360) {x: -0.000370, y: 0.006081, z: 0.999981}>",
+      "<Struct 'Vector' (0x000001C7FE5C65E0) {x: -7050.000000, y: -7350.000000, z: -0.979900}>",
+      "<Struct 'Vector' (0x000001C7FE5C6630) {x: -0.000370, y: 0.006081, z: 0.999981}>",
       "None"
      ]
     }
@@ -165,7 +165,7 @@
     "blocked": 0,
     "blocked_at": []
    },
-   "fps_first_room": 42.0,
+   "fps_first_room": 39.7,
    "walk": {
     "0": {
      "ok": true,
@@ -209,48 +209,39 @@
      12450,
      7350
     ],
-    "plan": [
-     "163.1",
-     "2",
-     "a try a frame",
-     "88.3"
-    ],
-    "shell_furnish_frames": [
-     "940",
-     "2",
-     "43"
-    ],
-    "frames": 141,
-    "worst_frame_ms": 104.9,
-    "frames_over_100ms": 1,
+    "plan": null,
+    "shell_furnish_frames": null,
+    "frames": 150,
+    "worst_frame_ms": 55.3,
+    "frames_over_100ms": 0,
     "built": true,
-    "pieces": 14
+    "pieces": 13
    },
    "dressing": {
     "torches_rooms": 36,
     "godrays": 5,
     "torches_tunnels": 31,
-    "dress|SM_SM_SM_Shrub_Cluster_04": 14,
-    "dress|SM_SM_Shrub_Cluster_03": 16,
-    "dress|SM_Shrub_Cluster_01": 1,
-    "dress|SM_Shrub_Cluster_02": 1,
-    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_a": 787,
+    "dress|SM_SM_SM_Shrub_Cluster_04": 114,
+    "dress|SM_SM_Shrub_Cluster_03": 128,
+    "dress|SM_Shrub_Cluster_01": 25,
+    "dress|SM_Shrub_Cluster_02": 14,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_a": 785,
     "dress|SM_shrub_sorrel_01_shrub_sorrel_01_b": 782,
-    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_c": 804,
-    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_d": 797,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_c": 806,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_d": 792,
     "dress|SM_shrub_sorrel_01_shrub_sorrel_01_e": 786,
-    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_f": 801,
-    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_g": 781,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_f": 802,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_g": 783,
     "dress|SM_shrub_sorrel_01_shrub_sorrel_01_h": 794,
     "dress|SM_shrub_sorrel_01_shrub_sorrel_01_i": 805,
-    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_j": 789,
-    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_k": 781,
-    "dress|SM_SmallRocks_Cluster": 266,
-    "dress|SM_rock_moss_set_02_rock_moss_set_02_rock10": 99,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_j": 787,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_k": 782,
+    "dress|SM_SmallRocks_Cluster": 432,
+    "dress|SM_rock_moss_set_02_rock_moss_set_02_rock10": 756,
     "containers": 8
    },
    "boss_pick": [
-    "0|0|1|-428|19911"
+    "0|0|1|-428"
    ],
    "boss_deepest": true,
    "lights_restart": [
@@ -260,14 +251,15 @@
   },
   {
    "step": "cave16chase",
-   "ok": true,
+   "ok": false,
    "monsters": 2,
    "monster": "Rat",
    "room": 4,
-   "start_m": 27.9,
-   "reached_s": 30.3,
-   "walked_m": 28.0,
-   "straight_m": 27.9
+   "bend_deg": 31,
+   "reached_s": null,
+   "walked_m": 34.5,
+   "straight_m": 46.0,
+   "worst_off_line_m": 1.8
   },
   {
    "step": "cave15",
@@ -316,12 +308,13 @@
    "kinds_ring": [
     "Half_Creature_04",
     "Half_Creature_05",
+    "Parasite_Slider",
     "Rat"
    ],
    "rooms": {
     "Great hall": 1,
-    "Crypt": 21,
-    "Hallway junction": 36
+    "Crypt": 20,
+    "Hallway junction": 35
    },
    "floors_rel": [
     15.7,
@@ -332,22 +325,22 @@
     2.8,
     22.8,
     12.0,
-    33.0,
-    145.6,
-    0.1,
-    0.3,
-    15.4,
-    0.1,
-    0.3,
-    -0.7,
-    24.1,
-    10.9,
-    20.2,
-    4.9,
-    0.0,
-    -0.2,
+    21.5,
+    13.9,
+    15.6,
     0.2,
-    8.9,
+    -0.2,
+    -1.3,
+    -0.1,
+    -0.7,
+    -419.6,
+    -428.8,
+    -428.5,
+    -428.5,
+    -428.8,
+    -425.8,
+    -428.1,
+    -427.2,
     12.9,
     9.6,
     28.9,
@@ -357,13 +350,13 @@
     21.0,
     5.3,
     150.0,
+    10.9,
+    20.5,
     150.0,
-    150.0,
-    0.2,
+    0.0,
     -0.2,
-    -1.3,
-    -0.1,
-    -0.7
+    0.2,
+    150.0
    ],
    "walls_m": [],
    "off_kinds": [],
@@ -372,14 +365,14 @@
  ],
  "windows_hidden": "Content Browser, Message Log",
  "shots": [
-  "mw_c9b_cave16_above.png",
-  "mw_c9b_cave16_room_large.png",
-  "mw_c9b_cave16_room_small.png",
-  "mw_c9b_cave16_tunnel0_medium.png",
-  "mw_c9b_cave16_tunnel1_medium.png",
-  "mw_c9b_cave16_tunnel2_medium.png",
-  "mw_c9b_cave15_hall.png",
-  "mw_c9b_cave15_tier2.png"
+  "mw_c9c_cave16_above.png",
+  "mw_c9c_cave16_room_large.png",
+  "mw_c9c_cave16_room_small.png",
+  "mw_c9c_cave16_tunnel0_medium.png",
+  "mw_c9c_cave16_tunnel1_medium.png",
+  "mw_c9c_cave16_tunnel2_medium.png",
+  "mw_c9c_cave15_hall.png",
+  "mw_c9c_cave15_tier2.png"
  ],
  "error": null,
  "saves_put_back": 0,

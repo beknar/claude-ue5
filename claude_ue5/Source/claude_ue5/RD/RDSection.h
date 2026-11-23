@@ -757,6 +757,13 @@ private:
 	/** phase 9: the torches by the rooms' wall-light points and on the tunnels' walls, the god rays, then the kit's dressing scattered over
 	 *  the set's floors and roofs (traced: after the tunnels' pieces) */
 	void CaveDressSet16();
+	void CaveDressBegin16();
+	bool CaveDressStep16(double Budget);
+	FRandomStream CaveDressR16;
+	int32 CaveDressStage16 = 0, CaveDressI16 = 0, CaveDressJ16 = 0, CaveDressTorches16 = 0;
+	TMap<TObjectPtr<UStaticMesh>, TObjectPtr<UInstancedStaticMeshComponent>> CaveDressIsm16;
+	TMap<FString, int32> CaveDressLaid16;
+	TArray<TArray<FIntPoint>> CaveRoomTiles16;
 	void CaveTorch16(const FTransform& At);
 	TArray<FString> CaveDressLines16;
 	int32 CaveContainers16 = 0;

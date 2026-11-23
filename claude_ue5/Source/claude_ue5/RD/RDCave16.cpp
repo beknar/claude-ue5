@@ -829,8 +829,11 @@ void ARDSection::CaveTorch16(const FTransform& At)
 		UNiagaraComponent* F = NewObject<UNiagaraComponent>(this);
 		F->SetupAttachment(RootComponent);
 		F->SetAsset(Generator->CaveTorchFire16);
-		F->SetRelativeTransform(Rel(FTransform(At.GetRotation(), At.TransformPosition(Generator->CaveTorchFireAt16))));
+		// (the castle's torch flame (945 level: the kit's own fire needs the NiagaraFluids plugin, not in the project: the package's cook
+		// said so), at a sconce's scale, and heard as the castle's torches are)
+		F->SetRelativeTransform(Rel(FTransform(At.GetRotation(), At.TransformPosition(Generator->CaveTorchFireAt16), FVector(0.6f))));
 		F->RegisterComponent();
+		FirePoints.Add({ At.TransformPosition(Generator->CaveTorchFireAt16), (uint8)0 });
 		F->Activate(true);
 		CaveComps16.Add(F);
 	}
@@ -852,42 +855,36 @@ void ARDSection::CaveTorch16(const FTransform& At)
 
 void ARDSection::CaveDressSet16()
 {
+	CaveDressBegin16();
+	while (!CaveDressStep16(1e9)) {}
+}
+
+void ARDSection::CaveDressBegin16()
+{
+	// (the dressing's state: a stream of its own, its steps in a fixed order, so a set dressed over frames is the one dressed at once;
+	// each room's walkable tiles gathered once)
+	CaveDressR16.Initialize(Seed ^ 0x0CA7E16);
+	CaveDressStage16 = 0; CaveDressI16 = 0; CaveDressJ16 = 0; CaveDressTorches16 = 0;
+	CaveDressIsm16.Reset(); CaveDressLaid16.Reset();
+	CaveRoomTiles16.SetNum(CavePlaced16.Num());
+	for (TArray<FIntPoint>& T : CaveRoomTiles16) T.Reset();
+	for (int32 T = 0; T < N * N; ++T) if (Owner.IsValidIndex(T) && CaveRoomTiles16.IsValidIndex(Owner[T])) CaveRoomTiles16[Owner[T]].Add(FIntPoint(T % N, T / N));
+}
+
+bool ARDSection::CaveDressStep16(double Budget)
+{
+	// (the torches on the tunnels' walls, then each dressing mesh over each tunnel and each room: a step at a time within Budget seconds
+	// (all at once, a set's thousands of traces took one frame: PR #116's review); true when all is laid)
 	UWorld* W = GetWorld();
-	if (!Generator || !W || !W->IsGameWorld()) return;
-	const float S = Generator->TileSize;
+	if (!Generator || !W || !W->IsGameWorld()) return true;
+	const double T00 = FPlatformTime::Seconds();
 	const FVector O = GetActorLocation();
-	FRandomStream R(Seed ^ 0x0CA7E16);
+	FRandomStream& R = CaveDressR16;
 	FCollisionQueryParams Q(SCENE_QUERY_STAT(RDCave16Dress), true);
 	auto Trace = [&](const FVector& A, const FVector& B, FHitResult& H) { return W->LineTraceSingleByChannel(H, A, B, ECC_Visibility, Q); };
-	// (a torch on a tunnel's wall every CaveTunnelTorchEvery16 cm, the sides in turn: the wall found by a ray across from the line 2 m
-	// over its floor, the torch facing back along the wall's normal)
-	int32 TunnelTorches = 0;
-	for (const FCaveRun16& Run : CaveRuns16)
-	{
-		float Acc = 0.f, Next = Generator->CaveTunnelTorchEvery16 * 0.5f; int32 Side = 0;
-		for (int32 I = 1; I < Run.Points.Num(); ++I)
-		{
-			Acc += FVector::Dist(Run.Points[I], Run.Points[I - 1]);
-			if (Acc < Next) continue;
-			Next += Generator->CaveTunnelTorchEvery16;
-			const FVector D = (Run.Points[I] - Run.Points[I - 1]).GetSafeNormal2D();
-			const FVector Sd = FVector(-D.Y, D.X, 0.f) * ((Side++ & 1) ? -1.f : 1.f);
-			const FVector A = O + Run.Points[I] + FVector(0, 0, 200.f);
-			FHitResult H;
-			if (!Trace(A, A + Sd * 1200.f, H) || H.ImpactNormal.Z > 0.5f) continue;
-			const FVector Nrm = FVector(H.ImpactNormal.X, H.ImpactNormal.Y, 0.f).GetSafeNormal();
-			const float Yaw = FMath::RadiansToDegrees(FMath::Atan2(Nrm.X, -Nrm.Y));
-			CaveTorch16(FTransform(FRotator(0.f, Yaw, 0.f), H.ImpactPoint));
-			++TunnelTorches;
-		}
-	}
-	CaveDressLines16.Add(FString::Printf(TEXT("torches_tunnels|%d"), TunnelTorches));
-	// (the dressing: each mesh's instances, tunnels by their length, rooms by their walkable tiles; traced onto the floor (or the roof,
-	// hanging), none colliding)
-	TMap<UStaticMesh*, UInstancedStaticMeshComponent*> Ism;
 	auto Put = [&](UStaticMesh* M, const FTransform& T)
 	{
-		UInstancedStaticMeshComponent*& C = Ism.FindOrAdd(M);
+		TObjectPtr<UInstancedStaticMeshComponent>& C = CaveDressIsm16.FindOrAdd(M);
 		if (!C)
 		{
 			C = NewObject<UInstancedStaticMeshComponent>(this);
@@ -902,53 +899,87 @@ void ARDSection::CaveDressSet16()
 		}
 		C->AddInstance(T.GetRelativeTransform(GetActorTransform()), false);
 	};
-	for (const FRDCaveDress16& Dr : Generator->CaveDress16)
+	auto RunOk = [&](const FCaveRun16& Run) { return Run.Points.Num() >= 2 && Generator->CaveTunnels16.IsValidIndex(Run.Kit); };
+	while (FPlatformTime::Seconds() - T00 < Budget)
 	{
-		if (!Dr.Mesh || Dr.PerUnit <= 0.f) continue;
-		int32 Laid = 0;
+		if (CaveDressStage16 == 0)
+		{
+			// (a torch on a tunnel's wall every CaveTunnelTorchEvery16 cm, the sides in turn: the wall found by a ray across from the line
+			// 2 m over its floor, the torch facing back along the wall's normal)
+			if (CaveDressI16 >= CaveRuns16.Num())
+			{
+				CaveDressLines16.Add(FString::Printf(TEXT("torches_tunnels|%d"), CaveDressTorches16));
+				CaveDressStage16 = 1; CaveDressI16 = 0; CaveDressJ16 = 0;
+				continue;
+			}
+			const FCaveRun16& Run = CaveRuns16[CaveDressI16++];
+			if (!RunOk(Run)) continue;
+			float Acc = 0.f, Next = Generator->CaveTunnelTorchEvery16 * 0.5f; int32 Side = 0;
+			for (int32 I = 1; I < Run.Points.Num(); ++I)
+			{
+				Acc += FVector::Dist(Run.Points[I], Run.Points[I - 1]);
+				if (Acc < Next) continue;
+				Next += Generator->CaveTunnelTorchEvery16;
+				const FVector D = (Run.Points[I] - Run.Points[I - 1]).GetSafeNormal2D();
+				const FVector Sd = FVector(-D.Y, D.X, 0.f) * ((Side++ & 1) ? -1.f : 1.f);
+				const FVector A = O + Run.Points[I] + FVector(0, 0, 200.f);
+				FHitResult H;
+				if (!Trace(A, A + Sd * 1200.f, H) || H.ImpactNormal.Z > 0.5f) continue;
+				const FVector Nrm = FVector(H.ImpactNormal.X, H.ImpactNormal.Y, 0.f).GetSafeNormal();
+				CaveTorch16(FTransform(FRotator(0.f, FMath::RadiansToDegrees(FMath::Atan2(Nrm.X, -Nrm.Y)), 0.f), H.ImpactPoint));
+				++CaveDressTorches16;
+			}
+			continue;
+		}
+		// (stage 1: dressing entry I over unit J: the tunnels first (J < runs), then the rooms)
+		if (CaveDressI16 >= Generator->CaveDress16.Num())
+		{
+			for (const TPair<FString, int32>& L : CaveDressLaid16) CaveDressLines16.Add(FString::Printf(TEXT("dress|%s|%d"), *L.Key, L.Value));
+			return true;
+		}
+		const FRDCaveDress16& Dr = Generator->CaveDress16[CaveDressI16];
+		const int32 Units = Dr.bTunnel ? CaveRuns16.Num() : CavePlaced16.Num();
+		if (!Dr.Mesh || Dr.PerUnit <= 0.f || CaveDressJ16 >= Units) { ++CaveDressI16; CaveDressJ16 = 0; continue; }
+		const int32 J = CaveDressJ16++;
+		int32& Laid = CaveDressLaid16.FindOrAdd(Dr.Mesh->GetName());
 		if (Dr.bTunnel)
 		{
-			for (const FCaveRun16& Run : CaveRuns16)
+			const FCaveRun16& Run = CaveRuns16[J];
+			if (!RunOk(Run)) continue;
+			const FRDCaveTunnel16& E = Generator->CaveTunnels16[Run.Kit];
+			const float Half = E.Mesh ? (float)E.Mesh->GetBoundingBox().GetExtent().Y : 600.f;
+			const int32 Want = FMath::RoundToInt(Dr.PerUnit * Run.Length / 100.f);
+			for (int32 K = 0; K < Want; ++K)
 			{
-				const FRDCaveTunnel16& E = Generator->CaveTunnels16[Run.Kit];
-				const float Half = E.Mesh ? (float)E.Mesh->GetBoundingBox().GetExtent().Y : 600.f;
-				const int32 Want = FMath::RoundToInt(Dr.PerUnit * Run.Length / 100.f);
-				for (int32 K = 0; K < Want; ++K)
-				{
-					const int32 I = R.RandRange(1, Run.Points.Num() - 1);
-					const FVector D = (Run.Points[I] - Run.Points[I - 1]).GetSafeNormal2D();
-					const FVector P = O + Run.Points[I] + FVector(-D.Y, D.X, 0.f) * (R.FRandRange(Dr.Lateral.X, Dr.Lateral.Y) * Half * (R.FRand() < 0.5f ? -1.f : 1.f));
-					FHitResult H;
-					const bool bHit = Dr.bRoof ? Trace(P + FVector(0, 0, 150.f), P + FVector(0, 0, 2000.f), H) : Trace(P + FVector(0, 0, 300.f), P - FVector(0, 0, 400.f), H);
-					if (!bHit) continue;
-					const float Sc = R.FRandRange(Dr.Scale.X, Dr.Scale.Y);
-					Put(Dr.Mesh, FTransform(FRotator(0.f, R.FRandRange(0.f, 360.f), Dr.bRoof ? 180.f : 0.f), H.ImpactPoint, FVector(Sc)));
-					++Laid;
-				}
+				const int32 I = R.RandRange(1, Run.Points.Num() - 1);
+				const FVector D = (Run.Points[I] - Run.Points[I - 1]).GetSafeNormal2D();
+				const FVector P = O + Run.Points[I] + FVector(-D.Y, D.X, 0.f) * (R.FRandRange(Dr.Lateral.X, Dr.Lateral.Y) * Half * (R.FRand() < 0.5f ? -1.f : 1.f));
+				FHitResult H;
+				const bool bHit = Dr.bRoof ? Trace(P + FVector(0, 0, 150.f), P + FVector(0, 0, 2000.f), H) : Trace(P + FVector(0, 0, 300.f), P - FVector(0, 0, 400.f), H);
+				const float Sc = R.FRandRange(Dr.Scale.X, Dr.Scale.Y), Yw = R.FRandRange(0.f, 360.f);
+				if (!bHit) continue;
+				Put(Dr.Mesh, FTransform(FRotator(0.f, Yw, Dr.bRoof ? 180.f : 0.f), H.ImpactPoint, FVector(Sc)));
+				++Laid;
 			}
 		}
 		else
 		{
-			for (int32 RI = 0; RI < CavePlaced16.Num(); ++RI)
+			if (CavePlaced16[J].Kit < 0 || Rooms[J].Kind == ERDRoomKind::Junction || !CaveRoomTiles16.IsValidIndex(J)) continue;
+			const TArray<FIntPoint>& Tiles = CaveRoomTiles16[J];
+			const int32 Want = FMath::RoundToInt(Dr.PerUnit * Tiles.Num());
+			for (int32 K = 0; K < Want && Tiles.Num(); ++K)
 			{
-				if (CavePlaced16[RI].Kit < 0 || Rooms[RI].Kind == ERDRoomKind::Junction) continue;
-				TArray<FIntPoint> Tiles;
-				for (int32 T = 0; T < N * N; ++T) if (Owner[T] == RI) Tiles.Add(FIntPoint(T % N, T / N));
-				const int32 Want = FMath::RoundToInt(Dr.PerUnit * Tiles.Num());
-				for (int32 K = 0; K < Want && Tiles.Num(); ++K)
-				{
-					const FIntPoint Tl = Tiles[R.RandRange(0, Tiles.Num() - 1)];
-					const FVector P = TileWorld(Tl, CaveFloorAt16(Tl)) + FVector(R.FRandRange(-140.f, 140.f), R.FRandRange(-140.f, 140.f), 0.f);
-					FHitResult H;
-					if (!Trace(P + FVector(0, 0, 300.f), P - FVector(0, 0, 400.f), H)) continue;
-					const float Sc = R.FRandRange(Dr.Scale.X, Dr.Scale.Y);
-					Put(Dr.Mesh, FTransform(FRotator(0.f, R.FRandRange(0.f, 360.f), 0.f), H.ImpactPoint, FVector(Sc)));
-					++Laid;
-				}
+				const FIntPoint Tl = Tiles[R.RandRange(0, Tiles.Num() - 1)];
+				const FVector P = TileWorld(Tl, CaveFloorAt16(Tl)) + FVector(R.FRandRange(-140.f, 140.f), R.FRandRange(-140.f, 140.f), 0.f);
+				const float Sc = R.FRandRange(Dr.Scale.X, Dr.Scale.Y), Yw = R.FRandRange(0.f, 360.f);
+				FHitResult H;
+				if (!Trace(P + FVector(0, 0, 300.f), P - FVector(0, 0, 400.f), H)) continue;
+				Put(Dr.Mesh, FTransform(FRotator(0.f, Yw, 0.f), H.ImpactPoint, FVector(Sc)));
+				++Laid;
 			}
 		}
-		CaveDressLines16.Add(FString::Printf(TEXT("dress|%s|%d"), *Dr.Mesh->GetName(), Laid));
 	}
+	return false;
 }
 
 TArray<FString> ARDSection::CaveDressing16() const
@@ -968,8 +999,9 @@ bool ARDSection::CaveShellPieces16(double Budget)
 	for (; CaveShellRun16 < CaveRuns16.Num(); ++CaveShellRun16, CaveShellPiece16 = 0)
 	{
 		const FCaveRun16& Run = CaveRuns16[CaveShellRun16];
+		if (Run.Points.Num() < 2 || !Generator->CaveTunnels16.IsValidIndex(Run.Kit)) continue;
 		const FRDCaveTunnel16& E = Generator->CaveTunnels16[Run.Kit];
-		if (!E.Mesh || Run.Points.Num() < 2) continue;
+		if (!E.Mesh) continue;
 		TArray<float> Acc; Acc.Add(0.f);
 		for (int32 I = 1; I < Run.Points.Num(); ++I) Acc.Add(Acc.Last() + FVector::Dist(Run.Points[I], Run.Points[I - 1]));
 		const float L = Acc.Last();
@@ -1063,8 +1095,10 @@ void ARDSection::CaveFurnish16(FRandomStream& R, int32 RI)
 		const FVector In2 = (Mid - C).GetSafeNormal2D();
 		const float Yaw = FMath::RadiansToDegrees(FMath::Atan2(In2.Y, In2.X));
 		const FName Piece = Laid == 0 ? FName(TEXT("Chest")) : (R.FRand() < 0.5f ? FName(TEXT("Barrel")) : FName(TEXT("Crate")));
+		// (counted by what AddContainer took: in a census, or with no interactive build, it lays none and still says yes (PR #116's
+		// review: counted by Containers, a census tried 30 chests a room and counted them all))
 		const int32 Before = Containers.Num();
-		if (AddContainer(Piece, C - In2 * 60.f, Yaw, Piece.ToString().ToLower()) && Containers.Num() > Before) { ++Laid; ++CaveContainers16; }
+		if (AddContainer(Piece, C - In2 * 60.f, Yaw, Piece.ToString().ToLower())) { ++Laid; if (Containers.Num() > Before) ++CaveContainers16; }
 	}
 	FurnRoom = -1;
 }
@@ -1200,20 +1234,12 @@ TArray<FString> ARDDungeonGenerator::GetCaveDressing16(FIntPoint Section) const
 
 TArray<FString> ARDDungeonGenerator::GetBossRoomPick16(int32 Tier) const
 {
+	// (the pick for the tier's boss (salt 1) and the very list it chose from (ExploredRooms: PR #116's review), heights in the world)
 	TArray<FString> Out;
 	ARDSection* S = nullptr; int32 Room = -1;
-	const AActor* Her = GetTrackedActor();
-	const FVector L = Her ? Her->GetActorLocation() : FVector::ZeroVector;
-	if (PickExploredRoom(Tier, 0, S, Room) && S)
-		Out.Add(FString::Printf(TEXT("%d|%d|%d|%.0f|%.0f"), S->Coord.X, S->Coord.Y, Room, S->CaveRoomFloor16(Room), FVector::Dist2D(S->GetRoomCenter(Room), L)));
-	for (const auto& KV : Sections)
-	{
-		const ARDSection* Sx = KV.Value;
-		const FRDSectionMap* M = MapData.Find(KV.Key);
-		if (!Sx || !M || TierOf(KV.Key) != Tier) continue;
-		for (int32 RI = 0; RI < Sx->GetNumRooms() && RI < M->Rects.Num(); ++RI)
-			if (!M->Rects[RI].bCorridor && M->Rects[RI].bDiscovered)
-				Out.Add(FString::Printf(TEXT("cand|%d|%d|%d|%.0f|%.0f"), KV.Key.X, KV.Key.Y, RI, Sx->CaveRoomFloor16(RI), FVector::Dist2D(Sx->GetRoomCenter(RI), L)));
-	}
+	TArray<FExploredRoom> Cands; ExploredRooms(Tier, Cands);
+	if (PickExploredRoom(Tier, 1, S, Room) && S)
+		Out.Add(FString::Printf(TEXT("%d|%d|%d|%.0f"), S->Coord.X, S->Coord.Y, Room, S->GetActorLocation().Z + S->CaveRoomFloor16(Room)));
+	for (const FExploredRoom& C : Cands) Out.Add(FString::Printf(TEXT("cand|%d|%d|%d|%.0f|%.0f"), C.S->Coord.X, C.S->Coord.Y, C.Room, C.Z, C.D));
 	return Out;
 }

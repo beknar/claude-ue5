@@ -395,15 +395,15 @@ void ARDDungeonGenerator::OnTierOpened(int32 Tier)
 	if (bRingGuards) PendingRingTiers.AddUnique(Tier);
 }
 
-bool ARDDungeonGenerator::PickExploredRoom(int32 Tier, int32 Salt, ARDSection*& OutSection, int32& OutRoom) const
+void ARDDungeonGenerator::ExploredRooms(int32 Tier, TArray<FExploredRoom>& Cands) const
 {
-	OutSection = nullptr; OutRoom = -1;
+	// (the rooms a tier's boss or guards may stand in: explored, not hallways, not hers, room to stand; PickExploredRoom's and the
+	// caves' test's one list (PR #116's review))
+	Cands.Reset();
 	const AActor* Her = GetTrackedActor();
 	const FVector L = Her ? Her->GetActorLocation() : FVector::ZeroVector;
 	const ARDSection* HerS = GetSection(WorldToSection(L));
 	const int32 HerRoom = HerS ? HerS->RoomAt(L) : -1;
-	struct FC { ARDSection* S; int32 Room; float D; };
-	TArray<FC> Cands;
 	for (const auto& KV : Sections)
 	{
 		ARDSection* S = KV.Value;
@@ -415,20 +415,25 @@ bool ARDDungeonGenerator::PickExploredRoom(int32 Tier, int32 Salt, ARDSection*& 
 			const FRDMapRect& R = M->Rects[RI];
 			if (R.bCorridor || !R.bDiscovered || (S == HerS && RI == HerRoom)) continue;
 			if (S->GetRoomFreeTiles(RI).Num() < 6) continue;
-			Cands.Add({ S, RI, (float)FVector::Dist2D(S->GetRoomCenter(RI), L) });
+			Cands.Add({ S, RI, (float)FVector::Dist2D(S->GetRoomCenter(RI), L), (float)(S->GetActorLocation().Z + S->CaveRoomFloor16(RI)) });
 		}
 	}
+}
+
+bool ARDDungeonGenerator::PickExploredRoom(int32 Tier, int32 Salt, ARDSection*& OutSection, int32& OutRoom) const
+{
+	OutSection = nullptr; OutRoom = -1;
+	typedef FExploredRoom FC;
+	TArray<FC> Cands; ExploredRooms(Tier, Cands);
 	if (Cands.Num() == 0) return false;
-	// (the caves of the list of 2026-11-22: the deepest room, its floor the lowest, then the farthest from her)
+	// (the caves of the list of 2026-11-22: by depth, the floor's height in the world the lowest first (sets of a tier can stand at other
+	// heights), then the farthest from her; the tier's boss (salt 1) the deepest, its ring's guards (salt 2) the next, others by their
+	// salt: the boss and the guards never in one room (PR #116's review))
 	if (bCave16)
 	{
-		const FC* Best = nullptr;
-		for (const FC& C : Cands)
-		{
-			const float Fz = C.S->CaveRoomFloor16(C.Room), Bz = Best ? Best->S->CaveRoomFloor16(Best->Room) : 0.f;
-			if (!Best || Fz < Bz - 1.f || (FMath::Abs(Fz - Bz) <= 1.f && C.D > Best->D)) Best = &C;
-		}
-		OutSection = Best->S; OutRoom = Best->Room;
+		Cands.Sort([](const FC& A, const FC& B) { return FMath::Abs(A.Z - B.Z) > 1.f ? A.Z < B.Z : A.D > B.D; });
+		const int32 K = FMath::Clamp(Salt <= 1 ? 0 : Salt - 1, 0, Cands.Num() - 1);
+		OutSection = Cands[K].S; OutRoom = Cands[K].Room;
 		return true;
 	}
 	// (not right beside her, not far off: among the nearer half, by a hash of the session and the tier)

@@ -2881,6 +2881,10 @@ private:
 	bool PlaceBoss(int32 Tier);
 	bool PlaceRingGuard(int32 Tier);
 	/** an explored room of a tier to set something in (not the one she is in, generated now); false: none */
+	/** a room a tier's boss or guards may stand in (explored, not hers, room to stand): its set, its index, her distance, its floor's
+	 *  height in the world */
+	struct FExploredRoom { ARDSection* S = nullptr; int32 Room = -1; float D = 0.f; float Z = 0.f; };
+	void ExploredRooms(int32 Tier, TArray<FExploredRoom>& Out) const;
 	bool PickExploredRoom(int32 Tier, int32 Salt, ARDSection*& OutSection, int32& OutRoom) const;
 	UPROPERTY(VisibleAnywhere, Category = "RandomDungeon|Reveal") TObjectPtr<UPostProcessComponent> RevealPost;
 	UPROPERTY(Transient) TObjectPtr<UMaterialInstanceDynamic> RevealMID;

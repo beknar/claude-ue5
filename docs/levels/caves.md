@@ -70,14 +70,16 @@ The user's list of 2026-11-22 ([improvements16.txt](../improvements16.txt); its 
 
 ### Measured (phase 9)
 
-- `868 cave16,cave16chase,cave15 -lv caves` (`test_c9b.json`): the start set's 36 torches in its rooms and 31 on its tunnels' walls, 5 god rays, the scattered meshes (99 moss rocks, 266 small rock clusters, 32 shrub clusters, about 8,700 sorrel), 8 containers; every room still reached on foot, no hole, no blockage; the start set's 72 lights before and after a restart; the boss's pick the room 4.28 m lower than the others; a set made in play as she nears it (plan 163 ms a try a frame, the longest step 88 ms; its shell 940 ms over 43 frames), the worst frame 105 ms; a rat came 28 m from its room down a tunnel to her in 30 s (`cave16chase`); the castle's rules as before (`cave15`).
+- **The package** (Development, a full cook of 10,827 packages after the cook's memory floor came down to 4 GB: at 6 GB it stalled 6 packages short): `caves` and `cavetower` ran (90 and 180 s, no crash, 5.0 and 3.7 GB); its log named two materials the game puts on Nanite meshes in play without the Nanite usage (the blood's spray, the moon): `869` sets them now.
+
+- `868 cave16,cave16chase,cave15 -lv caves` (`test_c9c.json`, after PR #116's review): the start set's 36 torches in its rooms and 31 on its tunnels' walls, 5 god rays, the scattered meshes (99 moss rocks, 266 small rock clusters, 32 shrub clusters, about 8,700 sorrel), 8 containers; every room still reached on foot, no hole, no blockage; the start set's 72 lights before and after a restart; the boss's pick the room 4.28 m lower than the others; a set made in play as she nears it (plan 163 ms a try a frame, the longest step 88 ms; its shell 940 ms over 43 frames), the worst frame 105 ms; provoked, a rat came from its room down a tunnel through a 31-degree bend to her (`cave16chase`, `test_c9d.json`: 55 s, 50.8 m walked for 46.0 m straight, never 1.8 m off the tunnel's line); the castle's rules as before (`cave15`).
 - Pictures: the large room lit by its torches, the scattered rocks on its floor; a tunnel with its sorrel and rocks.
 
 ## Limits
 
 - (Before the list of 2026-11-22) the rooms were the castle's rooms in rock; with the planner they are the kit's (above).
 - The dressing is the game's scatter of the kit's meshes, not the kit's PCG graphs (above); the hanging sorrel at 15 % of the kit's density.
-- The chase measured is a straight-ish one (the rat walked 28.0 m for 27.9 m straight): a chase round a sharp bend is not yet measured.
+- The torches burn the castle's torch flame: the kit's own (`NS_2DGasIntro`) needs the NiagaraFluids plugin, which the project does not have (the package's cook said so).
 - A portal that finds no tunnel is capped: a set has 3 or 4 of its 4 (six seeds), so a neighbour can be reached by fewer ways than its sides.
 - The kit's stairs are laid only where they and both their tunnels fit whole, else a tunnel slopes between levels; the measured start set has none (how often a set has stairs is not measured yet).
 - Every tower's cave has the same first hall (the saved start section); the sets beyond it are new each visit, as the castle's are.

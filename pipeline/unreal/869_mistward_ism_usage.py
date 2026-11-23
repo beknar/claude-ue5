@@ -162,6 +162,11 @@ for m_ in ("/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewe
                 for b in bases_of(pm): want(b, "used_with_nanite")
         gm = g_.get_editor_property("cave_god_ray_material16")
         if gm and gm.get_base_material(): note(gm)
+# (materials the game puts on Nanite meshes in play, which no table names: the blood's spray and the moon (the list of 2026-11-22's
+# package: "missing usage flag Nanite! Default Material will be used in game")
+for mp in ("/Game/RandomDungeon/Combat/Materials/M_RDC_BloodSpray", "/Game/RandomDungeon/Sky/M_RD_SkyMoon"):
+    mm = unreal.load_asset(mp)
+    if mm and mm.get_base_material(): want(mm.get_base_material(), "used_with_nanite")
 # the menu: its placed meshes; Nanite ones need the Nanite usage
 open_map(MENU)
 scan_refs(MENU)

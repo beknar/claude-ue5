@@ -219,9 +219,13 @@ def dressing():
                     e["lat"].append(min(1.5, math.hypot(p.x - q.x, p.y - q.y) / max(half, 1.0))); e["scale"].append(t.scale3d.x)
         elif cn in ROOMS and ROOMS[cn] != "stairs":
             room_tiles += tiles_of[ROOMS[cn]]
+            seen = set()
             for c in a.get_components_by_class(unreal.InstancedStaticMeshComponent):
                 m = c.static_mesh
-                if not m: continue
+                if not m or c.get_instance_count() == 0: continue
+                key = (m.get_path_name(), c.get_instance_count(), round(c.get_instance_transform(0, True).translation.x))
+                if key in seen: continue          # (the same PCG output listed twice, as in the tunnels: PR #116's review)
+                seen.add(key)
                 e = room.setdefault(m.get_path_name(), {"n": 0, "scale": []})
                 for i in range(c.get_instance_count()):
                     e["n"] += 1; e["scale"].append(c.get_instance_transform(i, True).scale3d.x)
@@ -232,16 +236,25 @@ def dressing():
                               "lat": [q(e["lat"], 0.1), q(e["lat"], 0.9)], "scale": [q(e["scale"], 0.1), q(e["scale"], 0.9)]})
     for m, e in sorted(room.items()):
         out["room"].append({"mesh": m, "per_tile": round(e["n"] / max(room_tiles, 1), 3), "scale": [q(e["scale"], 0.1), q(e["scale"], 0.9)]})
-    # (the rooms' wall-light points, in each room's frame)
+    # (the rooms' wall-light points, in each room's frame: each point's world transform against the room actor's (relative to their
+    # parent they would miss any offset or turn of Wall_Light_Parent), measured again on every run, from the first room of a kind that
+    # has any (PR #116's review))
+    got = set()
     for a in unreal.GameplayStatics.get_all_actors_of_class(w, unreal.Actor):
         cn = a.get_class().get_name()
-        if cn not in ROOMS or "lights" in kit["rooms"][ROOMS[cn]]: continue
-        kit["rooms"][ROOMS[cn]]["lights"] = [rel(c) for c in a.get_components_by_class(unreal.SceneComponent)
-                                            if c.get_attach_parent() and c.get_attach_parent().get_name() == "Wall_Light_Parent"]
+        if cn not in ROOMS or ROOMS[cn] in got: continue
+        at = a.get_actor_transform(); pts = []
+        for c in a.get_components_by_class(unreal.SceneComponent):
+            if not (c.get_attach_parent() and c.get_attach_parent().get_name() == "Wall_Light_Parent"): continue
+            r_ = c.get_world_transform().make_relative(at)
+            l_ = r_.translation; pts.append([r1(l_.x), r1(l_.y), r1(l_.z), r1(r_.rotation.rotator().yaw)])
+        if pts: kit["rooms"][ROOMS[cn]]["lights"] = pts; got.add(ROOMS[cn])
     gr = [a for a in unreal.GameplayStatics.get_all_actors_of_class(w, unreal.Actor) if a.get_class().get_name() == "BP_GodRay_Sun_C"]
     if gr:
         c = gr[0].get_components_by_class(unreal.StaticMeshComponent)[0]
-        out["godray"] = {"mesh": c.static_mesh.get_path_name(), "material": c.get_material(0).get_path_name(), "scale": [round(v, 1) for v in (c.get_world_scale().x, c.get_world_scale().y, c.get_world_scale().z)],
+        mt = c.get_material(0)
+        while isinstance(mt, unreal.MaterialInstanceDynamic): mt = mt.get_editor_property("parent")          # (the kit's instance under the level's dynamic one)
+        out["godray"] = {"mesh": c.static_mesh.get_path_name(), "material": mt.get_path_name() if mt else GODRAY_MI, "scale": [round(v, 2) for v in (c.get_world_scale().x, c.get_world_scale().y, c.get_world_scale().z)],
                          "pitch": round(c.get_world_rotation().pitch, 1), "yaw": round(c.get_world_rotation().yaw, 1)}
     kit["dressing"] = out
     kit["torch"] = {"mesh": "/Game/Hyper/ResourcePack/Structures/Wall_Torch/Mesh/SM_Wall_Torch.SM_Wall_Torch", "fire": "/Game/Hyper/ResourcePack/Effects/Particles/2DGas/NS_2DGasIntro.NS_2DGasIntro",
@@ -251,6 +264,117 @@ def dressing():
     print("CAVE16 godray", out.get("godray"), "| lights", {k: len(e.get("lights", [])) for k, e in kit["rooms"].items()})
     if CHECK: print("CAVE16 check: not written"); return
     open(OUT, "w", encoding="utf-8").write(json.dumps(kit, indent=1) + "\n")
+
+
+TREASURE = os.path.join(SA, "treasure16.json")
+MAPS16 = "/Game/RandomDungeon/Maps/"
+ITEM_KINDS = {"COMPONENT": "COMPONENT", "REPAIR": "REPAIR", "HEALING": "HEALING", "MANA": "MANA", "FOOD": "FOOD", "SCROLL": "SCROLL", "WEAPON": "WEAPON",
+              "ARMOUR": "ARMOUR", "RING": "RING", "TOME": "TOME", "TOKEN": "TOKEN", "RECIPE": "RECIPE", "SHIELD": "SHIELD"}
+
+
+def treasure_phases():
+    """every phase's block of treasure16.json, in order (phase10, phase11, ...)"""
+    T = json.load(open(TREASURE, encoding="utf-8"))
+    return T, [T[k] for k in sorted(k for k in T if k.startswith("phase"))]
+
+
+def each_map(maps, fn, label):
+    les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+    out = []
+    for m in maps:
+        if not unreal.EditorAssetLibrary.does_asset_exist(MAPS16 + m): out.append(f"{label}: no map {m}"); continue
+        les.load_level(MAPS16 + m); unreal.SystemLibrary.execute_console_command(None, "obj gc")
+        g = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
+        what = fn(g)
+        g.modify(); les.save_current_level()
+        g = None; gc.collect(); unreal.SystemLibrary.execute_console_command(None, "obj gc")
+        out.append(f"945 {label} {m}: {what}")
+    for l in out: print(l)
+
+
+def items():
+    """the caves' treasures of every phase written so far (treasure16.json) on every map of the game: each item copied from its 'like'
+    (its kind, numbers, buff, picture, tiers, weight, words), its recipe where it has one; the caves' own items (CaveItems16) on every
+    map (drawn only in a cave), the regions and the veins and growths. Idempotent: its own items and recipes taken out first, by name.
+    Run after 910, 905, 911, 918, 925, 928, 929, 937, 938 and 943 (they write the items anew)"""
+    T, P = treasure_phases()
+    X = [x for p in P for x in p.get("items", [])]
+    mine = {x["name"] for x in X}
+    regions = [r for p in P for r in p.get("regions", [])]
+    nodes = [n for p in P for n in p.get("nodes", [])]
+    def fn(g):
+        its = [i for i in g.get_editor_property("items") if str(i.name) not in mine]
+        recs = [r for r in g.get_editor_property("recipes") if str(r.item) not in mine]
+        have = {str(i.name) for i in its} | mine
+        missing = []
+        for x in X:
+            like = next((i for i in its if str(i.name) == x["like"]), None)
+            if not like: missing.append(f"no {x['like']} to copy for {x['name']}"); continue
+            it = unreal.RDItemDef()
+            for k in ("kind", "amount", "seconds", "weight", "icon", "looks", "tiers", "found_max", "durability", "armour_weight", "armour_type"):
+                it.set_editor_property(k, like.get_editor_property(k))
+            it.set_editor_property("name", x["name"])
+            it.set_editor_property("kind", getattr(unreal.RDItemKind, ITEM_KINDS[x["kind"]]))
+            for k in ("amount", "seconds", "weight"):
+                if k in x: it.set_editor_property(k, float(x[k]))
+            it.set_editor_property("icon", unreal.Name(x["icon"])); it.set_editor_property("looks", x.get("looks", ""))
+            it.set_editor_property("tiers", list(x.get("tiers", [])))
+            if "found_max" in x: it.set_editor_property("found_max", int(x["found_max"]))
+            if x.get("repairs"): it.set_editor_property("armour_type", x["repairs"])
+            if x.get("buff"):
+                it.set_editor_property("buff_kind", unreal.Name(x["buff"][0])); it.set_editor_property("buff_amount", float(x["buff"][1])); it.set_editor_property("buff_seconds", float(x["buff"][2]))
+            else:
+                it.set_editor_property("buff_kind", unreal.Name("None")); it.set_editor_property("buff_amount", 0.0); it.set_editor_property("buff_seconds", 0.0)
+            its.append(it)
+            if x.get("recipe"):
+                st, parts = x["recipe"]
+                rc = unreal.RDRecipe(); rc.item = x["name"]; rc.tier = 0; rc.station = st
+                ps = []
+                for lb, any_of, n in parts:
+                    if not any(a in have for a in any_of): missing.append(f"{x['name']}: no {any_of}")
+                    p = unreal.RDRecipePart(); p.label = lb; p.any_of = [unreal.Name(a) for a in any_of if a in have]; p.count = int(n); ps.append(p)
+                rc.parts = ps; recs.append(rc)
+        g.set_editor_property("items", its); g.set_editor_property("recipes", recs)
+        g.set_editor_property("cave_items16", [unreal.Name(x["name"]) for x in X if x.get("cave")])
+        rg = []
+        for r in regions:
+            e = unreal.RDCaveRegion16(); e.set_editor_property("name", r["name"]); e.set_editor_property("biomes", r["biomes"]); e.set_editor_property("items", [unreal.Name(i) for i in r["items"]]); rg.append(e)
+        g.set_editor_property("cave_regions16", rg)
+        nd = []
+        for n in nodes:
+            m = unreal.load_asset(n["mesh"])
+            if not m: missing.append(f"no mesh {n['mesh']}"); continue
+            e = unreal.RDCaveNode16(); e.set_editor_property("mesh", m); e.set_editor_property("item", n["item"])
+            e.set_editor_property("scale", unreal.Vector2D(*n["scale"])); e.set_editor_property("count", unreal.IntPoint(*n["count"]))
+            e.set_editor_property("per_room", unreal.IntPoint(*n["per_room"])); e.set_editor_property("wall", bool(n["wall"]))
+            if n.get("region"): e.set_editor_property("region", n["region"])
+            nd.append(e)
+        g.set_editor_property("cave_nodes16", nd)
+        assert not missing, f"945 items: {missing}"
+        return f"{len(X)} cave things ({sum(1 for x in X if x.get('recipe'))} with recipes), {len(rg)} regions, {len(nd)} veins and growths"
+    if CHECK: print("945 items: would write", len(X), "things on", T["maps"]); return
+    each_map(T["maps"], fn, "items")
+
+
+def icons():
+    """the caves' pictures (SourceArt/caves/icons16/icon_<icon>.png) imported and given to every map's UIArt under their names"""
+    import importlib
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    ui_texture = importlib.import_module("ui_tex").ui_texture
+    T, P = treasure_phases()
+    src = os.path.join(SA, "icons16")
+    names = sorted({x["icon"] for p in P for x in p.get("items", [])})
+    found = [n for n in names if os.path.exists(os.path.join(src, f"icon_{n}.png"))]
+    lost = sorted(set(names) - set(found))
+    if lost: print("945 icons: no picture for", lost)
+    if CHECK: print("945 icons: would import", len(found)); return
+    tex = {n: ui_texture(os.path.join(src, f"icon_{n}.png"), "/Game/RandomDungeon/UI/Caves16", f"T_Cave16_{n}") for n in found}
+    def fn(g):
+        ua = g.get_editor_property("ui_art")
+        for n, t in tex.items(): ua[unreal.Name(n)] = t
+        g.set_editor_property("ui_art", ua)
+        return f"{len(tex)} pictures"
+    each_map(T["maps"], fn, "icons")
 
 
 COLLIDE = "/Game/RandomDungeon/Caves16"
@@ -362,14 +486,18 @@ def level():
     t = kit.get("torch", {})
     if t:
         gen.set_editor_property("cave_torch_mesh16", mesh(t["mesh"]))
-        gen.set_editor_property("cave_torch_fire16", unreal.load_asset(t["fire"].split(".")[0]))
+        # (the castle's torch flame: the kit's NS_2DGasIntro needs the NiagaraFluids plugin, which the project does not have (the
+        # package's cook: "a dependency on package /NiagaraFluids/... which does not exist"))
+        fx = gen.get_editor_property("effects").get(unreal.Name("TorchFire"))
+        gen.set_editor_property("cave_torch_fire16", fx)
         gen.set_editor_property("cave_torch_fire_at16", unreal.Vector(*t["fire_at"]))
         gen.set_editor_property("cave_torch_light_at16", unreal.Vector(*t["light_at"]))
     g = kit.get("dressing", {}).get("godray")
     if g:
         gen.set_editor_property("cave_god_ray_mesh16", mesh(g["mesh"]))
-        gen.set_editor_property("cave_god_ray_material16", unreal.load_asset(GODRAY_MI))
+        gen.set_editor_property("cave_god_ray_material16", unreal.load_asset(g.get("material", GODRAY_MI).split(".")[0]))
         gen.set_editor_property("cave_god_ray_turn16", unreal.Rotator(0.0, g["pitch"], g["yaw"]))
+        gen.set_editor_property("cave_god_ray_scale16", unreal.Vector(*g.get("scale", [1.0, 1.0, 1.0])))          # (the example's, measured: PR #116's review)
     print("CAVE16 dressing", len(dr), "meshes | torch", bool(t), "| god ray", bool(g))
     # (the joints' yaw read back: a Rotator's argument order is easy to get wrong)
     j = gen.get_editor_property("cave_rooms16")[0].get_editor_property("joints")
@@ -381,7 +509,7 @@ def level():
     del gen
 
 
-PARTS = {"study": study, "measure": measure, "dressing": dressing, "collide": collide, "level": level}
+PARTS = {"study": study, "measure": measure, "dressing": dressing, "collide": collide, "level": level, "items": items, "icons": icons}
 for p in [a for a in ARGS if a in PARTS] or ["study"]:
     PARTS[p]()
 gc.collect()
