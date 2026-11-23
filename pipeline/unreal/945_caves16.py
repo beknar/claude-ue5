@@ -11,7 +11,7 @@ Parts:
   arrows, where a tunnel meets the room), the roof hole and god-ray points, the stairs' two ends, the tunnels' meshes, their
   cross-section and segment length (the spline's tangent), the cap; written to SourceArt/caves/hyper16.json for the game.
 Args: <part> [check]"""
-import sys, os, json, gc, unreal
+import sys, os, json, gc, math, unreal
 
 ARGS = [a.lower() for a in sys.argv[1:]]
 CHECK = "check" in ARGS
@@ -185,6 +185,74 @@ def measure():
     print("CAVE16 wrote", OUT)
 
 
+def dressing():
+    """the kit's PCG dressing measured on its example map (phase 9: the game scatters the same meshes at the same densities): for each
+    mesh its instances a metre of tunnel (floor and roof apart: height over the spline under or over 4 m) and a walkable tile of room,
+    their distance from the tunnel's line as a share of its half-width, their scales; the rooms' wall-light points (their Blueprints'
+    Wall_Light_Parent children), the kit's torch (BP_WallTorch's mesh, fire and light) and god ray"""
+    kit = json.load(open(OUT, encoding="utf-8"))
+    unreal.EditorLoadingAndSavingUtils.load_map(EXAMPLE)
+    w = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_editor_world()
+    tun, room = {}, {}
+    tun_len, room_tiles = 0.0, 0
+    tiles_of = {k: sum(e["mask"]) for k, e in kit["rooms"].items()}
+    for a in unreal.GameplayStatics.get_all_actors_of_class(w, unreal.Actor):
+        cn = a.get_class().get_name()
+        if cn in TUNNEL_BP:
+            sp = a.get_components_by_class(unreal.SplineComponent)[0]
+            if sp.get_number_of_spline_points() < 2: continue
+            L = sp.get_spline_length(); tun_len += L
+            half = kit["tunnels"][TUNNEL_BP[cn]]["box"]["max"][1]
+            seen = set()
+            for c in a.get_components_by_class(unreal.InstancedStaticMeshComponent):
+                m = c.static_mesh
+                if not m or c.get_instance_count() == 0: continue
+                key = (m.get_path_name(), c.get_instance_count(), round(c.get_instance_transform(0, True).translation.x))
+                if key in seen: continue          # (the same PCG output listed twice)
+                seen.add(key)
+                e = tun.setdefault(m.get_path_name(), {"n": 0, "roof": 0, "lat": [], "scale": []})
+                for i in range(c.get_instance_count()):
+                    t = c.get_instance_transform(i, True); p = t.translation
+                    k_ = sp.find_input_key_closest_to_world_location(p)
+                    q = sp.get_location_at_spline_input_key(k_, unreal.SplineCoordinateSpace.WORLD)
+                    e["n"] += 1; e["roof"] += 1 if p.z - q.z > 400.0 else 0
+                    e["lat"].append(min(1.5, math.hypot(p.x - q.x, p.y - q.y) / max(half, 1.0))); e["scale"].append(t.scale3d.x)
+        elif cn in ROOMS and ROOMS[cn] != "stairs":
+            room_tiles += tiles_of[ROOMS[cn]]
+            for c in a.get_components_by_class(unreal.InstancedStaticMeshComponent):
+                m = c.static_mesh
+                if not m: continue
+                e = room.setdefault(m.get_path_name(), {"n": 0, "scale": []})
+                for i in range(c.get_instance_count()):
+                    e["n"] += 1; e["scale"].append(c.get_instance_transform(i, True).scale3d.x)
+    def q(v, f): v = sorted(v); return round(v[int(f * (len(v) - 1))], 2) if v else 1.0
+    out = {"tunnel": [], "room": []}
+    for m, e in sorted(tun.items()):
+        out["tunnel"].append({"mesh": m, "per_m": round(e["n"] / (tun_len / 100.0), 3), "roof_share": round(e["roof"] / e["n"], 2),
+                              "lat": [q(e["lat"], 0.1), q(e["lat"], 0.9)], "scale": [q(e["scale"], 0.1), q(e["scale"], 0.9)]})
+    for m, e in sorted(room.items()):
+        out["room"].append({"mesh": m, "per_tile": round(e["n"] / max(room_tiles, 1), 3), "scale": [q(e["scale"], 0.1), q(e["scale"], 0.9)]})
+    # (the rooms' wall-light points, in each room's frame)
+    for a in unreal.GameplayStatics.get_all_actors_of_class(w, unreal.Actor):
+        cn = a.get_class().get_name()
+        if cn not in ROOMS or "lights" in kit["rooms"][ROOMS[cn]]: continue
+        kit["rooms"][ROOMS[cn]]["lights"] = [rel(c) for c in a.get_components_by_class(unreal.SceneComponent)
+                                            if c.get_attach_parent() and c.get_attach_parent().get_name() == "Wall_Light_Parent"]
+    gr = [a for a in unreal.GameplayStatics.get_all_actors_of_class(w, unreal.Actor) if a.get_class().get_name() == "BP_GodRay_Sun_C"]
+    if gr:
+        c = gr[0].get_components_by_class(unreal.StaticMeshComponent)[0]
+        out["godray"] = {"mesh": c.static_mesh.get_path_name(), "material": c.get_material(0).get_path_name(), "scale": [round(v, 1) for v in (c.get_world_scale().x, c.get_world_scale().y, c.get_world_scale().z)],
+                         "pitch": round(c.get_world_rotation().pitch, 1), "yaw": round(c.get_world_rotation().yaw, 1)}
+    kit["dressing"] = out
+    kit["torch"] = {"mesh": "/Game/Hyper/ResourcePack/Structures/Wall_Torch/Mesh/SM_Wall_Torch.SM_Wall_Torch", "fire": "/Game/Hyper/ResourcePack/Effects/Particles/2DGas/NS_2DGasIntro.NS_2DGasIntro",
+                    "fire_at": [0, -29, 109], "light_at": [0, -45, 80]}
+    for e in out["tunnel"]: print("CAVE16 tunnel dressing", e)
+    for e in out["room"]: print("CAVE16 room dressing", e)
+    print("CAVE16 godray", out.get("godray"), "| lights", {k: len(e.get("lights", [])) for k, e in kit["rooms"].items()})
+    if CHECK: print("CAVE16 check: not written"); return
+    open(OUT, "w", encoding="utf-8").write(json.dumps(kit, indent=1) + "\n")
+
+
 COLLIDE = "/Game/RandomDungeon/Caves16"
 
 
@@ -211,6 +279,8 @@ def collide():
 
 
 CAVES = "/Game/RandomDungeon/Maps/caves"
+SORREL_SHARE = 0.15
+GODRAY_MI = "/Game/Hyper/ResourcePack/Environments/GodRay/Materials/MI_GodRay_Animated"
 WEIGHTS = {"small": 1.0, "medium": 0.8, "large": 0.45, "stairs": 0.0}
 # (the kit's small tunnel is drawn by none: its walkable way is 2 to 3 m wide and closed up where it bent (868 cave16: she stuck on its
 # walls in every small tunnel, never in a medium one))
@@ -247,6 +317,7 @@ def level():
         g = e.get("godray")
         r.set_editor_property("god_ray", unreal.Vector(g[0], g[1], g[2]) if g else unreal.Vector(0, 0, 0))
         r.set_editor_property("weight", WEIGHTS[k])
+        r.set_editor_property("lights", [tf(x) for x in e.get("lights", [])])
         rooms.append(r)
     tunnels = []
     for k in ("small", "medium", "large"):
@@ -273,6 +344,33 @@ def level():
     gen.set_editor_property("cave_tunnels16", tunnels)
     gen.set_editor_property("cave_cap16", mesh(kit["cap"]["mesh"]))
     gen.set_editor_property("cave_rooms_per_set16", unreal.IntPoint(4, 7))
+    # (phase 9: the kit's PCG dressing as measured; the sorrel hung from the roofs at 15 % of the kit's density (about 88 a metre of
+    # tunnel at full: 12,000 instances a set))
+    dr = []
+    for where in ("tunnel", "room"):
+        for e in kit.get("dressing", {}).get(where, []):
+            d = unreal.RDCaveDress16()
+            d.set_editor_property("mesh", mesh(e["mesh"]))
+            d.set_editor_property("tunnel", where == "tunnel")
+            roof = where == "tunnel" and e.get("roof_share", 0) > 0.5
+            d.set_editor_property("roof", roof)
+            d.set_editor_property("per_unit", round((e["per_m"] * (SORREL_SHARE if roof else 1.0)) if where == "tunnel" else e["per_tile"], 3))
+            lat = e.get("lat", [0.0, 0.5]); d.set_editor_property("lateral", unreal.Vector2D(lat[0], lat[1]))
+            d.set_editor_property("scale", unreal.Vector2D(e["scale"][0], e["scale"][1]))
+            dr.append(d)
+    gen.set_editor_property("cave_dress16", dr)
+    t = kit.get("torch", {})
+    if t:
+        gen.set_editor_property("cave_torch_mesh16", mesh(t["mesh"]))
+        gen.set_editor_property("cave_torch_fire16", unreal.load_asset(t["fire"].split(".")[0]))
+        gen.set_editor_property("cave_torch_fire_at16", unreal.Vector(*t["fire_at"]))
+        gen.set_editor_property("cave_torch_light_at16", unreal.Vector(*t["light_at"]))
+    g = kit.get("dressing", {}).get("godray")
+    if g:
+        gen.set_editor_property("cave_god_ray_mesh16", mesh(g["mesh"]))
+        gen.set_editor_property("cave_god_ray_material16", unreal.load_asset(GODRAY_MI))
+        gen.set_editor_property("cave_god_ray_turn16", unreal.Rotator(0.0, g["pitch"], g["yaw"]))
+    print("CAVE16 dressing", len(dr), "meshes | torch", bool(t), "| god ray", bool(g))
     # (the joints' yaw read back: a Rotator's argument order is easy to get wrong)
     j = gen.get_editor_property("cave_rooms16")[0].get_editor_property("joints")
     print("CAVE16 large room's openings' yaw", [round(x.rotation.rotator().yaw) for x in j], "| from the kit", [c[3] for c in kit["rooms"]["large"]["connections"]])
@@ -283,7 +381,7 @@ def level():
     del gen
 
 
-PARTS = {"study": study, "measure": measure, "collide": collide, "level": level}
+PARTS = {"study": study, "measure": measure, "dressing": dressing, "collide": collide, "level": level}
 for p in [a for a in ARGS if a in PARTS] or ["study"]:
     PARTS[p]()
 gc.collect()

@@ -2149,7 +2149,7 @@ bool ARDSection::ContinueGenerate(double Budget)
 	{
 		// (the caves: the kit's rooms and caps at once, then the tunnels' pieces within the frame's budget)
 		if (ShellX == 0) { bShellSpread16 = true; CaveShell16(); ShellX = 1; }
-		if (CaveShellPieces16(Budget)) ShellX = N + 1;
+		if (CaveShellPieces16(Budget)) { CaveDressSet16(); ShellX = N + 1; }          // (the dressing traces onto the laid pieces)
 		ShellMs += (FPlatformTime::Seconds() - T0) * 1000.0;
 		return false;
 	}

@@ -7678,6 +7678,14 @@ def cave16_inner():
     res["ring_set"] = {"from": [round(float(east[0])), round(float(east[1]))], "plan": m_[-1] if m_ else None, "shell_furnish_frames": m2[-1] if m2 else None,
                        "frames": len(dts), "worst_frame_ms": round(max(dts[2:] or [0]), 1), "frames_over_100ms": sum(1 for d in dts[2:] if d > 100.0),
                        "built": bool(g.is_section_generated(S1)), "pieces": len(g.get_cave_pieces16(S1))}
+    # ---- phase 9: the start set's dressing (torches, god rays, the kit's scattered meshes, containers) and the boss's room (the deepest)
+    dl = [str(x).split("|") for x in g.get_cave_dressing16(S0)]
+    res["dressing"] = {x[0] + ("|" + x[1] if x[0] == "dress" else ""): int(x[-1]) for x in dl}
+    # (tier 1's: the rooms she walked to are explored)
+    pk = [str(x) for x in g.get_boss_room_pick16(1)]
+    res["boss_pick"] = pk[:1]; cands = [c.split("|") for c in pk if c.startswith("cand|")]
+    if pk and not pk[0].startswith("cand|") and cands:
+        f_ = float(pk[0].split("|")[3]); res["boss_deepest"] = all(float(c[4]) >= f_ - 1.0 for c in cands)
     # ---- the start set's lights again after a restart (PR #115's review: each restart had added another set of them)
     n_l0 = len(S.get_components_by_class(unreal.PointLightComponent))
     g.restart_play(0); yield from wait(1.5); refresh(); S = g.get_section(S0); pawn = G["pawn"]
@@ -7698,7 +7706,10 @@ def cave16_inner():
     if blocked:
         a = V(*map(float, blocked[0][:3])); fz = floor_z(a.x, a.y, top=a.z + 400.0, bottom=a.z - 400.0)
         put(a, yaw=0.0, z=(fz if fz is not None else a.z) + 20.0); yield from wait(1.2); shot("cave16_blocked", "1280x720"); yield from wait(0.6)
+    dsum = res.get("dressing", {})
     ok = (len(rooms) >= 4 and len(tunnels) >= 3 and comps["spline"] > 0 and res["start"]["room"] >= 0 and res["lights_restart"][0] == res["lights_restart"][1]
+          and dsum.get("torches_rooms", 0) > 0 and dsum.get("torches_tunnels", 0) > 0 and dsum.get("containers", 0) >= len(rooms) - 1
+          and sum(v for k_, v in dsum.items() if k_.startswith("dress|")) > 0 and res.get("boss_deepest", True)
           and not holes and not floors_off and not blocked and all(isinstance(v, dict) and v["ok"] for v in reached.values()))
     step_result("cave16", ok, **res)
 def step_cave16():
@@ -7707,7 +7718,48 @@ def step_cave16():
     finally:
         try: quiet(False)
         except Exception: pass
-STEPS.update({"cave16": step_cave16})
+def cave16chase_inner():
+    """phase 9's chase: a monster of the start set's rooms comes for her through a tunnel's bends: she stands on the tunnel from its room
+    about 20 m along it (the monsters awake), and the time it takes to come within 3 m, with its way (its distance walked against the
+    straight line) is recorded"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(False); res = {}
+    S0 = I2(0, 0); S = g.get_section(S0); pawn = G["pawn"]
+    yield from wait(1.5)
+    pcs = [str(x) for x in g.get_cave_pieces16(S0)]
+    tunnels = [p.split("|") for p in pcs if p.startswith("tunnel|")]
+    mons = [m for m in g.get_monsters() if alive(m) and S.room_at(m.get_actor_location()) >= 0]
+    res["monsters"] = len(mons)
+    picked = None
+    for m in mons:
+        ri = S.room_at(m.get_actor_location())
+        for t in tunnels:
+            if int(t[3]) == ri or int(t[4]) == ri:
+                pts = [V(*map(float, q.split(","))) for q in t[7].split(";")]
+                if int(t[4]) == ri: pts = list(reversed(pts))
+                if len(pts) > 12: picked = (m, ri, pts); break
+        if picked: break
+    if not picked:
+        step_result("cave16chase", False, error="no monster in a room with a tunnel", **res); return
+    m, ri, pts = picked
+    her = pts[10]                     # (20 m along the tunnel from its room's opening)
+    put(her, yaw=math.degrees(math.atan2(pts[0].y - her.y, pts[0].x - her.x)), z=her.z)
+    m0 = m.get_actor_location(); walked = 0.0; last = m0; t0 = time.time(); reach = None
+    while time.time() - t0 < 40.0:
+        yield
+        if not alive(m): break
+        p_ = m.get_actor_location(); walked += dist2(p_, last); last = p_
+        if dist2(p_, pawn.get_actor_location()) < 300.0: reach = round(time.time() - t0, 1); break
+    res.update({"monster": str(m.get_editor_property("monster_name")), "room": ri, "start_m": round(dist2(m0, her) / 100.0, 1), "reached_s": reach,
+                "walked_m": round(walked / 100.0, 1), "straight_m": round(dist2(m0, her) / 100.0, 1)})
+    quiet(True)
+    step_result("cave16chase", reach is not None, **res)
+def step_cave16chase():
+    try:
+        yield from cave16chase_inner()
+    finally:
+        try: quiet(False)
+        except Exception: pass
+STEPS.update({"cave16": step_cave16, "cave16chase": step_cave16chase})
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""
     if G.get("gen"): return G["gen"]

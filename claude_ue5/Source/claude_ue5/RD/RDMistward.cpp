@@ -419,6 +419,18 @@ bool ARDDungeonGenerator::PickExploredRoom(int32 Tier, int32 Salt, ARDSection*& 
 		}
 	}
 	if (Cands.Num() == 0) return false;
+	// (the caves of the list of 2026-11-22: the deepest room, its floor the lowest, then the farthest from her)
+	if (bCave16)
+	{
+		const FC* Best = nullptr;
+		for (const FC& C : Cands)
+		{
+			const float Fz = C.S->CaveRoomFloor16(C.Room), Bz = Best ? Best->S->CaveRoomFloor16(Best->Room) : 0.f;
+			if (!Best || Fz < Bz - 1.f || (FMath::Abs(Fz - Bz) <= 1.f && C.D > Best->D)) Best = &C;
+		}
+		OutSection = Best->S; OutRoom = Best->Room;
+		return true;
+	}
 	// (not right beside her, not far off: among the nearer half, by a hash of the session and the tier)
 	Cands.Sort([](const FC& A, const FC& B) { return A.D < B.D; });
 	TArray<FC> Pick;

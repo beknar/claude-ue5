@@ -1,7 +1,8 @@
 {
- "tag": "c16r4",
+ "tag": "c9b",
  "plan": [
   "cave16",
+  "cave16chase",
   "cave15"
  ],
  "level": "caves",
@@ -51,8 +52,8 @@
       834
      ],
      "trace": [
-      "<Struct 'Vector' (0x00000257F4FDD960) {x: 150.000000, y: 150.000000, z: 10.142148}>",
-      "<Struct 'Vector' (0x00000257F4FDE040) {x: -0.034831, y: -0.062730, z: 0.997423}>",
+      "<Struct 'Vector' (0x000001EC75FC5E10) {x: 150.000000, y: 150.000000, z: 10.142148}>",
+      "<Struct 'Vector' (0x000001EC75FC64F0) {x: -0.034831, y: -0.062730, z: 0.997423}>",
       "None"
      ]
     },
@@ -73,8 +74,8 @@
       702
      ],
      "trace": [
-      "<Struct 'Vector' (0x00000257F4FDDC30) {x: 7350.000000, y: -6750.000000, z: -0.979900}>",
-      "<Struct 'Vector' (0x00000257F4FDDC80) {x: 0.006081, y: 0.000370, z: 0.999981}>",
+      "<Struct 'Vector' (0x000001EC75FC60E0) {x: 7350.000000, y: -6750.000000, z: -0.979900}>",
+      "<Struct 'Vector' (0x000001EC75FC6130) {x: 0.006081, y: 0.000370, z: 0.999981}>",
       "None"
      ]
     },
@@ -95,8 +96,8 @@
       702
      ],
      "trace": [
-      "<Struct 'Vector' (0x00000257F4FDDE60) {x: -7050.000000, y: -7350.000000, z: -0.979900}>",
-      "<Struct 'Vector' (0x00000257F4FDDEB0) {x: -0.000370, y: 0.006081, z: 0.999981}>",
+      "<Struct 'Vector' (0x000001EC75FC6310) {x: -7050.000000, y: -7350.000000, z: -0.979900}>",
+      "<Struct 'Vector' (0x000001EC75FC6360) {x: -0.000370, y: 0.006081, z: 0.999981}>",
       "None"
      ]
     }
@@ -134,7 +135,7 @@
      [
       10,
       1.0,
-      "StaticMeshComponent_20",
+      "StaticMeshComponent_120",
       "SM_Room_Large"
      ]
     ],
@@ -142,7 +143,7 @@
      [
       2549,
       0.89,
-      "StaticMeshComponent_21",
+      "StaticMeshComponent_121",
       "SM_Roof_Hole_01"
      ]
     ],
@@ -164,7 +165,7 @@
     "blocked": 0,
     "blocked_at": []
    },
-   "fps_first_room": 43.5,
+   "fps_first_room": 42.0,
    "walk": {
     "0": {
      "ok": true,
@@ -196,29 +197,77 @@
     },
     "4": {
      "ok": true,
-     "seconds": 80.5,
+     "seconds": 80.1,
      "path_points": 106,
      "stuck_at": null,
      "held_by": null
     }
    },
+   "open2": true,
    "ring_set": {
     "from": [
      12450,
      7350
     ],
-    "plan": null,
-    "shell_furnish_frames": null,
-    "frames": 1828,
-    "worst_frame_ms": 76.1,
-    "frames_over_100ms": 0,
-    "built": false,
-    "pieces": 0
+    "plan": [
+     "163.1",
+     "2",
+     "a try a frame",
+     "88.3"
+    ],
+    "shell_furnish_frames": [
+     "940",
+     "2",
+     "43"
+    ],
+    "frames": 141,
+    "worst_frame_ms": 104.9,
+    "frames_over_100ms": 1,
+    "built": true,
+    "pieces": 14
    },
+   "dressing": {
+    "torches_rooms": 36,
+    "godrays": 5,
+    "torches_tunnels": 31,
+    "dress|SM_SM_SM_Shrub_Cluster_04": 14,
+    "dress|SM_SM_Shrub_Cluster_03": 16,
+    "dress|SM_Shrub_Cluster_01": 1,
+    "dress|SM_Shrub_Cluster_02": 1,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_a": 787,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_b": 782,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_c": 804,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_d": 797,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_e": 786,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_f": 801,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_g": 781,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_h": 794,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_i": 805,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_j": 789,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_k": 781,
+    "dress|SM_SmallRocks_Cluster": 266,
+    "dress|SM_rock_moss_set_02_rock_moss_set_02_rock10": 99,
+    "containers": 8
+   },
+   "boss_pick": [
+    "0|0|1|-428|19911"
+   ],
+   "boss_deepest": true,
    "lights_restart": [
-    37,
-    37
+    72,
+    72
    ]
+  },
+  {
+   "step": "cave16chase",
+   "ok": true,
+   "monsters": 2,
+   "monster": "Rat",
+   "room": 4,
+   "start_m": 27.9,
+   "reached_s": 30.3,
+   "walked_m": 28.0,
+   "straight_m": 27.9
   },
   {
    "step": "cave15",
@@ -265,13 +314,13 @@
     "Rat"
    ],
    "kinds_ring": [
+    "Half_Creature_04",
     "Half_Creature_05",
-    "Parasite_Slider",
     "Rat"
    ],
    "rooms": {
     "Great hall": 1,
-    "Crypt": 20,
+    "Crypt": 21,
     "Hallway junction": 36
    },
    "floors_rel": [
@@ -283,38 +332,38 @@
     2.8,
     22.8,
     12.0,
-    8.2,
-    -0.1,
-    29.5,
-    -2.1,
-    -0.3,
-    -0.1,
-    -0.6,
+    33.0,
+    145.6,
+    0.1,
+    0.3,
+    15.4,
+    0.1,
+    0.3,
+    -0.7,
+    24.1,
+    10.9,
+    20.2,
+    4.9,
+    0.0,
     -0.2,
-    -395.0,
-    -282.4,
-    -427.9,
-    -427.7,
-    -412.6,
-    -427.9,
-    -427.7,
-    -428.7,
-    8.4,
-    -0.8,
-    -0.5,
-    -0.5,
-    -0.8,
-    2.2,
+    0.2,
+    8.9,
+    12.9,
+    9.6,
+    28.9,
+    20.3,
+    4.6,
+    16.9,
+    21.0,
+    5.3,
+    150.0,
+    150.0,
+    150.0,
+    0.2,
+    -0.2,
+    -1.3,
     -0.1,
-    0.8,
-    15.7,
-    12.0,
-    27.4,
-    9.0,
-    -2.3,
-    2.8,
-    22.8,
-    12.0
+    -0.7
    ],
    "walls_m": [],
    "off_kinds": [],
@@ -323,14 +372,14 @@
  ],
  "windows_hidden": "Content Browser, Message Log",
  "shots": [
-  "mw_c16r4_cave16_above.png",
-  "mw_c16r4_cave16_room_large.png",
-  "mw_c16r4_cave16_room_small.png",
-  "mw_c16r4_cave16_tunnel0_medium.png",
-  "mw_c16r4_cave16_tunnel1_medium.png",
-  "mw_c16r4_cave16_tunnel2_medium.png",
-  "mw_c16r4_cave15_hall.png",
-  "mw_c16r4_cave15_tier2.png"
+  "mw_c9b_cave16_above.png",
+  "mw_c9b_cave16_room_large.png",
+  "mw_c9b_cave16_room_small.png",
+  "mw_c9b_cave16_tunnel0_medium.png",
+  "mw_c9b_cave16_tunnel1_medium.png",
+  "mw_c9b_cave16_tunnel2_medium.png",
+  "mw_c9b_cave15_hall.png",
+  "mw_c9b_cave15_tier2.png"
  ],
  "error": null,
  "saves_put_back": 0,
