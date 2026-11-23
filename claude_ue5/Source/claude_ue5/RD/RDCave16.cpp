@@ -1069,7 +1069,9 @@ void ARDSection::CaveFurnish16(FRandomStream& R, int32 RI)
 	// by its walls: on its floor's edge tiles, pushed 60 cm toward the wall, facing the room's middle)
 	if (RI == 0) CaveContainers16 = 0;
 	if (!CavePlaced16.IsValidIndex(RI) || CavePlaced16[RI].Kit < 0 || !Generator || Rooms[RI].Kind == ERDRoomKind::Junction) return;
-	FurnRoom = RI;
+	// (this room's footprints only, as the castle's Furnish keeps them: never reset, every restart's containers stood on the last
+	// one's footprints and fewer were laid each time (7, 8, 3, 2 in one session: PR #117's review run))
+	FurnRoom = RI; Feet.Reset();
 	static const FIntPoint N4[4] = { FIntPoint(1, 0), FIntPoint(-1, 0), FIntPoint(0, 1), FIntPoint(0, -1) };
 	TArray<FIntPoint> Edge;
 	for (int32 T = 0; T < N * N; ++T)

@@ -338,6 +338,9 @@ def items():
                 rc.parts = ps; recs.append(rc)
         g.set_editor_property("items", its); g.set_editor_property("recipes", recs)
         g.set_editor_property("cave_items16", [unreal.Name(x["name"]) for x in X if x.get("cave")])
+        # (made at the anvil whatever their kind: a recipe with the anvil's station '' on a kind the tables would send to the
+        # alchemist (the linings, kind HEALING for their buff; PR #117's review))
+        g.set_editor_property("anvil_made16", [unreal.Name(x["name"]) for x in X if x.get("recipe") and x["recipe"][0] == "" and x["kind"] in ("HEALING", "MANA", "SPEED")])
         rg = []
         for r in regions:
             e = unreal.RDCaveRegion16(); e.set_editor_property("name", r["name"]); e.set_editor_property("biomes", r["biomes"]); e.set_editor_property("items", [unreal.Name(i) for i in r["items"]]); rg.append(e)

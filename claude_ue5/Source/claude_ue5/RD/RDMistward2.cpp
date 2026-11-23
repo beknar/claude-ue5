@@ -1057,7 +1057,8 @@ static TArray<FName> RDM2TierItems(const ARDDungeonGenerator* G, int32 Tier, uin
 	TArray<FName> Pool;
 	for (const FRDItemDef& It : G->Items)
 		if (It.Weight > 0.f && G->ItemOfTier(It, Tier) && It.Kind != ERDItemKind::Slash && It.Kind != ERDItemKind::Key && It.Kind != ERDItemKind::Teleport
-			&& It.Kind != ERDItemKind::Component && It.Kind != ERDItemKind::Tome && It.Kind != ERDItemKind::Recipe) Pool.Add(It.Name);          // (recipes: the list of 2026-11-16, drawn apart)
+			&& It.Kind != ERDItemKind::Component && It.Kind != ERDItemKind::Tome && It.Kind != ERDItemKind::Recipe
+			&& G->CaveItemAllowed16(It)) Pool.Add(It.Name);          // (the caves' things: none in a dungeon's prizes, which stay as they were (PR #117's review))          // (recipes: the list of 2026-11-16, drawn apart)
 	// (distinct things: a draw that repeats one is drawn again (a gauntlet's chest held two of its three once))
 	TArray<FName> Out;
 	for (int32 K = 0; Out.Num() < FMath::Min(Count, Pool.Num()) && K < Count * 16; ++K) Out.AddUnique(Pool[HashCombine(Salt, (uint32)K * 7919u + 13u) % (uint32)Pool.Num()]);

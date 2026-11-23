@@ -7689,9 +7689,12 @@ def cave16_inner():
     if pk and not pk[0].startswith("cand|") and cands:
         f_ = float(pk[0].split("|")[3]); res["boss_deepest"] = all(float(c[4]) >= f_ - 1.0 for c in cands)
     # ---- the start set's lights again after a restart (PR #115's review: each restart had added another set of them)
-    n_l0 = len(S.get_components_by_class(unreal.PointLightComponent))
+    n_l0 = len(S.get_components_by_class(unreal.PointLightComponent)); n_c0 = S.get_num_containers()
     g.restart_play(0); yield from wait(1.5); refresh(); S = g.get_section(S0); pawn = G["pawn"]
     res["lights_restart"] = [n_l0, len(S.get_components_by_class(unreal.PointLightComponent))]
+    # (and its containers: the same every restart (PR #117's review run: 7, 8, 3, 2 as footprints piled up))
+    n_c1 = S.get_num_containers(); g.restart_play(0); yield from wait(1.5); refresh(); S = g.get_section(S0); pawn = G["pawn"]
+    res["containers_restart"] = [n_c0, n_c1, S.get_num_containers()]
     # ---- pictures: each kind of room from its middle, a tunnel along its middle
     seen = set()
     for r in rooms:
@@ -7710,6 +7713,7 @@ def cave16_inner():
         put(a, yaw=0.0, z=(fz if fz is not None else a.z) + 20.0); yield from wait(1.2); shot("cave16_blocked", "1280x720"); yield from wait(0.6)
     dsum = res.get("dressing", {})
     ok = (len(rooms) >= 4 and len(tunnels) >= 3 and comps["spline"] > 0 and res["start"]["room"] >= 0 and res["lights_restart"][0] == res["lights_restart"][1]
+          and len(set(res["containers_restart"])) == 1
           and dsum.get("torches_rooms", 0) > 0 and dsum.get("torches_tunnels", 0) > 0 and dsum.get("containers", 0) >= len(rooms) - 1
           and sum(v for k_, v in dsum.items() if k_.startswith("dress|")) > 0 and res.get("boss_deepest") is True
           and not holes and not floors_off and not blocked and all(isinstance(v, dict) and v["ok"] for v in reached.values()))
@@ -7800,9 +7804,17 @@ def cave16mats_inner():
     for x in X:
         if not x.get("recipe"): continue
         r = recs.get(x["name"])
-        st_ = "" if str(r.station) in ("None", "") else str(r.station) if r else None
-        if not r or st_ != x["recipe"][0] or any(not [a for a in p.any_of if str(a) in names] for p in r.parts): rec_bad.append(x["name"])
+        if not r: rec_bad.append(x["name"]); continue
+        # (the station the game sends it to (the tables' rule by kind; the linings the anvil's), not the data's (PR #117's review))
+        st_ = str(g.get_cave_craft16(x["name"])).split("|")[0]
+        if st_ != x["recipe"][0] or any(not [a for a in p.any_of if str(a) in names] for p in r.parts): rec_bad.append(x["name"])
     res["recipes"] = {"made": sum(1 for x in X if x.get("recipe")), "bad": rec_bad}
+    res["refusal"] = {n: str(g.get_cave_craft16(n)).split("|", 1)[1] for n in ("Darksight Draught", "Frost-quartz Lining")}
+    # (a store stands in a town, never in a cave: the stock as a level without the caves' switch reads it)
+    g.set_editor_property("cave16", False)
+    try: stock = [str(n) for n in g.get_town_stock16()]
+    finally: g.set_editor_property("cave16", True)
+    res["sold"] = [x["name"] for x in X if x["name"] in stock]
     # ---- the veins and growths, and a pile taken
     nodes = [str(n).split("|") for n in g.get_cave_nodes16(S0)]
     res["nodes"] = {k: sum(1 for n in nodes if n[1] == k) for k in sorted({n[1] for n in nodes})}
@@ -7836,8 +7848,12 @@ def cave16mats_inner():
         while time.time() - t0 < 6.0: yield
         return h0 - c.get_health()
     plain = yield from hurt(); yield from rwait(5.0)
-    c.add_item("Grave-moss Antivenom", 1); c.use_item("Grave-moss Antivenom"); yield from wait(0.3)
-    guarded = yield from hurt()
+    # (drunk after the poison took hold: a poison already on her is guarded too (PR #117's review))
+    c.set_health(c.get_max_health()); h0 = c.get_health(); c.apply_monster_ability(unreal.RDMonsterAbility.POISON, 1.0, 40.0); yield from wait(0.2)
+    c.add_item("Grave-moss Antivenom", 1); c.use_item("Grave-moss Antivenom"); h1 = c.get_health()
+    t0 = time.time()
+    while time.time() - t0 < 6.0: yield
+    guarded = h1 - c.get_health(); yield from rwait(6.0)
     res["poison"] = {"plain": round(plain, 1), "guarded": round(guarded, 1), "guard": float(str(c.get_cave_buffs16()).split("|")[3])}
     # ---- the oil: the torch's burn over 10 s without, then with it
     if c.get_item_count("Torch") < 1: c.add_item("Torch", 1)
@@ -7851,7 +7867,7 @@ def cave16mats_inner():
     b_oil = yield from burn()
     res["oil"] = {"burn_10s": round(b_plain, 2), "burn_10s_oiled": round(b_oil, 2)}
     c.hold_torch(False)
-    ok = (draw_ok and not rec_bad and res["recipes"]["made"] >= 7 and sum(res["nodes"].values()) > 0 and took is not None
+    ok = (draw_ok and not rec_bad and not any(res["refusal"].values()) and not res["sold"] and res["recipes"]["made"] >= 7 and sum(res["nodes"].values()) > 0 and took is not None
           and abs(res["darksight"]["light_cm"] - 1800.0) < 1.0 and plain > 0 and guarded <= plain * 0.5
           and b_plain > 0 and 0.4 <= b_oil / b_plain <= 0.6)
     step_result("cave16mats", ok, **res)

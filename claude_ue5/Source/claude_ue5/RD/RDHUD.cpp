@@ -1721,7 +1721,10 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 		: FString::Printf(TEXT("  Then for %.0f s: %s."), It.BuffSeconds, *URDCombatComponent::BuffWords15(It.BuffKind, It.BuffAmount, Hp));          // (one wording for every reader: PR #109's review)
 	switch (It.Kind)
 	{
-	case ERDItemKind::Healing: return FString::Printf(TEXT("Restores %.0f%% of your hit points  (%.0f HP)"), It.Amount * 100.f, It.Amount * Hp) + Buff;
+	case ERDItemKind::Healing:
+		// (the list of 2026-11-22's caves: a brew, an oil or a socket stone that heals nothing says what it is and does)
+		if (It.Amount <= 0.f) return (It.Looks.IsEmpty() ? FString() : It.Looks.Left(1).ToUpper() + It.Looks.Mid(1)) + Buff;
+		return FString::Printf(TEXT("Restores %.0f%% of your hit points  (%.0f HP)"), It.Amount * 100.f, It.Amount * Hp) + Buff;
 	case ERDItemKind::Mana: return Mp > 0.f ? FString::Printf(TEXT("Restores %.0f%% of your mana  (%.0f)"), It.Amount * 100.f, It.Amount * Mp) : FString(TEXT("No use to you: you have no mana"));
 	case ERDItemKind::Speed: return FString::Printf(TEXT("You move %.0f%% faster for %.0f seconds"), It.Amount * 100.f, It.Seconds) + Buff;
 	case ERDItemKind::Food: return FString::Printf(TEXT("Restores %.0f%% of your hit points a second for %.0f s  (%.1f HP/s)"), It.Amount * 100.f, It.Seconds, It.Amount * Hp) + Buff;
@@ -1761,6 +1764,9 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 		return S;
 	}
 	case ERDItemKind::Repair:
+		// (the list of 2026-11-22's caves: a patch or chitin mends one weight of armour only)
+		if (const FString W = It.ArmourType.ToLower(); W == TEXT("light") || W == TEXT("medium") || W == TEXT("heavy"))
+			return FString::Printf(TEXT("Mends %.0f%% of a set of %s armour's full durability, up to full (no other armour, no weapon).  Enter, then choose what it mends."), It.Amount * 100.f, *W);
 		return FString::Printf(TEXT("Mends %.0f%% of a set of armour's or a found weapon's full durability, up to full.  Enter, then choose what it mends."), It.Amount * 100.f);
 	case ERDItemKind::Component:
 	{
@@ -2813,7 +2819,10 @@ void ARDHUD::DrawCrafting(float Sc)
 			{
 				CraftWhatKey = Key; CraftWhatLines.Reset();
 				const FRDItemDef& It = Gen->Items[Ix];
-				const FString What = It.Kind == ERDItemKind::Repair ? FString::Printf(TEXT("Mends %.0f%% of a set of armour's or a found weapon's durability"), It.Amount * 100.f) : DescribeItem(It);
+				const FString OnlyW16 = It.ArmourType.ToLower();
+				const bool bOnly = OnlyW16 == TEXT("light") || OnlyW16 == TEXT("medium") || OnlyW16 == TEXT("heavy");          // (the caves' patch and chitin (PR #117's review))
+				const FString What = It.Kind == ERDItemKind::Repair ? (bOnly ? FString::Printf(TEXT("Mends %.0f%% of a set of %s armour's durability"), It.Amount * 100.f, *OnlyW16)
+				                                                           : FString::Printf(TEXT("Mends %.0f%% of a set of armour's or a found weapon's durability"), It.Amount * 100.f)) : DescribeItem(It);
 				TArray<FString> Words; What.ParseIntoArray(Words, TEXT(" "));
 				FString Ln;
 				for (const FString& Wd : Words)

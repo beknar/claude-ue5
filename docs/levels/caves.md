@@ -88,8 +88,9 @@ The list's "treasure types that can be found in caves instead of the things that
 
 ### Measured (phase 10)
 
-- `868 cave16mats -lv caves` (`test_c10h.json`; `868 cave16` with it in `test_c10e.json`): under a cold region (glacial) the draw holds frost quartz and blue geodes, never sun-glass or red geodes, and no gear but the caves' own; all seven recipes on the map at their stations, their parts items; the start set's 4 deepiron veins, 8 glowcap and 3 grave-moss growths, a vein's pile taken (her ore count went up); the darksight draught put an 18 m light on her; a poison's hurt in 6 s fell from 14.5 to 6.1 with the antivenom; the torch burned 10.0 s of its life in 10 s, 5.0 with the oil; pictures of a vein and a glowcap growth.
-- `868 cave16 -lv caves`: the caves as before (every room walked, no hole, no blockage, the dressing, the boss's room).
+- `868 cave16mats -lv caves` (`test_c10k.json`, with `cave16` and `cave15`, after PR #117's review): under a cold region (glacial) the draw holds frost quartz and blue geodes, never sun-glass or red geodes, and no gear but the caves' own; all seven recipes on the map at their stations, their parts items; the start set's 4 deepiron veins, 8 glowcap and 3 grave-moss growths, a vein's pile taken (her ore count went up); every recipe at the station the game sends it to (the linings at the anvil, the draughts at the alchemist's, none refused to the Warrior); no store sells a cave thing; the darksight draught put an 18 m light on her; a poison's hurt in 6 s fell from 14.3 to 6.0 with the antivenom drunk after it took hold; the torch burned 10.0 s of its life in 10 s, 5.0 with the oil; pictures of a vein and a glowcap growth.
+- `868 cave16 -lv caves`: the caves as before (every room walked, no hole, no blockage, the dressing, the boss's room), and the first set's containers the same over two restarts (7, 7, 7: before PR #117's review they fell 7, 8, 3, 2 as the rooms' footprints piled up).
+- **Never sold, never a dungeon's prize**: the caves' things are out of the towns' stores and the arena's and vaults' prizes (PR #117's review: the stores sold eight of them from the start, and two had joined every dungeon's prizes and moved them all).
 
 ## Limits
 

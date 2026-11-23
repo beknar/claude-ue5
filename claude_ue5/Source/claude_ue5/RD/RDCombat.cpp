@@ -1332,7 +1332,10 @@ bool URDCombatComponent::BeginRepair(FName Item)
 	if (GetRepairLines().Num() == 0)
 	{
 		RepairWith = NAME_None;
-		SetMessage(FString::Printf(TEXT("Nothing to mend: the %s mends armour and the weapons you found"), *Item.ToString().ToLower()));
+		const FString Only = Generator->Items[Ix].ArmourType.ToLower();
+		const bool bOnly = Only == TEXT("light") || Only == TEXT("medium") || Only == TEXT("heavy");          // (the caves' patch and chitin (PR #117's review))
+		SetMessage(bOnly ? FString::Printf(TEXT("Nothing to mend: the %s mends %s armour only"), *Item.ToString().ToLower(), *Only)
+		                 : FString::Printf(TEXT("Nothing to mend: the %s mends armour and the weapons you found"), *Item.ToString().ToLower()));
 		return false;
 	}
 	RepairCursor = 0;

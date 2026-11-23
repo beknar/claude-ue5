@@ -68,6 +68,14 @@ bool ARDDungeonGenerator::CaveMayDraw16(FName Item) const
 	return Ix >= 0 && CaveItemAllowed16(Items[Ix]);
 }
 
+FString ARDDungeonGenerator::GetCaveCraft16(FName Item) const
+{
+	const FRDRecipe* Rc = Recipes.FindByPredicate([&](const FRDRecipe& R) { return R.Item == Item; });
+	if (!Rc) return TEXT("none|no recipe");
+	const FName St = RecipeStation(*Rc);
+	return FString::Printf(TEXT("%s|%s"), St.IsNone() ? TEXT("") : *St.ToString(), *RecipeRefusal(*Rc));
+}
+
 TArray<FString> ARDDungeonGenerator::GetCaveNodes16(FIntPoint Section) const
 {
 	const ARDSection* S = GetSection(Section);
@@ -122,7 +130,13 @@ void ARDSection::CaveNodesSet16()
 				else
 				{
 					if (!W->LineTraceSingleByChannel(H, T3 + FVector(0, 0, 300.f), T3 - FVector(0, 0, 400.f), ECC_Visibility, Q)) continue;
-					At = H.ImpactPoint; PileAt = At + FVector(60.f, 0.f, 0.f);
+					At = H.ImpactPoint;
+					// (the pile beside it, on the floor: traced, and none against a wall (PR #117's review))
+					const FVector Side = FRotator(0.f, Yw, 0.f).RotateVector(FVector(70.f, 0.f, 0.f));
+					FHitResult F, Wl;
+					if (W->LineTraceSingleByChannel(Wl, At + FVector(0, 0, 60.f), At + Side + FVector(0, 0, 60.f), ECC_Visibility, Q)) continue;
+					if (!W->LineTraceSingleByChannel(F, At + Side + FVector(0, 0, 150.f), At + Side - FVector(0, 0, 300.f), ECC_Visibility, Q)) continue;
+					PileAt = F.ImpactPoint;
 				}
 				UStaticMeshComponent* C = NewObject<UStaticMeshComponent>(this);
 				C->SetMobility(EComponentMobility::Static);
@@ -137,7 +151,7 @@ void ARDSection::CaveNodesSet16()
 				if (Generator->CaveNodesLaid16.Contains(Key)) continue;
 				Generator->CaveNodesLaid16.Add(Key);
 				TArray<FName> Things; for (int32 J = 0; J < Count; ++J) Things.Add(Nd.Item);
-				Generator->DropHarvest(PileAt, Things, Generator->TierOf(Coord));
+				if (Generator->DropHarvest(PileAt, Things, Generator->TierOf(Coord))) --Generator->Harvests;          // (laid, not cut from a kill: out of the harvests' count (PR #117's review))
 			}
 		}
 	}
