@@ -2029,6 +2029,33 @@ public:
 	 *  (a cylinder stood on its side across the mouth: pitch 90) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") bool bCaveMouthMirror15 = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") FRotator CaveDarkTurn15 = FRotator::ZeroRotator;
+	// ---- the list of 2026-11-22's caves (RDCave16.cpp, 945): laid by a planner of their own and drawn with the Hyper kit
+	/** the cave level: every set a cave of the kit's rooms joined by winding tunnels on the tile grid, not the dungeon's rooms and
+	 *  hallways (Plan, the shell, the furnishing and the seals take the cave's ways) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") bool bCave16 = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FRDCaveRoom16> CaveRooms16;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FRDCaveTunnel16> CaveTunnels16;
+	/** the kit's cap: an opening no tunnel uses, a tunnel's dead end, a set's way into a shut tier */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TObjectPtr<UStaticMesh> CaveCap16 = nullptr;
+	/** rooms a set (the start set: its first the large room at the middle), by the tier's depth: X at tier 1 to Y at tier 5 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FIntPoint CaveRoomsPerSet16 = FIntPoint(4, 7);
+	/** the share of the rooms' joins beyond the tree that makes every room reachable (loops) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float CaveLoopShare16 = 0.2f;
+	/** how far a room's floor may lie below the set's (cm; a level of the set: the stairs join two, else a tunnel slopes) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float CaveLevelDrop16 = 428.f;
+	/** a fill light over each room (phase 8's: the kit's torches and god rays come with the dressing) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float CaveRoomLight16 = 3000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FLinearColor CaveLightColor16 = FLinearColor(0.75f, 0.85f, 1.f);
+	/** a test's: the set's pieces, "room|<index>|<kind>|x|y|z|yaw|<tiles>", "tunnel|<kind>|<its room index>|<from>|<to>|<length cm>|<pieces>|
+	 *  x,y,z;x,y,z;..." (the tunnel's centreline every 2 m on its floor; from / to a room's index, a portal's -1 - its index) and
+	 *  "cap|x|y|z|yaw" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetCavePieces16(FIntPoint Section) const;
+	/** a test's: the tiles of a set she can stand on, "x|y|z|owner" (world cm, the floor's height; the owner: its Rooms index, a
+	 *  tunnel's its own Junction entry, as GetCavePieces16's tunnel lines say) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetCaveTiles16(FIntPoint Section) const;
+	/** a test's: the set seen from above (an orthographic capture Height cm over its floor looking down, the kit's colours unlit:
+	 *  the roofs over the camera are not drawn), written to a PNG; false if it could not be */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") bool CaptureAbove16(FIntPoint Section, const FString& Folder, const FString& File, float Height = 700.f, int32 Pixels = 2048);
 	TWeakObjectPtr<class UStaticMeshComponent> CaveMouthB15;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TObjectPtr<UStaticMesh> CaveDarkMesh15 = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List15") TObjectPtr<UMaterialInterface> CaveDarkMaterial15 = nullptr;

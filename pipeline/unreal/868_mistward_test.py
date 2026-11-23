@@ -7470,6 +7470,9 @@ def cave15_inner():
     k2 = kinds_here()
     res["kinds_start"] = k1; res["kinds_ring"] = k2; res["rooms"] = rooms; res["floors_rel"] = floors; res["walls_m"] = walls
     res["off_kinds"] = [k for k in set(k1) | set(k2) if k not in allowed]
+    # (the list of 2026-11-22's caves: with the cave planner (cave16) the rooms have levels and the kit's walls, and the floors and the
+    # walls are cave16's step's (rays along every tunnel, every room walked to): the old dungeon-shaped checks are left out)
+    res["cave16"] = bool(g.get_editor_property("cave16"))
     # (pictures: the first hall from her eyes, then a room of the ring)
     put(g.get_start_room_center(), 0.0); yield from wait(1.5); shot("cave15_hall"); yield from rwait(1.0)
     S2 = g.get_section(I2(1, 0)) or g.get_section(I2(-1, 0))
@@ -7477,8 +7480,8 @@ def cave15_inner():
     quiet(False)
     ok = (cave[0].startswith("cave:") and all(t == tier for t in res["global_tiers"]) and res["switches"]["cave15"] and not res["switches"]["final_boss_on"]
           and not any(("Prison" in k) or ("Arena" in k) for k in rooms) and not found and (k1 or k2) and not res["off_kinds"]
-          and floors and sum(1 for f in floors if f is not None and abs(f) < 40) >= 0.85 * len(floors) and len(walls) >= 2
-          and all(w_["reached_m"] <= w_["wall_m"] for w_ in walls))
+          and (res["cave16"] or (floors and sum(1 for f in floors if f is not None and abs(f) < 40) >= 0.85 * len(floors) and len(walls) >= 2
+          and all(w_["reached_m"] <= w_["wall_m"] for w_ in walls))))
     step_result("cave15", ok, **res)
 def step_cave15():
     """the cave level's step (cave15_inner), its quiet put back in a finally (PR #101's review)"""
@@ -7489,6 +7492,222 @@ def step_cave15():
         except Exception: pass
 STEPS.update({"cave15": step_cave15})
 
+def cave16_inner():
+    """the list of 2026-11-22's caves (phase 8), on the cave level (-lv caves): the start set laid by the cave planner (RDCave16.cpp)
+    and drawn with the Hyper kit's rooms, tunnels and caps. Measured: every room reached on foot along the game's own tile paths
+    (FindPathWorld, the way the monsters go) with move input; no hole in the shell (rays from each tunnel's centreline every 2 m in 16
+    ways round it meet rock within the tunnel mesh's reach, the 8 m by each end left out where it opens into a room; rays down meet
+    floor within 80 cm of the plan's height); no blockage (her capsule, its foot at her step height, swept along each tunnel's
+    centreline); the frames in the first room; pictures of each kind of room and of a tunnel"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True); res = {}
+    S0 = I2(0, 0); S = g.get_section(S0); w = G["w"]; pawn = G["pawn"]
+    pcs = [str(x) for x in g.get_cave_pieces16(S0)]
+    rooms = [p.split("|") for p in pcs if p.startswith("room|")]
+    tunnels = [p.split("|") for p in pcs if p.startswith("tunnel|")]
+    caps = [p for p in pcs if p.startswith("cap|")]
+    res["pieces"] = {"rooms": [r[2] for r in rooms], "tunnels": [t[1] for t in tunnels], "caps": len(caps)}
+    comps = {"spline": 0, "rooms": 0}
+    kit_meshes = {r.mesh.get_name() for r in g.get_editor_property("cave_rooms16")}
+    for cc in S.get_components_by_class(unreal.StaticMeshComponent):
+        sm = cc.get_editor_property("static_mesh")
+        if isinstance(cc, unreal.SplineMeshComponent): comps["spline"] += 1
+        elif sm and sm.get_name() in kit_meshes: comps["rooms"] += 1
+    res["components"] = comps
+    # (each room mesh's collision as play has it, and a ray down its middle against that component alone)
+    rc = []
+    for cc in S.get_components_by_class(unreal.StaticMeshComponent):
+        sm = cc.get_editor_property("static_mesh")
+        if isinstance(cc, unreal.SplineMeshComponent) or not sm or sm.get_name() not in kit_meshes: continue
+        L = cc.get_world_location(); o_, e_, _r = unreal.SystemLibrary.get_component_bounds(cc)
+        lt = cc.line_trace_component(V(L.x, L.y, L.z + 3000), V(L.x, L.y, L.z - 3000), True, False, False)
+        rc.append({"mesh": sm.get_name(), "at": [round(L.x), round(L.y), round(L.z)], "enabled": str(cc.get_collision_enabled()), "profile": str(cc.get_collision_profile_name()),
+                   "mobility": str(cc.get_editor_property("mobility")), "visible": cc.is_visible(), 
+                   "bounds": [round(e_.x), round(e_.y), round(e_.z)], "trace": [round(x, 1) if isinstance(x, float) else str(x) for x in (lt if isinstance(lt, tuple) else [lt])][:3]})
+    res["room_collision"] = sorted(rc, key=lambda x: x["mesh"] != "SM_Room_Large")[:3]
+    tiles = [x.split("|") for x in (str(t) for t in g.get_cave_tiles16(S0))]
+    res["walkable_tiles"] = len(tiles)
+    # (the tiles' joined groups (4 ways): which rooms and tunnels each holds)
+    tset = {(math.floor(float(t[0]) / 300.0), math.floor(float(t[1]) / 300.0)): int(t[3]) for t in tiles}
+    seen_, groups = set(), []
+    for k0 in tset:
+        if k0 in seen_: continue
+        st, owners, n_ = [k0], set(), 0; seen_.add(k0)
+        while st:
+            c_ = st.pop(); n_ += 1; owners.add(tset[c_])
+            for d_ in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nb = (c_[0] + d_[0], c_[1] + d_[1])
+                if nb in tset and nb not in seen_: seen_.add(nb); st.append(nb)
+        groups.append({"tiles": n_, "owners": sorted(owners)})
+    res["tile_groups"] = sorted(groups, key=lambda g_: -g_["tiles"])
+    # where she starts: in the first room
+    yield from wait(1.0)
+    p0 = pawn.get_actor_location()
+    res["start"] = {"at": [round(p0.x), round(p0.y), round(p0.z)], "room": S.room_at(p0), "moving": str(pawn.get_editor_property("character_movement").movement_mode)}
+    # (what stands under her and under the first room's middle: every surface a ray down meets, its component and owner)
+    def under(x, y, top, bottom):
+        hs = unreal.SystemLibrary.line_trace_multi(w, V(x, y, top), V(x, y, bottom), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, True, [pawn], unreal.DrawDebugTrace.NONE, True) or []
+        out = []
+        for h_ in hs:
+            t_ = h_.to_tuple(); cm_ = t_[10]
+            sm_ = cm_.get_editor_property("static_mesh") if cm_ and isinstance(cm_, unreal.StaticMeshComponent) else None
+            out.append([round(t_[4].z), round(t_[7].z, 2), cm_.get_name() if cm_ else None, sm_.get_name() if sm_ else None])
+        return out
+    res["start"]["under_her"] = under(p0.x, p0.y, p0.z + 1500, p0.z - 3000)
+    rp = [r for r in rooms if r[2] == "large"]
+    if rp: res["start"]["under_first_room"] = under(float(rp[0][3]), float(rp[0][4]), 3000, -3000)
+    ps = GS.get_all_actors_of_class(w, unreal.PlayerStart)
+    res["start"]["player_starts"] = [[round(x.get_actor_location().x), round(x.get_actor_location().y), round(x.get_actor_location().z)] for x in ps]
+    # ---- holes and blockages along the tunnels
+    tk = {str(t.kind): t for t in g.get_editor_property("cave_tunnels16")}
+    holes, floors_off, blocked, rays = [], [], [], 0
+    def hit_name(t_):
+        if not (t_ and t_[0]): return None
+        cm_ = t_[10]
+        if cm_ is None: return None
+        sm_ = cm_.get_editor_property("static_mesh") if isinstance(cm_, unreal.StaticMeshComponent) else None
+        return (sm_.get_name() if sm_ else cm_.get_class().get_name()) + ("~spline" if isinstance(cm_, unreal.SplineMeshComponent) else "")
+    for t in tunnels:
+        pts = [V(*map(float, q.split(","))) for q in t[7].split(";")]
+        box = tk[t[1]].mesh.get_bounding_box(); reach = max(box.max.y - box.min.y, box.max.z - box.min.z) * 0.75
+        for i in range(4, len(pts) - 4):
+            p, q = pts[i], pts[i + 1]
+            d = V(q.x - p.x, q.y - p.y, 0.0); n_ = math.hypot(d.x, d.y) or 1.0; d = V(d.x / n_, d.y / n_, 0.0)
+            side = V(-d.y, d.x, 0.0); o = V(p.x, p.y, p.z + 200.0)
+            for k in range(16):
+                a = math.radians(k * 22.5); r_ = V(side.x * math.cos(a), side.y * math.cos(a), math.sin(a))
+                e = V(o.x + r_.x * reach, o.y + r_.y * reach, o.z + r_.z * reach)
+                h_ = unreal.SystemLibrary.line_trace_single(w, o, e, unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, True, [pawn], unreal.DrawDebugTrace.NONE, True)
+                rays += 1
+                if not (h_ and h_.to_tuple()[0]): holes.append([round(o.x), round(o.y), round(o.z), k * 22.5])
+            hf = unreal.SystemLibrary.line_trace_single(w, V(p.x, p.y, p.z + 250.0), V(p.x, p.y, p.z - 400.0), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, True, [pawn], unreal.DrawDebugTrace.NONE, True)
+            tf_ = hf.to_tuple() if hf else None
+            fz = round(tf_[4].z, 1) if tf_ and tf_[0] else None
+            if fz is None or abs(fz - p.z) > 80.0:
+                # (a rock on the line: the floor 1 or 2 m to either side counts)
+                ok2 = False
+                for off in (100.0, -100.0, 200.0, -200.0):
+                    f2 = floor_z(p.x + side.x * off, p.y + side.y * off, top=p.z + 250.0, bottom=p.z - 400.0)
+                    if f2 is not None and abs(f2 - p.z) <= 80.0: ok2 = True; break
+                if not ok2: floors_off.append([round(p.x), round(p.y), round(p.z), fz, hit_name(tf_), t[1]])
+            hb = unreal.SystemLibrary.capsule_trace_single(w, V(p.x, p.y, p.z + 135.0), V(q.x, q.y, q.z + 135.0), 34.0, 88.0, unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, True, [pawn], unreal.DrawDebugTrace.NONE, True)
+            tb_ = hb.to_tuple() if hb else None
+            if tb_ and tb_[0]:
+                # (blocked only if no way past: the same sweep 1 and 2 m to either side of the line (a bend's inner wall stands on
+                # the line where the way runs wide of it))
+                clear_ = False
+                for off in (100.0, -100.0, 200.0, -200.0):
+                    o2 = V(side.x * off, side.y * off, 0.0)
+                    h2 = unreal.SystemLibrary.capsule_trace_single(w, V(p.x + o2.x, p.y + o2.y, p.z + 135.0), V(q.x + o2.x, q.y + o2.y, q.z + 135.0), 34.0, 88.0, unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, True, [pawn], unreal.DrawDebugTrace.NONE, True)
+                    t2 = h2.to_tuple() if h2 else None
+                    if not (t2 and t2[0]): clear_ = True; break
+                if not clear_: blocked.append([round(p.x), round(p.y), round(p.z), hit_name(tb_), round(tb_[4].z - p.z), t[1]])
+                else: res.setdefault("passed_aside", 0); res["passed_aside"] += 1
+    res["shell"] = {"rays": rays, "holes": len(holes), "holes_at": holes[:12], "floor_off": len(floors_off), "floor_off_at": floors_off[:12], "blocked": len(blocked), "blocked_at": blocked[:12]}
+    # ---- the set from above: an orthographic capture 7 m over its floor looking down (the roofs above the camera are not drawn),
+    # the kit's colours unlit
+    try:
+        ok_ = g.capture_above16(S0, SHOTS, f"mw_{TAG}_cave16_above.png", 700.0, 2048)
+        if ok_: R.setdefault("shots", []).append(f"mw_{TAG}_cave16_above.png")
+    except Exception as e:
+        res["above_error"] = str(e)
+    # ---- the frames in the first room
+    yield from rwait(1.0); f0 = time.time(); n0 = 0
+    while time.time() - f0 < 5.0: yield; n0 += 1
+    res["fps_first_room"] = round(n0 / (time.time() - f0), 1)
+    # ---- every room on foot, from the last one reached, along the tile path
+    reached = {}
+    def room_target(ri):
+        mine = [x for x in tiles if int(x[3]) == ri]
+        if not mine: return None
+        cx = sum(float(x[0]) for x in mine) / len(mine); cy = sum(float(x[1]) for x in mine) / len(mine)
+        b = min(mine, key=lambda x: (float(x[0]) - cx) ** 2 + (float(x[1]) - cy) ** 2)
+        return V(float(b[0]), float(b[1]), float(b[2]))
+    order = [int(r[1]) for r in rooms if r[2] != "stairs"]
+    for ri in order:
+        tgt = room_target(ri)
+        if tgt is None: reached[ri] = "no tiles: cut off by the plan"; continue
+        path = list(S.find_path_world(pawn.get_actor_location(), tgt)) or [tgt]
+        t0 = time.time(); k = 0; last = pawn.get_actor_location(); lt = time.time(); stuck = False
+        while time.time() - t0 < 120.0:
+            here = pawn.get_actor_location()
+            # (the nearest point of the path ahead, then a point 3 m further along it: heading straight for the next point cut the
+            # bends into their walls)
+            k = min(range(k, len(path)), key=lambda i: dist2(here, path[i]))
+            if dist2(here, tgt) < 250.0: break
+            to, rest, i_ = path[k], 300.0, k
+            while i_ < len(path) - 1 and rest > 0:
+                seg = dist2(path[i_], path[i_ + 1])
+                if seg >= rest: f_ = rest / seg; to = V(path[i_].x + (path[i_ + 1].x - path[i_].x) * f_, path[i_].y + (path[i_ + 1].y - path[i_].y) * f_, path[i_].z); break
+                rest -= seg; i_ += 1; to = path[i_]
+            d = V(to.x - here.x, to.y - here.y, 0.0); n_ = math.hypot(d.x, d.y) or 1.0
+            pawn.add_movement_input(V(d.x / n_, d.y / n_, 0.0), 1.0, False)
+            if time.time() - lt > 4.0:
+                if dist2(here, last) < 100.0: stuck = True; break
+                last = here; lt = time.time()
+            yield
+        hp = pawn.get_actor_location()
+        sweep = None
+        if stuck:
+            # (what holds her: her capsule swept 1.5 m on toward the path's point)
+            to_ = to; d_ = V(to_.x - hp.x, to_.y - hp.y, 0.0); n_ = math.hypot(d_.x, d_.y) or 1.0
+            hs_ = unreal.SystemLibrary.capsule_trace_single(w, hp, V(hp.x + d_.x / n_ * 150.0, hp.y + d_.y / n_ * 150.0, hp.z), 34.0, 88.0, unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, True, [pawn], unreal.DrawDebugTrace.NONE, True)
+            ts_ = hs_.to_tuple() if hs_ else None
+            if ts_ and ts_[0]: sweep = {"mesh": hit_name(ts_), "at_z": round(ts_[4].z - hp.z), "normal": [round(ts_[7].x, 2), round(ts_[7].y, 2), round(ts_[7].z, 2)], "toward": [round(to_.x), round(to_.y), round(to_.z)]}
+        if stuck and len([v for v in reached.values() if isinstance(v, dict) and v.get("stuck_at")]) < 2:
+            face(hp, path[min(k, len(path) - 1)]); yield from wait(0.8); shot("cave16_stuck%d" % ri, "1280x720"); yield from wait(0.5)
+        reached[ri] = {"ok": dist2(hp, tgt) < 250.0, "seconds": round(time.time() - t0, 1), "path_points": len(path), "stuck_at": [round(hp.x), round(hp.y), round(hp.z)] if stuck else None, "held_by": sweep}
+        if not reached[ri]["ok"]: put(tgt); yield from wait(0.5)
+    res["walk"] = reached
+    # ---- a set of the ring made in play as she nears it (the plan a try a frame, the tunnels' pieces a budget a frame): she stands on
+    # the start set's walkable tile nearest its east border; every frame's time while the game makes the set beyond, and its log line
+    import re as _re
+    logp = os.path.join(unreal.Paths.project_log_dir(), "claude_ue5.log")
+    n0_ = os.path.getsize(logp)
+    # (tier 2 opens once the start set is cleared: until then the sets beyond are not made)
+    g.debug_clear_section(S0, 0, g.get_start_room_center()); yield from wait(0.5)
+    res["open2"] = g.is_tier_open(2)
+    east = max(tiles, key=lambda t: float(t[0]))
+    put(V(float(east[0]), float(east[1]), float(east[2])), yaw=0.0)
+    S1 = I2(1, 0); dts = []; last = time.time(); t0_ = time.time()
+    while time.time() - t0_ < 40.0:
+        yield; now_ = time.time(); dts.append((now_ - last) * 1000.0); last = now_
+        if g.is_section_generated(S1) and g.get_section(S1) and not g.get_section(S1).is_building() and time.time() - t0_ > 5.0: break
+    tail = open(logp, encoding="utf-8", errors="replace").read()[n0_:]
+    m_ = _re.findall(r"RDCAVE16 \(1,0\) planned in ([0-9.]+) ms \(try (\d+) kept; ([a-z ]+), the longest step ([0-9.]+) ms\)", tail)
+    m2 = _re.findall(r"RDSECTION \(1,0\)[^\n]*shell ([0-9]+) ms \+ furnish ([0-9]+) ms over ([0-9]+) frames", tail)
+    res["ring_set"] = {"from": [round(float(east[0])), round(float(east[1]))], "plan": m_[-1] if m_ else None, "shell_furnish_frames": m2[-1] if m2 else None,
+                       "frames": len(dts), "worst_frame_ms": round(max(dts[2:] or [0]), 1), "frames_over_100ms": sum(1 for d in dts[2:] if d > 100.0),
+                       "built": bool(g.is_section_generated(S1)), "pieces": len(g.get_cave_pieces16(S1))}
+    # ---- the start set's lights again after a restart (PR #115's review: each restart had added another set of them)
+    n_l0 = len(S.get_components_by_class(unreal.PointLightComponent))
+    g.restart_play(0); yield from wait(1.5); refresh(); S = g.get_section(S0); pawn = G["pawn"]
+    res["lights_restart"] = [n_l0, len(S.get_components_by_class(unreal.PointLightComponent))]
+    # ---- pictures: each kind of room from its middle, a tunnel along its middle
+    seen = set()
+    for r in rooms:
+        if r[2] in seen: continue
+        seen.add(r[2]); at = V(float(r[3]), float(r[4]), float(r[5]))
+        tgt = room_target(int(r[1])) or at
+        put(tgt, yaw=float(r[6]) + 30.0); yield from wait(1.2); shot("cave16_room_" + r[2], "1280x720"); yield from wait(0.6)
+    # (three tunnels, each from its middle along it, her feet on the floor the ray finds; and where the capsule was blocked first)
+    for ti, t in enumerate(sorted(tunnels, key=lambda t: -float(t[5]))[:3]):
+        pts = [V(*map(float, q.split(","))) for q in t[7].split(";")]
+        m = len(pts) // 2; a, b = pts[m], pts[min(m + 3, len(pts) - 1)]
+        fz = floor_z(a.x, a.y, top=a.z + 400.0, bottom=a.z - 400.0)
+        put(a, yaw=math.degrees(math.atan2(b.y - a.y, b.x - a.x)), z=(fz if fz is not None else a.z) + 20.0); yield from wait(1.2); shot("cave16_tunnel%d_%s" % (ti, t[1]), "1280x720"); yield from wait(0.6)
+    if blocked:
+        a = V(*map(float, blocked[0][:3])); fz = floor_z(a.x, a.y, top=a.z + 400.0, bottom=a.z - 400.0)
+        put(a, yaw=0.0, z=(fz if fz is not None else a.z) + 20.0); yield from wait(1.2); shot("cave16_blocked", "1280x720"); yield from wait(0.6)
+    ok = (len(rooms) >= 4 and len(tunnels) >= 3 and comps["spline"] > 0 and res["start"]["room"] >= 0 and res["lights_restart"][0] == res["lights_restart"][1]
+          and not holes and not floors_off and not blocked and all(isinstance(v, dict) and v["ok"] for v in reached.values()))
+    step_result("cave16", ok, **res)
+def step_cave16():
+    try:
+        yield from cave16_inner()
+    finally:
+        try: quiet(False)
+        except Exception: pass
+STEPS.update({"cave16": step_cave16})
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""
     if G.get("gen"): return G["gen"]

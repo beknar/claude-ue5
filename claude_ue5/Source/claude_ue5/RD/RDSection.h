@@ -457,6 +457,17 @@ public:
 	/** open or opening (target) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsTargetOpen(bool bDoor, int32 Index) const;
 
+	// ---- the list of 2026-11-22's caves (RDCave16.cpp): a test's lines of the set's kit pieces and walkable tiles (the generator's
+	// GetCavePieces16 / GetCaveTiles16 say what they hold)
+	TArray<FString> CavePieces16() const;
+	TArray<FString> CaveTiles16() const;
+	/** the floor's height over the set's at a tile (the kit's rooms are uneven, its tunnels climb; 0 off the cave) */
+	float CaveFloorAt16(FIntPoint Local) const { return In(Local) && CaveZ16.IsValidIndex(Idx(Local)) ? CaveZ16[Idx(Local)] : 0.f; }
+	/** the floor near a tile she may stand on off the tiles (FloorZAt's, the safety net's) */
+	float CaveFloorNear16(FIntPoint Local) const;
+	/** how long the set's plan took (ms; the planner runs in one frame) */
+	double PlanMs16 = 0.0, PlanStepMs16 = 0.0;
+
 	// ---- monsters (tile pathing)
 	FIntPoint WorldToLocal(const FVector& L) const;
 	FVector LocalToWorld(FIntPoint T) const;
@@ -710,6 +721,39 @@ private:
 
 	int32 Idx(FIntPoint T) const { return T.Y * N + T.X; }
 	bool In(FIntPoint T) const { return T.X >= 0 && T.Y >= 0 && T.X < N && T.Y < N; }
+	// ---- the caves (RDCave16.cpp): the set laid by the cave planner instead of Plan's rooms and hallways
+	/** a kit room laid in the set: its kit entry, the tile its mesh's pivot stands on, its quarter turns, its pivot's height over
+	 *  the set's floor, which of its openings a tunnel took */
+	struct FCavePlace16 { int32 Kit = -1; FIntPoint At = FIntPoint::ZeroValue; int32 Turn = 0; float Z = 0.f; TArray<bool> Used; TArray<FVector> JAt; TArray<FVector2D> JOut; };
+	/** a tunnel: its kit entry, its spline's points on the floor (the set's frame, cm), the places it joins (room index, or -1 - the
+	 *  portal's index) */
+	struct FCaveRun16 { int32 Kit = 0; TArray<FVector> Points; int32 From = -1, To = -1; float Length = 0.f; int32 Room = -1; };
+	TArray<FCavePlace16> CavePlaced16;          // (in step with Rooms: a tunnel's entry has no kit, Kit -1)
+	TArray<FCaveRun16> CaveRuns16;              // (each run's Room: its Rooms entry, its tiles' owner)
+	TArray<FTransform> CaveCaps16;
+	TArray<float> CaveZ16;
+	void PlanCave16(FRandomStream& R);
+	/** one try of the plan: the rooms cut off (no tunnel reached them) */
+	int32 PlanCaveOnce16(FRandomStream& R, int32 Try);
+	/** a try laid from its own stream (CaveBase16 + 7919 * Try): its score (-1000 a room cut off, +10 a portal) */
+	int32 CaveTryOnce16(int32 Try);
+	/** the plan's next step (a try, or the best laid again at the end): false when the plan is done */
+	bool CaveStep16();
+	int32 CaveBase16 = 0, CaveTry16 = 0, CaveBestTry16 = 0, CaveBestScore16 = 0, CaveLastTry16 = -1;
+	/** in play: the plan's tries a frame each (ContinueGenerate), not all in BeginGenerate */
+	bool bCaveSpread16 = false;
+	/** the kit's meshes for the set laid (in play: a set saved in the level keeps none, its shell is never saved) */
+	void CaveShell16();
+	/** the tunnels' pieces from where the last call stopped, within Budget seconds: true when all are laid */
+	bool CaveShellPieces16(double Budget);
+	int32 CaveShellRun16 = 0, CaveShellPiece16 = 0;
+	/** a set made in play: CaveShell16 lays the rooms and caps, ContinueGenerate the tunnels' pieces a budget a frame */
+	bool bShellSpread16 = false;
+	/** a cave room's light (the dressing's torches, god rays and containers are phase 9's) */
+	void CaveFurnish16(FRandomStream& R, int32 RI);
+	/** the kit's cap across a portal's tunnel into a shut tier, and its blocker */
+	void CaveSeal16(const FVector& Border, const FVector& Out, int32 Kind);
+	UPROPERTY(Transient) TArray<TObjectPtr<UPrimitiveComponent>> CaveComps16;
 	static int64 EdgeKey(FIntPoint A, FIntPoint B);
 
 	void Plan(FRandomStream& R);

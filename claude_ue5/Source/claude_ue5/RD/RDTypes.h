@@ -1686,3 +1686,49 @@ struct FRDSectionMap
 	UPROPERTY(BlueprintReadOnly) float GeneratedTime = -1.f;
 	UPROPERTY(BlueprintReadOnly) bool bStart = false;
 };
+
+/** the list of 2026-11-22's caves (RDCave16.cpp, 945): one of the Hyper Cave Building Toolkit's rooms (small, medium, large) or its
+ *  stairs, as 945 measured it: its combined mesh, its walkable tiles traced on that mesh (Mask, Size.X by Size.Y, the mesh's pivot at
+ *  tile Pivot's middle, unturned) with each tile's floor over the pivot (Floor, cm), and its openings (Joints: where a tunnel meets
+ *  it, in the room's frame, X out of the room; an unused one closed by the kit's cap) */
+USTRUCT(BlueprintType)
+struct FRDCaveRoom16
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Kind;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> Mesh = nullptr;
+	/** the pieces over it (the kit's roof with its hole), in the room's frame */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<TObjectPtr<UStaticMesh>> Roof;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FTransform> RoofAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FIntPoint Size = FIntPoint(1, 1);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FIntPoint Pivot = FIntPoint::ZeroValue;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<uint8> Mask;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<float> Floor;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FTransform> Joints;
+	/** where the kit's god rays come down through the roof's hole (room frame; zero: none) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector GodRay = FVector::ZeroVector;
+	/** how often the planner draws it (the stairs: 0, laid only where the floor's height changes) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Weight = 1.f;
+};
+
+/** one of the kit's tunnels: its mesh bent along a spline in pieces of Segment cm, each overlapping the next by Overlap (as the
+ *  kit's BP_Cave_Spline_* lay them), its walkable half-width and its floor's height against the mesh's pivot (FloorZ: the floor
+ *  FloorZ over the pivot, negative: below it) */
+USTRUCT(BlueprintType)
+struct FRDCaveTunnel16
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Kind;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> Mesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Segment = 1770.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Overlap = 200.f;
+	/** measured by 945 (the mesh's walkable half-width, straight); the tiles take 2.15 m either side of the line whatever it says (wider,
+	 *  the paths hugged the walls' feet on the bends; narrower, a diagonal's tiles touched only at their corners) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HalfWalk = 150.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float FloorZ = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Weight = 1.f;
+	/** the kit's tunnels are walls and a roof (its example stands them on a ground of its own): their floor is the kit's floor strip
+	 *  of the same size bent along the same curve, widened to FloorWidth (cm) so it runs under the walls' feet */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> FloorMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float FloorWidth = 800.f;
+};

@@ -1738,6 +1738,9 @@ void ARDDungeonGenerator::UpdateDiscovery(const FVector& L)
 		if (R.bDiscovered) continue;
 		// rooms: once she is inside (or in their doorway); hallways: within 4 tiles of her along them
 		const int32 Pad = R.bCorridor ? 4 : 0;
+		// (a room or tunnel with its own tiles (the caves', mistward's shaped rooms) by those tiles, not its rectangle: a winding
+		// tunnel's spans half the set, an L-shaped room's holds an empty corner)
+		if (R.Mask.Num() > 0) { if (R.HasTile(T)) { R.bDiscovered = true; bRoom |= !R.bCorridor; } continue; }
 		if (T.X >= R.Min.X - Pad && T.Y >= R.Min.Y - Pad && T.X < R.Max.X + Pad && T.Y < R.Max.Y + Pad) { R.bDiscovered = true; bRoom |= !R.bCorridor; }
 	}
 	if (bRoom) UpdateProgress(S);       // (a room explored: the tiers count it)
