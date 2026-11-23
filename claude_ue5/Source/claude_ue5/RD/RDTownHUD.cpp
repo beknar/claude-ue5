@@ -277,6 +277,7 @@ void ARDHUD::DrawTownMinimap(float Sc, const FVector& L, float Yaw)
 		UI.Text(Mark, RDTGold, P.X - Tw * 0.5f, P.Y - Th * 0.5f, Small, Sc * 1.2f, ERDType::Title);
 	}
 	{ FVector Ha; if (Gen->GetHorseMapAt(Ha)) { const FVector2D Hs = ToS(FVector2D(Ha)); if (FVector2D::Distance(Hs, C) < R * 0.9f) DrawHorseMark(Hs, Sc); } }
+	DrawAllyMarks16([&](const FVector& W) { return ToS(FVector2D(W)); }, [&](const FVector&, const FVector2D& S) { return FVector2D::Distance(S, C) < R * 0.94f; }, 6.f * Sc);          // (the list of 2026-11-22: her summons)
 	DrawPlayerArrow(C, Yaw - 90.f, 9.f * Sc);
 	if (Ra) UI.Fit(TEXT("minimap_ring"), C - FVector2D(Ring), C + FVector2D(Ring));
 	const FLinearColor Ink(0.75f, 0.77f, 0.8f, 0.85f);
@@ -403,6 +404,7 @@ void ARDHUD::DrawTownMap(float Sc, const FVector& L, float Yaw)
 	if (Gen->bTownSymbols15) DrawTownLegend15(A, B, Sc, false);
 	if (!S->MistgateAt.IsZero()) MistMark(10, ToM(FVector2D(S->MistgateAt.X, S->MistgateAt.Y)), 7.f * Sc);
 	{ FVector Ha; if (Gen->GetHorseMapAt(Ha) && Gen->IsInTownWalls(Ha)) DrawHorseMark(ToM(FVector2D(Ha.X, Ha.Y)), Sc * 1.2f); }          // (inside the town's walls: the map's sheet)
+	DrawAllyMarks16([&](const FVector& W) { return ToM(FVector2D(W.X, W.Y)); }, [&](const FVector& W, const FVector2D&) { return Gen->IsInTownWalls(W); }, 7.f * Sc);          // (the list of 2026-11-22: her summons)
 	{
 		const FVector2D P = ToM(FVector2D(L.X, L.Y));
 		SoftDot(P, 16.f * Sc, FLinearColor(0.8f, 0.05f, 0.03f, 0.35f));
@@ -806,6 +808,7 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 	if (Gen->bTownSymbols15) DrawTownLegend15(A, B, Sc, bSat);
 	if (!S->MistgateAt.IsZero()) MistMark(10, ToM(W2(S->MistgateAt)), 7.f * Sc);
 	{ FVector Ha; if (Gen->GetHorseMapAt(Ha) && Gen->IsInTownWalls(Ha)) DrawHorseMark(ToM(W2(Ha)), Sc * 1.2f); }
+	DrawAllyMarks16([&](const FVector& W) { return ToM(W2(W)); }, [&](const FVector& W, const FVector2D&) { return Gen->IsInTownWalls(W); }, 7.f * Sc);          // (the list of 2026-11-22: her summons)
 	{
 		const FVector2D P = ToM(FVector2D(L.X, L.Y));
 		SoftDot(P, 16.f * Sc, FLinearColor(0.8f, 0.05f, 0.03f, 0.4f));

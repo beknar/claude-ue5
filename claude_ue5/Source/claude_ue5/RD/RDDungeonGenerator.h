@@ -1033,6 +1033,28 @@ public:
 	FVector Perf16From = FVector::ZeroVector, Perf16Last = FVector::ZeroVector, Perf16SecPos = FVector::ZeroVector;
 	float Perf16SecT = 0.f, Perf16Turned = -10.f;
 	FString Perf16Broken;
+	/** the list of 2026-11-22's second phase (RDList16b.cpp): the loading cover over the game's view after a level opens, a fast travel, the map's
+	 *  teleport or a respawn, until the world round her is built and the textures streamed in (at most Cover16Cap s once it is built);
+	 *  rd.LoadingCover 0 turns it off (tests that picture the first seconds) */
+	void ShowCover16(const FString& Why);
+	void TickCover16(float Dt);
+	void HideCover16(const FString& How);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") bool IsCoverUp16() const { return bCover16; }
+	/** tests: every cover so far, "<why>|<seconds up>|<seconds after the world was built>|<how it lifted>|<textures still wanting>|<her x cm>|<her y cm>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") TArray<FString> GetCoverLines16() const { return Cover16Lines; }
+	/** tests: the map's travel to a town by name, as the package's -RDTownGo=town: does (found first, the refusal for enemies near passed) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List16") bool TravelToTown16(const FString& Name);
+	/** (a plain member, not a UPROPERTY: the maps hold the generator, and a package staged on an earlier cook reads its saved properties
+	 *  unversioned (the reel of 2026-11-18's lesson)) */
+	float Cover16Cap = 8.f;
+	bool bCover16 = false;
+	FString Cover16Why;
+	double Cover16Start = 0.0, Cover16ReadyAt = -1.0;
+	int32 Cover16Steady = 0, Cover16Frames = 0;
+	double Cover16FrameSum = 0.0;
+	float Cover16Health = -1.f;
+	TSharedPtr<class SWidget> Cover16Widget;
+	TArray<FString> Cover16Lines;
 
 	// ---- mistward_castle, the list of 2026-10-31b (docs/improvements5.txt; RDMistward5.cpp, pipeline/unreal/879): each a
 	// switch, off on the other levels
@@ -1749,6 +1771,10 @@ public:
 	FVector2D FarLandAt = FVector2D::ZeroVector;
 	int32 FarLandBuilds = 0; float FarLandBuildMs = 0.f;
 	void TickFarLand(const FVector& Cam);
+	/** the list of 2026-11-22's third phase: the far land computed on a worker (its samples and arrays), only swapped in on the game
+	 *  thread (FarLandBuildMs is the swap's time now, FarLandComputeMs the worker's) */
+	TSharedPtr<struct FRDFarLandJob, ESPMode::ThreadSafe> FarJob16;
+	float FarLandComputeMs = 0.f;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sky") FString GetFarLandState() const;
 	/** the list of 2026-11-10 (RDConsoleCmds.cpp): the weather now (0-7), and whether rd.Weather holds it (no change by itself) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sky") int32 GetWeather() const { return Weather; }
@@ -4063,6 +4089,26 @@ public:
 	bool WildStandableNear(FVector2D& Wm, double MaxM) const;
 	/** the wilds: put her down on dry ground within 200 m of Wm (metres), a town far behind her let go; never a town's travel */
 	bool WildPutDownNear(FVector2D Wm);
+	// ---- the list of 2026-11-22's third phase (RDList16c.cpp): the wilds' ground in levels of detail, collision near her only
+	bool IsWildLod16() const;
+	double WildChunkNearM16(const FIntPoint& C, const FVector2D& At) const;
+	int32 WildDrawEveryFor16(double NearM, int32 Cur) const;
+	bool WildCollisionFor16(double NearM, bool bHas) const;
+	void AskWildRegrid16(ARDWildChunk* C, int32 Every, bool bCollision, bool bNow);
+	void ApplyWildRegrid16(struct FRDWChunkData& D);
+	void MakeWildCollision16(ARDWildChunk* C, const TArray<FVector>& V, const TArray<int32>& T, bool bSync);
+	void TickWildLod16(const FVector2D& At);
+	/** tests: "<ground-only jobs>|<in flight>|<longest swap ms>|<on>|<chunks drawn at 2 m>|<at 4 m>|<at 8 m>|<with collision>|<triangles>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") FString GetWildLod16() const;
+	/** tests: the seams between chunks of two steps measured on their meshes; the trees' and rocks' feet on coarse chunks; every mover of
+	 *  the wilds on a chunk with collision (RDList16c.cpp) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") FString GetWildSeams16() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") FString GetWildFootGaps16() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") FString GetWildMoversOffGround16() const;
+	double WildLod1M16 = 250.0, WildLod2M16 = 500.0;
+	int32 WildRegridMax16 = 4, WildRegridInFlight16 = 0, WildRegrids16 = 0;
+	double WildRegridMsMax16 = 0.0;
+	TArray<TSharedPtr<struct FRDWChunkData, ESPMode::ThreadSafe>> WildRegridDone16;
 	void WildAutosave(const FString& Why);
 	// ---- the game saved to disk (RDSave.cpp)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") bool bAutosave = true;

@@ -398,6 +398,7 @@ bool ARDDungeonGenerator::WildFastTravel(int32 PlaceId)
 	}
 	// her things lying where she fell stay in the world they are in: dropped chunks take nothing of hers (piles are actors of
 	// their own); the chunks round the place are made now
+	ShowCover16(TEXT("travel"));          // (the list of 2026-11-22: covered until the place is built round her)
 	WildDropAll();
 	FVector2D To = P.At;
 	if (P.Town >= 0)

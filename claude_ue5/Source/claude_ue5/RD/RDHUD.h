@@ -204,6 +204,9 @@ private:
 	void DrawMessageLog(float Sc);
 	/** her horse on a map (RDList14b.cpp) */
 	void DrawHorseMark(const FVector2D& S, float Sc);
+	/** the list of 2026-11-22 (RDList16.cpp): her summons and allies on the wilds' and the towns' maps, as the dungeon maps draw them
+	 *  (MistMark 12), each recorded in MarksDrawn */
+	void DrawAllyMarks16(TFunctionRef<FVector2D(const FVector&)> ToScreen, TFunctionRef<bool(const FVector&, const FVector2D&)> Inside, float Size);
 	/** her inventory (it pauses the game): her weapons, then her potions and food; what the one under the cursor does */
 	void DrawInventory(float Sc);
 	/** what an item does, for her (its share in her hit points or mana) */

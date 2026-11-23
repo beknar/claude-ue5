@@ -41,6 +41,14 @@ struct FRDWChunkData
 	bool bSyncCollision = false;
 	/** made at once because she is put on it (left out of the streaming's measures; a fast run's streamed chunks stay in them) */
 	bool bPutOn = false;
+	/** the list of 2026-11-22's third phase (RDList16c.cpp): the drawn ground takes every DrawEvery-th vertex of the 2 m grid (1, 2 or 4,
+	 *  the border's last always), with a skirt under its edges; its collision (CV, CT: the whole 2 m grid) only when bCollision; a
+	 *  ground-only job (bGroundOnly) computes the ground alone for a chunk standing (its level of detail or its collision changed) */
+	int32 DrawEvery = 1;
+	bool bCollision = true, bGroundOnly = false;
+	int32 RegridSeq = 0;
+	TArray<FVector> CV;
+	TArray<int32> CT;
 };
 
 /** what the worker threads hand back, and the world's making (shared: the tasks outlive nothing they point at) */

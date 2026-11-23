@@ -189,6 +189,7 @@ void ARDDungeonGenerator::TickWildTowns(const FVector2D& AtM)
 
 FVector ARDDungeonGenerator::WildRespawnAt()
 {
+	ShowCover16(TEXT("respawn"));          // (the list of 2026-11-22)
 	if (!IsWildReady()) return GetStartRoomCenter();
 	const APawn* P = UGameplayStatics::GetPlayerPawn(this, 0);
 	const FVector2D At = P ? FVector2D(P->GetActorLocation().X / 100.0, P->GetActorLocation().Y / 100.0) : FVector2D::ZeroVector;
