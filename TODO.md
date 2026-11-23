@@ -374,6 +374,7 @@ Built and tested (`868`'s `finalboss`); still to test or do:
 
 - **Kethrys Spire's arrival** (888 loading16, 2026-11-23): once, after the map's travel to Kethrys Spire, she stood outside its gate when the cover lifted and was inside it 30 s later (moved about 20 m with nobody's input). The loading test leaves such a trip out of its comparison; the cause is not found.
 - **The wilds' collision near her only** (list 16's third phase): built and measured, then left off (every chunk keeps its collision): the wild monsters stand on most chunks. Worth trying again if the monsters far off are made dormant without movement.
+- **The editor's second play session never reaches the town** (2026-11-23, since Nanite foliage was turned on): in an editor that has already played, the `-Light` drivers' `OpenLevel brokenspire` is asked for and never browsed, with no error; a freshly started editor takes it. The tests are run each in a fresh editor; the cause is not found.
 - **The cities on a card without Nanite** (list 16's fifth phase): with `r.Nanite 0` (the meshes' fallbacks, what a graphics card without Nanite draws) every city but Heaven ran at 0.5 to 1.6 a second in the editor (`884 nanite16`, t16t and t16u). Why the fallbacks cost so much is not measured (the fallbacks' triangle counts, the shadows of the many lights with non-Nanite meshes); a player on such a card would see it.
 - **Trees on the coarse chunks** stand up to 1.45 m over or 1.62 m under the drawn ground beyond 250 m (95 % within 21 cm): sinking a far plant to the coarse surface would close it.
 

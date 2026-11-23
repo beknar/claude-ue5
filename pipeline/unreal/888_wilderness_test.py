@@ -2943,35 +2943,18 @@ def png_stats(path, box):
                 o = x * bpp; vals.append(0.2126 * line[o] + 0.7152 * line[o + 1] + 0.0722 * line[o + 2])
     m = sum(vals) / max(len(vals), 1)
     return m, (sum((v - m) ** 2 for v in vals) / max(len(vals), 1)) ** 0.5
+def rdpng():
+    """rd_png, the tests' shared PNG reader (884's too), loaded fresh each run"""
+    import importlib, sys as _s
+    d = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "..", "pipeline", "unreal")
+    if d not in _s.path: _s.path.insert(0, d)
+    import rd_png
+    return importlib.reload(rd_png)
+
+
 def png_grid(path, box, nx, ny):
-    """the mean luma of each of nx x ny cells over a part of a PNG (one decoding)"""
-    import zlib, struct
-    data = open(path, "rb").read(); pos = 8; w = h = 0; ct = 6; idat = b""
-    while pos + 8 <= len(data):
-        ln, typ = struct.unpack(">I4s", data[pos:pos + 8]); body = data[pos + 8:pos + 8 + ln]; pos += 12 + ln
-        if typ == b"IHDR": w, h, bd, ct = struct.unpack(">IIBB", body[:10])
-        elif typ == b"IDAT": idat += body
-        elif typ == b"IEND": break
-    bpp = 4 if ct == 6 else 3; raw = zlib.decompress(idat); stride = w * bpp
-    prev = bytearray(stride); x0, y0, x1, y1 = int(box[0] * w), int(box[1] * h), int(box[2] * w), int(box[3] * h)
-    S = [[0.0] * nx for _ in range(ny)]; N = [[0] * nx for _ in range(ny)]; i = 0
-    for y in range(h):
-        f = raw[i]; line = bytearray(raw[i + 1:i + 1 + stride]); i += 1 + stride
-        for x in range(stride):
-            a = line[x - bpp] if x >= bpp else 0; b = prev[x]; c = prev[x - bpp] if x >= bpp else 0
-            if f == 1: line[x] = (line[x] + a) & 255
-            elif f == 2: line[x] = (line[x] + b) & 255
-            elif f == 3: line[x] = (line[x] + (a + b) // 2) & 255
-            elif f == 4:
-                p_ = a + b - c; pa, pb, pc = abs(p_ - a), abs(p_ - b), abs(p_ - c)
-                line[x] = (line[x] + (a if pa <= pb and pa <= pc else b if pb <= pc else c)) & 255
-        prev = line
-        if y0 <= y < y1 and y % 2 == 0:
-            gy = min(ny - 1, (y - y0) * ny // max(y1 - y0, 1))
-            for x in range(x0, x1, 4):
-                o = x * bpp; gx = min(nx - 1, (x - x0) * nx // max(x1 - x0, 1))
-                S[gy][gx] += 0.2126 * line[o] + 0.7152 * line[o + 1] + 0.0722 * line[o + 2]; N[gy][gx] += 1
-    return [[S[j][k] / max(N[j][k], 1) for k in range(nx)] for j in range(ny)]
+    """the mean luma of each of nx x ny cells over a part of a PNG (one decoding: rd_png's)"""
+    return rdpng().grid(path, box, nx, ny, 2)
 def sky_edge(path):
     """the sky's sharpest change from one strip to the next down a picture of the horizon (the upper 42 %), taken where three
     columns in four agree (an arc's edge spans the picture; a tree or a blade of grass does not)"""
@@ -8339,73 +8322,95 @@ STEPS["lod16"] = step_lod16
 
 
 # ================================================================================================ the list of 2026-11-22's fourth phase
-def nanite_frames16(sec=8.0, reps=3):
-    """the frames with Nanite on and off (r.Nanite 0: every Nanite mesh drawn by its fallback, as the meshes were before), in turn"""
-    w = UES.get_game_world(); on_, off_ = [], []
-    try:
-        for k in range(reps):
-            unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1"); yield from rwait(2.0)
-            n = 0; t0 = time.time()
-            while time.time() - t0 < sec: yield; n += 1
-            on_.append(round(n / (time.time() - t0), 1))
-            unreal.SystemLibrary.execute_console_command(w, "r.Nanite 0"); yield from rwait(2.0)
-            n = 0; t0 = time.time()
-            while time.time() - t0 < sec: yield; n += 1
-            off_.append(round(n / (time.time() - t0), 1))
-    finally:
-        unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1")
-    return {"on": sorted(on_)[len(on_) // 2], "off": sorted(off_)[len(off_) // 2], "on_each": on_, "off_each": off_}
+def nanite_fps16(sec=8.0):
+    """the frames a second over sec of real time"""
+    n = 0; t0 = time.time()
+    while time.time() - t0 < sec: yield; n += 1
+    return round(n / (time.time() - t0), 1)
+
+
+def blend_shown16(m):
+    """the blend mode a material is drawn with: an instance's override (up its parents) before its base's"""
+    x = m
+    while isinstance(x, unreal.MaterialInstance):
+        try:
+            o = x.get_editor_property("base_property_overrides")
+            if o.get_editor_property("override_blend_mode"): return o.get_editor_property("blend_mode")
+        except Exception:
+            pass
+        x = x.get_editor_property("parent")
+    bm = m.get_base_material()
+    return bm.get_editor_property("blend_mode") if bm else unreal.BlendMode.BLEND_OPAQUE
 
 
 def step_nanite16():
-    """Nanite foliage in the wilds (944 nanite_wild): every biome mesh's Nanite state and shape preservation (the trees, bushes, grass,
-    flowers, reeds and crops voxelised, the rest plain, none see-through made Nanite); in three biomes (the temperate autumn forests,
-    BEFORE's slowest, the pine forests and the grasslands) at noon, the frame rate with Nanite on and with r.Nanite 0 (the meshes' fallbacks,
-    as before), three turns each, and a picture each way from the same view. Ok: every mesh 944 chose Nanite is, and in each biome Nanite's
-    frame rate is no worse than the fallbacks' by more than 5 %"""
-    g = G["gen"]; res = {"biomes": {}}; quiet(True); w = UES.get_game_world()
+    """Nanite foliage in the wilds (944 nanite_wild): every biome mesh's Nanite state and shape preservation, by kind; the trees,
+    bushes, grass, flowers, reeds and crops all Nanite and voxelised, none with a see-through material Nanite. In three biomes (the
+    temperate autumn forests, BEFORE's slowest, the pine forests and the grasslands) at noon: the frame rate with Nanite, three turns
+    before anything is switched; then a picture with Nanite and one with r.Nanite 0 (the meshes' fallbacks) from the same view, and the
+    fallbacks' frame rate once. The frame rates are recorded, not judged: the fallbacks are not the meshes as they were, and switching
+    slows the turns after it (the cities' step measured it); before and after is the packaged game's MID run at BEFORE's places.
+    Ok: every plant kind's meshes Nanite and voxelised, no see-through mesh Nanite, every Nanite mesh's base materials with the Nanite
+    usage saved (and the Voxels usage for a voxelised one), the three biomes measured with both pictures"""
+    g = G["gen"]; res = {"biomes": {}}; quiet(True); w = UES.get_game_world(); hour0 = g.get_town_hour()
+    plants = ("tree", "bush", "grass", "flower", "reed", "crop")
     try:
-        kinds = {}
+        kinds, seen = {}, set()
         for bm in g.get_editor_property("wild_biomes"):
             for f in bm.get_editor_property("foliage"):
                 m = f.get_editor_property("mesh")
-                if not m: continue
+                if not m or m.get_path_name() in seen: continue
+                seen.add(m.get_path_name())
                 ns = m.get_editor_property("nanite_settings")
                 k = str(f.get_editor_property("kind"))
-                d = kinds.setdefault(k, {"meshes": set(), "nanite": set(), "voxel": set()})
-                d["meshes"].add(m.get_path_name())
-                if ns.enabled: d["nanite"].add(m.get_path_name())
+                d = kinds.setdefault(k, {"meshes": 0, "nanite": 0, "voxel": 0, "see_through_nanite": 0, "usage_missing": 0})
+                d["meshes"] += 1
+                if ns.enabled: d["nanite"] += 1
                 try:
-                    if "VOXEL" in str(ns.get_editor_property("shape_preservation")).upper(): d["voxel"].add(m.get_path_name())
+                    if ns.enabled and ns.get_editor_property("shape_preservation") == unreal.NaniteShapePreservation.VOXELIZE: d["voxel"] += 1
                 except Exception: pass
-        res["kinds"] = {k: {"meshes": len(v["meshes"]), "nanite": len(v["nanite"]), "voxel": len(v["voxel"])} for k, v in kinds.items()}
+                mats = [s.get_editor_property("material_interface") for s in m.get_editor_property("static_materials")] + [x for x in f.get_editor_property("materials") if x]
+                if ns.enabled and any(x and blend_shown16(x) not in (unreal.BlendMode.BLEND_OPAQUE, unreal.BlendMode.BLEND_MASKED) for x in mats): d["see_through_nanite"] += 1
+                # (a base material without the usage its mesh needs is drawn in the engine's default material, the grey checker:
+                #  the autumn trees with Nanite foliage on before 869 saved the Voxels usage, 2026-11-23; read the saved flags)
+                vox = False
+                try: vox = ns.enabled and ns.get_editor_property("shape_preservation") == unreal.NaniteShapePreservation.VOXELIZE
+                except Exception: pass
+                for x in mats:
+                    bb = x.get_base_material() if x else None
+                    if ns.enabled and bb and (not bb.get_editor_property("used_with_nanite") or (vox and not bb.get_editor_property("used_with_voxels"))):
+                        d["usage_missing"] += 1; res.setdefault("usage_missing", []).append(bb.get_path_name()); break
+        res["kinds"] = kinds
         g.set_town_hour(12.0)
         for bn in ("temperate autumn forests", "pine forests", "grasslands"):
             pt = find_biome_point(bn)
             if not pt: res["biomes"][bn] = {"error": "not found"}; continue
             g = G["gen"]; g.wild_drop_all(); g.wild_put_her(pt[0], pt[1]); yield from wait_chunks(40, 60); ground_put(*pt); yield from rwait(4.0)
             G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4, yaw=30.0)); G["pawn"].set_actor_hidden_in_game(True); yield from rwait(2.0)
-            r = {}
-            r["pic_on"] = yield from shot_wait13("nanite16_" + bn.replace(" ", "_") + "_on", "1280x720")
+            r = {"fps_on_each": []}
+            for k in range(3): r["fps_on_each"].append((yield from nanite_fps16()))
+            r["fps_on"] = sorted(r["fps_on_each"])[1]
+            tag = "nanite16_" + bn.replace(" ", "_")
+            p_on = yield from shot_wait13(tag + "_on", "1280x720")
             unreal.SystemLibrary.execute_console_command(w, "r.Nanite 0"); yield from rwait(3.0)
-            r["pic_off"] = yield from shot_wait13("nanite16_" + bn.replace(" ", "_") + "_off", "1280x720")
+            p_off = yield from shot_wait13(tag + "_off", "1280x720")
+            r["fps_off"] = yield from nanite_fps16()
             unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1"); yield from rwait(2.0)
-            if r["pic_on"] and r["pic_off"]:
-                a, b = png_grid(r["pic_on"], (0, 0, 1, 1), 8, 6), png_grid(r["pic_off"], (0, 0, 1, 1), 8, 6)
-                r["luma_diff"] = round(sum(abs(a[j][i] - b[j][i]) for j in range(6) for i in range(8)) / 48.0, 2)
-            r["frames"] = yield from nanite_frames16()
             G["pawn"].set_actor_hidden_in_game(False)
+            r["pic_on"] = os.path.basename(p_on) if p_on else None; r["pic_off"] = os.path.basename(p_off) if p_off else None
+            if p_on and p_off: r["luma_diff"] = rdpng().luma_diff(p_on, p_off)
             res["biomes"][bn] = r
     except Exception as e_:
         res["error"] = str(e_)
     finally:
         try:
-            unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1"); G["pawn"].set_actor_hidden_in_game(False)
+            unreal.SystemLibrary.execute_console_command(w, "r.Nanite 1"); G["pawn"].set_actor_hidden_in_game(False); G["gen"].set_town_hour(hour0)
         except Exception: pass
         quiet(False)
-    bs = [v for v in res["biomes"].values() if "frames" in v]
-    made = sum(v["nanite"] for v in res.get("kinds", {}).values())
-    ok = "error" not in res and len(bs) == 3 and made > 0 and all(v["frames"]["on"] >= 0.95 * v["frames"]["off"] for v in bs)
+    ks = res.get("kinds", {})
+    bs = [v for v in res["biomes"].values() if "luma_diff" in v]
+    ok = ("error" not in res and len(bs) == 3 and all(ks[k]["nanite"] == ks[k]["meshes"] == ks[k]["voxel"] for k in plants if k in ks)
+          and any(k in ks for k in plants) and all(v["see_through_nanite"] == 0 and v["usage_missing"] == 0 for v in ks.values()))
     step_result("nanite16", ok, **res)
 
 

@@ -6,7 +6,7 @@ Each perf file is RD/RDList16.cpp's -RDPerf output, one leg after another (the w
 "perf|info|<WxH>|<GPU>|<when>|<overall quality>|<screen %>|<map>|<quality groups>", its "place|..." lines (where each place stood, for
 the later runs' replay), a line a place "perf|<kind>|<name>|<hour>|<fps>|<p95 ms>|<p99 ms>|<game ms>|<draw ms>|<rhi ms>|<gpu ms>|
 <frames>|<x m>|<y m>|<biome there>|<metres run>" (or "perf|<kind>|<name>|<hour>|skipped|<why>"), then "perf|done". The section under <heading> is written anew (one table per resolution); the
-rest of the page is kept. Under an AFTER heading, each row also gives the change against the BEFORE section's row of the same place
+rest of the page is kept. Under a MID or AFTER heading, each row also gives the change against the BEFORE section's row of the same place
 and resolution, when the page has one.
 """
 import os
@@ -99,7 +99,7 @@ def section(heading, files, before):
 def main():
     doc, heading, files = sys.argv[1], sys.argv[2], sys.argv[3:]
     text = open(doc, encoding="utf-8").read() if os.path.exists(doc) else "# Performance\n\nThe packaged game's frame rate in every city and every biome, measured before and after the list of 2026-11-22 ([improvements16.txt](improvements16.txt)).\n\n"
-    before = before_rows(text) if heading.upper().startswith("AFTER") else {}
+    before = before_rows(text) if heading.upper().startswith(("AFTER", "MID")) else {}
     new = section(heading, files, before)
     # (the section of exactly this heading (not one that only starts with it); the new text put in as it is, not as a pattern)
     pat = re.compile(r"^## " + re.escape(heading) + r"[ \t]*\n.*?(?=^## |\Z)", re.S | re.M)
