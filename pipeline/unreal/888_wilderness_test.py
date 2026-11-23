@@ -8177,6 +8177,9 @@ def step_loading16():
     except Exception as e_:
         res["error"] = str(e_)
     finally:
+        # (her body shown again whatever stopped the trips (PR #112's review))
+        try: G["pawn"].set_actor_hidden_in_game(False)
+        except Exception: pass
         quiet(False)
     tr = res["trips"]
     # (a trip where she was moved between the two pictures (Kethrys Spire's, 2026-11-23: put down outside its gate, then inside) shows
@@ -8256,10 +8259,12 @@ def run_frames16(yaw, metres, sec=90):
     pawn = G["pawn"]; c = cb(); c.set_run_mode(True)
     d = V(math.cos(math.radians(yaw)), math.sin(math.radians(yaw)), 0)
     L0 = pawn.get_actor_location(); t0 = time.time(); last = t0; dts = []
-    while time.time() - t0 < sec and dist2(pawn.get_actor_location(), L0) < metres * 100.0:
-        pawn.add_movement_input(d, 1.0); yield
-        n = time.time(); dts.append((n - last) * 1000.0); last = n
-    c.set_run_mode(False)
+    try:
+        while time.time() - t0 < sec and dist2(pawn.get_actor_location(), L0) < metres * 100.0:
+            pawn.add_movement_input(d, 1.0); yield
+            n = time.time(); dts.append((n - last) * 1000.0); last = n
+    finally:
+        c.set_run_mode(False)          # (PR #112's review: put back whatever stops the run)
     dts = sorted(dts[5:]) or [0.0]
     pick = lambda q: round(dts[min(len(dts) - 1, int(len(dts) * q))], 1)
     return {"m": round(dist2(pawn.get_actor_location(), L0) / 100), "frames": len(dts), "p50": pick(0.5), "p95": pick(0.95), "p99": pick(0.99), "max": round(dts[-1], 1)}

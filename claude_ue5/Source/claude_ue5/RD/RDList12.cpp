@@ -84,8 +84,10 @@ bool ARDDungeonGenerator::MapTeleportTo(const FVector& World)
 				bTravelForced = false;
 				return bOk;
 			}
-		ShowCover16(TEXT("teleport"));
-		return WildPutDownNear(Wm);
+		// (covered only once she is put down: a click on water or a cliff moves her nowhere (PR #112's review))
+		const bool bPut = WildPutDownNear(Wm);
+		if (bPut) ShowCover16(TEXT("teleport"));
+		return bPut;
 	}
 	// (a town's map or a dungeon's: the floors under the point, traced down from well over it one after another (a roof, a vault,
 	// the floor under them...); of those she fits on (her capsule clear there: PR #54's review, a click on a wall or a column put

@@ -1015,6 +1015,7 @@ void ARDDungeonGenerator::EndPlay(const EEndPlayReason::Type Reason)
 {
 	if (StartKeys.IsValid() && FSlateApplication::IsInitialized()) FSlateApplication::Get().UnregisterInputPreProcessor(StartKeys);
 	StartKeys.Reset();
+	HideCover16(TEXT("end of play"));          // (the list of 2026-11-22: a cover up as the level goes is taken down with it)
 	// (the clouds' render-target mode as it was before this level's sky set it: RDSky.cpp)
 	if (VrtModeWas >= 0)
 		if (IConsoleVariable* V = IConsoleManager::Get().FindConsoleVariable(TEXT("r.VolumetricRenderTarget.Mode"))) { V->Set(VrtModeWas, ECVF_SetByCode); VrtModeWas = -1; }

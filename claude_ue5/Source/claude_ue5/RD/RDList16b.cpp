@@ -9,6 +9,7 @@
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDGameInstance.h"
 #include "RD/RDMonster.h"
+#include "RD/RDCombat.h"
 #include "RD/RDSection.h"
 #include "RD/RDWild.h"
 #include "Kismet/GameplayStatics.h"
@@ -82,6 +83,9 @@ void URDGameInstance::BeginLoadingScreen16(const FString& Map)
 void ARDDungeonGenerator::ShowCover16(const FString& Why)
 {
 	if (CVarRDLoadingCover.GetValueOnGameThread() == 0) return;
+	// (the reels' pilots record the screen: their scenes are not covered (PR #112's review))
+	static const bool bNoCover = FParse::Param(FCommandLine::Get(), TEXT("RDNoCover")) || FParse::Param(FCommandLine::Get(), TEXT("RDReel15")) || FParse::Param(FCommandLine::Get(), TEXT("RDReel16")) || FParse::Param(FCommandLine::Get(), TEXT("RDShow7"));
+	if (bNoCover) return;
 	UWorld* W = GetWorld();
 	UGameViewportClient* V = W ? W->GetGameViewport() : nullptr;
 	if (!V) return;
@@ -91,7 +95,13 @@ void ARDDungeonGenerator::ShowCover16(const FString& Why)
 		V->AddViewportWidgetContent(Cover16Widget.ToSharedRef(), 10000);
 	}
 	// (a second reason while it is up: the cover stays, timed from the first)
-	if (!bCover16) Cover16Start = FPlatformTime::Seconds();
+	if (!bCover16)
+	{
+		Cover16Start = FPlatformTime::Seconds();
+		// (under the cover she neither moves nor turns, and nothing hurts her: she cannot see (PR #112's review))
+		if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0)) { PC->SetIgnoreMoveInput(true); PC->SetIgnoreLookInput(true); }
+		Cover16Health = PlayerCombat ? PlayerCombat->GetHealth() : -1.f;
+	}
 	Cover16Why = bCover16 ? Cover16Why + TEXT("+") + Why : Why;
 	bCover16 = true; Cover16ReadyAt = -1.0;
 	UE_LOG(LogRDList16b, Log, TEXT("RDCOVER16 up: %s"), *Cover16Why);
@@ -100,6 +110,7 @@ void ARDDungeonGenerator::ShowCover16(const FString& Why)
 void ARDDungeonGenerator::HideCover16(const FString& How)
 {
 	if (!bCover16) return;
+	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0)) { PC->SetIgnoreMoveInput(false); PC->SetIgnoreLookInput(false); }
 	if (UWorld* W = GetWorld()) if (UGameViewportClient* V = W->GetGameViewport(); V && Cover16Widget.IsValid()) V->RemoveViewportWidgetContent(Cover16Widget.ToSharedRef());
 	Cover16Widget.Reset();
 	bCover16 = false;
@@ -124,6 +135,8 @@ void ARDDungeonGenerator::TickCover16(float Dt)
 {
 	if (!bCover16) return;
 	const double Now = FPlatformTime::Seconds();
+	// (nothing hurts her while she cannot see)
+	if (PlayerCombat && Cover16Health > 0.f && !PlayerCombat->IsDead() && PlayerCombat->GetHealth() < Cover16Health) PlayerCombat->SetHealth(Cover16Health);
 	// (never more than a minute, whatever waits)
 	if (Now - Cover16Start > 60.0) { HideCover16(TEXT("timeout")); return; }
 	// (the world round her: the town built (or none to build), a pending load put down, the chunks under her made)
