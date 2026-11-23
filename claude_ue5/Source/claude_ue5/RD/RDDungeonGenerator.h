@@ -4101,7 +4101,9 @@ public:
 		uint8 Why = 1; int32 WhyWin = -1;
 		FVector2D A = FVector2D::ZeroVector, B = FVector2D::ZeroVector;
 		TArray<TWeakObjectPtr<class UInstancedStaticMeshComponent>> Ism;
-		TArray<TWeakObjectPtr<class UStaticMeshComponent>> Props;
+		struct FProp { TWeakObjectPtr<class USceneComponent> C; bool bHidden0 = false; };
+		TArray<FProp> Props;
+		TArray<TWeakObjectPtr<class USceneComponent>> Hearths;
 		TArray<int32> Doors, Windows;
 	};
 	TArray<FTownInterior16> TownInt16;
@@ -4114,6 +4116,9 @@ public:
 	/** tests: "<on>|<lights>|<built to shadow>|<shadowing now>|<street lamps>|<people and animals: full|half|quarter|eighth|not drawn>|<dome drawn, -1 none>" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") FString GetTownLod16() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") TArray<FString> GetTownLodLines16() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") TArray<FString> GetTownLightLines16() const;
+	/** one actor hidden by the distance rule or an interior's (by the reason's tag), shown again only if these rules hid it */
+	static void SetHidden16(AActor* A, FName Why, bool bHide);
 	struct FTownLight16 { TWeakObjectPtr<class UPointLightComponent> L; bool bShadows = false, bLamp = false; float Draw0 = 0.f, Fade0 = 0.f; };
 	TArray<FTownLight16> TownLights16;
 	TWeakObjectPtr<class ARDSection> TownLodFor16;

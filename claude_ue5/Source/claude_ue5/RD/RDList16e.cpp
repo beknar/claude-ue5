@@ -68,6 +68,16 @@ void ARDDungeonGenerator::TickTownInteriors16(float Dt)
 			}
 		}
 		for (int32 W = 0; W < S->TownWindows16.Num(); ++W) if (TownInt16.IsValidIndex(S->TownWindows16[W].Bld)) TownInt16[S->TownWindows16[W].Bld].Windows.Add(W);
+		// (its hearth: the fire and its glow, which the lit rule leaves burning whoever is home, hidden with the interior (PR #113's review))
+		TInlineComponentArray<USceneComponent*> Hs(S);
+		for (USceneComponent* C : Hs)
+		{
+			if (!C || !(C->IsA<UPointLightComponent>() || C->IsA<UNiagaraComponent>())) continue;
+			const UNiagaraComponent* Nc = Cast<UNiagaraComponent>(C);
+			if (!((Nc && HearthFx15 && Nc->GetAsset() == HearthFx15) || C->ComponentHasTag(TEXT("RDHearth15")))) continue;
+			const int32 BI = S->TownBuildingAt(C->GetComponentLocation());
+			if (TownInt16.IsValidIndex(BI)) TownInt16[BI].Hearths.Add(C);
+		}
 		// (its props and containers: the interactive meshes inside its rectangle, 80 cm in from its walls, away from its doors' leaves)
 		TInlineComponentArray<UStaticMeshComponent*> Ms(S);
 		for (UStaticMeshComponent* C : Ms)
@@ -80,7 +90,13 @@ void ARDDungeonGenerator::TickTownInteriors16(float Dt)
 				if (L.X < I.A.X + 80.f || L.X > I.B.X - 80.f || L.Y < I.A.Y + 80.f || L.Y > I.B.Y - 80.f) continue;
 				bool bByDoor = false;
 				for (const int32 D : I.Doors) if (FVector::Dist2D(S->GetDoorLocation(D), L) < 150.f) bByDoor = true;
-				if (!bByDoor) I.Props.Add(C);
+				if (!bByDoor)
+				{
+					// (the prop and every component under it, each with the hidden state it had: shown again as it was, a helper another
+					// rule hides is never shown by this one (PR #113's review))
+					TArray<USceneComponent*> Sub; C->GetChildrenComponents(true, Sub); Sub.Insert(C, 0);
+					for (USceneComponent* Sc : Sub) if (Sc) I.Props.Add({ Sc, Sc->bHiddenInGame });
+				}
 				break;
 			}
 		}
@@ -121,9 +137,10 @@ void ARDDungeonGenerator::TickTownInteriors16(float Dt)
 		if (I.bShown == bShow && I.bSet) continue;
 		I.bShown = bShow; I.bSet = true;
 		for (const TWeakObjectPtr<UInstancedStaticMeshComponent>& W : I.Ism) if (UInstancedStaticMeshComponent* C = W.Get()) C->SetHiddenInGame(!bShow);
-		for (const TWeakObjectPtr<UStaticMeshComponent>& W : I.Props) if (UStaticMeshComponent* C = W.Get()) C->SetHiddenInGame(!bShow, true);
+		for (const FTownInterior16::FProp& Pp : I.Props) if (USceneComponent* C = Pp.C.Get()) C->SetHiddenInGame(bShow ? Pp.bHidden0 : true);
 		if (const TArray<TWeakObjectPtr<USceneComponent>>* Ls = TownBldLights.Find(BI))
 			for (const TWeakObjectPtr<USceneComponent>& W : *Ls) if (USceneComponent* C = W.Get()) C->SetHiddenInGame(!bShow);
+		for (const TWeakObjectPtr<USceneComponent>& W : I.Hearths) if (USceneComponent* C = W.Get()) C->SetHiddenInGame(!bShow);
 	}
 	// ---- the townsfolk in a hidden interior: hidden with it
 	if (!bFull) return;
@@ -134,9 +151,7 @@ void ARDDungeonGenerator::TickTownInteriors16(float Dt)
 		const int32 BI = S->TownBuildingAt(T->GetActorLocation());
 		const bool bHide = TownInt16.IsValidIndex(BI) && TownInt16[BI].bSet && !TownInt16[BI].bShown;
 		if (bHide) ++TownIntPeopleHidden16;
-		// (hidden by this rule only: one hidden by another is left so, and only those it hid are shown again)
-		if (bHide && !T->IsHidden()) { T->SetActorHiddenInGame(true); T->Tags.AddUnique(TEXT("RDIntHidden16")); }
-		else if (!bHide && T->Tags.Contains(TEXT("RDIntHidden16"))) { T->SetActorHiddenInGame(false); T->Tags.Remove(TEXT("RDIntHidden16")); }
+		SetHidden16(T, TEXT("RDInt16"), bHide);          // (with the distance rule's: hidden while either wants it, RDList16d.cpp)
 	}
 }
 

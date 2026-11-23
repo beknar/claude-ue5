@@ -582,7 +582,10 @@ bool ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollisio
 	if (Bld16 >= 0 && Generator && Generator->bTown && !P->bHidden && ARDDungeonGenerator::InteriorBatch16())
 	{
 		const bool bColB = P->bCollision && !bForceNoCollision;
-		const FString Key = FString::Printf(TEXT("%d|%s|%d"), Bld16, P->Material ? *PcName(Name).ToString() : *P->Mesh->GetPathName(), bColB ? 1 : 0);
+		// (small (clutter) and large placings of one mesh in separate batches: the cull and the shadow are the component's, and the first
+		// instance's size decided them for every later one (PR #113's review))
+		const bool bSmallB = P->Mesh->GetBounds().SphereRadius * (float)W.GetScale3D().GetMax() < 40.f;
+		const FString Key = FString::Printf(TEXT("%d|%s|%d|%d"), Bld16, P->Material ? *PcName(Name).ToString() : *P->Mesh->GetPathName(), bColB ? 1 : 0, bSmallB ? 1 : 0);
 		PendingBld16.FindOrAdd(Key).Add(W);
 		if (!HismsBld16.Contains(Key))
 		{
@@ -594,9 +597,8 @@ bool ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollisio
 			H->SetCollisionProfileName(bColB ? TEXT("BlockAll") : TEXT("NoCollision"));
 			if (!bColB) H->SetCanEverAffectNavigation(false);
 			// (culled: the small clutter (under 40 cm round: cups, books, candles, food) from 20 to 25 m, the rest from 35 to 40 m)
-			const float Rad = P->Mesh->GetBounds().SphereRadius * (float)W.GetScale3D().GetMax();
-			const bool bSmall = Rad < 40.f;
-			if (P->CullDistance > 0.f) H->SetCullDistances(FMath::RoundToInt(P->CullDistance * 0.8f), FMath::RoundToInt(P->CullDistance));
+			const bool bSmall = bSmallB;
+			if (P->CullDistance > 0.f) { H->SetCullDistances(FMath::RoundToInt(P->CullDistance * 0.8f), FMath::RoundToInt(P->CullDistance)); H->SetCastShadow(false); }
 			else H->SetCullDistances(bSmall ? 2000 : 3500, bSmall ? 2500 : 4000);
 			if (bSmall) H->SetCastShadow(false);
 			H->RegisterComponent();

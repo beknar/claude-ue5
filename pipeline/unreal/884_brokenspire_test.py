@@ -5700,15 +5700,15 @@ def step_dist16():
             if sq: put(sq, yaw=0.0)
             yield from rwait(8.0)
             r = {"lod": town_lod16()}
-            cam = G["pc"].player_camera_manager.get_camera_location()
-            S = section(); bad_sh, bad_draw, near_off = 0, 0, 0
-            for L in S.get_components_by_class(unreal.PointLightComponent):
-                d = (L.get_world_location() - cam).length()
-                if L.get_editor_property("cast_shadows") and d > 2000.0: bad_sh += 1
-                lamp = L.component_has_tag("RDStreetLamp16")
-                md = L.get_editor_property("max_draw_distance")
+            # (each light read from the rule's own list: its distance, built to shadow, casting now, a street lamp, its draw distance; a light
+            # built to shadow casts within 18 m and none casts beyond 20 m (the 2 m between them is the hysteresis))
+            bad_sh, bad_draw, near_off = 0, 0, 0
+            for l in g.get_town_light_lines16():
+                q = str(l).split("|"); d, built, casting, lamp, md = float(q[0]), q[1] == "1", q[2] == "1", q[3] == "1", float(q[4])
+                if casting and d > 2000.0: bad_sh += 1
+                if built and not casting and d < 1800.0: near_off += 1
                 if (not lamp and md > 4500.0 + 1.0) or (lamp and md < 8999.0): bad_draw += 1
-            r["shadow_far"] = bad_sh; r["draw_wrong"] = bad_draw
+            r["shadow_far"] = bad_sh; r["shadow_near_missing"] = near_off; r["draw_wrong"] = bad_draw
             def lod_lines():
                 out = {}
                 for l in g.get_town_lod_lines16():
@@ -5748,7 +5748,7 @@ def step_dist16():
     cities = [v for k, v in res.items() if isinstance(v, dict) and "lod" in v]
     hv = res.get("Heaven", {})
     # (a band is set four times a second while people and the camera move: one in a hundred read across an edge is allowed)
-    ok = ("error" not in res and len(cities) == 6 and all(c["shadow_far"] == 0 and c["draw_wrong"] == 0 and c["bands_wrong"] <= max(1, c.get("people", 0) // 100) and (c["far_people"] == 0 or c["far_moved"] > 0) for c in cities)
+    ok = ("error" not in res and len(cities) == 6 and all(c["shadow_far"] == 0 and c.get("shadow_near_missing", 1) == 0 and c["draw_wrong"] == 0 and c["bands_wrong"] <= max(1, c.get("people", 0) // 100) and (c["far_people"] == 0 or c["far_moved"] > 0) for c in cities)
           and hv.get("dome_inside") == 0 and hv.get("dome_outside") == 1)
     step_result("dist16", ok, **res)
 
@@ -5833,10 +5833,21 @@ def step_interior16():
         res["frames_rule_on"] = {"median_fps": sorted(x["fps"] for x in on_)[1], "each": [x["fps"] for x in on_]}
         res["frames_rule_off"] = {"median_fps": sorted(x["fps"] for x in off_)[1], "each": [x["fps"] for x in off_]}
         unreal.SystemLibrary.execute_console_command(w, "rd.InteriorHide 1")
+        # (the batching measured: the town built again with each building's interior in the town's batches (rd.InteriorBatch 0), the rule
+        # on, three samples; then built again as it was)
+        seed = G["gi"].get_editor_property("town_seed")
+        unreal.SystemLibrary.execute_console_command(w, "rd.InteriorBatch 0"); g.rebuild_town(seed); yield from rwait(8.0); refresh(); g = G["gen"]
+        put(place("square"), yaw=0.0); yield from rwait(3.0)
+        nb = [(yield from frames16(8.0)) for _k in range(3)]
+        res["frames_batch_off"] = {"median_fps": sorted(x["fps"] for x in nb)[1], "each": [x["fps"] for x in nb], "batches": interiors16()["batches"]}
+        unreal.SystemLibrary.execute_console_command(w, "rd.InteriorBatch 1"); g.rebuild_town(seed); yield from rwait(8.0); refresh(); g = G["gen"]
     except Exception as e_:
         res["error"] = str(e_)
     finally:
-        try: unreal.SystemLibrary.execute_console_command(w, "rd.InteriorHide 1"); unreal.SystemLibrary.execute_console_command(w, "rd.InteriorWindows 1")
+        try:
+            unreal.SystemLibrary.execute_console_command(w, "rd.InteriorHide 1"); unreal.SystemLibrary.execute_console_command(w, "rd.InteriorWindows 1")
+            if unreal.SystemLibrary.get_console_variable_int_value("rd.InteriorBatch") != 1:
+                unreal.SystemLibrary.execute_console_command(w, "rd.InteriorBatch 1"); G["gen"].rebuild_town(G["gi"].get_editor_property("town_seed"))
         except Exception: pass
         quiet(False)
     sw = res.get("swing", {}); sqr = res.get("square", {})

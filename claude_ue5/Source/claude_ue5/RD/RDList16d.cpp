@@ -27,6 +27,19 @@ namespace
 
 FName ARDDungeonGenerator::StreetLampTag16() { return RDStreetLampTag16; }
 
+void ARDDungeonGenerator::SetHidden16(AActor* A, FName Why, bool bHide)
+{
+	// (one actor hidden by the distance rule ("RDDist16") or an interior ("RDInt16"), or both: the actor hidden while any of them wants it
+	// (its held prop and its lantern's light go with it, PR #113's review); shown again only if these rules hid it, never one another
+	// system hid)
+	if (!IsValid(A)) return;
+	static const FName By(TEXT("RDHidBy16"));
+	if (bHide) A->Tags.AddUnique(Why); else A->Tags.Remove(Why);
+	const bool bWant = A->Tags.Contains(FName(TEXT("RDDist16"))) || A->Tags.Contains(FName(TEXT("RDInt16")));
+	if (bWant && !A->IsHidden()) { A->SetActorHiddenInGame(true); A->Tags.AddUnique(By); }
+	else if (!bWant && A->Tags.Contains(By)) { A->SetActorHiddenInGame(false); A->Tags.Remove(By); }
+}
+
 void ARDDungeonGenerator::TickTownLod16(float Dt)
 {
 	TownLodTimer16 -= Dt;
@@ -40,8 +53,7 @@ void ARDDungeonGenerator::TickTownLod16(float Dt)
 	// ---- the town's lights, gathered once per section once it is built (the saved Brokenspire's too: what they were built with is read
 	// from them); gathered while a wilderness city was still being built, they missed nearly all its lights (884 dist16's first run)
 	if (S && S->IsBuilding()) return;
-	int32 NowLights = 0;
-	if (S) { TArray<UPointLightComponent*> Ls0; S->GetComponents<UPointLightComponent>(Ls0); NowLights = Ls0.Num(); }
+	const int32 NowLights = S ? S->NumLights : 0;          // (counted by AddLight: no walk of the section's components each tick)
 	if (S != TownLodFor16.Get() || NowLights != TownLodLightsSeen16)
 	{
 		TownLodLightsSeen16 = NowLights;
@@ -84,34 +96,22 @@ void ARDDungeonGenerator::TickTownLod16(float Dt)
 			if (bWant) ++TownShadowing16;
 		}
 	// ---- the people and animals
-	auto Band = [&](AActor* A, const TArray<USkeletalMeshComponent*>& Ms)
+	auto Band = [&](AActor* A)
 	{
 		const float D = FVector::Dist(A->GetActorLocation(), Cam);
 		const int32 B = !bOn ? 0 : D < 1500.f ? 0 : D < 4000.f ? 1 : D < 8000.f ? 2 : D < 11000.f ? 3 : 4;
 		static const float Rate[5] = { 0.f, 1.f / 30.f, 1.f / 15.f, 1.f / 7.5f, 1.f };
-		for (USkeletalMeshComponent* M : Ms)
-		{
-			if (!M) continue;
-			if (!FMath::IsNearlyEqual(M->PrimaryComponentTick.TickInterval, Rate[B])) M->SetComponentTickInterval(Rate[B]);
-			const bool bDraw = B < 4;
-			if (M->IsVisible() != bDraw && !A->IsHidden()) M->SetVisibility(bDraw);
-		}
-		A->SetActorTickInterval(B == 4 ? 1.f : 0.f);
+		TInlineComponentArray<USkeletalMeshComponent*> Ms(A);
+		for (USkeletalMeshComponent* M : Ms) if (M && !FMath::IsNearlyEqual(M->PrimaryComponentTick.TickInterval, Rate[B])) M->SetComponentTickInterval(Rate[B]);
+		// (beyond 110 m hidden whole (its held prop and lantern with it); its logic ten times a second: its steps and pushes were written for a
+		// frame's time, and a second's tick moved a pen's animal through its fence (PR #113's review))
+		SetHidden16(A, TEXT("RDDist16"), B == 4);
+		A->SetActorTickInterval(B == 4 ? 0.1f : 0.f);
 		++TownBands16[B];
 	};
 	for (int32& N : TownBands16) N = 0;
-	for (ARDTownsfolk* T : TownPeople)
-	{
-		if (!IsValid(T)) continue;
-		TArray<USkeletalMeshComponent*> Ms; T->GetComponents<USkeletalMeshComponent>(Ms);
-		Band(T, Ms);
-	}
-	for (ARDTownAnimal* A : TownAnimalActors)
-	{
-		if (!IsValid(A)) continue;
-		TArray<USkeletalMeshComponent*> Ms; A->GetComponents<USkeletalMeshComponent>(Ms);
-		Band(A, Ms);
-	}
+	for (ARDTownsfolk* T : TownPeople) if (IsValid(T)) Band(T);
+	for (ARDTownAnimal* A : TownAnimalActors) if (IsValid(A)) Band(A);
 	// ---- the dome from outside only
 	if (UStaticMeshComponent* Dm = TownDome16.Get(); Dm && S)
 	{
@@ -141,9 +141,23 @@ TArray<FString> ARDDungeonGenerator::GetTownLodLines16() const
 	{
 		if (!IsValid(A) || !M) return;
 		const FVector L = A->GetActorLocation();
-		Out.Add(FString::Printf(TEXT("%s|%.0f|%.4f|%d|%.0f|%.0f"), *A->GetName(), FVector::Dist(L, Cam), M->PrimaryComponentTick.TickInterval, M->IsVisible() && !A->IsHidden() ? 1 : 0, L.X, L.Y));
+		Out.Add(FString::Printf(TEXT("%s|%.0f|%.4f|%d|%.0f|%.0f|%d|%d"), *A->GetName(), FVector::Dist(L, Cam), M->PrimaryComponentTick.TickInterval, M->IsVisible() && !A->IsHidden() ? 1 : 0, L.X, L.Y,
+			A->Tags.Contains(FName(TEXT("RDInt16"))) ? 1 : 0, A->PrimaryActorTick.TickInterval > 0.05f ? 1 : 0));
 	};
 	for (const ARDTownsfolk* T : TownPeople) if (IsValid(T)) Add(T, T->GetBody());
 	for (const ARDTownAnimal* A : TownAnimalActors) if (IsValid(A)) Add(A, A->GetBody());
+	return Out;
+}
+
+TArray<FString> ARDDungeonGenerator::GetTownLightLines16() const
+{
+	// (tests: a line a town light: "<distance from the camera cm>|<built to shadow>|<casting now>|<street lamp>|<draw distance cm>")
+	TArray<FString> Out;
+	const APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	if (!PC || !PC->PlayerCameraManager) return Out;
+	const FVector Cam = PC->PlayerCameraManager->GetCameraLocation();
+	for (const FTownLight16& Tl : TownLights16)
+		if (const UPointLightComponent* L = Tl.L.Get())
+			Out.Add(FString::Printf(TEXT("%.0f|%d|%d|%d|%.0f"), FVector::Dist(L->GetComponentLocation(), Cam), Tl.bShadows ? 1 : 0, L->CastShadows ? 1 : 0, Tl.bLamp ? 1 : 0, L->MaxDrawDistance));
 	return Out;
 }

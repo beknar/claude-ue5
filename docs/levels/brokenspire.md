@@ -570,11 +570,11 @@ Every city: Brokenspire, Vel Morrath, Ashenreach, Graymourne, Kethrys Spire and 
   - every second frame to 40 m;
   - every fourth frame to 80 m;
   - every eighth frame to 110 m;
-  - beyond 110 m not drawn, their logic ticked once a second, so their day goes on.
+  - beyond 110 m not drawn (hidden whole: a lantern or a held tool goes with them), their logic ticked ten times a second, so their day goes on (at once a second, a pen's push moved an animal through its fence).
 - **Heaven's shield dome** is drawn only while the camera is outside it.
 - **Interiors** (`RD/RDList16e.cpp`, the user's choice of all three options):
   1. **Batched by building:** what `TownFurnish` lays in a building is batched by building (`RDSection::AddPiece`'s `Bld16`), culled from 40 m, its small clutter (under 40 cm round) from 25 m.
-  2. **Shown only when seen:** ten times a second, a building's interior (its batches, the lights and flames inside it, its props and containers, the townsfolk in it) is drawn only when the camera or she is inside it, a door of it is open or opening within 45 m, or a window of it within 45 m has a clear line from the camera on its outside. Each window is recorded in `TownShellBuilding`. A hidden interior whose door begins to open is shown in that frame.
+  2. **Shown only when seen:** ten times a second, a building's interior (its batches, the lights and flames inside it, its hearth's fire and glow, its props and containers with each part's own hidden state kept, the townsfolk in it) is drawn only when the camera or she is inside it, a door of it is open or opening within 45 m, or a window of it within 45 m has a clear line from the camera on its outside. Each window is recorded in `TownShellBuilding`. A hidden interior whose door begins to open is shown in that frame.
   3. **Nanite on the furniture and props** is the list's fifth phase.
   - The special shells (the castle, the cathedral, the foundry, the spire, the research facility) and the burned houses are never hidden. `rd.InteriorHide`, `rd.InteriorBatch`, and `rd.InteriorWindows` (the window rule alone off, for the door's test) switch it.
 - **`884 dist16`**, at night in each city's square:

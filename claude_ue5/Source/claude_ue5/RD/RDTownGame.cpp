@@ -1038,6 +1038,7 @@ void ARDDungeonGenerator::TickTownLights(float Dt)
 {
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	if (!S || S->TownBlds.Num() == 0) return;
+	if (S->IsBuilding()) return;          // (the list of 2026-11-22, PR #113's review: a wilderness city's lights gathered while it was built missed most)
 	TownLightsT -= Dt;
 	if (TownLightsFor.Get() == S && TownLightsT > 0.f) return;
 	TownLightsT = 1.f;
