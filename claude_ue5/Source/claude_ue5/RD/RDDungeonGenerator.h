@@ -1050,7 +1050,8 @@ public:
 	bool bCover16 = false;
 	FString Cover16Why;
 	double Cover16Start = 0.0, Cover16ReadyAt = -1.0;
-	int32 Cover16Steady = 0;
+	int32 Cover16Steady = 0, Cover16Frames = 0;
+	double Cover16FrameSum = 0.0;
 	float Cover16Health = -1.f;
 	TSharedPtr<class SWidget> Cover16Widget;
 	TArray<FString> Cover16Lines;

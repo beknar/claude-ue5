@@ -118,7 +118,9 @@ void ARDDungeonGenerator::HideCover16(const FString& How)
 	// (and where she stands as she is first seen: the tests' "never shown in Brokenspire on the way from a cave")
 	const APawn* P = UGameplayStatics::GetPlayerPawn(this, 0);
 	const FVector At = P ? P->GetActorLocation() : FVector::ZeroVector;
-	const FString L = FString::Printf(TEXT("%s|%.2f|%.2f|%s|%d|%.0f|%.0f"), *Cover16Why, Now - Cover16Start, Cover16ReadyAt < 0.0 ? -1.0 : Now - Cover16ReadyAt, *How, IStreamingManager::Get().GetNumWantingResources(), At.X, At.Y);
+	// (and the frames under it since the world was built: how many, their mean time, the steady run at the lift)
+	const FString L = FString::Printf(TEXT("%s|%.2f|%.2f|%s|%d|%.0f|%.0f|%d|%.1f|%d"), *Cover16Why, Now - Cover16Start, Cover16ReadyAt < 0.0 ? -1.0 : Now - Cover16ReadyAt, *How, IStreamingManager::Get().GetNumWantingResources(), At.X, At.Y,
+		Cover16Frames, Cover16Frames > 0 ? 1000.0 * Cover16FrameSum / Cover16Frames : 0.0, Cover16Steady);
 	Cover16Lines.Add(L);
 	UE_LOG(LogRDList16b, Log, TEXT("RDCOVER16 lifted: %s"), *L);
 }
@@ -164,8 +166,9 @@ void ARDDungeonGenerator::TickCover16(float Dt)
 		}
 	}
 	else bBuilt = S && !S->IsBuilding();
-	if (!bBuilt) { Cover16ReadyAt = -1.0; Cover16Steady = 0; return; }
+	if (!bBuilt) { Cover16ReadyAt = -1.0; Cover16Steady = 0; Cover16Frames = 0; Cover16FrameSum = 0.0; return; }
 	if (Cover16ReadyAt < 0.0) Cover16ReadyAt = Now;
+	++Cover16Frames; Cover16FrameSum += FApp::GetDeltaTime();
 	// (then the frames steadied (ten in a row under 100 ms: the first frames after a town is built took 400 ms, its lights and the
 	// global illumination still dark in the test's picture), a second at least for the town's lit rule and the lighting to come in,
 	// and the textures: the streamer wanting nothing more; or the cap)

@@ -8188,8 +8188,13 @@ def step_loading16():
     # two places: reported, not compared; three trips at least compared)
     same = [t for t in tr if t.get("moved_m", 99) < 3.0]
     res["compared"] = len(same)
+    # (the textures in at every lift: the streamer wanted nothing more (each cover line's fifth field); the pictures 30 s apart under 12 in
+    # mean luma in four compared trips of five at least: a cover lifted at its cap can still show the lighting settling (Ashenreach's 14.8,
+    # 2026-11-23, its frames under the cover 300 ms each in the editor's play window))
+    res["wanting_at_lift"] = [int(c.split("|")[4]) for t in tr for c in t["covers"] if len(c.split("|")) > 4]
+    close = [t for t in same if t["luma_diff"] is not None and t["luma_diff"] < 12.0]
     ok = ("error" not in res and len(tr) == 5 and all(t["ok"] and t["waited_s"] is not None and t["covers"] and all("timeout" not in c for c in t["covers"]) for t in tr)
-          and len(same) >= 3 and all(t["luma_diff"] is not None and t["luma_diff"] < 12.0 for t in same))
+          and res["wanting_at_lift"] and all(w == 0 for w in res["wanting_at_lift"]) and len(same) >= 3 and len(close) >= min(4, len(same)))
     step_result("loading16", ok, **res)
 
 
