@@ -1020,7 +1020,7 @@ public:
 	/** the list of 2026-11-22's first phase (RDList16.cpp): -RDPerf=<file>: the frame rate measured in every city (its square and a
 	 *  street) and every biome (its nearest site to Brokenspire), each settled 20 s and measured 15 s, one line a place */
 	void TickPerf16(APawn* P);
-	struct FPerf16Place { FString Kind, Name; FVector2D SiteM = FVector2D::ZeroVector; float Hour = 12.f; bool bFixed = false; FVector At = FVector::ZeroVector; float Yaw = 0.f; };
+	struct FPerf16Place { FString Kind, Name; FVector2D SiteM = FVector2D::ZeroVector; TArray<FVector2D> Alts; float Hour = 12.f; bool bFixed = false; FVector At = FVector::ZeroVector; float Yaw = 0.f; };
 	TArray<FPerf16Place> Perf16Places;
 	/** -RDPerfPlaces=<file>: an earlier run's "place|..." lines, replayed exactly (kind|name|hour as the key) */
 	TMap<FString, FPerf16Place> Perf16Replay;
@@ -1030,7 +1030,9 @@ public:
 	bool bPerf16Read = false;
 	TArray<float> Perf16Frames;
 	double Perf16Game = 0.0, Perf16Draw = 0.0, Perf16Rhi = 0.0, Perf16Gpu = 0.0;
-	FVector Perf16From = FVector::ZeroVector;
+	FVector Perf16From = FVector::ZeroVector, Perf16Last = FVector::ZeroVector, Perf16SecPos = FVector::ZeroVector;
+	float Perf16SecT = 0.f, Perf16Turned = -10.f;
+	FString Perf16Broken;
 
 	// ---- mistward_castle, the list of 2026-10-31b (docs/improvements5.txt; RDMistward5.cpp, pipeline/unreal/879): each a
 	// switch, off on the other levels

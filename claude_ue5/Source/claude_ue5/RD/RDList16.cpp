@@ -63,7 +63,7 @@ namespace
 
 	void RDPerf16Write(const FString& File, const FString& Line)
 	{
-		FFileHelper::SaveStringToFile(Line + TEXT("\n"), *File, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), FILEWRITE_Append);
+		FFileHelper::SaveStringToFile(Line + TEXT("\n"), *File, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM, &IFileManager::Get(), FILEWRITE_Append);
 	}
 }
 
@@ -93,16 +93,25 @@ void ARDDungeonGenerator::TickPerf16(APawn* P)
 			}
 			UE_LOG(LogRDList16, Log, TEXT("RDPERF16 %d places to replay from %s"), Perf16Replay.Num(), *Rp);
 		}
+		// (PR #111's review: no vertical sync and no frame cap, whatever the player's settings hold; every quality group recorded, so a
+		// run's settings can be compared with another's)
+		if (IConsoleVariable* Vs = IConsoleManager::Get().FindConsoleVariable(TEXT("r.VSync"))) Vs->Set(0, ECVF_SetByCode);
+		if (IConsoleVariable* Mf = IConsoleManager::Get().FindConsoleVariable(TEXT("t.MaxFPS"))) Mf->Set(0, ECVF_SetByCode);
+		if (GEngine) GEngine->SetMaxFPS(0.f);
 		const Scalability::FQualityLevels Q = Scalability::GetQualityLevels();
 		const IConsoleVariable* Sp = IConsoleManager::Get().FindConsoleVariable(TEXT("r.ScreenPercentage"));
-		RDPerf16Write(Perf16File, FString::Printf(TEXT("perf|info|%dx%d|%s|%s|%d|%.0f|%s"), GSystemResolution.ResX, GSystemResolution.ResY, *GRHIAdapterName,
-			*FDateTime::Now().ToString(TEXT("%Y-%m-%d %H:%M")), Q.GetSingleQualityLevel(), Sp ? Sp->GetFloat() : -1.f, *GetWorld()->GetName()));
+		const FString Groups = FString::Printf(TEXT("res%.0f view%d aa%d shadow%d gi%d refl%d pp%d tex%d fx%d foliage%d shading%d"), Q.ResolutionQuality, Q.ViewDistanceQuality, Q.AntiAliasingQuality,
+			Q.ShadowQuality, Q.GlobalIlluminationQuality, Q.ReflectionQuality, Q.PostProcessQuality, Q.TextureQuality, Q.EffectsQuality, Q.FoliageQuality, Q.ShadingQuality);
+		RDPerf16Write(Perf16File, FString::Printf(TEXT("perf|info|%dx%d|%s|%s|%d|%.0f|%s|%s"), GSystemResolution.ResX, GSystemResolution.ResY, *GRHIAdapterName,
+			*FDateTime::Now().ToString(TEXT("%Y-%m-%d %H:%M")), Q.GetSingleQualityLevel(), Sp ? Sp->GetFloat() : -1.f, *GetWorld()->GetName(), *Groups));
 		UE_LOG(LogRDList16, Log, TEXT("RDPERF16 measuring into %s"), *Perf16File);
 	}
 	if (Perf16File.IsEmpty() || !P || !GetWorld()) return;
-	if (bTown && !bTownPlaced) return;
 	const float Dt = FApp::GetDeltaTime();
 	Perf16T += Dt;
+	// (PR #111's review: a town loading as she stands or runs near it is part of what is measured: only the first placing waits for it,
+	// and the stages' own give-up still counts while it does)
+	if (bTown && !bTownPlaced && Perf16Index < 0) return;
 	if (bWild) WildLastEngaged = GetWorld()->GetTimeSeconds();          // (no encounter of the director's while it measures)
 	APlayerController* PC = Cast<APlayerController>(P->GetController());
 	if (PC && PC->MyHUD) PC->MyHUD->bShowHUD = false;
@@ -118,11 +127,13 @@ void ARDDungeonGenerator::TickPerf16(APawn* P)
 					for (const float H : { 12.f, 0.f }) { FPerf16Place Pl; Pl.Kind = K; Pl.Name = T.Name; Pl.SiteM = T.Site; Pl.Hour = H; Perf16Places.Add(Pl); }
 			for (int32 B = 0; B < Wild->Biomes.Num(); ++B)
 			{
-				double Best = 1e18; FVector2D Bs; bool bAny = false;
-				for (int32 K = 0; K < Wild->CellBiome.Num(); ++K)
-					if (Wild->CellBiome[K] == B) { const double D = Wild->CellSite[K].Size(); if (D < Best) { Best = D; Bs = Wild->CellSite[K]; bAny = true; } }
-				if (!bAny) continue;
-				FPerf16Place Pl; Pl.Kind = TEXT("biome"); Pl.Name = Wild->Biomes[B].Name; Pl.SiteM = Bs; Perf16Places.Add(Pl);
+				// (its nearest five sites to Brokenspire, nearest first: a site with no dry ground to stand on gives way to the next (PR #111's review))
+				TArray<FVector2D> Sites;
+				for (int32 K = 0; K < Wild->CellBiome.Num(); ++K) if (Wild->CellBiome[K] == B) Sites.Add(Wild->CellSite[K]);
+				if (Sites.Num() == 0) continue;
+				Sites.Sort([](const FVector2D& A, const FVector2D& C) { return A.SizeSquared() < C.SizeSquared(); });
+				if (Sites.Num() > 5) Sites.SetNum(5);
+				FPerf16Place Pl; Pl.Kind = TEXT("biome"); Pl.Name = Wild->Biomes[B].Name; Pl.SiteM = Sites[0]; Pl.Alts = Sites; Perf16Places.Add(Pl);
 				Pl.Kind = TEXT("run"); Perf16Places.Add(Pl);
 			}
 		}
@@ -161,10 +172,15 @@ void ARDDungeonGenerator::TickPerf16(APawn* P)
 		// where the biome's stand was); the hour, clear weather, held)
 		bool bOk = true;
 		if (bCity) { if (TownName != Pl.Name) { bTravelForced = true; bOk = WildTravelToTown(Pl.Name); bTravelForced = false; } }
-		else if (Pl.Kind == TEXT("biome")) bOk = WildPutDownNear(Pl.bFixed ? FVector2D(Pl.At.X / 100.0, Pl.At.Y / 100.0) : Pl.SiteM);
+		else if (Pl.Kind == TEXT("biome"))
+		{
+			if (Pl.bFixed) bOk = WildPutDownNear(FVector2D(Pl.At.X / 100.0, Pl.At.Y / 100.0));
+			else { bOk = false; for (const FVector2D& Site : Pl.Alts) if (WildPutDownNear(Site)) { bOk = true; break; } }
+		}
 		if (!bOk) { Next(bCity ? TEXT("travel refused") : TEXT("no ground to stand on")); return; }
 		if (bTown) { SetTownHour(Pl.Hour); SetWeather(0, true); }
 		Perf16Stage = 1; Perf16T = 0.f; Perf16Ready = 0.f;
+		Perf16Broken.Reset();
 		return;
 	}
 	case 1:
@@ -172,8 +188,8 @@ void ARDDungeonGenerator::TickPerf16(APawn* P)
 		// (the world round her built: the city (for a city's places), the chunks asked and made, the dungeon's set; then placed)
 		// (out in the wilds there is no town section: the section is waited for only where there is one to build, a city's or a hall's)
 		const bool bNeedS = bCity || !bWild;
-		const bool bBusy = (bWild && (WildInFlight.Num() > 0 || WildBuilding.Num() > 0)) || bTownLoading || bTownTraveling || (bNeedS && (!S || S->IsBuilding())) || (S && S->IsBuilding())
-			|| (bCity && TownName != Pl.Name);
+		const bool bBusy = (bWild && (WildInFlight.Num() > 0 || WildBuilding.Num() > 0)) || bTownLoading || bTownTraveling || (bNeedS && !S) || (S && S->IsBuilding())
+			|| (bCity && TownName != Pl.Name) || (bTown && !bTownPlaced);
 		if (Perf16T > RDPerf16Give) { Next(TEXT("the world round her was not built in 240 s")); return; }
 		if (bBusy) { Perf16Ready = 0.f; return; }
 		Perf16Ready += Dt;
@@ -209,29 +225,39 @@ void ARDDungeonGenerator::TickPerf16(APawn* P)
 	case 2:
 	{
 		// (settled: what the place streams in after she stands there (textures, the near grass) comes in its first seconds; a run starts
-		// at once from the stand it follows)
+		// at once from the stand it follows; the hour held where it was asked (PR #111's review: the clock went on 0.4 h a minute))
+		if (bTown) SetTownHour(Pl.Hour);
 		if (!bRun && Perf16T < RDPerf16Settle) return;
 		const FVector At = P->GetActorLocation();
 		RDPerf16Write(Perf16File, FString::Printf(TEXT("place|%s|%s|%.0f|%.0f|%.0f|%.0f|%.1f"), *Pl.Kind, *Pl.Name, Pl.Hour, At.X, At.Y, At.Z, P->GetActorRotation().Yaw));
-		if (!bRun)
-		{
-			IFileManager::Get().MakeDirectory(*Perf16Shots, true);
-			FScreenshotRequest::RequestScreenshot(Perf16Shots / FString::Printf(TEXT("%s_%s_%02.0f.png"), *Pl.Kind, *Pl.Name.Replace(TEXT(" "), TEXT("_")), Pl.Hour), false, false);
-		}
 		if (bRun && PlayerCombat) PlayerCombat->SetRunMode(true);
 		Perf16Stage = 3; Perf16T = 0.f; Perf16Frames.Reset(); Perf16Game = Perf16Draw = Perf16Rhi = Perf16Gpu = 0.0; Perf16From = At;
+		Perf16Last = At; Perf16SecPos = At; Perf16SecT = 0.f; Perf16Turned = -10.f;
 		return;
 	}
 	case 3:
 	{
+		if (bTown) SetTownHour(Pl.Hour);
+		// (PR #111's review: a row is not filed for another place: she died, or was moved more than 20 m in a frame (a respawn, a put-down))
+		const FVector Now = P->GetActorLocation();
+		if (PlayerCombat && PlayerCombat->IsDead()) Perf16Broken = TEXT("she died");
+		else if (FVector::Dist2D(Now, Perf16Last) > 2000.f) Perf16Broken = FString::Printf(TEXT("she was moved %.0f m in a frame"), FVector::Dist2D(Now, Perf16Last) / 100.0);
+		Perf16Last = Now;
 		if (bRun)
 		{
-			// (on along her way; blocked (under a metre a second over the last second), a quarter turn)
+			// (on along her way; blocked (under a metre over the last second), a quarter turn, at most once a second (PR #111's review: it
+			// turned every frame while she was slow, and she spun on the spot))
 			P->AddMovementInput(FRotator(0.f, P->GetActorRotation().Yaw, 0.f).Vector(), 1.f);
-			if (ACharacter* Ch = Cast<ACharacter>(P); Ch && Perf16T > 2.f && Ch->GetVelocity().Size2D() < 100.f)
+			Perf16SecT += Dt;
+			if (Perf16SecT >= 1.f)
 			{
-				const float Yaw = P->GetActorRotation().Yaw + 90.f;
-				P->SetActorRotation(FRotator(0.f, Yaw, 0.f)); if (PC) PC->SetControlRotation(FRotator(-5.f, Yaw, 0.f));
+				const bool bStuck = Perf16T > 2.f && FVector::Dist2D(Now, Perf16SecPos) < 100.f && Perf16T - Perf16Turned > 1.f;
+				Perf16SecT = 0.f; Perf16SecPos = Now;
+				if (bStuck)
+				{
+					const float Yaw = P->GetActorRotation().Yaw + 90.f; Perf16Turned = Perf16T;
+					P->SetActorRotation(FRotator(0.f, Yaw, 0.f)); if (PC) PC->SetControlRotation(FRotator(-5.f, Yaw, 0.f));
+				}
 			}
 		}
 		Perf16Frames.Add(Dt);
@@ -240,6 +266,7 @@ void ARDDungeonGenerator::TickPerf16(APawn* P)
 		const int32 N = Perf16Frames.Num();
 		if (bRun ? Perf16T < RDPerf16Run : (Perf16T < RDPerf16MeasureMax && (Perf16T < RDPerf16Measure || N < RDPerf16Frames))) return;
 		if (bRun && PlayerCombat) PlayerCombat->SetRunMode(false);
+		if (!Perf16Broken.IsEmpty()) { Next(*FString::Printf(TEXT("not measured: %s"), *Perf16Broken)); return; }
 		double Sum = 0.0; for (const float F : Perf16Frames) Sum += F;
 		TArray<float> Sorted = Perf16Frames; Sorted.Sort();
 		auto Pct = [&](float Q) { return 1000.f * Sorted[FMath::Clamp(FMath::FloorToInt(N * Q), 0, N - 1)]; };
@@ -250,6 +277,12 @@ void ARDDungeonGenerator::TickPerf16(APawn* P)
 			Perf16Game / N, Perf16Draw / N, Perf16Rhi / N, Perf16Gpu / N, N, Her.X / 100.0, Her.Y / 100.0, *Biome, bRun ? FVector::Dist2D(Her, Perf16From) / 100.0 : 0.0);
 		RDPerf16Write(Perf16File, L);
 		UE_LOG(LogRDList16, Log, TEXT("RDPERF16 %s"), *L);
+		// (its picture after the measure: the capture's stall falls outside the measured frames (PR #111's review))
+		if (!bRun)
+		{
+			IFileManager::Get().MakeDirectory(*Perf16Shots, true);
+			FScreenshotRequest::RequestScreenshot(Perf16Shots / FString::Printf(TEXT("%s_%s_%02.0f.png"), *Pl.Kind, *Pl.Name.Replace(TEXT(" "), TEXT("_")), Pl.Hour), false, false);
+		}
 		Next(nullptr);
 		return;
 	}
