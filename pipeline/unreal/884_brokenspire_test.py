@@ -5838,7 +5838,8 @@ def step_interior16():
         seed = G["gi"].get_editor_property("town_seed")
         unreal.SystemLibrary.execute_console_command(w, "rd.InteriorBatch 0"); g.rebuild_town(seed); yield from rwait(8.0); refresh(); g = G["gen"]
         put(place("square"), yaw=0.0); yield from rwait(3.0)
-        nb = [(yield from frames16(8.0)) for _k in range(3)]
+        nb = []
+        for _k in range(3): nb.append((yield from frames16(8.0)))
         res["frames_batch_off"] = {"median_fps": sorted(x["fps"] for x in nb)[1], "each": [x["fps"] for x in nb], "batches": interiors16()["batches"]}
         unreal.SystemLibrary.execute_console_command(w, "rd.InteriorBatch 1"); g.rebuild_town(seed); yield from rwait(8.0); refresh(); g = G["gen"]
     except Exception as e_:
