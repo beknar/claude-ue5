@@ -84,6 +84,7 @@ bool ARDDungeonGenerator::MapTeleportTo(const FVector& World)
 				bTravelForced = false;
 				return bOk;
 			}
+		ShowCover16(TEXT("teleport"));
 		return WildPutDownNear(Wm);
 	}
 	// (a town's map or a dungeon's: the floors under the point, traced down from well over it one after another (a roof, a vault,

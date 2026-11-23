@@ -172,6 +172,9 @@ void ARDDungeonGenerator::TickWild(float Dt, APlayerController* PC)
 	TSharedPtr<FRDWChunkData, ESPMode::ThreadSafe> D;
 	while (WildStream->Done.Dequeue(D))
 	{
+		// (the list of 2026-11-22's third phase: a ground-only job swaps a standing chunk's ground (RDList16c.cpp))
+		// (one swap a frame: a 2 m chunk's swap took up to 9.6 ms of a frame; the rest wait in their queue)
+		if (D->bGroundOnly) { WildRegridDone16.Add(D); continue; }
 		WildInFlight.Remove(D->Coord);
 		if (WildStale.Remove(D->Coord) > 0) continue;          // (asked before a town came or went: asked again)
 		WildComputeMs = WildComputeMs <= 0.0 ? D->Ms : FMath::Lerp(WildComputeMs, D->Ms, 0.1);
@@ -181,6 +184,7 @@ void ARDDungeonGenerator::TickWild(float Dt, APlayerController* PC)
 		if (!bWildBuildSteps && (Steps == 0 || Spent() <= WildBuildBudgetMs)) { BuildWildChunk(D, true); ++Steps; continue; }
 		FWildBuild B; B.D = D; WildBuilding.Add(MoveTemp(B));
 	}
+	if (WildRegridDone16.Num() > 0 && Steps == 0) { const TSharedPtr<FRDWChunkData, ESPMode::ThreadSafe> Rd = WildRegridDone16[0]; WildRegridDone16.RemoveAt(0); ApplyWildRegrid16(*Rd); ++Steps; }
 	if (WildBuilding.Num() > 0 && (Steps == 0 || Spent() <= WildBuildBudgetMs))
 	{
 		// (those begun first; of the rest the nearest)
@@ -215,6 +219,7 @@ void ARDDungeonGenerator::TickWild(float Dt, APlayerController* PC)
 		const double Ex = FMath::Max3(X0 - Xm, 0.0, Xm - (X0 + Cm)), Ey = FMath::Max3(Y0 - Ym, 0.0, Ym - (Y0 + Cm));
 		SetWildNear(C, FMath::Sqrt(Ex * Ex + Ey * Ey) < WildNearM);
 	}
+	TickWildLod16(FVector2D(Xm, Ym));          // (the list of 2026-11-22: each chunk's step and collision by its distance)
 	// ---- the map's fog lifted round her; the places she comes to found (four times a second)
 	WildLookTimer -= Dt;
 	if (WildLookTimer <= 0.f)
@@ -256,6 +261,12 @@ void ARDDungeonGenerator::AskWildChunk(FIntPoint C)
 	D->Coord = C; D->ChunkM = WildChunkM; D->StepM = WildStepM; D->Ticket = ++WildTicket;
 	// (the list of 2026-11-07: run fast (rd.WildRunSpeed over 1) she outruns a worker's cooking: the ground's collision at once)
 	D->bSyncCollision = WildRunApplied > 1.f;
+	// (the list of 2026-11-22: its drawn step and its collision by its distance from her as it is asked)
+	if (const APawn* Pw = UGameplayStatics::GetPlayerPawn(this, 0))
+	{
+		const double Nm = WildChunkNearM16(C, FVector2D(Pw->GetActorLocation().X / 100.0, Pw->GetActorLocation().Y / 100.0));
+		D->DrawEvery = WildDrawEveryFor16(Nm, 0); D->bCollision = WildCollisionFor16(Nm, false);
+	}
 	WildTownHole(*D);
 	WildInFlight.Add(C);
 	TSharedPtr<FRDWildWorld, ESPMode::ThreadSafe> W = Wild;
@@ -286,7 +297,7 @@ bool ARDDungeonGenerator::StepWildBuild(FWildBuild& B)
 		const FVector O(D->Coord.X * WildChunkM * 100.0, D->Coord.Y * WildChunkM * 100.0, 0.0);
 		ARDWildChunk* C = GetWorld()->SpawnActor<ARDWildChunk>(ARDWildChunk::StaticClass(), FTransform(O), Sp);
 		if (!C) return true;
-		C->Coord = D->Coord; C->bMaking = true;
+		C->Coord = D->Coord; C->bMaking = true; C->DrawEvery16 = D->DrawEvery; C->Ticket16 = D->Ticket;
 		C->Ground->CreateMeshSection_LinearColor(0, D->V, D->T, D->N, D->UV0, D->UV1, D->UV2, D->UV3, D->C, D->Tan, false);
 		if (WildGroundMaterial) C->Ground->SetMaterial(0, WildGroundMaterial);
 		C->Triangles = D->T.Num() / 3;
@@ -300,16 +311,9 @@ bool ARDDungeonGenerator::StepWildBuild(FWildBuild& B)
 	{
 		Part = TEXT("collision");
 		ARDWildChunk* C = B.C.Get();
-		// (she, the monsters, the camera and the traces stand on it as on the ground before: BlockAll, hidden, not in the scene)
-		UProceduralMeshComponent* G = NewObject<UProceduralMeshComponent>(C, TEXT("GroundCollision"));
-		G->SetupAttachment(C->Ground);
-		G->bUseAsyncCooking = !D->bSyncCollision;
-		G->SetCollisionProfileName(TEXT("BlockAll"));
-		G->SetHiddenInGame(true); G->SetVisibility(false); G->SetCastShadow(false);
-		G->RegisterComponent();
-		G->CreateMeshSection(0, D->V, D->T, TArray<FVector>(), TArray<FVector2D>(), TArray<FColor>(), TArray<FProcMeshTangent>(), true);
-		C->GroundCollision = G;
-		D->V.Empty(); D->T.Empty();
+		// (the whole 2 m grid, kept apart from the drawn ground: only a chunk near her has it (the list of 2026-11-22, RDList16c.cpp))
+		if (D->bCollision) MakeWildCollision16(C, D->CV, D->CT, D->bSyncCollision);
+		D->V.Empty(); D->T.Empty(); D->CV.Empty(); D->CT.Empty();
 		B.Step = 2;
 	}
 	else if (B.Step == 2)
@@ -706,9 +710,10 @@ bool ARDDungeonGenerator::WildPutHer(float Xm, float Ym)
 				WildBuilding.RemoveAt(Mk);
 				if (TObjectPtr<ARDWildChunk>* Old = WildChunks.Find(C)) { if (*Old) (*Old)->Destroy(); WildChunks.Remove(C); WildKept.Remove(C); }
 			}
-			if (WildChunks.Contains(C)) continue;
+			// (the list of 2026-11-22: one standing there without its collision (a far chunk) has it made now)
+			if (TObjectPtr<ARDWildChunk>* Cp = WildChunks.Find(C)) { if (IsValid(*Cp) && !(*Cp)->bMaking && !(*Cp)->GroundCollision) AskWildRegrid16(*Cp, 1, true, true); continue; }
 			TSharedPtr<FRDWChunkData, ESPMode::ThreadSafe> D = MakeShared<FRDWChunkData, ESPMode::ThreadSafe>();
-			D->Coord = C; D->ChunkM = WildChunkM; D->StepM = WildStepM; D->bSyncCollision = true; D->bPutOn = true;
+			D->Coord = C; D->ChunkM = WildChunkM; D->StepM = WildStepM; D->bSyncCollision = true; D->bPutOn = true; D->Ticket = ++WildTicket;
 			WildTownHole(*D);
 			RDWildComputeChunk(*Wild, *D);
 			BuildWildChunk(D);

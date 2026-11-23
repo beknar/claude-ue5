@@ -8073,6 +8073,255 @@ def step_climate15():
           and len(res.get("items", [])) == 4 and len(res.get("oven_recipes", [])) == 2)
     step_result("climate15", ok, **res)
 STEPS["climate15"] = step_climate15
+
+
+# ================================================================================================ the list of 2026-11-22's second phase
+def step_allies16():
+    """her summons on the wilds' minimap and big map and on a town's minimap (RD/RDList16b.cpp): the Summoner summons out in the
+    wilds; each ally alive has a mark (MarksDrawn kind 12) within 2 m of it on the minimap, then on the big map; then in Brokenspire's
+    square the town minimap's the same"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    hero0 = str(g.get_editor_property("current_hero"))
+    try:
+        if hero0 != "Summoner": g.switch_hero("Summoner"); yield from rwait(1.0); refresh()
+        t0 = time.time()
+        while cb() is None and time.time() - t0 < 10: yield; refresh()
+        c = cb(); g.unlock_hero_weapons(4); yield from rwait(0.2)
+        W = [str(w.name) for w in g.get_editor_property("weapons")]
+        sp = next((n for n in W if n.startswith("Summon")), None); res["spell"] = sp
+        if not sp: raise RuntimeError("no summoning among her weapons")
+        def marks_vs_allies():
+            al = [a for a in g.get_allies() if alive(a)]
+            mk = [m for m in G["pc"].get_hud().get_marks_drawn() if round(m.z) == 12]
+            hit = sum(1 for a in al if any(math.hypot(m.x - a.get_actor_location().x, m.y - a.get_actor_location().y) < 200.0 for m in mk))
+            return {"allies": len(al), "marks": len(mk), "allies_marked": hit}
+        g.wild_drop_all(); g.wild_put_her(1500.0, 300.0); yield from wait_chunks(30, 50); yield from rwait(1.0)
+        for k in range(2):
+            c.set_mana(c.get_max_mana()); c.start_attack_with(W.index(sp)); yield from rwait(2.6)
+        yield from rwait(1.0); res["wild_minimap"] = marks_vs_allies()
+        g.set_map_open(True); yield from rwait(1.0); res["wild_map"] = marks_vs_allies(); shot("allies16_wildmap", "1280x720"); yield from rwait(1.0); g.set_map_open(False)
+        # (in a town: Brokenspire's square, the allies come with her)
+        ok_t = g.travel_to_town16("Brokenspire"); res["to_town"] = ok_t
+        yield from wait_ready(60); yield from rwait(6.0)
+        res["town_minimap"] = marks_vs_allies()
+    except Exception as e_:
+        res["error"] = str(e_)
+    finally:
+        for a_ in list(g.get_allies()):
+            try:
+                if alive(a_): a_.apply_damage(1e7, None)
+            except Exception: pass
+        quiet(False)
+        if str(g.get_editor_property("current_hero")) != hero0: g.switch_hero(hero0); yield from rwait(1.0); refresh()
+    def good(d): return d and d["allies"] > 0 and d["allies_marked"] == d["allies"]
+    ok = "error" not in res and good(res.get("wild_minimap")) and good(res.get("wild_map")) and good(res.get("town_minimap"))
+    step_result("allies16", ok, **res)
+
+
+def town_id16(name):
+    """a town's place id for the map's travel (TownIdBase + its index in the world's towns)"""
+    names = [str(l).split("|")[0] for l in G["gen"].get_wild_town_lines()]
+    return TOWN_ID + names.index(name)
+
+
+def cover_lines16():
+    return [str(l).split("|") for l in G["gen"].get_cover_lines16()]
+
+
+def wait_cover16(sec=70):
+    """until the loading cover is down (it is up from the call that raised it); the seconds waited"""
+    t0 = time.time()
+    while time.time() - t0 < sec:
+        yield
+        try:
+            if not G["gen"].is_cover_up16(): return round(time.time() - t0, 2)
+        except Exception: pass
+    return None
+
+
+def step_loading16():
+    """the loading cover (RD/RDList16b.cpp): after each of five trips by the map's travel (to Ashenreach, back to Brokenspire, to
+    Graymourne, to Kethrys Spire, back to Brokenspire) a picture the moment the cover lifts and one 30 s later, compared cell by cell
+    (8 x 6 cells' mean luma): what streamed in after the lift is the difference. Each trip's cover line (its time, how it lifted, the
+    textures still wanting). The cover never lifts by its minute's timeout; each picture pair differs by under 12 luma in the mean"""
+    g = G["gen"]; res = {"trips": []}; quiet(True)
+    yield from wait_ready(90)
+    try:
+        trips = ["Ashenreach", "Brokenspire", "Graymourne", "Kethrys Spire", "Brokenspire"]
+        for k, town in enumerate(trips):
+            n0 = len(cover_lines16())
+            g = G["gen"]
+            ok_ = g.travel_to_town16(town)
+            # (one view for both pictures, set while the cover is still up and held: the first run's camera moved between them, and the
+            # difference measured the camera; her body hidden, the hour held)
+            G["pawn"].set_actor_hidden_in_game(True)
+            hr = G["gen"].get_town_hour()
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=float((k * 77) % 360)))
+            waited = yield from wait_cover16()
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=float((k * 77) % 360)))
+            p0 = yield from shot_wait13(f"loading16_{k}_lift", "960x540"); at0 = G["pawn"].get_actor_location()
+            t30 = time.time()
+            while time.time() - t30 < 30.0:
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=float((k * 77) % 360))); G["gen"].set_town_hour(hr)
+                yield from rwait(0.5)
+            p1 = yield from shot_wait13(f"loading16_{k}_late", "960x540"); at1 = G["pawn"].get_actor_location()
+            G["pawn"].set_actor_hidden_in_game(False)
+            moved = round(dist2(at0, at1) / 100, 1)
+            d = None
+            if p0 and p1:
+                a, b = png_grid(p0, (0, 0, 1, 1), 8, 6), png_grid(p1, (0, 0, 1, 1), 8, 6)
+                d = round(sum(abs(a[j][i] - b[j][i]) for j in range(6) for i in range(8)) / 48.0, 2)
+            ls = cover_lines16()[n0:]
+            res["trips"].append({"to": town, "ok": bool(ok_), "waited_s": waited, "covers": ["|".join(l[:5]) for l in ls], "luma_diff": d, "moved_m": moved})
+    except Exception as e_:
+        res["error"] = str(e_)
+    finally:
+        quiet(False)
+    tr = res["trips"]
+    # (a trip where she was moved between the two pictures (Kethrys Spire's, 2026-11-23: put down outside its gate, then inside) shows
+    # two places: reported, not compared; three trips at least compared)
+    same = [t for t in tr if t.get("moved_m", 99) < 3.0]
+    res["compared"] = len(same)
+    ok = ("error" not in res and len(tr) == 5 and all(t["ok"] and t["waited_s"] is not None and t["covers"] and all("timeout" not in c for c in t["covers"]) for t in tr)
+          and len(same) >= 3 and all(t["luma_diff"] is not None and t["luma_diff"] < 12.0 for t in same))
+    step_result("loading16", ok, **res)
+
+
+def step_caveport16():
+    """the cave's way out (item 'the teleporter in the Broken Tower cave system takes you back to Brokenspire first'): into the nearest
+    tower's cave by its mouth, then out by the cave's way back (ReturnToTown: the boss's teleporter's town choice and the Escape
+    menu's line call it); in the wilds' level the cover is up from its first tick and lifts only once she stands before the mouth
+    (its line's place within 10 m of it), never in Brokenspire (more than 1 km from the town's middle when it lifts)"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    try:
+        cands = [(math.cos(math.radians(a)) * km * 1000.0, math.sin(math.radians(a)) * km * 1000.0) for km in (6, 22, 45) for a in (20, 110, 200, 290)]
+        mouth = None
+        for (x, y) in cands:
+            g = G["gen"]; g.wild_put_her(x, y); yield from wait_chunks(30, 50); ground_put(x, y); yield from rwait(3.0)
+            m = str(g.get_cave_mouth15()).split("|")
+            if m[0] == "on": mouth = m; break
+        if not mouth: raise RuntimeError("no tower's mouth found")
+        mx, my, ox, oy = float(mouth[1]), float(mouth[2]), float(mouth[4]), float(mouth[5])
+        ground_put((mx + ox * 250) / 100.0, (my + oy * 250) / 100.0); yield from rwait(1.0)
+        yield from travel15("caves", lambda: G["pawn"] and cb().simulate_key(key("F"), True))
+        try: cb().simulate_key(key("F"), False)
+        except Exception: pass
+        res["level"] = G["w"].get_path_name().split(".")[-1] if G["w"] else None
+        if res["level"] != "caves": raise RuntimeError("not in the caves: " + str(res["level"]))
+        yield from rwait(3.0)
+        yield from travel15("brokenspire", lambda: G["gen"].return_to_town(), 150)
+        w = yield from wait_cover16(120)
+        res["cover_waited_s"] = w
+        ls = cover_lines16(); res["covers"] = ["|".join(l) for l in ls]
+        first = ls[0] if ls else None
+        if first and len(first) >= 7:
+            fx, fy = float(first[5]), float(first[6])
+            res["first_lift"] = {"why": first[0], "how": first[3], "from_mouth_m": round(math.hypot(fx - mx, fy - my) / 100, 1), "from_brokenspire_km": round(math.hypot(fx, fy) / 100000, 2)}
+        p = G["pawn"].get_actor_location(); res["her_from_mouth_m"] = round(math.hypot(p.x - mx, p.y - my) / 100, 1)
+    except Exception as e_:
+        res["error"] = str(e_)
+    finally:
+        quiet(False)
+    fl = res.get("first_lift", {})
+    ok = ("error" not in res and fl.get("why", "").startswith("level") and fl.get("how") != "timeout" and fl.get("from_mouth_m", 99) < 10.0
+          and fl.get("from_brokenspire_km", 0) > 1.0)
+    step_result("caveport16", ok, **res)
+
+
+STEPS["allies16"] = step_allies16; STEPS["loading16"] = step_loading16; STEPS["caveport16"] = step_caveport16
+
+
+# ================================================================================================ the list of 2026-11-22's third phase
+def lod16(): 
+    f = str(G["gen"].get_wild_lod16()).split("|")
+    return {"regrids": int(f[0]), "in_flight": int(f[1]), "swap_ms_max": float(f[2]), "on": f[3] == "1", "at_2m": int(f[4]), "at_4m": int(f[5]), "at_8m": int(f[6]), "with_collision": int(f[7]), "triangles": int(f[8])}
+
+
+def settle_lod16(sec=60):
+    """until no chunk is being asked or made and no ground-only job is on its way"""
+    t0 = time.time()
+    while time.time() - t0 < sec:
+        yield from rwait(0.5)
+        try:
+            g = G["gen"]
+            if lod16()["in_flight"] == 0 and not str(g.get_wild_build_stats(False)).split("|")[4] != "0": return True
+        except Exception: pass
+    return False
+
+
+def run_frames16(yaw, metres, sec=90):
+    """she runs straight on (her run) until she has gone so far or the time is up: the frame times (ms) on the real clock"""
+    pawn = G["pawn"]; c = cb(); c.set_run_mode(True)
+    d = V(math.cos(math.radians(yaw)), math.sin(math.radians(yaw)), 0)
+    L0 = pawn.get_actor_location(); t0 = time.time(); last = t0; dts = []
+    while time.time() - t0 < sec and dist2(pawn.get_actor_location(), L0) < metres * 100.0:
+        pawn.add_movement_input(d, 1.0); yield
+        n = time.time(); dts.append((n - last) * 1000.0); last = n
+    c.set_run_mode(False)
+    dts = sorted(dts[5:]) or [0.0]
+    pick = lambda q: round(dts[min(len(dts) - 1, int(len(dts) * q))], 1)
+    return {"m": round(dist2(pawn.get_actor_location(), L0) / 100), "frames": len(dts), "p50": pick(0.5), "p95": pick(0.95), "p99": pick(0.99), "max": round(dts[-1], 1)}
+
+
+def step_lod16():
+    """the wilds' ground in levels of detail (RD/RDList16c.cpp): 3 km out on open ground, the world settled; the chunks by step and
+    collision, the ground's triangles; on the meshes themselves: the seams between chunks of two steps (every 50 cm: no gap deeper
+    than the 5 m skirt), the drawn surfaces' departure from the 2 m ground, the trees' and rocks' feet on the coarse chunks, every
+    mover of the wilds on a chunk with collision; the far ground pictured; the longest ground swap; a 1 km run's frame times. Then
+    rd.WildLod 0 (every chunk at 2 m with collision) at the same place: its triangles, the same picture and run. On: under half the
+    triangles, no seam past the skirt, no mover off the ground, the swap under 8 ms, the run's 99th percentile no worse than off's
+    by more than a tenth"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    w = UES.get_game_world()
+    try:
+        x, y = 3000.0, 600.0
+        g.wild_drop_all(); g.wild_put_her(x, y); yield from wait_chunks(40, 60); ground_put(x, y); yield from rwait(2.0)
+        res["settled_on"] = yield from settle_lod16(90)
+        res["on"] = lod16()
+        s = str(g.get_wild_seams16()).split("|"); res["seams"] = {"pairs": int(s[0]), "points": int(s[1]), "gap_cm": float(s[2]), "past_skirt": int(s[3]), "departure_cm": float(s[4])}
+        f = str(g.get_wild_foot_gaps16()).split("|"); res["feet"] = {"n": int(f[0]), "above_max_cm": float(f[1]), "above_p95_cm": float(f[2]), "below_max_cm": float(f[3])}
+        m = str(g.get_wild_movers_off_ground16()).split("|"); res["movers"] = {"checked": int(m[0]), "off": int(m[1]), "names": m[2]}
+        yaw = 20.0
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4, yaw=yaw)); G["pawn"].set_actor_hidden_in_game(True)
+        yield from rwait(2.0); res["pic_on"] = yield from shot_wait13("lod16_far_on", "1280x720"); G["pawn"].set_actor_hidden_in_game(False)
+        res["run_on"] = yield from run_frames16(yaw, 1000.0)
+        res["on_after_run"] = lod16()
+        # (looked at again 2 s later: one spawned in the second before the look has not had the once-a-second pass yet)
+        m = str(g.get_wild_movers_off_ground16()).split("|"); first = set(x for x in m[2].split(";") if x)
+        yield from rwait(2.0)
+        m = str(g.get_wild_movers_off_ground16()).split("|"); still = [x for x in m[2].split(";") if x and x in first]
+        res["movers_after_run"] = {"checked": int(m[0]), "off": len(still), "names": ";".join(still)}
+        # ---- off, at the same place
+        unreal.SystemLibrary.execute_console_command(w, "rd.WildLod 0")
+        g.wild_drop_all(); g.wild_put_her(x, y); yield from wait_chunks(40, 60); ground_put(x, y); yield from rwait(2.0)
+        res["settled_off"] = yield from settle_lod16(90)
+        res["off"] = lod16()
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4, yaw=yaw)); G["pawn"].set_actor_hidden_in_game(True)
+        yield from rwait(2.0); res["pic_off"] = yield from shot_wait13("lod16_far_off", "1280x720"); G["pawn"].set_actor_hidden_in_game(False)
+        res["run_off"] = yield from run_frames16(yaw, 1000.0)
+        if res.get("pic_on") and res.get("pic_off"):
+            a, b = png_grid(res["pic_on"], (0, 0, 1, 1), 8, 6), png_grid(res["pic_off"], (0, 0, 1, 1), 8, 6)
+            res["pictures_luma_diff"] = round(sum(abs(a[j][i] - b[j][i]) for j in range(6) for i in range(8)) / 48.0, 2)
+    except Exception as e_:
+        res["error"] = str(e_)
+    finally:
+        try: unreal.SystemLibrary.execute_console_command(w, "rd.WildLod 1")
+        except Exception: pass
+        try: G["pawn"].set_actor_hidden_in_game(False)
+        except Exception: pass
+        quiet(False)
+    on, off, se = res.get("on", {}), res.get("off", {}), res.get("seams", {})
+    ro, rf = res.get("run_on", {}), res.get("run_off", {})
+    ok = ("error" not in res and on.get("triangles", 0) > 0 and off.get("triangles", 0) > 0 and on["triangles"] < 0.5 * off["triangles"]
+          and se.get("pairs", 0) > 0 and se.get("past_skirt", 1) == 0 and res.get("movers", {}).get("off", 1) == 0 and res.get("movers_after_run", {}).get("off", 1) == 0
+          and res.get("on_after_run", {}).get("swap_ms_max", 99) < 8.0 and ro.get("p99", 999) <= rf.get("p99", 0) * 1.1 + 1.0)
+    step_result("lod16", ok, **res)
+
+
+STEPS["lod16"] = step_lod16
 SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
 def saves_snapshot():
     """the save folder's files and their bytes: put back at the end, the tests' own new saves deleted (PR #61's review)"""

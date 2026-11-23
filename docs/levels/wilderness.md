@@ -1052,3 +1052,28 @@ The tool's exit code is 1 for the 15 known unreadable pack files the asset regis
 2l. Its fourth part, the lairs hidden: C++ first (`RD/RDWildLair12.cpp`, `RDWildRuin12.cpp`, `RDMonster.cpp`), then `924_list12_wild.py lairs` (after `ruins`: the covers use its walls, rubble, cliffs and cave). Check with `888_wilderness_test.ps1 lairs12 <tag> 1500 -Light`.
 2m. Its fifth part, the structures and their quests: C++ first (`RD/RDWildSite12.cpp`, `RD/RDWildQuest12.cpp`, `RDWildWorld.cpp`'s sites, `RDHorse.cpp`'s second mount), then `924_list12_wild.py sites,quests` (after `ruins` and `lairs`: on `brokenspire`, the structures' pieces, kinds and beast, then the quests). Check with `888_wilderness_test.ps1 "sites12=<twelve kinds>" <tag> 1500 -Light` three times and `"quests12=<eight quests>" <tag> 2400 -Light` (the editor restarted between batches).
 3. `888_wilderness_test.ps1 all <tag>`; Brokenspire's own test (`884_brokenspire_test.ps1 all`) after anything shared: its `gate` step expects the gate open when the wilderness is on.
+
+## The list of 2026-11-22: the loading cover, the summons on the maps, the ground in levels of detail
+
+- **The summons on the maps** (`RD/RDList16b.cpp`): her summoned and raised allies are drawn on the wilds' minimap and big map and on the towns' minimap and maps (inside the walls), with the dungeon maps' own mark. `888 allies16`: two summons, both marked on each map.
+- **The loading cover** (`RDList16b.cpp`): the engine's loading screen while a map loads (the movie player, a packaged game's), then a cover over the view after a level opens, a fast travel, the map's teleport or a respawn. It lifts once the town round her is built, a pending load has put her down, the 3 x 3 chunks under her are made, ten frames in a row have taken under 100 ms, a second has passed since all that, and the texture streamer wants nothing more (or 8 s after the world is built). Each cover's times and how it lifted are logged (`RDCOVER16`). `rd.LoadingCover 0` turns it off.
+  - `888 loading16`: five trips by the map's travel (Ashenreach, Brokenspire, Graymourne, Kethrys Spire, Brokenspire). Every cover lifted when the streamer was done (4 to 7 s after the world was built).
+  - A picture at the lift against one 30 s later from the same view differed by 0.5 to 4.8 in mean luma; before the steady-frames rule the first frames after a city was built took 400 ms and its lights were still dark (17 to 23).
+- **The cave's way out**: coming back from a cave still plans Brokenspire (the world's roads leave by its gate: the wilds' level reads it when it starts), but under the cover. `888 caveport16`: the cover lifted only once she stood 6 m from the tower's mouth, 5.7 km from Brokenspire.
+- **The ground in levels of detail** (`RD/RDList16c.cpp`, `RDWildChunk.cpp`'s `RDWildDrawGround16`):
+  - **The drawn mesh:** a chunk's drawn ground takes every vertex of its 2 m grid within 250 m of her (its nearest edge), every second within 500 m, and every fourth beyond. The border's last row is always kept, so every grid has vertices on the chunk's edges.
+  - **Skirts:** a 5 m skirt hangs under every edge, covering the slivers where chunks of two steps meet.
+  - **What stays at 2 m:** the plants, water and places are still laid on the 2 m grid.
+  - **Changing step:** a chunk whose step should change gets a ground-only job on the workers. One swap is made a frame (1 ms at most), and a chunk turns coarser only 80 m past its ring.
+  - **Collision stays on every chunk.** Collision only near her was built and measured: the wild monsters stand on 52 to 58 of the 64 chunks, so it saved six chunks and cost a swap each time one changed.
+  - **The far land** is computed on a worker and only swapped in on the game thread (it took about 12 ms of a frame every 150 m).
+  - `rd.WildLod 0` draws every chunk at 2 m.
+- **`888 lod16`**, 3 km out:
+  - The ground's triangles: 484,000 against 2,064,000 at 2 m everywhere.
+  - On the meshes themselves, the largest gap along a seam between two steps is 56 cm (the skirt is 500), and the drawn surface departs from the 2 m ground by 56 cm at most.
+  - The trees' and rocks' feet on the coarse chunks: within 21 cm in 95 %, at most 1.45 m over and 1.62 m under (beyond 250 m).
+  - Every wild monster stands on a chunk with collision.
+  - A 316 m run's frame times are no worse than at 2 m everywhere (99th percentile 51.7 ms against 53.6).
+  - The far pictures differ by 7 in mean luma.
+
+Rebuild note 2n (the list of 2026-11-22's second and third phases): C++ only (`RDList16b.cpp`, `RDList16c.cpp`, `RDWildChunk.cpp`, `RDSkyFar.cpp`; the `MoviePlayer` module); check with `888_wilderness_test.ps1 allies16,loading16,caveport16,lod16 <tag> 3600 -Light`.

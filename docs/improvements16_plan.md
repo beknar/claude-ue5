@@ -83,6 +83,9 @@ Stages go under `944` (`944_improvements16.py <part>`, as `934` did for list 15)
 
 ## The phases
 
+**How the phases went into PRs** (2026-11-23): phases 2 and 3 are one PR, and phases 6 and 7 another. Their tests' fixes ran through the same files, and each pair is a reasonable size. Phases 4 and 5 (Nanite) follow phase 7, and MID is measured after them, so the interiors are still measured with Nanite on. The first BEFORE run was measured again after PR #111's review fixed the measuring run.
+
+
 | Phase | What |
 |---|---|
 | 1 | This plan; the measuring run (`-RDPerf`), its places kept; **BEFORE** in `docs/performance.md` |

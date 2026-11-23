@@ -1745,6 +1745,8 @@ void ARDDungeonGenerator::UpdateDiscovery(const FVector& L)
 void ARDDungeonGenerator::BeginPlay()
 {
 	Super::BeginPlay();
+	// (the list of 2026-11-22: the loading cover until the world round her is built and its textures streamed in)
+	if (bTown || bTownLink) ShowCover16(TEXT("level"));
 	// (the list of 2026-11-08b: the gamepad's Start as the device sends it, for the Escape menu's hold)
 	if (bEscapeMenu && !StartKeys.IsValid() && FSlateApplication::IsInitialized())
 	{
@@ -1830,6 +1832,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 	if (bOpeningMenu) return;
 	// (the list of 2026-11-22: -RDPerf, the frame rate in every city and biome, and the castle's and a dungeon's first hall)
 	if (bTown || bTownLink) TickPerf16(UGameplayStatics::GetPlayerPawn(this, 0));
+	TickCover16(Dt);
 	// (mistward: the frame rate, smoothed over about a second of frames, from the real time between frames)
 	if (bShowFps)
 	{

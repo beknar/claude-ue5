@@ -113,6 +113,9 @@ public:
 	 *  runs before and after the list's changes stand in the same places */
 	static bool IsPerfRun16();
 	static constexpr int32 PerfSeed16 = 16016;
+	/** the list of 2026-11-22 (RDList16b.cpp): the engine's loading screen while a map loads (a packaged game's: the movie player) */
+	virtual void Init() override;
+	void BeginLoadingScreen16(const FString& Map);
 
 	/** a new game for this hero: nothing carried, an empty purse and storage, no quests, a new town */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") void NewGame(FName Hero);

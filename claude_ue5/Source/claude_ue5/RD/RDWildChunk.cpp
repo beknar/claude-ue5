@@ -61,8 +61,61 @@ FRDWGroundVertex RDWildGroundVertex(const FRDWSample& Q, const FVector& Nr, cons
 	return G;
 }
 
-namespace
+// (the list of 2026-11-22's third phase: the drawn ground of every DrawEvery-th vertex of the 2 m grid, its edges' skirts)
+void RDWildDrawGround16(FRDWChunkData& D, int32 Nv)
 {
+	const int32 Ev = FMath::Clamp(D.DrawEvery, 1, 8);
+	TArray<int32> Ix;
+	for (int32 I = 0; I < Nv; I += Ev) Ix.Add(I);
+	if (Ix.Last() != Nv - 1) Ix.Add(Nv - 1);
+	const int32 M = Ix.Num();
+	TArray<FVector> V, N; TArray<FVector2D> U0, U1, U2, U3; TArray<FLinearColor> C; TArray<FProcMeshTangent> Tg; TArray<int32> T;
+	const int32 Sk = 4 * M;          // (the skirt's vertices: each of the four edges' M again)
+	V.Reserve(M * M + Sk); N.Reserve(M * M + Sk); U0.Reserve(M * M + Sk); U1.Reserve(M * M + Sk); U2.Reserve(M * M + Sk); U3.Reserve(M * M + Sk); C.Reserve(M * M + Sk); Tg.Reserve(M * M + Sk);
+	auto Copy = [&](int32 K, const FVector& At)
+	{
+		V.Add(At); N.Add(D.N[K]); U0.Add(D.UV0[K]); U1.Add(D.UV1[K]); U2.Add(D.UV2[K]); U3.Add(D.UV3[K]); C.Add(D.C[K]); Tg.Add(D.Tan[K]);
+	};
+	for (int32 A = 0; A < M; ++A) for (int32 B = 0; B < M; ++B) { const int32 K = Ix[A] * Nv + Ix[B]; Copy(K, D.V[K]); }
+	T.Reserve((M - 1) * (M - 1) * 6 + Sk * 6);
+	for (int32 A = 0; A + 1 < M; ++A)
+		for (int32 B = 0; B + 1 < M; ++B)
+		{
+			const int32 P0 = A * M + B, P1 = (A + 1) * M + B, P2 = A * M + B + 1, P3 = (A + 1) * M + B + 1;
+			T.Add(P0); T.Add(P2); T.Add(P1);
+			T.Add(P1); T.Add(P2); T.Add(P3);
+		}
+	// (the skirt: each border vertex again 5 m lower, a strip from the edge down, facing out of the chunk: where a coarser neighbour's
+	// straight edge leaves a sliver open, the sliver shows this skirt (or the neighbour's), not the sky under the world)
+	constexpr float RDSkirtCm = 500.f;
+	auto Tri = [&](int32 P0, int32 P1, int32 P2, const FVector& Out)
+	{
+		// (UE's procedural mesh draws a triangle's front where cross(V1 - V0, V2 - V0) points away from the viewer: its front is -cross)
+		const FVector Fr = -FVector::CrossProduct(V[P1] - V[P0], V[P2] - V[P0]);
+		if (FVector::DotProduct(Fr, Out) >= 0.f) { T.Add(P0); T.Add(P1); T.Add(P2); } else { T.Add(P0); T.Add(P2); T.Add(P1); }
+	};
+	auto Edge = [&](TFunctionRef<int32(int32)> Grid, const FVector& Out)
+	{
+		const int32 Base = V.Num();
+		for (int32 E = 0; E < M; ++E)
+		{
+			// (copied out first: an array's own element added to it is read after a reallocation moved it)
+			const int32 G = Grid(E);
+			const FVector Top = V[G], Nn = N[G]; const FVector2D A0 = U0[G], A1 = U1[G], A2 = U2[G], A3 = U3[G]; const FLinearColor Cc = C[G]; const FProcMeshTangent Tt = Tg[G];
+			V.Add(Top - FVector(0, 0, RDSkirtCm)); N.Add(Nn); U0.Add(A0); U1.Add(A1); U2.Add(A2); U3.Add(A3); C.Add(Cc); Tg.Add(Tt);
+		}
+		for (int32 E = 0; E + 1 < M; ++E)
+		{
+			const int32 A0 = Grid(E), A1 = Grid(E + 1), B0 = Base + E, B1 = Base + E + 1;
+			Tri(A0, B0, A1, Out); Tri(A1, B0, B1, Out);
+		}
+	};
+	Edge([&](int32 E) { return 0 * M + E; }, FVector(-1, 0, 0));
+	Edge([&](int32 E) { return (M - 1) * M + E; }, FVector(1, 0, 0));
+	Edge([&](int32 E) { return E * M + 0; }, FVector(0, -1, 0));
+	Edge([&](int32 E) { return E * M + (M - 1); }, FVector(0, 1, 0));
+	D.V = MoveTemp(V); D.N = MoveTemp(N); D.UV0 = MoveTemp(U0); D.UV1 = MoveTemp(U1); D.UV2 = MoveTemp(U2); D.UV3 = MoveTemp(U3); D.C = MoveTemp(C); D.Tan = MoveTemp(Tg); D.T = MoveTemp(T);
+	D.Slope.Empty();
 }
 
 void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
@@ -128,6 +181,14 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 			D.T.Add(A); D.T.Add(C); D.T.Add(B);
 			D.T.Add(B); D.T.Add(C); D.T.Add(E);
 		}
+	// ---- the list of 2026-11-22's third phase: the collision (the whole 2 m grid) kept apart, and the drawn ground made of every
+	// DrawEvery-th vertex (the border's last always: every grid has vertices on the chunk's edges), a skirt hung under its edges where
+	// neighbours of two steps meet; the plants and the rest read the 2 m grid as before (FineN, FineSlope)
+	if (D.bCollision) { D.CV = D.V; D.CT = D.T; }
+	const TArray<FVector> FineN = D.N;
+	const TArray<float> FineSlope = D.Slope;
+	RDWildDrawGround16(D, Nv);
+	if (D.bGroundOnly) { D.Ms = (FPlatformTime::Seconds() - T0) * 1000.0; return; }
 	// ---- water: a surface over every quad under water (fresh, sea, hot spring), lava over the lava; a floor to wade on
 	// under deep water and a barrier where the sea is deep
 	for (int32 I = 0; I + 1 < Nv; ++I)
@@ -266,7 +327,7 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 					if (F.NearWater < 0.f) { if (!Q.WaterKind || Q.WaterKind == 1) continue; }
 					else if (Q.WaterKind) continue;
 					else if (F.NearWater > 0.f && !Wet[I * Nv + J]) continue;
-					if (D.Slope[I * Nv + J] > F.SlopeMax) continue;
+					if (FineSlope[I * Nv + J] > F.SlopeMax) continue;
 					if (D.bTownHole && FMath::Abs(X0 + Lx - D.TownAt.X) < D.TownHalfM + 6.0 && FMath::Abs(Y0 + Ly - D.TownAt.Y) < D.TownHalfM + 6.0) continue;
 					if (FRDWildWorld::Rand01(Wx, Wy, Hs + 4u) > Wb) continue;
 					// (its height: the ground's, from the quad's corners)
@@ -277,7 +338,7 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 					const float Sc = FMath::Lerp(F.ScaleMin, F.ScaleMax, FRDWildWorld::Rand01(Wx, Wy, Hs + 5u));
 					const float Yaw = FRDWildWorld::Rand01(Wx, Wy, Hs + 6u) * 360.f;
 					FQuat Rq = FQuat(FVector::UpVector, FMath::DegreesToRadians(Yaw));
-					if (F.bAlign) Rq = FQuat::FindBetweenNormals(FVector::UpVector, D.N[I * Nv + J]) * Rq;
+					if (F.bAlign) Rq = FQuat::FindBetweenNormals(FVector::UpVector, FineN[I * Nv + J]) * Rq;
 					Ins.X.Add(FTransform(Rq, FVector(Lx * 100.0, Ly * 100.0, Zc - F.Sink * Sc), FVector(Sc)));
 				}
 			if (Ins.X.Num() > 0) D.Inst.Add(MoveTemp(Ins));
@@ -343,7 +404,7 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 						const double Fs = Vs / Q.StripW - FMath::FloorToDouble(Vs / Q.StripW);
 						if (FMath::Min(Fs, 1.0 - Fs) * Q.StripW < 0.8) continue;
 					}
-					if (D.Slope[I * Nv + J] > 22.f) continue;
+					if (FineSlope[I * Nv + J] > 22.f) continue;
 					if (D.bTownHole && FMath::Abs(Wx - D.TownAt.X) < D.TownHalfM + 6.0 && FMath::Abs(Wy - D.TownAt.Y) < D.TownHalfM + 6.0) continue;
 					// (its kind: the crop's kinds by their Density; one kind a step, the same each time it is made)
 					float Pick = FRDWildWorld::Rand01(Rn, Sn, Hs + 4u) * Wsum; int32 Fi = Kinds.Last();

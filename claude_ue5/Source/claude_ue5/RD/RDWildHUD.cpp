@@ -231,6 +231,8 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 	}
 	// (the list of 2026-11-16: her horse)
 	{ FVector Ha; if (Gen->GetHorseMapAt(Ha)) { const FVector2D Hs = ToS(FVector2D(Ha.X / 100.0, Ha.Y / 100.0)); if (Hs.X > A.X && Hs.X < B.X && Hs.Y > A.Y && Hs.Y < B.Y) DrawHorseMark(Hs, Sc * 1.2f); } }
+	// (the list of 2026-11-22: her summons and allies, as the dungeon maps draw them)
+	DrawAllyMarks16([&](const FVector& W) { return ToS(FVector2D(W.X / 100.0, W.Y / 100.0)); }, [&](const FVector&, const FVector2D& S) { return S.X > A.X && S.X < B.X && S.Y > A.Y && S.Y < B.Y; }, 8.f * Sc);
 	// her arrow (pinned to the sheet's edge when she is off it), the view's middle
 	{
 		FVector2D S = ToS(FVector2D(L.X / 100.0, L.Y / 100.0));
@@ -321,6 +323,7 @@ void ARDHUD::DrawWildMinimap(float Sc, const FVector& L, float Yaw)
 		SoftDot(S, 8.f * Sc, FLinearColor(1.f, 0.16f, 0.1f, Mo->IsAggro() ? 0.45f : 0.2f)); SoftDot(S, 3.8f * Sc, FLinearColor(1.f, 0.16f, 0.1f, Mo->IsAggro() ? 1.f : 0.6f));
 	}
 	{ FVector Ha; if (Gen->GetHorseMapAt(Ha)) { const FVector2D Hs = ToS(FVector2D(Ha.X / 100.0, Ha.Y / 100.0)); if (FVector2D::Distance(Hs, C) < R * 0.9f) DrawHorseMark(Hs, Sc); } }
+	DrawAllyMarks16([&](const FVector& W) { return ToS(FVector2D(W.X / 100.0, W.Y / 100.0)); }, [&](const FVector&, const FVector2D& S) { return FVector2D::Distance(S, C) < R * 0.94f; }, 6.f * Sc);
 	DrawPlayerArrow(C, Yaw - 90.f, 9.f * Sc);
 	if (Ra) UI.Fit(TEXT("minimap_ring"), C - FVector2D(Ring), C + FVector2D(Ring));
 	const FLinearColor Ink(0.75f, 0.77f, 0.8f, 0.85f);
