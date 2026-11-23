@@ -589,5 +589,6 @@ Every city: Brokenspire, Vel Morrath, Ashenreach, Graymourne, Kethrys Spire and 
   - She inside it: shown.
   - From 20 m before its door: shown by a window whose line from the camera the test checks apart from the rule.
   - Within 45 m of the square every home with a door is in sight of one of its windows, so the door's own test runs with the window rule off.
+  - The batching measured: the town built again with the interiors in the town's batches (`rd.InteriorBatch 0`) ran its square at 7.8 a second in the editor's play window, against 23.0 batched by building (the rule hides only what is batched by building: in the town's batches every interior stayed drawn).
 
 Rebuild note (the list of 2026-11-22's sixth and seventh phases): C++ only; a city built in play takes the per-building batches (Brokenspire's saved section too, rebuilt with its new seed every game). Check with `884_brokenspire_test.ps1 interior16,dist16 <tag> 3600 -Light`.

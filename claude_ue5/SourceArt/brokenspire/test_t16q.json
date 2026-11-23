@@ -1,5 +1,5 @@
 {
- "tag": "t16k",
+ "tag": "t16q",
  "plan": [
   "interior16",
   "dist16"
@@ -12,63 +12,63 @@
    "square": {
     "hide": true,
     "batch": true,
-    "buildings": 130,
-    "shown": 40,
-    "hidden": 90,
-    "people_hidden": 4,
-    "windows": 1497,
-    "batches": 773
+    "buildings": 129,
+    "shown": 31,
+    "hidden": 98,
+    "people_hidden": 23,
+    "windows": 1583,
+    "batches": 809
    },
    "before_door": {
     "shown": false,
     "never": false,
     "batches": 6,
-    "props": 1,
+    "props": 3,
     "doors": 1,
-    "windows": 20,
+    "windows": 15,
     "why": "hidden",
     "window": null
    },
    "door_alpha_before": 0.0,
-   "from_her_m": 35.5,
+   "from_her_m": 39.0,
    "home": {
-    "index": 82,
-    "door": 82
+    "index": 92,
+    "door": 92
    },
    "swing": {
     "first_open_frame": 0,
     "first_shown_frame": 0,
     "frames": [
      [
-      0.56,
+      0.104,
       true
      ],
      [
-      0.96,
+      0.17,
       true
      ],
      [
-      1.0,
+      0.225,
       true
      ],
      [
-      1.0,
+      0.291,
       true
      ],
      [
-      1.0,
+      0.35,
       true
      ],
      [
-      1.0,
+      0.416,
       true
      ],
      [
-      1.0,
+      0.492,
       true
      ],
      [
-      1.0,
+      0.564,
       true
      ]
     ]
@@ -77,42 +77,46 @@
     "shown": true,
     "never": false,
     "batches": 6,
-    "props": 1,
+    "props": 3,
     "doors": 1,
-    "windows": 20,
+    "windows": 15,
     "why": "inside",
     "window": null
    },
    "away": {
-    "shown": true,
+    "shown": false,
     "never": false,
     "batches": 6,
-    "props": 1,
+    "props": 3,
     "doors": 1,
-    "windows": 20,
-    "why": "window",
-    "window": [
-     1650,
-     300,
-     152
-    ]
+    "windows": 15,
+    "why": "hidden",
+    "window": null
    },
-   "away_window_clear": true,
    "frames_rule_on": {
-    "median_fps": 18.7,
+    "median_fps": 23.0,
     "each": [
-     18.7,
-     20.3,
-     15.0
+     23.5,
+     22.7,
+     23.0
     ]
    },
    "frames_rule_off": {
-    "median_fps": 19.3,
+    "median_fps": 20.5,
     "each": [
-     19.3,
-     19.6,
-     17.6
+     18.9,
+     20.5,
+     21.2
     ]
+   },
+   "frames_batch_off": {
+    "median_fps": 7.8,
+    "each": [
+     7.8,
+     7.8,
+     7.8
+    ],
+    "batches": 0
    }
   },
   {
@@ -121,32 +125,33 @@
    "Brokenspire": {
     "lod": {
      "on": true,
-     "lights": 609,
-     "built_to_shadow": 48,
+     "lights": 589,
+     "built_to_shadow": 51,
      "shadowing": 0,
      "street_lamps": 0,
      "bands": [
-      3,
-      13,
-      47,
-      16,
-      97
+      4,
+      8,
+      24,
+      23,
+      116
      ],
      "dome": -1
     },
     "shadow_far": 0,
+    "shadow_near_missing": 0,
     "draw_wrong": 0,
-    "people": 176,
+    "people": 175,
     "bands_wrong": 0,
-    "far_people": 97,
-    "far_moved": 61,
+    "far_people": 103,
+    "far_moved": 53,
     "frames_on": {
-     "fps": 23.6,
-     "p95_ms": 49.6
+     "fps": 24.1,
+     "p95_ms": 50.0
     },
     "frames_off": {
-     "fps": 19.4,
-     "p95_ms": 73.0
+     "fps": 25.5,
+     "p95_ms": 44.4
     }
    },
    "Vel Morrath": {
@@ -157,27 +162,28 @@
      "shadowing": 0,
      "street_lamps": 0,
      "bands": [
-      9,
-      19,
-      28,
-      55,
-      106
+      8,
+      20,
+      27,
+      57,
+      105
      ],
      "dome": -1
     },
     "shadow_far": 0,
+    "shadow_near_missing": 0,
     "draw_wrong": 0,
     "people": 217,
     "bands_wrong": 0,
     "far_people": 103,
-    "far_moved": 86,
+    "far_moved": 84,
     "frames_on": {
-     "fps": 23.4,
-     "p95_ms": 49.1
+     "fps": 23.5,
+     "p95_ms": 48.5
     },
     "frames_off": {
-     "fps": 22.8,
-     "p95_ms": 50.6
+     "fps": 22.1,
+     "p95_ms": 57.8
     }
    },
    "Ashenreach": {
@@ -191,24 +197,25 @@
       4,
       19,
       31,
-      20,
-      139
+      21,
+      138
      ],
      "dome": -1
     },
     "shadow_far": 0,
+    "shadow_near_missing": 0,
     "draw_wrong": 0,
     "people": 213,
     "bands_wrong": 0,
     "far_people": 131,
-    "far_moved": 79,
+    "far_moved": 90,
     "frames_on": {
-     "fps": 3.4,
-     "p95_ms": 642.2
+     "fps": 24.7,
+     "p95_ms": 45.1
     },
     "frames_off": {
-     "fps": 2.8,
-     "p95_ms": 676.3
+     "fps": 24.2,
+     "p95_ms": 46.1
     }
    },
    "Graymourne": {
@@ -221,25 +228,26 @@
      "bands": [
       3,
       11,
-      28,
+      27,
       25,
-      155
+      156
      ],
      "dome": -1
     },
     "shadow_far": 0,
+    "shadow_near_missing": 0,
     "draw_wrong": 0,
     "people": 222,
     "bands_wrong": 0,
-    "far_people": 154,
-    "far_moved": 77,
+    "far_people": 155,
+    "far_moved": 98,
     "frames_on": {
-     "fps": 14.6,
-     "p95_ms": 95.2
+     "fps": 7.2,
+     "p95_ms": 157.8
     },
     "frames_off": {
-     "fps": 15.6,
-     "p95_ms": 90.6
+     "fps": 7.1,
+     "p95_ms": 162.5
     }
    },
    "Kethrys Spire": {
@@ -252,25 +260,26 @@
      "bands": [
       4,
       19,
+      20,
       19,
-      21,
-      154
+      155
      ],
      "dome": -1
     },
     "shadow_far": 0,
+    "shadow_near_missing": 0,
     "draw_wrong": 0,
     "people": 217,
     "bands_wrong": 0,
-    "far_people": 149,
-    "far_moved": 89,
+    "far_people": 148,
+    "far_moved": 104,
     "frames_on": {
-     "fps": 21.1,
-     "p95_ms": 54.1
+     "fps": 14.0,
+     "p95_ms": 88.2
     },
     "frames_off": {
-     "fps": 20.6,
-     "p95_ms": 55.1
+     "fps": 14.7,
+     "p95_ms": 85.2
     }
    },
    "Heaven": {
@@ -290,18 +299,19 @@
      "dome": 0
     },
     "shadow_far": 0,
+    "shadow_near_missing": 0,
     "draw_wrong": 0,
     "people": 131,
     "bands_wrong": 0,
     "far_people": 73,
-    "far_moved": 53,
+    "far_moved": 54,
     "frames_on": {
-     "fps": 16.3,
-     "p95_ms": 79.7
+     "fps": 17.2,
+     "p95_ms": 67.2
     },
     "frames_off": {
-     "fps": 16.4,
-     "p95_ms": 80.1
+     "fps": 18.7,
+     "p95_ms": 60.7
     },
     "dome_inside": 0,
     "dome_outside": 1
