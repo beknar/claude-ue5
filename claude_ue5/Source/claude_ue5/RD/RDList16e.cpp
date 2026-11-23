@@ -95,7 +95,7 @@ void ARDDungeonGenerator::TickTownInteriors16(float Dt)
 					// (the prop and every component under it, each with the hidden state it had: shown again as it was, a helper another
 					// rule hides is never shown by this one (PR #113's review))
 					TArray<USceneComponent*> Sub; C->GetChildrenComponents(true, Sub); Sub.Insert(C, 0);
-					for (USceneComponent* Sc : Sub) if (Sc) I.Props.Add({ Sc, Sc->bHiddenInGame });
+					for (USceneComponent* Sc : Sub) if (Sc) I.Props.Add({ Sc, Sc->bHiddenInGame != 0 });
 				}
 				break;
 			}
