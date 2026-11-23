@@ -27,6 +27,7 @@ void URDGameInstance::NewGame(FName Hero)
 	KnownRecipes.Reset();          // (the list of 2026-11-16's sixth phase: a new game knows only the plain recipes)
 	// (a new continent each game: the seed from the clock)
 	WildSeed = (int32)(FDateTime::Now().GetTicks() % 1999999999) + 1;
+	if (IsPerfRun16()) WildSeed = PerfSeed16;          // (the list of 2026-11-22: the measuring run's world the same every run)
 	WildRevealKeys.Reset(); WildRevealBits.Reset(); WildFound.Reset(); WildKilled.Reset(); TownStore.Reset();
 	CurrentTown = TEXT("Brokenspire");
 	UE_LOG(LogTemp, Log, TEXT("RDGAME new game %d for %s"), GamesStarted, *Hero.ToString());

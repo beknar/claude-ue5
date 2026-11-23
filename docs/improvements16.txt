@@ -1,0 +1,192 @@
+measure current performance in FPS in all the cities, wilderness in all biomes, and record it in docs/performance.md with a time stamp under the heading BEFORE LIST16 changes.
+
+is there a way to load textures before the game is displayed?
+
+implement LOD for the wilderness terrain.  
+
+in the cities, implement LOD in this manner:
+
+        What        │                     Distance                      │
+├────────────────────┼───────────────────────────────────────────────────┤
+│ Building interiors │ 30–40 m, ideally hidden whenever she isn't inside │
+│  and furniture     │  that building                                    │
+├────────────────────┼───────────────────────────────────────────────────┤
+│ Small clutter      │                                                   │
+│ (cups, books,      │ 20–30 m                                           │
+│ crates)            │                                                   │
+├────────────────────┼───────────────────────────────────────────────────┤
+│                    │ LOD1 at about 80 m, LOD2 at about 200 m; Heaven's │
+│ Building exteriors │  skyscrapers need a simple shell visible to about │
+│                    │  1 km                                             │
+├────────────────────┼───────────────────────────────────────────────────┤
+│ Point lights       │ 35–45 m with a fade (now 90 m); shadows only      │
+│                    │ within 15–20 m                                    │
+├────────────────────┼───────────────────────────────────────────────────┤
+│ Townsfolk          │ full rate under 15 m, half to 40 m, a quarter to  │
+│ animation          │ 80 m, hidden beyond 100–120 m (they already skip  │
+│                    │ posing when off screen)                           │
+├────────────────────┼───────────────────────────────────────────────────┤
+│ Heaven's cars      │ collision only within 30 m, movement only within  │
+│                    │ 150 m, hidden beyond about 200 m
+
+in cities, further implement nanite. Nanite picks detail automatically and would replace the hand-set LODs for the pack meshes and the town buildings. 
+
+in the wilderness, use Nanite foliage
+
+1. Give each building's interior its own components (my recommendation).
+Interior pieces would be batched per building instead of per town. Then the engine's occlusion culling handles exactly the cases you described with no game logic at all:
+- a shut door hides the room;
+- an open door shows what's visible through the doorway;
+- a window shows what's visible through it.
+
+2. Turn on Nanite for the furniture and prop meshes.
+
+3. Game logic: hide a building's interior until a door opens or she looks in a window.
+- Windows would need a line-of-sight check from the camera to every window, every frame.
+- On opening a door, she'd see an empty room for a frame.
+- The townsfolk inside would need the same rule.
+
+there should be a marker for the summoner's minions on the mini-map in the wilderness
+
+the teleporter in the Broken Tower cave system takes you back to Brokenspire first before taking you outside of the cave.  it should just take you to outside the cave
+
+
+the cave generation should not be the same as the dungeon procedural generation.  it should not look like a dungeon but with cave textures.  look at the Hyper Cave Building Toolkit in the 3d fab cache.  Follow the guide for the cave building here: https://gamesbyhyper.com/product/hyper-cave-building-toolkit/
+
+also follow this guide:
+
+Project Setup
+
+• Enable required plugins: Ensure Unreal Engine's PCG (Procedural Content Generation) plugin is enabled for floor and roof dressing workflows.
+• Study the example map: Open the included large example cave map to see how modular meshes, combined meshes, and Blueprint pieces are connected and dressed.
+
+2. Route Tunnels with Splines
+
+• Create spline tunnels: Place spline-driven tunnel actors and choose size variants (small, medium, or large).
+• Shape the layout: Adjust spline points in the editor to shape the tunnel path. Note that the system relies on manual routing rather than automatic tunnel generation.
+• Optimize editing performance: Temporarily disable collision while editing splines, then re-enable it afterward to regenerate collision.
+
+3. Connect Rooms, Caps, and Stairs
+
+• Attach rooms and caps: Use the spline and room Blueprint details panels to spawn small, medium, or large rooms at spline ends, or attach caps to close off openings.
+• Align connection points: Select specific connection points on Blueprint room actors so tunnels and rooms align cleanly, adjusting yaw offset manually if needed.
+• Add transitions and intersections: Use room intersection controls to insert stairs, connect additional splines from room connection points, or place combined-mesh prefabs for faster layout.
+
+4. Dress with PCG and Lighting
+
+• Populate floor and roof detail: Use PCG components to scatter rocks, foliage, shrubs, and debris across floors and ceilings.
+• Tune PCG parameters: Adjust settings such as spawn density/frequency, offset height, ratios, and amounts to fit your cave's look.
+• Place lighting helpers: Use the toolkit's light and atmosphere placement helpers to spawn or adjust wall/roof lights and light shafts
+
+Follow the video here by taking pictures of the video and reading the transcript here: https://www.youtube.com/watch?v=TQdGCKnO6lc
+
+after instructions for procedural cave generation have been followed for future caves, come up with new treasure types that can be found in caves.  these treasure types and rewards should be found in caves instead of the things that can be found in dungeons.  the angel token crafting materials should still be available for caves.  
+
+implement the following for cave environments:
+
+Crafting materials (anvil, alchemist's and librarian's tables, oven)
+
+- Deepiron ore veins in the cave walls. A cave-only metal for a set of anvil recipes, one step above what a town smith sells at the region's tier.
+- Glowcap and grave-moss, fungi for potions: darksight (you see farther without a torch), poison resist, a slow regeneration potion.
+- Cave-pearl, blind-fish oil: the oil fuels torches and the ankh for longer, which matters because both burn down.
+- Bat-wing leather, crawler chitin: light armour patches, and chitin as a repair item for medium armour.
+- Crystal geode shards, cut at the librarian's table into scroll inks or socket stones; a colour per region.
+- Bones of something old (a giant's femur, a wyrm's vertebra): rare, for a named weapon recipe.
+- Petrified wood or amber with something inside: an alchemy reagent, and also a collectible (below).
+- Regional ores tied to the climate phase: frost quartz in cold regions (warm-gear upgrades) and sun-glass in hot ones (cool-gear upgrades).
+
+Weapons
+
+- The miner's pick: a two-handed weapon that also breaks cave rubble, opening side tunnels and hidden caches.
+- A shard blade of cave crystal: high damage, low durability, mended only with geode shards.
+- A lost adventurer's weapon: a named blade on a skeleton deep in the cave, with a note telling who carried it. Each cave picks one from a pool.
+- Bone weapons (a jawbone club, a rib dagger): dark, cheap and brittle.
+- A lightless bow whose arrows don't show where you shot from, which suits the Rogue's stealth.
+
+Armour
+
+- Spelunker's light armour: quieter footsteps, a little darksight.
+- Chitin plate: heavy, with poison resistance.
+- The drowned knight's set, from a flooded cave chamber, one piece in each cave of a region; wearing the whole set lets you breathe longer under water.
+- Deepiron versions of existing sets: the same looks, a better tier.
+
+Rings, charms and other wearables (alongside the twelve named roamers' rings)
+
+- Ring of the Echo: shows nearby monsters on the minimap as dim pings.
+- Glow-worm amulet: a faint light without a torch, leaving both hands free.
+- The miner's lucky stone: more ore from each vein.
+- Cursed relics: strong but with a cost, such as more damage while you bleed slowly, or more gold while monsters notice you sooner. A temple could lift the curse for a price.
+
+Lasting rewards (as with the collectibles and the temple's trade)
+
+- Fossils and relics, a collectible set per region; a full set traded at the temple gives lasting hit points or mana, as the existing collectibles do.
+- Ancient tablets that teach a recipe or a spell, using the existing recipe-item system.
+- Cave paintings: you find them, and they mark the region's other caves and secrets on the big map.
+- Angel Tokens, guaranteed from a cave's last boss.
+
+Things that link back to the open world
+
+- Treasure maps pointing at a ruin or a structure on the surface.
+- A contract target's lair: a contract beast that retreats underground, so you finish the contract in its cave.
+- A prisoner or lost traveller found alive deep inside, who becomes a quest or settles a reclaimed camp.
+- A waystone fragment that lets you fast-travel to that cave's mouth.
+- The tower's key: the cave's deepest room holds the key to the broken tower's top, with a lookout and a chest up there.
+
+Gold and trade goods
+
+- Raw gems and old coins of a dead kingdom, which merchants buy, and which a collector in one city pays double for.
+- Dragonglass or blackstone that only one city's smith works, giving you a reason to travel there.
+
+if there are no existing assets for these, generate any 2d tokens/icons/materials in the image server at: http://192.168.1.35:9090/
+then build the models for them in blender and import them into the game
+
+
+the city of heaven--
+
+the street lights in heaven do not provide light
+
+the signs for the buildings in heaven should be modern style signs instead of medieval looking
+
+heaven's large overhead map should have modern map symbols for its facilities instead of medieval symbols
+
+sleeping citizens in Heaven look like they're floating above the bed
+
+the building housing Kratos Aurorim Research, LLC in Heaven should be a much taller and more imposing 
+
+the multi-story buildings in heaven only have one room.  the buildings that look like they have 2-3 stories should
+have stairs and elevators that take someone to the second and third floors, as well as stairs to the ceiling.
+
+the skyscrapers and very tall office buildings can have the front door or entrances transport them to a new level that holds
+only the skyscraper's floors.  the contents should have office furniture and rooms that look like an office, as well as typical
+rooms that are in a modern building, like bathrooms, offices, cubicles, datacenter rooms, equipment closets, a cafeteria, etc.  
+if the player looks out the window, she should see the layout of the city, but not be able to interact with it.  this skyscraper
+level should be procedurally generated.
+
+the streets of heaven do not have typical traffic road markings like lane separators, sidewalk crossing, traffic lights, stop signs or other signs indicating where you are.  
+
+there are no parked vehicles in the city of heaven.
+
+the movement of vehicles in heaven is not natural, they follow each other instead of following a set route.  none of the vehicles have anyone driving them and there are never any passengers on the buses.  someone should at least be driving the vehicles in motion.  have each driver with a goal tree with a job to get to and prioritized goals that they are looking to achieve in their vehicles.  have the drivers follow typical traffic laws, traffic lights and signs.  buses in particular should have a route, and passengers that get on and off of the bus.
+
+the insides of shops in Heaven should look like typical shops with rows and shelves full of food and other things that can be purchased from the sales person manning that shop.
+
+the containers in heaven should be modern ones instead of medieval structures
+
+the scattered carts should be the modern equivalent of carts, like actual cars or trailers.
+
+the city of heaven should have typical 
+
+food, items and other things bought in the city of heaven should be modern in looks
+
+generate new icons, symbols, PBRs, etc in the image generation server and then model and texture those items in blender
+
+vary the Heaven dungeon with soldier variants, medics, differently colored/designed drones/ and differently colored/designed mechs from the Dystopia and Sci-fi packs.  also use aliens and monsters from the Aliens Warrior Pack
+
+draw the dome only from the outside
+
+the heaven dungeon's assets should be taken from any modern city building pack, looking like the inside of a modern building for the first two levels, eventually opening up into a wider open world that uses the Alien Planet, using its procedural content generation graphs to generate areas that can be explored by the player for Tiers 3-5.  also use props and buildings from the sci-fi city packs for Tiers 1-2.  
+
+after all changes have been done, measure current performance in FPS in all the cities, wilderness in all biomes, and record it in docs/performance.md with a time stamp under the heading AFTER LIST16 changes.
+
+break up these changes into appropriate pieces, formulate a plan to implement it, write that plan to an MD file in the docs directory, review the plan, then create a PR for reasonably sized portions of the plan and execute each PR in an order that would be most efficient and makes sense.  If there are opportunities to do parallel actions.  once the PR is merged, build the shipping binary.  do not stop until the last PR is finished in the plan MD file.
+

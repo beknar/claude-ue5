@@ -109,6 +109,10 @@ class CLAUDE_UE5_API URDGameInstance : public UGameInstance
 public:
 	/** the game instance of a world, or none (another game instance class: nothing is kept) */
 	static URDGameInstance* Of(const UObject* Ctx);
+	/** the list of 2026-11-22 (RDList16.cpp): a -RDPerf run (the packaged game's measures): its world and its towns from fixed seeds, so the
+	 *  runs before and after the list's changes stand in the same places */
+	static bool IsPerfRun16();
+	static constexpr int32 PerfSeed16 = 16016;
 
 	/** a new game for this hero: nothing carried, an empty purse and storage, no quests, a new town */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") void NewGame(FName Hero);
