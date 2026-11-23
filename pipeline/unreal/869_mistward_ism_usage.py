@@ -143,6 +143,30 @@ for m_ in ("/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewe
         mm = d.get_editor_property("material")
         if mm and mm.get_base_material():
             nskel += 1; note(mm); want(mm.get_base_material(), "used_with_skeletal_mesh")
+    # (the caves of the list of 2026-11-22 (945, RDCave16.cpp): the kit's tunnels and their floor strips are bent spline meshes, its
+    # dressing instanced meshes; its rooms, caps, torches and god rays plain components (the Nanite usage where Nanite))
+    if g_.get_editor_property("cave16"):
+        for t in g_.get_editor_property("cave_tunnels16"):
+            for tm in (t.get_editor_property("mesh"), t.get_editor_property("floor_mesh")):
+                if not tm: continue
+                nan = tm.get_editor_property("nanite_settings").enabled
+                for b in bases_of(tm):
+                    want(b, "used_with_spline_meshes")
+                    if nan: want(b, "used_with_nanite")
+        for d in g_.get_editor_property("cave_dress16"):
+            if d.get_editor_property("mesh"): use(d.get_editor_property("mesh"))
+        plain = [r.get_editor_property("mesh") for r in g_.get_editor_property("cave_rooms16")] + [m for r in g_.get_editor_property("cave_rooms16") for m in r.get_editor_property("roof")]
+        plain += [g_.get_editor_property(k) for k in ("cave_cap16", "cave_torch_mesh16", "cave_god_ray_mesh16")]
+        for pm in plain:
+            if pm and pm.get_editor_property("nanite_settings").enabled:
+                for b in bases_of(pm): want(b, "used_with_nanite")
+        gm = g_.get_editor_property("cave_god_ray_material16")
+        if gm and gm.get_base_material(): note(gm)
+# (materials the game puts on Nanite meshes in play, which no table names: the blood's spray and the moon (the list of 2026-11-22's
+# package: "missing usage flag Nanite! Default Material will be used in game")
+for mp in ("/Game/RandomDungeon/Combat/Materials/M_RDC_BloodSpray", "/Game/RandomDungeon/Sky/M_RD_SkyMoon"):
+    mm = unreal.load_asset(mp)
+    if mm and mm.get_base_material(): want(mm.get_base_material(), "used_with_nanite")
 # the menu: its placed meshes; Nanite ones need the Nanite usage
 open_map(MENU)
 scan_refs(MENU)

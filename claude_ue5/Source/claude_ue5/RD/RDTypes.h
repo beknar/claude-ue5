@@ -1709,6 +1709,23 @@ struct FRDCaveRoom16
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector GodRay = FVector::ZeroVector;
 	/** how often the planner draws it (the stairs: 0, laid only where the floor's height changes) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Weight = 1.f;
+	/** its wall-light points (the kit's Blueprint's Wall_Light_Parent children), in the room's frame, a torch's facing their yaw */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FTransform> Lights;
+};
+
+/** the list of 2026-11-22's caves, phase 9: one mesh of the kit's PCG dressing as 945 measured it on the example map: in tunnels
+ *  (instances a metre, on the floor or hanging from the roof, their distance from the line a share of the tunnel's half-width) or in
+ *  rooms (instances a walkable tile), their scale's range */
+USTRUCT(BlueprintType)
+struct FRDCaveDress16
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> Mesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bTunnel = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bRoof = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float PerUnit = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector2D Lateral = FVector2D(0.f, 0.5f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector2D Scale = FVector2D(1.f, 1.f);
 };
 
 /** one of the kit's tunnels: its mesh bent along a spline in pieces of Segment cm, each overlapping the next by Overlap (as the

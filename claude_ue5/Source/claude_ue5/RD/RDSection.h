@@ -753,7 +753,24 @@ private:
 	void CaveFurnish16(FRandomStream& R, int32 RI);
 	/** the kit's cap across a portal's tunnel into a shut tier, and its blocker */
 	void CaveSeal16(const FVector& Border, const FVector& Out, int32 Kind);
-	UPROPERTY(Transient) TArray<TObjectPtr<UPrimitiveComponent>> CaveComps16;
+	UPROPERTY(Transient) TArray<TObjectPtr<USceneComponent>> CaveComps16;
+	/** phase 9: the torches by the rooms' wall-light points and on the tunnels' walls, the god rays, then the kit's dressing scattered over
+	 *  the set's floors and roofs (traced: after the tunnels' pieces) */
+	void CaveDressSet16();
+	void CaveDressBegin16();
+	bool CaveDressStep16(double Budget);
+	FRandomStream CaveDressR16;
+	int32 CaveDressStage16 = 0, CaveDressI16 = 0, CaveDressJ16 = 0, CaveDressTorches16 = 0;
+	TMap<TObjectPtr<UStaticMesh>, TObjectPtr<UInstancedStaticMeshComponent>> CaveDressIsm16;
+	TMap<FString, int32> CaveDressLaid16;
+	TArray<TArray<FIntPoint>> CaveRoomTiles16;
+	void CaveTorch16(const FTransform& At);
+	TArray<FString> CaveDressLines16;
+	int32 CaveContainers16 = 0;
+public:
+	TArray<FString> CaveDressing16() const;
+	float CaveRoomFloor16(int32 RI) const { return CavePlaced16.IsValidIndex(RI) && CavePlaced16[RI].Kit >= 0 ? CavePlaced16[RI].Z : 0.f; }
+private:
 	static int64 EdgeKey(FIntPoint A, FIntPoint B);
 
 	void Plan(FRandomStream& R);

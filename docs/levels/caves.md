@@ -59,10 +59,27 @@ The user's list of 2026-11-22 ([improvements16.txt](../improvements16.txt); its 
 - **A set made in play** (`test_c16r5.json`, PR #115's review): the start set cleared (tier 2 open), she stood by its east border and the game made the set beyond as she would meet it: its plan 293 ms in all, a try a frame (the longest step 116 ms), its shell 1,020 ms over 53 frames, the worst frame 135 ms and only that one over 100 ms (all at once it had been 3 s in one frame: a bent piece's collision is cooked as it is made, from the kit's 20,000 to 30,000 triangles; `945 collide`'s copies cook a reduced level of detail, a tenth). A restart keeps the start set's 37 lights (each had added another set).
 - The plan over six seeds of the start set: every one found a plan within 5 tries with no room cut off, 3 or 4 portals of 4.
 
+## Dressed (the list of 2026-11-22, phase 9)
+
+- **The kit's PCG dressing, scattered by the game**: the kit's PCG graphs run on its own spline Blueprints (a spline component and the Blueprint's variables), which the game's tunnels (bent meshes laid by the C++) do not have, and running PCG in a packaged game would need the plugin enabled and its graphs cooked. So `945 dressing` measured what the graphs lay on the example map, mesh by mesh, and the game scatters the same (`CaveDressSet16`, traced onto the laid floors and roofs, none colliding, drawn to 60 m): in tunnels the moss rocks (1.0 a metre), small rock clusters (0.25), four shrub clusters, and the sorrel that hangs from the roofs (eleven meshes, 88 a metre at the kit's density, laid at 15 %: 12,000 a set otherwise); in rooms the small rocks (1.07 a walkable tile), the moss rocks (0.4) and the shrub clusters.
+- **Light**: the kit's wall torch (its mesh, its fire's effect `NS_2DGasIntro` and a warm light that flickers as the castle's torches do, on the maps as a torch) on every wall-light point of a room (its Blueprint's `Wall_Light_Parent` children: 12 in the large room, 9 medium, 6 small, 2 on the stairs) and on a tunnel's wall every 20 m, the sides in turn (the wall found by a ray across, the torch facing back along its normal); the kit's god ray (its plane and animated material) under each room's roof hole with a cool light down the shaft. All laid with the shell in play and taken down with it.
+- **Containers**: one to three of the castle's (a chest first, then barrels and crates) on a room's floor tiles by its walls, facing the room's middle, none within 2 tiles of an opening (by an opening one blocked the only way in).
+- **The boss**: a tier's boss stands in the deepest explored room (its floor the lowest, then the farthest from her).
+- **Not built here**: the rubble across side tunnels comes with the miner's pick (phase 12), which clears it: laid now it would only shut ways; the way in and out is the castle's (the start room's teleporter; the mouth under the tower), the maps the tiles'.
+- **Stages**: `945 dressing` (the densities, the rooms' light points, the torch and god ray into `hyper16.json`), then `945 level`; `869` gives the kit's tunnel and floor materials the spline-mesh usage and the dressing the instanced-mesh one (none was missing: the kit bends its own tunnels).
+
+### Measured (phase 9)
+
+- **The package** (Development, a full cook of 10,827 packages after the cook's memory floor came down to 4 GB: at 6 GB it stalled 6 packages short): `caves` and `cavetower` ran (90 and 180 s, no crash, 5.0 and 3.7 GB); its log named two materials the game puts on Nanite meshes in play without the Nanite usage (the blood's spray, the moon): `869` sets them now.
+
+- `868 cave16,cave16chase,cave15 -lv caves` (`test_c9c.json`, after PR #116's review): the start set's 36 torches in its rooms and 31 on its tunnels' walls, 5 god rays, the scattered meshes (99 moss rocks, 266 small rock clusters, 32 shrub clusters, about 8,700 sorrel), 8 containers; every room still reached on foot, no hole, no blockage; the start set's 72 lights before and after a restart; the boss's pick the room 4.28 m lower than the others; a set made in play as she nears it (plan 163 ms a try a frame, the longest step 88 ms; its shell 940 ms over 43 frames), the worst frame 105 ms; provoked, a rat came from its room down a tunnel through a 31-degree bend to her (`cave16chase`, `test_c9d.json`: 55 s, 50.8 m walked for 46.0 m straight, never 1.8 m off the tunnel's line); the castle's rules as before (`cave15`).
+- Pictures: the large room lit by its torches, the scattered rocks on its floor; a tunnel with its sorrel and rocks.
+
 ## Limits
 
 - (Before the list of 2026-11-22) the rooms were the castle's rooms in rock; with the planner they are the kit's (above).
-- Phase 8's rooms are bare: the dressing (the kit's PCG rocks and plants, torches, god rays), the containers and the boss's room come with phase 9; a room's light is one fill light, a tunnel's one every 20 m.
+- The dressing is the game's scatter of the kit's meshes, not the kit's PCG graphs (above); the hanging sorrel at 15 % of the kit's density.
+- The torches burn the castle's torch flame: the kit's own (`NS_2DGasIntro`) needs the NiagaraFluids plugin, which the project does not have (the package's cook said so).
 - A portal that finds no tunnel is capped: a set has 3 or 4 of its 4 (six seeds), so a neighbour can be reached by fewer ways than its sides.
 - The kit's stairs are laid only where they and both their tunnels fit whole, else a tunnel slopes between levels; the measured start set has none (how often a set has stairs is not measured yet).
 - Every tower's cave has the same first hall (the saved start section); the sets beyond it are new each visit, as the castle's are.

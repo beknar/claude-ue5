@@ -1,0 +1,25 @@
+{
+ "tag": "c9d",
+ "plan": [
+  "cave16chase"
+ ],
+ "level": "caves",
+ "steps": [
+  {
+   "step": "cave16chase",
+   "ok": true,
+   "monsters": 2,
+   "monster": "Rat",
+   "room": 4,
+   "bend_deg": 31,
+   "reached_s": 55.4,
+   "walked_m": 50.8,
+   "straight_m": 46.0,
+   "worst_off_line_m": 1.8
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}

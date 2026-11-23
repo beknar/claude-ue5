@@ -2046,6 +2046,33 @@ public:
 	/** a fill light over each room (phase 8's: the kit's torches and god rays come with the dressing) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float CaveRoomLight16 = 3000.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FLinearColor CaveLightColor16 = FLinearColor(0.75f, 0.85f, 1.f);
+	// ---- phase 9: the caves dressed (RDCave16.cpp)
+	/** the kit's PCG dressing as measured (945 dressing, level), scattered by the game in play over each set (traced onto its floors and
+	 *  roofs) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FRDCaveDress16> CaveDress16;
+	/** the kit's wall torch: its mesh, its fire's effect and the fire's and light's places on it (BP_WallTorch's), the light's candelas;
+	 *  a torch on every wall-light point of a room and one on a tunnel's wall every CaveTunnelTorchEvery16 cm, sides taken in turn */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TObjectPtr<UStaticMesh> CaveTorchMesh16 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TObjectPtr<UNiagaraSystem> CaveTorchFire16 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FVector CaveTorchFireAt16 = FVector(0, -29, 109);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FVector CaveTorchLightAt16 = FVector(0, -45, 80);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float CaveTorchCandelas16 = 250.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FLinearColor CaveTorchColor16 = FLinearColor(1.f, 0.62f, 0.3f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float CaveTunnelTorchEvery16 = 2000.f;
+	/** the kit's god ray (its plane and animated material) under each room's roof hole, turned as the example's sun; a cool light down
+	 *  the shaft */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TObjectPtr<UStaticMesh> CaveGodRayMesh16 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TObjectPtr<UMaterialInterface> CaveGodRayMaterial16 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FRotator CaveGodRayTurn16 = FRotator(-48.f, -36.f, 0.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FVector CaveGodRayScale16 = FVector(1.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float CaveGodRayCandelas16 = 1500.f;
+	/** containers a room by its walls (the castle's chest, barrel and crate pieces): X to Y */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FIntPoint CaveContainers16 = FIntPoint(1, 3);
+	/** a test's: the set's dressing, "torches|<n>", "godrays|<n>", "dress|<mesh>|<instances>", "containers|<n>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetCaveDressing16(FIntPoint Section) const;
+	/** a test's: where a tier's boss would stand now ("<section x>|<section y>|<room>|<floor z>|<her distance>") and the rooms it was chosen
+	 *  from (same lines after "cand|"); the caves take the deepest room (its floor lowest, then the farthest from her) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetBossRoomPick16(int32 Tier) const;
 	/** a test's: the set's pieces, "room|<index>|<kind>|x|y|z|yaw|<tiles>", "tunnel|<kind>|<its room index>|<from>|<to>|<length cm>|<pieces>|
 	 *  x,y,z;x,y,z;..." (the tunnel's centreline every 2 m on its floor; from / to a room's index, a portal's -1 - its index) and
 	 *  "cap|x|y|z|yaw" */
@@ -2854,6 +2881,10 @@ private:
 	bool PlaceBoss(int32 Tier);
 	bool PlaceRingGuard(int32 Tier);
 	/** an explored room of a tier to set something in (not the one she is in, generated now); false: none */
+	/** a room a tier's boss or guards may stand in (explored, not hers, room to stand): its set, its index, her distance, its floor's
+	 *  height in the world */
+	struct FExploredRoom { ARDSection* S = nullptr; int32 Room = -1; float D = 0.f; float Z = 0.f; };
+	void ExploredRooms(int32 Tier, TArray<FExploredRoom>& Out) const;
 	bool PickExploredRoom(int32 Tier, int32 Salt, ARDSection*& OutSection, int32& OutRoom) const;
 	UPROPERTY(VisibleAnywhere, Category = "RandomDungeon|Reveal") TObjectPtr<UPostProcessComponent> RevealPost;
 	UPROPERTY(Transient) TObjectPtr<UMaterialInstanceDynamic> RevealMID;
