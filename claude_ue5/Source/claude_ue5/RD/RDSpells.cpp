@@ -150,7 +150,8 @@ void URDCombatComponent::ApplyMonsterAbility(ERDMonsterAbility Ability, float Po
 	{
 	case ERDMonsterAbility::Poison:
 		if (Now >= PoisonUntil) SetMessage(TEXT("You are poisoned"));
-		PoisonDps = FMath::Max(Now < PoisonUntil ? PoisonDps : 0.f, Blow * 0.10f * Power);
+		// (the list of 2026-11-22's caves: a grave-moss draught guards against it)
+		PoisonDps = FMath::Max(Now < PoisonUntil ? PoisonDps : 0.f, Blow * 0.10f * Power * (1.f - FMath::Clamp(GetEffectMax16(ERDItemKind::PoisonGuard), 0.f, 0.9f)));
 		PoisonUntil = FMath::Max(PoisonUntil, Now + 3.f + Power);
 		break;
 	case ERDMonsterAbility::Weaken:

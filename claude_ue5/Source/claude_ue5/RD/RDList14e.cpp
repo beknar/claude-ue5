@@ -79,6 +79,9 @@ static ERDItemKind RDBuffKind14(FName B, bool& bOk)
 	if (B == TEXT("regen")) return ERDItemKind::Food;
 	if (B == TEXT("warm")) return ERDItemKind::Warmth;          // (the list of 2026-11-20's seventeenth phase)
 	if (B == TEXT("cool")) return ERDItemKind::Cooling;
+	if (B == TEXT("darksight")) return ERDItemKind::Darksight;          // (the list of 2026-11-22's caves)
+	if (B == TEXT("poisonres")) return ERDItemKind::PoisonGuard;
+	if (B == TEXT("oil")) return ERDItemKind::LampOil;
 	bOk = false; return ERDItemKind::Food;
 }
 
@@ -91,6 +94,9 @@ FString URDCombatComponent::BuffWords15(FName Kind, float Amount, float MaxHealt
 	if (Kind == TEXT("speed")) return FString::Printf(TEXT("you move %.0f%% faster"), P);
 	if (Kind == TEXT("warm")) return FString::Printf(TEXT("the cold comes on %.0f%% slower"), P);
 	if (Kind == TEXT("cool")) return FString::Printf(TEXT("the heat comes on %.0f%% slower"), P);
+	if (Kind == TEXT("darksight")) return FString::Printf(TEXT("you see %.0f m without a torch"), Amount);
+	if (Kind == TEXT("poisonres")) return FString::Printf(TEXT("poison hurts you %.0f%% less"), P);
+	if (Kind == TEXT("oil")) return FString::Printf(TEXT("your torch and ankh burn %.0f times as long"), 1.f + Amount);
 	return FString::Printf(TEXT("%.1f HP a second"), Amount * MaxHealth);
 }
 
@@ -105,6 +111,9 @@ FString URDCombatComponent::EffectWords15(const FEffect& E, float MaxHealth, boo
 	case ERDItemKind::Weapon: return bChip ? FString::Printf(TEXT("MIGHT +%.0f%%  %.0fs"), P, L) : FString::Printf(TEXT("Your blows %.0f%% more: %.0f s left"), P, L);
 	case ERDItemKind::Warmth: return bChip ? FString::Printf(TEXT("WARM %.0f%%  %.0fs"), P, L) : FString::Printf(TEXT("Warm: the cold %.0f%% slower: %.0f s left"), P, L);
 	case ERDItemKind::Cooling: return bChip ? FString::Printf(TEXT("COOL %.0f%%  %.0fs"), P, L) : FString::Printf(TEXT("Cool: the heat %.0f%% slower: %.0f s left"), P, L);
+	case ERDItemKind::Darksight: return bChip ? FString::Printf(TEXT("DARKSIGHT %.0fm  %.0fs"), E.Amount, L) : FString::Printf(TEXT("Darksight: you see %.0f m without a torch: %.0f s left"), E.Amount, L);
+	case ERDItemKind::PoisonGuard: return bChip ? FString::Printf(TEXT("ANTIVENOM %.0f%%  %.0fs"), P, L) : FString::Printf(TEXT("Poison hurts you %.0f%% less: %.0f s left"), P, L);
+	case ERDItemKind::LampOil: return bChip ? FString::Printf(TEXT("OIL x%.0f  %.0fs"), 1.f + E.Amount, L) : FString::Printf(TEXT("Oiled: your torch and ankh burn %.0f times as long: %.0f s left"), 1.f + E.Amount, L);
 	default: return bChip ? FString::Printf(TEXT("REGEN +%.1f/s  %.0fs"), E.Amount * MaxHealth, L) : FString::Printf(TEXT("Regenerating %.1f HP/s: %.0f s left"), E.Amount * MaxHealth, L);
 	}
 }
@@ -117,7 +126,7 @@ FName URDCombatComponent::EffectIcon15(const FEffect& E) const
 	case ERDItemKind::Speed: return TEXT("chip_speed");
 	case ERDItemKind::Armour: return TEXT("elixir_ironhide");
 	case ERDItemKind::Weapon: return TEXT("elixir_might");
-	case ERDItemKind::Warmth: case ERDItemKind::Cooling:
+	case ERDItemKind::Warmth: case ERDItemKind::Cooling: case ERDItemKind::Darksight: case ERDItemKind::PoisonGuard: case ERDItemKind::LampOil:
 		if (Generator) { const int32 Ix = Generator->FindItem(E.Item); if (Ix >= 0 && !Generator->Items[Ix].Icon.IsNone()) return Generator->Items[Ix].Icon; }
 		return TEXT("chip_regen");
 	default: return TEXT("chip_regen");

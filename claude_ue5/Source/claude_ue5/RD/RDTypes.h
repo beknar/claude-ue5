@@ -829,7 +829,12 @@ enum class ERDItemKind : uint8
 	/** the list of 2026-11-20's seventeenth phase: a buff's kind among her effects only (a warm meal's: the cold builds up more slowly;
 	 *  a cool drink's: the heat does), never an item's own kind */
 	Warmth UMETA(Hidden),
-	Cooling UMETA(Hidden)
+	Cooling UMETA(Hidden),
+	/** the list of 2026-11-22's caves (phase 10): buffs' kinds among her effects only: darksight (a dim light of Amount metres on her,
+	 *  no torch needed), poison guarded (a poison's blows Amount less), lamp oil (the torch and ankh burn 1 + Amount times as long) */
+	Darksight UMETA(Hidden),
+	PoisonGuard UMETA(Hidden),
+	LampOil UMETA(Hidden)
 };
 
 /** the list of 2026-11-08b's eighth phase (913): the ridable horse: its meshes (her bay, the stable's grey), its clips (made in
@@ -1748,4 +1753,31 @@ struct FRDCaveTunnel16
 	 *  of the same size bent along the same curve, widened to FloorWidth (cm) so it runs under the walls' feet */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> FloorMesh = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float FloorWidth = 800.f;
+};
+/** the list of 2026-11-22's caves (phase 10): a vein or a growth laid in a cave's rooms (on a wall or the floor), its mesh, and the
+ *  harvest pile before it (Item, Count.X to Count.Y); PerRoom.X to PerRoom.Y a room; a region's only if Region is set (the cave's
+ *  region by its tower's biome: CaveRegions16) */
+USTRUCT(BlueprintType)
+struct FRDCaveNode16
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> Mesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UMaterialInterface> Material = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector2D Scale = FVector2D(1.f, 1.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Item;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FIntPoint Count = FIntPoint(1, 2);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FIntPoint PerRoom = FIntPoint(0, 1);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bWall = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Region;
+};
+
+/** the list of 2026-11-22's caves (phase 10): a region of the land for its caves: the biomes its towers stand in, and the items found
+ *  only in its caves (a geode's colour, frost quartz in the cold, sun-glass in the heat) */
+USTRUCT(BlueprintType)
+struct FRDCaveRegion16
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Biomes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FName> Items;
 };

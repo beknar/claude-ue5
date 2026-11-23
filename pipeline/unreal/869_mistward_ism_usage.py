@@ -157,6 +157,7 @@ for m_ in ("/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewe
             if d.get_editor_property("mesh"): use(d.get_editor_property("mesh"))
         plain = [r.get_editor_property("mesh") for r in g_.get_editor_property("cave_rooms16")] + [m for r in g_.get_editor_property("cave_rooms16") for m in r.get_editor_property("roof")]
         plain += [g_.get_editor_property(k) for k in ("cave_cap16", "cave_torch_mesh16", "cave_god_ray_mesh16")]
+        plain += [n.get_editor_property("mesh") for n in g_.get_editor_property("cave_nodes16")]          # (phase 10's veins and growths)
         for pm in plain:
             if pm and pm.get_editor_property("nanite_settings").enabled:
                 for b in bases_of(pm): want(b, "used_with_nanite")

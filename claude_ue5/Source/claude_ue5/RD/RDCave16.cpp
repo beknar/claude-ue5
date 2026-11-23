@@ -935,6 +935,7 @@ bool ARDSection::CaveDressStep16(double Budget)
 		if (CaveDressI16 >= Generator->CaveDress16.Num())
 		{
 			for (const TPair<FString, int32>& L : CaveDressLaid16) CaveDressLines16.Add(FString::Printf(TEXT("dress|%s|%d"), *L.Key, L.Value));
+			CaveNodesSet16();          // (phase 10: the veins and growths, traced onto the laid shell)
 			return true;
 		}
 		const FRDCaveDress16& Dr = Generator->CaveDress16[CaveDressI16];

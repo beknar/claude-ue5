@@ -556,7 +556,9 @@ TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) co
 	const int32 Tier = TierOf(Section);
 	// (the list of 2026-11-16's sixth phase: recipes are drawn apart, below, so the draw's sums and every pick stay what they were
 	// (PR #83's review); what only a found recipe makes is never found made)
-	auto InTier = [this, Tier](const FRDItemDef& It) { return ItemOfTier(It, Tier) && It.Kind != ERDItemKind::Recipe && !(bRecipes14 && IsLockedRecipe14(It.Name)); };
+	// (the list of 2026-11-22's caves: their own items only in a cave, a cave's gear from them alone (CaveItemAllowed16); outside the caves
+	// they are out of the sums and picks both, so a dungeon's draws are what they were)
+	auto InTier = [this, Tier](const FRDItemDef& It) { return ItemOfTier(It, Tier) && It.Kind != ERDItemKind::Recipe && !(bRecipes14 && IsLockedRecipe14(It.Name)) && CaveItemAllowed16(It); };
 	// what is put in the start room's containers: one to each in turn
 	if (StartRoomItems.Num() > 0 && IsStartSection(Section))
 	{
@@ -1487,6 +1489,7 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 		It.RemoveCurrent();
 	}
 	Queue.Reset(); Building = nullptr; MapData.Reset(); HitTexts.Reset();
+	CaveNodesLaid16.Reset();          // (the list of 2026-11-22's caves: a new run lays the veins' and growths' piles again (the old ones go with the piles))
 	if (Blood) Blood->Clear();
 	SoundCounts.Reset(); LastSoundPick.Reset(); SoundR.Initialize(RDSoundSeed);
 	StopMusic();
