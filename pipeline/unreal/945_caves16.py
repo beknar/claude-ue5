@@ -412,6 +412,40 @@ def flood_water(fl):
     return mi
 
 
+_PAINTING = {}
+def painting_decal(pt):
+    """(made once a run: every map points at the same material)
+    the cave painting's decal: its texture (cut from the icon by cave_painting_decal.py) and a deferred decal material of our own,
+    its colour the texture's, its opacity the texture's alpha (as 798's blood decal, the Substrate blend that says how it blends)"""
+    import importlib
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    ui_texture = importlib.import_module("ui_tex").ui_texture
+    if _PAINTING.get("m"): return _PAINTING["m"]
+    tex = ui_texture(os.path.join(SA, pt["texture"]), "/Game/RandomDungeon/Caves16", "T_Cave16_PaintingDecal")
+    mel = unreal.MaterialEditingLibrary
+    path = "/Game/RandomDungeon/Caves16/M_Cave16_Painting"
+    if unreal.EditorAssetLibrary.does_asset_exist(path): unreal.EditorAssetLibrary.delete_asset(path)
+    m = unreal.AssetToolsHelpers.get_asset_tools().create_asset("M_Cave16_Painting", "/Game/RandomDungeon/Caves16", unreal.Material, unreal.MaterialFactoryNew())
+    m.set_editor_property("material_domain", unreal.MaterialDomain.MD_DEFERRED_DECAL)
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT_GREY_TRANSMITTANCE if hasattr(unreal.BlendMode, "BLEND_TRANSLUCENT_GREY_TRANSMITTANCE") else unreal.BlendMode.BLEND_TRANSLUCENT)
+    try: m.set_editor_property("material_decal_response", unreal.MaterialDecalResponse.MDR_COLOR_NORMAL_ROUGHNESS)
+    except Exception: pass
+    t = mel.create_material_expression(m, unreal.MaterialExpressionTextureSampleParameter2D, -500, 0)
+    t.set_editor_property("parameter_name", "Paint"); t.set_editor_property("texture", tex)
+    a = mel.create_material_expression(m, unreal.MaterialExpressionScalarParameter, -500, 260)
+    a.set_editor_property("parameter_name", "Alpha"); a.set_editor_property("default_value", 0.85)
+    mul = mel.create_material_expression(m, unreal.MaterialExpressionMultiply, -200, 200)
+    assert mel.connect_material_expressions(t, "A", mul, "A") and mel.connect_material_expressions(a, "", mul, "B")
+    r = mel.create_material_expression(m, unreal.MaterialExpressionConstant, -200, 340); r.set_editor_property("r", 0.85)
+    assert mel.connect_material_property(t, "RGB", unreal.MaterialProperty.MP_BASE_COLOR)
+    assert mel.connect_material_property(mul, "", unreal.MaterialProperty.MP_OPACITY)
+    assert mel.connect_material_property(r, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    print("945 painting: the decal material's last compile follows")
+    mel.recompile_material(m); unreal.EditorAssetLibrary.save_loaded_asset(m, False)
+    _PAINTING["m"] = m
+    return m
+
+
 def cave_armour(its, P, missing, mine_names=()):
     """phase 13's armour on a map: (items, recipes, looks, perks, their names), each band of its like's that the map has"""
     A = [a for p_ in P for a in p_.get("armour", [])]
@@ -465,7 +499,8 @@ def items():
     regions = [r for p in P for r in p.get("regions", [])]
     nodes = [n for p in P for n in p.get("nodes", [])]
     def fn(g):
-        its = [i for i in g.get_editor_property("items") if str(i.name) not in mine]
+        tablet_names = []
+        its = [i for i in g.get_editor_property("items") if str(i.name) not in mine and not str(i.name).startswith("Ancient Tablet of ")]
         recs = [r for r in g.get_editor_property("recipes") if str(r.item) not in mine]
         have = {str(i.name) for i in its} | mine
         missing = []
@@ -473,6 +508,8 @@ def items():
             like = next((i for i in its if str(i.name) == x["like"]), None)
             # (a map without the 'like' (not every map has every material): the first of the item's kind there)
             if not like: like = next((i for i in its if str(i.kind).endswith("." + ITEM_KINDS[x["kind"]]) or ITEM_KINDS[x["kind"]] in str(i.kind)), None)
+            # (phase 15: a tablet on a map with no recipe items: any item to copy, its kind, picture, weight and words set below)
+            if not like and x.get("teaches") and its: like = its[0]
             if not like: missing.append(f"no {x['like']} or any {x['kind']} to copy for {x['name']}"); continue
             it = unreal.RDItemDef()
             for k in ("kind", "amount", "seconds", "weight", "icon", "looks", "tiers", "found_max", "durability", "armour_weight", "armour_type"):
@@ -486,6 +523,7 @@ def items():
             if "found_max" in x: it.set_editor_property("found_max", int(x["found_max"]))
             if x.get("repairs"): it.set_editor_property("armour_type", x["repairs"])
             if x.get("ring_kind"): it.set_editor_property("ring_kind", getattr(unreal.RDRingKind, x["ring_kind"]))          # (phase 14: the Echo, the lucky stone, a charm)
+            if x.get("teaches"): it.set_editor_property("teaches", unreal.Name(x["teaches"]))          # (phase 15: a tablet, a recipe item)
             if x.get("buff"):
                 it.set_editor_property("buff_kind", unreal.Name(x["buff"][0])); it.set_editor_property("buff_amount", float(x["buff"][1])); it.set_editor_property("buff_seconds", float(x["buff"][2]))
             else:
@@ -517,6 +555,21 @@ def items():
                 if q is not None: q.any_of = list(q.any_of) + [unreal.Name(n) for n in inks]
             r.parts = ps; recs2.append(r)
         recs = recs2
+        # (phase 15: the spell tablets, copies of the highest tomes of that many spells)
+        nt = sum(p_.get("spell_tablets", 0) for p_ in P)
+        if nt:
+            tomes = [i for i in its if "TOME" in str(i.kind) and str(i.spell) not in ("None", "") and not str(i.name).startswith("Ancient Tablet")]
+            tomes.sort(key=lambda i: -max(list(i.tiers) or [0]))
+            seen = set(); picked = []
+            for t in tomes:
+                if str(t.spell) in seen: continue
+                seen.add(str(t.spell)); picked.append(t)
+                if len(picked) >= nt: break
+            for t in picked:
+                it = unreal.RDItemDef(); it.import_text(t.export_text())
+                nm = f"Ancient Tablet of {t.spell}"; it.set_editor_property("name", nm); it.set_editor_property("icon", unreal.Name("cave_ancient_tablet"))
+                it.set_editor_property("weight", 0.08); it.set_editor_property("looks", f"A stone tablet cut by the old people: read it to learn {t.spell}.")
+                its.append(it); mine.add(nm); tablet_names.append(nm)
         # (phase 12: the caves' weapons, copied band by band from the table's)
         wits, looks, mends, lightless, breakers, lost, wnames = cave_weapons(its, P, missing)
         # (phase 13: the caves' armour, band by band; their recipes (the deepiron sets', the drowned knight's); their looks with the weapons')
@@ -556,14 +609,27 @@ def items():
             for n, (stat, amt) in p_.get("sockets", {}).items():
                 e = unreal.RDSocket16(); e.set_editor_property("stat", stat); e.set_editor_property("amount", float(amt)); sk[unreal.Name(n)] = e
         g.set_editor_property("socket_stones16", sk)
-        g.set_editor_property("cave_items16", [unreal.Name(x["name"]) for x in X if x.get("cave")] + [unreal.Name(n) for n in wnames])
+        g.set_editor_property("cave_items16", [unreal.Name(x["name"]) for x in X if x.get("cave")] + [unreal.Name(n) for n in wnames] + [unreal.Name(n) for n in tablet_names])
         # (made at the anvil whatever their kind: a recipe with the anvil's station '' on a kind the tables would send to the
         # alchemist (the linings, kind HEALING for their buff; PR #117's review))
         g.set_editor_property("anvil_made16", [unreal.Name(x["name"]) for x in X if x.get("recipe") and x["recipe"][0] == "" and x["kind"] in ("HEALING", "MANA", "SPEED")])
         rg = []
         for r in regions:
             e = unreal.RDCaveRegion16(); e.set_editor_property("name", r["name"]); e.set_editor_property("biomes", r["biomes"]); e.set_editor_property("items", [unreal.Name(i) for i in r["items"]]); rg.append(e)
+        # (phase 15: a region's own things added to it (its fossils))
+        for p_ in P:
+            for rn, extra in p_.get("region_items", {}).items():
+                for e in rg:
+                    if str(e.get_editor_property("name")) == rn: e.set_editor_property("items", list(e.get_editor_property("items")) + [unreal.Name(n) for n in extra])
         g.set_editor_property("cave_regions16", rg)
+        g.set_editor_property("fossil_sets16", [l for p_ in P for l in p_.get("fossil_sets", [])])
+        fa = next((p_["fossil_amber"] for p_ in P if p_.get("fossil_amber")), None)
+        if fa: g.set_editor_property("fossil_amber16", fa)
+        fg = next((p_["fossil_gain"] for p_ in P if p_.get("fossil_gain")), None)
+        if fg: g.set_editor_property("fossil_gain16", int(fg))
+        pt = next((p_["painting"] for p_ in P if p_.get("painting")), None)
+        if pt:
+            g.set_editor_property("painting_decal16", painting_decal(pt)); g.set_editor_property("painting_share16", float(pt["share"]))
         nd = []
         for n in nodes:
             m = unreal.load_asset(n["mesh"])

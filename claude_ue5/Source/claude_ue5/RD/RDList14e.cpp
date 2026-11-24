@@ -53,9 +53,10 @@ FName ARDDungeonGenerator::RecipeOfTier14(int32 GameTier, FRandomStream& R) cons
 {
 	// (a recipe item whose lowest tier is the game's tier or below, by the items' weights)
 	float Sum = 0.f;
-	auto Ok = [GameTier](const FRDItemDef& It)
+	// (the list of 2026-11-22's caves: the caves' tablets are drawn in a cave alone (CaveTablet16); out of the sums here)
+	auto Ok = [this, GameTier](const FRDItemDef& It)
 	{
-		if (It.Kind != ERDItemKind::Recipe) return false;
+		if (It.Kind != ERDItemKind::Recipe || CaveItems16.Contains(It.Name)) return false;
 		int32 Lo = MAX_int32; for (const int32 T : It.Tiers) Lo = FMath::Min(Lo, T);
 		return It.Tiers.Num() == 0 || Lo <= GameTier;
 	};

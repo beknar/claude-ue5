@@ -8376,6 +8376,169 @@ def step_cave16charms():
         except Exception: pass
 STEPS.update({"cave16charms": step_cave16charms})
 
+def cave16relics_inner(res):
+    """the list of 2026-11-22's caves, phase 15: rewards that last. Measured: a cave painting laid on a set's wall (its decal component
+    with the painting's material), F's prompt before it names it and F studies it (the studied line names the cave's region, waiting
+    for the wilds); a picture of it. The cold lands' fossil set: whole, traded at the temple's line for 15 hit points' top for good;
+    two pieces and amber traded for an Angel Token (the amber spent); one piece alone refused (nothing taken). The tablets: drawn in
+    the caves' containers (LootListOf over the sets made), each recipe tablet's recipe locked until read and known after; as the
+    Mage a spell tablet read teaches its spell. A cave's last boss: slain, an Angel Token lies where it fell (CaveTokens16), taken"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    gi = GS.get_game_instance(G["w"]); res["lasting0"] = gi.get_editor_property("lasting_health15")
+    g.set_cave_biome16("glacial"); res["region"] = str(g.get_cave_region16())
+    T = json.load(open(os.path.join(SA, "caves", "treasure16.json"), encoding="utf-8"))["phase15"]
+    items = {str(i.name): i for i in g.get_editor_property("items")}
+    tablets = [n for n in items if n.startswith("Ancient Tablet")]
+    res["tablets"] = {n: (str(items[n].kind).split(".")[-1].split(":")[0], str(items[n].teaches), str(items[n].spell)) for n in tablets}
+    res["fossils_known"] = all(n in items for n in T["region_items"]["cold"])
+    pawn = G["pawn"]; at0 = pawn.get_actor_location(); kill_all_near(at0, 9000.0); yield from wait(0.5)
+    # ---- the paintings: the start set and its ring made; their lines
+    S0 = I2(0, 0); sets = [S0] + [I2(x, y) for x in range(-1, 2) for y in range(-1, 2) if not (x == 0 and y == 0)]
+    g.debug_clear_section(S0, 0, g.get_start_room_center()); yield from wait(0.5)
+    for sc in sets[1:]:
+        g.generate_section_now(sc); yield from built(sc)
+    pl = [str(l).split("|") for l in g.get_paintings16() if str(l).startswith("painting|")]
+    res["paintings"] = [[int(q[1]), int(q[2])] for q in pl]
+    res["sets_made"] = sum(1 for sc in sets if g.get_section(sc))
+    # (the tablets in the containers of the sets made, over six session seeds (the draws' streams are the seed's); the seed put back)
+    drawn = {}; holding = 0; seed0 = g.get_editor_property("session_seed")
+    for sd in range(seed0, seed0 + 6):
+        g.set_session_seed(sd)
+        for sc in sets:
+            S_ = g.get_section(sc)
+            if not S_: continue
+            for i in range(S_.get_num_containers()):
+                L_ = [str(x) for x in g.loot_list_of(sc, i)]
+                if L_: holding += 1
+                for x in L_:
+                    if x.startswith("Ancient Tablet"): drawn[x] = drawn.get(x, 0) + 1
+    g.set_session_seed(seed0)
+    res["tablets_drawn"] = drawn; res["containers_with_loot"] = holding
+    res["tablet_share"] = round(sum(drawn.values()) / max(holding, 1), 3)
+    # ---- study the first painting
+    if pl:
+        q = pl[0]; P_ = V(float(q[3]), float(q[4]), float(q[5])); N_ = V(float(q[6]), float(q[7]), 0.0)
+        Sx = g.get_section(I2(int(q[1]), int(q[2])))
+        decals = [d for d in Sx.get_components_by_class(unreal.DecalComponent)] if Sx else []
+        res["decal"] = [str(d.get_decal_material().get_name()) if d.get_decal_material() else None for d in decals]
+        yaw = math.degrees(math.atan2(-N_.y, -N_.x))
+        # (spots before it, out from the wall and to each side, until the prompt names it: a vein's pile at the wall's foot is nearer
+        # from some (the nearer takes F))
+        T_ = V(-N_.y, N_.x, 0.0); tries = []
+        for out_, side_ in ((150.0, 0.0), (120.0, 90.0), (120.0, -90.0), (200.0, 0.0), (100.0, 150.0), (100.0, -150.0)):
+            X_ = V(P_.x + N_.x * out_ + T_.x * side_, P_.y + N_.y * out_ + T_.y * side_, P_.z)
+            fz = floor_z(X_.x, X_.y, top=P_.z + 200.0, bottom=P_.z - 600.0)
+            put(X_, yaw=yaw, z=(fz if fz is not None else P_.z - 170.0) + 100.0); yield from wait(0.8)
+            res["prompt"] = str(g.describe_nearest(pawn.get_actor_location(), 300.0)); tries.append([out_, side_, res["prompt"]])
+            if "painting" in res["prompt"]: break
+        res["prompt_tries"] = tries
+        res["f"] = str(g.interact_nearest(pawn.get_actor_location(), 300.0)); yield from wait(0.3)
+        res["studied"] = [str(l) for l in g.get_paintings16() if str(l).startswith("studied|")]
+        res["message"] = str(c.message)
+        # (its picture from 3.5 m, her body hidden)
+        fz2 = floor_z(P_.x + N_.x * 350.0, P_.y + N_.y * 350.0, top=P_.z + 200.0, bottom=P_.z - 600.0)
+        put(V(P_.x + N_.x * 350.0, P_.y + N_.y * 350.0, P_.z), yaw=yaw, z=(fz2 if fz2 is not None else P_.z - 170.0) + 100.0)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-5, yaw=yaw))
+        pawn.set_actor_hidden_in_game(True); yield from wait(1.2); shot("cave16_painting", "1280x720"); yield from rwait(1.0)
+        # (and close: her place 0.9 m out, the camera's boom behind her, level with the painting)
+        fz3 = floor_z(P_.x + N_.x * 90.0, P_.y + N_.y * 90.0, top=P_.z + 200.0, bottom=P_.z - 600.0)
+        put(V(P_.x + N_.x * 90.0, P_.y + N_.y * 90.0, P_.z), yaw=yaw, z=(fz3 if fz3 is not None else P_.z - 170.0) + 100.0)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=0, yaw=yaw)); yield from wait(1.2); shot("cave16_painting_close", "1280x720"); yield from rwait(1.0)
+        pawn.set_actor_hidden_in_game(False)
+        put(at0, yaw=0.0); yield from wait(0.5)
+    # ---- the fossils at the temple's trade
+    cold = T["region_items"]["cold"]; amber = T["fossil_amber"]
+    for n in cold: c.add_item(n, 1)
+    res["fossil_lines"] = [str(l) for l in g.get_fossil_lines16()]
+    hm0 = c.get_max_health(); ok_hp = g.town_fossil_trade16("cold|hp"); yield from wait(0.3)
+    res["hp"] = {"traded": ok_hp, "gain": round(c.get_max_health() - hm0, 2), "left": [c.get_item_count(n) for n in cold]}
+    tok = str(g.get_editor_property("angel_token_item")); t0_ = c.get_item_count(tok)
+    c.add_item(cold[0], 1); c.add_item(cold[1], 1); c.add_item(amber, 1); a0 = c.get_item_count(amber)
+    ok_tk = g.town_fossil_trade16("cold|token"); yield from wait(0.3)
+    res["token"] = {"traded": ok_tk, "tokens": c.get_item_count(tok) - t0_, "amber_spent": a0 - c.get_item_count(amber), "left": [c.get_item_count(n) for n in cold]}
+    c.add_item(cold[2], 1)
+    hm1 = c.get_max_health(); ok_one = g.town_fossil_trade16("cold|hp"); yield from wait(0.3)
+    res["one_piece"] = {"traded": ok_one, "gain": round(c.get_max_health() - hm1, 2), "kept": c.get_item_count(cold[2])}
+    res["mana_trade_warrior"] = g.town_fossil_trade16("cold|mana")
+    # ---- the recipe tablets: locked until read
+    rec = [n for n in tablets if res["tablets"][n][0] == "RECIPE"]
+    res["recipes"] = {}
+    for n in rec:
+        t_ = res["tablets"][n][1]; lk = g.is_locked_recipe14(t_)
+        c.add_item(n, 1); used = c.use_item(n); yield from wait(0.3)
+        res["recipes"][n] = {"locked_before": lk, "used": used, "known_after": g.knows_recipe14(t_)}
+    # ---- a spell tablet as the Mage
+    sp = [n for n in tablets if res["tablets"][n][0] == "TOME"]
+    if sp:
+        c = yield from restart("Mage"); g = G["gen"]; quiet(True)
+        W0 = [str(w.name) for w in g.get_editor_property("weapons")]
+        c.add_item(sp[0], 1); used = c.use_item(sp[0]); yield from wait(0.5)
+        W1 = [str(w.name) for w in g.get_editor_property("weapons")]
+        res["spell_tablet"] = {"item": sp[0], "spell": res["tablets"][sp[0]][2], "used": used, "new": [w for w in W1 if w not in W0], "message": str(c.message)}
+    # ---- a cave's last boss: its Angel Token
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True); pawn = G["pawn"]
+    mt = g.get_editor_property("max_tier"); res["max_tier"] = mt
+    tok = str(g.get_editor_property("angel_token_item"))
+    g.debug_clear_section(S0, 0, g.get_start_room_center()); yield from wait(0.5)
+    if mt > 2: g.debug_open_tiers(mt - 1, False); yield from wait(0.5)
+    Sp = I2(mt - 2, 0) if mt > 1 else S0; span = g.get_editor_property("section_tiles") * g.get_editor_property("tile_size")
+    cm_ = pawn.get_editor_property("character_movement"); cm_.set_movement_mode(unreal.MovementMode.MOVE_FLYING)
+    pawn.set_actor_location(V(Sp.x * span, Sp.y * span, g.section_floor_z(Sp) + 400.0), False, True); yield from wait(0.3)
+    g.generate_section_now(Sp); yield from built(Sp)
+    secp = g.get_section(Sp)
+    if secp: put(secp.get_room_center(0)); cm_.set_movement_mode(unreal.MovementMode.MOVE_WALKING); yield from wait(0.5); g.debug_clear_section(Sp, 0, secp.get_room_center(0)); yield from wait(0.5)
+    else: cm_.set_movement_mode(unreal.MovementMode.MOVE_WALKING)
+    g.debug_open_tiers(mt, True); yield from wait(1.0)
+    boss = []
+    for _ in range(80):
+        boss = [e for e in (str(l).split("|") for l in g.get_encounter_lines()) if e[0] == "boss" and e[6] == str(mt) and "USURPER" not in e[7]]
+        if boss: break
+        yield from rwait(0.25)
+    res["boss"] = boss[0][4] if boss else None
+    k0 = g.get_editor_property("cave_tokens16"); n0 = c.get_item_count(tok); taken = None
+    if boss:
+        at = V(float(boss[0][1]), float(boss[0][2]), float(boss[0][3])); bl = None
+        for mo in g.get_monsters():
+            if alive(mo) and mo.boss and dist2(mo.get_actor_location(), at) < 600: bl = mo.get_actor_location(); mo.apply_damage(1e7, None)
+        yield from wait(1.0)
+        res["notice"] = str(g.get_editor_property("tier_notice"))
+        piles = [p_ for p_ in g.loot_piles if p_ and tok in [str(x) for x in p_.things]]
+        res["token_piles"] = len(piles)
+        if piles:
+            pp = piles[0].get_actor_location(); put(V(pp.x - 120.0, pp.y, pp.z + 60.0), yaw=0.0); yield from wait(0.6)
+            taken = str(g.interact_nearest(pawn.get_actor_location(), 260.0)); yield from wait(0.4)
+    res["boss_token"] = {"cave_tokens": g.get_editor_property("cave_tokens16") - k0, "taken_by": taken, "tokens_gained": c.get_item_count(tok) - n0}
+    H, K, O = res["hp"], res["token"], res["one_piece"]
+    ok = (res["region"].startswith("cold|") and res["fossils_known"] and len(tablets) >= 4
+          and res.get("paintings") and "M_Cave16_Painting" in (res.get("decal") or []) and "painting" in res.get("prompt", "") and res.get("f") == "painting"
+          and any("|cold|waiting" in l for l in res.get("studied", []))
+          and any(l.split("|")[2] == "1" for l in res["fossil_lines"] if l.startswith("fossil|cold|"))
+          and H["traded"] and abs(H["gain"] - 15.0) < 0.5 and H["left"] == [0, 0, 0]
+          and K["traded"] and K["tokens"] == 1 and K["amber_spent"] == 1 and K["left"] == [0, 0, 0]
+          and not O["traded"] and abs(O["gain"]) < 0.01 and O["kept"] == 1 and not res["mana_trade_warrior"]
+          and 0.04 <= res["tablet_share"] <= 0.25 and len(drawn) >= 3
+          and rec and all(r["locked_before"] and r["used"] and r["known_after"] for r in res["recipes"].values())
+          and res.get("spell_tablet", {}).get("new")
+          and res["boss_token"]["cave_tokens"] == 1 and res["boss_token"]["tokens_gained"] == 1)
+    step_result("cave16relics", bool(ok), **res)
+
+def step_cave16relics():
+    res = {}
+    gi = GS.get_game_instance(G["w"]); keep = {k: list(gi.get_editor_property(k)) for k in ("paintings16", "paintings_applied16", "known_caves16")}
+    h0 = gi.get_editor_property("lasting_health15")
+    try:
+        yield from cave16relics_inner(res)
+    finally:
+        try: quiet(False)
+        except Exception: pass
+        try:
+            gi = GS.get_game_instance(G["w"]); gi.set_editor_property("lasting_health15", h0)
+            for k, v in keep.items(): gi.set_editor_property(k, v)
+        except Exception: pass
+        try: G["pawn"].set_actor_hidden_in_game(False)
+        except Exception: pass
+STEPS.update({"cave16relics": step_cave16relics})
+
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""
     if G.get("gen"): return G["gen"]

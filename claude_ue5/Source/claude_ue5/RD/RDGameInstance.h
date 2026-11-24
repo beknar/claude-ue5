@@ -170,6 +170,10 @@ public:
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FString> DrownedCaves16;
 	/** the cursed relics a temple has lifted (their items): their cost gone for good */
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FName> LiftedRelics16;
+	/** phase 15: the cave paintings studied ("<cave key>|<region>"), those applied to the wilds' map, the caves they marked (tower squares) */
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FString> Paintings16;
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FString> PaintingsApplied16;
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FIntPoint> KnownCaves16;
 	/** the tenth phase: the places the lookouts' tops marked on her map, and the lookouts climbed */
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> WildMarked15;
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> WildLookoutsClimbed15;
@@ -179,8 +183,8 @@ public:
 	/** the twelfth phase: the collectibles taken, the hit points and mana bought with them for good, the ruins' maps taken, the maps held
 	 *  (their chests not dug), the chests dug, the structures' kinds whose named item was given */
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> CollectiblesTaken15;
-	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") int32 LastingHealth15 = 0;
-	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") int32 LastingMana15 = 0;
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|List15") int32 LastingHealth15 = 0;
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|List15") int32 LastingMana15 = 0;
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> TreasureMapsTaken15;
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> TreasureMaps15;
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> TreasuresDug15;

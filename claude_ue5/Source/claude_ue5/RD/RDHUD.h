@@ -46,6 +46,9 @@ public:
 	TArray<FString> ReclaimSharesDrawn15;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetReclaimSharesDrawn15() const { return ReclaimSharesDrawn15; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetContractMarksDrawn15() const { return ContractMarksDrawn15; }
+	/** the list of 2026-11-22's caves: the caves a painting showed her, drawn on the wilds' map when last drawn (for the tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Cave16") int32 GetKnownCavesDrawn16() const { return KnownCavesDrawn16; }
+	int32 KnownCavesDrawn16 = 0;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") bool IsTreasureShown15() const { return TreasureShown15; }
 	/** the wilderness's minimap: the region's line it drew under it (tests) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") FString GetBiomeLabelDrawn() const { return BiomeLabelDrawn; }

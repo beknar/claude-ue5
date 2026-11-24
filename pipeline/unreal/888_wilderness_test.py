@@ -8385,6 +8385,68 @@ def step_nanite16():
 
 
 STEPS["nanite16"] = step_nanite16
+
+
+def step_paintings16():
+    """the list of 2026-11-22's caves, phase 15: a cave painting studied (as if in the cave under the tower nearest Brokenspire) marks,
+    back in the wilds, its region's other caves (the towers within 7 squares whose land is the region's) and the lairs and ruins within
+    3 km of each on the big map. Measured: the painting applied once (its line 'applied'), every cave marked stands on a biome of the
+    region, the places marked are new to the map's marks, the map draws the caves (the HUD's count) where they are; a picture of the
+    map. The game instance's paintings, caves and marks put back in a finally"""
+    g = G["gen"]; res = {}; quiet(True)
+    gi = GS.get_game_instance(G["w"])
+    keep = {k: list(gi.get_editor_property(k)) for k in ("paintings16", "paintings_applied16", "known_caves16")}
+    m0 = len(gi.get_editor_property("wild_marked15"))
+    try:
+        T = towns(); b = T.get("Brokenspire", {"x": 0.0, "y": 0.0})
+        g.wild_put_her(b["x"] + 20.0, b["y"]); yield from wait_ready(90); yield from wait_chunks(30, 50); yield from rwait(3.0)
+        regions = {str(r.name): [str(x) for x in r.biomes] for r in g.get_editor_property("cave_regions16")}
+        e = str(g.debug_painting_near16(b["x"], b["y"]))
+        res["entry"] = e
+        if not e:
+            step_result("paintings16", False, **res); return
+        region = e.split("|")[1]
+        t0 = time.time(); lines = []
+        while time.time() - t0 < 8.0:
+            lines = [str(l) for l in g.get_paintings16()]
+            if any(l.startswith("studied|") and l.endswith("|applied") for l in lines): break
+            yield from rwait(0.25)
+        caves = [l.split("|") for l in lines if l.startswith("cave|")]
+        res["studied"] = [l for l in lines if l.startswith("studied|")]
+        res["caves"] = [{"cell": [int(c[1]), int(c[2])], "km": [round(float(c[3]) / 1000, 1), round(float(c[4]) / 1000, 1)], "biome": c[5]} for c in caves]
+        res["off_region"] = [c for c in res["caves"] if c["biome"] not in regions.get(region, [])]
+        res["marked_new"] = len(gi.get_editor_property("wild_marked15")) - m0
+        res["message"] = next((str(l) for l in reversed(list(cb().get_message_log())) if "cave painting" in str(l)), None) if cb() else None
+        # (the caves on the big map: its view over their middle, from 3.5 km out of the town (M in a town opens the town's own map))
+        drawn = None
+        if caves:
+            g.wild_put_her(b["x"] + 3500.0, b["y"]); yield from wait_chunks(30, 50); yield from rwait(2.0)
+            cx = sum(float(c[3]) for c in caves) / len(caves); cy = sum(float(c[4]) for c in caves) / len(caves)
+            g.set_map_open(True); g.set_wild_map_view(cx, cy, 90.0)
+            t1 = time.time()
+            while time.time() - t1 < 20 and map_state()["asked"] > 0: yield
+            yield from rwait(1.5)
+            drawn = G["pc"].get_hud().get_known_caves_drawn16()
+            shot("paintings16_map", "1280x720"); yield from rwait(1.0)
+            g.set_map_open(False)
+        res["drawn"] = drawn
+        # (applied once: a second look adds nothing)
+        n_c = len(caves); yield from rwait(2.0)
+        res["caves_after_2s"] = len([l for l in g.get_paintings16() if str(l).startswith("cave|")])
+        ok = (1 <= len(caves) <= 12 and not res["off_region"] and (drawn or 0) >= 1 and res["caves_after_2s"] == n_c
+              and any(l.endswith("|applied") for l in res["studied"]))
+        step_result("paintings16", ok, **res)
+    finally:
+        try: g.set_map_open(False)
+        except Exception: pass
+        try: res["marks_put_back"] = g.forget_painting_marks16()
+        except Exception: pass
+        for k, v in keep.items():
+            try: gi.set_editor_property(k, v)
+            except Exception: pass
+        try: quiet(False)
+        except Exception: pass
+STEPS["paintings16"] = step_paintings16
 SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
 def saves_snapshot():
     """the save folder's files and their bytes: put back at the end, the tests' own new saves deleted (PR #61's review)"""

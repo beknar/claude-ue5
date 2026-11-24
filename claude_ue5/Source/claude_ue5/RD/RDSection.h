@@ -775,6 +775,10 @@ public:
 	static constexpr int32 CaveSpurTo16 = -1000;
 	FString CaveLostLine16;
 	void CaveRubbleSet16();
+	/** phase 15: a cave painting on a set's wall (a decal), studied by F */
+	struct FCavePainting16 { FVector At = FVector::ZeroVector, Normal = FVector::ForwardVector; };
+	TArray<FCavePainting16> CavePaintings16;
+	void CavePaintingSet16();
 	/** phase 13: a flooded side tunnel (its stretch under water, the water's face) */
 	struct FCaveFlood16 { TArray<FVector> Pts; float Half = 300.f, WaterZ = 0.f; TArray<TObjectPtr<UPrimitiveComponent>> Comps; };
 	TArray<FCaveFlood16> CaveFloods16;

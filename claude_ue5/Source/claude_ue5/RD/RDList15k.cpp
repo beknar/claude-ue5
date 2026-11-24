@@ -368,6 +368,7 @@ UTextureRenderTarget2D* ARDDungeonGenerator::TreasurePictureToShow15(FString& Ca
 void ARDDungeonGenerator::AddCollectibleTrades15(TFunctionRef<void(const FString& Act, const FString& Label, const FString& Tag, const FString& Detail, bool bOn, const FString& Arg)> Add) const
 {
 	if (!PlayerCombat) return;
+	AddFossilTrades16(Add);          // (the list of 2026-11-22's caves: a region's fossil set)
 	// (the list of 2026-11-22's caves: a cursed relic she carries, its curse lifted for gold)
 	for (const FString& Ll : GetLiftLines16())
 	{

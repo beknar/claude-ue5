@@ -185,6 +185,21 @@ The list's "crystal geode shards, cut at the librarian's table into scroll inks 
 - **A new game** empties the lifted curses and the caves' records (the lost blades', the drowned pieces'), and so does loading a save made before them.
 - **Not measured**: the temple's line in a town's panel (the lifting was called as the panel calls it); the charms' looks (they are worn unseen, as the rings).
 
+## Fossils, tablets, paintings and the Angel Token (the list of 2026-11-22, phase 15)
+
+`treasure16.json`'s `phase15`, written by `945 items` (and pictured by `945 icons`) on every map of the game; C++ `RD/RDCave16g.cpp`.
+
+- **Fossils**: each region's caves hold their own set of three (Frozen, Highland, Ashen, Sandstone, Mossy or Plains Ammonite, Claw and Egg), drawn as the region's other things are (only in its caves). A whole set, the amber with an insect standing in for one piece, is traded at a town's temple for 15 hit points' top for good, 15 mana's (a hero with mana), or an Angel Token (`FossilSets16`, `FossilGain16`; the lasting top is `938`'s, `LastingHealth15` / `LastingMana15`).
+- **Ancient tablets**: a cave's container that holds anything holds a tablet besides about one time in eight (`TabletShare16` 0.12, a draw of its own on a stream of its own, so every other draw stays what it was). Three teach a recipe (recipe items: the Slow Mending Draught, the Ring of the Echo, the Sun-glass Weave, each locked until a tablet is read); two teach a spell (copies of the tomes of the two highest spells, named "Ancient Tablet of ..."). A recipe already known is not drawn.
+- **Cave paintings**: about one cave set in three (`PaintingShare16` 0.35, by a hash of its seed) has one on a flat stretch of a room's wall: two hunters, a stag, a sun and three hand prints in red ochre, a decal drawn by `blender_numpy/cave_painting_decal.py`. The kit's rock is lumpy: the wall is taken only where a grid of eight traces round the spot, 1.4 by 1 m, meets rock facing the same way within 35 degrees and within 18 cm of its plane. F studies it (nearer than any pile, as F takes it). Back in the wilds the cave's region's twelve nearest other caves (the landmark towers' squares within 7 of the painted cave's whose land is the region's) are marked on the big map at their towers, and the lairs and ruins within 3 km of each are marked as found by a map (`Paintings16`, `PaintingsApplied16`, `KnownCaves16` in the game instance, saved).
+- **The Angel Token**: a cave's last tier's boss always leaves one where it fell, with its notice ("AN ANGEL TOKEN LIES WHERE IT FELL").
+
+### Measured (phase 15)
+
+- `868 cave16relics -lv caves` (`test_c15i.json`): the cold lands (glacial) region; nine sets made, three with a painting, each with its decal (`M_Cave16_Painting`); before it F's prompt was "study the cave painting" and F studied it ("studied|cave|cold|waiting"); its pictures from 3.5 m and close (upright, the sun at the top left); the cold set whole ("3 of 3"), traded for 15 hit points' top (her top 140 -> 155, the pieces gone); two pieces and amber for an Angel Token (the amber spent); one piece alone refused (nothing taken); the Warrior's mana trade refused; the tablets drawn in 0.118 to 0.138 of the containers with loot over six session seeds (all five kinds); each recipe tablet's recipe locked before and known after it was read; as the Mage the Singularity tablet taught Singularity; the tier-3 boss slain: one Angel Token in a pile where it fell, taken by F.
+- `888 paintings16 -Light` (`test_p15b.json`): a painting studied in the cave under the tower nearest Brokenspire applied once back in the wilds, every cave marked on a biome of its region, the lairs and ruins round them marked, the caves drawn on the big map from 3.5 km out of the town; its picture.
+- **Not measured**: the temple's fossil lines in a town's panel (the trade was called as the panel calls it).
+
 ## Limits
 
 - (Before the list of 2026-11-22) the rooms were the castle's rooms in rock; with the planner they are the kit's (above).
@@ -193,4 +208,4 @@ The list's "crystal geode shards, cut at the librarian's table into scroll inks 
 - A portal that finds no tunnel is capped: a set has 3 or 4 of its 4 (six seeds), so a neighbour can be reached by fewer ways than its sides.
 - The kit's stairs are laid only where they and both their tunnels fit whole, else a tunnel slopes between levels; the measured start set has none (how often a set has stairs is not measured yet).
 - Every tower's cave has the same first hall (the saved start section); the sets beyond it are new each visit, as the castle's are.
-- The way in is the mouth's F only: the map does not mark the caves, and no quest leads into one.
+- The way in is the mouth's F only; the map marks the caves a studied painting showed her (phase 15), and no quest leads into one.
