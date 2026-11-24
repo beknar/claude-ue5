@@ -685,6 +685,9 @@ UPointLightComponent* ARDSection::AddLight(const FVector& Loc, const FLinearColo
 	// (a dungeon's own light (the list of 2026-11-08b: the Black Tower's cold violet): every light of its sets drawn toward the
 	// level's tint; 0 on every other level)
 	L->SetLightColor(Generator && !Generator->bTown && Generator->DungeonLightTintShare > 0.f ? FMath::Lerp(Color, Generator->DungeonLightTint, FMath::Clamp(Generator->DungeonLightTintShare, 0.f, 1.f)) : Color);
+	// (Heaven (PR #126's review): no flame's light: a warm light (a candle's, a chandelier's, a torch's) is a lamp's steady white)
+	const bool bHeavenLamp = Theme == FName(TEXT("Heaven")) && Color.G < 0.8f * Color.R;
+	if (bHeavenLamp) { L->SetLightColor(FMath::Lerp(Color, FLinearColor(1.f, 0.95f, 0.88f), 0.8f)); Flicker = 0.f; }
 	L->SetAttenuationRadius(Radius);
 	L->SetSourceRadius(6.f);
 	L->SetCastShadows(bShadows);
@@ -699,6 +702,8 @@ UPointLightComponent* ARDSection::AddLight(const FVector& Loc, const FLinearColo
 
 void ARDSection::AddEffect(FName Name, const FVector& Loc, float Scale)
 {
+	// (the list of 2026-11-22's phase 19: Heaven burns no torch, candle, brazier or hearth: its pieces are lamps (946 streets))
+	if (Theme == FName(TEXT("Heaven")) && (Name == TEXT("TorchFire") || Name == TEXT("CandleFire") || Name == TEXT("BrazierFire") || Name == TEXT("HearthFire"))) return;
 	// in play the fires are heard: where they are (also when the effect itself was saved with the start section)
 	if (const UWorld* W = GetWorld(); W && W->IsGameWorld())
 	{
@@ -754,7 +759,9 @@ void ARDSection::AddTorch(const FVector& WallPoint, float InYaw, float Candelas,
 	if (!bLit || !P) return;
 	const FVector Flame = WallPoint + FRotator(0, InYaw, 0).RotateVector(P->Hinge);
 	AddEffect(TEXT("TorchFire"), Flame, 0.6f);
-	AddLight(Flame + FRotator(0, InYaw, 0).RotateVector(FVector(25, 0, 10)), FLinearColor(1.f, 0.55f, 0.24f), Candelas, 1300.f, false, 0.18f);
+	// (Heaven's wall lamp: a steady white light, no flame)
+	const bool bLamp = Theme == FName(TEXT("Heaven"));
+	AddLight(Flame + FRotator(0, InYaw, 0).RotateVector(FVector(25, 0, 10)), bLamp ? FLinearColor(1.f, 0.93f, 0.82f) : FLinearColor(1.f, 0.55f, 0.24f), Candelas, 1300.f, false, bLamp ? 0.f : 0.18f);
 }
 
 USceneComponent* ARDSection::AddPivot(USceneComponent* Parent, const FTransform& Rel)
@@ -1333,6 +1340,8 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 	};
 	auto Candles = [&](const FVector& P, float Cd)
 	{
+		// (Heaven: a desk lamp on a table, never one on the floor (PR #126's review); the draw is taken all the same)
+		if (Theme == FName(TEXT("Heaven")) && P.Z - GetActorLocation().Z < 30.f) { R.FRandRange(0, 360); return; }
 		AddPieceAt(TEXT("Candles"), P, R.FRandRange(0, 360), 1.f, true);
 		AddEffect(TEXT("CandleFire"), P + FVector(0, 0, 18), 1.f);
 		AddLight(P + FVector(0, 0, 45), FLinearColor(1.f, 0.62f, 0.32f), Cd, 700.f, false, 0.12f);
@@ -1626,7 +1635,9 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 				const FVector P = Wall + Rt.RotateVector(FVector(Fp->Size.X * 0.5f + 30.f, 0, 0));
 				Center(TEXT("Fireplace"), P, Yaw, true, true);      // (on the lane at a wall without a door: block it)
 				AddEffect(TEXT("HearthFire"), P + Rt.RotateVector(FVector(0, 0, 0)) + FVector(0, 0, 42), RDHearthFlame);
-				if (UPointLightComponent* Hl = AddLight(P + Rt.RotateVector(FVector(80, 0, 0)) + FVector(0, 0, 90), FLinearColor(1.f, 0.48f, 0.18f), 260.f, 1800.f, true, 0.25f))
+				if (Theme == FName(TEXT("Heaven")))
+					AddLight(P + Rt.RotateVector(FVector(160, 0, 0)) + FVector(0, 0, 170), FLinearColor(0.6f, 0.72f, 1.f), 25.f, 800.f, false, 0.f);          // (the list of 2026-11-22: a screen's glow, no fire)
+				else if (UPointLightComponent* Hl = AddLight(P + Rt.RotateVector(FVector(80, 0, 0)) + FVector(0, 0, 90), FLinearColor(1.f, 0.48f, 0.18f), 260.f, 1800.f, true, 0.25f))
 					Hl->ComponentTags.Add(TEXT("RDHearth15"));          // (the list of 2026-11-20: a hearth's glow burns with its fire)
 			}
 		}

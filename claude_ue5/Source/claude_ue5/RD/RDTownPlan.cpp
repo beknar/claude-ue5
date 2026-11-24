@@ -137,7 +137,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 	Rooms.Reset(); Corrs.Reset(); DoorEdges.Reset(); Portals.Reset(); Cells.Reset(); Fixtures.Reset(); SpecialChests.Reset();
 	Pickups.Reset();
 	Type.Init(0, N * N); Owner.Init(-1, N * N); Blocked.Init(0, N * N); CeilH.Init(0.f, N * N);
-	TownBlds.Reset(); TownSpots.Reset(); TownRoads.Reset(); TownPosts.Reset(); TownGreens.Reset();
+	TownBlds.Reset(); TownSpots.Reset(); TownRoads.Reset(); TownPosts.Reset(); TownGreens.Reset(); Signals19.Reset(); SignalLenses19 = nullptr; YardLines19.Reset(); Runs19.Reset(); Junctions19.Reset(); ParkTiles19.Reset(); Parks19.Reset(); StopLines19.Reset(); Streets19.Reset();
 	CastleHallRoom = -1; CastleBld = -1; CastleTowers.Reset(); CastleStairTower = -1;
 	FRDTFrame F; F.O = FMath::Max(4, (N - 160) / 2); F.S = N - 2 * F.O; F.G = R.RandRange(0, 3);
 	const int32 S = F.S;
@@ -2063,7 +2063,9 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 			case TS_Lamp:
 				AddPieceAt(TEXT("Town.Lamp"), Sp.At, R.FRandRange(0, 360));
 				AddEffect(TEXT("BrazierFire"), Sp.At + FVector(0, 0, 105.f), 1.2f);
-				AddLight(Sp.At + FVector(0, 0, 180.f), FLinearColor(1.f, 0.58f, 0.26f), 320.f, 2600.f, true, 0.18f);
+				// (Heaven's bollard light (PR #126's review): a small steady white light at its band, no shadows; the fire basket's elsewhere)
+				if (Theme == FName(TEXT("Heaven"))) AddLight(Sp.At + FVector(0, 0, 95.f), FLinearColor(1.f, 0.95f, 0.88f), 90.f, 900.f, false, 0.f);
+				else AddLight(Sp.At + FVector(0, 0, 180.f), FLinearColor(1.f, 0.58f, 0.26f), 320.f, 2600.f, true, 0.18f);
 				break;
 			case TS_Circle:
 				for (int32 K = 0; K < 8; ++K)
@@ -2183,6 +2185,37 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 			const FVector P = Door + Across * (R.RandBool() ? 1.f : -1.f) * 420.f;
 			if (!Free(WorldToLocal(P))) continue;
 			static const TCHAR* Yard[] = { TEXT("Town.Cart"), TEXT("Town.Hay"), TEXT("Town.Sacks"), TEXT("Town.Logs"), TEXT("Town.Cart2") };
+			if (Generator->TownPlan == 5)
+			{
+				// (Heaven (PR #126's review): its yard things are a trailer, a car, a dumpster: at a random turn they stood half in the street
+				// and the traffic drove through them. Set along the building's front, every tile under it and round its middle off the
+				// streets, the whole footprint blocked; the same two draws, only Heaven's own picks move)
+				const int32 Pick = R.RandRange(0, 4); R.FRandRange(0, 360);
+				const FName Nm(Yard[Pick]);
+				const float Yw = Out.Rotation().Yaw + 90.f;
+				const FRDPiece* Pp = Pc(Nm);
+				const FVector2D Hs = Pp ? FVector2D(Pp->Size.X * 0.5f + 20.f, Pp->Size.Y * 0.5f + 20.f) : FVector2D(100.f, 100.f);
+				bool bClear = true;
+				const FIntPoint Tp = WorldToLocal(P);
+				for (int32 Dx = -1; Dx <= 1 && bClear; ++Dx)
+					for (int32 Dy = -1; Dy <= 1 && bClear; ++Dy)
+					{
+						const FIntPoint Q = Tp + FIntPoint(Dx, Dy);
+						if (!In(Q) || TownRoadMask[Idx(Q)] != 0 || TownSquare.Contains(Q)) bClear = false;
+					}
+				const FRotator Ry(0, Yw, 0);
+				for (int32 Cx = -1; Cx <= 1 && bClear; Cx += 2)
+					for (int32 Cy = -1; Cy <= 1 && bClear; Cy += 2)
+					{
+						const FIntPoint Q = WorldToLocal(P + Ry.RotateVector(FVector(Cx * Hs.X, Cy * Hs.Y, 0.f)));
+						if (!Free(Q) || TownRoadMask[Idx(Q)] != 0) bClear = false;
+					}
+				if (!bClear) continue;
+				AddPieceAt(Nm, P, Yw);
+				MarkBlocked(P, Yw, Hs * 2.f, true);
+				YardLines19.Add(FString::Printf(TEXT("yard|%.0f|%.0f|%.0f|%.0f|%.0f"), P.X, P.Y, Yw, Hs.X * 2.f - 40.f, Hs.Y * 2.f - 40.f));
+				continue;
+			}
 			AddPieceAt(Yard[R.RandRange(0, 4)], P, R.FRandRange(0, 360));
 			MarkBlocked(P, 0.f, FVector2D(200, 200), true);
 		}

@@ -198,16 +198,18 @@ void ARDSection::HeavenStreets()
 	// (every tile of the open ground: the streets asphalt, the rest (the square, the pavements, the lane by the wall) paving; no
 	// grass in Heaven. Under the buildings nothing: they have floors)
 	int32 Roads = 0, Paved = 0;
+	HeavenStreets19Plan();          // (the list of 2026-11-22's phase 19: the crossings, the lay-bys and lots, asphalt under them)
 	for (int32 X = 0; X < N; ++X)
 		for (int32 Y = 0; Y < N; ++Y)
 		{
 			const FIntPoint T(X, Y);
 			if (Type[Idx(T)] != 2 || Owner[Idx(T)] != 1000) continue;
 			const FVector C = TileWorld(T);
-			const bool bRoad = TownRoadMask[Idx(T)] == 1 && !TownSquare.Contains(T);
+			const bool bRoad = (TownRoadMask[Idx(T)] == 1 && !TownSquare.Contains(T)) || ParkTiles19.Contains(Idx(T));
 			if (AddPieceAt(bRoad ? FName(TEXT("Heaven.Road")) : FName(TEXT("Heaven.Paving")), C, 0.f, 1.f, true)) { if (bRoad) ++Roads; else ++Paved; }
 		}
 	UE_LOG(LogRDHeaven, Log, TEXT("RDHEAVEN streets: %d tiles of asphalt, %d paved"), Roads, Paved);
+	HeavenStreets19Build();          // (the markings, signs and parked cars)
 }
 
 void ARDSection::HeavenSpotBuild(const FTownSpot& Sp)
@@ -221,7 +223,14 @@ void ARDSection::HeavenSpotBuild(const FTownSpot& Sp)
 		MarkBlocked(Sp.At, 0.f, FVector2D(90.f, 90.f), true);
 		return;
 	}
-	if (Sp.Kind == TS_TrafficLight) { AddPieceAt(TEXT("Heaven.TrafficLight"), Sp.At, Sp.Yaw); MarkBlocked(Sp.At, 0.f, FVector2D(60.f, 60.f), true); return; }
+	if (Sp.Kind == TS_TrafficLight)
+	{
+		// (the list of 2026-11-22's phase 19: our own four-way signal, its lenses lit by phase; the pack's pole had no lamps)
+		if (Generator->Piece(TEXT("Heaven.Signal19"))) { AddPieceAt(TEXT("Heaven.Signal19"), Sp.At, 0.f); HeavenSignal19(Sp); }
+		else AddPieceAt(TEXT("Heaven.TrafficLight"), Sp.At, Sp.Yaw);
+		MarkBlocked(Sp.At, 0.f, FVector2D(60.f, 60.f), true);
+		return;
+	}
 	// (the street's bench is its own piece: "Heaven.Bench" is the rooms' (the town's furnishing asks for "Bench"))
 	static const TCHAR* Props[4] = { TEXT("Heaven.StreetBench"), TEXT("Heaven.BusStop"), TEXT("Heaven.Hydrant"), TEXT("Heaven.Bin") };
 	const FName Nm(Props[FMath::Clamp(Sp.Bld, 0, 3)]);

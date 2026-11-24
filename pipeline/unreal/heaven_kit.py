@@ -87,7 +87,13 @@ MATS = {"stone": ("MI_HV_Stone", (0.2, 0.21, 0.23), 0.0, 0.7), "brick": ("MI_HV_
         "paving": ("MI_HV_Paving", (0.42, 0.41, 0.39), 0.0, 0.85), "roof": ("MI_HV_Roof", (0.3, 0.3, 0.31), 0.0, 0.9),
         "panel": ("MI_HV_LightPanel", (0.9, 0.95, 1.0), 0.0, 0.5, 6.0), "red": ("MI_HV_RedLight", (1.0, 0.06, 0.04), 0.0, 0.5, 12.0),
         "cyan": ("MI_HV_CyanStrip", (0.2, 0.85, 1.0), 0.0, 0.4, 8.0), "hazard": ("MI_HV_Hazard", (0.75, 0.55, 0.05), 0.2, 0.5),
-        "plate": ("MI_HV_FloorPlate", (0.22, 0.23, 0.25), 0.7, 0.45)}
+        "plate": ("MI_HV_FloorPlate", (0.22, 0.23, 0.25), 0.7, 0.45),
+        # (the list of 2026-11-22's phase 19: the streets' paint and signs, the modern things that stand where the medieval ones did)
+        "paint": ("MI_HV_Paint", (0.8, 0.8, 0.78), 0.0, 0.6), "signgreen": ("MI_HV_SignGreen", (0.01, 0.22, 0.08), 0.0, 0.35),
+        "signblue": ("MI_HV_SignBlue", (0.02, 0.08, 0.3), 0.0, 0.35), "stopred": ("MI_HV_StopRed", (0.6, 0.02, 0.02), 0.0, 0.35),
+        "dumpster": ("MI_HV_Dumpster", (0.05, 0.18, 0.1), 0.3, 0.6), "pallet": ("MI_HV_Pallet", (0.5, 0.38, 0.22), 0.0, 0.85),
+        "carton": ("MI_HV_Carton", (0.45, 0.33, 0.2), 0.0, 0.9), "tyre": ("MI_HV_Tyre", (0.02, 0.02, 0.02), 0.0, 0.9),
+        "screen": ("MI_HV_Screen", (0.05, 0.08, 0.12), 0.0, 0.2, 0.8), "art": ("MI_HV_Art", (0.1, 0.42, 0.5), 0.0, 0.7)}
 
 
 def materials():

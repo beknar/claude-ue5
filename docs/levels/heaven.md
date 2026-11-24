@@ -62,3 +62,82 @@ A modern city surrounded by a shimmering shield, with skyscrapers, office buildi
 4. `946_heaven16.py all` (the list of 2026-11-22: the lamps' head, the modern signs, the map's pictograms), after `908`; its faces painted first by `blender_numpy/bs_signs.py SourceArt/heaven/signs16 --modern`.
 5. The tests above; Brokenspire's (`884`) and the other cities' own (`884 holy,descend`, `forge,descendwar`, `port,descendsewer`, `spire,descendspire`) after anything shared.
 5. A game to play: `869_mistward_ism_usage.py` (the editor open; it reads `heaven_fortress`'s pieces too), then `pipeline\package_mistward.ps1 -Out <dir> -Test` (the editor closed; `heaven_fortress` is named to the cook).
+
+## The list of 2026-11-22: the streets (phase 19)
+
+`946 streets` (its pieces from boxes, `SourceArt/heaven/streets19.json`'s names and timings) and C++ `RD/RDHeaven19.cpp`, hooked into `HeavenStreets` (before the ground is laid: the crossings, runs and parking; after it: the markings, signs and cars) and `HeavenSpotBuild` (the signals). No random draw is taken: the plan's streams and everything placed from them are unchanged.
+
+- **The streets' runs**: each street of the grid is cut into runs between its crossings (a tile under both kinds of road, the square, the facility's forecourt, or another road beyond the street's end).
+- **Markings** (`Heaven.Mark`, a unit square of white paint stretched to each line):
+  - a 3 m centre dash every other tile;
+  - an edge line 40 cm in from each kerb;
+  - at each end that meets a crossing, a zebra (50 cm bars a metre apart) in the last tile and a 40 cm stop line across the lane coming in;
+  - a plaza (the square, the forecourt) gets its zebra and no stop line.
+- **Traffic lights**: the pack's pole had no lamps, so each signalled crossing has our own four-way signal (`Heaven.Signal19`).
+  - Its twelve lenses are instances of one mesh in one component per town. Each lens carries its colour and its light as per-instance data (`M_HV_SignalLens`), set five times a second by `TickSignals19`.
+  - Each crossing's two roads take turns: green 14 s, amber 3 s, all red 2 s (`SignalGreen19`, `SignalAmber19`, `SignalAllRed19`). Each crossing has its own offset in the cycle.
+  - The stop lines keep their lane, way and signal (`StopLines19`) for the traffic of phase 23.
+- **Signs**:
+  - a stop sign at the kerb of every approach to a crossing without lights (in this town only the four T-junctions; every grid crossing has lights);
+  - a street-name sign at a corner of each crossing of two streets, its green blades naming the street each one lies along;
+  - a district board at the crossing nearest the square in each quarter: Elysian, Meridian, Sanctum, Ascent.
+- **Parking**: the pavement's row of tiles along each run, two tiles clear of the crossings, where it is free (no door's way, street furniture, tree or spot).
+  - A stretch of three tiles or more whose next row is free too becomes a lot (bays nose in, two tiles deep; at most six a town). The rest becomes two-tile lay-bys along the street.
+  - Asphalt is laid under both, with the bays' lines painted.
+  - A car stands in three lay-bys of four and two lot bays of three, of the kinds 5.8 m long or less. The traffic's 12.4 m bus, parked nose in, stood half across the street in the first pictures.
+- **No medieval leftovers**: Heaven's theme has a modern piece for each medieval one, and its fires are never lit (`AddEffect`).
+
+  | Medieval piece | Heaven's piece |
+  |---|---|
+  | wall torch | wall lamp (its light white and steady) |
+  | candles | desk lamp |
+  | chandelier | ceiling light |
+  | hearth | media wall (a screen's soft glow) |
+  | kitchen tripod and cauldron | cooker and pot |
+  | pot rack | wall shelf |
+  | wall shield | picture |
+  | cart | trailer |
+  | wagon | parked car |
+  | hay | dumpster |
+  | logs | pallets |
+  | sacks | bin |
+  | fire basket | bollard light |
+
+### Measured
+
+- `884 heaven19_medieval,heaven19_markings,heaven19_signals,heaven19_signs,heaven19_parking,heaven19_fps,heaven19_restart -Light` (`test_h19d.json`, after PR #126's review):
+- **Medieval leftovers**:
+  - none of the 13 medieval meshes in Heaven and no torch, candle or hearth fire;
+  - Brokenspire, counted first in the same run, keeps 158 torches, 256 candles, 38 hearths and its fires;
+  - of Heaven's 646 lights, none flickering and none a flame's warm colour, and no desk lamp on a floor.
+- **Markings**:
+  - 85 runs on 18 streets and 36 crossings;
+  - 452 dashes, 158 edge lines, 1026 zebra bars, 129 stop lines;
+  - all 2294 marks laid, against the plan's count of instances.
+  - Read apart from the plan: over 30 s, the moving cars were seen 394 times within 15 m before a stop line of their own way. Every one drove in that line's lane, 0 cm off its middle, and none in the other lane.
+- **Signals**:
+  - 36 signals, none of the pack's old poles;
+  - over a full 38 s cycle (77 reads of every signal), the timing never let both roads go (green or amber) at once. The cars do not obey the lights yet: phase 23;
+  - every read four lenses lit, the ones of the phase they were last set to (42 of 2772 reads a tick behind the clock);
+  - every signal went green, amber, red in order on both roads.
+  - In the pictures, each lens's own colour on the screen:
+    - the +X face at the X road's green: its green lens 150 green pixels, its red lens 9;
+    - the same face at its red: the red lens 91 red, the green lens 12 green;
+    - the +Y face at the Y road's green: its green lens 224 green pixels.
+  - After `RestartPlay`, whose replan builds nothing static, all 36 found their lenses again and kept changing, every read right.
+- **Signs**:
+  - 4 stop signs for the 4 approaches without lights;
+  - 33 name signs at 36 crossings;
+  - 4 district boards;
+  - 144 text components, every sign's words, drawn within 60 m.
+- **Parking**:
+  - 246 cars in 324 bays (234 in lay-bys, 12 in 6 lots), the longest 5.67 m;
+  - 5 yard things by the homes, set along their fronts off the streets, the whole footprint blocked (at a random turn they had stood half in the street);
+  - no two footprints overlapping;
+  - over 30 s, none of the 84 moving cars within 1.6 m of a parked car's or yard thing's footprint.
+- **Frame rate** at a signalled crossing looking along a street, in the editor's play window (`rd.Streets19` hides the street things):
+  - 9.3 frames a second shown (the first reading, as the view settled);
+  - 11.9 hidden;
+  - 11.6 shown again.
+- **Pictures**: a crossing from its approach, a signal at green, at red and from its other side, each sign, a lay-by, a lot, the media wall, a trailer, a dumpster, a wall lamp.
+- **Packaging**: the phase adds settings to the generator (`HeavenStreetNames19`...) and assets saved into `brokenspire`. A package needs a full cook (no `-SkipCook`) and `869` first (phase 28).

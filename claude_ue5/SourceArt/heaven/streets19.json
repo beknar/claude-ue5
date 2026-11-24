@@ -1,0 +1,10 @@
+{
+  "_about": "Heaven's streets (the list of 2026-11-22's phase 19, 946 streets): the street names (the X roads take them from the front by their place across the town, the Y roads from the back), the four districts round the square (-X -Y, +X -Y, -X +Y, +X +Y), the signals' seconds, the most lots a town lays",
+  "street_names": ["AURORA AVENUE", "HALCYON STREET", "MERIDIAN WAY", "ZENITH BOULEVARD", "SERAPH STREET", "LUMEN AVENUE",
+                   "EMPYREAN WAY", "CELESTE STREET", "ORISON AVENUE", "SOLACE STREET", "HALO DRIVE", "NIMBUS AVENUE",
+                   "VESPER STREET", "ETHER WAY", "PARAGON AVENUE", "RADIANT STREET", "SILVERLINE AVENUE", "ASCENSION WAY",
+                   "CLEARWATER STREET", "GLASSWORKS AVENUE", "SKYLINE DRIVE", "LANTERN STREET", "BEACON AVENUE", "ARCADIA STREET"],
+  "districts": ["ELYSIAN", "MERIDIAN", "SANCTUM", "ASCENT"],
+  "signal": {"green": 14.0, "amber": 3.0, "all_red": 2.0},
+  "lots": 6
+}
