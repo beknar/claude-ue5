@@ -1,0 +1,287 @@
+{
+ "tag": "h18d",
+ "plan": [
+  "heaven16_sleep",
+  "sleep10"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "heaven16_sleep",
+   "ok": true,
+   "in_bed": 57,
+   "poses": [
+    {
+     "role": "Priest",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_860"
+    },
+    {
+     "role": "Innkeeper",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_861"
+    },
+    {
+     "role": "Scholar",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_862"
+    },
+    {
+     "role": "Smith",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_863"
+    },
+    {
+     "role": "Trader",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_864"
+    },
+    {
+     "role": "Healer",
+     "hips_over_mattress": 12.5,
+     "hit": "InstancedStaticMeshComponent_108"
+    },
+    {
+     "role": "Soldier",
+     "hips_over_mattress": 12.5,
+     "hit": "InstancedStaticMeshComponent_115"
+    },
+    {
+     "role": "Soldier",
+     "hips_over_mattress": 12.5,
+     "hit": "InstancedStaticMeshComponent_115"
+    },
+    {
+     "role": "Soldier",
+     "hips_over_mattress": 12.5,
+     "hit": "InstancedStaticMeshComponent_115"
+    },
+    {
+     "role": "Worker",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_865"
+    }
+   ]
+  },
+  {
+   "step": "sleep10",
+   "ok": false,
+   "walk_home_s": 2.0,
+   "still_walking": 0,
+   "beds": {
+    "recorded": 46,
+    "made": 45,
+    "sleepers": 57,
+    "given": 57
+   },
+   "no_bed_with_building": [
+    [
+     "Drunk",
+     true
+    ],
+    [
+     "Keeper",
+     true
+    ],
+    [
+     "Worker",
+     true
+    ],
+    [
+     "Worker",
+     true
+    ],
+    [
+     "Worker",
+     true
+    ],
+    [
+     "Worker",
+     true
+    ],
+    [
+     "Worker",
+     true
+    ],
+    [
+     "Worker",
+     true
+    ],
+    [
+     "Worker",
+     true
+    ],
+    [
+     "Worker",
+     true
+    ],
+    [
+     "Worker",
+     true
+    ],
+    [
+     "Worker",
+     true
+    ]
+   ],
+   "sleepers": 57,
+   "asleep": 57,
+   "in_bed": 57,
+   "on_sleep_clip": 57,
+   "children": {
+    "at_home": 7,
+    "in_bed": 7,
+    "square": 0
+   },
+   "awake_sample": [],
+   "shared_beds": 0,
+   "poses": [
+    {
+     "role": "Priest",
+     "mesh": "SK_UE5_NPC_Distopia_Full_02",
+     "hips_over_top": 9.3,
+     "head_rise": 8.1,
+     "head_off": 66.2,
+     "on_bed": 0.4,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Innkeeper",
+     "mesh": "SK_UE5_NPC_Distopia_Full_04",
+     "hips_over_top": 9.3,
+     "head_rise": 7.9,
+     "head_off": 66.3,
+     "on_bed": 0.4,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Scholar",
+     "mesh": "SK_UE5_NPC_Distopia_Full_03",
+     "hips_over_top": 9.3,
+     "head_rise": 7.4,
+     "head_off": 66.3,
+     "on_bed": 0.4,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Smith",
+     "mesh": "SK_UE5_NPC_Distopia_Full_05",
+     "hips_over_top": 9.3,
+     "head_rise": 7.8,
+     "head_off": 66.3,
+     "on_bed": 0.4,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Trader",
+     "mesh": "SK_UE5_NPC_Old_gangster_Full_04",
+     "hips_over_top": 9.3,
+     "head_rise": 7.9,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Healer",
+     "mesh": "SK_UE5_NPC_Distopia_Full_01",
+     "hips_over_top": 9.3,
+     "head_rise": 7.5,
+     "head_off": 66.3,
+     "on_bed": 0.7,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SK_UE5_NPC_Distopia_Full_09",
+     "hips_over_top": 9.3,
+     "head_rise": 7.9,
+     "head_off": 66.3,
+     "on_bed": 0.4,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SK_UE5_NPC_Distopia_Full_09",
+     "hips_over_top": 9.3,
+     "head_rise": 7.4,
+     "head_off": 66.3,
+     "on_bed": 0.7,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SK_UE5_NPC_Distopia_Full_09",
+     "hips_over_top": 9.3,
+     "head_rise": 8.4,
+     "head_off": 66.2,
+     "on_bed": 0.4,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Worker",
+     "mesh": "SK_UE5_NPC_Old_gangster_Full_03",
+     "hips_over_top": 9.3,
+     "head_rise": 7.6,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Worker",
+     "mesh": "SK_UE5_NPC_Old_gangster_Full_03",
+     "hips_over_top": 9.3,
+     "head_rise": 7.9,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Worker",
+     "mesh": "SK_UE5_NPC_Old_gangster_Full_05",
+     "hips_over_top": 9.3,
+     "head_rise": 7.6,
+     "head_off": 66.3,
+     "on_bed": 0.4,
+     "plays": true,
+     "bld": true
+    }
+   ],
+   "bad_poses": [],
+   "poses_n": 14,
+   "shots": [
+    "sleep10_a",
+    "sleep10_b"
+   ],
+   "night_smith_says": "the smith's work",
+   "night_smith_f": "smith",
+   "night_smith_panel": "smith",
+   "night_trader_f": "bark",
+   "night_trader_panel": "store",
+   "night_trader_in_bed": true,
+   "morning": {
+    "asleep": 1,
+    "in_bed": 0
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_h18d_heaven16_sleeper.png",
+  "bs_h18d_sleep10_a.png",
+  "bs_h18d_sleep10_b.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

@@ -1,0 +1,131 @@
+{
+ "tag": "h18b",
+ "plan": [
+  "heaven16_map",
+  "heaven16_tower",
+  "heaven16_sleep"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "heaven16_map",
+   "ok": true,
+   "badges": {
+    "hvmap_chapel": 2,
+    "hvmap_bar": 1,
+    "hvmap_gear_shop": 1,
+    "hvmap_grocery": 1,
+    "hvmap_clinic": 1,
+    "hvmap_storage": 1,
+    "hvmap_security": 1,
+    "hvmap_skyscraper": 9,
+    "hvmap_office": 12,
+    "hvmap_shop": 12,
+    "hvmap_research_lab": 1
+   },
+   "legend": [
+    "hvmap_chapel|chapel: blessings",
+    "hvmap_bar|bar: food and drink",
+    "hvmap_gear_shop|gear shop: repairs, the anvil",
+    "hvmap_grocery|grocery: buy and sell",
+    "hvmap_clinic|clinic: healing",
+    "hvmap_storage|storage: your storage",
+    "hvmap_security|security: the city's guard",
+    "hvmap_skyscraper|skyscraper",
+    "hvmap_office|offices",
+    "hvmap_shop|shop: buy and sell",
+    "hvmap_research_lab|Kratos Aurorim Research: the way into the fortress",
+    "@seal|a quest giver: ! offers, ? to hand in"
+   ],
+   "drawn_medieval": [],
+   "drawn_hvmap": [
+    "hvmap_bar",
+    "hvmap_chapel",
+    "hvmap_clinic",
+    "hvmap_gear_shop",
+    "hvmap_grocery",
+    "hvmap_office",
+    "hvmap_research_lab",
+    "hvmap_security",
+    "hvmap_shop",
+    "hvmap_skyscraper",
+    "hvmap_storage"
+   ]
+  },
+  {
+   "step": "heaven16_tower",
+   "ok": true,
+   "research_top_m": 161.8,
+   "plan_max_skyscraper_m": 101.1,
+   "skyscrapers": 9,
+   "tallest_skyscraper_m": 101.3
+  },
+  {
+   "step": "heaven16_sleep",
+   "ok": false,
+   "in_bed": 57,
+   "poses": [
+    {
+     "role": "Priest",
+     "hips_over_mattress": 32.5,
+     "hit": "StaticMeshComponent_860"
+    },
+    {
+     "role": "Innkeeper",
+     "hips_over_mattress": 32.5,
+     "hit": "StaticMeshComponent_861"
+    },
+    {
+     "role": "Scholar",
+     "hips_over_mattress": 32.5,
+     "hit": "StaticMeshComponent_862"
+    },
+    {
+     "role": "Smith",
+     "hips_over_mattress": 32.5,
+     "hit": "StaticMeshComponent_863"
+    },
+    {
+     "role": "Trader",
+     "hips_over_mattress": 32.5,
+     "hit": "StaticMeshComponent_864"
+    },
+    {
+     "role": "Healer",
+     "hips_over_mattress": 32.5,
+     "hit": "InstancedStaticMeshComponent_108"
+    },
+    {
+     "role": "Soldier",
+     "hips_over_mattress": 32.5,
+     "hit": "InstancedStaticMeshComponent_115"
+    },
+    {
+     "role": "Soldier",
+     "hips_over_mattress": 32.5,
+     "hit": "InstancedStaticMeshComponent_115"
+    },
+    {
+     "role": "Soldier",
+     "hips_over_mattress": 32.5,
+     "hit": "InstancedStaticMeshComponent_115"
+    },
+    {
+     "role": "Worker",
+     "hips_over_mattress": 32.5,
+     "hit": "StaticMeshComponent_865"
+    }
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_h18b_heaven16_map.png",
+  "bs_h18b_heaven16_tower_noon.png",
+  "bs_h18b_heaven16_tower_night.png",
+  "bs_h18b_heaven16_sleeper.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

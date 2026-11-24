@@ -4454,6 +4454,180 @@ def step_lines10():
     # (PR #41's review: no line twice in a row, none naming the town it is said in)
     step_result("lines10", len(seen) >= 8 and all(v["pool"] >= 30 and v["distinct"] >= 30 and v["back_to_back"] == 0 and not v["names_here"] for v in seen.values()), **res)
 
+def heaven16_in():
+    """in Heaven (built round her), its section"""
+    st = str(G["gen"].get_wild_town_state()).split("|")
+    if not (len(st) > 3 and st[1] == "Heaven" and st[2] == "0" and st[3] == "1"): yield from to_town("Heaven")
+    return section()
+
+
+def step_heaven16_lamps():
+    """the list of 2026-11-22: "the street lights in heaven do not provide light": every street light's lamp lit at night (one each),
+    none by day; the brightness of the street under a lamp and half way between two at midnight (her body hidden, the camera
+    looking down at the street from 6 m), against noon's; pictures"""
+    g = G["gen"]; res = {}; quiet(True)
+    S = yield from heaven16_in(); h_was = g.get_town_hour()
+    poles = ism_instances("SM_MM00284_Exterior_Light_Streetlight")
+    res["poles"] = len(poles)
+    try:
+        g.set_town_hour(12.0); yield from wait(2.0)
+        res["noon"] = [str(l) for l in g.get_street_lamps16()][:1]
+        g.set_town_hour(23.5); yield from wait(2.0)
+        L = [str(l).split("|") for l in g.get_street_lamps16()]
+        res["midnight"] = "|".join(L[0]) if L else None
+        lamps = [V(float(q[1]), float(q[2]), float(q[3])) for q in L[1:]]
+        res["lamp_cd_radius"] = [L[1][4], L[1][5]] if len(L) > 1 else None
+        # (two lamps of one street, 15 to 25 m apart: under one, and half way between them)
+        pair = None
+        for a in lamps:
+            for b in lamps:
+                if a is not b and 1500 < dist2(a, b) < 2500: pair = (a, b); break
+            if pair: break
+        res["pair_m"] = round(dist2(*pair) / 100, 1) if pair else None
+        if pair:
+            a, b = pair
+            def street_view(at, name):
+                put(V(at.x, at.y, 0), yaw=0.0, z=0.0); G["pawn"].set_actor_hidden_in_game(True)
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-80, yaw=0.0)); yield from wait(2.5)
+                return (yield from shot_luma(name, (0.35, 0.35, 0.65, 0.65)))
+            res["luma_under"] = yield from street_view(a, "heaven16_lamp_under")
+            mid = V((a.x + b.x) / 2, (a.y + b.y) / 2, 0)
+            res["luma_between"] = yield from street_view(mid, "heaven16_lamp_between")
+            G["pawn"].set_actor_hidden_in_game(False)
+            put(V(a.x + 1200, a.y, 0), yaw=180.0, z=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=180.0)); yield from wait(2.0)
+            shot("heaven16_lamps_night", "1280x720"); yield from rwait(1.0)
+            g.set_town_hour(12.0); yield from wait(4.0)
+            res["luma_under_noon"] = yield from street_view(a, "heaven16_lamp_noon")
+    finally:
+        G["pawn"].set_actor_hidden_in_game(False); g.set_town_hour(h_was); quiet(False)
+    n = res["midnight"].split("|") if res.get("midnight") else []
+    ok = (res["poles"] > 0 and res["noon"] and res["noon"][0].split("|")[2] == "0" and n and int(n[1]) == res["poles"] and int(n[2]) == res["poles"]
+          and res.get("luma_under") is not None and res.get("luma_between") is not None and res["luma_under"] > 0.08 and res["luma_between"] > 0.03)
+    step_result("heaven16_lamps", bool(ok), **res)
+
+
+def step_heaven16_signs():
+    """the list of 2026-11-22: "the signs for the buildings in heaven should be modern style signs": every trade's board Heaven's lit
+    panel (no wooden shield board in Heaven), its faces lit pictures of modern words, none of the town's gold ones; a picture of one"""
+    g = G["gen"]; res = {}
+    S = yield from heaven16_in()
+    res["boards"] = len(ism_instances("SM_HV_SignBoard")); res["shield_boards"] = len(ism_instances("Sign", "/Game/RandomDungeon/Brokenspire"))
+    faces = []
+    for c in isms(S):
+        m = c.get_material(0)
+        if m and m.get_name().startswith(("MI_HV_Sign_", "MI_BS_Sign_")):
+            for i_ in range(c.get_instance_count()):
+                t = c.get_instance_transform(i_, True); t = t[-1] if isinstance(t, tuple) else t
+                faces.append((m.get_name(), t))
+    res["faces"] = {}
+    for n, _ in faces: res["faces"][n] = res["faces"].get(n, 0) + 1
+    res["gold_faces"] = sum(v for k, v in res["faces"].items() if k.startswith("MI_BS_Sign_"))
+    hv = [(n, t) for n, t in faces if n.startswith("MI_HV_Sign_")]
+    if hv:
+        n, t = hv[0]
+        # (from 2.6 m before the face (its +Z, the plane's), the camera level with it)
+        fw = unreal.MathLibrary.get_up_vector(t.rotation.rotator())
+        at = V(t.translation.x + fw.x * 260, t.translation.y + fw.y * 260, 0)
+        put(at, yaw=math.degrees(math.atan2(-fw.y, -fw.x)), z=0.0); G["pawn"].set_actor_hidden_in_game(True)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=5, yaw=math.degrees(math.atan2(-fw.y, -fw.x))))
+        g.set_town_hour(20.5); yield from wait(2.5); shot("heaven16_sign", "1280x720"); yield from rwait(1.0)
+        G["pawn"].set_actor_hidden_in_game(False); g.set_town_hour(11.0)
+    ok = res["boards"] > 0 and res["gold_faces"] == 0 and sum(res["faces"].values()) >= 2 * res["boards"] - 2 and hv
+    step_result("heaven16_signs", bool(ok), **res)
+
+
+def step_heaven16_map():
+    """the list of 2026-11-22: "heaven's large overhead map should have modern map symbols": the big map's marks for Heaven's
+    buildings are its pictograms (hvmap_*), none of the medieval building pictures (mapc_ / mapicon_) or badges drawn; its key names
+    them; a picture"""
+    g = G["gen"]; res = {}
+    S = yield from heaven16_in()
+    hud = G["pc"].get_hud()
+    sq = place("square")
+    if sq: put(sq, yaw=0.0)
+    try:
+        g.set_map_open(True); yield from rwait(1.5)
+        badges = [str(b).split("|")[0] for b in hud.get_town_badges15()]
+        res["badges"] = {}
+        for b in badges: res["badges"][b] = res["badges"].get(b, 0) + 1
+        res["legend"] = [str(l) for l in hud.get_town_legend15()][:20]
+        drawn = {str(x) for x in hud.get_art_drawn()}
+        res["drawn_medieval"] = sorted(x for x in drawn if x.startswith(("mapc_castle", "mapc_store", "mapc_barracks", "mapc_storehouse", "mapc_smithy", "mapc_healer", "mapc_tavern", "mapc_temple", "mapc_chapel", "mapicon_")))
+        res["drawn_hvmap"] = sorted(x for x in drawn if x.startswith("hvmap_"))
+        shot("heaven16_map", "1280x720"); yield from rwait(1.2)
+    finally:
+        g.set_map_open(False); yield from rwait(0.5)
+    ok = badges and all(b.startswith("hvmap_") for b in badges) and "hvmap_research_lab" in badges and len(res["badges"]) >= 4 and not res["drawn_medieval"]
+    step_result("heaven16_map", bool(ok), **res)
+
+
+def step_heaven16_sleep():
+    """the list of 2026-11-22: "sleeping citizens in Heaven look like they're floating above the bed": at 23 o'clock each sleeper's hips
+    against its mattress as the bed's own mesh is traced (complex), not its simple collision: 2 to 25 cm over it; pictures"""
+    g = G["gen"]; res = {}; quiet(True)
+    S = yield from heaven16_in(); h_was = g.get_town_hour()
+    try:
+        g.set_town_hour(20.0); GS.set_global_time_dilation(G["w"], 4.0); t0 = time.time()
+        while time.time() - t0 < 90.0:
+            yield from rwait(2.0)
+            if sum(1 for f in folk() if g.get_townsfolk(f["i"]).is_walking() and g.get_townsfolk(f["i"]).is_resident()) == 0: break
+        g.set_town_hour(23.0); yield from rwait(2.0); GS.set_global_time_dilation(G["w"], 1.0); yield from rwait(1.0)
+        L = sleep_lines(); sl = [f for f in L["folk"] if f["hasbed"] and f["inbed"]]
+        res["in_bed"] = len(sl)
+        poses = []
+        for f in sl[:10]:
+            t = g.get_townsfolk(f["i"]); m = t.get_component_by_class(unreal.SkeletalMeshComponent); b_ = f["bed"]
+            put(V(b_.x + 200, b_.y, 0), yaw=180.0, z=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-30, yaw=180.0)); yield from rwait(1.5)
+            pv = m.get_socket_location("pelvis")
+            # (the mattress: the bed's mesh traced from above (complex), the sleeper left out)
+            h = unreal.SystemLibrary.line_trace_single(G["w"], V(pv.x, pv.y, pv.z + 150), V(pv.x, pv.y, pv.z - 200), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, True, [t], unreal.DrawDebugTrace.NONE, True)
+            tt = h.to_tuple() if h else None
+            top = tt[4].z if tt and tt[0] else None
+            poses.append({"role": f["role"], "hips_over_mattress": round(pv.z - top, 1) if top is not None else None, "hit": (tt[10].get_name() if tt and tt[0] and tt[10] else None)})
+            if len(poses) == 1:
+                put(V(b_.x + 260, b_.y + 60, 0), yaw=200.0, z=0.0); G["pawn"].set_actor_hidden_in_game(True); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-25, yaw=200.0))
+                yield from rwait(1.5); shot("heaven16_sleeper", "1280x720"); yield from rwait(1.0); G["pawn"].set_actor_hidden_in_game(False)
+        res["poses"] = poses
+    finally:
+        GS.set_global_time_dilation(G["w"], 1.0); G["pawn"].set_actor_hidden_in_game(False); g.set_town_hour(h_was); quiet(False)
+    good = [q for q in res.get("poses", []) if q["hips_over_mattress"] is not None and 2.0 <= q["hips_over_mattress"] <= 25.0]
+    ok = res.get("in_bed", 0) >= 3 and len(res.get("poses", [])) >= 3 and len(good) == len(res["poses"])
+    step_result("heaven16_sleep", bool(ok), **res)
+
+
+def step_heaven16_tower():
+    """the list of 2026-11-22: "the building housing Kratos Aurorim Research, LLC in Heaven should be a much taller and more imposing":
+    its top against the tallest skyscraper here (their rooftops' tops) and the tallest the plan can make: 1.5 times or more both; its
+    security door still the way in; a picture from the square at noon and at night"""
+    g = G["gen"]; res = {}
+    S = yield from heaven16_in(); h_was = g.get_town_hour()
+    rt = S.get_editor_property("heaven_research_top_z16"); res["research_top_m"] = round(rt / 100, 1)
+    res["plan_max_skyscraper_m"] = round(g.heaven_sky_max_z16() / 100, 1)
+    tops = []
+    for c in isms(S):
+        m = c.get_editor_property("static_mesh")
+        if not m or "Rooftop01" not in m.get_name(): continue
+        bb = m.get_bounding_box()
+        for i_ in range(c.get_instance_count()):
+            t = c.get_instance_transform(i_, True); t = t[-1] if isinstance(t, tuple) else t
+            tops.append(t.translation.z + bb.max.z * t.scale3d.z)
+    res["skyscrapers"] = len(tops); res["tallest_skyscraper_m"] = round(max(tops) / 100, 1) if tops else None
+    rf = next((b for b in blds() if b["kind"] == "research facility"), None)
+    if rf:
+        sq = place("square") or V(rf["c"].x + 6000, rf["c"].y, 0)
+        d = V(rf["c"].x - sq.x, rf["c"].y - sq.y, 0); n_ = math.hypot(d.x, d.y) or 1.0
+        stand = V(rf["c"].x - d.x / n_ * 9000, rf["c"].y - d.y / n_ * 9000, 0)
+        yaw = math.degrees(math.atan2(d.y, d.x))
+        put(stand, yaw=yaw, z=0.0); G["pawn"].set_actor_hidden_in_game(True); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=22, yaw=yaw))
+        g.set_town_hour(12.0); yield from wait(3.0); shot("heaven16_tower_noon", "1280x720"); yield from rwait(1.0)
+        g.set_town_hour(22.0); yield from wait(4.0); shot("heaven16_tower_night", "1280x720"); yield from rwait(1.0)
+        G["pawn"].set_actor_hidden_in_game(False); g.set_town_hour(h_was)
+    ok = rt > 0 and res["tallest_skyscraper_m"] and res["research_top_m"] >= 1.5 * res["tallest_skyscraper_m"] and res["research_top_m"] >= 1.5 * res["plan_max_skyscraper_m"]
+    step_result("heaven16_tower", bool(ok), **res)
+
+STEPS.update({"heaven16_lamps": step_heaven16_lamps, "heaven16_signs": step_heaven16_signs, "heaven16_map": step_heaven16_map, "heaven16_sleep": step_heaven16_sleep, "heaven16_tower": step_heaven16_tower})
+
+
 def step_sleep10():
     """"if an NPC is supposed to be sleeping at night, have them sleep in their beds with a new animation or clip in blender" and "there
     should be more children in town, and they are supposed to be asleep at night": the evening walks everyone with a building home

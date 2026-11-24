@@ -225,7 +225,9 @@ void ARDTownsfolk::Tick(float Dt)
 			if (!bInBed)
 			{
 				PreBed = GetActorLocation(); bInBed = true;
-				SetActorLocationAndRotation(BedAt + FVector(0.f, 0.f, 92.f), FRotator(0.f, BedYaw, 0.f));
+				// (the list of 2026-11-22: "floating above the bed": over the mattress the bed's mesh traces, the body lifted so its hips lie
+				// 12 cm over it (92 cm lifted them 32.5 cm over every mattress, measured))
+				SetActorLocationAndRotation(BedAt + FVector(0.f, 0.f, Gen ? Gen->SleepLift16 : 72.f), FRotator(0.f, BedYaw, 0.f));
 				UAnimationAsset* Sl = WorkClip(TEXT("Sleep"));
 				if (Sl) PlayAnim(Sl, 1.f); else SetClip(false);
 			}

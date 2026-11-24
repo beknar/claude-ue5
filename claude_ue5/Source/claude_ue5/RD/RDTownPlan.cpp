@@ -36,8 +36,21 @@ DEFINE_LOG_CATEGORY_STATIC(LogRDTown, Log, All);
 static const FIntPoint RDTDir4[4] = { FIntPoint(-1, 0), FIntPoint(1, 0), FIntPoint(0, -1), FIntPoint(0, 1) };
 
 /** what a trade's sign says (two lines at most) */
-static FString RDTSignText(uint8 Kind)
+static FString RDTSignText(uint8 Kind, bool bModern = false)
 {
+	// (the list of 2026-11-22: Heaven's trades in a modern city's words)
+	if (bModern)
+		switch (Kind)
+		{
+		case TK_Smithy: case TK_Workshop: return TEXT("GEAR\nSHOP");
+		case TK_Store: return TEXT("GROCERY");
+		case TK_Healer: return TEXT("CLINIC");
+		case TK_Temple: case TK_Chapel: return TEXT("CHAPEL");
+		case TK_Storehouse: case TK_Warehouse: return TEXT("STORAGE");
+		case TK_Tavern: return TEXT("BAR");
+		case TK_Barracks: return TEXT("SECURITY");
+		default: break;
+		}
 	switch (Kind)
 	{
 	case TK_Smithy: return TEXT("SMITHY");
@@ -1514,7 +1527,7 @@ void ARDSection::TownShellBuilding(int32 BI)
 		// outside buildings look like they're floating"))
 		const FTransform Sg = WallT(FVector2D(Hx + 9.f, (DoorK + 0.5f) * M - Hy + 140.f), FVector2D(1, 0), 262.f);
 		AddPiece(TEXT("Town.Sign"), Sg, true);
-		AddSignText(Sg, RDTSignText(B.Kind));
+		AddSignText(Sg, RDTSignText(B.Kind, Generator->TownPlan == 5));
 	}
 }
 
@@ -3286,7 +3299,10 @@ void ARDSection::AddSignText(const FTransform& SignT, const FString& Text)
 	// painted in Almendra by bs_signs.py to fit 58 x 42 cm on a plane against each face (890's "Town.SignFace_<WORDS>"))
 	FString Key;
 	for (const TCHAR Ch : Text) if (FChar::IsAlnum(Ch)) Key.AppendChar(Ch);
-	const FName Face(*FString::Printf(TEXT("Town.SignFace_%s"), *Key));
+	FName Face(*FString::Printf(TEXT("Town.SignFace_%s"), *Key));
+	// (the list of 2026-11-22: Heaven's faces lit, on its own board (946 signs), where it has them)
+	if (Theme != NAME_None)
+		if (const FName Th(*FString::Printf(TEXT("%s.Town.SignFace_%s"), *Theme.ToString(), *Key)); Generator->Piece(Th)) Face = Th;
 	if (Generator->Piece(Face))
 	{
 		for (int32 Side = -1; Side <= 1; Side += 2)

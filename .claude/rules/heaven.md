@@ -18,3 +18,10 @@ The city is a wilderness town on `brokenspire` with the modern plan (`FRDWildTow
 - **A shot clip's "fastest bone" is late in a burst**: the trooper's and the commander's release came out 3.0 s; the release is held to 0.5 s.
 - **A held shooter fires only within its range**: a trooper held 10 m from her (its range 9 m, `max_chase_speed` 1) fired nothing in 12 s; from 7 m it fired twice and both rounds reached her.
 - **The start section keeps the castle's great-hall furniture**, as every dungeon copied from the castle.
+
+## The list of 2026-11-22 (phase 18: `946`, `RD/RDHeaven16.cpp`, `884 heaven16_*`)
+
+- **A light placed by a guess is not under the lamp**: the street light's head was taken as 2.6 m out and 7.4 m up; measured on the mesh it is 3.6 m out with its underside at 7.05 m. Measure a fixture's head on its vertices in the piece's frame (after `Adjust`).
+- **A bed's simple collision is not its mattress**: Heaven's beds' boxes stood over the mattress and the sleepers floated; a trace of the mesh (complex) finds it. The body's lift over the top then had to come down (92 to 72 cm): measure the hips against the mattress, not the traced top.
+- **A test that fails half way leaves what it opened**: the map step stopped on a wrong property name with the map open, and the next step's picture was the map. Close what a step opens in a `finally`.
+- **A piece looked up by its plain name is not themed**: the sign faces were found by `Town.SignFace_<WORDS>` (`Generator->Piece`), so Heaven's own needed `<Theme>.Town.SignFace_<WORDS>` asked for first.

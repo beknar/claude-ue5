@@ -1,0 +1,75 @@
+{
+ "tag": "h18a",
+ "plan": [
+  "heaven16_lamps",
+  "heaven16_signs",
+  "heaven16_map",
+  "heaven16_tower"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "heaven16_lamps",
+   "ok": true,
+   "poles": 154,
+   "noon": [
+    "lamps|154|0|0"
+   ],
+   "midnight": "lamps|154|154|1",
+   "lamp_cd_radius": [
+    "1400",
+    "2400"
+   ],
+   "pair_m": 21.0,
+   "luma_under": 134.58,
+   "luma_between": 102.5,
+   "luma_under_noon": 82.13
+  },
+  {
+   "step": "heaven16_signs",
+   "ok": true,
+   "boards": 41,
+   "shield_boards": 0,
+   "faces": {
+    "MI_HV_Sign_CHAPEL": 4,
+    "MI_HV_Sign_BAR": 2,
+    "MI_HV_Sign_GEARSHOP": 2,
+    "MI_HV_Sign_GROCERY": 2,
+    "MI_HV_Sign_CLINIC": 2,
+    "MI_HV_Sign_STORAGE": 2,
+    "MI_HV_Sign_SECURITY": 2,
+    "MI_HV_Sign_TOWER": 18,
+    "MI_HV_Sign_OFFICES": 24,
+    "MI_HV_Sign_SHOP": 24
+   },
+   "gold_faces": 0
+  },
+  {
+   "step": "heaven16_map",
+   "ok": false,
+   "error": "RDHUD: Failed to find property 'ui_drawn' for attribute 'ui_drawn' on 'RDHUD'",
+   "trace": "Traceback (most recent call last):\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\884_brokenspire_test.py\", line 6124, in run\n    yield from STEPS[s]()\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\884_brokenspire_test.py\", line 4552, in step_heaven16_map\n    res[\"drawn_medieval\"] = sorted({str(x) for x in hud.get_editor_property(\"ui_drawn\") if str(x).startswith((\"mapc_castle\", \"mapc_store\", \"mapc_barracks\", \"mapc_storehouse\", \"mapicon_\"))}) if hasattr(hud, \"get_editor_property\") else None\n                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nException: RDHUD: Failed to find property 'ui_drawn' for attribute 'ui_drawn' on 'RDHUD'\n"
+  },
+  {
+   "step": "heaven16_tower",
+   "ok": true,
+   "research_top_m": 161.8,
+   "plan_max_skyscraper_m": 101.1,
+   "skyscrapers": 9,
+   "tallest_skyscraper_m": 101.3
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_h18a_heaven16_lamp_under.png",
+  "bs_h18a_heaven16_lamp_between.png",
+  "bs_h18a_heaven16_lamps_night.png",
+  "bs_h18a_heaven16_lamp_noon.png",
+  "bs_h18a_heaven16_sign.png",
+  "bs_h18a_heaven16_tower_noon.png",
+  "bs_h18a_heaven16_tower_night.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 3
+}

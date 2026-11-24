@@ -2232,6 +2232,30 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") bool TownForge16(const FString& Result);
 	/** for the tests: "town|<name>|<collector>", "value|<item>|<gold>", "work|<result>|<band made>" */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetTrade16() const;
+	// ---- the list of 2026-11-22's eighteenth phase: Heaven's first fixes (RDHeaven16.cpp)
+	/** a street lamp's head in its pole's frame (946 lamps measures it on the mesh: the arm's end, the head's underside), its light */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven16") FVector HeavenLampHead16 = FVector::ZeroVector;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven16") float HeavenLampCd16 = 1400.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven16") float HeavenLampRadius16 = 2400.f;
+	/** the hours the street lamps burn: from LampsOn to LampsOff */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven16") float HeavenLampsOn16 = 19.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven16") float HeavenLampsOff16 = 6.5f;
+	/** Kratos Aurorim Research's top against the tallest a skyscraper of the plan can stand */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven16") float HeavenResearchShare16 = 1.6f;
+	/** a sleeper's body over its mattress's top (the bed's mesh traced): its hips then lie about 12 cm over it */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven16") float SleepLift16 = 72.f;
+	bool IsStreetNight16() const;
+	void TickStreetLamps16(float Dt);
+	/** for the tests: "lamps|<n>|<on>|<night>", "lamp|<x>|<y>|<z>|<cd>|<radius>|<visible>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven16") TArray<FString> GetStreetLamps16() const;
+	static FName HeavenMapSymbol16(uint8 Kind);
+	static FString HeavenMapMeaning16(uint8 Kind);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Heaven16") float HeavenSkyMaxZ16() const;
+	float StreetLampLook16 = 0.f;
+	int32 StreetLampNight16 = -1;
+	TWeakObjectPtr<ARDSection> StreetLampsOf16;
+	TArray<TWeakObjectPtr<class UPointLightComponent>> StreetLamps16;
+	TArray<TWeakObjectPtr<class UInstancedStaticMeshComponent>> StreetLampGlows16;
 	/** for the tests: the marks and found ids the cave links made this session taken off again */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") int32 ForgetCaveLinkMarks16();
 	TArray<int32> CaveLinkMarked16;

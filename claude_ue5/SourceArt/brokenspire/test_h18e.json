@@ -1,0 +1,257 @@
+{
+ "tag": "h18e",
+ "plan": [
+  "sleep10"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "sleep10",
+   "ok": false,
+   "walk_home_s": 8.7,
+   "still_walking": 0,
+   "beds": {
+    "recorded": 57,
+    "made": 30,
+    "sleepers": 49,
+    "given": 49
+   },
+   "no_bed_with_building": [
+    [
+     "Drunk",
+     true
+    ],
+    [
+     "Smith",
+     true
+    ],
+    [
+     "Keeper",
+     true
+    ],
+    [
+     "Witch",
+     false
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ]
+   ],
+   "sleepers": 49,
+   "asleep": 48,
+   "in_bed": 48,
+   "on_sleep_clip": 48,
+   "children": {
+    "at_home": 4,
+    "in_bed": 4,
+    "square": 0
+   },
+   "awake_sample": [
+    [
+     "Innkeeper",
+     "AS_Town_CarryWalk",
+     "bld -1",
+     true,
+     1
+    ]
+   ],
+   "shared_beds": 0,
+   "poses": [
+    {
+     "role": "Priest",
+     "mesh": "SKM_NPC_Character_05_Full_02",
+     "hips_over_top": 9.1,
+     "head_rise": 8.3,
+     "head_off": 66.2,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Scholar",
+     "mesh": "SK_UE5_NPC_Plague_doctor_Full_02",
+     "hips_over_top": 9.1,
+     "head_rise": 8.1,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Trader",
+     "mesh": "SKM_NPC_Character_03_Full_01",
+     "hips_over_top": 9.1,
+     "head_rise": 8.7,
+     "head_off": 66.2,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Healer",
+     "mesh": "SK_UE5_NPC_Queen_Full_02",
+     "hips_over_top": 9.1,
+     "head_rise": 7.5,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SKM_Viking_Full_010",
+     "hips_over_top": 9.1,
+     "head_rise": 7.5,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SKM_Knight_05_Full_01",
+     "hips_over_top": 9.1,
+     "head_rise": 7.7,
+     "head_off": 66.3,
+     "on_bed": 0.6,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SKM_Viking_Full_010",
+     "hips_over_top": 9.1,
+     "head_rise": 8.0,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SK_UE5_NPC_Beggar_03_Full_01",
+     "hips_over_top": 7.7,
+     "head_rise": 7.6,
+     "head_off": 62.9,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SKM_NPC_Character_02_Full_01",
+     "hips_over_top": 9.1,
+     "head_rise": 7.4,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SKM_NPC_Character_02_Full_01",
+     "hips_over_top": 9.1,
+     "head_rise": 7.7,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SKM_NPC_Character_01_Full_01",
+     "hips_over_top": 9.1,
+     "head_rise": 7.7,
+     "head_off": 66.3,
+     "on_bed": 0.0,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SKM_NPC_Character_01_Full_01",
+     "hips_over_top": 77.9,
+     "head_rise": 66.7,
+     "head_off": 1.6,
+     "on_bed": 1.8,
+     "plays": false,
+     "bld": true
+    }
+   ],
+   "bad_poses": [
+    {
+     "role": "Townsfolk",
+     "mesh": "SKM_NPC_Character_01_Full_01",
+     "hips_over_top": 77.9,
+     "head_rise": 66.7,
+     "head_off": 1.6,
+     "on_bed": 1.8,
+     "plays": false,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SK_UE5_NPC_Beggar_03_Full_01",
+     "hips_over_top": 71.3,
+     "head_rise": 62.7,
+     "head_off": 9.0,
+     "on_bed": 2.3,
+     "plays": false,
+     "bld": true
+    }
+   ],
+   "poses_n": 14,
+   "shots": [
+    "sleep10_a",
+    "sleep10_b"
+   ],
+   "night_smith_says": "the smith's work",
+   "night_smith_f": "smith",
+   "night_smith_panel": "smith",
+   "night_trader_f": "bark",
+   "night_trader_panel": "store",
+   "night_trader_in_bed": true,
+   "morning": {
+    "asleep": 1,
+    "in_bed": 0
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_h18e_sleep10_a.png",
+  "bs_h18e_sleep10_b.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

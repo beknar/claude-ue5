@@ -89,13 +89,29 @@ void ARDSection::ResearchShell(int32 BI)
 		if (const FRDPiece* Bx = Generator->Piece(TEXT("Lab.Block")))
 		{
 			const FVector2D Sz((Hl.Max.X - Hl.Min.X) * M, (Hl.Max.Y - Hl.Min.Y) * M);
-			const float Hb = 2400.f;
-			AddPiece(TEXT("Lab.Block"), FTransform(FRotator::ZeroRotator, Hc + FVector(0, 0, HeightOf(1) + 30.f), FVector(Sz.X * 0.86f / FMath::Max((float)Bx->Size.X, 1.f), Sz.Y * 0.86f / FMath::Max((float)Bx->Size.Y, 1.f), Hb / FMath::Max((float)Bx->Size.Z, 1.f))), true);
-			HeavenTallestZ = FMath::Max(HeavenTallestZ, HeightOf(1) + 30.f + Hb);
-			// (a red warning light at each top corner of the block)
-			for (int32 Cx = -1; Cx <= 1; Cx += 2)
-				for (int32 Cy = -1; Cy <= 1; Cy += 2)
-					AddLight(Hc + FVector(Cx * Sz.X * 0.43f, Cy * Sz.Y * 0.43f, HeightOf(1) + 60.f + Hb), FLinearColor(1.f, 0.08f, 0.05f), 400.f, 1500.f, false, 0.f);
+			// (the list of 2026-11-22: "much taller and more imposing": three tiers stepping in over the hall (0.86, 0.68, 0.48 of it, 45, 33
+			// and 22 % of the height), a spire on the top, red lights at each tier's corners; its top 1.6 times the tallest a skyscraper of
+			// the plan can stand (HeavenSkyMaxZ16), whatever this city's towers came to)
+			const float Want = Generator->HeavenResearchShare16 * Generator->HeavenSkyMaxZ16() - (HeightOf(1) + 30.f);
+			static const float Shares[3] = { 0.45f, 0.33f, 0.22f }, Widths[3] = { 0.86f, 0.68f, 0.48f };
+			float Z = HeightOf(1) + 30.f;
+			const float Body = Want * 0.88f;
+			for (int32 Ti = 0; Ti < 3; ++Ti)
+			{
+				const float Hb = Body * Shares[Ti];
+				AddPiece(TEXT("Lab.Block"), FTransform(FRotator::ZeroRotator, Hc + FVector(0, 0, Z), FVector(Sz.X * Widths[Ti] / FMath::Max((float)Bx->Size.X, 1.f), Sz.Y * Widths[Ti] / FMath::Max((float)Bx->Size.Y, 1.f), Hb / FMath::Max((float)Bx->Size.Z, 1.f))), true);
+				Z += Hb;
+				for (int32 Cx = -1; Cx <= 1; Cx += 2)
+					for (int32 Cy = -1; Cy <= 1; Cy += 2)
+						AddLight(Hc + FVector(Cx * Sz.X * Widths[Ti] * 0.5f, Cy * Sz.Y * Widths[Ti] * 0.5f, Z + 30.f), FLinearColor(1.f, 0.08f, 0.05f), 600.f, 2500.f, false, 0.f);
+			}
+			// (the spire: a thin block the rest of the way, its beacon at the top)
+			const float Sp = Want - Body;
+			AddPiece(TEXT("Lab.Block"), FTransform(FRotator::ZeroRotator, Hc + FVector(0, 0, Z), FVector(120.f / FMath::Max((float)Bx->Size.X, 1.f), 120.f / FMath::Max((float)Bx->Size.Y, 1.f), Sp / FMath::Max((float)Bx->Size.Z, 1.f))), true);
+			Z += Sp;
+			AddLight(Hc + FVector(0, 0, Z + 40.f), FLinearColor(1.f, 0.05f, 0.03f), 1500.f, 4000.f, false, 0.f);
+			HeavenTallestZ = FMath::Max(HeavenTallestZ, Z);
+			HeavenResearchTopZ16 = Z;
 		}
 	}
 	{
@@ -197,11 +213,10 @@ void ARDSection::HeavenSpotBuild(const FTownSpot& Sp)
 {
 	if (Sp.Kind == TS_StreetLight)
 	{
-		// (its arm out over the street; one in three lit (the town's lights are many already))
+		// (its arm out over the street; every one lit under its head at night (the list of 2026-11-22: "the street lights in heaven do not
+		// provide light": one in three had 220 cd, 7.4 m up, day and night))
 		AddPieceAt(TEXT("Heaven.StreetLight"), Sp.At, Sp.Yaw);
-		if (HashCombine(GetTypeHash(FIntPoint(FMath::RoundToInt(Sp.At.X), FMath::RoundToInt(Sp.At.Y))), 0x11u) % 3u == 0u)
-			if (UPointLightComponent* L = AddLight(Sp.At + FRotator(0, Sp.Yaw, 0).RotateVector(FVector(260.f, 0, 0)) + FVector(0, 0, 740.f), FLinearColor(1.f, 0.9f, 0.75f), 220.f, 1700.f, false, 0.f))
-				L->ComponentTags.Add(ARDDungeonGenerator::StreetLampTag16());          // (the list of 2026-11-22: a street lamp keeps its 90 m)
+		HeavenLamp16(Sp.At, Sp.Yaw);
 		MarkBlocked(Sp.At, 0.f, FVector2D(90.f, 90.f), true);
 		return;
 	}
