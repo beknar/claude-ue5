@@ -160,13 +160,19 @@ void ARDSection::ModernRoof(int32 BI, float Top)
 	// ---- the roof: a slab a tile, a parapet round its edge
 	for (int32 I = 0; I < Nx; ++I)
 		for (int32 J = 0; J < Ny; ++J)
-			AddPiece(TEXT("Modern.Roof"), FTransform(FRotator(0, Yaw0, 0), TownBldPoint(B, (I + 0.5f) * M - Hx, (J + 0.5f) * M - Hy, Top)), true);
+		{
+			const FVector Rp = TownBldPoint(B, (I + 0.5f) * M - Hx, (J + 0.5f) * M - Hy, Top);
+			if (CoreOpenAt20(BI, B.Storeys, Rp)) continue;          // (the last flight's and the lift's way up through it: the twentieth phase)
+			// (a roof she reaches by the core's stair and lift is stood on: its slabs and parapet collide (the first test: she stood on a
+			// wall's top 24 cm under the roof, which had none))
+			AddPiece(TEXT("Modern.Roof"), FTransform(FRotator(0, Yaw0, 0), Rp), !Cores20.Contains(BI));
+		}
 	const struct { FVector2D Out; int32 N; } Sides[4] = { { FVector2D(1, 0), Ny }, { FVector2D(-1, 0), Ny }, { FVector2D(0, 1), Nx }, { FVector2D(0, -1), Nx } };
 	for (int32 Si = 0; Si < 4; ++Si)
 		for (int32 K = 0; K < Sides[Si].N; ++K)
 		{
 			const FVector2D P = Si < 2 ? FVector2D(Sides[Si].Out.X * Hx, (K + 0.5f) * M - Hy) : FVector2D((K + 0.5f) * M - Hx, Sides[Si].Out.Y * Hy);
-			AddPiece(TEXT("Modern.Parapet"), WallT(P, Sides[Si].Out, Top), true);
+			AddPiece(TEXT("Modern.Parapet"), WallT(P, Sides[Si].Out, Top), !Cores20.Contains(BI));
 		}
 	HeavenTallestZ = FMath::Max(HeavenTallestZ, Top);
 	// ---- a tower: its floors stacked over the lobby, fitted to the lobby's footprint, its rooftop; how many floors by its seed
@@ -189,7 +195,14 @@ void ARDSection::ModernRoof(int32 BI, float Top)
 	{
 		FRandomStream R((int32)(B.Seed ^ 0x0FF1CEu));
 		for (int32 K = 0; K < 1 + R.RandRange(0, 1); ++K)
-			AddPiece(TEXT("Modern.RoofUnit"), FTransform(FRotator(0, Yaw0 + 90.f * R.RandRange(0, 3), 0), TownBldPoint(B, R.FRandRange(-Hx * 0.5f, Hx * 0.5f), R.FRandRange(-Hy * 0.5f, Hy * 0.5f), Top + 25.f)));
+		{
+			// (never over a stair and lift core's way up through the roof (PR #127's review); the same three draws)
+			const int32 Q = R.RandRange(0, 3); const float Ux = R.FRandRange(-Hx * 0.5f, Hx * 0.5f), Uy = R.FRandRange(-Hy * 0.5f, Hy * 0.5f);
+			const FVector Up = TownBldPoint(B, Ux, Uy, Top + 25.f);
+			bool bOver = false;
+			for (const float Dx : { -140.f, 0.f, 140.f }) for (const float Dy : { -140.f, 0.f, 140.f }) if (InCore20(Up + FVector(Dx, Dy, 0.f))) bOver = true;
+			if (!bOver) AddPiece(TEXT("Modern.RoofUnit"), FTransform(FRotator(0, Yaw0 + 90.f * Q, 0), Up));
+		}
 	}
 }
 

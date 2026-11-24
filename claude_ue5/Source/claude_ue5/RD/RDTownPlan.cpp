@@ -137,7 +137,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 	Rooms.Reset(); Corrs.Reset(); DoorEdges.Reset(); Portals.Reset(); Cells.Reset(); Fixtures.Reset(); SpecialChests.Reset();
 	Pickups.Reset();
 	Type.Init(0, N * N); Owner.Init(-1, N * N); Blocked.Init(0, N * N); CeilH.Init(0.f, N * N);
-	TownBlds.Reset(); TownSpots.Reset(); TownRoads.Reset(); TownPosts.Reset(); TownGreens.Reset(); Signals19.Reset(); SignalLenses19 = nullptr; YardLines19.Reset(); Runs19.Reset(); Junctions19.Reset(); ParkTiles19.Reset(); Parks19.Reset(); StopLines19.Reset(); Streets19.Reset();
+	TownBlds.Reset(); TownSpots.Reset(); TownRoads.Reset(); TownPosts.Reset(); TownGreens.Reset(); Signals19.Reset(); SignalLenses19 = nullptr; YardLines19.Reset(); Cores20.Reset(); CoreTiles20.Reset(); Lifts20.Reset(); Storeys20.Reset(); Runs19.Reset(); Junctions19.Reset(); ParkTiles19.Reset(); Parks19.Reset(); StopLines19.Reset(); Streets19.Reset();
 	CastleHallRoom = -1; CastleBld = -1; CastleTowers.Reset(); CastleStairTower = -1;
 	FRDTFrame F; F.O = FMath::Max(4, (N - 160) / 2); F.S = N - 2 * F.O; F.G = R.RandRange(0, 3);
 	const int32 S = F.S;
@@ -1464,6 +1464,8 @@ void ARDSection::TownShellBuilding(int32 BI)
 		for (int32 Cy = -1; Cy <= 1; Cy += 2)
 			for (int32 St = 0; St < B.Storeys; ++St)
 				AddPiece(TownPiece(B, TEXT("Pillar")), FTransform(FRotator(0, Yaw0, 0), TownBldPoint(B, Cx * Hx, Cy * Hy, 2.f + St * WH)));
+	// (the list of 2026-11-22's twentieth phase: Heaven's floors between the storeys, its stair and lift core)
+	if (B.Style >= 7) HeavenStoreys20(BI);
 	// ---- the roof: a gable along the building's longer side (none for a burned house: charred beams and a few rafters)
 	const float Top = 2.f + B.Storeys * WH;
 	// (Heaven: a flat roof with a parapet, a tower's floors over its lobby (RDHeaven.cpp), instead of the gable)
@@ -1643,6 +1645,7 @@ void ARDSection::TownFurnish(FRandomStream& R, int32 BI)
 	Bld16 = (BI == CastleBld || B.Kind == TK_Castle || B.Kind == TK_Cathedral || B.Kind == TK_Foundry || B.Kind == TK_Spire || B.Kind == TK_Research) ? -1 : BI;
 	ON_SCOPE_EXIT { Bld16 = -1; };
 	for (const int32 RI : B.Rooms) Furnish(R, RI);
+	FurnishStoreys20(BI);          // (the list of 2026-11-22's twentieth phase: Heaven's upper storeys, the building's interior too)
 	if (B.Rooms.Num() == 0) return;
 	// what the trades add to the dungeon's furnishing: their service's piece (a counter, a basin, the stash's chest) by the wall
 	// across from the door, the tavern's tables, the witch's cauldron

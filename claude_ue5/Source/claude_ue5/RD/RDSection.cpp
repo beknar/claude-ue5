@@ -1248,8 +1248,10 @@ void ARDSection::LightRoom(FRandomStream& R, const FRoom& Rm, int32 RoomIndex)
 	if (TorchCd > 0.f)
 		for (int32 Side = 0; Side < 4; ++Side)
 			for (const FVector& W : WallSlots(Rm, Side, Spacing, 40.f, 140.f))
-				AddTorch(W + FVector(0, 0, 250.f), InwardYaw(Side), TorchCd * R.FRandRange(0.8f, 1.2f), R.FRand() >= Unlit);
-	if (FillCd > 0.f) AddLight(Ctr + FVector(0, 0, Generator->RoomHeight - 120.f), Fill, FillCd * Big / 900.f, Big * 0.9f, false, 0.f);
+				// (none on a stair and lift core's walls (PR #127's review: a wall lamp in a flight's steps); its two draws are taken all the same)
+			if (InCore20(W + FRotator(0, InwardYaw(Side), 0).RotateVector(FVector(60.f, 0, 0)))) { R.FRandRange(0.8f, 1.2f); R.FRand(); }
+			else AddTorch(W + FVector(0, 0, 250.f), InwardYaw(Side), TorchCd * R.FRandRange(0.8f, 1.2f), R.FRand() >= Unlit);
+	if (FillCd > 0.f) AddLight(Ctr + FVector(0, 0, Theme == FName(TEXT("Heaven")) ? 230.f : Generator->RoomHeight - 120.f), Fill, FillCd * Big / 900.f, Big * 0.9f, false, 0.f);
 }
 
 void ARDSection::EnsureAnvil()
@@ -1319,7 +1321,8 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 	// (mistward: the footprints placed in this room, so that nothing is set on anything else)
 	FurnRoom = RI; Feet.Reset();
 	ON_SCOPE_EXIT { FurnRoom = -1; };
-	auto Center = [&](FName Nm, const FVector& P, float Yaw, bool bBlock = true, bool bLaneToo = false) -> bool
+	AddCoreFeet20(RI);          // (the list of 2026-11-22's twentieth phase: Heaven's stair and lift core kept free)
+	auto Center =[&](FName Nm, const FVector& P, float Yaw, bool bBlock = true, bool bLaneToo = false) -> bool
 	{
 		const FRDPiece* Pc = this->Pc(Nm);
 		if (!Pc) return false;
@@ -1336,6 +1339,8 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		float Ch = Rm.Shape != 0 || Rm.Ceil != 0 ? CeilAt(Tl) : RH;
 		// (mistward5: under a vault, from the vault at that point)
 		if (const float Vh = VaultHeightAt(RI, P); Vh > 0.f) Ch = Vh;
+		if (Theme == FName(TEXT("Heaven"))) Ch = FMath::Min(Ch, 272.f);          // (a storey's ceiling, not the room's 6 m: the twentieth phase's floors)
+		if (InCore20(P)) return;          // (nothing hung over a stair and lift core (PR #127's review))
 		if (Pc) AddPieceAt(Nm, P + FVector(0, 0, Ch - Pc->Size.Z), Yaw, 1.f, true);
 	};
 	auto Candles = [&](const FVector& P, float Cd)
@@ -1398,7 +1403,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		for (const FVector& Q : Quads)
 		{
 			if (!bCaveHall) Hang(TEXT("Chandelier"), Q, 0.f);
-			AddLight(Q + FVector(0, 0, RH - 230.f), FLinearColor(1.f, 0.66f, 0.36f), 260.f, 2200.f, true, 0.06f);
+			AddLight(Q + FVector(0, 0, Theme == FName(TEXT("Heaven")) ? FMath::Min(RH - 230.f, 230.f) : RH - 230.f), FLinearColor(1.f, 0.66f, 0.36f), 260.f, 2200.f, true, 0.06f);
 		}
 		for (const FVector& Cn : { FVector(B.Min.X + 150, B.Min.Y + 150, GetActorLocation().Z), FVector(B.Max.X - 150, B.Min.Y + 150, GetActorLocation().Z), FVector(B.Min.X + 150, B.Max.Y - 150, GetActorLocation().Z), FVector(B.Max.X - 150, B.Max.Y - 150, GetActorLocation().Z) })
 		{
@@ -1644,7 +1649,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		FurnishWalls(R, Rm, { TEXT("PrepTable"), TEXT("BreadOven"), TEXT("ShelfRack"), TEXT("Barrel"), TEXT("Crate") }, 300.f, 0.7f, true);
 		for (int32 I = 0; I < Quads.Num(); ++I)
 		{
-			if (I == 0) { Center(TEXT("Tripod"), Quads[I], 0.f); Center(TEXT("Cauldron"), Quads[I], 0.f, false); AddEffect(TEXT("CandleFire"), Quads[I] + FVector(0, 0, 10), 2.5f); AddLight(Quads[I] + FVector(0, 0, 60), FLinearColor(1.f, 0.5f, 0.2f), 60.f, 900.f, false, 0.3f); }
+			if (I == 0 && !InCore20(Quads[I])) { Center(TEXT("Tripod"), Quads[I], 0.f); Center(TEXT("Cauldron"), Quads[I], 0.f, false); AddEffect(TEXT("CandleFire"), Quads[I] + FVector(0, 0, 10), 2.5f); AddLight(Quads[I] + FVector(0, 0, 60), FLinearColor(1.f, 0.5f, 0.2f), 60.f, 900.f, false, 0.3f); }
 			else TableSet(Quads[I], R.RandBool() ? 0.f : 90.f, TEXT("TableLong"), TEXT("Bench"), I == 1);
 		}
 		for (const FVector& Q : Quads) { Hang(TEXT("PotRack"), Q + FVector(0, 0, -150), 0.f); break; }
@@ -1748,7 +1753,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		for (const FVector& Q : Quads)
 		{
 			Hang(TEXT("Chandelier"), Q, 0.f);
-			AddLight(Q + FVector(0, 0, RH - 230.f), FLinearColor(1.f, 0.7f, 0.42f), 110.f, 1800.f, false, 0.06f);
+			AddLight(Q + FVector(0, 0, Theme == FName(TEXT("Heaven")) ? FMath::Min(RH - 230.f, 230.f) : RH - 230.f), FLinearColor(1.f, 0.7f, 0.42f), 110.f, 1800.f, false, 0.06f);
 		}
 		for (int32 Side = 0; Side < 4; ++Side)
 		{
