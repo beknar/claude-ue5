@@ -112,7 +112,7 @@ The list's "crystal geode shards, cut at the librarian's table into scroll inks 
 
 ### Measured (phase 11)
 
-- `868 cave16gems -lv caves` (`test_c11f.json`, with `cave16mats`, after PR #118's review; again in `test_c12g.json` with the weapons): the twelve recipes at the librarian's table, none refused to the Warrior; the six inks in the Fire Bolt scroll's reagent; the red stone in her dagger: its blow 14.3 -> 15.73, and a found longsword's untouched by it (37.7) until a red stone of its own (41.47), the dagger's then still 15.73; the longsword let go of (as broken down or sold): its stone back in her pack; the white in her plate (40 %): a blow of 20 took 12, then 10.4, and none of it with the plate taken off; the violet in the dagger's place: her top speed 279.2 -> 301.5 and the red back in her pack; the blue: the climate's warmth 0 -> 0.4; the green: 0.2 % of her hit points a second more than without it; the sockets kept through `SaveCarry` / `RestoreCarry` and a death.
+- `868 cave16gems -lv caves` (`test_c12g.json`, with `cave16mats` and the weapons, after PR #118's review): the twelve recipes at the librarian's table, none refused to the Warrior; the six inks in the Fire Bolt scroll's reagent; the red stone in her dagger: its blow 14.3 -> 15.73, and a found longsword's untouched by it (37.7) until a red stone of its own (41.47), the dagger's then still 15.73; the longsword let go of (as broken down or sold): its stone back in her pack; the white in her plate (40 %): a blow of 20 took 12, then 10.4, and none of it with the plate taken off; the violet in the dagger's place: her top speed 279.2 -> 301.5 and the red back in her pack; the blue: the climate's warmth 0 -> 0.4; the green: 0.2 % of her hit points a second more than without it; the sockets kept through `SaveCarry` / `RestoreCarry` and a death.
 
 ## The caves' weapons (the list of 2026-11-22, phase 12)
 
@@ -135,10 +135,31 @@ The list's "crystal geode shards, cut at the librarian's table into scroll inks 
 
 ### Measured (phase 12)
 
-- `868 cave16weapons -lv caves` (`test_c12g.json`): every weapon in its six bands, a cave thing, its damage against its like's at its figure; the pick in the Warrior's hands (the pickaxe; her hand bone 8 cm off the handle's line, at its end: the wrist stands past the grip) and its picture; rubble in some sets of the 13 it builds (2, 6, 3 and 4 in four sessions: the side tunnel finds room or not with each session's seed; the test asks 2 at least); the pile five rocks to her chest's height across the tunnel (the picture); the Warrior's dagger broke a pile on its third blow (its tiles blocked before, open after; she walked 8.2 m through where it stood), the pick another in one; the cache of kind "cache"; the shard blade: no repair kit offered for it, a red geode shard mended 9.1 of its 30.5 (30 %); the lost blade laid two rings out.
+- `868 cave16weapons -lv caves` (`test_c12g.json`; again in `test_c13j.json` over the 25 sets to the second ring, rubble in 3, since half the side tunnels now flood): every weapon in its six bands, a cave thing, its damage against its like's at its figure; the pick in the Warrior's hands (the pickaxe; her hand bone 8 cm off the handle's line, at its end: the wrist stands past the grip) and its picture; rubble in some sets of the 13 it builds (2, 6, 3 and 4 in four sessions: the side tunnel finds room or not with each session's seed; the test asks 2 at least); the pile five rocks to her chest's height across the tunnel (the picture); the Warrior's dagger broke a pile on its third blow (its tiles blocked before, open after; she walked 8.2 m through where it stood), the pick another in one; the cache of kind "cache"; the shard blade: no repair kit offered for it, a red geode shard mended 9.1 of its 30.5 (30 %); the lost blade laid two rings out.
 - `868 cave16 -lv caves` (`test_c12g.json`): the caves with the side tunnels: no hole, nothing blocked but the rubble, every room walked, the containers 7, 7, 7 over two restarts.
 - `868 cave16lightless -lv caves` (`test_c12j.json`, PR #119's review): the Rogue hidden, a monster 8 m off: the lightless bow's arrow took 45.5 (the ambush), she stayed hidden and it was never roused (read every 0.1 s), its second arrow 26.0 (no ambush again); the same shots with a plain longbow took the same, ended her stealth and roused it.
 - **Not measured**: the named blades' and bones' looks in her hands.
+
+## The caves' armour, breath and the flooded chamber (the list of 2026-11-22, phase 13)
+
+`treasure16.json`'s `phase13`, written by `945 items` on every map of the game; C++ `RD/RDCave16e.cpp`.
+
+- **Armour from the fitted sets in new materials** (a new body of armour would need fitting to all six heroes): each copied band by band, every hero's fit kept, its material on every slot of the worn meshes; what it does while worn is the generator's `ArmourPerks16`.
+
+| Set | Copied from | Look | While worn |
+|---|---|---|---|
+| Spelunker's Armour (light) | Desert Hero's Armour | the Bazaar pack's leather | monsters notice her from 0.8 of their distance; a darksight light of 6 m |
+| Chitin Plate (heavy) | Plate Armour | the Creatures Insects pack's shell | a poison hurts half as much |
+| Drowned Knight's Armour (medium) | Templar's Armour | Pitch Black Temple's barnacles | her breath three times as long; made at the anvil from its four pieces |
+| Deepiron Mail, Scale, Plate | Orc Bruiser's, Split, Dark Knight's | rusted iron (Feather's) | one band (0.04 of a blow) better than its like; made at the anvil from 3, 4 or 6 deepiron ingots (one more a band) and two leather |
+
+- **The drowned knight's pieces**: helm, cuirass, gauntlets, greaves, one in each cave by its key, lying beside the cache of the first flooded side tunnel laid in a visit (once taken, that cave lays it no more: the game instance's `DrownedCaves16`, saved).
+- **Breath and the flooded chamber**: half of the side tunnels (to nowhere, or a loop's) are flooded instead of closed by rubble, the choice a hash of the set's seed (a stream's first draw leaned a whole session one way: 0 floods in 25 sets): on a side tunnel to nowhere from a quarter to 70 % of the way the water stands to the roof (on a loop's 14 m about its middle, crossed on one breath, the cache and the drowned piece under it) (3.5 m over the floor in the test's), its face a translucent teal plane both ways up and standing at both ends of the stretch (the packs' cave waters fade with depth and showed nothing between the walls), the end past it a dry pocket. Under it her head is under water: her speed 0.6 of her walk's, a blue-green tint on her view, her breath (15 s; the drowned knight's set 45 s) runs down and a bar over the quick bar shows it; at none the water takes 8 % of her hit points a second, whatever she wears, as any hurt (the pact can hold her; her regeneration waits); above it her breath is full again in 3 s.
+
+### Measured (phase 13)
+
+- `868 cave16armour -lv caves` (`test_c13k.json`, after PR #120's review; `cave16` in `test_c13i.json`): every set in its bands (the drowned knight's in one), a cave thing; the deepiron sets 0.04 better than their likes in every band; a monster 9 m off (0.9 of the noticing distance), unquiet, its alert read every 0.1 s: it noticed her bare and not in the spelunker's armour; her darksight light 6 m in it; a poison's hurt in 6 s 14.3 bare, 6.1 in chitin plate; the drowned knight's recipe at the anvil, none refused to the Warrior; her breath 15 s bare, 45 s in the set; a flooded side tunnel: under its water at once, her breath 14.7 -> 11.7 in 3 s, her top speed 353 -> 212, at none 24 % of her hit points gone in 3 s, out of it full (15 s) again in 3.5 s; one drowned knight's piece in a visit whatever the sets flooded (3 of the 25 to the second ring); pictures of the water from the dry tunnel (a teal wall across it) and from under it.
+- **Not measured**: the armour's looks on every hero (pictures of the Warrior only); how her view under water reads to a player.
 
 ## Limits
 

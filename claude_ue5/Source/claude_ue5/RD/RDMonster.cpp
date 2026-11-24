@@ -946,6 +946,8 @@ bool ARDMonster::TickCombat(float Dt)
 		// her steps on a quiet floor are heard from less far)
 		// (a hunting monster never comes here: bHunt sets bAggro above)
 		if (bOpenGround) Aggro *= G->WildQuietScale;
+		// (the list of 2026-11-22's caves: the spelunker's armour's quiet steps: she is noticed from a share of the distance)
+		if (G->GetPlayerCombat() && P == G->GetPlayerCombat()->GetOwner()) Aggro *= G->GetPlayerCombat()->GetNoticeMul16();
 		if (PreyT && G->AggroDistance > 0.f) Aggro = G->WildFolkPreyCm14;
 		if (NoticeCap >= 0.f) Aggro = FMath::Min(Aggro, NoticeCap);          // (lying low in an ambush, the list of 2026-11-14)
 		if (Dist > Aggro || Dz > (bOpenGround ? 700.f : 300.f) || ChaseTimer > 0.f) return false;

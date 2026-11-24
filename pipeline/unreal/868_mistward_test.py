@@ -8010,7 +8010,8 @@ def cave16weapons_inner():
     pawn.set_actor_hidden_in_game(False); shot("cave16weapons_pick", "1280x720"); yield from wait(0.6)
     # ---- the rubble: the start set, else the ring sets round it
     rub = []; sec = None; with_rubble = 0; looked = 0; second = None; lost_lines = []
-    for sc in [I2(x, y) for x in (-1, 0, 1) for y in (-1, 0, 1)] + [I2(2, 1), I2(-2, 0), I2(0, 2), I2(0, -2)]:
+    # (every set to the second ring, 25: since phase 13 half the side tunnels are flooded instead, and 13 sets held one pile once)
+    for sc in sorted([I2(x, y) for x in range(-2, 3) for y in range(-2, 3)], key=lambda q: max(abs(q.x), abs(q.y))):
         if g.get_section(sc) is None: g.generate_section_now(sc); yield from wait(0.5)
         L = [str(l).split("|") for l in g.get_cave_rubble16(sc)]
         lost_lines += ["|".join(l) for l in L if l[0] == "lost"]
@@ -8132,6 +8133,121 @@ def step_cave16lightless():
         try: quiet(False)
         except Exception: pass
 STEPS.update({"cave16lightless": step_cave16lightless})
+
+
+def cave16armour_inner():
+    """the list of 2026-11-22's caves, phase 13: the caves' armour and the flooded side tunnel. Measured: every set in its bands, a
+    cave thing, the deepiron sets one band (0.04) better than their likes; the spelunker's armour: a monster at 0.9 of the noticing
+    distance notices her unarmoured and not in it (unquiet, its alert read every 0.1 s), her darksight light 6 m; chitin plate: a
+    poison's hurt in 6 s against none worn; the drowned knight's set made from its four pieces (its recipe at the anvil, none
+    refused), her breath 45 s in it; a flooded side tunnel: under it her breath runs down a second a second, her top speed 0.6 of
+    her walk's, at none the water takes her hit points, out of it her breath full again in 3 s; the drowned piece by the cache"""
+    c = yield from restart("Warrior"); g = G["gen"]; res = {}
+    T = json.load(open(os.path.join(SA, "caves", "treasure16.json"), encoding="utf-8"))
+    AR = T["phase13"]["armour"]; BANDS = ["", "Fine ", "Masterwork ", "Exalted ", "Celestial ", "Divine "]
+    items = {str(i.name): i for i in g.get_editor_property("items")}
+    cave = {str(n) for n in g.get_editor_property("cave_items16")}
+    res["bands"] = {a["name"]: [b + a["name"] in items and b + a["name"] in cave for b in (BANDS if a.get("bands", True) else [""])] for a in AR}
+    res["deepiron_vs_like"] = {a["name"]: [round(items[b + a["name"]].amount - items[b + a["like"]].amount, 3) for b in BANDS if b + a["name"] in items] for a in AR if a.get("ingots")}
+    ok_items = all(all(v) for v in res["bands"].values()) and all(abs(x - 0.04) < 1e-3 for v in res["deepiron_vs_like"].values() for x in v)
+    pawn = G["pawn"]; at = pawn.get_actor_location(); kill_all_near(at, 8000.0); yield from wait(0.5)
+    def wear(nm):
+        c.add_item(nm, 1); return c.wear_armour(nm)
+    # ---- the spelunker's quiet steps: a monster at 0.9 of the noticing distance
+    ad = g.get_editor_property("aggro_distance")
+    end, yaw = clear_line(at, 0.0, ad * 0.9)
+    def noticed(sec=3.0):
+        m = spawn_dummy(end, 30.0); yield from wait(0.2)
+        # (held where it stands: a wandering monster came inside the shorter distance in one run of three)
+        mm_ = m.get_component_by_class(unreal.CharacterMovementComponent)
+        if mm_: mm_.set_editor_property("max_walk_speed", 0.0)
+        put(at, yaw=yaw); t0 = time.time(); seen = False
+        while time.time() - t0 < sec:
+            seen = seen or bool(m.is_aggro()); yield from wait(0.1)
+        try: m.destroy_actor()
+        except Exception: pass
+        yield from wait(0.5)
+        return seen
+    res["notice"] = {"distance_cm": round(ad * 0.9), "line": end is not None}
+    if end is not None:
+        res["notice"]["bare"] = yield from noticed()
+        res["notice"]["worn"] = wear("Spelunker's Armour")
+        c2 = yield from restart("Warrior"); c = c2; g = G["gen"]; pawn = G["pawn"]; kill_all_near(at, 8000.0); yield from wait(0.5)
+        wear("Spelunker's Armour"); yield from wait(0.3)
+        res["notice"]["spelunker"] = yield from noticed()
+    res["spelunker_darksight_cm"] = float(str(c.get_cave_buffs16()).split("|")[1]) if c.get_worn_armour() else None
+    # ---- chitin plate: a poison's hurt over 6 s
+    def poison_hurt():
+        c.set_health(c.get_max_health()); h0 = c.get_health(); c.apply_monster_ability(unreal.RDMonsterAbility.POISON, 1.0, 40.0)
+        t0 = time.time()
+        while time.time() - t0 < 6.0: yield
+        return h0 - c.get_health()
+    c.take_off_armour(); yield from rwait(5.0)
+    p_bare = yield from poison_hurt(); yield from rwait(6.0)
+    wear("Chitin Plate"); yield from wait(0.3)
+    p_chitin = yield from poison_hurt(); yield from rwait(6.0)
+    res["poison"] = {"bare": round(p_bare, 1), "chitin": round(p_chitin, 1)}
+    # ---- the drowned knight's set: its recipe, her breath in it
+    res["drowned_recipe"] = str(g.get_cave_craft16("Drowned Knight's Armour"))
+    c.take_off_armour(); yield from wait(0.2); b_bare = c.get_breath_left16()
+    wear("Drowned Knight's Armour"); yield from wait(0.3)
+    res["breath_max"] = [round(b_bare, 1), round(float(str(c.get_breath16()).split("|")[2]), 1)]
+    c.take_off_armour(); yield from wait(0.3)
+    # ---- a flooded side tunnel
+    # (a flooded side tunnel is in about one set of six (a side tunnel, then half of them flooded): every set to the second ring, 25,
+    # until one is found; the first session's 15 found none)
+    fl = None; sec = None; drowned = []; looked = 0; floods = 0
+    for sc in sorted([I2(x, y) for x in range(-2, 3) for y in range(-2, 3)], key=lambda q: max(abs(q.x), abs(q.y))):
+        if g.get_section(sc) is None: g.generate_section_now(sc); yield from wait(0.5)
+        L = [str(l).split("|") for l in g.get_cave_rubble16(sc)]
+        drowned += ["|".join(l) for l in L if l[0] == "drowned"]
+        F = [l for l in L if l[0] == "flood"]
+        looked += 1; floods += 1 if F else 0
+        if F and fl is None: fl, sec = F[0], sc
+    res["flood"] = {"set": [sec.x, sec.y] if sec else None, "drowned_pieces": drowned, "sets_flooded": [floods, looked]}
+    if fl:
+        a0 = V(float(fl[1]), float(fl[2]), float(fl[3])); a1 = V(float(fl[4]), float(fl[5]), float(fl[6])); wz = float(fl[7])
+        mid = V((a0.x + a1.x) / 2, (a0.y + a1.y) / 2, (a0.z + a1.z) / 2)
+        res["flood"]["water_over_floor_cm"] = round(wz - mid.z)
+        # (a picture of the water from the dry tunnel before it)
+        d_ = unreal.Vector(a0.x - a1.x, a0.y - a1.y, 0.0); d_ = d_ * (1.0 / max(d_.length(), 1.0))
+        dry = V(a0.x + d_.x * 400.0, a0.y + d_.y * 400.0, a0.z)
+        fz = floor_z(dry.x, dry.y, top=dry.z + 300.0, bottom=dry.z - 300.0)
+        put(V(dry.x, dry.y, (fz if fz is not None else dry.z) + 95.0), yaw=math.degrees(math.atan2(-d_.y, -d_.x))); yield from wait(1.0)
+        shot("cave16armour_flood", "1280x720"); yield from wait(0.6)
+        mv = pawn.get_component_by_class(unreal.CharacterMovementComponent); s_dry = mv.get_editor_property("max_walk_speed")
+        fz = floor_z(mid.x, mid.y, top=mid.z + 300.0, bottom=mid.z - 300.0)
+        put(V(mid.x, mid.y, (fz if fz is not None else mid.z) + 95.0), yaw=0.0); yield from wait(0.3)
+        t0 = time.time(); u0 = False
+        while time.time() - t0 < 1.0 and not u0: u0 = c.is_under_water16(); yield
+        b0 = c.get_breath_left16(); yield from rwait(3.0)
+        b1 = c.get_breath_left16(); s_wet = mv.get_editor_property("max_walk_speed")
+        res["flood"].update({"under": u0, "breath_3s": [round(b0, 2), round(b1, 2)], "speed": [round(s_dry, 1), round(s_wet, 1)]})
+        shot("cave16armour_under", "1280x720")
+        # (until the breath is gone, then 3 s more: the water's bite)
+        t0 = time.time()
+        while c.get_breath_left16() > 0.0 and time.time() - t0 < 20.0: yield
+        h0 = c.get_health(); yield from rwait(3.0); h1 = c.get_health()
+        res["flood"]["drowned_3s_share"] = round((h0 - h1) / max(c.get_max_health(), 1.0), 3)
+        # (out to the dry end: full again)
+        put(V(dry.x, dry.y, (floor_z(dry.x, dry.y, top=dry.z + 300.0, bottom=dry.z - 300.0) or dry.z) + 95.0), yaw=0.0); yield from rwait(3.5)
+        res["flood"]["breath_after_3_5s"] = round(c.get_breath_left16(), 2); res["flood"]["out_under"] = c.is_under_water16()
+    F_ = res.get("flood", {})
+    ok = (ok_items and res["notice"].get("bare") is True and res["notice"].get("spelunker") is False
+          and abs((res["spelunker_darksight_cm"] or 0) - 600.0) < 1.0
+          and res["poison"]["bare"] > 0 and res["poison"]["chitin"] <= res["poison"]["bare"] * 0.6
+          and res["drowned_recipe"] == "|" and abs(res["breath_max"][1] - 3 * res["breath_max"][0]) < 0.5
+          and F_.get("under") is True and 2.5 <= F_["breath_3s"][0] - F_["breath_3s"][1] <= 3.6 and abs(F_["speed"][1] / F_["speed"][0] - 0.6) < 0.02
+          and 0.15 <= F_.get("drowned_3s_share", 0) <= 0.33 and F_.get("breath_after_3_5s", 0) >= 14.9 and F_.get("out_under") is False
+          and len(F_.get("drowned_pieces", [])) == 1)          # (one a cave a run, whatever the sets flooded (PR #120's review: one in each))
+    step_result("cave16armour", ok, **res)
+def step_cave16armour():
+    try:
+        yield from cave16armour_inner()
+    finally:
+        try: quiet(False)
+        except Exception: pass
+STEPS.update({"cave16armour": step_cave16armour})
 
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""

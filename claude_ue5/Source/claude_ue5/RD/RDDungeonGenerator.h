@@ -2109,6 +2109,24 @@ public:
 	bool bLostBladeLaid16 = false;
 	/** set while the lightless bow's arrow strikes with her hidden: the monster takes the blow and is not roused */
 	bool bQuietHit16 = false;
+	// ---- phase 13: the caves' armour, breath and the flooded side tunnel (RDCave16e.cpp)
+	/** what a set does while worn (its item, every band) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TMap<FName, FRDArmourPerk16> ArmourPerks16;
+	/** her breath under water (s), the share of her hit points the water takes a second once it is gone, her speed under it */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float Breath16 = 15.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float DrownShare16 = 0.08f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float UnderwaterSpeed16 = 0.6f;
+	/** the share of the side tunnels to nowhere flooded (the others closed by rubble), the water's material */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float FloodShare16 = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TObjectPtr<UMaterialInterface> FloodWater16 = nullptr;
+	/** the drowned knight's four pieces (each cave holds one, by its key, in its flooded tunnel's dry end) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FName> DrownedPieces16;
+	/** whether a point (her head) is under a flooded tunnel's water */
+	bool UnderWater16(const FVector& Head) const;
+	FName DrownedPieceOf16() const;
+	/** the sets whose drowned knight's piece is laid this run; whether one is laid at all this run */
+	TSet<FIntPoint> DrownedLaid16;
+	bool bDrownedLaid16 = false;
 	/** her blow from From along Fw with a weapon (its gear key) of Reach: rubble in front of her struck */
 	void StrikeRubble16(const FVector& From, const FVector& Fw, float Reach, FName Gear);
 	/** the lost blade this cave picks */

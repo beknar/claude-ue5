@@ -725,7 +725,7 @@ void URDCombatComponent::TickSpells(float Dt, float Now)
 	if (PoisonDps > 0.f && Now < PoisonUntil && !bDead)
 	{
 		// (the list of 2026-11-22's caves: a grave-moss draught guards against it, a poison already on her too (PR #117's review))
-		PoisonAcc += PoisonDps * (1.f - FMath::Clamp(GetEffectMax16(ERDItemKind::PoisonGuard), 0.f, 0.9f)) * Dt;
+		PoisonAcc += PoisonDps * (1.f - FMath::Clamp(FMath::Max(GetEffectMax16(ERDItemKind::PoisonGuard), ArmourPerk16().PoisonGuard), 0.f, 0.9f)) * Dt;          // (phase 13: chitin plate's guard too)
 		if (PoisonAcc >= 2.f) { if (O) Generator->AddHitText(O->GetActorLocation() + FVector(0, 0, 90.f), PoisonAcc, true); LoseHealth(PoisonAcc); PoisonAcc = 0.f; }
 	}
 	else if (Now >= PoisonUntil) { PoisonDps = 0.f; PoisonAcc = 0.f; }

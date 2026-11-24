@@ -75,7 +75,19 @@ void ARDSection::CaveRubbleSet16()
 		? (float)Generator->CaveTunnels16[Run.Kit].Mesh->GetBoundingBox().GetExtent().Y : 450.f;
 	const float S = Generator->TileSize;
 	FVector Cache, CacheDir; PointAt(bSpur ? 0.8f : 0.5f, Cache, CacheDir);
-	for (int32 Pile = 0; Pile < (bSpur ? 1 : 2); ++Pile)
+	// (phase 13: a side tunnel to nowhere may be flooded instead: its middle under water, its dry end the cache and a piece of the
+	// drowned knight's set)
+	// (by a hash of the set's seed, not the stream's next draw: a stream seeded by its seed with a constant XORed in gives nearly the
+	// same first draws to neighbouring seeds, and a whole session's side tunnels came out all rubble (0 floods in 25 sets))
+	// (a loop's tunnel may flood too (a session with no side tunnel to nowhere had no water at all): 14 m about its middle, the cache and the
+	// drowned piece under it)
+	const float Lf = Run.Length > 1.f ? FMath::Min(0.2f, 700.f / Run.Length) : 0.2f;
+	const float FloodRoll = (float)(HashCombine((uint32)Seed, 0xF100D16u) % 10000u) / 10000.f;
+	const bool bFloodRolled = FloodRoll < Generator->FloodShare16;
+	const bool bFlood = bFloodRolled && CaveFloodSet16(Run, Half, bSpur ? 0.25f : 0.5f - Lf, bSpur ? 0.7f : 0.5f + Lf);
+	UE_LOG(LogRDCave16d, Log, TEXT("RDCAVE16 (%d,%d): the water's roll %.3f against %.2f, %s"), Coord.X, Coord.Y, FloodRoll, Generator->FloodShare16,
+		bFlood ? TEXT("flooded") : bFloodRolled ? TEXT("rolled, but the water was not laid") : TEXT("rubble"));
+	for (int32 Pile = 0; Pile < (bFlood ? 0 : bSpur ? 1 : 2); ++Pile)
 	{
 		FCaveRubble16 Rb; Rb.Index = Pile; Rb.Cache = Cache;
 		PointAt(bSpur ? 0.4f : Pile == 0 ? 0.3f : 0.7f, Rb.At, Rb.Dir);
@@ -125,7 +137,19 @@ void ARDSection::CaveRubbleSet16()
 	// (the cache between the piles: a chest of kind "cache", out of the set's chests to loot (a hero without a pick may never reach it))
 	FurnRoom = -1;
 	AddContainer(TEXT("Chest"), Cache, CacheDir.Rotation().Yaw + 90.f, TEXT("cache"));
-	UE_LOG(LogRDCave16d, Log, TEXT("RDCAVE16 (%d,%d): rubble across a %s of %.0f m, its cache at (%.0f, %.0f)"), Coord.X, Coord.Y, bSpur ? TEXT("side tunnel to nowhere") : TEXT("loop's tunnel"), Run.Length / 100.f, Cache.X, Cache.Y);
+	if (bFlood && bBuildInteractive && GetWorld() && GetWorld()->IsGameWorld())
+	{
+		// (the drowned knight's piece of this cave beside the cache, once a run)
+		const FName Pc = Generator->DrownedPieceOf16();
+		if (!Pc.IsNone() && !Generator->DrownedLaid16.Contains(Coord))
+		{
+			Generator->DrownedLaid16.Add(Coord); Generator->bDrownedLaid16 = true;
+			TArray<float> Wr; Wr.Init(-1.f, 1);
+			Generator->DropLoot(Cache + CacheDir * 120.f, { Pc }, Wr);
+			CaveLostLine16 += FString::Printf(TEXT("%sdrowned|%s|%.0f|%.0f|%.0f"), CaveLostLine16.IsEmpty() ? TEXT("") : TEXT(";"), *Pc.ToString(), Cache.X + CacheDir.X * 120.f, Cache.Y + CacheDir.Y * 120.f, Cache.Z);
+		}
+	}
+	UE_LOG(LogRDCave16d, Log, TEXT("RDCAVE16 (%d,%d): %s across a %s of %.0f m, its cache at (%.0f, %.0f)"), Coord.X, Coord.Y, bFlood ? TEXT("water") : TEXT("rubble"), bSpur ? TEXT("side tunnel to nowhere") : TEXT("loop's tunnel"), Run.Length / 100.f, Cache.X, Cache.Y);
 }
 
 void ARDSection::ClearRubble16(int32 K)
@@ -191,15 +215,16 @@ FName ARDDungeonGenerator::LostBladeOf16() const
 
 void ARDDungeonGenerator::NoteLostBladeTaken16(const TArray<FName>& Things)
 {
-	if (!bCave16 || LostBlades16.Num() == 0) return;
+	if (!bCave16 || (LostBlades16.Num() == 0 && DrownedPieces16.Num() == 0)) return;
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	if (!GI) return;
 	for (const FName& T : Things)
 	{
 		// (any band of a lost blade: its name ends with the blade's own)
 		const FString S = T.ToString();
-		if (!LostBlades16.ContainsByPredicate([&S](const FName& B) { return S.EndsWith(B.ToString()); })) continue;
 		const FString Key = !GI->CaveKey15.IsEmpty() ? GI->CaveKey15 : FString(TEXT("cave"));
+		if (DrownedPieces16.Contains(T)) { GI->DrownedCaves16.AddUnique(Key); continue; }          // (the drowned knight's piece of this cave (PR #120's review))
+		if (!LostBlades16.ContainsByPredicate([&S](const FName& B) { return S.EndsWith(B.ToString()); })) continue;
 		GI->LostBladeCaves16.AddUnique(Key);
 		UE_LOG(LogRDCave16d, Log, TEXT("RDCAVE16 the lost %s taken: %s lays it no more"), *S, *Key);
 	}
@@ -208,7 +233,6 @@ void ARDDungeonGenerator::NoteLostBladeTaken16(const TArray<FName>& Things)
 void ARDSection::CaveLostBlade16()
 {
 	// (deep in the cave: the first set two rings out from the start laid this run, in its lowest kit room, by its middle)
-	CaveLostLine16.Reset();
 	if (!Generator || Generator->bLostBladeLaid16 || FMath::Max(FMath::Abs(Coord.X), FMath::Abs(Coord.Y)) < 2) return;
 	UWorld* W = GetWorld();
 	if (!bBuildInteractive || !W || !W->IsGameWorld()) return;
@@ -259,7 +283,7 @@ void ARDSection::CaveLostBlade16()
 	TArray<float> Wr; Wr.Init(-1.f, 1);
 	Generator->DropLoot(PileAt, { Blade }, Wr);
 	Generator->bLostBladeLaid16 = true;
-	CaveLostLine16 = FString::Printf(TEXT("lost|%s|%.0f|%.0f|%.0f"), *Blade.ToString(), PileAt.X, PileAt.Y, PileAt.Z);
+	CaveLostLine16 += FString::Printf(TEXT("%slost|%s|%.0f|%.0f|%.0f"), CaveLostLine16.IsEmpty() ? TEXT("") : TEXT(";"), *Blade.ToString(), PileAt.X, PileAt.Y, PileAt.Z);          // (beside the drowned piece's line, not over it)
 	UE_LOG(LogRDCave16d, Log, TEXT("RDCAVE16 (%d,%d): the lost %s by a skeleton in room %d"), Coord.X, Coord.Y, *Blade.ToString(), Low);
 }
 
@@ -270,7 +294,9 @@ TArray<FString> ARDDungeonGenerator::GetCaveRubble16(FIntPoint Section) const
 	if (!S) return Out;
 	for (const ARDSection::FCaveRubble16& Rb : S->CaveRubble16)
 		Out.Add(FString::Printf(TEXT("rubble|%d|%.0f|%.0f|%.0f|%d|%d|%.0f|%.0f|%.0f"), Rb.Index, Rb.At.X, Rb.At.Y, Rb.At.Z, Rb.Hits < 0 ? 1 : 0, FMath::Max(Rb.Hits, 0), Rb.Cache.X, Rb.Cache.Y, Rb.Cache.Z));
-	if (!S->CaveLostLine16.IsEmpty()) Out.Add(S->CaveLostLine16);
+	if (!S->CaveLostLine16.IsEmpty()) { TArray<FString> Ls; S->CaveLostLine16.ParseIntoArray(Ls, TEXT(";")); Out.Append(Ls); }
+	for (const ARDSection::FCaveFlood16& Fl : S->CaveFloods16)
+		if (Fl.Pts.Num() > 1) Out.Add(FString::Printf(TEXT("flood|%.0f|%.0f|%.0f|%.0f|%.0f|%.0f|%.0f|%d"), Fl.Pts[0].X, Fl.Pts[0].Y, Fl.Pts[0].Z, Fl.Pts.Last().X, Fl.Pts.Last().Y, Fl.Pts.Last().Z, Fl.WaterZ, Fl.Pts.Num()));
 	return Out;
 }
 

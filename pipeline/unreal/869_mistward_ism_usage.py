@@ -163,6 +163,15 @@ for m_ in ("/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewe
                 for b in bases_of(pm): want(b, "used_with_nanite")
         gm = g_.get_editor_property("cave_god_ray_material16")
         if gm and gm.get_base_material(): note(gm)
+        # (phases 12 and 13: the caves' looks on weapons (static meshes in her hand) and on armour (skeletal meshes on her); the rubble's
+        # rocks; the flooded tunnels' water on the engine's plane)
+        for lk in g_.get_editor_property("weapon_looks16").values():
+            if lk and lk.get_base_material(): note(lk); want(lk.get_base_material(), "used_with_skeletal_mesh")
+        for rm in g_.get_editor_property("rubble_meshes16"):
+            if rm and rm.get_editor_property("nanite_settings").enabled:
+                for b in bases_of(rm): want(b, "used_with_nanite")
+        fw = g_.get_editor_property("flood_water16")
+        if fw and fw.get_base_material(): note(fw)
 # (materials the game puts on Nanite meshes in play, which no table names: the blood's spray and the moon (the list of 2026-11-22's
 # package: "missing usage flag Nanite! Default Material will be used in game")
 for mp in ("/Game/RandomDungeon/Combat/Materials/M_RDC_BloodSpray", "/Game/RandomDungeon/Sky/M_RD_SkyMoon"):
