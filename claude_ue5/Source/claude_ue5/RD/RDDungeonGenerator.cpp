@@ -1618,7 +1618,7 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 	if (bWild) { const FString Wp = WildPoiInteract(From); if (!Wp.IsEmpty()) return Wp; }
 	// (Brokenspire: someone of the town, a service, the gate, a boarded door; the castle's way back)
 	// (the list of 2026-11-22's twentieth phase: Heaven's lifts, at their doors and on their platforms)
-	if (bTown && TownPlan == 5) if (ARDSection* Hs = GetSection(FIntPoint::ZeroValue)) { const FString Lf = Hs->LiftUse20(From); if (!Lf.IsEmpty()) return Lf; }
+	if (bTown && TownPlan == 5) if (ARDSection* Hs = GetSection(FIntPoint::ZeroValue)) { const FString Lf = Hs->LiftUse20(From, Best ? BestD : 1e9f); if (!Lf.IsEmpty()) return Lf; }
 	if (bTown || bTownLink) { const FString Tw = TownInteract(From); if (!Tw.IsEmpty()) return Tw; }
 	// (the third list: an armory table's weapon, a shrine, a fountain, a vault's door)
 	if (bSpecialRooms || bWeaponPickups) { const FString Sp = UseSpecialNear(From); if (!Sp.IsEmpty()) return Sp; }
@@ -1743,7 +1743,7 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 				: FString::Printf(TEXT("search the body of %s (%d)"), *Lp->Owner14, Lp->GetNumThings());
 			return Lp->GetNumThings() == 1 ? FString::Printf(TEXT("take the %s"), *Lp->Things[0].ToString().ToLower()) : FString::Printf(TEXT("take up what lies here (%d)"), Lp->GetNumThings());
 		}
-	if (bTown && TownPlan == 5) if (const ARDSection* Hs = GetSection(FIntPoint::ZeroValue)) { const FString Lf = Hs->LiftDescribe20(From); if (!Lf.IsEmpty()) return Lf; }          // (the twentieth phase)
+	if (bTown && TownPlan == 5) if (const ARDSection* Hs = GetSection(FIntPoint::ZeroValue)) { const FString Lf = Hs->LiftDescribe20(From, Best ? BestD : 1e9f); if (!Lf.IsEmpty()) return Lf; }          // (the twentieth phase)
 	if (bTown || bTownLink) { const FString Tw = TownDescribe(From); if (!Tw.IsEmpty()) return Tw; }
 	if (bSpecialRooms || bWeaponPickups) { const FString Sp = DescribeSpecialNear(From); if (!Sp.IsEmpty()) return Sp; }
 	if (bTeleporters) { const FString Pd = DescribePadNear(From); if (!Pd.IsEmpty()) return Pd; }

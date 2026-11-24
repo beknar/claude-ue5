@@ -17,8 +17,8 @@
                               cooker and pot for the tripod and cauldron, a wall shelf, a picture for the shield; in the streets a
                               trailer for the cart, a parked car for the wagon, a dumpster for the hay, pallets for the logs, a bin
                               for the sacks, a bollard light for the fire basket)
-    946_heaven16.py storeys   phase 20, Heaven's storeys: the stair's flight (Heaven.Stair20: 15 steps of 20 cm over 6 m, a box each so each
-                              step is stood on), the rail round an opening (Heaven.Rail20), the lift shaft's glass side
+    946_heaven16.py storeys   phase 20, Heaven's storeys: the stair's flight (Heaven.Stair20: 15 steps of 20 cm over 6 m, 2.5 m wide, a
+                              box each so each step is stood on), the rail round an opening (Heaven.Rail20), the lift shaft's glass side
                               (Heaven.LiftWall20), its platform (Heaven.LiftPlatform20), the upper storeys' ceiling panel
                               (Heaven.CeilingPanel20)
     946_heaven16.py all       the five
@@ -270,20 +270,22 @@ def storeys(g):
     mats = hk.materials()
     B = lambda n, parts: hk.boxes(n, parts, mats)
     add = {}
-    # (a flight in its own frame: its foot at x 0, rising along +x 300 cm over 600 in 15 steps of 20 by 40, 270 wide; a stringer each side)
-    steps = [(40 * i, 40 * (i + 1), -135, 135, 0, 20 * (i + 1), "concrete") for i in range(15)]
-    steps += [(40 * i, 40 * (i + 1), -135, 135, 20 * (i + 1) - 2, 20 * (i + 1), "dark") for i in range(15)]
-    add["Heaven.Stair20"] = raw(B("SM_HV_Stair20", steps), collision=True)
+    # (a flight in its own frame: its foot at x 0, rising along +x 300 cm over 600 in 15 steps of 20 by 40, 250 wide (the walls stand
+    # 20 cm into a tile's edge: at 270 the flight by the back wall went 5 cm into it (PR #127's review), a new name for the new shape),
+    # each step's dark nosing)
+    steps = [(40 * i, 40 * (i + 1), -125, 125, 0, 20 * (i + 1), "concrete") for i in range(15)]
+    steps += [(40 * i, 40 * (i + 1), -125, 125, 20 * (i + 1) - 2, 20 * (i + 1), "dark") for i in range(15)]
+    add["Heaven.Stair20"] = raw(B("SM_HV_Stair20b", steps), collision=True)
     # (a rail along its own Y, 300 long: a glass panel 1 m high between a base and a steel top bar)
     add["Heaven.Rail20"] = raw(B("SM_HV_Rail20", [(-3, 3, -150, 150, 0, 10, "steel"), (-1, 1, -148, 148, 10, 100, "glass"), (-2.5, 2.5, -150, 150, 100, 106, "steel"),
                                                   (-3, 3, -150, -144, 0, 106, "steel"), (-3, 3, 144, 150, 0, 106, "steel")]), collision=True)
     # (the shaft's side: a storey's height of glass in a steel frame along its own Y)
     add["Heaven.LiftWall20"] = raw(B("SM_HV_LiftWall20", [(-2, 2, -148, 148, 0, 300, "glass"), (-4, 4, -150, -144, 0, 300, "steel"), (-4, 4, 144, 150, 0, 300, "steel"),
                                                           (-4, 4, -150, 150, 0, 8, "steel"), (-4, 4, -150, 150, 292, 300, "steel")]), collision=True)
-    # (the platform: a steel plate 2.7 m square, its top at its origin, a hazard stripe round its rim)
-    add["Heaven.LiftPlatform20"] = raw(B("SM_HV_LiftPlatform20", [(-135, 135, -135, 135, -20, -1, "plate"), (-135, 135, -135, 135, -1, 0, "plate"),
-                                                                  (-135, 135, -135, -125, 0, 0.6, "hazard"), (-135, 135, 125, 135, 0, 0.6, "hazard"),
-                                                                  (-135, -125, -125, 125, 0, 0.6, "hazard"), (125, 135, -125, 125, 0, 0.6, "hazard")]), collision=True)
+    # (the platform: a steel plate 2.5 m square (clear of the walls' 20 cm into the tile), its top at its origin, a hazard stripe round its rim)
+    add["Heaven.LiftPlatform20"] = raw(B("SM_HV_LiftPlatform20b", [(-125, 125, -125, 125, -20, -1, "plate"), (-125, 125, -125, 125, -1, 0, "plate"),
+                                                                   (-125, 125, -125, -115, 0, 0.6, "hazard"), (-125, 125, 115, 125, 0, 0.6, "hazard"),
+                                                                   (-125, -115, -115, 115, 0, 0.6, "hazard"), (115, 125, -115, 115, 0, 0.6, "hazard")]), collision=True)
     add["Heaven.CeilingPanel20"] = raw(B("SM_HV_CeilingPanel20", [(-62, 62, -32, 32, 0, 2, "steel"), (-60, 60, -30, 30, -1, 0, "panel")]))
     # (the roof's slabs and parapet collide where a core reaches the roof (the section asks for it only there); 908 made them without:
     # run this after 908)

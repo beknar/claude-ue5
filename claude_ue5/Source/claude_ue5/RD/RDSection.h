@@ -822,8 +822,12 @@ public:
 	void TickLifts20(float Dt);
 	int32 LiftNear20(const FVector& From, int32& OutFloor, bool& bOnIt) const;
 	FString LiftFloorName20(const FLift20& L, int32 K) const;
-	FString LiftDescribe20(const FVector& From) const;
-	FString LiftUse20(const FVector& From);
+	float LiftDist20(const FVector& From) const;
+	FString LiftDescribe20(const FVector& From, float NearerThan = 1e9f) const;
+	FString LiftUse20(const FVector& From, float NearerThan = 1e9f);
+	TSet<FIntPoint> CoreTiles20;
+	/** a point over a stair and lift core's tiles (a lamp, a hung piece or a kitchen's fire kept out of it) */
+	bool InCore20(const FVector& P) const;
 	/** for the tests: "core|<building>|<kind>|<storeys>|<x>|<y>|<slabs>|<flights>|<rails>", "route|<building>|<x>|<y>|<z>" (the way up),
 	 *  "furnished|<building>|<pieces>", "lift|...", "liftfloor|<i>|<k>|<z>" */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven20") TArray<FString> GetStoreys20() const;

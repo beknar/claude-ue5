@@ -4956,10 +4956,13 @@ def storeys20():
         q = str(l).split("|")
         if q[0] == "core": d["cores"][int(q[1])] = {"kind": q[2], "storeys": int(q[3]), "shaft": V(float(q[4]), float(q[5]), 0), "slabs": int(q[6]), "flights": int(q[7]), "rails": int(q[8])}
         elif q[0] == "route": d["routes"].setdefault(int(q[1]), []).append(V(float(q[2]), float(q[3]), float(q[4])))
-        elif q[0] == "furnished": d["furnished"][int(q[1])] = int(q[2])
+        elif q[0] == "furnished": d["furnished"][int(q[1])] = int(q[2]); d.setdefault("free_tiles", {})[int(q[1])] = int(q[3]) if len(q) > 3 else 1
         elif q[0] == "lift": d["lifts"].append({"i": int(q[1]), "bld": int(q[2]), "shaft": V(float(q[3]), float(q[4]), 0), "n": int(q[5]), "at": int(q[6]), "target": int(q[7]),
                                                 "z": float(q[8]), "moving": q[9] == "1", "shut": int(q[10]), "platform": q[11] == "1", "floors": []})
         elif q[0] == "liftfloor": d["lifts"][int(q[1])]["floors"].append(float(q[3]))
+        elif q[0] == "probe": d.setdefault("probes", {}).setdefault(int(q[1]), []).append({"k": int(q[2]), "at": V(float(q[3]), float(q[4]), float(q[5])), "open": q[6] == "1"})
+        elif q[0] == "roofedge": d.setdefault("roofedge", {})[int(q[1])] = {"at": V(float(q[2]), float(q[3]), float(q[4])), "out": V(float(q[5]), float(q[6]), 0)}
+        elif q[0] == "wayin": d.setdefault("wayin", {})[int(q[1])] = [V(float(q[2 + 3 * j]), float(q[3 + 3 * j]), float(q[4 + 3 * j])) for j in range(3)]
     return d
 
 
@@ -5011,8 +5014,20 @@ def step_heaven20_floors():
             if got is None or abs(got - want) > 6: bad.append({"bld": b, "storey": k, "want": round(want), "got": got})
         # (the shaft: open all the way, a platform only)
     res["floors_traced"] = traced; res["floors_missing"] = bad[:6]; res["floors_missing_n"] = len(bad)
+    # (each core's slabs probed: over the flight coming up and the shaft nothing at the slab's height; over the lift strip's far tile and
+    # the tile before it a floor there)
+    pbad = []; pn = 0
+    for b_, lst in d.get("probes", {}).items():
+        for pr in lst:
+            pn += 1; w_ = pr["at"]
+            got = trace_floor20(w_.x, w_.y, w_.z + 150, w_.z - 60)
+            at_slab = got is not None and abs(got - w_.z) < 8
+            if at_slab == pr["open"]: pbad.append({"bld": b_, "k": pr["k"], "open": pr["open"], "got": got, "want": round(w_.z)})
+    res["probes"] = pn; res["probes_wrong"] = pbad[:6]; res["probes_wrong_n"] = len(pbad)
     res["flights"] = sum(c["flights"] for c in d["cores"].values()); res["rails"] = sum(c["rails"] for c in d["cores"].values())
-    res["furnished_pieces"] = sum(d["furnished"].values()); res["unfurnished_cores"] = [b for b, c in d["cores"].items() if c["storeys"] >= 2 and d["furnished"].get(b, 0) == 0]
+    res["furnished_pieces"] = sum(d["furnished"].values()); res["unfurnished_cores"] = [b for b, c in d["cores"].items() if c["storeys"] >= 2 and d["furnished"].get(b, 0) == 0 and d.get("free_tiles", {}).get(b, 1) >= 3]
+    # (a small home's upper storeys can be all core and its way out: nothing to furnish there)
+    res["cores_with_no_free_tile_upstairs"] = sum(1 for b in d["cores"] if d.get("free_tiles", {}).get(b, 1) == 0)
     # (an office's second storey: its interior hidden from the street, shown from inside)
     b, c = tallest_core20(d, "office block")
     shots = []
@@ -5035,25 +5050,93 @@ def step_heaven20_floors():
         put(V(r0.x, r0.y, 0), z=r0.z); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=8, yaw=math.degrees(math.atan2(f0.y - r0.y, f0.x - r0.x))))
         yield from wait(1.5)
         pth = yield from shot_file19("heaven20_stair"); shots.append("stair" if pth else "stair?")
-    # (the roof stood on: traced over the lift strip's far tile at the roof's height; she stands there and is pushed at the parapet behind
-    # the core (out along its back wall) 2.5 s: on the roof all along)
-    if b is not None:
-        r0 = d["routes"][b][0]; rz = r0.z + 300.0 * c["storeys"] + 22.0
-        res["roof_traced_over_want"] = (lambda z_: None if z_ is None else round(z_ - rz, 1))(trace_floor20(r0.x, r0.y, rz + 200, rz - 200))
-        put(V(r0.x, r0.y, 0), z=rz); yield from wait(1.0)
+    # (the roof stood on: traced on its front edge's tile at the roof's height; she stands there and is pushed out over the edge 2.5 s:
+    # the parapet stops her (her middle no further out than the tile's edge less the parapet's 24 cm and her body), on the roof all along)
+    if b is not None and b in d.get("roofedge", {}):
+        e_ = d["roofedge"][b]; at, out = e_["at"], e_["out"]; rz = at.z
+        res["roof_traced_over_want"] = (lambda z_: None if z_ is None else round(z_ - rz, 1))(trace_floor20(at.x, at.y, rz + 200, rz - 200))
+        put(V(at.x, at.y, 0), z=rz); yield from wait(1.0)
         z1 = G["pawn"].get_actor_location().z
-        sh = d["cores"][b]["shaft"]; out = V(r0.x - sh.x, r0.y - sh.y, 0); n_ = math.hypot(out.x, out.y) or 1.0
         t1 = now(); zmin = 1e9
         while now() - t1 < 2.5:
             q = G["pawn"].get_actor_location(); zmin = min(zmin, q.z)
-            G["pawn"].add_movement_input(V(out.x / n_, out.y / n_, 0), 1.0, False); yield
-        res["roof"] = {"her_z_over_roof": round(z1 - rz, 1), "lowest_pushed_at_parapet": round(zmin - rz, 1)}
+            G["pawn"].add_movement_input(out, 1.0, False); yield
+        q = G["pawn"].get_actor_location()
+        res["roof"] = {"her_z_over_roof": round(z1 - rz, 1), "lowest_pushed_at_parapet": round(zmin - rz, 1),
+                       "out_from_tile_middle_cm": round((q.x - at.x) * out.x + (q.y - at.y) * out.y, 1)}
+    # (the way in from the street door to the core's lift strip on the ground floor, and out of it into the first storey (her own walk))
+    if b is not None and b in d.get("wayin", {}):
+        dr, fr, ln = d["wayin"][b]
+        put(V(dr.x, dr.y, 0), z=dr.z); yield from wait(0.8)
+        w1 = yield from walk20(fr, 8.0, 60.0); w2 = yield from walk20(ln, 6.0, 60.0)
+        put(V(ln.x, ln.y, 0), z=ln.z + 300.0); yield from wait(0.8)
+        w3 = yield from walk20(V(fr.x, fr.y, fr.z + 300.0), 6.0, 60.0)
+        res["way"] = {"door_to_before_core_cm": w1[0], "into_core_cm": w2[0], "storey1_out_of_core_cm": w3[0], "storey1_her_z_over_floor": round(w3[1] - fr.z - 300.0, 1)}
     res["shots"] = shots
     ok = res["cores"] >= 0.5 * max(res["homes_offices"], 1) and res["floors_missing_n"] == 0 and traced > 0 and not res["unfurnished_cores"] \
         and res.get("interior_from_street") is False and res.get("interior_from_storey_1", (False,))[0] is True \
         and res.get("roof_traced_over_want") is not None and abs(res["roof_traced_over_want"]) < 6 \
-        and 60 < res.get("roof", {}).get("her_z_over_roof", 0) < 130 and 60 < res.get("roof", {}).get("lowest_pushed_at_parapet", 0) < 130
+        and 75 < res.get("roof", {}).get("her_z_over_roof", 0) < 100 and 75 < res.get("roof", {}).get("lowest_pushed_at_parapet", 0) < 100 \
+        and 40 < res.get("roof", {}).get("out_from_tile_middle_cm", 999) < 110 and res["probes_wrong_n"] == 0 and res["probes"] > 0 \
+        and all(v < 70 for k_, v in res.get("way", {}).items() if k_.endswith("_cm")) and len(res.get("way", {})) == 4
     step_result("heaven20_floors", bool(ok), **res)
+
+
+def step_heaven20_restart():
+    """PR #127's review: after RestartPlay (ClearInteractive, then the replan with static building off) the lift keeps its platform and
+    gates and is ridden: on it at the street, F, it stops at floor 1 with her on it"""
+    g = G["gen"]; res = {}; quiet(True)
+    S = yield from heaven16_in(); yield from wait(1.0)
+    try:
+        g.restart_play(0); yield from rwait(3.0)
+        d = storeys20()
+        b, c = tallest_core20(d, "office block")
+        L = next((x for x in d["lifts"] if x["bld"] == b), None)
+        res["lifts"] = len(d["lifts"]); res["with_platform"] = sum(1 for x in d["lifts"] if x["platform"])
+        if L:
+            res["at"] = L["at"]; res["z_over_street"] = round(L["z"] - L["floors"][0], 1); res["gates_shut"] = L["shut"]
+            put(V(L["shaft"].x, L["shaft"].y, 0), z=L["floors"][0]); yield from wait(0.8)
+            res["f"] = str(g.interact_nearest(G["pawn"].get_actor_location()))
+            t1 = now(); x = None
+            while now() - t1 < 8:
+                yield from wait(0.25)
+                x = next((y for y in storeys20()["lifts"] if y["bld"] == b), None)
+                if x and not x["moving"] and x["at"] == x["target"]: break
+            res["lift_at"] = x["at"] if x else None; res["her_z_over_floor1"] = round(G["pawn"].get_actor_location().z - L["floors"][1], 1)
+    finally:
+        quiet(False)
+    ok = res.get("lifts", 0) > 0 and res["with_platform"] == res["lifts"] and res.get("at") == 0 and abs(res.get("z_over_street", 99)) < 1 \
+        and res.get("f") == "lift ride" and res.get("lift_at") == 1 and 75 < res.get("her_z_over_floor1", 0) < 100
+    step_result("heaven20_restart", bool(ok), **res)
+
+
+def step_heaven20_fps():
+    """PR #127's review: the storeys' cost: at phase 19's crossing view the frame rate over 6 s with Heaven built with its storeys and
+    without (rd.Storeys20 0, the town built again by leaving it and coming back), then with them again"""
+    g = G["gen"]; res = {}
+    def cvar(v): unreal.SystemLibrary.execute_console_command(G["w"], f"rd.Storeys20 {v}")
+    def measure():
+        S = yield from heaven16_in(); yield from wait(2.0)
+        d = streets19(); sl = [x for x in d["stoplines"] if x["signal"] >= 0]
+        if not sl: return None, 0
+        x = sl[0]; w_ = x["way"]
+        look_at19(V(x["at"].x - w_.x * 1500, x["at"].y - w_.y * 1500, 0), V(x["at"].x + w_.x * 3000, x["at"].y + w_.y * 3000, 0), -6.0)
+        G["pawn"].set_actor_hidden_in_game(False); yield from wait(3.0)
+        xs = []; t0 = time.time()
+        while time.time() - t0 < 6.0: yield from rwait(0.25); xs.append(g.get_fps())
+        return round(sum(xs) / max(len(xs), 1), 1), len(storeys20()["cores"])
+    try:
+        for st, v in (("with", 1), ("without", 0), ("with_again", 1)):
+            cvar(v)
+            if st != "with": yield from to_town("Brokenspire")
+            f_, n_ = yield from measure()
+            res[f"fps_{st}"] = f_; res[f"cores_{st}"] = n_
+    finally:
+        cvar(1)
+    w_ = [res.get("fps_with"), res.get("fps_with_again")]
+    res["with_mean"] = round(sum(x for x in w_ if x) / max(1, len([x for x in w_ if x])), 1)
+    ok = res.get("cores_without") == 0 and res.get("cores_with", 0) > 0 and res.get("fps_without") and res["with_mean"] >= 0.85 * res["fps_without"]
+    step_result("heaven20_fps", bool(ok), **res)
 
 
 def step_heaven20_stairs():
@@ -5136,11 +5219,22 @@ def step_heaven20_lift():
             # (and she walks onto it there)
             best, z = yield from walk20(V(sh.x, sh.y, 0), 4.0, 60.0)
             res["stepped_on"] = {"off_cm": best, "her_z_over_floor": round(z - L["floors"][k2], 1)}
+            # (on its edge (1.1 m from its middle, half off it toward the door) no ride is offered: only well on it)
+            # (her walk's speed stopped first: put there still walking, she slid 57 cm onto the platform in half a second)
+            cm_ = G["pawn"].get_component_by_class(unreal.CharacterMovementComponent)
+            put(V(sh.x + ent.x * 110, sh.y + ent.y * 110, 0), z=L["floors"][k2])
+            if cm_: cm_.stop_movement_immediately()
+            yield from wait(0.5)
+            qe = G["pawn"].get_actor_location(); e_said = str(g.describe_nearest(qe))
+            e_off = round((qe.x - sh.x) * ent.x + (qe.y - sh.y) * ent.y, 1); e_side = round(abs(-(qe.x - sh.x) * ent.y + (qe.y - sh.y) * ent.x), 1)
+            put(V(sh.x, sh.y, 0), z=L["floors"][k2]); yield from wait(0.5)
+            res["edge"] = {"said_at_edge": e_said, "her_out_from_middle_cm": e_off, "her_aside_cm": e_side, "said_at_middle": str(g.describe_nearest(G["pawn"].get_actor_location()))}
     finally:
         quiet(False)
     n = len(L["floors"]) if L else 0
     ok = L is not None and L["platform"] and len(rides) == n and all(r["lift_at"] == r["to"] and 60 < r["her_z_over_floor"] < 130 for r in rides) \
-        and res.get("gate", {}).get("nearest_to_shaft_middle_cm", 0) > 140 and abs(res.get("gate", {}).get("lowest_over_floor", -999) - 92) < 40 \
+        and res.get("gate", {}).get("nearest_to_shaft_middle_cm", 0) > 170 and abs(res.get("gate", {}).get("lowest_over_floor", -999) - 92) < 40 \
+        and res.get("edge", {}).get("said_at_edge", "").startswith("ride") is False and res.get("edge", {}).get("said_at_middle", "").startswith("ride") \
         and res.get("call", {}).get("lift_at") == k2 and res.get("call", {}).get("f") == "lift called" \
         and res.get("stepped_on", {}).get("off_cm", 999) < 60 and 60 < res.get("stepped_on", {}).get("her_z_over_floor", 0) < 130
     step_result("heaven20_lift", bool(ok), **res)
@@ -5275,7 +5369,7 @@ def step_heaven16_tower():
           and res["air_lights"] >= 13 and res["security_door"] == 1)
     step_result("heaven16_tower", bool(ok), **res)
 
-STEPS.update({"heaven20_floors": step_heaven20_floors, "heaven20_stairs": step_heaven20_stairs, "heaven20_lift": step_heaven20_lift, "heaven19_survey": step_heaven19_survey, "heaven19_medieval": step_heaven19_medieval, "heaven19_markings": step_heaven19_markings, "heaven19_signals": step_heaven19_signals, "heaven19_signs": step_heaven19_signs, "heaven19_parking": step_heaven19_parking, "heaven19_fps": step_heaven19_fps, "heaven19_restart": step_heaven19_restart, "heaven16_lamps": step_heaven16_lamps, "heaven16_signs": step_heaven16_signs, "heaven16_map": step_heaven16_map, "heaven16_sleep": step_heaven16_sleep, "heaven16_tower": step_heaven16_tower})
+STEPS.update({"heaven20_floors": step_heaven20_floors, "heaven20_stairs": step_heaven20_stairs, "heaven20_lift": step_heaven20_lift, "heaven20_restart": step_heaven20_restart, "heaven20_fps": step_heaven20_fps, "heaven19_survey": step_heaven19_survey, "heaven19_medieval": step_heaven19_medieval, "heaven19_markings": step_heaven19_markings, "heaven19_signals": step_heaven19_signals, "heaven19_signs": step_heaven19_signs, "heaven19_parking": step_heaven19_parking, "heaven19_fps": step_heaven19_fps, "heaven19_restart": step_heaven19_restart, "heaven16_lamps": step_heaven16_lamps, "heaven16_signs": step_heaven16_signs, "heaven16_map": step_heaven16_map, "heaven16_sleep": step_heaven16_sleep, "heaven16_tower": step_heaven16_tower})
 
 
 def step_sleep10():

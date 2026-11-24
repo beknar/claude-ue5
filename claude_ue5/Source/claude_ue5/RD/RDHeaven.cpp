@@ -195,7 +195,14 @@ void ARDSection::ModernRoof(int32 BI, float Top)
 	{
 		FRandomStream R((int32)(B.Seed ^ 0x0FF1CEu));
 		for (int32 K = 0; K < 1 + R.RandRange(0, 1); ++K)
-			AddPiece(TEXT("Modern.RoofUnit"), FTransform(FRotator(0, Yaw0 + 90.f * R.RandRange(0, 3), 0), TownBldPoint(B, R.FRandRange(-Hx * 0.5f, Hx * 0.5f), R.FRandRange(-Hy * 0.5f, Hy * 0.5f), Top + 25.f)));
+		{
+			// (never over a stair and lift core's way up through the roof (PR #127's review); the same three draws)
+			const int32 Q = R.RandRange(0, 3); const float Ux = R.FRandRange(-Hx * 0.5f, Hx * 0.5f), Uy = R.FRandRange(-Hy * 0.5f, Hy * 0.5f);
+			const FVector Up = TownBldPoint(B, Ux, Uy, Top + 25.f);
+			bool bOver = false;
+			for (const float Dx : { -140.f, 0.f, 140.f }) for (const float Dy : { -140.f, 0.f, 140.f }) if (InCore20(Up + FVector(Dx, Dy, 0.f))) bOver = true;
+			if (!bOver) AddPiece(TEXT("Modern.RoofUnit"), FTransform(FRotator(0, Yaw0 + 90.f * Q, 0), Up));
+		}
 	}
 }
 

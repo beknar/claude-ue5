@@ -1,0 +1,166 @@
+{
+ "tag": "h20e",
+ "plan": [
+  "heaven20_fps",
+  "heaven20_floors",
+  "heaven20_lift",
+  "heaven20_restart"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "heaven20_fps",
+   "ok": true,
+   "fps_with": 11.5,
+   "cores_with": 71,
+   "fps_without": 9.8,
+   "cores_without": 0,
+   "fps_with_again": 9.5,
+   "cores_with_again": 71,
+   "with_mean": 10.5
+  },
+  {
+   "step": "heaven20_floors",
+   "ok": true,
+   "homes_offices": 68,
+   "cores": 71,
+   "cores_by_kind": {
+    "temple": 1,
+    "tavern": 1,
+    "storehouse": 1,
+    "office block": 12,
+    "home": 56
+   },
+   "storeys_by_core": {
+    "2": 3,
+    "3": 62,
+    "4": 3,
+    "5": 3
+   },
+   "floors_traced": 148,
+   "floors_missing": [],
+   "floors_missing_n": 0,
+   "probes": 876,
+   "probes_wrong": [],
+   "probes_wrong_n": 0,
+   "flights": 219,
+   "rails": 811,
+   "furnished_pieces": 1103,
+   "unfurnished_cores": [],
+   "cores_with_no_free_tile_upstairs": 0,
+   "interior_from_street": false,
+   "interior_from_storey_1": [
+    true,
+    "inside"
+   ],
+   "roof_traced_over_want": 0.0,
+   "roof": {
+    "her_z_over_roof": 84.6,
+    "lowest_pushed_at_parapet": 84.6,
+    "out_from_tile_middle_cm": 90.2
+   },
+   "way": {
+    "door_to_before_core_cm": 51,
+    "into_core_cm": 30,
+    "storey1_out_of_core_cm": 54,
+    "storey1_her_z_over_floor": 84.6
+   },
+   "shots": [
+    "upper",
+    "stair"
+   ]
+  },
+  {
+   "step": "heaven20_lift",
+   "ok": false,
+   "building": 20,
+   "floors": 6,
+   "platform": true,
+   "rides": [
+    {
+     "to": 1,
+     "said": "ride the lift to floor 1",
+     "f": "lift ride",
+     "lift_at": 1,
+     "her_z_over_floor": 84.6
+    },
+    {
+     "to": 2,
+     "said": "ride the lift to floor 2",
+     "f": "lift ride",
+     "lift_at": 2,
+     "her_z_over_floor": 84.6
+    },
+    {
+     "to": 3,
+     "said": "ride the lift to floor 3",
+     "f": "lift ride",
+     "lift_at": 3,
+     "her_z_over_floor": 84.6
+    },
+    {
+     "to": 4,
+     "said": "ride the lift to floor 4",
+     "f": "lift ride",
+     "lift_at": 4,
+     "her_z_over_floor": 84.6
+    },
+    {
+     "to": 5,
+     "said": "ride the lift to the roof",
+     "f": "lift ride",
+     "lift_at": 5,
+     "her_z_over_floor": 84.6
+    },
+    {
+     "to": 0,
+     "said": "ride the lift to the street",
+     "f": "lift ride",
+     "lift_at": 0,
+     "her_z_over_floor": 84.6
+    }
+   ],
+   "gate": {
+    "nearest_to_shaft_middle_cm": 192,
+    "lowest_over_floor": 84.6
+   },
+   "call": {
+    "floor": 2,
+    "said": "call the lift",
+    "f": "lift called",
+    "lift_at": 2,
+    "gates_shut": 5
+   },
+   "stepped_on": {
+    "off_cm": 47,
+    "her_z_over_floor": 84.7
+   },
+   "edge": {
+    "said_at_edge": "ride the lift to floor 3",
+    "her_out_from_middle_cm": 52.8,
+    "her_aside_cm": 0.0,
+    "said_at_middle": "ride the lift to floor 3"
+   }
+  },
+  {
+   "step": "heaven20_restart",
+   "ok": true,
+   "lifts": 71,
+   "with_platform": 71,
+   "at": 0,
+   "z_over_street": 0.0,
+   "gates_shut": 5,
+   "f": "lift ride",
+   "lift_at": 1,
+   "her_z_over_floor1": 84.6
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_h20e_heaven20_upper_storey.png",
+  "bs_h20e_heaven20_stair.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

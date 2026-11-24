@@ -20,6 +20,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogRDHeaven20, Log, All);
 
 static const FIntPoint RDH20Dir4[4] = { FIntPoint(-1, 0), FIntPoint(1, 0), FIntPoint(0, -1), FIntPoint(0, 1) };
 static const FName RDLiftTag20(TEXT("HeavenLift20"));
+static TAutoConsoleVariable<int32> CVarRDStoreys20(TEXT("rd.Storeys20"), 1, TEXT("Heaven's storeys (floors, stair and lift cores, upper storeys' furniture): 1 built, 0 not (tests: the frame rate with and without them; a town built after the change)"));
 
 // (the storeys' surfaces over the section's floor: the ground's Modern.Floor at 2 has its top at 4; a slab at 2 + 300 k, its top at
 // 4 + 300 k, its underside at 300 k - 28; the roof at 2 + 300 N, 24 thick)
@@ -34,7 +35,7 @@ bool ARDSection::HeavenCorePlan20(int32 BI)
 	const int32 Nx = B.DoorSide < 2 ? B.Max.X - B.Min.X : B.Max.Y - B.Min.Y;
 	const int32 Ny = B.DoorSide < 2 ? B.Max.Y - B.Min.Y : B.Max.X - B.Min.X;
 	const bool bKind = B.Kind == TK_Home || B.Kind == TK_Office || (B.Kind != TK_SkyTower && B.Kind != TK_Shop && B.Kind != TK_Research && Ny >= 8);
-	if (!bKind || B.Storeys < 2 || B.State != 0 || Nx < 4 || Ny < 4 || !Generator->Piece(TEXT("Heaven.Stair20"))) return false;
+	if (!bKind || B.Storeys < 2 || B.State != 0 || Nx < 4 || Ny < 4 || !Generator->Piece(TEXT("Heaven.Stair20")) || CVarRDStoreys20.GetValueOnGameThread() == 0) return false;
 	const float Hx = Nx * M * 0.5f, Hy = Ny * M * 0.5f;
 	const int32 DoorCell = B.DoorSide < 2 ? B.DoorTile.Y - B.Min.Y : B.DoorTile.X - B.Min.X;
 	const FVector Yw = FRotator(0, TownBldYaw(B), 0).RotateVector(FVector(0, 1, 0));
@@ -56,9 +57,9 @@ bool ARDSection::HeavenCorePlan20(int32 BI)
 				for (int32 D = 0; D < 4 && bOk; ++D) if (DoorEdges.Contains(EdgeKey(Tl, Tl + RDH20Dir4[D]))) bOk = false;
 				Tiles.Add(Tl);
 			}
-		// (and a tile of the ground floor in front of the lift's strip to come in by: the core must not fill the building)
-		if (!bOk || Nx * Ny - 12 < 4) continue;
+		if (!bOk) continue;
 		Cores20.Add(BI, C);
+		for (const FIntPoint& Tl : Tiles) CoreTiles20.Add(Tl);
 		for (const FIntPoint& Tl : Tiles) Blocked[Idx(Tl)] = 1;          // (the townsfolk's ways keep off it)
 		return true;
 	}
@@ -151,9 +152,16 @@ void ARDSection::HeavenStoreys20(int32 BI)
 		L.Z = L.Floors[0];
 		if (const FRDPiece* Pp = Generator->Piece(TEXT("Heaven.LiftPlatform20")); Pp && Pp->Mesh)
 		{
-			UStaticMeshComponent* P = AddMesh(RootComponent, Pp->Mesh, FTransform::Identity, true);
+			UStaticMeshComponent* P = NewObject<UStaticMeshComponent>(this, NAME_None, RF_Transactional);
 			if (P)
 			{
+				P->SetMobility(EComponentMobility::Movable);
+				P->SetStaticMesh(Pp->Mesh);
+				P->SetupAttachment(RootComponent);
+				P->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+				P->SetCastShadow(false);
+				P->RegisterComponent();
+				AddInstanceComponent(P);
 				if (Pp->Material) P->SetMaterial(0, Pp->Material);
 				P->ComponentTags.Add(RDLiftTag20); P->ComponentTags.Add(FName(*FString::Printf(TEXT("Lift20_%d"), BI)));
 				P->SetWorldLocationAndRotation(FVector(Shaft.X, Shaft.Y, L.Z), FRotator(0, Yaw0, 0));
@@ -190,14 +198,28 @@ void ARDSection::HeavenStoreys20(int32 BI)
 			else if (UPrimitiveComponent* Pc = Cast<UPrimitiveComponent>(Cp)) L.Gates.Add(Pc);
 		}
 		L.Gates.Sort([](const TWeakObjectPtr<UPrimitiveComponent>& A, const TWeakObjectPtr<UPrimitiveComponent>& Bb) { return A.Get() && Bb.Get() && A->GetComponentLocation().Z < Bb->GetComponentLocation().Z; });
-		if (const UStaticMeshComponent* P = L.Platform.Get())
-		{
-			L.Z = P->GetComponentLocation().Z;
-			for (int32 K = 0; K < L.Floors.Num(); ++K) if (FMath::Abs(L.Floors[K] - L.Z) < 5.f) { L.At = L.Target = K; }
-		}
+		// (a restart puts it back at the street, as the rest of the town at its start)
+		L.Z = L.Floors[0]; L.At = L.Target = 0;
+		if (UStaticMeshComponent* P = L.Platform.Get()) P->SetWorldLocation(FVector(Shaft.X, Shaft.Y, L.Z));
+		else UE_LOG(LogRDHeaven20, Warning, TEXT("RDHEAVEN20 lift %d: no platform found again"), BI);
 		Lifts20.Add(L);
+		UpdateLiftGates20(Lifts20.Last());
 	}
 	Storeys20.Add(FString::Printf(TEXT("core|%d|%s|%d|%.0f|%.0f|%d|%d|%d"), BI, *TownKindName(B.Kind), B.Storeys, Shaft.X, Shaft.Y, Slabs, Flights, Rails));
+	// (the slabs probed for the tests: over the flight coming up (open), over the shaft (open), the lift strip's far tile and the tile in
+	// front of it (closed); the roof's front edge tile and its way out; the way in from the door to the core)
+	for (int32 K = 1; K <= B.Storeys; ++K)
+	{
+		const float Z = K < B.Storeys ? RDH20Floor(K) : RoofZ;
+		auto Pr = [&](float S, float T, int32 Open) { const FVector P = CorePoint20(C, S, T, Z); Storeys20.Add(FString::Printf(TEXT("probe|%d|%d|%.0f|%.0f|%.0f|%d"), BI, K, P.X, P.Y, P.Z, Open)); };
+		Pr((K - 1) % 2, 1.f, 1); Pr(2.f, 0.f, 1); Pr(2.f, 2.f, 0); Pr(3.f, 2.f, 0);
+	}
+	{
+		const FVector Edge = TownBldPoint(B, Hx - M * 0.5f, C.Y0 + C.Sgn * 2.5f * M, RoofZ);
+		Storeys20.Add(FString::Printf(TEXT("roofedge|%d|%.0f|%.0f|%.0f|%.3f|%.3f"), BI, Edge.X, Edge.Y, Edge.Z, Across.X, Across.Y));
+		const FVector Dr = TileWorld(B.DoorTile, RDH20Floor(0)), Fr = CorePoint20(C, 3.f, 2.f, RDH20Floor(0)), Ln = CorePoint20(C, 2.f, 2.f, RDH20Floor(0));
+		Storeys20.Add(FString::Printf(TEXT("wayin|%d|%.0f|%.0f|%.0f|%.0f|%.0f|%.0f|%.0f|%.0f|%.0f"), BI, Dr.X, Dr.Y, Dr.Z, Fr.X, Fr.Y, Fr.Z, Ln.X, Ln.Y, Ln.Z));
+	}
 	// (the way up for the tests: in at the lift's strip, round to the first flight's foot, and up flight by flight to the roof)
 	auto Rt = [&](float S, float T, float Z) { const FVector P = CorePoint20(C, S, T, Z); Storeys20.Add(FString::Printf(TEXT("route|%d|%.0f|%.0f|%.0f"), BI, P.X, P.Y, P.Z)); };
 	Rt(2.f, 2.f, RDH20Floor(0)); Rt(1.f, 1.f, RDH20Floor(0)); Rt(1.f, 0.f, RDH20Floor(0)); Rt(0.f, 0.f, RDH20Floor(0));
@@ -210,6 +232,11 @@ void ARDSection::HeavenStoreys20(int32 BI)
 	}
 }
 
+bool ARDSection::InCore20(const FVector& P) const
+{
+	return CoreTiles20.Num() > 0 && CoreTiles20.Contains(WorldToLocal(P));
+}
+
 // ------------------------------------------------------------------------------------------------ the core kept free on the ground floor
 void ARDSection::AddCoreFeet20(int32 RI)
 {
@@ -219,6 +246,8 @@ void ARDSection::AddCoreFeet20(int32 RI)
 		if (!B.Rooms.Contains(RI)) continue;
 		const FVector Ctr = CorePoint20(Kv.Value, 1.f, 1.5f, 0.f);
 		AddFoot(Ctr, TownBldYaw(B), FVector2D(3.f * Generator->TileSize, 4.f * Generator->TileSize), false, TEXT("Core20"));
+		// (the way into it: the row before the lift's strip, beside its three floor tiles, kept clear of furniture (PR #127's review))
+		AddFoot(CorePoint20(Kv.Value, 3.f, 2.f, 0.f), TownBldYaw(B), FVector2D(Generator->TileSize, 3.f * Generator->TileSize), true, TEXT("Core20Way"));
 	}
 }
 
@@ -236,7 +265,9 @@ void ARDSection::FurnishStoreys20(int32 BI)
 	const float Yaw0 = TownBldYaw(B);
 	TSet<FIntPoint> CoreT;
 	for (int32 S = 0; S < 3; ++S) for (int32 T = 0; T < 4; ++T) CoreT.Add(WorldToLocal(CorePoint20(*C, S, T, 0.f)));
-	int32 Placed = 0;
+	// (the core's way out on every storey: the row before the lift's strip's three floor tiles left bare (PR #127's review))
+	for (int32 T = 1; T < 4; ++T) CoreT.Add(WorldToLocal(CorePoint20(*C, 3, T, 0.f)));
+	int32 Placed = 0, Tiles = 0;
 	for (int32 K = 1; K < B.Storeys; ++K)
 	{
 		const float Z = RDH20Floor(K);
@@ -247,6 +278,7 @@ void ARDSection::FurnishStoreys20(int32 BI)
 				const FVector P = TownBldPoint(B, X, Y, Z);
 				const FIntPoint T = WorldToLocal(P);
 				if (CoreT.Contains(T)) continue;
+				++Tiles;
 				// (a ceiling light on every other tile: the storey seen lit through its windows)
 				if ((I + J) % 2 == 0) AddPiece(TEXT("Heaven.CeilingPanel20"), FTransform(FRotator(0, Yaw0, 0), TownBldPoint(B, X, Y, 300.f * K + 272.f - 4.f)), true);
 				// (the edge tiles: something against the wall, facing in; the inner ones: something free-standing; one tile in three left clear)
@@ -278,7 +310,7 @@ void ARDSection::FurnishStoreys20(int32 BI)
 				++Placed;
 			}
 	}
-	Storeys20.Add(FString::Printf(TEXT("furnished|%d|%d"), BI, Placed));
+	Storeys20.Add(FString::Printf(TEXT("furnished|%d|%d|%d"), BI, Placed, Tiles));
 }
 
 // ------------------------------------------------------------------------------------------------ the lift at play
@@ -314,7 +346,9 @@ int32 ARDSection::LiftNear20(const FVector& From, int32& OutFloor, bool& bOnIt) 
 	{
 		const FLift20& L = Lifts20[I];
 		const FVector D = From - L.Shaft;
-		if (FMath::Abs(D.X) < 160.f && FMath::Abs(D.Y) < 160.f && FMath::Abs(From.Z - L.Z - 92.f) < 80.f) { bOnIt = true; OutFloor = L.At; return I; }
+		// (on it: within its square (125 cm half) less her body (40), so her capsule is clear of the floors' gates (150 cm out) as it rides
+		// (PR #127's review: at 160 F rode it from the landing and shut the gate in her))
+		if (FMath::Abs(D.X) < 85.f && FMath::Abs(D.Y) < 85.f && FMath::Abs(From.Z - L.Z - 92.f) < 80.f) { bOnIt = true; OutFloor = L.At; return I; }
 		const FVector E = L.Shaft + L.Entry * 300.f;
 		if (FVector::Dist2D(From, E) < 220.f)
 			for (int32 K = 0; K < L.Floors.Num(); ++K) if (FMath::Abs(From.Z - L.Floors[K] - 92.f) < 80.f) { OutFloor = K; return I; }
@@ -327,22 +361,31 @@ FString ARDSection::LiftFloorName20(const FLift20& L, int32 K) const
 	return K == 0 ? FString(TEXT("the street")) : K == L.Floors.Num() - 1 ? FString(TEXT("the roof")) : FString::Printf(TEXT("floor %d"), K);
 }
 
-FString ARDSection::LiftDescribe20(const FVector& From) const
+float ARDSection::LiftDist20(const FVector& From) const
 {
 	int32 F; bool bOn;
 	const int32 I = LiftNear20(From, F, bOn);
-	if (I < 0) return FString();
+	if (I < 0) return 1e9f;
+	const FLift20& L = Lifts20[I];
+	return bOn ? FVector::Dist2D(From, L.Shaft) : FVector::Dist2D(From, L.Shaft + L.Entry * 300.f);
+}
+
+FString ARDSection::LiftDescribe20(const FVector& From, float NearerThan) const
+{
+	int32 F; bool bOn;
+	const int32 I = LiftNear20(From, F, bOn);
+	if (I < 0 || LiftDist20(From) >= NearerThan) return FString();          // (a door or container nearer takes F (PR #127's review))
 	const FLift20& L = Lifts20[I];
 	if (L.bMoving) return TEXT("the lift is moving");
 	if (bOn) { const int32 Next = L.At + 1 < L.Floors.Num() ? L.At + 1 : 0; return FString::Printf(TEXT("ride the lift to %s"), *LiftFloorName20(L, Next)); }
 	return L.At == F ? FString(TEXT("the lift is here: step on")) : FString(TEXT("call the lift"));
 }
 
-FString ARDSection::LiftUse20(const FVector& From)
+FString ARDSection::LiftUse20(const FVector& From, float NearerThan)
 {
 	int32 F; bool bOn;
 	const int32 I = LiftNear20(From, F, bOn);
-	if (I < 0) return FString();
+	if (I < 0 || LiftDist20(From) >= NearerThan) return FString();
 	FLift20& L = Lifts20[I];
 	if (L.bMoving) return TEXT("lift moving");
 	if (bOn) { L.Target = L.At + 1 < L.Floors.Num() ? L.At + 1 : 0; UE_LOG(LogRDHeaven20, Log, TEXT("RDHEAVEN20 lift %d: up from %d to %d"), L.Bld, L.At, L.Target); return TEXT("lift ride"); }

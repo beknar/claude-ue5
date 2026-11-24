@@ -1,0 +1,228 @@
+{
+ "tag": "h20f",
+ "plan": [
+  "heaven20_lift",
+  "heaven20_stairs",
+  "heaven16_sleep"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "heaven20_lift",
+   "ok": true,
+   "building": 20,
+   "floors": 6,
+   "platform": true,
+   "rides": [
+    {
+     "to": 1,
+     "said": "ride the lift to floor 1",
+     "f": "lift ride",
+     "lift_at": 1,
+     "her_z_over_floor": 84.6
+    },
+    {
+     "to": 2,
+     "said": "ride the lift to floor 2",
+     "f": "lift ride",
+     "lift_at": 2,
+     "her_z_over_floor": 84.6
+    },
+    {
+     "to": 3,
+     "said": "ride the lift to floor 3",
+     "f": "lift ride",
+     "lift_at": 3,
+     "her_z_over_floor": 84.6
+    },
+    {
+     "to": 4,
+     "said": "ride the lift to floor 4",
+     "f": "lift ride",
+     "lift_at": 4,
+     "her_z_over_floor": 84.6
+    },
+    {
+     "to": 5,
+     "said": "ride the lift to the roof",
+     "f": "lift ride",
+     "lift_at": 5,
+     "her_z_over_floor": 84.6
+    },
+    {
+     "to": 0,
+     "said": "ride the lift to the street",
+     "f": "lift ride",
+     "lift_at": 0,
+     "her_z_over_floor": 84.6
+    }
+   ],
+   "gate": {
+    "nearest_to_shaft_middle_cm": 192,
+    "lowest_over_floor": 84.6
+   },
+   "call": {
+    "floor": 2,
+    "said": "call the lift",
+    "f": "lift called",
+    "lift_at": 2,
+    "gates_shut": 5
+   },
+   "stepped_on": {
+    "off_cm": 48,
+    "her_z_over_floor": 84.7
+   },
+   "edge": {
+    "said_at_edge": "the lift is here: step on",
+    "her_out_from_middle_cm": 110.0,
+    "her_aside_cm": 0.0,
+    "said_at_middle": "ride the lift to floor 3"
+   }
+  },
+  {
+   "step": "heaven20_stairs",
+   "ok": true,
+   "building": 20,
+   "storeys": 5,
+   "points": [
+    {
+     "i": 1,
+     "reached": true,
+     "off_cm": 48,
+     "her_z_over_point": 84.6
+    },
+    {
+     "i": 2,
+     "reached": true,
+     "off_cm": 60,
+     "her_z_over_point": 84.6
+    },
+    {
+     "i": 3,
+     "reached": true,
+     "off_cm": 59,
+     "her_z_over_point": 84.6
+    },
+    {
+     "i": 4,
+     "reached": true,
+     "off_cm": 53,
+     "her_z_over_point": 84.7
+    },
+    {
+     "i": 5,
+     "reached": true,
+     "off_cm": 50,
+     "her_z_over_point": 84.7
+    },
+    {
+     "i": 6,
+     "reached": true,
+     "off_cm": 54,
+     "her_z_over_point": 84.6
+    },
+    {
+     "i": 7,
+     "reached": true,
+     "off_cm": 54,
+     "her_z_over_point": 84.6
+    },
+    {
+     "i": 8,
+     "reached": true,
+     "off_cm": 43,
+     "her_z_over_point": 84.7
+    },
+    {
+     "i": 9,
+     "reached": true,
+     "off_cm": 43,
+     "her_z_over_point": 84.7
+    },
+    {
+     "i": 10,
+     "reached": true,
+     "off_cm": 45,
+     "her_z_over_point": 84.7
+    },
+    {
+     "i": 11,
+     "reached": true,
+     "off_cm": 52,
+     "her_z_over_point": 84.7
+    },
+    {
+     "i": 12,
+     "reached": true,
+     "off_cm": 45,
+     "her_z_over_point": 84.6
+    }
+   ],
+   "roof_reached": true
+  },
+  {
+   "step": "heaven16_sleep",
+   "ok": true,
+   "in_bed": 66,
+   "poses": [
+    {
+     "role": "Priest",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_787"
+    },
+    {
+     "role": "Innkeeper",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_788"
+    },
+    {
+     "role": "Scholar",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_789"
+    },
+    {
+     "role": "Smith",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_790"
+    },
+    {
+     "role": "Trader",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_791"
+    },
+    {
+     "role": "Healer",
+     "hips_over_mattress": 12.5,
+     "hit": "InstancedStaticMeshComponent_129"
+    },
+    {
+     "role": "Soldier",
+     "hips_over_mattress": 12.5,
+     "hit": "InstancedStaticMeshComponent_139"
+    },
+    {
+     "role": "Soldier",
+     "hips_over_mattress": 12.5,
+     "hit": "InstancedStaticMeshComponent_139"
+    },
+    {
+     "role": "Soldier",
+     "hips_over_mattress": 12.5,
+     "hit": "InstancedStaticMeshComponent_139"
+    },
+    {
+     "role": "Worker",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_792"
+    }
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log, Content Browser",
+ "shots": [
+  "bs_h20f_heaven16_sleeper.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}
