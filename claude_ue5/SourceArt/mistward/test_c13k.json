@@ -1,0 +1,135 @@
+{
+ "tag": "c13k",
+ "plan": [
+  "cave16armour"
+ ],
+ "level": "caves",
+ "steps": [
+  {
+   "step": "cave16armour",
+   "ok": true,
+   "bands": {
+    "Spelunker's Armour": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Chitin Plate": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Drowned Knight's Armour": [
+     true
+    ],
+    "Deepiron Mail": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Deepiron Scale": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Deepiron Plate": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ]
+   },
+   "deepiron_vs_like": {
+    "Deepiron Mail": [
+     0.04,
+     0.04,
+     0.04,
+     0.04,
+     0.04,
+     0.04
+    ],
+    "Deepiron Scale": [
+     0.04,
+     0.04,
+     0.04,
+     0.04,
+     0.04,
+     0.04
+    ],
+    "Deepiron Plate": [
+     0.04,
+     0.04,
+     0.04,
+     0.04,
+     0.04,
+     0.04
+    ]
+   },
+   "notice": {
+    "distance_cm": 900,
+    "line": true,
+    "bare": true,
+    "worn": true,
+    "spelunker": false
+   },
+   "spelunker_darksight_cm": 600.0,
+   "poison": {
+    "bare": 14.5,
+    "chitin": 6.0
+   },
+   "drowned_recipe": "|",
+   "breath_max": [
+    15.0,
+    45.0
+   ],
+   "flood": {
+    "set": [
+     -1,
+     -1
+    ],
+    "drowned_pieces": [
+     "drowned|Drowned Knight's Gauntlets|-19586|-20408|-861"
+    ],
+    "sets_flooded": [
+     3,
+     25
+    ],
+    "water_over_floor_cm": 372,
+    "under": true,
+    "breath_3s": [
+     14.64,
+     11.63
+    ],
+    "speed": [
+     353.4,
+     212.0
+    ],
+    "drowned_3s_share": 0.243,
+    "breath_after_3_5s": 15.0,
+    "out_under": false
+   }
+  }
+ ],
+ "windows_hidden": "Content Browser, Message Log",
+ "shots": [
+  "mw_c13k_cave16armour_flood.png",
+  "mw_c13k_cave16armour_under.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}

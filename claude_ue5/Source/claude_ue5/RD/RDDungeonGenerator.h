@@ -2124,8 +2124,9 @@ public:
 	/** whether a point (her head) is under a flooded tunnel's water */
 	bool UnderWater16(const FVector& Head) const;
 	FName DrownedPieceOf16() const;
-	/** the sets whose drowned knight's piece is laid this run */
+	/** the sets whose drowned knight's piece is laid this run; whether one is laid at all this run */
 	TSet<FIntPoint> DrownedLaid16;
+	bool bDrownedLaid16 = false;
 	/** her blow from From along Fw with a weapon (its gear key) of Reach: rubble in front of her struck */
 	void StrikeRubble16(const FVector& From, const FVector& Fw, float Reach, FName Gear);
 	/** the lost blade this cave picks */

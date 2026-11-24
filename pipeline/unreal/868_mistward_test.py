@@ -8239,7 +8239,7 @@ def cave16armour_inner():
           and res["drowned_recipe"] == "|" and abs(res["breath_max"][1] - 3 * res["breath_max"][0]) < 0.5
           and F_.get("under") is True and 2.5 <= F_["breath_3s"][0] - F_["breath_3s"][1] <= 3.6 and abs(F_["speed"][1] / F_["speed"][0] - 0.6) < 0.02
           and 0.15 <= F_.get("drowned_3s_share", 0) <= 0.33 and F_.get("breath_after_3_5s", 0) >= 14.9 and F_.get("out_under") is False
-          and len(F_.get("drowned_pieces", [])) >= 1)
+          and len(F_.get("drowned_pieces", [])) == 1)          # (one a cave a run, whatever the sets flooded (PR #120's review: one in each))
     step_result("cave16armour", ok, **res)
 def step_cave16armour():
     try:

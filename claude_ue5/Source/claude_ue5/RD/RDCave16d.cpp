@@ -143,7 +143,7 @@ void ARDSection::CaveRubbleSet16()
 		const FName Pc = Generator->DrownedPieceOf16();
 		if (!Pc.IsNone() && !Generator->DrownedLaid16.Contains(Coord))
 		{
-			Generator->DrownedLaid16.Add(Coord);
+			Generator->DrownedLaid16.Add(Coord); Generator->bDrownedLaid16 = true;
 			TArray<float> Wr; Wr.Init(-1.f, 1);
 			Generator->DropLoot(Cache + CacheDir * 120.f, { Pc }, Wr);
 			CaveLostLine16 += FString::Printf(TEXT("%sdrowned|%s|%.0f|%.0f|%.0f"), CaveLostLine16.IsEmpty() ? TEXT("") : TEXT(";"), *Pc.ToString(), Cache.X + CacheDir.X * 120.f, Cache.Y + CacheDir.Y * 120.f, Cache.Z);
@@ -215,15 +215,16 @@ FName ARDDungeonGenerator::LostBladeOf16() const
 
 void ARDDungeonGenerator::NoteLostBladeTaken16(const TArray<FName>& Things)
 {
-	if (!bCave16 || LostBlades16.Num() == 0) return;
+	if (!bCave16 || (LostBlades16.Num() == 0 && DrownedPieces16.Num() == 0)) return;
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	if (!GI) return;
 	for (const FName& T : Things)
 	{
 		// (any band of a lost blade: its name ends with the blade's own)
 		const FString S = T.ToString();
-		if (!LostBlades16.ContainsByPredicate([&S](const FName& B) { return S.EndsWith(B.ToString()); })) continue;
 		const FString Key = !GI->CaveKey15.IsEmpty() ? GI->CaveKey15 : FString(TEXT("cave"));
+		if (DrownedPieces16.Contains(T)) { GI->DrownedCaves16.AddUnique(Key); continue; }          // (the drowned knight's piece of this cave (PR #120's review))
+		if (!LostBlades16.ContainsByPredicate([&S](const FName& B) { return S.EndsWith(B.ToString()); })) continue;
 		GI->LostBladeCaves16.AddUnique(Key);
 		UE_LOG(LogRDCave16d, Log, TEXT("RDCAVE16 the lost %s taken: %s lays it no more"), *S, *Key);
 	}

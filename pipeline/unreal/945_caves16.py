@@ -412,7 +412,7 @@ def flood_water(fl):
     return mi
 
 
-def cave_armour(its, P, missing):
+def cave_armour(its, P, missing, mine_names=()):
     """phase 13's armour on a map: (items, recipes, looks, perks, their names), each band of its like's that the map has"""
     A = [a for p_ in P for a in p_.get("armour", [])]
     out, recs, looks, perks, names = [], [], {}, {}, []
@@ -448,7 +448,8 @@ def cave_armour(its, P, missing):
                 tiers = list(like.get_editor_property("tiers")); rc.tier = int(tiers[0]) if tiers else 0
                 ps = []
                 for lb, any_of, n in parts:
-                    q = unreal.RDRecipePart(); q.label = lb; q.any_of = [unreal.Name(x) for x in any_of]; q.count = int(n); ps.append(q)
+                    if not any(x in by or x in mine_names for x in any_of): missing.append(f"{nm}: no {any_of}")
+                    q = unreal.RDRecipePart(); q.label = lb; q.any_of = [unreal.Name(x) for x in any_of if x in by or x in mine_names]; q.count = int(n); ps.append(q)
                 rc.parts = ps; recs.append(rc)
     return out, recs, looks, perks, names
 
@@ -518,7 +519,7 @@ def items():
         # (phase 12: the caves' weapons, copied band by band from the table's)
         wits, looks, mends, lightless, breakers, lost, wnames = cave_weapons(its, P, missing)
         # (phase 13: the caves' armour, band by band; their recipes (the deepiron sets', the drowned knight's); their looks with the weapons')
-        aits, arecs, alooks, perks, anames = cave_armour(its, P, missing)
+        aits, arecs, alooks, perks, anames = cave_armour(its, P, missing, {x["name"] for x in X})
         its = its + wits + aits; recs = recs + arecs; looks.update(alooks); wnames = wnames + anames
         g.set_editor_property("armour_perks16", perks)
         fl = next((p_["flood"] for p_ in P if p_.get("flood")), None)
@@ -578,7 +579,7 @@ def icons():
     ui_texture = importlib.import_module("ui_tex").ui_texture
     T, P = treasure_phases()
     src = os.path.join(SA, "icons16")
-    names = sorted({x["icon"] for p in P for x in p.get("items", []) + p.get("weapons", [])})
+    names = sorted({x["icon"] for p in P for x in p.get("items", []) + p.get("weapons", []) + p.get("armour", [])})          # (the armour's too (PR #120's review))
     found = [n for n in names if os.path.exists(os.path.join(src, f"icon_{n}.png"))]
     lost = sorted(set(names) - set(found))
     if lost: print("945 icons: no picture for", lost)

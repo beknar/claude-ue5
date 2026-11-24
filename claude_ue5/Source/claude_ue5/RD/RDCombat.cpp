@@ -789,6 +789,7 @@ void URDCombatComponent::Revive(bool bToStart)
 	WardUntil = SkinUntil = VeilUntil = MirrorUntil = PactUntil = DispelUntil = RuneUntil = SanctumUntil = DrainUntil = -100.f;
 	WardHits = 0; WardPool = 0.f; DrainTarget = nullptr;
 	ResetRogueArts();
+	LeaveWater16();          // (the list of 2026-11-22's caves: a death under water leaves her view tinted and slow no more (PR #120's review))
 	ClearAfflictions();
 	for (FArea& Ar : Areas) if (UFXSystemComponent* F = Ar.Fx.Get()) F->Deactivate();
 	Areas.Reset();

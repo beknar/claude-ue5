@@ -72,7 +72,6 @@ bool ARDSection::CaveFloodSet16(const FCaveRun16& Run, float Half, float F0, flo
 			};
 			const FVector Mid = (A + B) * 0.5f;
 			Put(FTransform(FRotator(0.f, D.Rotation().Yaw, 0.f), FVector(Mid.X, Mid.Y, Fl.WaterZ), FVector(Len / 100.f, Half * 2.f / 100.f, 1.f)));
-			Put(FTransform(FRotator(0.f, D.Rotation().Yaw, 180.f), FVector(Mid.X, Mid.Y, Fl.WaterZ - 1.f), FVector(Len / 100.f, Half * 2.f / 100.f, 1.f)));          // (its face from under it)
 			if (I == 0 || J == Fl.Pts.Num() - 1)
 			{
 				// (the plane's face is +Z: turned to face out of the water along the tunnel)
@@ -113,6 +112,7 @@ FName ARDDungeonGenerator::DrownedPieceOf16() const
 	if (DrownedPieces16.Num() == 0) return NAME_None;
 	const URDGameInstance* GI = URDGameInstance::Of(this);
 	const FString Key = GI && !GI->CaveKey15.IsEmpty() ? GI->CaveKey15 : FString(TEXT("cave"));
+	if (bDrownedLaid16 || (GI && GI->DrownedCaves16.Contains(Key))) return NAME_None;          // (one a cave: laid once a run, no more once taken (PR #120's review))
 	return DrownedPieces16[(GetTypeHash(Key) >> 3) % (uint32)DrownedPieces16.Num()];
 }
 
@@ -134,7 +134,8 @@ void URDCombatComponent::TickBreath16(float Dt)
 	APawn* P = Cast<APawn>(GetOwner());
 	if (!P) return;
 	const float Max = GetBreathMax16();
-	if (Breath16 < 0.f) Breath16 = Max;
+	if (Breath16 < 0.f || (!bUnder16 && Max > LastBreathMax16 + 0.01f && Breath16 >= LastBreathMax16 - 0.01f)) Breath16 = Max;
+	LastBreathMax16 = Max;
 	const bool bUnder = Generator->UnderWater16(P->GetActorLocation() + FVector(0, 0, 60.f));
 	if (bUnder != bUnder16)
 	{
@@ -163,14 +164,26 @@ void URDCombatComponent::TickBreath16(float Dt)
 			if (DrownAcc16 >= 1.f)
 			{
 				const float D = FMath::FloorToFloat(DrownAcc16); DrownAcc16 -= D;
-				Health = FMath::Max(0.f, Health - D); DrownTaken16 += D;
-				if (Health <= 0.f) Fall();
-				else if (GetWorld()->GetTimeSeconds() - LastDrownMsg16 > 2.f) { LastDrownMsg16 = GetWorld()->GetTimeSeconds(); SetMessage(TEXT("You are drowning: get out of the water")); }
+				// (as every hurt: the pact can hold her, the damage is counted, regeneration waits (PR #120's review: it set her hit points
+				// and fell, past the pact))
+				const float Now = GetWorld()->GetTimeSeconds();
+				LastHurtTime = Now; DrownTaken16 += D;
+				LoseHealth(D);
+				if (!bDead && Now - LastDrownMsg16 > 2.f) { LastDrownMsg16 = Now; SetMessage(TEXT("You are drowning: get out of the water")); Generator->PlaySoundAt(TEXT("Player.Hurt"), P->GetActorLocation()); }
 			}
 		}
 	}
 	else Breath16 = FMath::Min(Max, Breath16 + Dt * Max / 3.f);          // (back to full in 3 s above the water)
 	Breath16 = FMath::Min(Breath16, Max);
+}
+
+void URDCombatComponent::LeaveWater16()
+{
+	Breath16 = -1.f; DrownAcc16 = 0.f;
+	if (!bUnder16) return;
+	bUnder16 = false; UpdateWalkSpeed();
+	if (APawn* P = Cast<APawn>(GetOwner()))
+		if (UCameraComponent* Cam = P->FindComponentByClass<UCameraComponent>(); Cam && bCamPPSaved16) { Cam->PostProcessSettings = SavedCamPP16; Cam->PostProcessBlendWeight = SavedCamPPWeight16; bCamPPSaved16 = false; }
 }
 
 FString URDCombatComponent::GetBreath16() const

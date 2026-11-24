@@ -705,7 +705,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Cave16") float GetBreathLeft16() const { return Breath16 < 0.f ? GetBreathMax16() : Breath16; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Cave16") bool IsUnderWater16() const { return bUnder16; }
 	float Breath16 = -1.f, DrownAcc16 = 0.f, DrownTaken16 = 0.f, LastDrownMsg16 = -100.f;
-	bool bUnder16 = false; int32 Dives16 = 0;
+	bool bUnder16 = false; int32 Dives16 = 0; float LastBreathMax16 = 0.f;
+	/** out of the water at once (a revive, a restart): her speed and view as above it */
+	void LeaveWater16();
 	FPostProcessSettings SavedCamPP16; float SavedCamPPWeight16 = 0.f; bool bCamPPSaved16 = false;
 	/** a thing that alone mends one of her weapons (the shard blade and the geode shards) used on it */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") bool MendWith16(FName Item);
