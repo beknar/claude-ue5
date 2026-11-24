@@ -2136,6 +2136,8 @@ public:
 	/** the Echo's pings: monsters beyond the maps' own sensing and within the ring's metres */
 	void EchoPings16(const FVector& Her, float SenseCm, TArray<FVector2D>& Out) const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") int32 GetEchoPings16(FVector Her) const { TArray<FVector2D> P; EchoPings16(Her, 2500.f, P); return P.Num(); }
+	/** gold she finds (more with a gilded relic), as AddGold */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") void AddFoundGold16(int32 Amount, const FString& Why = TEXT(""));
 	/** a harvest's things more by the lucky stone */
 	void LuckyHarvest16(TArray<FName>& Things) const;
 	/** the sets whose drowned knight's piece is laid this run; whether one is laid at all this run */

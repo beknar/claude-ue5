@@ -8323,24 +8323,28 @@ def cave16charms_inner():
         return seen
     c.wear_ring("Glow-worm Amulet") if c.get_worn_ring(unreal.RDRingKind.CHARM) == "Glow-worm Amulet" else None
     c.take_off_armour()
-    gc0 = g.get_gold(); g.add_gold(100, "test"); gold_bare = g.get_gold() - gc0
+    gc0 = g.get_gold(); g.add_found_gold16(100, "test"); gold_bare = g.get_gold() - gc0
     n_bare = (yield from noticed()) if end is not None else None
     wear("Gilded Skull"); yield from wait(0.3)
-    gc0 = g.get_gold(); g.add_gold(100, "test"); gold_skull = g.get_gold() - gc0
+    gc0 = g.get_gold(); g.add_found_gold16(100, "test"); gold_skull = g.get_gold() - gc0
+    gc0 = g.get_gold(); g.add_gold(100, "test"); paid_skull = g.get_gold() - gc0          # (a payment, a sale: no more with it (PR #121's review))
     n_skull = (yield from noticed()) if end is not None else None
-    res["skull"] = {"gold": [gold_bare, gold_skull], "noticed_at_1_2": [n_bare, n_skull], "notice_mul": round(c.get_charm16("notice"), 2)}
+    res["skull"] = {"gold": [gold_bare, gold_skull], "paid": paid_skull, "noticed_at_1_2": [n_bare, n_skull], "notice_mul": round(c.get_charm16("notice"), 2)}
     # ---- the temple's lifting of the skull: its price taken, its cost gone, its gift kept
     lines = [str(l) for l in g.get_lift_lines16()]
     pr = next((int(l.split("|")[2]) for l in lines if l.split("|")[1] == "Gilded Skull"), None)
     g.add_gold(5000, "test"); gb = g.get_gold()
     lifted = g.town_lift_curse16("Gilded Skull"); yield from wait(0.2)
-    gc0 = g.get_gold(); g.add_gold(100, "test"); gold_lifted = g.get_gold() - gc0
+    gc0 = g.get_gold(); g.add_found_gold16(100, "test"); gold_lifted = g.get_gold() - gc0
     res["lift"] = {"lines": lines, "price": pr, "lifted": lifted, "paid": gb - gc0, "notice_after": round(c.get_charm16("notice"), 2), "gold_after": gold_lifted,
                    "lines_after": [str(l) for l in g.get_lift_lines16()]}
     # ---- the black candle and the thorned crown
     hm0 = c.get_max_health(); wear("Black Candle"); yield from wait(0.3)
     res["candle"] = {"damage": round(c.get_damage_of(c.get_weapon_index()) / max(d_bare, 1e-3), 3), "maxhp": round(c.get_max_health() / max(hm0, 1e-3), 3),
                      "worn": str(c.get_worn_ring(unreal.RDRingKind.CHARM))}
+    # (taken off at half its top, no heal (PR #121's review: off and on healed her 15 % each time))
+    c.set_health(c.get_max_health() * 0.5); h_half = c.get_health(); c.wear_ring("Black Candle"); yield from wait(0.3)
+    res["candle"]["off_heal"] = round(c.get_health() - h_half, 1); wear("Black Candle"); yield from wait(0.3)
     mv = pawn.get_component_by_class(unreal.CharacterMovementComponent)
     def blow():
         c.set_health(c.get_max_health()); h = c.get_health(); c.apply_damage(20.0, None); return h - c.get_health()
@@ -8348,17 +8352,21 @@ def cave16charms_inner():
     s0 = mv.get_editor_property("max_walk_speed"); b0 = blow(); yield from wait(1.2)
     wear("Thorned Crown"); yield from wait(0.5)
     s1 = mv.get_editor_property("max_walk_speed"); b1 = blow(); yield from wait(1.2)
-    res["crown"] = {"speed": [round(s0, 1), round(s1, 1)], "blow": [round(b0, 2), round(b1, 2)]}
+    # (taken off: her speed back; on again: slowed again (PR #121's review: off it stayed slow, on again it slowed no more))
+    c.wear_ring("Thorned Crown"); yield from wait(0.5); s2 = mv.get_editor_property("max_walk_speed")
+    wear("Thorned Crown"); yield from wait(0.5); s3 = mv.get_editor_property("max_walk_speed")
+    res["crown"] = {"speed": [round(s0, 1), round(s1, 1), round(s2, 1), round(s3, 1)], "blow": [round(b0, 2), round(b1, 2)]}
     E, L, C_, K = res["echo"], res["lucky"], res["candle"], res["crown"]
     ok = (all(res["items"].values()) and E["monsters_placed"] > 0 and E["pings"][0] == 0 and E["pings"][1] == E["monsters_placed"] and E["drawn"][1] == E["monsters_placed"]
-          and L and L["got"] == L["pile"] + math.ceil(L["pile"] * 0.5)
+          and L and L["pile"] + math.floor(L["pile"] * 0.5) <= L["got"] <= L["pile"] + math.ceil(L["pile"] * 0.5)          # (half more on average: the fraction by chance)
           and abs(res["glow_cm"] - 800.0) < 1.0
           and abs(res["idol_damage"] - 1.25) < 0.01 and res["idol_bled_8s"] >= res["idol_expected_8s"] - 1.0 and res["idol_floor"] >= 1.0
-          and res["skull"]["gold"] == [100, 150] and res["skull"]["noticed_at_1_2"] == [False, True]
+          and res["skull"]["gold"] == [100, 150] and res["skull"]["paid"] == 100 and res["skull"]["noticed_at_1_2"] == [False, True]
           and res["lift"]["lifted"] and res["lift"]["paid"] == res["lift"]["price"] and res["lift"]["notice_after"] == 0.0 and res["lift"]["gold_after"] == 150
           and "Gilded Skull" not in " ".join(res["lift"]["lines_after"])
           and abs(C_["damage"] - 1.15) < 0.01 and abs(C_["maxhp"] - 0.85) < 0.01 and C_["worn"] == "Black Candle"
-          and abs(K["speed"][1] / K["speed"][0] - 0.9) < 0.01 and abs(K["blow"][1] / max(K["blow"][0], 1e-3) - 0.85) < 0.03)
+          and abs(K["speed"][1] / K["speed"][0] - 0.9) < 0.01 and abs(K["blow"][1] / max(K["blow"][0], 1e-3) - 0.85) < 0.03
+          and abs(K["speed"][2] - K["speed"][0]) < 0.5 and abs(K["speed"][3] - K["speed"][1]) < 0.5 and C_.get("off_heal", 1) == 0)
     step_result("cave16charms", ok, **res)
 def step_cave16charms():
     try:

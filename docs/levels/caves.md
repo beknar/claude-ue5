@@ -170,10 +170,10 @@ The list's "crystal geode shards, cut at the librarian's table into scroll inks 
 | Thing | Kind | While worn |
 |---|---|---|
 | Ring of the Echo | ring (Echo); made at the anvil from 2 cave pearls and a deepiron ingot | monsters within 60 m, beyond the maps' own 25 m, show on the minimap and the big maps as dim pings, seen or not |
-| Miner's Lucky Stone | ring (Lucky) | a cave's vein or growth gives half as much again (rounded up) |
+| Miner's Lucky Stone | ring (Lucky) | a cave's vein or growth gives half as much again on average (the fraction by chance) |
 | Glow-worm Amulet | charm | a light of 8 m round her, no torch, both hands free |
-| Bleeding Idol | cursed charm | her blows 25 % stronger; she bleeds 0.25 % of her hit points a second, never her last |
-| Gilded Skull | cursed charm | half as much gold again; monsters notice her from 30 % farther |
+| Bleeding Idol | cursed charm | her blows 25 % stronger; she bleeds 0.25 % of her hit points a second, never her last (a hurt: her regeneration waits) |
+| Gilded Skull | cursed charm | half as much again of the gold she finds (kills, containers, piles, buried chests; not what she is paid or sells for); monsters notice her from 30 % farther |
 | Black Candle | cursed charm | her blows 15 % stronger; 15 % fewer hit points |
 | Thorned Crown | cursed charm | a blow on her 15 % less; 10 % slower |
 
@@ -181,7 +181,8 @@ The list's "crystal geode shards, cut at the librarian's table into scroll inks 
 
 ### Measured (phase 14)
 
-- `868 cave16charms -lv caves` (`test_c14a.json`): every thing of its kind; two monsters 35 to 55 m off: no ping bare, both counted and drawn on the minimap with the Echo; a vein's pile of 1 gave 2 with the lucky stone; the glow-worm amulet's light 8 m; the bleeding idol: her blows x 1.25, 2 hit points bled in 8 s (0.25 % a second, counted in whole points), her hit points held at 1 at the least; the gilded skull: 100 gold came as 150, a monster at 1.2 of the noticing distance (held still, read every 0.1 s) noticed her in it and not bare; the temple's lines named the four relics carried, lifting the skull took its 300 gold, its notice cost was gone and its gold kept (150), its line no longer offered; the black candle: blows x 1.15, hit points x 0.85, and it took the charm slot from the skull; the thorned crown: a blow of 20 took 17, her speed 353 -> 318.
+- `868 cave16charms -lv caves` (`test_c14c.json`, after PR #121's review): every thing of its kind; two monsters 35 to 55 m off: no ping bare, both counted and drawn on the minimap with the Echo; a vein's pile of 1 gave 2 with the lucky stone; the glow-worm amulet's light 8 m; the bleeding idol: her blows x 1.25, 2 hit points bled in 8 s (0.25 % a second, counted in whole points), her hit points held at 1 at the least; the gilded skull: 100 gold found came as 150 and a payment of 100 stayed 100, a monster at 1.2 of the noticing distance (held still, read every 0.1 s) noticed her in it and not bare; the temple's lines named the four relics carried, lifting the skull took its 300 gold, its notice cost was gone and its gold kept (150), its line no longer offered; the black candle: blows x 1.15, hit points x 0.85, it took the charm slot from the skull, and taken off at half its top it healed nothing; the thorned crown: a blow of 20 took 17, her speed 353 -> 318, taken off 353 again and put on 318 again.
+- **A new game** empties the lifted curses and the caves' records (the lost blades', the drowned pieces'), and so does loading a save made before them.
 - **Not measured**: the temple's line in a town's panel (the lifting was called as the panel calls it); the charms' looks (they are worn unseen, as the rings).
 
 ## Limits

@@ -1,5 +1,5 @@
 {
- "tag": "c14a",
+ "tag": "c14c",
  "plan": [
   "cave16charms"
  ],
@@ -43,6 +43,7 @@
      100,
      150
     ],
+    "paid": 100,
     "noticed_at_1_2": [
      false,
      true
@@ -70,10 +71,13 @@
    "candle": {
     "damage": 1.15,
     "maxhp": 0.85,
-    "worn": "Black Candle"
+    "worn": "Black Candle",
+    "off_heal": 0.0
    },
    "crown": {
     "speed": [
+     353.4,
+     318.1,
      353.4,
      318.1
     ],

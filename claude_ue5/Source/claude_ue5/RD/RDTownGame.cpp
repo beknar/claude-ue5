@@ -405,8 +405,6 @@ void ARDDungeonGenerator::AddGold(int32 Amount, const FString& Why)
 {
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	if (!GI || Amount == 0) return;
-	// (the list of 2026-11-22's caves: a gilded relic's more gold, on what she gains)
-	if (Amount > 0 && PlayerCombat && PlayerCombat->GetCharm16(TEXT("gold")) > 0.f) Amount = FMath::RoundToInt(Amount * (1.f + PlayerCombat->GetCharm16(TEXT("gold"))));
 	GI->Gold = FMath::Max(0, GI->Gold + Amount);
 	if (Amount > 0) { GI->Count(TEXT("gold"), Amount); if (PlayerCombat) PlayerCombat->ShowMessage(Why.IsEmpty() ? FString::Printf(TEXT("+%d gold"), Amount) : FString::Printf(TEXT("+%d gold  (%s)"), Amount, *Why)); }
 	UE_LOG(LogRDTownGame, Log, TEXT("RDGOLD %+d (%s): %d"), Amount, *Why, GI->Gold);
@@ -1580,7 +1578,7 @@ void ARDDungeonGenerator::TownOnKill(ARDMonster* M, bool bBossKill)
 			if (!Thing.IsNone()) { TArray<float> Wr; Wr.Add(-1.f); if (ARDLootPile* Pl = DropLoot(M->GetActorLocation(), { Thing }, Wr)) { Pl->bHers = false; ++GreedThings; } }
 		}
 	}
-	if (Gold > 0) AddGold(Gold, bBossKill || M->bBoss ? TEXT("the boss's hoard") : FString());
+	if (Gold > 0) AddFoundGold16(Gold, bBossKill || M->bBoss ? TEXT("the boss's hoard") : FString());
 	if (bTown)
 	{
 		if (M->GuardIndex >= 0)
@@ -1609,7 +1607,7 @@ void ARDDungeonGenerator::TownOnContainer(ARDSection* Section, int32 Key, const 
 	if ((H % 1000u) / 1000.f < ContainerGoldChance)
 	{
 		const int32 Gold = FMath::RoundToInt(FMath::Lerp(ContainerGold.X, ContainerGold.Y, ((H >> 10) % 1000u) / 999.f) * T);
-		AddGold(Gold, TEXT("in the container"));
+		AddFoundGold16(Gold, TEXT("in the container"));
 	}
 	if (URDGameInstance* GI = URDGameInstance::Of(this); GI && Section->Coord == FIntPoint::ZeroValue)
 		(bTown ? GI->TownLooted : GI->CastleStartLooted).AddUnique(Key);

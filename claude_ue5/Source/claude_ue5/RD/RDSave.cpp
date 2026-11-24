@@ -27,6 +27,8 @@ namespace
 		{
 			FMemoryReader R(Bytes, true);
 			FObjectAndNameAsStringProxyArchive Ar(R, true); Ar.ArIsSaveGame = true; Ar.ArNoDelta = true;
+			// (a save made before the caves' records holds none of them: the session's own must not stay (PR #121's review))
+			GI->LiftedRelics16.Reset(); GI->LostBladeCaves16.Reset(); GI->DrownedCaves16.Reset();
 			GI->Serialize(Ar);
 		}
 		else

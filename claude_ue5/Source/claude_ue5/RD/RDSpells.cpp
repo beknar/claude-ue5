@@ -200,7 +200,11 @@ void URDCombatComponent::UpdateMaxima()
 	const float RawM = Generator->PlayerMaxMana * (1.f + GetRingBonus(ERDRingKind::Magic)) * ManaMul + (Generator->PlayerMaxMana > 0.f ? Generator->LastingMana15() : 0.f);
 	MaxMana = FMath::Max(ManaMul != 1.f ? FMath::RoundToFloat(RawM) : RawM, GetTomeMana());
 	// (a ring put on adds its part to what she has; one taken off takes no more than it gave)
-	if (MaxHealth > OldH) Health += MaxHealth - OldH;
+	// (a charm's lower top taken off gives nothing back (PR #121's review: the black candle off and on healed her 15 % each time))
+	const float CharmHpF = FMath::Max(1.f + GetCharm16(TEXT("maxhp")), 0.1f);
+	const bool bCharmRose = CharmHpF > LastCharmHpF16 + 1e-4f;
+	LastCharmHpF16 = CharmHpF;
+	if (MaxHealth > OldH && !bCharmRose) Health += MaxHealth - OldH;
 	if (MaxMana > OldM) Mana += MaxMana - OldM;
 	Health = FMath::Min(Health, MaxHealth); Mana = FMath::Min(Mana, MaxMana);
 	// (mistward6: the Rogue's dexterity energy, her hero's)

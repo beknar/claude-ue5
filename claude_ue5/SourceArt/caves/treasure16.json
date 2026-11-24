@@ -480,7 +480,7 @@
     "icon": "cave_black_candle",
     "weight": 0.06,
     "cave": true,
-    "looks": "A candle of black wax that never burns down: it lights the dark and sharpens your blows, but it draws on your life.",
+    "looks": "A candle of black wax that never burns down: it sharpens your blows, but it draws on your life.",
     "charm": {
      "good": "damage",
      "good_amount": 0.15,

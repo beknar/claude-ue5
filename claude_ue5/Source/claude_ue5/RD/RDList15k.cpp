@@ -284,7 +284,7 @@ FString ARDDungeonGenerator::RewardInteract15(const FVector& From)
 		Things.Add(Items[Pick].Name);
 	}
 	const int32 Gold = FMath::RoundToInt(TreasureChestGold15 * (1.f + 0.35f * (Tier - 1)));
-	AddGold(Gold, TEXT("a buried chest"));
+	AddFoundGold16(Gold, TEXT("a buried chest"));
 	TArray<float> Wear; Wear.Init(0.f, Things.Num());
 	if (ARDLootPile* Pile = DropLoot(R.At + FVector(80.f, 0.f, 60.f), Things, Wear)) Pile->bHers = false;
 	PlayerCombat->ShowMessage(FString::Printf(TEXT("You dig up the buried chest: %d gold and %d things (tier %d)"), Gold, Things.Num(), Tier));

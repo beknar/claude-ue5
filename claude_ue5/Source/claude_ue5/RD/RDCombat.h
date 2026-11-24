@@ -711,7 +711,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Cave16") float GetCharm16(FName Stat) const;
 	void TickCharms16(float Dt);
 	FString CharmWords16(const FRDItemDef& It) const;
-	float BleedAcc16 = 0.f, BledTotal16 = 0.f, CharmSpeedSeen16 = 0.f;
+	float BleedAcc16 = 0.f, BledTotal16 = 0.f, CharmSpeedSeen16 = 0.f, LastCharmHpF16 = 1.f;
 	/** out of the water at once (a revive, a restart): her speed and view as above it */
 	void LeaveWater16();
 	FPostProcessSettings SavedCamPP16; float SavedCamPPWeight16 = 0.f; bool bCamPPSaved16 = false;

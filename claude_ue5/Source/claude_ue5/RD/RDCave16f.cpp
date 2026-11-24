@@ -29,17 +29,23 @@ float URDCombatComponent::GetCharm16(FName Stat) const
 
 void URDCombatComponent::TickCharms16(float Dt)
 {
-	if (bDead || !Generator || GetWornRing(ERDRingKind::Charm).IsNone()) return;
-	// (a bleeding relic: a share of her hit points a second, never her last one)
+	if (bDead || !Generator) return;
+	// (a charm's speed comes or goes with it: her top speed set again, also when it is taken off or dropped (PR #121's review: the
+	// crown taken off left her slowed, and put back on it slowed her no more))
+	const float Sp = GetCharm16(TEXT("speed"));
+	if (!FMath::IsNearlyEqual(Sp, CharmSpeedSeen16)) { CharmSpeedSeen16 = Sp; UpdateWalkSpeed(); }
+	if (GetWornRing(ERDRingKind::Charm).IsNone()) return;
+	// (a bleeding relic: a share of her hit points a second, never her last one; a hurt as any (the damage counted, regeneration waits))
 	const float B = GetCharm16(TEXT("bleed"));
 	if (B > 0.f && Health > 1.f)
 	{
 		BleedAcc16 += B * MaxHealth * Dt;
-		if (BleedAcc16 >= 1.f) { const float D = FMath::FloorToFloat(BleedAcc16); BleedAcc16 -= D; Health = FMath::Max(1.f, Health - D); BledTotal16 += D; }
+		if (BleedAcc16 >= 1.f)
+		{
+			const float D = FMath::Min(FMath::FloorToFloat(BleedAcc16), Health - 1.f); BleedAcc16 -= FMath::FloorToFloat(BleedAcc16);
+			if (D > 0.f) { LastHurtTime = GetWorld()->GetTimeSeconds(); LoseHealth(D); BledTotal16 += D; }
+		}
 	}
-	// (a charm's speed comes or goes with it: her top speed set again)
-	const float Sp = GetCharm16(TEXT("speed"));
-	if (!FMath::IsNearlyEqual(Sp, CharmSpeedSeen16)) { CharmSpeedSeen16 = Sp; UpdateWalkSpeed(); }
 }
 
 FString URDCombatComponent::CharmWords16(const FRDItemDef& It) const
@@ -113,6 +119,14 @@ bool ARDDungeonGenerator::TownLiftCurse16(const FString& Arg)
 	return true;
 }
 
+void ARDDungeonGenerator::AddFoundGold16(int32 Amount, const FString& Why)
+{
+	// (gold she finds (a kill, a container, a pile, a buried chest) is more with a gilded relic; what she is paid or sells for is not
+	// (PR #121's review: a sale paid 1.5 times what its line said))
+	if (Amount > 0 && PlayerCombat && PlayerCombat->GetCharm16(TEXT("gold")) > 0.f) Amount = FMath::RoundToInt(Amount * (1.f + PlayerCombat->GetCharm16(TEXT("gold"))));
+	AddGold(Amount, Why);
+}
+
 // ================================================================================================ the Echo's pings
 void ARDDungeonGenerator::EchoPings16(const FVector& Her, float SenseCm, TArray<FVector2D>& Out) const
 {
@@ -141,5 +155,11 @@ void ARDDungeonGenerator::LuckyHarvest16(TArray<FName>& Things) const
 	TMap<FName, int32> N;
 	for (const FName& T : Things) if (CaveNodes16.ContainsByPredicate([&T](const FRDCaveNode16& Nd) { return Nd.Item == T; })) ++N.FindOrAdd(T);
 	for (const TPair<FName, int32>& Kv : N)
-		for (int32 K = 0, More = FMath::CeilToInt(Kv.Value * Items[Ix].Amount); K < More; ++K) Things.Add(Kv.Key);
+	{
+		// (its share more on average: the whole part, and the fraction by chance (PR #121's review: rounded up, 1 gave 2, about +70 %))
+		const float Want = Kv.Value * Items[Ix].Amount;
+		int32 More = FMath::FloorToInt(Want);
+		if (FMath::FRand() < Want - More) ++More;
+		for (int32 K = 0; K < More; ++K) Things.Add(Kv.Key);
+	}
 }
