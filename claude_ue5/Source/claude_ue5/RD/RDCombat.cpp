@@ -479,7 +479,8 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 	VeilUntil = FMath::Min(VeilUntil, GetWorld()->GetTimeSeconds());      // (an attack ends her veil: they see her again)
 	// (mistward6: an attack out of stealth ends it, and is an ambush)
 	// (the list of 2026-11-22's caves: the lightless bow's shot leaves her hidden)
-	if (IsLightless16(Index) && IsStealthed()) bAmbushArmed = true;
+	// (its first arrow of a stealth is the ambush, the others plain (PR #119's review: every arrow of the stealth took the bonus))
+	if (IsLightless16(Index) && IsStealthed()) { if (LightlessAmbushFor16 != StealthUntil) { bAmbushArmed = true; LightlessAmbushFor16 = StealthUntil; } }
 	else ArtStrikeFromHiding();          // (out of stealth: an ambush; the vanishing act spares her first blows)
 	SetSlowed(true);
 	return true;
@@ -1610,6 +1611,7 @@ bool URDCombatComponent::MendAtAnvil(const FString& Code)
 		const FRDWeaponDef& W = Generator->Weapons[Wi];
 		Item = W.Item; Type = W.WeaponType; Nm = W.Name.ToString();
 		if (W.Durability <= 0.f || GetWeaponWear(Wi) >= W.Durability) { SetMessage(FString::Printf(TEXT("The %s needs no mending"), *Nm.ToLower())); return false; }
+		if (Generator->IsMendOnly16(W.Item)) { SetMessage(FString::Printf(TEXT("No smith's work holds on the %s: only a geode shard mends it"), *Nm.ToLower())); return false; }          // (the caves' shard blade (PR #119's review))
 	}
 	else
 	{

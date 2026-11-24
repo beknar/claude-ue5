@@ -2113,6 +2113,10 @@ public:
 	void StrikeRubble16(const FVector& From, const FVector& Fw, float Reach, FName Gear);
 	/** the lost blade this cave picks */
 	FName LostBladeOf16() const;
+	/** a pile taken: a lost blade among its things is recorded for the cave she is in (laid there no more) */
+	void NoteLostBladeTaken16(const TArray<FName>& Things);
+	/** a found weapon nothing but its own things mend (the anvil, the smith and the repair items pass it by) */
+	bool IsMendOnly16(FName WeaponItem) const { return !WeaponItem.IsNone() && MendOnly16.Contains(WeaponItem); }
 	/** for the tests: "rubble|<i>|<x>|<y>|<z>|<cleared 0/1>|<hits>|<cache x>|<y>|<z>" of a set; "lost|<blade>|<x>|<y>|<z>" */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetCaveRubble16(FIntPoint Section) const;
 	/** for the tests: whether the tile under a point is walkable (its set's tiles, the blocked ones not) */

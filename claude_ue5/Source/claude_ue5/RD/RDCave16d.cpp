@@ -23,7 +23,10 @@ void ARDSection::CaveRubbleSet16()
 	CaveRubble16.Reset();
 	if (!Generator || Generator->RubbleMeshes16.Num() == 0 || CaveRuns16.Num() == 0) return;
 	FRandomStream R(Seed ^ 0x2BB1E16);          // (its own stream: the plan's draws stay where they were)
-	if (R.FRand() >= Generator->RubbleShare16) return;
+	// (the share is rolled once: by the plan for its side tunnel to nowhere; here only when there is none and a loop's tunnel may take it
+	// (PR #119's review: rolled twice on two streams, a capped spur could stand with no rubble))
+	const bool bHasSpur = CaveRuns16.ContainsByPredicate([](const FCaveRun16& Rn) { return Rn.To == CaveSpurTo16; });
+	if (!bHasSpur && R.FRand() >= Generator->RubbleShare16) return;
 	// (a side tunnel: one between two kit rooms that stay joined by the others; never a portal's)
 	auto Joined = [&](int32 Skip, int32 A, int32 B)
 	{
@@ -131,7 +134,8 @@ void ARDSection::ClearRubble16(int32 K)
 	FCaveRubble16& Rb = CaveRubble16[K];
 	for (UPrimitiveComponent* C : Rb.Comps) if (IsValid(C)) { CaveComps16.Remove(C); C->DestroyComponent(); }
 	Rb.Comps.Reset();
-	for (const FIntPoint& T : Rb.Tiles) if (In(T)) Blocked[Idx(T)] = false;
+	const FIntPoint CacheT = WorldToLocal(Rb.Cache);
+	for (const FIntPoint& T : Rb.Tiles) if (In(T) && T != CacheT) Blocked[Idx(T)] = false;          // (the cache chest's own tile stays blocked (PR #119's review))
 	Rb.Hits = -1;
 	if (Generator)
 	{
@@ -185,6 +189,22 @@ FName ARDDungeonGenerator::LostBladeOf16() const
 	return LostBlades16[GetTypeHash(Key) % (uint32)LostBlades16.Num()];
 }
 
+void ARDDungeonGenerator::NoteLostBladeTaken16(const TArray<FName>& Things)
+{
+	if (!bCave16 || LostBlades16.Num() == 0) return;
+	URDGameInstance* GI = URDGameInstance::Of(this);
+	if (!GI) return;
+	for (const FName& T : Things)
+	{
+		// (any band of a lost blade: its name ends with the blade's own)
+		const FString S = T.ToString();
+		if (!LostBlades16.ContainsByPredicate([&S](const FName& B) { return S.EndsWith(B.ToString()); })) continue;
+		const FString Key = !GI->CaveKey15.IsEmpty() ? GI->CaveKey15 : FString(TEXT("cave"));
+		GI->LostBladeCaves16.AddUnique(Key);
+		UE_LOG(LogRDCave16d, Log, TEXT("RDCAVE16 the lost %s taken: %s lays it no more"), *S, *Key);
+	}
+}
+
 void ARDSection::CaveLostBlade16()
 {
 	// (deep in the cave: the first set two rings out from the start laid this run, in its lowest kit room, by its middle)
@@ -192,8 +212,22 @@ void ARDSection::CaveLostBlade16()
 	if (!Generator || Generator->bLostBladeLaid16 || FMath::Max(FMath::Abs(Coord.X), FMath::Abs(Coord.Y)) < 2) return;
 	UWorld* W = GetWorld();
 	if (!bBuildInteractive || !W || !W->IsGameWorld()) return;
-	const FName Blade = Generator->LostBladeOf16();
-	if (Blade.IsNone()) return;
+	const FName Base = Generator->LostBladeOf16();
+	if (Base.IsNone()) return;
+	// (its band: the highest whose tier the set's reaches (a cave's blade as strong as its tier's weapons))
+	FName Blade = Base;
+	{
+		const int32 T = Generator->GlobalTier(Generator->TierOf(Coord));
+		int32 BestT = -1;
+		for (const TCHAR* Band : { TEXT(""), TEXT("Fine "), TEXT("Masterwork "), TEXT("Exalted "), TEXT("Celestial "), TEXT("Divine ") })
+		{
+			const FName Nm(*(FString(Band) + Base.ToString()));
+			const int32 Ix = Generator->FindItem(Nm);
+			if (Ix < 0) continue;
+			const int32 It = Generator->Items[Ix].Tiers.Num() > 0 ? Generator->Items[Ix].Tiers[0] : 1;
+			if (It <= T && It > BestT) { BestT = It; Blade = Nm; }
+		}
+	}
 	int32 Low = -1;
 	for (int32 I = 0; I < CavePlaced16.Num(); ++I)
 		if (CavePlaced16[I].Kit >= 0 && Rooms[I].Kind != ERDRoomKind::Junction && CaveRoomTiles16.IsValidIndex(I) && CaveRoomTiles16[I].Num() > 0 && (Low < 0 || CavePlaced16[I].Z < CavePlaced16[Low].Z)) Low = I;

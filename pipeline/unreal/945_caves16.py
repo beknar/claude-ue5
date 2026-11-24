@@ -469,7 +469,7 @@ def items():
             g.set_editor_property("rubble_hero16", rb["hero"]); g.set_editor_property("rubble_hero_hits16", int(rb["hero_hits"]))
         lb = next((p_["lost"] for p_ in P if p_.get("lost")), None)
         if lb:
-            g.set_editor_property("lost_skeleton16", unreal.load_asset(lb["skeleton"])); g.set_editor_property("lost_skeleton_turn16", unreal.Rotator(*lb["turn"]))
+            g.set_editor_property("lost_skeleton16", unreal.load_asset(lb["skeleton"])); g.set_editor_property("lost_skeleton_turn16", unreal.Rotator(roll=float(lb["turn"][0]), pitch=float(lb["turn"][1]), yaw=float(lb["turn"][2])))
         sk = {}
         for p_ in P:
             for n, (stat, amt) in p_.get("sockets", {}).items():

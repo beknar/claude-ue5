@@ -1,0 +1,38 @@
+{
+ "tag": "c12j",
+ "plan": [
+  "cave16lightless"
+ ],
+ "level": "caves",
+ "steps": [
+  {
+   "step": "cave16lightless",
+   "ok": true,
+   "line": true,
+   "lightless": {
+    "weapon": 2,
+    "hid": true,
+    "hurt1": 45.5,
+    "still_hidden": true,
+    "roused": false,
+    "hurt2": 26.0,
+    "still_hidden2": true,
+    "roused2": false
+   },
+   "longbow": {
+    "weapon": 2,
+    "hid": true,
+    "hurt1": 45.5,
+    "still_hidden": false,
+    "roused": true,
+    "hurt2": 26.0,
+    "still_hidden2": false,
+    "roused2": true
+   }
+  }
+ ],
+ "windows_hidden": "Content Browser, Message Log",
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}

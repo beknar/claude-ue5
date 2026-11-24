@@ -693,6 +693,8 @@ public:
 	/** a found weapon's own look on its mesh in her hands (the generator's WeaponLooks16), else the mesh's own */
 	void ApplyWeaponLook16(class UStaticMeshComponent* C, const FRDWeaponDef& W) const;
 	bool IsLightless16(int32 Index) const;
+	/** the stealth (its end time) whose ambush a lightless arrow has taken */
+	float LightlessAmbushFor16 = -1.f;
 	/** a thing that alone mends one of her weapons (the shard blade and the geode shards) used on it */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") bool MendWith16(FName Item);
 	UPROPERTY() TMap<FName, FName> Sockets16;

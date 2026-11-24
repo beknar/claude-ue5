@@ -7979,9 +7979,9 @@ def cave16weapons_inner():
     """the list of 2026-11-22's caves, phase 12: the caves' weapons. Measured: each in its six bands, a cave thing (none in a dungeon's
     draw), its damage against its like's; the pick in the Warrior's hands (its handle under her hand: the mesh's measured grip point
     near the hand bone) and its picture; rubble across a side tunnel and its cache in the start or a ring set, the tunnel's tiles
-    blocked, a blow of a dagger refused for a Mage, three of the Warrior's dagger or one of the pick clearing it, the tiles open and
-    the box gone (she walks through); the shard blade: no repair item mends it, a geode shard does; the lightless bow's shot from
-    stealth: she stays hidden, the struck monster not roused; the lost blade laid by a skeleton in a set two rings out"""
+    blocked, three of the Warrior's dagger or one of the pick clearing it, the tiles open and the box gone (she walks through); the
+    shard blade: no repair item mends it, a geode shard does; the lost blade laid by a skeleton in a set two rings out (the lightless
+    bow: cave16lightless)"""
     c = yield from restart("Warrior"); g = G["gen"]; quiet(True); res = {}
     T = json.load(open(os.path.join(SA, "caves", "treasure16.json"), encoding="utf-8"))
     WD = T["phase12"]["weapons"]; BANDS = ["", "Fine ", "Masterwork ", "Exalted ", "Celestial ", "Divine "]
@@ -8081,6 +8081,57 @@ def step_cave16weapons():
         try: quiet(False)
         except Exception: pass
 STEPS.update({"cave16weapons": step_cave16weapons})
+
+
+def cave16lightless_inner():
+    """the list of 2026-11-22's caves, phase 12 (PR #119's review): the lightless bow measured in play. The Rogue hidden, a monster
+    8 m off in a clear line: her lightless arrow hurts it, she stays hidden and it is not roused; her second arrow hurts it less
+    (the ambush is the first arrow's alone); the same shot with a plain longbow ends her stealth and rouses its monster"""
+    # (not quiet: a quiet monster (its noticing distance 0) drops its alert on its next tick, and a roused one could not be told from
+    # one that was not; the start set's monsters near her are killed instead, the trials' monster does no harm)
+    c = yield from restart("Rogue"); g = G["gen"]; res = {}
+    pawn = G["pawn"]; at = pawn.get_actor_location(); kill_all_near(at, 6000.0); yield from wait(0.5)
+    end, yaw = clear_line(at, 0.0, 800.0)
+    res["line"] = end is not None
+    if end is None: step_result("cave16lightless", False, **res); return
+    def trial(item):
+        m = spawn_dummy(end, 30.0); yield from wait(0.5)
+        c.add_item(item, 1); yield from wait(0.3)
+        wi = next((i for i, w in enumerate(g.get_editor_property("weapons")) if str(w.item) == item), -1)
+        c.select_weapon(wi); yield from wait(0.5)
+        put(at, yaw=yaw); yield from wait(0.3)
+        c.set_dex_energy(c.get_max_dex_energy()) if hasattr(c, "set_dex_energy") else None
+        hid = c.start_stealth(); yield from wait(0.4)
+        def watch(sec):
+            # (its alert read every 0.1 s: roused at any moment counts)
+            t0 = time.time(); seen = False
+            while time.time() - t0 < sec:
+                seen = seen or bool(m.is_aggro()); yield from wait(0.1)
+            return seen
+        h0 = m.get_health(); c.start_attack(); roused = yield from watch(2.0)
+        h1 = m.get_health(); r = {"weapon": wi, "hid": bool(hid), "hurt1": round(h0 - h1, 1), "still_hidden": bool(c.is_stealthed()), "roused": roused}
+        c.start_attack(); roused2 = yield from watch(2.0)
+        r["hurt2"] = round(h1 - m.get_health(), 1); r["still_hidden2"] = bool(c.is_stealthed()); r["roused2"] = roused2
+        try: m.destroy_actor()
+        except Exception: pass
+        c.remove_item(item, 1) if c.get_item_count(item) else None
+        yield from wait(0.5)
+        return r
+    res["lightless"] = yield from trial("Lightless Bow")
+    # (the control from a restart of its own: the first trial's monster, destroyed, stays in the generator's list a while)
+    c = yield from restart("Rogue"); g = G["gen"]; pawn = G["pawn"]; kill_all_near(at, 6000.0); yield from wait(0.5)
+    res["longbow"] = yield from trial("Longbow")
+    L, P = res["lightless"], res["longbow"]
+    ok = (L["hid"] and L["hurt1"] > 0 and L["still_hidden"] and not L["roused"] and L["hurt2"] > 0 and L["hurt2"] < L["hurt1"] * 0.8
+          and P["hid"] and P["hurt1"] > 0 and not P["still_hidden"] and P["roused"])
+    step_result("cave16lightless", ok, **res)
+def step_cave16lightless():
+    try:
+        yield from cave16lightless_inner()
+    finally:
+        try: quiet(False)
+        except Exception: pass
+STEPS.update({"cave16lightless": step_cave16lightless})
 
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""

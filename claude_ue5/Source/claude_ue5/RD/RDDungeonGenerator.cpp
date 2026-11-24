@@ -569,7 +569,10 @@ TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) co
 				if (FindItem(StartRoomItems[J]) >= 0) Out.Add(StartRoomItems[J]);
 	}
 	// (level 5: a container holds anything at all only so often; the start room's own items are there whatever it says)
-	if (!ContainerHoldsLoot(Section, Index)) return Out;
+	// (the caves' cache behind rubble or water always holds something: it took the pick or the dive to reach (PR #119's review))
+	const ARDSection* Cs = GetSection(Section);
+	const bool bCache = Cs && Cs->GetContainerKind(Index) == TEXT("cache");
+	if (!bCache && !ContainerHoldsLoot(Section, Index)) return Out;
 	float Sum = 0.f;
 	for (const FRDItemDef& It : Items) if (InTier(It)) Sum += FMath::Max(It.Weight, 0.f);
 	if (Sum <= 0.f) return Out;
