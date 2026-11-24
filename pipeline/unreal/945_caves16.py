@@ -630,6 +630,12 @@ def items():
         if fa: g.set_editor_property("fossil_amber16", fa)
         fg = next((p_["fossil_gain"] for p_ in P if p_.get("fossil_gain")), None)
         if fg: g.set_editor_property("fossil_gain16", int(fg))
+        # (phase 17: the things besides, the trade goods' worth, the collector, the smiths' works)
+        g.set_editor_property("cave_besides16", [f"{n}|{sh}" for p_ in P for n, sh in p_.get("besides", {}).items()])
+        g.set_editor_property("trade_goods16", [f"{n}|{pr}" for p_ in P for n, pr in p_.get("trade", {}).items()])
+        for p_ in P:
+            if p_.get("collector"): g.set_editor_property("collector_town16", p_["collector"]["town"]); g.set_editor_property("collector_mul16", float(p_["collector"]["mul"]))
+        g.set_editor_property("smith_works16", ["|".join(str(x) for x in w) for p_ in P for w in p_.get("smith", [])])
         # (phase 16: the map and the fragment, their shares, the travellers)
         for p_ in P:
             if p_.get("cave_map_item"): g.set_editor_property("cave_map_item16", p_["cave_map_item"])

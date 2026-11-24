@@ -1815,7 +1815,8 @@ static void RDTownThingLines(const ARDDungeonGenerator* G, const URDCombatCompon
 		if (Pc->GetWornArmour() == It.Name || Pc->GetWornShield() == It.Name) --Free;
 		for (int32 K = 0; K < 8; ++K) if (Pc->GetWornRing((ERDRingKind)K) == It.Name) --Free;
 		if (Free <= 0) continue;
-		const int32 P = bPrices ? FMath::Max(1, FMath::RoundToInt(G->PriceOf(It.Name) * G->SellShare)) : 0;
+		const int32 Tv = G->TradeValue16(It.Name);          // (the list of 2026-11-22's caves: a trade good sells at its worth, the collector's double)
+		const int32 P = bPrices ? (Tv > 0 ? Tv : FMath::Max(1, FMath::RoundToInt(G->PriceOf(It.Name) * G->SellShare))) : 0;
 		if (bPrices && G->PriceOf(It.Name) <= 0) continue;
 		ARDDungeonGenerator::FTownLine L; L.Act = Act; L.Arg = FString::Printf(TEXT("i:%s"), *It.Name.ToString());
 		L.Label = Free > 1 ? FString::Printf(TEXT("%s  x %d"), *It.Name.ToString(), Free) : It.Name.ToString();
@@ -1897,6 +1898,8 @@ void ARDDungeonGenerator::BuildTownLines()
 				Add(TEXT("buy"), It.ToString(), FString::Printf(TEXT("%d g"), P), Ix >= 0 && !Items[Ix].Looks.IsEmpty() ? Items[Ix].Looks : FString::Printf(TEXT("You carry %d"), PlayerCombat ? PlayerCombat->GetItemCount(It) : 0), Gold >= P, It.ToString());
 			}
 		else if (PlayerCombat) RDTownThingLines(this, PlayerCombat, TownLines, TEXT("sell"), true);
+		// (the list of 2026-11-22's caves: the city's collector buys raw gems and old coins at double)
+		if (IsCollectorTown16()) Add(TEXT("none"), TEXT("A collector keeps a stall here"), TEXT("x2"), TEXT("Raw gems and the old coins of a dead kingdom sell here for twice what any other trader pays."), false);
 		Add(TEXT("bye"), TEXT("Leave"), FString(), FString());
 	}
 	else if (TownPanel == TEXT("healer"))
@@ -1946,6 +1949,8 @@ void ARDDungeonGenerator::BuildTownLines()
 		if (Each.Num() > 1) Add(TEXT("repair"), TEXT("Mend everything"), FString::Printf(TEXT("%d g"), All), TEXT("Every found weapon, set of armour and shield back to full"), Gold >= All, TEXT("all"));
 		TownLines.Append(Each);
 		if (Each.Num() == 0) Add(TEXT("none"), TEXT("Nothing of yours needs mending"), FString(), FString(), false);
+		// (the list of 2026-11-22's caves: dragonglass and blackstone, each worked by one city's smith)
+		AddSmithWorks16([&](const FString& Act, const FString& Label, const FString& Tag, const FString& Detail, bool bOn, const FString& Arg) { Add(FName(*Act), Label, Tag, Detail, bOn, Arg); });
 		Add(TEXT("anvil"), TEXT("Use the anvil"), FString(), TEXT("Make repair items from materials, break down what you found"), Recipes.Num() > 0);
 		Add(TEXT("bye"), TEXT("Leave"), FString(), FString());
 	}
@@ -2059,6 +2064,7 @@ bool ARDDungeonGenerator::ActivateTownEntry(int32 Line)
 	else if (E.Act == TEXT("collect")) bOk = TownCollectTrade15(E.Arg);          // (the twelfth phase)
 	else if (E.Act == TEXT("lift16")) bOk = TownLiftCurse16(E.Arg);          // (the list of 2026-11-22's caves: a cursed relic's lifting)
 	else if (E.Act == TEXT("fossil16")) bOk = TownFossilTrade16(E.Arg);          // (a region's fossil set)
+	else if (E.Act == TEXT("forge16")) bOk = TownForge16(E.Arg);          // (phase 17: the one city's smith who works dragonglass or blackstone)
 	else if (E.Act == TEXT("contract") || E.Act == TEXT("claim")) bOk = TownContract15(E.Act, E.Arg);          // (the thirteenth phase)
 	else if (E.Act == TEXT("donate")) { AddGold(-5, TEXT("an offering")); TownCount(TEXT("offerings")); SetTownNote(TEXT("The priest bows his head: \"They will eat tonight.\"")); bOk = true; }
 	else if (E.Act == TEXT("deposit")) bOk = TownDeposit(E.Arg);
@@ -2097,7 +2103,7 @@ bool ARDDungeonGenerator::TownSell(const FString& Ref)
 	{
 		Item = FName(*Ref.Mid(2));
 		if (PlayerCombat->GetItemCount(Item) <= 0 || PriceOf(Item) <= 0) return false;
-		P = FMath::Max(1, FMath::RoundToInt(PriceOf(Item) * SellShare));
+		P = TradeValue16(Item) > 0 ? TradeValue16(Item) : FMath::Max(1, FMath::RoundToInt(PriceOf(Item) * SellShare));
 		PlayerCombat->RemoveItem(Item, 1);
 	}
 	AddGold(P, FString::Printf(TEXT("sold %s"), *Item.ToString()));

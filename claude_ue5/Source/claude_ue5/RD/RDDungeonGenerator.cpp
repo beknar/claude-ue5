@@ -622,6 +622,7 @@ TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) co
 		// (phase 16: a cave's treasure map or a waystone fragment now and then, besides)
 		if (bCave16)
 			if (const FName Lk = CaveLinkThing16(Section, Index); !Lk.IsNone()) Out.Add(Lk);
+		CaveBesidesOf16(Section, Index, Out);          // (phase 17: raw gems, old coins, dragonglass, blackstone, each on a stream of its own)
 		return Out;
 		}
 

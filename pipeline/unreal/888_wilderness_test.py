@@ -8640,6 +8640,90 @@ def step_cavelinks16():
         try: quiet(False); G["pawn"].set_actor_hidden_in_game(False)
         except Exception: pass
 STEPS["cavelinks16"] = step_cavelinks16
+
+
+def step_trade16():
+    """the list of 2026-11-22's caves, phase 17, the towns' side: a raw ruby sold at Brokenspire's store at its worth, another at
+    Graymourne's at double (the collector: its store's line said so); at Brokenspire's smith dragonglass and blackstone are refused with
+    the city that works each; at Ashenreach's smith four dragonglass and the gold forge the blade of the game's tier's band; at Kethrys
+    Spire's six blackstone the plate. Her gold and things put back"""
+    g = G["gen"]; res = {}; quiet(True)
+    T = towns(); gold0 = g.get_gold(); c = cb()
+    keep = {n: c.get_item_count(n) for n in ("Raw Ruby", "Dragonglass", "Blackstone")}
+    def into(name):
+        t_ = T[name]
+        g.wild_put_her(t_["x"], t_["y"] - 1300.0); yield from wait_town(150, lambda s_: s_["name"] == name and s_["section"] == 1 and s_["loading"] == 0)
+        sq = place("square")
+        if sq: put(sq, yaw=0.0)
+        yield from rwait(1.5)
+    def sell_ruby():
+        c.add_item("Raw Ruby", 1)
+        g.open_town_panel("store", -1); yield from rwait(0.3); g.set_town_tab(1); yield from rwait(0.3)
+        lines = ["|".join(p) for p in panel()]
+        i = line_of("sell", "Raw Ruby"); g0 = g.get_gold()
+        okk = g.activate_town_entry(i) if i >= 0 else None; yield from rwait(0.3)
+        out = {"ok": okk, "gold": g.get_gold() - g0, "collector_line": any("collector" in l.lower() for l in lines), "town": [str(l) for l in g.get_trade16() if str(l).startswith("town|")]}
+        g.close_town_panel(); yield from rwait(0.3)
+        return out
+    def smith_lines():
+        g.open_town_panel("smith", -1); yield from rwait(0.4)
+        out = [p for p in panel() if p[0] in ("forge16", "none") and ("dragonglass" in "|".join(p).lower() or "blackstone" in "|".join(p).lower())]
+        return out
+    try:
+        yield from wait_ready(90)
+        # ---- Brokenspire: the ruby at its worth; the smith refuses both materials
+        yield from into("Brokenspire")
+        res["brokenspire_sell"] = yield from sell_ruby()
+        res["value_here"] = next((int(str(l).split("|")[2]) for l in g.get_trade16() if str(l).startswith("value|Raw Ruby|")), None)
+        c.add_item("Dragonglass", 4); c.add_item("Blackstone", 6)
+        res["brokenspire_smith"] = [p[0] + "|" + p[1] for p in (yield from smith_lines())]; g.close_town_panel(); yield from rwait(0.3)
+        # ---- Graymourne: the collector's double
+        yield from into("Graymourne")
+        res["graymourne_sell"] = yield from sell_ruby()
+        # ---- Ashenreach: the blade forged (gold enough given: put back at the end)
+        g.add_gold(2000, "test")
+        yield from into("Ashenreach")
+        ls = yield from smith_lines()
+        res["ashenreach_smith"] = [p[0] + "|" + p[1] for p in ls]
+        i = line_of("forge16", "Dragonglass"); g0 = g.get_gold(); n0 = c.get_item_count("Dragonglass")
+        res["forge_blade"] = {"ok": g.activate_town_entry(i) if i >= 0 else None}; yield from rwait(0.3)
+        res["forge_blade"].update({"gold": g.get_gold() - g0, "used": n0 - c.get_item_count("Dragonglass"),
+                                   "got": [w.split("|")[2] for w in (str(l) for l in g.get_trade16()) if w.startswith("work|Dragonglass Blade|")]})
+        made = res["forge_blade"]["got"][0] if res["forge_blade"]["got"] else ""
+        # (a weapon made for her hero joins her weapons, not her pack's counts)
+        res["forge_blade"]["held"] = (c.get_item_count(made) + sum(1 for w in g.get_editor_property("weapons") if str(w.item) == made)) if made else 0
+        g.close_town_panel(); yield from rwait(0.3)
+        # ---- Kethrys Spire: the plate forged
+        yield from into("Kethrys Spire")
+        ls = yield from smith_lines()
+        res["kethrys_smith"] = [p[0] + "|" + p[1] for p in ls]
+        i = line_of("forge16", "Blackstone"); g0 = g.get_gold(); n0 = c.get_item_count("Blackstone")
+        res["forge_plate"] = {"ok": g.activate_town_entry(i) if i >= 0 else None}; yield from rwait(0.3)
+        made = next((w.split("|")[2] for w in (str(l) for l in g.get_trade16()) if w.startswith("work|Blackstone Plate|")), "")
+        res["forge_plate"].update({"gold": g.get_gold() - g0, "used": n0 - c.get_item_count("Blackstone"), "made": made, "held": c.get_item_count(made) if made else 0})
+        g.close_town_panel(); yield from rwait(0.3)
+        B, G2, FB, FP = res["brokenspire_sell"], res["graymourne_sell"], res["forge_blade"], res["forge_plate"]
+        ok = (B["ok"] and B["gold"] == res["value_here"] and not B["collector_line"] and B["town"] == ["town|Brokenspire|0"]
+              and G2["ok"] and G2["gold"] == 2 * B["gold"] and G2["collector_line"] and G2["town"] == ["town|Graymourne|1"]
+              and any(l.startswith("none|Dragonglass: only the smith of Ashenreach") for l in res["brokenspire_smith"])
+              and any(l.startswith("none|Blackstone: only the smith of Kethrys Spire") for l in res["brokenspire_smith"])
+              and not any(l.startswith("forge16|") for l in res["brokenspire_smith"])
+              and FB["ok"] and FB["used"] == 4 and FB["gold"] < 0 and FB["held"] >= 1
+              and FP["ok"] and FP["used"] == 6 and FP["gold"] < 0 and FP["held"] >= 1)
+        step_result("trade16", bool(ok), **res)
+    finally:
+        try: g.close_town_panel()
+        except Exception: pass
+        try:
+            d_ = g.get_gold() - gold0
+            if d_: g.add_gold(-d_, "test")
+            for n, v in keep.items():
+                h = c.get_item_count(n)
+                if h > v: c.remove_item(n, h - v)
+        except Exception: pass
+        try: quiet(False)
+        except Exception: pass
+STEPS["trade16"] = step_trade16
 SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
 def saves_snapshot():
     """the save folder's files and their bytes: put back at the end, the tests' own new saves deleted (PR #61's review)"""

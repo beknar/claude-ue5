@@ -1,0 +1,61 @@
+{
+ "tag": "t17c",
+ "plan": [
+  "trade16"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "trade16",
+   "ok": true,
+   "brokenspire_sell": {
+    "ok": true,
+    "gold": 60,
+    "collector_line": false,
+    "town": [
+     "town|Brokenspire|0"
+    ]
+   },
+   "value_here": 60,
+   "brokenspire_smith": [
+    "none|Dragonglass: only the smith of Ashenreach works it",
+    "none|Blackstone: only the smith of Kethrys Spire works it"
+   ],
+   "graymourne_sell": {
+    "ok": true,
+    "gold": 120,
+    "collector_line": true,
+    "town": [
+     "town|Graymourne|1"
+    ]
+   },
+   "ashenreach_smith": [
+    "forge16|Forge a Dragonglass Blade from 4 Dragonglass",
+    "none|Blackstone: only the smith of Kethrys Spire works it"
+   ],
+   "forge_blade": {
+    "ok": true,
+    "gold": -200,
+    "used": 4,
+    "got": [
+     "Dragonglass Blade"
+    ],
+    "held": 1
+   },
+   "kethrys_smith": [
+    "forge16|Forge a Blackstone Plate from 6 Blackstone"
+   ],
+   "forge_plate": {
+    "ok": true,
+    "gold": -300,
+    "used": 6,
+    "made": "Blackstone Plate",
+    "held": 1
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

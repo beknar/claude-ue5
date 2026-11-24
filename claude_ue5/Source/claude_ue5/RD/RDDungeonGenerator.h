@@ -2204,6 +2204,23 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetCaveLinks16() const;
 	/** for the tests: the broken tower nearest (Xm, Ym) (metres): "<i>|<j>|<x>|<y>|<metres off>", or "" */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") FString DebugNearestTower16(float Xm, float Ym) const;
+	// ---- phase 17: gold and trade goods (RDCave16i.cpp)
+	/** the caves' things besides a container's draw: "<item>|<share>" each on a stream of its own */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FString> CaveBesides16;
+	/** the trade goods' worth when sold ("<item>|<gold>", a quarter more a game tier); the city whose collector pays CollectorMul16 times */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FString> TradeGoods16;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FString CollectorTown16;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float CollectorMul16 = 2.f;
+	/** "<result>|<material>|<count>|<city>|<gold>": what one city's smith alone forges from a cave's material */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FString> SmithWorks16;
+	void CaveBesidesOf16(FIntPoint Section, int32 Index, TArray<FName>& Out) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Cave16") bool IsCollectorTown16() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Cave16") int32 TradeValue16(FName Item) const;
+	FName SmithWorkOf16(const FString& Result) const;
+	void AddSmithWorks16(TFunctionRef<void(const FString& Act, const FString& Label, const FString& Tag, const FString& Detail, bool bOn, const FString& Arg)> Add) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") bool TownForge16(const FString& Result);
+	/** for the tests: "town|<name>|<collector>", "value|<item>|<gold>", "work|<result>|<band made>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetTrade16() const;
 	/** for the tests: the marks and found ids the cave links made this session taken off again */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") int32 ForgetCaveLinkMarks16();
 	TArray<int32> CaveLinkMarked16;
