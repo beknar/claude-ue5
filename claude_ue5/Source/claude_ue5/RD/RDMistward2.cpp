@@ -999,6 +999,7 @@ FName ARDDungeonGenerator::PickupItemFor(FIntPoint Section, int32 Index) const
 	for (const FRDItemDef& It : Items)
 	{
 		if ((It.Kind != ERDItemKind::Weapon && It.Kind != ERDItemKind::Shield) || !ItemOfTier(It, Tier) || !PickupMeshOf(It.Name)) continue;
+		if (!CaveItemAllowed16(It)) continue;          // (the caves' own weapons, the smiths' works: never on an armory's table (PR #124's review: leaked since phase 12))
 		(It.Kind == ERDItemKind::Weapon ? Wpn : Shd).Add(It.Name);
 	}
 	const uint32 H = HashCombine(HashCombine((uint32)SessionSeed ^ 0x9C4Bu, GetTypeHash(Section)), GetTypeHash(Index * 131 + 7));

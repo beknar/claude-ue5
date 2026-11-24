@@ -1,0 +1,106 @@
+{
+ "tag": "c17d",
+ "plan": [
+  "cave16trade"
+ ],
+ "level": "caves",
+ "steps": [
+  {
+   "step": "cave16trade",
+   "ok": true,
+   "items": {
+    "Raw Ruby": [
+     true,
+     0.0
+    ],
+    "Raw Emerald": [
+     true,
+     0.0
+    ],
+    "Raw Sapphire": [
+     true,
+     0.0
+    ],
+    "Raw Topaz": [
+     true,
+     0.0
+    ],
+    "Old Coins of Vael": [
+     true,
+     0.0
+    ],
+    "Dragonglass": [
+     true,
+     0.0
+    ],
+    "Blackstone": [
+     true,
+     0.0
+    ]
+   },
+   "bands": {
+    "Dragonglass Blade": [
+     "Celestial Dragonglass Blade",
+     "Divine Dragonglass Blade",
+     "Dragonglass Blade",
+     "Exalted Dragonglass Blade",
+     "Fine Dragonglass Blade",
+     "Masterwork Dragonglass Blade"
+    ],
+    "Blackstone Plate": [
+     "Blackstone Plate",
+     "Celestial Blackstone Plate",
+     "Divine Blackstone Plate",
+     "Exalted Blackstone Plate",
+     "Fine Blackstone Plate",
+     "Masterwork Blackstone Plate"
+    ]
+   },
+   "work": [
+    "work|Dragonglass Blade|Dragonglass Blade",
+    "work|Blackstone Plate|Blackstone Plate"
+   ],
+   "values": {
+    "Raw Ruby": 60,
+    "Raw Emerald": 55,
+    "Raw Sapphire": 50,
+    "Raw Topaz": 40,
+    "Old Coins of Vael": 35
+   },
+   "game_tier": 1,
+   "holding": 312,
+   "shares": {
+    "Raw Ruby": 0.032,
+    "Raw Emerald": 0.029,
+    "Raw Sapphire": 0.016,
+    "Raw Topaz": 0.029,
+    "Old Coins of Vael": 0.077,
+    "Dragonglass": 0.032,
+    "Blackstone": 0.029
+   },
+   "band_by_tier": {
+    "Dragonglass Blade": {
+     "wrong": [],
+     "at_10": "Fine Dragonglass Blade",
+     "at_30": "Divine Dragonglass Blade"
+    },
+    "Blackstone Plate": {
+     "wrong": [],
+     "at_10": "Fine Blackstone Plate",
+     "at_30": "Divine Blackstone Plate"
+    }
+   },
+   "values_want": {
+    "Raw Ruby": 60,
+    "Raw Emerald": 55,
+    "Raw Sapphire": 50,
+    "Raw Topaz": 40,
+    "Old Coins of Vael": 35
+   }
+  }
+ ],
+ "windows_hidden": "Content Browser, Message Log",
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}

@@ -215,6 +215,32 @@ The list's "things that link back to the open world". `treasure16.json`'s `phase
 - `868 cave16links -lv caves` (`test_c16c.json`, after PR #123's review): as the cave of square (0, -1): the map and the fragment drawn in 0.043 to 0.067 and 0.030 to 0.051 of the containers with loot over six session seeds; the map read and recorded ("map|cave:0_-1|0|-1"), used up; the fragment used (the mouth attuned), a second refused and kept; three lost travellers in eight sets; F's prompt "help the lost traveller out", F freed Tobin the shepherd, recorded, and the set made again held nobody; a contract beast recorded as fled here laid after a restart 91 m from the start in the first set's deepest room, 1.1 m over its floor, slain by her: its contract done, its record gone; the tier-3 boss slain: the tower's key recorded. A picture of the traveller.
 - `888 cavelinks16 -Light` (`test_l16e.json`, after PR #123's review), as if the cave under the tower nearest Brokenspire (square (0, -1), 4.4 km off) had given: the cave map resolved to a structure (an abandoned village) 2.0 km from the tower (before the review's fix of the structures' cells: always a ruin, the Ruins of Oakdale 4.9 km off), marked, in the buried chests' maps; from 1.2 m F's prompt "dig up the buried chest", dug: 60 gold; the mouth attuned and found, the map's travel put her 0.4 m from its place, from 6 m on F's prompt "go down into the cave"; at the lift's door without the key "a locked iron door (its key is in the cave below)" and F refused, from Brokenspire's gate the map's travel to the mouth (from the village, among its monsters, travel is refused as in any fight); with it F took her up 158 m (the platform 26 m across), 11 places and structures marked, held there 2 s later; the tower's chest: 150 gold and three things of tier 1, their pile named and taken by F there; from the platform's middle "take the lift down", down to the foot; a rescued traveller with two camps cleared settled at the last one (the rule's choice; the settler at its fire not walked to), one with no camp cleared waiting, paid 120 gold in Brokenspire; of the two contracts taken at Brokenspire's board both lairs had a tower within 5 km: Silkwidow struck under half was gone, recorded as fled into cave 0_0, and the big map marked "Silkwidow's cave". Pictures of the mouth, the view from the top and the platform.
 
+## Gold and trade goods (the list of 2026-11-22, phase 17)
+
+`treasure16.json`'s `phase17` through `945 items` / `945 icons` on every map of the game; C++ `RD/RDCave16i.cpp`, with hooks in the store's selling and the smith's panel (`RDTownGame.cpp`).
+
+- **Found in the caves**: a cave's container that holds anything holds, besides, each of these now and then, each by a hash of its own (a CRC of the session's seed, its name, the set and the container: `CaveBesides16`; weight 0 in every other draw, so no other draw moves):
+
+| Thing | Share | Worth when sold |
+|---|---|---|
+| Raw Ruby | 2.5 % | 60 gold |
+| Raw Emerald | 2.5 % | 55 gold |
+| Raw Sapphire | 3 % | 50 gold |
+| Raw Topaz | 3.5 % | 40 gold |
+| Old Coins of Vael | 6 % | 35 gold |
+| Dragonglass | 3 % | (worked by Ashenreach's smith) |
+| Blackstone | 3 % | (worked by Kethrys Spire's smith) |
+
+- **The trade goods** sell at any trader for their worth, a quarter more a game tier (`TradeGoods16`), not the store's share of a price; **the collector** of Graymourne (`CollectorTown16`) pays double, and the store there says so.
+- **Dragonglass and blackstone**: only one city's smith works each (`SmithWorks16`): Ashenreach's forges a Dragonglass Blade from four (a longsword's copy, 1.35 times its damage, 1.3 times its durability, in obsidian glass), Kethrys Spire's a set of Blackstone Plate from six (the Dark Knight's armour's copy, 4 points of protection more, 1.4 times its durability, in black basalt), each of the band of the game's tier (tiers 1-5 the plain, 6-10 Fine ... 26-30 Divine; the nearest band below where a map lacks one), for gold (200 and 300, a quarter more a tier). A hero who cannot use the work is not offered it (a blade with no fit for her, plate of a weight she does not wear: the line says why). Any other smith hands the stone back and names the city. The collector pays double only within 500 m of Graymourne's middle.
+- **The armory's tables lay no cave thing outside the caves**: the caves' own weapons had been laid there since phase 12 (PR #124's review); now `CaveItemAllowed16` keeps them off.
+
+### Measured (phase 17)
+
+- `868 cave16trade -lv caves` (`test_c17d.json`, after PR #124's review): the seven things on every map with weight 0; drawn besides over twelve session seeds in 312 containers with loot at 0.016 to 0.077 (each within three standard deviations of its share; with the first streams, seeded by the seed with the name's hash, five of seven came out at half their share); their worth read from the game as the table's at tier 1; the blade and the plate in all six bands, the smith's band right at every tier 1 to 30 (Fine at 10, Divine at 30).
+- `888 trade16 -Light` (`test_t17d.json`, after PR #124's review): a raw ruby sold at Brokenspire's store for 60 gold (its worth at tier 1, no collector there), another at Graymourne's for 120 (its store's line names the collector); at Brokenspire's smith both stones refused with the city that works each and no forging offered; the Mage at Ashenreach's smith offered the blade's line but not to be taken; the Warrior's: a Dragonglass Blade from four dragonglass for exactly 200 gold (in her weapons, none in her pack), Kethrys Spire's a Blackstone Plate from six blackstone for 300 (in her pack), each offering only its own; 600 armory picks of three sets outside the caves held no cave thing; what was forged taken off her again at the end.
+- `869` gives the plate's basalt (Volstok's layered master) and the blade's obsidian glass the skeletal-mesh usage.
+
 ## Limits
 
 - (Before the list of 2026-11-22) the rooms were the castle's rooms in rock; with the planner they are the kit's (above).

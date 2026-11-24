@@ -800,5 +800,133 @@
    "The trader says the roads are safer since you came."
   ],
   "rescue_gold": 120
+ },
+ "phase17": {
+  "_note": "Gold and trade goods: raw gems and the old coins of a dead kingdom (any trader buys them at their worth, a quarter more a game tier; the collector of one city pays double), dragonglass and blackstone (only one city's smith each works them, into a blade and a set of plate of the band of the game's tier). All drawn in a cave's containers besides their things, each on a stream of its own (weight 0 in every other draw). C++: RDCave16i.cpp.",
+  "items": [
+   {
+    "name": "Raw Ruby",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_raw_ruby",
+    "weight": 0.0,
+    "cave": true,
+    "looks": "An uncut ruby, red as a coal in the lamp's light. A trade good: any trader buys it (60 gold, more as the land grows dangerous); the collector in Graymourne pays double."
+   },
+   {
+    "name": "Raw Emerald",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_raw_emerald",
+    "weight": 0.0,
+    "cave": true,
+    "looks": "An uncut emerald, green and flawed, worth a good deal all the same. A trade good: any trader buys it (55 gold, more as the land grows dangerous); the collector in Graymourne pays double."
+   },
+   {
+    "name": "Raw Sapphire",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_raw_sapphire",
+    "weight": 0.0,
+    "cave": true,
+    "looks": "An uncut sapphire, deep blue under its crust of rock. A trade good: any trader buys it (50 gold, more as the land grows dangerous); the collector in Graymourne pays double."
+   },
+   {
+    "name": "Raw Topaz",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_raw_topaz",
+    "weight": 0.0,
+    "cave": true,
+    "looks": "An uncut topaz, gold-brown and clear. A trade good: any trader buys it (40 gold, more as the land grows dangerous); the collector in Graymourne pays double."
+   },
+   {
+    "name": "Old Coins of Vael",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_old_coins",
+    "weight": 0.0,
+    "cave": true,
+    "looks": "A handful of coins of Vael, a kingdom dead before the castle was built. A trade good: any trader buys them (35 gold); the collector in Graymourne pays double."
+   },
+   {
+    "name": "Dragonglass",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_dragonglass",
+    "weight": 0.0,
+    "cave": true,
+    "looks": "Black volcanic glass that holds an edge no steel holds. Only the smith of Ashenreach knows how to work it: four of them make a blade."
+   },
+   {
+    "name": "Blackstone",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_blackstone",
+    "weight": 0.0,
+    "cave": true,
+    "looks": "A dense black stone that rings like iron. Only the smith of Kethrys Spire works it: six of them make a set of plate."
+   }
+  ],
+  "besides": {
+   "Raw Ruby": 0.025,
+   "Raw Emerald": 0.025,
+   "Raw Sapphire": 0.03,
+   "Raw Topaz": 0.035,
+   "Old Coins of Vael": 0.06,
+   "Dragonglass": 0.03,
+   "Blackstone": 0.03
+  },
+  "trade": {
+   "Raw Ruby": 60,
+   "Raw Emerald": 55,
+   "Raw Sapphire": 50,
+   "Raw Topaz": 40,
+   "Old Coins of Vael": 35
+  },
+  "collector": {
+   "town": "Graymourne",
+   "mul": 2.0
+  },
+  "smith": [
+   [
+    "Dragonglass Blade",
+    "Dragonglass",
+    4,
+    "Ashenreach",
+    200
+   ],
+   [
+    "Blackstone Plate",
+    "Blackstone",
+    6,
+    "Kethrys Spire",
+    300
+   ]
+  ],
+  "weapons": [
+   {
+    "name": "Dragonglass Blade",
+    "like": "Longsword",
+    "icon": "cave_dragonglass",
+    "damage": 1.35,
+    "durability": 1.3,
+    "weight": 0.0,
+    "material": "/Game/RandomDungeon/Wild13/Kit/MI_N13_ObsidianGlass",
+    "looks": "A blade of black dragonglass, forged by the smith of Ashenreach: it bites deeper than steel and holds its edge."
+   }
+  ],
+  "armour": [
+   {
+    "name": "Blackstone Plate",
+    "like": "Dark Knight’s Armour",
+    "icon": "cave_blackstone",
+    "amount": 0.04,
+    "durability": 1.4,
+    "weight": 0.0,
+    "material": "/Game/Volstok_District/Materials/MI_Basalt_01a",
+    "looks": "Plate of black blackstone, forged by the smith of Kethrys Spire: heavier than iron, and it turns a blow better."
+   }
+  ]
  }
 }

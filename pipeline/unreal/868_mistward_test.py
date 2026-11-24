@@ -8693,6 +8693,55 @@ def step_cave16links():
         except Exception: pass
 STEPS.update({"cave16links": step_cave16links})
 
+def step_cave16trade():
+    """the list of 2026-11-22's caves, phase 17, the cave's side: the trade goods, dragonglass and blackstone drawn in the caves'
+    containers besides their things (each at its share over six session seeds, none outside the caves' draw: their weight 0); the
+    trade goods' worth (a quarter more a game tier) read from the game; the smiths' works made band by band (the blade's and the
+    plate's copies, the band of the game's tier)"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True); res = {}
+    T = json.load(open(os.path.join(SA, "caves", "treasure16.json"), encoding="utf-8"))["phase17"]
+    items = {str(i.name): i for i in g.get_editor_property("items")}
+    res["items"] = {n: (n in items, round(items[n].weight, 3) if n in items else None) for n in T["besides"]}
+    res["bands"] = {w["name"]: sorted(n for n in items if n.endswith(w["name"])) for w in T["weapons"] + T["armour"]}
+    res["work"] = [str(l) for l in g.get_trade16() if str(l).startswith("work|")]
+    res["values"] = {str(l).split("|")[1]: int(str(l).split("|")[2]) for l in g.get_trade16() if str(l).startswith("value|")}
+    res["game_tier"] = g.get_game_tier()
+    S0 = I2(0, 0); sets = [S0] + [I2(x, y) for x in range(-1, 2) for y in range(-1, 2) if not (x == 0 and y == 0)]
+    g.debug_clear_section(S0, 0, g.get_start_room_center()); yield from wait(0.5)
+    for sc in sets[1:]:
+        g.generate_section_now(sc); yield from built(sc)
+    drawn = {n: 0 for n in T["besides"]}; holding = 0; seed0 = g.get_editor_property("session_seed")
+    for sd in range(seed0, seed0 + 12):          # (twelve seeds: a share of 2.5 % in 150 containers is 4 on average, 1 by chance often)
+        g.set_session_seed(sd)
+        for sc in sets:
+            S_ = g.get_section(sc)
+            if not S_: continue
+            for i in range(S_.get_num_containers()):
+                L_ = [str(x) for x in g.loot_list_of(sc, i)]
+                if L_: holding += 1
+                for x in L_:
+                    if x in drawn: drawn[x] += 1
+    g.set_session_seed(seed0)
+    res["holding"] = holding
+    res["shares"] = {n: round(v / max(holding, 1), 3) for n, v in drawn.items()}
+    gt = res["game_tier"]
+    want = {n: max(1, round(pr * (1 + 0.25 * (gt - 1)))) for n, pr in T["trade"].items()}
+    # (the smith's band by the tier's place among the bands, 1-5 plain ... 26-30 Divine (PR #124's review: an exact tier match gave the
+    # plain copy at four tiers of five))
+    BANDS = ["", "Fine ", "Masterwork ", "Exalted ", "Celestial ", "Divine "]
+    res["band_by_tier"] = {}
+    for w in T["weapons"] + T["armour"]:
+        got = [str(g.debug_smith_band16(w["name"], t)) for t in range(1, 31)]
+        res["band_by_tier"][w["name"]] = {"wrong": [t for t in range(1, 31) if got[t - 1] != BANDS[(t - 1) // 5] + w["name"]], "at_10": got[9], "at_30": got[29]}
+    res["values_want"] = want
+    ok = (all(v[0] and v[1] == 0.0 for v in res["items"].values())
+          and all(len(b) == 6 for b in res["bands"].values()) and len(res["work"]) == 2 and all(l.split("|")[2] for l in res["work"])
+          and all(not v["wrong"] for v in res["band_by_tier"].values())
+          and all(abs(res["shares"][n] - sh) <= 3.0 * math.sqrt(sh * (1.0 - sh) / max(res["holding"], 1)) + 0.002 for n, sh in T["besides"].items())          # (three sigma of the binomial)
+          and all(res["values"].get(n) == v for n, v in want.items()))
+    step_result("cave16trade", bool(ok), **res)
+STEPS.update({"cave16trade": step_cave16trade})
+
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""
     if G.get("gen"): return G["gen"]
