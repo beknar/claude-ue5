@@ -801,6 +801,8 @@ public:
 	TArray<FPark19> Parks19;
 	TArray<FStop19> StopLines19;
 	TArray<FString> Streets19;
+	/** Heaven's yard things by the homes (a trailer, a parked car, a dumpster, pallets, a bin): "yard|<x>|<y>|<yaw>|<length>|<width>" */
+	TArray<FString> YardLines19;
 	void HeavenSignal19(const FTownSpot& Sp);
 	void TickSignals19(float Now);
 	void HeavenRuns19();

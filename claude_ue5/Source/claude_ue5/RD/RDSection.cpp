@@ -685,6 +685,9 @@ UPointLightComponent* ARDSection::AddLight(const FVector& Loc, const FLinearColo
 	// (a dungeon's own light (the list of 2026-11-08b: the Black Tower's cold violet): every light of its sets drawn toward the
 	// level's tint; 0 on every other level)
 	L->SetLightColor(Generator && !Generator->bTown && Generator->DungeonLightTintShare > 0.f ? FMath::Lerp(Color, Generator->DungeonLightTint, FMath::Clamp(Generator->DungeonLightTintShare, 0.f, 1.f)) : Color);
+	// (Heaven (PR #126's review): no flame's light: a warm light (a candle's, a chandelier's, a torch's) is a lamp's steady white)
+	const bool bHeavenLamp = Theme == FName(TEXT("Heaven")) && Color.G < 0.8f * Color.R;
+	if (bHeavenLamp) { L->SetLightColor(FMath::Lerp(Color, FLinearColor(1.f, 0.95f, 0.88f), 0.8f)); Flicker = 0.f; }
 	L->SetAttenuationRadius(Radius);
 	L->SetSourceRadius(6.f);
 	L->SetCastShadows(bShadows);
@@ -1337,6 +1340,8 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 	};
 	auto Candles = [&](const FVector& P, float Cd)
 	{
+		// (Heaven: a desk lamp on a table, never one on the floor (PR #126's review); the draw is taken all the same)
+		if (Theme == FName(TEXT("Heaven")) && P.Z - GetActorLocation().Z < 30.f) { R.FRandRange(0, 360); return; }
 		AddPieceAt(TEXT("Candles"), P, R.FRandRange(0, 360), 1.f, true);
 		AddEffect(TEXT("CandleFire"), P + FVector(0, 0, 18), 1.f);
 		AddLight(P + FVector(0, 0, 45), FLinearColor(1.f, 0.62f, 0.32f), Cd, 700.f, false, 0.12f);

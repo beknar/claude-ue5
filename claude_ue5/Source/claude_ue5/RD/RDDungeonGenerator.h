@@ -2278,6 +2278,8 @@ public:
 	int32 SignalPhase19(float T, float Offset, bool bAlongX) const;
 	void TickSignals19(float Dt);
 	float SignalLook19 = 0.f;
+	int32 Streets19Shown = -1;
+	TWeakObjectPtr<ARDSection> Streets19Of;
 	/** for the tests: the marks and found ids the cave links made this session taken off again */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") int32 ForgetCaveLinkMarks16();
 	TArray<int32> CaveLinkMarked16;

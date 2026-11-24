@@ -14,6 +14,8 @@
 #include "Components/TextRenderComponent.h"
 DEFINE_LOG_CATEGORY_STATIC(LogRDHeaven19, Log, All);
 
+static TAutoConsoleVariable<int32> CVarRDStreets19(TEXT("rd.Streets19"), 1, TEXT("Heaven's street things (markings, signals, signs, parked cars): 1 shown, 0 hidden (tests: the frame rate with and without them)"));
+
 static const FIntPoint RDH19Dir4[4] = { FIntPoint(-1, 0), FIntPoint(1, 0), FIntPoint(0, -1), FIntPoint(0, 1) };
 
 // ------------------------------------------------------------------------------------------------ the signals' phases
@@ -39,6 +41,27 @@ void ARDDungeonGenerator::TickSignals19(float Dt)
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	if (!S || S->IsBuilding()) return;
 	S->TickSignals19(GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f);
+	// (the street things shown or hidden, for the frame-rate test)
+	const int32 Show = CVarRDStreets19.GetValueOnGameThread() != 0 ? 1 : 0;
+	if (Show != Streets19Shown || S != Streets19Of.Get())
+	{
+		Streets19Shown = Show; Streets19Of = S;
+		static const TCHAR* Names[] = { TEXT("Heaven.Mark"), TEXT("Heaven.Signal19"), TEXT("Heaven.StopSign19"), TEXT("Heaven.StreetSign19"), TEXT("Heaven.DistrictSign19"),
+			TEXT("Heaven.Car_1"), TEXT("Heaven.Car_2"), TEXT("Heaven.Car_3"), TEXT("Heaven.Car_4"), TEXT("Heaven.Car_5"), TEXT("Heaven.Car_6") };
+		TSet<const UStaticMesh*> Ms;
+		for (const TCHAR* N : Names) if (const FRDPiece* P = Piece(N)) if (P->Mesh) Ms.Add(P->Mesh);
+		TArray<UActorComponent*> Cs; S->GetComponents(Cs);
+		int32 Set = 0;
+		for (UActorComponent* C : Cs)
+		{
+			USceneComponent* Sc = Cast<USceneComponent>(C);
+			if (!Sc) continue;
+			bool bMine = C->ComponentHasTag(TEXT("HeavenSign19")) || C->ComponentHasTag(TEXT("HeavenSignal19"));
+			if (const UInstancedStaticMeshComponent* I = Cast<UInstancedStaticMeshComponent>(C); I && Ms.Contains(I->GetStaticMesh()) && !C->ComponentHasTag(TEXT("HeavenCar"))) bMine = true;
+			if (bMine) { Sc->SetVisibility(Show == 1); ++Set; }
+		}
+		UE_LOG(LogRDHeaven19, Log, TEXT("RDHEAVEN19 street things %s (%d components)"), Show ? TEXT("shown") : TEXT("hidden"), Set);
+	}
 }
 
 void ARDSection::HeavenSignal19(const FTownSpot& Sp)
@@ -48,6 +71,14 @@ void ARDSection::HeavenSignal19(const FTownSpot& Sp)
 	FSignal19 Sg; Sg.At = Sp.At;
 	Sg.Offset = (float)(HashCombine(GetTypeHash(FIntPoint(FMath::RoundToInt(Sp.At.X), FMath::RoundToInt(Sp.At.Y))), 0x519Au) % 997u) * 0.1f;
 	const FRDPiece* Lp = Generator->Piece(TEXT("Heaven.SignalLens19"));
+	// (a replan with static building off (RestartPlay's ActivateForPlay) keeps the built lenses: found again, in the same order (PR #126's
+	// review: every signal stood at its last phase after a restart))
+	if (!bBuildStatic)
+	{
+		if (!SignalLenses19.IsValid())
+			for (UActorComponent* C : GetComponentsByTag(UInstancedStaticMeshComponent::StaticClass(), TEXT("HeavenSignal19"))) { SignalLenses19 = Cast<UInstancedStaticMeshComponent>(C); break; }
+		if (const UInstancedStaticMeshComponent* I = SignalLenses19.Get(); I && (Signals19.Num() + 1) * 12 <= I->GetInstanceCount()) Sg.First = Signals19.Num() * 12;
+	}
 	if (bBuildStatic && Lp && Lp->Mesh)
 	{
 		UInstancedStaticMeshComponent* I = SignalLenses19.Get();
@@ -266,6 +297,7 @@ void ARDSection::AddText19(const FString& Text, const FTransform& T, float MaxW,
 	Tx->SetTextRenderColor(Col);
 	Tx->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Tx->ComponentTags.Add(TEXT("HeavenSign19"));
+	Tx->LDMaxDrawDistance = 6000.f; Tx->SetCachedMaxDrawDistance(6000.f);          // (words read within 60 m; each is a draw of its own)
 	Tx->SetWorldTransform(T);
 	Tx->RegisterComponent();
 	AddInstanceComponent(Tx);
@@ -315,8 +347,6 @@ void ARDSection::HeavenStreets19Build()
 		auto Tile = [&](int32 A, int32 C) { return Ru.bX ? FIntPoint(A, C) : FIntPoint(C, A); };
 		const FVector Av = (TileWorld(Tile(Ru.S + 1, Ru.C0)) - TileWorld(Tile(Ru.S, Ru.C0))).GetSafeNormal2D();
 		const FVector Cv = (TileWorld(Tile(Ru.S, Ru.C0 + 1)) - TileWorld(Tile(Ru.S, Ru.C0))).GetSafeNormal2D();
-		const FVector Rp(-Av.Y, Av.X, 0.f);
-		const float SR = FVector::DotProduct(Rp, Cv) >= 0.f ? 1.f : -1.f;
 		const float Hw = (Ru.C1 - Ru.C0) * M * 0.5f;
 		auto Mw = [&](float A) { const FVector P0 = (TileWorld(Tile(Ru.S, Ru.C0)) + TileWorld(Tile(Ru.S, Ru.C1 - 1))) * 0.5f; return P0 + Av * ((A - Ru.S) * M); };
 		const int32 Len = Ru.E - Ru.S;
@@ -456,6 +486,7 @@ void ARDSection::HeavenStreets19Build()
 	}
 	// ---- the parked cars: one in three quarters of the lay-bys (along the street, heading as that side's lane), two thirds of the lots'
 	// bays (nose in); the bays' lines
+	TSet<FIntPoint> BayEnds;
 	TArray<FName> Kinds;
 	// (only what fits a 6 m bay: the traffic's bus (12.4 m) parked nose in stood half across the street (the first pictures))
 	for (int32 K = 1; K <= 6; ++K) { const FName Nk(*FString::Printf(TEXT("Heaven.Car_%d"), K)); if (const FRDPiece* P = Generator->Piece(Nk)) if (P->Mesh && P->Size.X <= 2.f * M - 20.f) Kinds.Add(Nk); }
@@ -465,14 +496,21 @@ void ARDSection::HeavenStreets19Build()
 		auto Tile = [&](int32 A, int32 C) { return Ru.bX ? FIntPoint(A, C) : FIntPoint(C, A); };
 		const FVector Av = (TileWorld(Tile(Ru.S + 1, Ru.C0)) - TileWorld(Tile(Ru.S, Ru.C0))).GetSafeNormal2D();
 		const FVector Cv = (TileWorld(Tile(Ru.S, Ru.C0 + 1)) - TileWorld(Tile(Ru.S, Ru.C0))).GetSafeNormal2D();
-		const FVector Rp(-Av.Y, Av.X, 0.f);
+		const FVector Rp(-Av.Y, Av.X, 0.f);          // (the right of +Av: that side's lane heads +Av)
 		const int32 Ck = Pk.Side > 0 ? Ru.C1 : Ru.C0 - 1, Cd = Pk.Side > 0 ? Ru.C1 + 1 : Ru.C0 - 2;
 		const FVector Out = Cv * (float)Pk.Side;          // (from the street out across the pavement)
 		if (!Pk.bLot)
 		{
 			const FVector C = (TileWorld(Tile(Pk.A, Ck)) + TileWorld(Tile(Pk.A + 1, Ck))) * 0.5f;
 			const FVector Hd = (Out | Rp) > 0.f ? Av : -Av;          // (the right side of +Av heads +Av)
-			for (int32 E = 0; E < 2; ++E) Mark(C + Av * (E == 0 ? -M : M) - Out * 10.f, Av, 12.f, 240.f);
+			// (a bay's end lines; one shared with the bay before it is drawn once)
+			for (int32 E = 0; E < 2; ++E)
+			{
+				const FVector Lp = C + Av * (E == 0 ? -M : M) - Out * 10.f;
+				const FIntPoint Key(FMath::RoundToInt(Lp.X / 10.f), FMath::RoundToInt(Lp.Y / 10.f));
+				if (BayEnds.Contains(Key)) continue;
+				BayEnds.Add(Key); Mark(Lp, Av, 12.f, 240.f);
+			}
 			++Bays;
 			const uint32 Hh = HashCombine(GetTypeHash(Tile(Pk.A, Ck)), 0xCA75u);
 			if (Kinds.Num() && Hh % 100u < 75u)
@@ -522,6 +560,7 @@ void ARDSection::HeavenStreets19Build()
 		++Crossings; if (Jn.Signal >= 0) ++Signalled;
 		Streets19.Add(FString::Printf(TEXT("junction|%.0f|%.0f|%d|%d|%d"), Jn.Mid.X, Jn.Mid.Y, Jn.Signal, Jn.Max.X - Jn.Min.X + 1, Jn.Max.Y - Jn.Min.Y + 1));
 	}
+	Streets19.Append(YardLines19);
 	for (const FStop19& St : StopLines19) Streets19.Add(FString::Printf(TEXT("stopline|%.0f|%.0f|%.0f|%.0f|%d"), St.At.X, St.At.Y, St.Way.X, St.Way.Y, St.Signal));
 	Streets19.Insert(FString::Printf(TEXT("streets|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d"), Runs19.Num(), Dashes, Edges, Zebras, Stops, StopSigns, NameSigns, Districts,
 		Crossings, Signalled, Parked, Bays, LotsN, Signals19.Num(), MarksN), 0);

@@ -1,11 +1,13 @@
 {
- "tag": "h19b",
+ "tag": "h19d",
  "plan": [
   "heaven19_medieval",
   "heaven19_markings",
   "heaven19_signals",
   "heaven19_signs",
-  "heaven19_parking"
+  "heaven19_parking",
+  "heaven19_fps",
+  "heaven19_restart"
  ],
  "level": "brokenspire",
  "steps": [
@@ -14,23 +16,23 @@
    "ok": true,
    "elsewhere_town": "Brokenspire",
    "elsewhere_medieval": {
-    "SM_Torch_A": 154,
-    "SM_Candle_low": 252,
+    "SM_Torch_A": 156,
+    "SM_Candle_low": 306,
     "SM_Kit_Fireplace15": 38,
-    "SM_WoodWagons": 14,
-    "SM_WoodenCart": 10,
+    "SM_WoodWagons": 7,
+    "SM_WoodenCart": 7,
     "SM_HaySquare": 8,
-    "sm_WoodLog_01d": 4,
+    "sm_WoodLog_01d": 9,
     "SM_FireBasket": 4,
     "SM_Chandelier_A": 12,
-    "SM_Kit_Tripod": 39,
+    "SM_Kit_Tripod": 43,
     "SM_Kit_Cauldron": 48,
     "SM_Kit_PotRack": 38,
-    "SM_Shield_1": 159
+    "SM_Shield_1": 157
    },
    "elsewhere_fires": {
-    "P_TorchFire": 177,
-    "NS_Candle_Fire_A": 290,
+    "P_TorchFire": 179,
+    "NS_Candle_Fire_A": 344,
     "NS_Fireplace_Low": 38
    },
    "medieval": {},
@@ -44,11 +46,15 @@
     "SM_HV_Pot19": 29,
     "SM_HV_WallShelf19": 29,
     "SM_HV_Picture19": 71,
-    "SM_HV_Trailer19": 6,
-    "SM_HV_Dumpster19": 6,
-    "SM_HV_Pallets19": 6,
+    "SM_HV_Trailer19": 1,
+    "SM_HV_Dumpster19": 1,
+    "SM_HV_Pallets19": 1,
     "SM_HV_Bollard19": 4
    },
+   "lights": 646,
+   "flickering_lights": 0,
+   "warm_lights": 0,
+   "desk_lamps_on_floor": 0,
    "shots": [
     "media",
     "trailer",
@@ -70,13 +76,13 @@
     "districts": 4,
     "crossings": 36,
     "signalled": 36,
-    "parked": 239,
-    "bays": 316,
+    "parked": 246,
+    "bays": 324,
     "lots": 6,
     "signals": 36,
-    "marks": 2382
+    "marks": 2294
    },
-   "marks_laid": 2382,
+   "marks_laid": 2294,
    "roads": 18,
    "roads_without_lines": [],
    "road_sample": [
@@ -122,6 +128,15 @@
     }
    ],
    "crossings": 36,
+   "cars_before_stop_lines": 394,
+   "cars_off_the_stop_lines_lane_cm": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "cars_in_the_other_lane": 0,
    "shot": true
   },
   {
@@ -130,40 +145,54 @@
    "poles": 36,
    "old_poles": 0,
    "signals": 36,
-   "reads": 79,
+   "reads": 77,
    "both_moving": 0,
    "wrong_lenses": 0,
-   "lenses_behind_the_clock": 40,
-   "lens_reads": 2844,
+   "lenses_behind_the_clock": 42,
+   "lens_reads": 2772,
    "full_cycles": 36,
    "out_of_order": 0,
    "pictures_red_green_px": {
     "green": {
      "red": [
-      10,
+      9,
       0
      ],
      "amber": [
-      5,
-      70
+      0,
+      57
      ],
      "green": [
       0,
-      292
+      150
      ]
     },
     "red": {
      "red": [
-      93,
+      91,
       0
      ],
      "amber": [
-      36,
-      0
+      1,
+      2
      ],
      "green": [
       0,
       12
+     ]
+    },
+    "ygreen": {
+     "red": [
+      9,
+      0
+     ],
+     "amber": [
+      6,
+      60
+     ],
+     "green": [
+      0,
+      224
      ]
     }
    },
@@ -224,35 +253,54 @@
    "step": "heaven19_parking",
    "ok": true,
    "head": {
-    "parked": 239,
-    "bays": 316,
+    "parked": 246,
+    "bays": 324,
     "lots": 6
    },
-   "laybys_cars": 227,
+   "yard_things": 5,
+   "laybys_cars": 234,
    "lot_cars": 12,
-   "parked_closer_than_2_8m": 0,
+   "parked_overlapping": 0,
+   "longest_parked_cm": 567.0,
    "moving_cars": 84,
-   "moving_within_2_5m_of_parked": 0,
+   "moving_into_parked_footprints": 0,
    "shots": [
     "layby",
     "lot"
    ]
+  },
+  {
+   "step": "heaven19_fps",
+   "ok": true,
+   "fps_on": 9.3,
+   "fps_off": 11.9,
+   "fps_on2": 11.6,
+   "on_mean": 10.4
+  },
+  {
+   "step": "heaven19_restart",
+   "ok": true,
+   "signals": 36,
+   "reads": 43,
+   "changed": 36,
+   "wrong_lenses": 0
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
  "shots": [
-  "bs_h19b_heaven19_media.png",
-  "bs_h19b_heaven19_trailer.png",
-  "bs_h19b_heaven19_dumpster.png",
-  "bs_h19b_heaven19_walllamp.png",
-  "bs_h19b_heaven19_crossing.png",
-  "bs_h19b_heaven19_signal_green.png",
-  "bs_h19b_heaven19_signal_red.png",
-  "bs_h19b_heaven19_sign_stop.png",
-  "bs_h19b_heaven19_sign_name.png",
-  "bs_h19b_heaven19_sign_district.png",
-  "bs_h19b_heaven19_layby.png",
-  "bs_h19b_heaven19_lot.png"
+  "bs_h19d_heaven19_media.png",
+  "bs_h19d_heaven19_trailer.png",
+  "bs_h19d_heaven19_dumpster.png",
+  "bs_h19d_heaven19_walllamp.png",
+  "bs_h19d_heaven19_crossing.png",
+  "bs_h19d_heaven19_signal_green.png",
+  "bs_h19d_heaven19_signal_red.png",
+  "bs_h19d_heaven19_signal_ygreen.png",
+  "bs_h19d_heaven19_sign_stop.png",
+  "bs_h19d_heaven19_sign_name.png",
+  "bs_h19d_heaven19_sign_district.png",
+  "bs_h19d_heaven19_layby.png",
+  "bs_h19d_heaven19_lot.png"
  ],
  "error": null,
  "saves_put_back": 1,

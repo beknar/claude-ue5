@@ -34,3 +34,9 @@ The city is a wilderness town on `brokenspire` with the modern plan (`FRDWildTow
 - **A car list is not all cars**: `Heaven.Car_6` is a 12.4 m bus. Parked nose in a 3 m bay, it stood half across the street. The test had checked parked cars by their middles, so it passed. Parked kinds are filtered by length (6 m bays), and the test checks each car's footprint (its length and width, turned by its yaw) against the moving cars over 30 s.
 - **A picture's stand point needs room**: a stand 7 m beside a parked car put the camera inside a building, and one over a crossing put it inside a shelf. Stand in the street, from the stop lines' lanes.
 - **Heaven's medieval things are replaced by name**: `PcName` takes `Heaven.<name>` wherever `946` made one (torch, candles, chandelier, fireplace, tripod, cauldron, pot rack, shield; `Town.Cart`, `Cart2`, `Hay`, `Logs`, `Sacks`, `Lamp`). Their fires are cut in `AddEffect` by the theme, along with the fires' sounds (`FirePoints`).
+- **PR #126's review**:
+  - **A rule old towns lived with can break under a new piece**: the yard rule set a cart at a random turn on any free tile, so in Heaven a trailer or car stood half in the street. Heaven's yard things stand along the building's front, off the streets and the kerb row, with the whole footprint blocked.
+  - **A replan with static building off finds what the static build made**: `RestartPlay`'s replan cleared `SignalLenses19`, and every signal froze. The lenses are found again by their tag.
+  - **A theme replaces the light as well as the mesh**: the desk lamps kept the candles' flickering orange light and the bollards the fire basket's. In Heaven a warm light is a steady white (`AddLight`).
+  - **A count of instances the code made is checked against the code's own plan**: the side of a stop line is read apart from it, from the moving cars' own lanes.
+

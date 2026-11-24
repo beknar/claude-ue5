@@ -105,28 +105,39 @@ A modern city surrounded by a shimmering shield, with skyscrapers, office buildi
 
 ### Measured
 
-- `884 heaven19_medieval,heaven19_markings,heaven19_signals,heaven19_signs,heaven19_parking -Light` (`test_h19b.json`; parking again after the bus in `test_h19c.json`).
+- `884 heaven19_medieval,heaven19_markings,heaven19_signals,heaven19_signs,heaven19_parking,heaven19_fps,heaven19_restart -Light` (`test_h19d.json`, after PR #126's review):
 - **Medieval leftovers**:
   - none of the 13 medieval meshes in Heaven and no torch, candle or hearth fire;
   - Brokenspire, counted first in the same run, keeps 158 torches, 256 candles, 38 hearths and its fires;
-  - 421 modern stand-ins.
+  - of Heaven's 646 lights, none flickering and none a flame's warm colour, and no desk lamp on a floor.
 - **Markings**:
   - 85 runs on 18 streets and 36 crossings;
   - 452 dashes, 158 edge lines, 1026 zebra bars, 129 stop lines;
-  - all 2382 marks laid, against the plan's count of instances.
+  - all 2294 marks laid, against the plan's count of instances.
+  - Read apart from the plan: over 30 s, the moving cars were seen 394 times within 15 m before a stop line of their own way. Every one drove in that line's lane, 0 cm off its middle, and none in the other lane.
 - **Signals**:
   - 36 signals, none of the pack's old poles;
-  - over a full 38 s cycle (79 reads of every signal), never both roads moving;
-  - every read four lenses lit, the ones of the phase the lenses were last set to (40 of 2844 reads a tick behind the clock);
-  - every signal went green, amber, red in order on both roads;
-  - in the pictures, each lens's own colour on the screen: at the X road's green the green lens 292 green pixels and the red lens 10 red; at its red the red lens 93 red and the green lens 12 green.
+  - over a full 38 s cycle (77 reads of every signal), the timing never let both roads go (green or amber) at once. The cars do not obey the lights yet: phase 23;
+  - every read four lenses lit, the ones of the phase they were last set to (42 of 2772 reads a tick behind the clock);
+  - every signal went green, amber, red in order on both roads.
+  - In the pictures, each lens's own colour on the screen:
+    - the +X face at the X road's green: its green lens 150 green pixels, its red lens 9;
+    - the same face at its red: the red lens 91 red, the green lens 12 green;
+    - the +Y face at the Y road's green: its green lens 224 green pixels.
+  - After `RestartPlay`, whose replan builds nothing static, all 36 found their lenses again and kept changing, every read right.
 - **Signs**:
   - 4 stop signs for the 4 approaches without lights;
   - 33 name signs at 36 crossings;
   - 4 district boards;
-  - 144 text components, every sign's words.
+  - 144 text components, every sign's words, drawn within 60 m.
 - **Parking**:
-  - 239 cars in 316 bays (227 in lay-bys, 12 in 6 lots), the longest 5.67 m;
+  - 246 cars in 324 bays (234 in lay-bys, 12 in 6 lots), the longest 5.67 m;
+  - 5 yard things by the homes, set along their fronts off the streets, the whole footprint blocked (at a random turn they had stood half in the street);
   - no two footprints overlapping;
-  - over 30 s, none of the 84 moving cars within 1.6 m of a parked car's footprint.
-- **Pictures**: a crossing from its approach, a signal at green and at red, each sign, a lay-by, a lot, the media wall, a trailer, a dumpster, a wall lamp.
+  - over 30 s, none of the 84 moving cars within 1.6 m of a parked car's or yard thing's footprint.
+- **Frame rate** at a signalled crossing looking along a street, in the editor's play window (`rd.Streets19` hides the street things):
+  - 9.3 frames a second shown (the first reading, as the view settled);
+  - 11.9 hidden;
+  - 11.6 shown again.
+- **Pictures**: a crossing from its approach, a signal at green, at red and from its other side, each sign, a lay-by, a lot, the media wall, a trailer, a dumpster, a wall lamp.
+- **Packaging**: the phase adds settings to the generator (`HeavenStreetNames19`...) and assets saved into `brokenspire`. A package needs a full cook (no `-SkipCook`) and `869` first (phase 28).

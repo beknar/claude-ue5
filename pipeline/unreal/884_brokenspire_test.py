@@ -4565,7 +4565,7 @@ def fire_counts19(S):
 
 def streets19():
     L = [str(l).split("|") for l in section().get_heaven_streets19()]
-    d = {"head": None, "roads": [], "junctions": [], "stoplines": [], "stopsigns": [], "namesigns": [], "districts": [], "cars": []}
+    d = {"head": None, "roads": [], "junctions": [], "stoplines": [], "stopsigns": [], "namesigns": [], "districts": [], "cars": [], "yard": []}
     for q in L:
         if q[0] == "streets":
             k = ["runs", "dashes", "edges", "zebras", "stops", "stopsigns", "namesigns", "districts", "crossings", "signalled", "parked", "bays", "lots", "signals", "marks"]
@@ -4576,6 +4576,7 @@ def streets19():
         elif q[0] == "stopsign": d["stopsigns"].append({"at": V(float(q[1]), float(q[2]), 0), "yaw": float(q[3])})
         elif q[0] == "namesign": d["namesigns"].append({"at": V(float(q[1]), float(q[2]), 0), "names": q[3:5]})
         elif q[0] == "district": d["districts"].append({"at": V(float(q[1]), float(q[2]), 0), "words": q[3]})
+        elif q[0] == "yard": d["yard"].append({"at": V(float(q[1]), float(q[2]), 0), "yaw": float(q[3]), "len": float(q[4]), "wid": float(q[5]), "lot": None})
         elif q[0] == "car": d["cars"].append({"at": V(float(q[1]), float(q[2]), 0), "yaw": float(q[3]), "lot": q[4] == "1", "len": float(q[5]) if len(q) > 5 else 500.0, "wid": float(q[6]) if len(q) > 6 else 216.0})
     return d
 
@@ -4648,6 +4649,19 @@ def step_heaven19_medieval():
     res["medieval"] = {k: v for k, v in mesh_counts19(S, MEDIEVAL19).items() if v}
     res["fires"] = fire_counts19(S)
     res["modern"] = mesh_counts19(S, MODERN19)
+    # (every light Heaven's: none flickering, none a flame's warm colour (green under 0.8 of red); the floor's desk lamps none)
+    Ls = S.get_components_by_class(unreal.PointLightComponent)
+    res["lights"] = len(Ls)
+    res["flickering_lights"] = sum(1 for l in Ls if l.component_has_tag("RDFlicker"))
+    res["warm_lights"] = sum(1 for l in Ls if l.get_editor_property("light_color").g < 0.8 * l.get_editor_property("light_color").r)
+    floor_lamps = 0
+    for c in isms(S):
+        m = c.get_editor_property("static_mesh")
+        if m and m.get_name() == "SM_HV_DeskLamp19":
+            for i_ in range(c.get_instance_count()):
+                t = c.get_instance_transform(i_, True); t = t[-1] if isinstance(t, tuple) else t
+                if t.translation.z - S.get_actor_location().z < 30: floor_lamps += 1
+    res["desk_lamps_on_floor"] = floor_lamps
     shots = []
     try:
         for nm, mesh in (("media", "SM_HV_Media19"), ("trailer", "SM_HV_Trailer19"), ("dumpster", "SM_HV_Dumpster19"), ("walllamp", "SM_HV_WallLamp19")):
@@ -4668,6 +4682,7 @@ def step_heaven19_medieval():
         G["pawn"].set_actor_hidden_in_game(False)
     res["shots"] = shots
     ok = not res["medieval"] and not res["fires"] and res["modern"]["SM_HV_WallLamp19"] > 0 and sum(res["modern"].values()) >= 20 \
+        and res["flickering_lights"] == 0 and res["warm_lights"] == 0 and res["desk_lamps_on_floor"] == 0 \
         and ("elsewhere_medieval" not in res or sum(res["elsewhere_medieval"].values()) > 0)
     step_result("heaven19_medieval", bool(ok), **res)
 
@@ -4686,6 +4701,22 @@ def step_heaven19_markings():
     res["road_sample"] = d["roads"][:4]
     cross = [j for j in d["junctions"]]
     res["crossings"] = len(cross)
+    # (an independent read of the sides: each moving car within 15 m before a stop line of its own way, how far it drives to the side
+    # of that line's lane middle (right-hand traffic: the line's lane is the cars' lane, 0 m off; the other side would be 4.4 m))
+    offs = []
+    for t_ in range(20):
+        for c in S.get_components_by_class(unreal.SceneComponent):
+            if not c.component_has_tag("HeavenCar") or isinstance(c, unreal.StaticMeshComponent): continue
+            p_ = c.get_world_location(); f_ = c.get_forward_vector()
+            for x in d["stoplines"]:
+                w_ = x["way"]
+                if f_.x * w_.x + f_.y * w_.y < 0.95: continue
+                dx, dy = p_.x - x["at"].x, p_.y - x["at"].y
+                along = dx * w_.x + dy * w_.y; side = -dx * w_.y + dy * w_.x
+                if -1500 < along < 0 and abs(side) < 700: offs.append(round(side))
+        yield from wait(1.5)
+    res["cars_before_stop_lines"] = len(offs); res["cars_off_the_stop_lines_lane_cm"] = sorted(abs(o) for o in offs)[-5:] if offs else []
+    res["cars_in_the_other_lane"] = sum(1 for o in offs if abs(o) > 150)
     sl = [x for x in d["stoplines"] if x["signal"] >= 0]
     if sl:
         x = sl[0]; w_ = x["way"]
@@ -4695,7 +4726,7 @@ def step_heaven19_markings():
         G["pawn"].set_actor_hidden_in_game(False)
         res["shot"] = bool(pth)
     ok = h.get("marks", 0) > 0 and res["marks_laid"] == h.get("marks") and not res["roads_without_lines"] and h.get("zebras", 0) > 0 \
-        and h.get("stops", 0) >= 2 * h.get("crossings", 99) and h.get("dashes", 0) > 0
+        and h.get("stops", 0) >= 2 * h.get("crossings", 99) and h.get("dashes", 0) > 0 and res["cars_before_stop_lines"] >= 10 and res["cars_in_the_other_lane"] == 0
     step_result("heaven19_markings", bool(ok), **res)
 
 
@@ -4725,6 +4756,7 @@ def step_heaven19_signals():
             if not s_["xs"] or s_["xs"][-1] != x: s_["xs"].append(x)
         reads += 1
         yield from wait(0.5)
+    # (both_moving: the timing's own rule read back (both roads green or amber at once); the cars do not yet obey the lights: phase 23)
     res["signals"] = len(seen); res["reads"] = reads; res["both_moving"] = both; res["wrong_lenses"] = wrong_lit
     res["lenses_behind_the_clock"] = lagging; res["lens_reads"] = sum(1 for _ in range(reads)) * len(seen)
     res["full_cycles"] = sum(1 for v in seen.values() if v["x"] == {0, 1, 2} and v["y"] == {0, 1, 2})
@@ -4736,18 +4768,20 @@ def step_heaven19_signals():
     try:
         if len(L) > 1:
             q = L[1]; at = V(float(q[2]), float(q[3]), 0)
-            for want, nm in ((2, "green"), (0, "red")):
+            for want, nm in ((2, "green"), (0, "red"), (-2, "ygreen")):
                 t1 = time.time()
                 while time.time() - t1 < cyc + 2:
                     q2 = str(section().get_signals19()[1]).split("|")
-                    if int(q2[4]) == want and (want == 2 or int(q2[5]) == 2): break
+                    if want == -2 and int(q2[5]) == 2: break
+                    if want >= 0 and int(q2[4]) == want and (want == 2 or int(q2[5]) == 2): break
                     yield from wait(0.25)
-                look_at19(V(at.x + 600, at.y, 0), at, 14.0); yield from wait(1.2)
+                fy = want == -2          # (the +Y face, from 6 m along +Y)
+                look_at19(V(at.x, at.y + 600, 0) if fy else V(at.x + 600, at.y, 0), at, 14.0); yield from wait(1.2)
                 # (each lens of the +X face boxed where it is on the screen (its middle 1.5 cm out of the face), its own colour read)
                 hd = g.get_editor_property("signal_head19")
                 boxes = {}
                 for k_, dz in (("red", 30.0), ("amber", 0.0), ("green", -30.0)):
-                    pw = V(at.x + hd.x + 1.5, at.y, S.get_actor_location().z + hd.z + dz)
+                    pw = V(at.x, at.y + hd.x + 1.5, S.get_actor_location().z + hd.z + dz) if fy else V(at.x + hd.x + 1.5, at.y, S.get_actor_location().z + hd.z + dz)
                     ok_ = unreal.GameplayStatics.project_world_to_screen(G["pc"], pw, False)
                     ok2, sp = (ok_[0], ok_[1]) if isinstance(ok_, tuple) else (ok_ is not None, ok_)
                     vs = unreal.WidgetLayoutLibrary.get_viewport_size(G["w"])
@@ -4761,8 +4795,10 @@ def step_heaven19_signals():
     res["pictures_red_green_px"] = pics
     gp, rp = pics.get("green") or {}, pics.get("red") or {}
     # (at its green the green lens green and the red lens not red; at its red the reverse)
+    yp = pics.get("ygreen") or {}
     lit_ok = (len(gp) == 3 and len(rp) == 3 and gp["green"][1] >= 8 and gp["red"][0] < gp["green"][1] / 4
-              and rp["red"][0] >= 8 and rp["green"][1] < rp["red"][0] / 4)
+              and rp["red"][0] >= 8 and rp["green"][1] < rp["red"][0] / 4
+              and len(yp) == 3 and yp["green"][1] >= 8 and yp["red"][0] < yp["green"][1] / 4)
     res["pictures_ok"] = lit_ok
     ok = res["poles"] > 0 and res["poles"] == res["signals"] and res["old_poles"] == 0 and res["both_moving"] == 0 and res["wrong_lenses"] == 0 \
         and res["full_cycles"] == res["signals"] and res["out_of_order"] == 0 and res["lenses_behind_the_clock"] <= 0.02 * max(res["lens_reads"], 1) and lit_ok
@@ -4791,8 +4827,10 @@ def step_heaven19_signs():
                 fw = V(math.cos(math.radians(x["yaw"])), math.sin(math.radians(x["yaw"])), 0)
                 stand = V(at.x + fw.x * back, at.y + fw.y * back, 0)
             else:
-                to = V(at.x - S.get_actor_location().x, at.y - S.get_actor_location().y, 0); n_ = math.hypot(to.x, to.y) or 1
-                stand = V(at.x - to.x / n_ * back * 0.7 + to.y / n_ * back * 0.7, at.y - to.y / n_ * back * 0.7 - to.x / n_ * back * 0.7, 0)
+                # (from the crossing it stands at: out past its middle, so the camera looks back across the street at it)
+                jm = min(d["junctions"], key=lambda j: dist2(j["at"], at))["at"] if d["junctions"] else at
+                to = V(jm.x - at.x, jm.y - at.y, 0); n_ = math.hypot(to.x, to.y) or 1
+                stand = V(at.x + to.x / n_ * back * 1.6, at.y + to.y / n_ * back * 1.6, 0)
             look_at19(stand, at, 18.0 if nm != "district" else 8.0); yield from wait(2.0)
             pth = yield from shot_file19(f"heaven19_sign_{nm}"); shots.append(nm if pth else nm + "?")
     finally:
@@ -4805,6 +4843,54 @@ def step_heaven19_signs():
     step_result("heaven19_signs", bool(ok), **res)
 
 
+def step_heaven19_fps():
+    """PR #126's review: the street things' cost: at a signalled crossing, looking along a street with its markings, signs, signals and
+    parked cars, the frame rate over 6 s with them shown and with them hidden (rd.Streets19 0)"""
+    g = G["gen"]; res = {}
+    S = yield from heaven16_in(); yield from wait(1.0)
+    d = streets19()
+    sl = [x for x in d["stoplines"] if x["signal"] >= 0]
+    def cvar(v): unreal.SystemLibrary.execute_console_command(G["w"], f"rd.Streets19 {v}")
+    try:
+        if sl:
+            x = sl[0]; w_ = x["way"]
+            look_at19(V(x["at"].x - w_.x * 1500, x["at"].y - w_.y * 1500, 0), V(x["at"].x + w_.x * 3000, x["at"].y + w_.y * 3000, 0), -6.0)
+            G["pawn"].set_actor_hidden_in_game(False)
+            for st, v in (("on", 1), ("off", 0), ("on2", 1)):
+                cvar(v); yield from wait(2.5)
+                xs = []; t0 = time.time()
+                while time.time() - t0 < 6.0: yield from rwait(0.25); xs.append(g.get_fps())
+                res[f"fps_{st}"] = round(sum(xs) / max(len(xs), 1), 1)
+    finally:
+        cvar(1)
+    on = (res.get("fps_on", 0) + res.get("fps_on2", 0)) / 2
+    res["on_mean"] = round(on, 1)
+    ok = bool(sl) and res.get("fps_off") and on >= 0.85 * res["fps_off"]
+    step_result("heaven19_fps", bool(ok), **res)
+
+
+def step_heaven19_restart():
+    """PR #126's review: after RestartPlay (its replan builds nothing static) every signal still finds its lenses and keeps changing
+    with its phase: over 25 s each signal's lit lenses those of its phase and changing at least once"""
+    g = G["gen"]; res = {}
+    S = yield from heaven16_in(); yield from wait(1.0)
+    g.restart_play(0); yield from rwait(3.0)
+    changes = {}; wrong = 0; first = {}; reads = 0
+    t0 = time.time()
+    while time.time() - t0 < 25:
+        for q in [str(l).split("|") for l in section().get_signals19()][1:]:
+            i, x, y, lit = int(q[1]), int(q[4]), int(q[5]), int(q[6])
+            which = sorted(int(w) for w in q[7].split(",") if w)
+            if lit != 4 or which != sorted([x, 3 + x, 6 + y, 9 + y]): wrong += 1
+            if i in first and first[i] != (x, y): changes[i] = True
+            first.setdefault(i, (x, y))
+        reads += 1
+        yield from wait(0.5)
+    res["signals"] = len(first); res["reads"] = reads; res["changed"] = len(changes); res["wrong_lenses"] = wrong
+    ok = res["signals"] > 0 and wrong == 0 and res["changed"] == res["signals"]
+    step_result("heaven19_restart", bool(ok), **res)
+
+
 def step_heaven19_parking():
     """the list of 2026-11-22: parked cars along the kerbs and in lots: cars in lay-bys cut into the pavement (along the street) and in
     lots (nose in), each clear of the street's lanes (outside every street's tiles: its middle more than half the street's width from
@@ -4814,8 +4900,9 @@ def step_heaven19_parking():
     S = yield from heaven16_in(); yield from wait(1.0)
     d = streets19(); h = d["head"] or {}
     res["head"] = {k: h.get(k) for k in ("parked", "bays", "lots")}
-    cars = d["cars"]
-    res["laybys_cars"] = sum(1 for c in cars if not c["lot"]); res["lot_cars"] = sum(1 for c in cars if c["lot"])
+    cars = d["cars"] + d["yard"]
+    res["yard_things"] = len(d["yard"])
+    res["laybys_cars"] = sum(1 for c in cars if c["lot"] is False); res["lot_cars"] = sum(1 for c in cars if c["lot"] is True)
     # (each parked car's own footprint (its length and width turned by its yaw): two parked cars' footprints apart, and over 30 s
     # every moving car's middle kept 1.6 m off every parked car's footprint (a moving car is 2.2 m wide: half of it and a margin))
     def inside(p, c, grow):
@@ -4829,7 +4916,7 @@ def step_heaven19_parking():
     for i, a in enumerate(cars):
         for b in cars[i + 1:]:
             if dist2(a["at"], b["at"]) < 900 and (any(inside(p, b, 5) for p in corners(a)) or any(inside(p, a, 5) for p in corners(b))): close += 1
-    res["parked_overlapping"] = close; res["longest_parked_cm"] = max((c["len"] for c in cars), default=0)
+    res["parked_overlapping"] = close; res["longest_parked_cm"] = max((c["len"] for c in d["cars"]), default=0)
     moving = [c.get_world_location() for c in S.get_components_by_class(unreal.SceneComponent) if c.component_has_tag("HeavenCar") and not isinstance(c, unreal.StaticMeshComponent)]
     res["moving_cars"] = len(moving)
     near = 0
@@ -4841,7 +4928,7 @@ def step_heaven19_parking():
     shots = []
     try:
         for nm, lot in (("layby", False), ("lot", True)):
-            c = next((c for c in cars if c["lot"] == lot), None)
+            c = next((c for c in cars if c["lot"] is lot), None)
             if not c: continue
             near_sl = min(d["stoplines"], key=lambda x: dist2(x["at"], c["at"])) if d["stoplines"] else None
             fw = V(math.cos(math.radians(c["yaw"])), math.sin(math.radians(c["yaw"])), 0)
@@ -4991,7 +5078,7 @@ def step_heaven16_tower():
           and res["air_lights"] >= 13 and res["security_door"] == 1)
     step_result("heaven16_tower", bool(ok), **res)
 
-STEPS.update({"heaven19_survey": step_heaven19_survey, "heaven19_medieval": step_heaven19_medieval, "heaven19_markings": step_heaven19_markings, "heaven19_signals": step_heaven19_signals, "heaven19_signs": step_heaven19_signs, "heaven19_parking": step_heaven19_parking, "heaven16_lamps": step_heaven16_lamps, "heaven16_signs": step_heaven16_signs, "heaven16_map": step_heaven16_map, "heaven16_sleep": step_heaven16_sleep, "heaven16_tower": step_heaven16_tower})
+STEPS.update({"heaven19_survey": step_heaven19_survey, "heaven19_medieval": step_heaven19_medieval, "heaven19_markings": step_heaven19_markings, "heaven19_signals": step_heaven19_signals, "heaven19_signs": step_heaven19_signs, "heaven19_parking": step_heaven19_parking, "heaven19_fps": step_heaven19_fps, "heaven19_restart": step_heaven19_restart, "heaven16_lamps": step_heaven16_lamps, "heaven16_signs": step_heaven16_signs, "heaven16_map": step_heaven16_map, "heaven16_sleep": step_heaven16_sleep, "heaven16_tower": step_heaven16_tower})
 
 
 def step_sleep10():
