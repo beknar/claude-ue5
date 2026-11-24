@@ -11,12 +11,14 @@ Every line is now fitted inside the outline, 3 cm in from it, its dark edge and 
 the board's 63 x 47.25 cm about its middle (x 90.4, z -89.5 in the sign's frame), and every painted pixel is checked against the
 outline before it is saved (the script stops on one outside). Every word of the town plans' signs is painted (RDTownPlan.cpp's
 RDTSignText: 20), so no sign falls back to the engine's text.
-Args: out_dir [font.ttf] [sign_board.json]. Needs Pillow and numpy."""
+Args: out_dir [font.ttf] [sign_board.json], or out_dir --modern (Heaven's faces). Needs Pillow and numpy."""
 import os, sys, json
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else "signs"
+MODERN_ON = "--modern" in sys.argv
+if MODERN_ON: sys.argv = [x for x in sys.argv if x != "--modern"]          # (--modern may follow the folder)
 FONT = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] else os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\Windows\Fonts\Almendra-Bold.ttf")
 BOARD = sys.argv[3] if len(sys.argv) > 3 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "brokenspire", "sign_board.json")
 W, H = 512, 384
@@ -123,8 +125,48 @@ def paint(key, options):
         outside += int(((cols < bx0) | (cols > bx1)).sum())
     assert outside == 0, f"bs_signs: {key}: {outside} pixels outside the board"
     img = np.dstack([np.clip(col, 0, 1), a])
-    Image.fromarray((img * 255).astype(np.uint8), "RGBA").save(os.path.join(OUT, f"sign_{key}.png"))
+    Image.fromarray((img * 255).astype(np.uint8)).save(os.path.join(OUT, f"sign_{key}.png"))
     return lines, size
+
+
+# ---- the list of 2026-11-22 (Heaven: "the signs for the buildings in heaven should be modern style signs"): --modern paints a lit
+# panel's face for the whole 63 x 47.25 cm plane (Heaven's board is a rectangle that size, 946 signs): white letters in Bahnschrift (a
+# DIN-like signage face shipped with Windows) on a dark blue-grey glass ground with a thin pale rim; the words as Heaven's
+# RDTSignText(Kind, bModern) keys them
+MODERN = {"GEARSHOP": [["GEAR", "SHOP"]], "GROCERY": [["GROCERY"]], "CLINIC": [["CLINIC"]], "CHAPEL": [["CHAPEL"]], "STORAGE": [["STORAGE"]],
+          "BAR": [["BAR"]], "SECURITY": [["SECURITY"]], "TOWER": [["TOWER"]], "OFFICES": [["OFFICES"]], "SHOP": [["SHOP"]]}
+
+
+def paint_modern(key, options, font_path):
+    lines = options[0]
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 255))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle([0, 0, W - 1, H - 1], radius=18, fill=(14, 24, 36, 255), outline=(150, 205, 235, 255), width=6)
+    # (the largest size whose block fits 84 % of the width and 66 % of the height, the lines centred, a little tracking)
+    for size in range(240, 20, -2):
+        f = ImageFont.truetype(font_path, size)
+        ws = [d.textlength(t, font=f) + size * 0.06 * (len(t) - 1) for t in lines]
+        bb = [f.getbbox(t) for t in lines]
+        hs = [b[3] - b[1] for b in bb]; gap = int(size * 0.18)
+        if max(ws) <= W * 0.84 and sum(hs) + gap * (len(lines) - 1) <= H * 0.66: break
+    y = (H - (sum(hs) + gap * (len(lines) - 1))) / 2
+    for t, b, h, w in zip(lines, bb, hs, ws):
+        x = (W - w) / 2
+        for ch in t:
+            d.text((x, y - b[1]), ch, font=f, fill=(240, 247, 252, 255))
+            x += d.textlength(ch, font=f) + size * 0.06
+        y += h + gap
+    img.save(os.path.join(OUT, f"sign_{key}.png"))
+    return lines, size
+
+
+if MODERN_ON:
+    os.makedirs(OUT, exist_ok=True)
+    fp = r"C:\Windows\Fonts\bahnschrift.ttf"
+    rep = {k: paint_modern(k, v, fp)[1] for k, v in MODERN.items()}
+    json.dump({"plane_cm": [63.0, 47.25], "middle": [90.4, -89.5], "modern": True, "signs": rep}, open(os.path.join(OUT, "signs.json"), "w", encoding="utf-8"), indent=1)
+    print("bs_signs --modern:", len(MODERN), "faces in", OUT, rep)
+    sys.exit(0)
 
 
 os.makedirs(OUT, exist_ok=True)

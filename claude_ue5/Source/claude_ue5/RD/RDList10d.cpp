@@ -127,7 +127,7 @@ void ARDDungeonGenerator::AssignTownBeds(ARDSection* S)
 {
 	if (!S || !GetWorld()) return;
 	int32 Sleepers = 0, Given = 0, Made = 0;
-	FCollisionQueryParams Q(SCENE_QUERY_STAT(RDTownBed), false);
+	FCollisionQueryParams Q(SCENE_QUERY_STAT(RDTownBed), true);          // (the mattress itself: Heaven's beds' simple collision stood over it (the list of 2026-11-22: "floating above the bed"))
 	for (ARDTownsfolk* T : TownPeople) if (IsValid(T)) Q.AddIgnoredActor(T);
 	for (int32 I = 0; I < TownPeople.Num(); ++I)
 	{

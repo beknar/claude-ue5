@@ -358,7 +358,8 @@ void ARDHUD::DrawTownMap(float Sc, const FVector& L, float Yaw)
 		const FVector W = (S->LocalToWorld(Bd.Min) + S->LocalToWorld(Bd.Max - FIntPoint(1, 1))) * 0.5f;
 		const bool bHome = Bd.Kind == TK_Home;
 		const bool bBadge = Gen->bTownSymbols15 && !RDTLabelOf(Bd.Kind).IsEmpty();
-		Icon(RDTIconOf(Bd.Kind, Bd.State), W, (bHome ? 12.f : Bd.Kind == TK_Castle ? 40.f : 26.f) * Sc, bBadge ? FString() : RDTLabelOf(Bd.Kind));
+		const FName Hv = Gen->TownPlan == 5 ? ARDDungeonGenerator::HeavenMapSymbol16(Bd.Kind) : NAME_None;          // (the list of 2026-11-22: Heaven's modern pictograms)
+		Icon(!Hv.IsNone() && UI.Has(Hv) ? Hv : RDTIconOf(Bd.Kind, Bd.State), W, (bHome ? 12.f : Bd.Kind == TK_Castle ? 40.f : 26.f) * Sc, bBadge ? FString() : RDTLabelOf(Bd.Kind));
 		if (bBadge) TownBadge15(Bd.Kind, ToM(FVector2D(W.X, W.Y)) + FVector2D(0.f, -20.f * Sc), 15.f * Sc, W);
 	}
 	// what stands outdoors: the square, the well, the market, the circle, the board, the graveyard, the mill, the still, the gate
@@ -703,7 +704,9 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 		default: Nm = Bd.State == 1 ? FName(TEXT("mapc_burned")) : Bd.State == 2 ? FName(TEXT("mapc_boarded")) : Bd.Style == 1 ? FName(TEXT("mapc_home3")) : Bd.Style == 2 ? FName(TEXT("mapc_home1")) : FName(TEXT("mapc_home2")); break;
 		}
 		const float Grow = Bd.Kind == TK_Castle ? 1.12f : Bd.Kind == TK_Home ? 1.3f : 1.22f;
-		Pic(Nm, Ctr, FMath::Max(Hw, Hh * 0.8f) * Grow, FMath::Max(Hh, Hw * 0.8f) * Grow, (Bd.Seed & 1u) != 0u && Bd.Kind != TK_Castle, true);
+		// (the list of 2026-11-22: in Heaven no painted medieval building: the picture from above shows it, its modern pictogram marks it)
+		const bool bHvPic = Gen->TownPlan == 5 && Bd.Kind != TK_Home && UI.Has(ARDDungeonGenerator::HeavenMapSymbol16(Bd.Kind));          // (the homes keep theirs: no badge for them (PR #125's review))
+		if (!bHvPic) Pic(Nm, Ctr, FMath::Max(Hw, Hh * 0.8f) * Grow, FMath::Max(Hh, Hw * 0.8f) * Grow, (Bd.Seed & 1u) != 0u && Bd.Kind != TK_Castle, true);
 		if (Bd.Kind != TK_Home) Taken.Add(FBox2D(Ctr - FVector2D(Hw, Hh) * 0.9f, Ctr + FVector2D(Hw, Hh) * 0.9f));
 		if (Gen->bTownSymbols15 && !RDTLabelOf(Bd.Kind).IsEmpty()) Badges15.Add({ Bd.Kind, Ctr, FVector((W0 + W1) * 0.5f, 0.f) });
 		else Label(RDTLabelOf(Bd.Kind), Ctr, FMath::Max(Hw, Hh), Nm.ToString());
@@ -1098,6 +1101,20 @@ static FName RDT15SymbolOf(uint8 Kind, FString& Means)
 void ARDHUD::TownBadge15(uint8 Kind, const FVector2D& P, float Size, const FVector& World)
 {
 	FString Means;
+	// (the list of 2026-11-22: Heaven's modern pictograms, each its own coloured tile, no parchment disc)
+	if (Gen && Gen->TownPlan == 5)
+	{
+		const FName Hv = ARDDungeonGenerator::HeavenMapSymbol16(Kind);
+		if (!Hv.IsNone() && UI.Has(Hv))
+		{
+			SoftDot(P + FVector2D(Size * 0.12f, Size * 0.18f), Size * 1.15f, FLinearColor(0.f, 0.f, 0.f, 0.4f));
+			UI.Fit(Hv, P - FVector2D(Size * 1.05f), P + FVector2D(Size * 1.05f));
+			TownBadges15.Add(FString::Printf(TEXT("%s|%.0f|%.0f"), *Hv.ToString(), World.X, World.Y));
+			const FString Mn = ARDDungeonGenerator::HeavenMapMeaning16(Kind);
+			if (!Legend15.ContainsByPredicate([&Hv](const TPair<FName, FString>& E) { return E.Key == Hv; })) Legend15.Add({ Hv, Mn });
+			return;
+		}
+	}
 	const FName Sym = RDT15SymbolOf(Kind, Means);
 	if (Sym.IsNone()) return;
 	// (a parchment disc in a dark ring, the symbol on it: legible on the painted sheet and on the picture from above)

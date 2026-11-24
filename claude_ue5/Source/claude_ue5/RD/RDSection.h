@@ -781,6 +781,9 @@ public:
 	void CavePaintingSet16();
 	/** phase 16: a lost traveller in the set's deepest room (a set beyond the first, by its seed's hash), freed by F */
 	void CaveTravellerSet16();
+	/** the list of 2026-11-22: a Heaven street lamp's light and glowing head */
+	void HeavenLamp16(const FVector& At, float Yaw);
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") float HeavenResearchTopZ16 = 0.f;
 	/** the kit's room with the lowest floor at least 15 m from Away: its walkable tile nearest its middle, on the floor */
 	bool CaveDeepSpot16(const FVector& Away, FVector& Out) const;
 	TWeakObjectPtr<class ARDPrisoner> CaveTraveller16;
