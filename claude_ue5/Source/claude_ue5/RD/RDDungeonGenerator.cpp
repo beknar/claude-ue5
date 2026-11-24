@@ -680,6 +680,7 @@ bool ARDDungeonGenerator::HeroLearns(ERDSpellType Type) const
 
 bool ARDDungeonGenerator::HeroWearsRing(ERDRingKind Kind) const
 {
+	if (Kind >= ERDRingKind::Echo) return true;          // (the caves' Echo, lucky stone and charms: every hero)
 	const FRDHeroDef* H = FindHero(CurrentHero);
 	return H && H->RingKinds.Contains(Kind);
 }

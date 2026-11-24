@@ -284,7 +284,7 @@ FString ARDDungeonGenerator::RewardInteract15(const FVector& From)
 		Things.Add(Items[Pick].Name);
 	}
 	const int32 Gold = FMath::RoundToInt(TreasureChestGold15 * (1.f + 0.35f * (Tier - 1)));
-	AddGold(Gold, TEXT("a buried chest"));
+	AddFoundGold16(Gold, TEXT("a buried chest"));
 	TArray<float> Wear; Wear.Init(0.f, Things.Num());
 	if (ARDLootPile* Pile = DropLoot(R.At + FVector(80.f, 0.f, 60.f), Things, Wear)) Pile->bHers = false;
 	PlayerCombat->ShowMessage(FString::Printf(TEXT("You dig up the buried chest: %d gold and %d things (tier %d)"), Gold, Things.Num(), Tier));
@@ -368,6 +368,15 @@ UTextureRenderTarget2D* ARDDungeonGenerator::TreasurePictureToShow15(FString& Ca
 void ARDDungeonGenerator::AddCollectibleTrades15(TFunctionRef<void(const FString& Act, const FString& Label, const FString& Tag, const FString& Detail, bool bOn, const FString& Arg)> Add) const
 {
 	if (!PlayerCombat) return;
+	// (the list of 2026-11-22's caves: a cursed relic she carries, its curse lifted for gold)
+	for (const FString& Ll : GetLiftLines16())
+	{
+		TArray<FString> F; Ll.ParseIntoArray(F, TEXT("|"), false);
+		if (F.Num() < 3) continue;
+		const URDGameInstance* GI = URDGameInstance::Of(this);
+		const int32 Price = FCString::Atoi(*F[2]);
+		Add(TEXT("lift16"), FString::Printf(TEXT("Lift the curse of the %s"), *F[1]), FString::Printf(TEXT("%d gold"), Price), TEXT("Its cost gone for good, its gift kept"), GI && GI->Gold >= Price, F[1]);
+	}
 	for (const FString& L : CollectibleKinds15)
 	{
 		TArray<FString> F; L.ParseIntoArray(F, TEXT("|"), false);

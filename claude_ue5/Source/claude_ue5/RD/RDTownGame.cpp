@@ -1578,7 +1578,7 @@ void ARDDungeonGenerator::TownOnKill(ARDMonster* M, bool bBossKill)
 			if (!Thing.IsNone()) { TArray<float> Wr; Wr.Add(-1.f); if (ARDLootPile* Pl = DropLoot(M->GetActorLocation(), { Thing }, Wr)) { Pl->bHers = false; ++GreedThings; } }
 		}
 	}
-	if (Gold > 0) AddGold(Gold, bBossKill || M->bBoss ? TEXT("the boss's hoard") : FString());
+	if (Gold > 0) AddFoundGold16(Gold, bBossKill || M->bBoss ? TEXT("the boss's hoard") : FString());
 	if (bTown)
 	{
 		if (M->GuardIndex >= 0)
@@ -1607,7 +1607,7 @@ void ARDDungeonGenerator::TownOnContainer(ARDSection* Section, int32 Key, const 
 	if ((H % 1000u) / 1000.f < ContainerGoldChance)
 	{
 		const int32 Gold = FMath::RoundToInt(FMath::Lerp(ContainerGold.X, ContainerGold.Y, ((H >> 10) % 1000u) / 999.f) * T);
-		AddGold(Gold, TEXT("in the container"));
+		AddFoundGold16(Gold, TEXT("in the container"));
 	}
 	if (URDGameInstance* GI = URDGameInstance::Of(this); GI && Section->Coord == FIntPoint::ZeroValue)
 		(bTown ? GI->TownLooted : GI->CastleStartLooted).AddUnique(Key);
@@ -2057,6 +2057,7 @@ bool ARDDungeonGenerator::ActivateTownEntry(int32 Line)
 	else if (E.Act == TEXT("swaphorse")) { bOk = SwapHorse(); if (bOk) CloseTownPanel(); }
 	else if (E.Act == TEXT("callhorse")) { bOk = CallHorse(); if (bOk) { SetTownNote(TEXT("Your horse comes")); CloseTownPanel(); } }
 	else if (E.Act == TEXT("collect")) bOk = TownCollectTrade15(E.Arg);          // (the twelfth phase)
+	else if (E.Act == TEXT("lift16")) bOk = TownLiftCurse16(E.Arg);          // (the list of 2026-11-22's caves: a cursed relic's lifting)
 	else if (E.Act == TEXT("contract") || E.Act == TEXT("claim")) bOk = TownContract15(E.Act, E.Arg);          // (the thirteenth phase)
 	else if (E.Act == TEXT("donate")) { AddGold(-5, TEXT("an offering")); TownCount(TEXT("offerings")); SetTownNote(TEXT("The priest bows his head: \"They will eat tonight.\"")); bOk = true; }
 	else if (E.Act == TEXT("deposit")) bOk = TownDeposit(E.Arg);

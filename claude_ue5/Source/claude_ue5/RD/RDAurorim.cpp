@@ -701,7 +701,8 @@ void ARDDungeonGenerator::TickFinalShow(float RealDt)
 			else if (It.Kind == ERDItemKind::Weapon) { for (const FRDWeaponFit& F : It.WeaponFits) if (F.Hero == CurrentHero && F.Weapon.Damage > Wv) { Wv = F.Weapon.Damage; Wpn = It.Name; } }
 			else if (It.Kind == ERDItemKind::Shield && It.Amount > Sv) { Sv = It.Amount; Shd = It.Name; }
 			else if (It.Kind == ERDItemKind::Healing && It.Amount > Hv) { Hv = It.Amount; Heal = It.Name; }
-			else if (It.Kind == ERDItemKind::Ring && It.Weight > 0.f) { TPair<FName, float>& B = Rings.FindOrAdd((uint8)It.RingKind, TPair<FName, float>(NAME_None, -1.f)); if (It.Amount > B.Value) B = TPair<FName, float>(It.Name, It.Amount); }
+			else if (It.Kind == ERDItemKind::Ring && It.Weight > 0.f && It.RingKind < ERDRingKind::Echo) {          // (not the caves' Echo, lucky stone or charms (PR #121's review))
+			 TPair<FName, float>& B = Rings.FindOrAdd((uint8)It.RingKind, TPair<FName, float>(NAME_None, -1.f)); if (It.Amount > B.Value) B = TPair<FName, float>(It.Name, It.Amount); }
 		}
 		if (!Arm.IsNone()) { Pc->AddItem(Arm, 1); if (Pc->WearArmour(Arm)) Kit.Add(Arm.ToString()); }
 		if (!Shd.IsNone()) { Pc->AddItem(Shd, 1); if (Pc->WearShield(Shd)) Kit.Add(Shd.ToString()); }

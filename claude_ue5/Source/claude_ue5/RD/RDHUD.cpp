@@ -956,6 +956,7 @@ static const FLinearColor RDTacExit(0.25f, 0.95f, 1.f, 1.f);
 static const FLinearColor RDTacWire(0.30f, 0.95f, 1.f, 1.f);
 static const FLinearColor RDTacDoor(1.f, 0.90f, 0.50f, 1.f);
 static FLinearColor RDTacA(const FLinearColor& C, float A) { return FLinearColor(C.R, C.G, C.B, C.A * A); }
+static constexpr int32 RDEchoPing16 = -16;          // (a mark of its own, under the boss's and the others' kinds (7 on))
 
 UTexture2D* ARDHUD::GetSoftDisc()
 {
@@ -1075,6 +1076,12 @@ void ARDHUD::GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistan
 	{
 		if (!Mo || Mo->IsDead() || FVector::Dist2D(Mo->GetActorLocation(), L) > SenseDistance) continue;      // (sensed nearby)
 		Out.Add({ FVector2D(Mo->GetActorLocation()), IsElite(Mo) ? 1 : 0 });
+	}
+	// (the list of 2026-11-22's caves: the Ring of the Echo's dim pings, beyond the maps' own sensing)
+	{
+		TArray<FVector2D> Pings; Gen->EchoPings16(L, SenseDistance, Pings);
+		for (const FVector2D& Pg : Pings) Out.Add({ Pg, RDEchoPing16 });
+		EchoDrawn16 = Pings.Num();
 	}
 	for (const auto& KV : Gen->Sections)
 	{
@@ -1318,6 +1325,7 @@ void ARDHUD::DrawTacticalMinimap(float Sc, const FVector& L, float Yaw)
 		}
 		if (Pi.Kind == 0) { SoftDot(S, 9.f * Sc, RDTacA(RDTacRed, 0.35f)); SoftDot(S, 4.6f * Sc, RDTacRed); }
 		else if (Pi.Kind == 1) { SoftDot(S, 11.f * Sc, RDTacA(RDTacElite, 0.35f)); Triangle(S, 7.f * Sc, RDTacElite); }
+		else if (Pi.Kind == RDEchoPing16) SoftDot(S, 4.f * Sc, RDTacA(RDTacRed, 0.30f));          // (the Echo's dim ping)
 		else if (Pi.Kind >= 7) { MistMark(Pi.Kind, S, 6.f * Sc); MarksDrawn.Add(FVector(Pi.W.X, Pi.W.Y, (float)Pi.Kind)); }
 	}
 	DrawPlayerArrow(C, Yaw - 90.f, 9.f * Sc);
@@ -1515,6 +1523,7 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 		}
 		if (Pi.Kind == 0) { SoftDot(S, 11.f * Sc, RDTacA(RDTacRed, 0.35f)); SoftDot(S, 5.5f * Sc, RDTacRed); }
 		else if (Pi.Kind == 1) { SoftDot(S, 13.f * Sc, RDTacA(RDTacElite, 0.35f)); Triangle(S, 8.5f * Sc, RDTacElite); }
+		else if (Pi.Kind == RDEchoPing16) SoftDot(S, 4.f * Sc, RDTacA(RDTacRed, 0.30f));          // (the Echo's dim ping)
 		else if (Pi.Kind >= 7) { MistMark(Pi.Kind, S, 8.f * Sc); MarksDrawn.Add(FVector(Pi.W.X, Pi.W.Y, (float)Pi.Kind)); }
 	}
 	// her arrow where she is (scrolled away from her, it may be out of view)
@@ -1669,6 +1678,7 @@ void ARDHUD::DrawTacticalMap(float Sc, const FVector& L, float Yaw)
 		else if (Pi.Kind == 1) { SoftDot(S, 16.f * Sc, RDTacA(RDTacElite, 0.35f)); Triangle(S, 10.f * Sc, RDTacElite); }
 		else if (Pi.Kind == 2) { Star(S, 10.f * Sc, RDTacGold); StarsDrawn.Add(Pi.W); }
 		else if (Pi.Kind == 5) SealMark(S, 8.f * Sc);
+		else if (Pi.Kind == RDEchoPing16) SoftDot(S, 4.f * Sc, RDTacA(RDTacRed, 0.30f));          // (the Echo's dim ping)
 		else if (Pi.Kind >= 7) { MistMark(Pi.Kind, S, 9.f * Sc); MarksDrawn.Add(FVector(Pi.W.X, Pi.W.Y, (float)Pi.Kind)); }
 		else Diamond(S, 9.f * Sc, RDTacExit);
 	}
@@ -1828,6 +1838,7 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 	}
 	case ERDItemKind::Ring:
 	{
+		if (It.RingKind >= ERDRingKind::Echo) return Cb ? Cb->CharmWords16(It) : FString();          // (the caves' Echo, lucky stone, charms)
 		static const TCHAR* What[3] = { TEXT("mana"), TEXT("hit points"), TEXT("ranged weapons' damage") };
 		static const TCHAR* Who[3] = { TEXT("spellcasters"), TEXT("the Warrior, the Warlock and the Martial Artist"), TEXT("the Rogue and the Martial Artist") };
 		// (the Martial Artist's Dexterity ring: her fists and knives, never her chi attacks)

@@ -485,6 +485,7 @@ def items():
             it.set_editor_property("tiers", list(x.get("tiers", [])))
             if "found_max" in x: it.set_editor_property("found_max", int(x["found_max"]))
             if x.get("repairs"): it.set_editor_property("armour_type", x["repairs"])
+            if x.get("ring_kind"): it.set_editor_property("ring_kind", getattr(unreal.RDRingKind, x["ring_kind"]))          # (phase 14: the Echo, the lucky stone, a charm)
             if x.get("buff"):
                 it.set_editor_property("buff_kind", unreal.Name(x["buff"][0])); it.set_editor_property("buff_amount", float(x["buff"][1])); it.set_editor_property("buff_seconds", float(x["buff"][2]))
             else:
@@ -522,6 +523,15 @@ def items():
         aits, arecs, alooks, perks, anames = cave_armour(its, P, missing, {x["name"] for x in X})
         its = its + wits + aits; recs = recs + arecs; looks.update(alooks); wnames = wnames + anames
         g.set_editor_property("armour_perks16", perks)
+        # (phase 14: the charms' good and cost)
+        ch = {}
+        for x in X:
+            c_ = x.get("charm")
+            if not c_: continue
+            e = unreal.RDCharm16(); e.set_editor_property("good", c_["good"]); e.set_editor_property("good_amount", float(c_["good_amount"]))
+            e.set_editor_property("cost", c_.get("cost", "None")); e.set_editor_property("cost_amount", float(c_.get("cost_amount", 0.0))); e.set_editor_property("lift_price", int(c_.get("lift", 0)))
+            ch[unreal.Name(x["name"])] = e
+        g.set_editor_property("charms16", ch)
         fl = next((p_["flood"] for p_ in P if p_.get("flood")), None)
         if fl:
             g.set_editor_property("flood_share16", float(fl["share"])); g.set_editor_property("breath16", float(fl["breath"]))

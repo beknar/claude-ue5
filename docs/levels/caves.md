@@ -161,6 +161,30 @@ The list's "crystal geode shards, cut at the librarian's table into scroll inks 
 - `868 cave16armour -lv caves` (`test_c13k.json`, after PR #120's review; `cave16` in `test_c13i.json`): every set in its bands (the drowned knight's in one), a cave thing; the deepiron sets 0.04 better than their likes in every band; a monster 9 m off (0.9 of the noticing distance), unquiet, its alert read every 0.1 s: it noticed her bare and not in the spelunker's armour; her darksight light 6 m in it; a poison's hurt in 6 s 14.3 bare, 6.1 in chitin plate; the drowned knight's recipe at the anvil, none refused to the Warrior; her breath 15 s bare, 45 s in the set; a flooded side tunnel: under its water at once, her breath 14.7 -> 11.7 in 3 s, her top speed 353 -> 212, at none 24 % of her hit points gone in 3 s, out of it full (15 s) again in 3.5 s; one drowned knight's piece in a visit whatever the sets flooded (3 of the 25 to the second ring); pictures of the water from the dry tunnel (a teal wall across it) and from under it.
 - **Not measured**: the armour's looks on every hero (pictures of the Warrior only); how her view under water reads to a player.
 
+## The charm slot, the rings and the cursed relics (the list of 2026-11-22, phase 14)
+
+`treasure16.json`'s `phase14`, written by `945 items` (and pictured by `945 icons`) on every map of the game; C++ `RD/RDCave16f.cpp`.
+
+- **The charm slot**: the game had no amulet slot. A charm is a ring of a kind of its own (`ERDRingKind::Charm`), worn one at a time beside her rings, so it goes with her between the levels, into the save and her pile as the rings do; another charm put on takes its place. The Ring of the Echo and the miner's lucky stone are rings of kinds of their own (`Echo`, `Lucky`). Every hero wears them.
+
+| Thing | Kind | While worn |
+|---|---|---|
+| Ring of the Echo | ring (Echo); made at the anvil from 2 cave pearls and a deepiron ingot | monsters within 60 m, beyond the maps' own 25 m, show on the minimap and the big maps as dim pings, seen or not |
+| Miner's Lucky Stone | ring (Lucky) | a cave's vein or growth gives half as much again on average (the fraction by chance) |
+| Glow-worm Amulet | charm | a light of 8 m round her, no torch, both hands free |
+| Bleeding Idol | cursed charm | her blows 25 % stronger; she bleeds 0.25 % of her hit points a second, never her last (a hurt: her regeneration waits) |
+| Gilded Skull | cursed charm | half as much again of the gold she finds (kills, containers, piles, buried chests; not what she is paid or sells for); monsters notice her from 30 % farther |
+| Black Candle | cursed charm | her blows 15 % stronger; 15 % fewer hit points |
+| Thorned Crown | cursed charm | a blow on her 15 % less; 10 % slower |
+
+- **The temple's lifting**: a town's temple offers, for each cursed relic she carries, "Lift the curse of the ..." for 300 or 350 gold (a quarter more each game tier past the first); lifted, the relic keeps its gift and loses its cost for good (the game instance's `LiftedRelics16`, saved).
+
+### Measured (phase 14)
+
+- `868 cave16charms -lv caves` (`test_c14c.json`, after PR #121's review): every thing of its kind; two monsters 35 to 55 m off: no ping bare, both counted and drawn on the minimap with the Echo; a vein's pile of 1 gave 2 with the lucky stone; the glow-worm amulet's light 8 m; the bleeding idol: her blows x 1.25, 2 hit points bled in 8 s (0.25 % a second, counted in whole points), her hit points held at 1 at the least; the gilded skull: 100 gold found came as 150 and a payment of 100 stayed 100, a monster at 1.2 of the noticing distance (held still, read every 0.1 s) noticed her in it and not bare; the temple's lines named the four relics carried, lifting the skull took its 300 gold, its notice cost was gone and its gold kept (150), its line no longer offered; the black candle: blows x 1.15, hit points x 0.85, it took the charm slot from the skull, and taken off at half its top it healed nothing; the thorned crown: a blow of 20 took 17, her speed 353 -> 318, taken off 353 again and put on 318 again.
+- **A new game** empties the lifted curses and the caves' records (the lost blades', the drowned pieces'), and so does loading a save made before them.
+- **Not measured**: the temple's line in a town's panel (the lifting was called as the panel calls it); the charms' looks (they are worn unseen, as the rings).
+
 ## Limits
 
 - (Before the list of 2026-11-22) the rooms were the castle's rooms in rock; with the planner they are the kit's (above).

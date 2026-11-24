@@ -2124,6 +2124,22 @@ public:
 	/** whether a point (her head) is under a flooded tunnel's water */
 	bool UnderWater16(const FVector& Head) const;
 	FName DrownedPieceOf16() const;
+	// ---- phase 14: the charm slot, the Echo, the lucky stone, the cursed relics (RDCave16f.cpp)
+	/** a charm's good and cost (its item, a ring of kind Charm) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TMap<FName, FRDCharm16> Charms16;
+	bool IsRelicLifted16(FName Relic) const;
+	int32 LiftPrice16(FName Relic) const;
+	/** a temple's lines: "lift|<relic>|<price>" for each cursed relic she carries not lifted yet */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetLiftLines16() const;
+	/** a temple's lifting: the relic's cost gone for good, for its price */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") bool TownLiftCurse16(const FString& Arg);
+	/** the Echo's pings: monsters beyond the maps' own sensing and within the ring's metres */
+	void EchoPings16(const FVector& Her, float SenseCm, TArray<FVector2D>& Out) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") int32 GetEchoPings16(FVector Her) const { TArray<FVector2D> P; EchoPings16(Her, 2500.f, P); return P.Num(); }
+	/** gold she finds (more with a gilded relic), as AddGold */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") void AddFoundGold16(int32 Amount, const FString& Why = TEXT(""));
+	/** a harvest's things more by the lucky stone */
+	void LuckyHarvest16(TArray<FName>& Things) const;
 	/** the sets whose drowned knight's piece is laid this run; whether one is laid at all this run */
 	TSet<FIntPoint> DrownedLaid16;
 	bool bDrownedLaid16 = false;

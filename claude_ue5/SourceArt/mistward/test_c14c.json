@@ -1,0 +1,95 @@
+{
+ "tag": "c14c",
+ "plan": [
+  "cave16charms"
+ ],
+ "level": "caves",
+ "steps": [
+  {
+   "step": "cave16charms",
+   "ok": true,
+   "items": {
+    "Ring of the Echo": "ECHO",
+    "Miner's Lucky Stone": "LUCKY",
+    "Glow-worm Amulet": "CHARM",
+    "Bleeding Idol": "CHARM",
+    "Gilded Skull": "CHARM",
+    "Black Candle": "CHARM",
+    "Thorned Crown": "CHARM"
+   },
+   "echo": {
+    "monsters_placed": 2,
+    "pings": [
+     0,
+     2
+    ],
+    "drawn": [
+     0,
+     2
+    ]
+   },
+   "lucky": {
+    "item": "Deepiron Ore",
+    "pile": 1,
+    "got": 2
+   },
+   "glow_cm": 800.0,
+   "idol_damage": 1.25,
+   "idol_bled_8s": 2.0,
+   "idol_expected_8s": 2.8,
+   "idol_floor": 1.0,
+   "skull": {
+    "gold": [
+     100,
+     150
+    ],
+    "paid": 100,
+    "noticed_at_1_2": [
+     false,
+     true
+    ],
+    "notice_mul": 0.3
+   },
+   "lift": {
+    "lines": [
+     "lift|Bleeding Idol|300",
+     "lift|Gilded Skull|300",
+     "lift|Black Candle|350",
+     "lift|Thorned Crown|350"
+    ],
+    "price": 300,
+    "lifted": true,
+    "paid": 300,
+    "notice_after": 0.0,
+    "gold_after": 150,
+    "lines_after": [
+     "lift|Bleeding Idol|300",
+     "lift|Black Candle|350",
+     "lift|Thorned Crown|350"
+    ]
+   },
+   "candle": {
+    "damage": 1.15,
+    "maxhp": 0.85,
+    "worn": "Black Candle",
+    "off_heal": 0.0
+   },
+   "crown": {
+    "speed": [
+     353.4,
+     318.1,
+     353.4,
+     318.1
+    ],
+    "blow": [
+     20.0,
+     17.0
+    ]
+   }
+  }
+ ],
+ "windows_hidden": "Content Browser, Message Log",
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}

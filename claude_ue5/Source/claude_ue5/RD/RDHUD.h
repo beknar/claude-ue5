@@ -185,6 +185,11 @@ private:
 	 *  generated, 5 a sealed hallway end (level 5), 6 an anvil (level 5) */
 	struct FRDPoi { FVector2D W; int32 Kind; };
 	void GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistance);
+	/** the Echo's pings on the maps when last drawn (for the tests) */
+	int32 EchoDrawn16 = 0;
+public:
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") int32 GetEchoDrawn16() const { return EchoDrawn16; }
+private:
 	/** mistward: 7 a boss, 8 a guarded ring, 9 her dropped things, 10 a teleporter pad, 11 a trap she has seen; mistward4:
 	 *  12 her ally */
 	void MistMark(int32 Kind, const FVector2D& S, float Size);

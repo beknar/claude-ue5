@@ -697,7 +697,7 @@ public:
 	float LightlessAmbushFor16 = -1.f;
 	// ---- phase 13: her armour's perks and her breath (RDCave16e.cpp)
 	FRDArmourPerk16 ArmourPerk16() const;
-	float GetNoticeMul16() const { return FMath::Clamp(ArmourPerk16().Notice, 0.1f, 1.f); }
+	float GetNoticeMul16() const { return FMath::Clamp(ArmourPerk16().Notice * (1.f + GetCharm16(TEXT("notice"))), 0.1f, 3.f); }          // (phase 14: a relic's cost too)
 	float GetBreathMax16() const;
 	void TickBreath16(float Dt);
 	/** for the tests: "breath|<left>|<max>|<under 0/1>|<dives>|<drowned hp>|notice|..|darksight|..|poisonguard|.." */
@@ -706,6 +706,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Cave16") bool IsUnderWater16() const { return bUnder16; }
 	float Breath16 = -1.f, DrownAcc16 = 0.f, DrownTaken16 = 0.f, LastDrownMsg16 = -100.f;
 	bool bUnder16 = false; int32 Dives16 = 0; float LastBreathMax16 = 0.f;
+	// ---- phase 14: her charm (RDCave16f.cpp)
+	/** the worn charm's share of a stat: its good, and its cost unless a temple has lifted it */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Cave16") float GetCharm16(FName Stat) const;
+	void TickCharms16(float Dt);
+	FString CharmWords16(const FRDItemDef& It) const;
+	float BleedAcc16 = 0.f, BledTotal16 = 0.f, CharmSpeedSeen16 = 0.f, LastCharmHpF16 = 1.f;
 	/** out of the water at once (a revive, a restart): her speed and view as above it */
 	void LeaveWater16();
 	FPostProcessSettings SavedCamPP16; float SavedCamPPWeight16 = 0.f; bool bCamPPSaved16 = false;
