@@ -2082,6 +2082,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") FString GetCaveCraft16(FName Item) const;
 	/** for the tests: what a store of this level sells now */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FName> GetTownStock16() const { return TownStock(); }
+	/** phase 11: the socket stones (item -> its bonus); a weapon or a set of armour holds one (URDCombatComponent::SetSocket16) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TMap<FName, FRDSocket16> SocketStones16;
 	/** whether a container may hold it here (the caves' own items, their regions' items) */
 	bool CaveItemAllowed16(const FRDItemDef& It) const;
 	/** the cave's region (by the tower's biome the game instance keeps; -1: none known) and its name for a test */

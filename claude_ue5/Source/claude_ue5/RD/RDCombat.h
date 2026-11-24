@@ -312,6 +312,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool WearArmour(FName Item);
 	/** the list of 2026-11-20's seventeenth phase: the strongest warm (ERDItemKind::Warmth) or cool (Cooling) buff on her */
 	float GetClimateBuff15(ERDItemKind K) const;
+	/** for the tests: the climate's buff against the cold (bCold) or the heat, as the climate reads it (its kinds are hidden from Python) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Cave16") float GetClimateGuard16(bool bCold) const { return GetClimateBuff15(bCold ? ERDItemKind::Warmth : ERDItemKind::Cooling); }
 	/** tests: the effects an item put on her taken off (a step puts back what it changed) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") int32 RemoveEffectsOf15(FName Item) { const int32 N = Effects.RemoveAll([Item](const FEffect& E) { return E.Item == Item; }); UpdateWalkSpeed(); return N; }
 	/** a buff's words (an item's), an effect's on her (the chip's or the inventory's line), the chip's picture: one place for every reader */
@@ -665,6 +667,21 @@ public:
 	UPROPERTY(Transient) TObjectPtr<class UPointLightComponent> DarkLight16 = nullptr;
 	/** a test's: the darksight's light's reach (cm; 0: none), the poison guarded share, the torch's burn rate */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") FString GetCaveBuffs16() const;
+	// ---- phase 11: the sockets (RDCave16c.cpp): a weapon or a set of armour holds one stone (gear item or weapon name -> stone)
+	/** sets a socket stone she carries into the weapon in her hands (if its socket is empty), else the armour she wears, else
+	 *  the weapon's, the old stone back in her pack */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") bool SetSocket16(FName Stone);
+	/** the sum of a stat's bonus over the stones working now (the weapon in her hands, the armour on her) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Cave16") float GetSocketBonus16(FName Stat) const;
+	/** "socket|<gear>|<stone>|<stat>|<amount>|<working 0/1>" for each socket filled */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetSockets16() const;
+	/** the words for a gear's socket in the inventory's description (empty for no gear) */
+	FString SocketWords16(FName Gear) const;
+	/** the gear's key the weapon in her hands has (its item, else its name; none for magic) */
+	FName HandGear16() const;
+	void TickSockets16(float Dt);
+	UPROPERTY() TMap<FName, FName> Sockets16;
+	float SocketSpeedSeen16 = 0.f;
 	/** seconds of burning left on a torch or ankh (its durability; -1 it does not burn) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List15") float GetLightLeft15(FName Item) const;
 	/** the one rule (PR #97's review: it was written out four times): an item that burns down (a torch or the ankh, bLightBurn15,

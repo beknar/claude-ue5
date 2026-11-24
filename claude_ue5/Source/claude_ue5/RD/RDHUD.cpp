@@ -2499,7 +2499,7 @@ void ARDHUD::DrawInventory(float Sc)
 		else
 		{
 			const int32 Ix = Gen->FindItem(FName(*Sel[1]));
-			if (Ix >= 0) Para(DescribeItem(Gen->Items[Ix]), RDInk, Sc * 1.1f);
+			if (Ix >= 0) Para(DescribeItem(Gen->Items[Ix]) + (Gen->GetPlayerCombat() ? Gen->GetPlayerCombat()->SocketWords16(Gen->Items[Ix].Name) : FString()), RDInk, Sc * 1.1f);          // (the caves' sockets)
 			Ry += 6.f * Sc;
 			const FString Use = bPad ? TEXT("A") : TEXT("Enter");
 			if (Sel[0] == TEXT("item")) Para(Use + TEXT("  use it"), Gold, Sc * 1.05f);

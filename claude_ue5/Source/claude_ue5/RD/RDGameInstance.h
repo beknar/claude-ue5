@@ -56,6 +56,9 @@ struct FRDCarry
 	UPROPERTY(SaveGame, BlueprintReadOnly) int32 QuickFirst = 0;
 	/** the torch lit in her hand (its item; none: not lit) */
 	UPROPERTY(SaveGame, BlueprintReadOnly) FName TorchHeld;
+	/** the list of 2026-11-22's caves, phase 11: the sockets filled (a gear and its stone, side by side) */
+	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<FName> SocketGear16;
+	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<FName> SocketStone16;
 	/** the slashes on her found weapons, each with its weapon's item: Things carries a slash as a thing of its own beside the
 	 *  weapon (as it drops at a death), so it goes back on a weapon of that item (by name: a weapon the level cannot give back
 	 *  must not move the others' slashes) */

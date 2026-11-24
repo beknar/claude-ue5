@@ -85,6 +85,7 @@ void URDCombatComponent::GatherState(FRDCarry& C) const
 		if (!Wd.Item.IsNone() && !Wd.Slash.IsNone()) { C.SlashWeapons.Add(Wd.Item); C.SlashNames.Add(Wd.Slash); }
 	C.QuickSlots = QuickSlots; C.QuickOff = QuickOff.Array(); C.QuickFirst = QuickFirst;
 	if (bTorchHeld && !TorchItem.IsNone()) C.TorchHeld = TorchItem;
+	for (const TPair<FName, FName>& Sk : Sockets16) { C.SocketGear16.Add(Sk.Key); C.SocketStone16.Add(Sk.Value); }          // (the caves' sockets)
 	// ---- her summons standing
 	for (const ARDMonster* A : Generator->Allies)
 		if (IsValid(A) && !A->IsDead() && !A->SummonSpell.IsNone())
@@ -184,6 +185,8 @@ void URDCombatComponent::RestoreState(const FRDCarry& C)
 		QuickFirst = FMath::Clamp(C.QuickFirst, 0, FMath::Max(0, QuickSlots.Num() - 1));
 	}
 	if (!C.TorchHeld.IsNone() && GetItemCount(C.TorchHeld) > 0) { TorchItem = C.TorchHeld; HoldTorch(true); }
+	Sockets16.Reset();
+	for (int32 I = 0; I < C.SocketGear16.Num() && I < C.SocketStone16.Num(); ++I) Sockets16.Add(C.SocketGear16[I], C.SocketStone16[I]);
 	UpdateWalkSpeed();
 	// ---- her summons: called to her side once she stands in this level (the generator's TickCarrySummons)
 	Generator->CarrySummons = C.Summons; Generator->CarrySummonShares = C.SummonShares; Generator->CarrySummonKinds15 = C.SummonKinds15;

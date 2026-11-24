@@ -1781,3 +1781,14 @@ struct FRDCaveRegion16
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Biomes;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FName> Items;
 };
+
+/** the list of 2026-11-22's caves, phase 11: a socket stone's bonus while the weapon in her hands or the armour she wears holds
+ *  it. Stat: "damage" (her blows' share more), "guard" (a blow on her a share less), "warm" / "cool" (the climate's cold or heat
+ *  that much slower, as a buff of that kind), "regen" (a share of her hit points a second), "speed" (her speed a share more) */
+USTRUCT(BlueprintType)
+struct FRDSocket16
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Stat;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Amount = 0.f;
+};
