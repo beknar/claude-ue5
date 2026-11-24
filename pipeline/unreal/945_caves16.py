@@ -348,8 +348,10 @@ def items():
                 q.any_of = [a_ for a_ in p_.any_of if str(a_) not in inks]
                 ps.append(q)
             if inks and "SCROLL" in kinds.get(str(r.item), "") and str(r.item) not in mine:
-                for q in ps:
-                    if "essence" not in str(q.label).lower(): q.any_of = list(q.any_of) + [unreal.Name(n) for n in inks]
+                # (the reagent: the first part that is not an essence, only it (PR #118's review: Starfall's and Singularity's seraph
+                # feather, their second, was an ink away))
+                q = next((q for q in ps if "essence" not in str(q.label).lower()), None)
+                if q is not None: q.any_of = list(q.any_of) + [unreal.Name(n) for n in inks]
             r.parts = ps; recs2.append(r)
         recs = recs2
         g.set_editor_property("items", its); g.set_editor_property("recipes", recs)

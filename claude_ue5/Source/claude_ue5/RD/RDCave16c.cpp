@@ -8,10 +8,26 @@
 
 FString RDSocketWords16(const FRDSocket16& Sk);
 
-FName URDCombatComponent::HandGear16() const
+FName URDCombatComponent::HandGear16() const { return WeaponGear16(WeaponIndex); }
+
+float URDCombatComponent::GetSocketDamage16(int32 Index) const
 {
-	if (!Generator || !Generator->Weapons.IsValidIndex(WeaponIndex)) return NAME_None;
-	const FRDWeaponDef& W = Generator->Weapons[WeaponIndex];
+	if (!Generator || Sockets16.Num() == 0) return 0.f;
+	float B = 0.f;
+	const FName Wg = WeaponGear16(Index);
+	for (const FName Gear : { Wg, WornArmour == Wg ? NAME_None : WornArmour })
+	{
+		const FName* St = Gear.IsNone() ? nullptr : Sockets16.Find(Gear);
+		const FRDSocket16* Sk = St ? Generator->SocketStones16.Find(*St) : nullptr;
+		if (Sk && Sk->Stat == TEXT("damage")) B += Sk->Amount;
+	}
+	return B;
+}
+
+FName URDCombatComponent::WeaponGear16(int32 Index) const
+{
+	if (!Generator || !Generator->Weapons.IsValidIndex(Index)) return NAME_None;
+	const FRDWeaponDef& W = Generator->Weapons[Index];
 	if (W.bSpell && !W.BoltMesh) return NAME_None;          // (magic and chi attacks: no socket)
 	if (W.bScroll) return NAME_None;
 	return W.Item.IsNone() ? W.Name : W.Item;
@@ -42,6 +58,8 @@ bool URDCombatComponent::SetSocket16(FName Stone)
 	FName Into;
 	if (!Hand.IsNone() && !Sockets16.Contains(Hand)) Into = Hand;
 	else if (!WornArmour.IsNone() && !Sockets16.Contains(WornArmour)) Into = WornArmour;
+	// (both full: the one filled longer ago (PR #118's review: every stone went to the weapon's, the armour's never changed))
+	else if (!Hand.IsNone() && !WornArmour.IsNone()) Into = SocketSerial16.FindRef(Hand) <= SocketSerial16.FindRef(WornArmour) ? Hand : WornArmour;
 	else if (!Hand.IsNone()) Into = Hand;
 	else if (!WornArmour.IsNone()) Into = WornArmour;
 	if (Into.IsNone())
@@ -56,7 +74,7 @@ bool URDCombatComponent::SetSocket16(FName Stone)
 		Back = FString::Printf(TEXT(" (the %s back in your pack)"), *Old->ToString().ToLower());
 	}
 	RemoveItem(Stone, 1);
-	Sockets16.Add(Into, Stone);
+	Sockets16.Add(Into, Stone); SocketSerial16.Add(Into, ++SocketNext16);
 	UpdateWalkSpeed();
 	ShowMessage(FString::Printf(TEXT("The %s is set in your %s%s"), *Stone.ToString().ToLower(), *Into.ToString(), *Back));
 	return true;
@@ -75,11 +93,11 @@ TArray<FString> URDCombatComponent::GetSockets16() const
 	return Out;
 }
 
-FString URDCombatComponent::SocketWords16(FName Gear) const
+FString URDCombatComponent::SocketWords16(FName Gear, bool bGearIn) const
 {
-	if (!Generator || Generator->SocketStones16.Num() == 0) return FString();
+	if (!Generator || Generator->SocketStones16.Num() == 0 || Gear.IsNone()) return FString();
 	const int32 Ix = Generator->FindItem(Gear);
-	const bool bGear = Ix >= 0 && (Generator->Items[Ix].Kind == ERDItemKind::Armour || Generator->Items[Ix].Kind == ERDItemKind::Weapon);
+	const bool bGear = bGearIn || (Ix >= 0 && (Generator->Items[Ix].Kind == ERDItemKind::Armour || Generator->Items[Ix].Kind == ERDItemKind::Weapon));
 	if (const FName* St = Sockets16.Find(Gear))
 	{
 		const FRDSocket16* Sk = Generator->SocketStones16.Find(*St);

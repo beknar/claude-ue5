@@ -98,7 +98,7 @@ The list's "crystal geode shards, cut at the librarian's table into scroll inks 
 
 - **Cut at the librarian's table**: one geode shard makes an ink of its colour, two a socket stone.
 - **Inks**: any ink stands in for a scroll recipe's reagent (the part that is not its essence: a venom sac, a horn shard...), in every one of the 36 scroll recipes.
-- **Sockets**: every weapon (not magic, chi or a scroll's) and every set of armour has one socket. A stone used goes into the weapon in her hands if its socket is empty, else the armour she wears, else it takes the weapon's place and the old stone goes back to her pack. A stone works while its weapon is in her hands or its armour on her; the sockets go with her between the levels and the save, and stay with her gear when she dies (it comes back with her pile). The inventory says what a gear's socket holds.
+- **Sockets**: every weapon (not magic, chi or a scroll's) and every set of armour has one socket. A stone used goes into the weapon in her hands if its socket is empty, else the armour she wears, else it takes the place of the one set longer ago and the old stone goes back to her pack. A red stone strengthens its own weapon's blows (and, in her armour, all of them); gear sold, broken down or broken gives its stone back. Autoplay never uses a stone (or anything else that heals nothing) as a potion. A stone works while its weapon is in her hands or its armour on her; the sockets go with her between the levels and the save, and stay with her gear when she dies (it comes back with her pile). The inventory says what a gear's socket holds.
 - **The colours** (a region's own, as its geodes):
 
 | Stone | Region | While it works |
@@ -112,7 +112,7 @@ The list's "crystal geode shards, cut at the librarian's table into scroll inks 
 
 ### Measured (phase 11)
 
-- `868 cave16gems -lv caves` (`test_c11d.json`, with `cave16mats` and `cave16` unchanged): the twelve recipes at the librarian's table, none refused to the Warrior; the six inks in the Fire Bolt scroll's reagent; the red stone in her dagger: its blow 14.3 -> 15.73; the white in her plate (40 %): a blow of 20 took 12, then 10.4; the violet in the dagger's place: her top speed 279.2 -> 301.5 and the red back in her pack; the blue: the climate's warmth 0 -> 0.4; the green: 0.2 % of her hit points a second more than without it; the sockets kept through `SaveCarry` / `RestoreCarry` and a death.
+- `868 cave16gems -lv caves` (`test_c11f.json`, with `cave16mats`, after PR #118's review): the twelve recipes at the librarian's table, none refused to the Warrior; the six inks in the Fire Bolt scroll's reagent; the red stone in her dagger: its blow 14.3 -> 15.73, and a found longsword's untouched by it (37.7) until a red stone of its own (41.47), the dagger's then still 15.73; the longsword let go of (as broken down or sold): its stone back in her pack; the white in her plate (40 %): a blow of 20 took 12, then 10.4, and none of it with the plate taken off; the violet in the dagger's place: her top speed 279.2 -> 301.5 and the red back in her pack; the blue: the climate's warmth 0 -> 0.4; the green: 0.2 % of her hit points a second more than without it; the sockets kept through `SaveCarry` / `RestoreCarry` and a death.
 
 ## Limits
 

@@ -668,7 +668,8 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 			const ERDItemKind Want = Hp < 0.45f ? ERDItemKind::Healing : bLowMana ? ERDItemKind::Mana : ERDItemKind::Speed;
 			int32 Best = -1; float BestAmt = -1.f;
 			for (int32 I = 0; I < Items.Num(); ++I)
-				if ((Items[I].Kind == Want || (Want == ERDItemKind::Healing && Items[I].Kind == ERDItemKind::Food && Pc->GetRegenPerSecond() <= 0.f)) && Pc->GetItemCount(Items[I].Name) > 0 && Items[I].Amount > BestAmt)
+				if ((Items[I].Kind == Want || (Want == ERDItemKind::Healing && Items[I].Kind == ERDItemKind::Food && Pc->GetRegenPerSecond() <= 0.f)) && Pc->GetItemCount(Items[I].Name) > 0 && Items[I].Amount > BestAmt
+					&& Items[I].Amount > 0.f)          // (nothing that heals nothing: the caves' brews, linings and socket stones (PR #118's review))
 				{ Best = I; BestAmt = Items[I].Amount; }
 			// (a potion's or food's effect shows before the next: food heals over time; nothing to use, a short wait: no speed
 			// potion for her energy must not keep a healing one back for 3 s (the PR review's find))

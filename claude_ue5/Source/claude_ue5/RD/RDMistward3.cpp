@@ -217,7 +217,16 @@ void URDCombatComponent::DropWeaponAt(int32 Index)
 {
 	if (!Generator || !Generator->Weapons.IsValidIndex(Index)) return;
 	if (AttackTime >= 0.f && AttackIndex == Index) EndAttack();
+	const FName Gear16 = WeaponGear16(Index);
 	Generator->Weapons.RemoveAt(Index);
+	// (the caves' sockets: a weapon broken, broken down or sold gives its stone back, unless another of it is still hers (PR #118's review))
+	if (const FName* St = Gear16.IsNone() ? nullptr : Sockets16.Find(Gear16))
+		if (!Generator->Weapons.ContainsByPredicate([&](const FRDWeaponDef& X) { return (X.Item.IsNone() ? X.Name : X.Item) == Gear16; }))
+		{
+			const FName Back = *St; Sockets16.Remove(Gear16); SocketSerial16.Remove(Gear16);
+			AddItem(Back, 1);
+			SetMessage(FString::Printf(TEXT("The %s comes out of the %s: back in your pack"), *Back.ToString().ToLower(), *Gear16.ToString()));
+		}
 	if (Wear.IsValidIndex(Index)) Wear.RemoveAt(Index);
 	if (NextOf.IsValidIndex(Index)) NextOf.RemoveAt(Index);
 	Bolts.RemoveAll([Index](const FBolt& B) { return B.Weapon == Index; });

@@ -676,9 +676,18 @@ public:
 	/** "socket|<gear>|<stone>|<stat>|<amount>|<working 0/1>" for each socket filled */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetSockets16() const;
 	/** the words for a gear's socket in the inventory's description (empty for no gear) */
-	FString SocketWords16(FName Gear) const;
+	FString SocketWords16(FName Gear, bool bGear = false) const;
 	/** the gear's key the weapon in her hands has (its item, else its name; none for magic) */
 	FName HandGear16() const;
+	/** the gear's key of weapon Index (none for magic, chi or a scroll's) */
+	FName WeaponGear16(int32 Index) const;
+	/** a weapon's blows' share more from the stones: its own socket's (red) and the armour's she wears (PR #118's review: the
+	 *  weapon in her hands added its stone to every weapon's and spell's damage) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Cave16") float GetSocketDamage16(int32 Index) const;
+	/** for the tests: a found weapon let go of, as the anvil's break-down and a store's sale do (RemoveFoundWeapon) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") bool LetGoWeapon16(int32 Index) { float Wl = 0.f; return RemoveFoundWeapon(Index, Wl); }
+	/** when each socket was filled (a stone with both sockets full replaces the older one) */
+	TMap<FName, int32> SocketSerial16; int32 SocketNext16 = 0;
 	void TickSockets16(float Dt);
 	UPROPERTY() TMap<FName, FName> Sockets16;
 	float SocketSpeedSeen16 = 0.f;

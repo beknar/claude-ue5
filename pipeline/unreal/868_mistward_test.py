@@ -7897,6 +7897,19 @@ def cave16gems_inner():
     wi = c.get_weapon_index(); d0 = c.get_damage_of(wi)
     res["set_red"] = c.use_item("Red Socket Stone"); yield from wait(0.2)
     d1 = c.get_damage_of(wi); res["damage"] = [round(d0, 2), round(d1, 2)]
+    # (another weapon's damage untouched by the stone in this one (PR #118's review): a found sword taken up)
+    c.add_item("Longsword", 1); yield from wait(0.3)
+    wl = next((i for i, w in enumerate(g.get_editor_property("weapons")) if str(w.item) == "Longsword"), -1)
+    res["other_weapon"] = [wl, round(c.get_damage_of(wl), 2) if wl >= 0 else None]
+    if wl >= 0:
+        dl0 = c.get_damage_of(wl); c.select_weapon(wl); yield from wait(0.3)
+        res["set_red_sword"] = c.use_item("Red Socket Stone"); yield from wait(0.2)
+        res["other_weapon"] += [round(dl0, 2), round(c.get_damage_of(wl), 2), round(c.get_damage_of(wi), 2)]
+        # (the sword let go of (sold, broken down): its stone back in her pack)
+        r0 = c.get_item_count("Red Socket Stone"); c.select_weapon(wi); yield from wait(0.2)
+        wl2 = next((i for i, w in enumerate(g.get_editor_property("weapons")) if str(w.item) == "Longsword"), -1)
+        res["let_go"] = c.let_go_weapon16(wl2); yield from wait(0.2)
+        res["stone_back"] = c.get_item_count("Red Socket Stone") - r0
     # ---- white into the armour she wears: a blow on her
     arm = None
     for i in g.get_editor_property("items"):
@@ -7911,6 +7924,8 @@ def cave16gems_inner():
     res["set_white"] = c.use_item("White Socket Stone"); yield from wait(0.2)
     b1 = blow(); yield from wait(1.2)
     res["blow"] = [round(b0, 2), round(b1, 2), round(c.get_armour(), 3)]
+    # (armour taken off: its stone no longer works)
+    c.take_off_armour(); yield from wait(0.2); res["guard_off"] = round(c.get_socket_bonus16("guard"), 3); c.wear_armour(arm); yield from wait(0.2)
     # ---- violet replaces the red in the weapon: her speed; the red back in her pack
     mv = G["pawn"].get_component_by_class(unreal.CharacterMovementComponent)
     s0 = mv.get_editor_property("max_walk_speed"); red0 = c.get_item_count("Red Socket Stone")
@@ -7943,7 +7958,9 @@ def cave16gems_inner():
           and res["set_violet"] and abs(s1 / s0 - 1.08) < 0.01 and res["red_back"] == 1
           and res["set_blue"] and abs(res["warm"][1] - res["warm"][0] - 0.4) < 0.01
           and abs(res["regen_per_s_share"] - 0.002) < 0.0006 and res["carry"] == [0, True] and len(res["sockets"]) == 2
-          and len(res["death"]) == 2)
+          and len(res["death"]) == 2 and res.get("guard_off") == 0.0
+          and len(res["other_weapon"]) == 5 and abs(res["other_weapon"][3] / res["other_weapon"][2] - 1.10) < 0.01 and abs(res["other_weapon"][4] - d1) < 0.01
+          and res.get("stone_back") == 1)
     step_result("cave16gems", ok, **res)
 def step_cave16gems():
     try:

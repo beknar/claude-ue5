@@ -324,7 +324,7 @@ float URDCombatComponent::GetDamageOf(int32 Index) const
 	return W.Damage * (1.f + GetBonusOf(Index)) * WeakMul() * (1.f + GetBlessDamage())        // (the third list: a shrine's blessing of might)
 		* Generator->TierPowerOf(W) * AmbushMul(Index) * SpellBoostMul(W)          // (the sixth phase: the Mage's spell boosts)
 		* (1.f + GetMightBuff14())          // (the list of 2026-11-16's sixth phase: an elixir's or a meal's might)
-		* (1.f + GetSocketBonus16(TEXT("damage")));          // (the list of 2026-11-22's caves: a red stone in her weapon or armour)
+		* (1.f + GetSocketDamage16(Index));          // (the list of 2026-11-22's caves: a red stone in this weapon or her armour)
 }
 
 float URDCombatComponent::GetBonusOf(int32 Index) const
@@ -1023,6 +1023,13 @@ void URDCombatComponent::RemoveCarried(FName Name, int32 Count)
 	if (*N <= 0)
 	{
 		Carried.Remove(Name); CarriedOrder.Remove(Name); ArmourWear.Remove(Name); Spares.Remove(Name);
+		// (the caves' sockets: gear sold, broken down or broken gives its stone back (PR #118's review: it was lost with it))
+		if (const FName* St = Sockets16.Find(Name))
+		{
+			const FName Back = *St; Sockets16.Remove(Name); SocketSerial16.Remove(Name);
+			AddItem(Back, 1);
+			SetMessage(FString::Printf(TEXT("The %s comes out of the %s: back in your pack"), *Back.ToString().ToLower(), *Name.ToString()));
+		}
 		// (a ring she no longer has is not on her)
 		for (auto It = WornRings.CreateIterator(); It; ++It) if (It->Value == Name) { It.RemoveCurrent(); UpdateMaxima(); break; }
 		// (mistward: nor a set, a shield or a torch)

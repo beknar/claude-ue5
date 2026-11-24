@@ -2488,6 +2488,8 @@ void ARDHUD::DrawInventory(float Sc)
 			Para(Wp.bAlongside ? TEXT("Cast with RMB or E (LB) while your weapon stays drawn") : Wi == Cb->GetWeaponIndex() ? InHands : (bPad ? TEXT("A  wield it") : TEXT("Enter  wield it")), Gold, Sc * 1.05f);
 			// (the third list: its slash, its quick slot)
 			if (const FRDSlashDef* Sl = Cb->SlashOf(Wi)) Para(FString::Printf(TEXT("%s:  +%.0f %s on every hit;  %s   (T / X takes it off)"), *Sl->Name.ToString(), Sl->Bonus, *Sl->Type.ToLower(), *Sl->Text), RDCyan, Sc * 1.05f);
+			// (the caves' sockets: a weapon's own (PR #118's review: shown only for armour))
+			if (const FString Sw = Cb->SocketWords16(Cb->WeaponGear16(Wi), true); !Sw.IsEmpty()) Para(Sw.TrimStart(), RDInk, Sc);
 			if (Gen->bQuickSlots && !Wp.bAlongside)
 			{
 				const int32 Qs = Cb->GetQuickSlots().IndexOfByKey(Wp.Name);
