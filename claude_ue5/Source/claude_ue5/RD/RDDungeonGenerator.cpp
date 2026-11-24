@@ -615,6 +615,10 @@ TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) co
 		if (Rr.FRand() < RecipeLootChance14)
 			if (const FName Rc = RecipeOfTier14(GlobalTier(Tier), Rr); !Rc.IsNone()) Out.Add(Rc);
 		}
+		// (the list of 2026-11-22's caves: an ancient tablet now and then, on a stream of its own, a thing beyond the container's
+		// draw (a container holds one thing: a tablet that waited for room was never found))
+		if (bCave16)
+			if (const FName Tb = CaveTablet16(Section, Index); !Tb.IsNone()) Out.Add(Tb);
 		return Out;
 		}
 
@@ -1441,6 +1445,14 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 				if (E.bBoss && I == 0 && !E.bFinal)
 				{
 					TierNotice = E.bThrone ? FString(TEXT("THE USURPER IS SLAIN")) : FString::Printf(TEXT("THE BOSS OF TIER %d IS SLAIN"), E.Tier); TierNoticeTime = GetWorld()->GetTimeSeconds();
+					// (the list of 2026-11-22's caves: a cave's last boss always leaves an Angel Token where it fell)
+					if (bCave16 && !E.bThrone && MaxTier > 0 && E.Tier == MaxTier && !AngelTokenItem.IsNone() && FindItem(AngelTokenItem) >= 0)
+					{
+						TArray<float> Wr; Wr.Init(-1.f, 1);
+						DropLoot(Monster ? Monster->GetActorLocation() : E.At, { AngelTokenItem }, Wr);
+						TierNotice += FString::Printf(TEXT("  -  AN %s LIES WHERE IT FELL"), *AngelTokenItem.ToString().ToUpper());
+						++CaveTokens16;
+					}
 					if (E.bThrone) RoomUses.FindOrAdd(TEXT("usurper"))++;
 					// (the third list: a slash of its tier for her weapons, when her hero takes slashes)
 					const FName Sl = bCave15 ? NAME_None : GiveBossSlash(E.Tier, Monster ? Monster->GetActorLocation() : E.At);
@@ -1582,6 +1594,8 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 	// (mistward: her dropped things, a teleporter pad, a trap she has seen (the Rogue disarms it) come before the rest)
 	// (the eighth phase: F off her horse; beside it, on it)
 	if (bMounted) { DismountHorse(); return TEXT("dismount"); }
+	// (the list of 2026-11-22's caves: a cave painting, when it is nearer than every pile F reaches (what F names is what F takes))
+	if (bCave16 && PaintingFirst16(From, MaxDistance, Best ? BestD : MaxDistance)) { const FString Pn = StudyPainting16(From, MaxDistance); if (!Pn.IsEmpty()) return Pn; }
 	if (LootPiles.Num() > 0 && TakeLootNear(From, 260.f)) return TEXT("loot");
 	// (the list of 2026-11-20's ninth phase: a landmark tower's cave mouth)
 	if (bWild && CaveMouthFirst15(From) && EnterCave15()) return TEXT("cave");
@@ -1693,6 +1707,8 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 				const float D = S->FindNearestInteractive(From, BestD, bDoor, I);
 				if (I >= 0 && D < BestD) { BestD = D; Best = S; bBestDoor = bDoor; BestI = I; }
 			}
+	// (the list of 2026-11-22's caves: a painting nearer than everything else F reaches (PR #122's review), as F takes it)
+	if (bCave16 && PaintingFirst16(From, MaxDistance, Best ? BestD : MaxDistance)) return TEXT("study the cave painting");
 	// (mistward: her dropped things, a pad, a trap she sees)
 	// (the nearest within reach, the one F takes (TakeLootNear): the first in the list named another pile beside it, the PR
 	// review's find)

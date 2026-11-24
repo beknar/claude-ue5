@@ -2136,6 +2136,41 @@ public:
 	/** the Echo's pings: monsters beyond the maps' own sensing and within the ring's metres */
 	void EchoPings16(const FVector& Her, float SenseCm, TArray<FVector2D>& Out) const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") int32 GetEchoPings16(FVector Her) const { TArray<FVector2D> P; EchoPings16(Her, 2500.f, P); return P.Num(); }
+	// ---- phase 15: rewards that last (RDCave16g.cpp)
+	/** the cave painting's decal, the share of the sets that hold one */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TObjectPtr<UMaterialInterface> PaintingDecal16 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float PaintingShare16 = 0.35f;
+	/** the most caves one painting marks (the region's nearest the painted one) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") int32 PaintingCaves16 = 12;
+	/** the fossil sets: "<region>|<fossil>|<fossil>|<fossil>"; amber may stand in for one; a set's lasting hit points or mana */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FString> FossilSets16;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FName FossilAmber16;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") int32 FossilGain16 = 15;
+	bool PaintingNear16(const FVector& From, float Reach, FVector* OutAt = nullptr) const;
+	/** a painting within F's reach (Reach) and nearer than everything else F reaches: the nearest door or container (OtherD), every
+	 *  pile, anvil and station; the prompt and F both ask it */
+	bool PaintingFirst16(const FVector& From, float Reach, float OtherD) const;
+	FString StudyPainting16(const FVector& From, float Reach);
+	/** for the tests: "studied|<cave>|<region>|applied/waiting", "cave|<i>|<j>" known, "painting|<set x>|<y>|<x>|<y>|<z>" laid */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetPaintings16() const;
+	void ApplyPaintings16();
+	/** for the tests: a painting as if studied in the cave under the tower nearest (Xm, Ym) (metres): "cave:<i>_<j>|<region>|<biome>" or "" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") FString DebugPaintingNear16(float Xm, float Ym);
+	/** for the tests: the map's marks the paintings made this session taken off again (the paintings' lists are the test's to put back) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") int32 ForgetPaintingMarks16();
+	TArray<int32> PaintingMarked16;
+	void DrawKnownCaves16(TFunctionRef<void(const FVector2D&)> Draw) const;
+	int32 PaintedApplied16 = 0;
+	/** the share of a cave's containers with loot that hold an ancient tablet (a recipe or a spell the old people cut in stone) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float TabletShare16 = 0.12f;
+	FName CaveTablet16(FIntPoint Section, int32 Index) const;
+	/** the Angel Tokens a cave's last boss left this run (for the tests) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Cave16") int32 CaveTokens16 = 0;
+	/** "fossil|<region>|<1: whole>|<n of m>" for each set she carries a piece of */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetFossilLines16() const;
+	/** a temple's trade of a fossil set: "<region>|hp", "|mana" or "|token" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") bool TownFossilTrade16(const FString& Arg);
+	void AddFossilTrades16(TFunctionRef<void(const FString& Act, const FString& Label, const FString& Tag, const FString& Detail, bool bOn, const FString& Arg)> Add) const;
 	/** gold she finds (more with a gilded relic), as AddGold */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") void AddFoundGold16(int32 Amount, const FString& Why = TEXT(""));
 	/** a harvest's things more by the lucky stone */

@@ -186,6 +186,16 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 	};
 	// (the list of 2026-11-20's eleventh phase: the roamers she has seen and not slain, a skull at their rounds, named)
 	Gen->DrawRoamerMarks15([&](const FVector2D& AtM, const FString& Nm) { NamedMark(AtM, Nm, 15.f, FLinearColor(1.f, 0.35f, 0.30f, 1.f), FLinearColor(1.f, 0.55f, 0.48f, 1.f)); });
+	// (the list of 2026-11-22's caves: the caves a cave painting showed her, at their towers)
+	KnownCavesDrawn16 = 0;
+	Gen->DrawKnownCaves16([&](const FVector2D& AtM)
+	{
+		const FVector2D S = ToS(AtM);
+		if (S.X < A.X || S.X > B.X || S.Y < A.Y || S.Y > B.Y) return;
+		const float Ic = 13.f * Sc;
+		if (!UI.Fit(TEXT("wmap_cave"), S - FVector2D(Ic), S + FVector2D(Ic), FLinearColor(0.85f, 0.75f, 1.f, 1.f))) SoftDot(S, 6.f * Sc, FLinearColor(0.85f, 0.75f, 1.f, 1.f));
+		++KnownCavesDrawn16;
+	});
 	// (the list of 2026-11-20's thirteenth phase: the contracts taken, the next sign or the lair, in gold)
 	Gen->DrawContractMarks15([&](const FVector2D& AtM, const FString& Nm)
 	{

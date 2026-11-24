@@ -1,0 +1,162 @@
+{
+ "tag": "c15k",
+ "plan": [
+  "cave16relics"
+ ],
+ "level": "caves",
+ "steps": [
+  {
+   "step": "cave16relics",
+   "ok": true,
+   "lasting0": 0,
+   "region": "cold|glacial",
+   "tablets": {
+    "Ancient Tablet: Slow Mending Draught": [
+     "RECIPE",
+     "Slow Mending Draught",
+     "None"
+    ],
+    "Ancient Tablet: Darksight Draught": [
+     "RECIPE",
+     "Darksight Draught",
+     "None"
+    ],
+    "Ancient Tablet: Sun-glass Weave": [
+     "RECIPE",
+     "Sun-glass Weave",
+     "None"
+    ],
+    "Ancient Tablet of Singularity": [
+     "TOME",
+     "None",
+     "Singularity"
+    ],
+    "Ancient Tablet of Doom": [
+     "TOME",
+     "None",
+     "Doom"
+    ]
+   },
+   "fossils_known": true,
+   "paintings": [
+    [
+     0,
+     -1
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     1,
+     1
+    ]
+   ],
+   "sets_made": 9,
+   "tablets_drawn": {
+    "Ancient Tablet: Darksight Draught": 4,
+    "Ancient Tablet: Slow Mending Draught": 6,
+    "Ancient Tablet of Singularity": 4,
+    "Ancient Tablet: Sun-glass Weave": 3,
+    "Ancient Tablet of Doom": 2
+   },
+   "containers_with_loot": 159,
+   "tablet_share": 0.119,
+   "decal": [
+    "M_Cave16_Painting"
+   ],
+   "prompt": "study the cave painting",
+   "prompt_tries": [
+    [
+     150.0,
+     0.0,
+     "study the cave painting"
+    ]
+   ],
+   "f_nocell": "painting",
+   "studied_nocell": [],
+   "message_nocell": "Hunters and a stag in red ochre: the old people knew these caves",
+   "f": "painting",
+   "studied": [
+    "studied|cave:0_-1|cold|waiting"
+   ],
+   "message": "You study the painting: it shows the cold lands' caves and their hidden places (on your map once you are back in the wilds)",
+   "fossil_lines": [
+    "fossil|cold|1|3 of 3"
+   ],
+   "hp": {
+    "traded": true,
+    "gain": 15.0,
+    "left": [
+     0,
+     0,
+     0
+    ]
+   },
+   "token": {
+    "traded": true,
+    "tokens": 1,
+    "amber_spent": 1,
+    "left": [
+     0,
+     0,
+     0
+    ]
+   },
+   "one_piece": {
+    "traded": false,
+    "gain": 0.0,
+    "kept": 1
+   },
+   "mana_trade_warrior": false,
+   "recipes": {
+    "Ancient Tablet: Slow Mending Draught": {
+     "locked_before": true,
+     "used": true,
+     "known_after": true
+    },
+    "Ancient Tablet: Darksight Draught": {
+     "locked_before": true,
+     "used": true,
+     "known_after": true
+    },
+    "Ancient Tablet: Sun-glass Weave": {
+     "locked_before": true,
+     "used": true,
+     "known_after": true
+    }
+   },
+   "spell_tablet": {
+    "item": "Ancient Tablet of Singularity",
+    "spell": "Singularity",
+    "used": false,
+    "left": 0,
+    "new": [
+     "Singularity"
+    ],
+    "message": "You learn Singularity:  key 3"
+   },
+   "max_tier": 3,
+   "boss": "Half_Creature_05",
+   "notice": "THE BOSS OF TIER 3 IS SLAIN  -  AN ANGEL TOKEN LIES WHERE IT FELL",
+   "token_piles": 1,
+   "boss_token": {
+    "cave_tokens": 1,
+    "taken_by": "loot",
+    "tokens_gained": 1
+   }
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "shots": [
+  "mw_c15k_cave16_painting.png",
+  "mw_c15k_cave16_painting_close.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}

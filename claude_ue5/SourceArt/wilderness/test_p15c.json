@@ -1,0 +1,164 @@
+{
+ "tag": "p15c",
+ "plan": [
+  "paintings16"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "paintings16",
+   "ok": true,
+   "entry": "cave:0_-1|open|grasslands",
+   "studied": [
+    "studied|cave:0_-1|open|applied"
+   ],
+   "caves": [
+    {
+     "cell": [
+      0,
+      0
+     ],
+     "km": [
+      3.8,
+      4.2
+     ],
+     "biome": "meadows"
+    },
+    {
+     "cell": [
+      1,
+      -1
+     ],
+     "km": [
+      10.4,
+      -4.6
+     ],
+     "biome": "plains"
+    },
+    {
+     "cell": [
+      -1,
+      -1
+     ],
+     "km": [
+      -3.8,
+      -3.1
+     ],
+     "biome": "farms"
+    },
+    {
+     "cell": [
+      -1,
+      -2
+     ],
+     "km": [
+      -1.4,
+      -7.7
+     ],
+     "biome": "plains"
+    },
+    {
+     "cell": [
+      0,
+      -2
+     ],
+     "km": [
+      4.8,
+      -9.9
+     ],
+     "biome": "plains"
+    },
+    {
+     "cell": [
+      1,
+      -2
+     ],
+     "km": [
+      7.3,
+      -9.9
+     ],
+     "biome": "plains"
+    },
+    {
+     "cell": [
+      -1,
+      0
+     ],
+     "km": [
+      -3.4,
+      4.5
+     ],
+     "biome": "grasslands"
+    },
+    {
+     "cell": [
+      0,
+      1
+     ],
+     "km": [
+      4.4,
+      8.7
+     ],
+     "biome": "meadows"
+    },
+    {
+     "cell": [
+      2,
+      -2
+     ],
+     "km": [
+      14.7,
+      -7.6
+     ],
+     "biome": "plains"
+    },
+    {
+     "cell": [
+      -2,
+      -1
+     ],
+     "km": [
+      -9.1,
+      -2.9
+     ],
+     "biome": "grasslands"
+    },
+    {
+     "cell": [
+      1,
+      -3
+     ],
+     "km": [
+      10.8,
+      -13.7
+     ],
+     "biome": "plains"
+    },
+    {
+     "cell": [
+      0,
+      -3
+     ],
+     "km": [
+      3.9,
+      -15.8
+     ],
+     "biome": "plains"
+    }
+   ],
+   "off_region": [],
+   "marked_new": 4,
+   "message": "0|From the cave painting you studied: 12 caves and 4 hidden places marked on your map",
+   "drawn": 12,
+   "caves_after_2s": 12,
+   "applied_lines": 1
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "wd_p15c_paintings16_map.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

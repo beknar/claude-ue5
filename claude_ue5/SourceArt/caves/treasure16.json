@@ -508,5 +508,250 @@
     }
    }
   ]
+ },
+ "phase15": {
+  "_note": "Rewards that last: a fossil set per region (found in its caves only; a full set, amber standing in for one, traded at a temple for hit points or mana for good, or an Angel Token); ancient tablets teaching a recipe (recipe items: the recipe they teach is locked until read) or a spell ('spell_tablets': copies of that many of the highest tomes, renamed); the cave painting (a decal cut from its icon by blender_numpy/cave_painting_decal.py, in a share of the sets; studied, it marks the region's caves and their hidden places on the wilds' map); an Angel Token from a cave's last boss (C++).",
+  "items": [
+   {
+    "name": "Frozen Ammonite",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_ammonite",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the cold lands' caves: a coiled shell turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Frozen Claw",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_claw",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the cold lands' caves: a great claw turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Frozen Egg",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_egg",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the cold lands' caves: an egg of something long gone, turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Highland Ammonite",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_ammonite",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the mountains lands' caves: a coiled shell turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Highland Claw",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_claw",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the mountains lands' caves: a great claw turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Highland Egg",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_egg",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the mountains lands' caves: an egg of something long gone, turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Ashen Ammonite",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_ammonite",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the volcanic lands' caves: a coiled shell turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Ashen Claw",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_claw",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the volcanic lands' caves: a great claw turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Ashen Egg",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_egg",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the volcanic lands' caves: an egg of something long gone, turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Sandstone Ammonite",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_ammonite",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the desert lands' caves: a coiled shell turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Sandstone Claw",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_claw",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the desert lands' caves: a great claw turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Sandstone Egg",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_egg",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the desert lands' caves: an egg of something long gone, turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Mossy Ammonite",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_ammonite",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the forest lands' caves: a coiled shell turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Mossy Claw",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_claw",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the forest lands' caves: a great claw turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Mossy Egg",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_egg",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the forest lands' caves: an egg of something long gone, turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Plains Ammonite",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_ammonite",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the open lands' caves: a coiled shell turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Plains Claw",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_claw",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the open lands' caves: a great claw turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Plains Egg",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_fossil_egg",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A fossil of the open lands' caves: an egg of something long gone, turned to stone. The three of a land's caves (amber may stand in for one) bring something lasting at a temple."
+   },
+   {
+    "name": "Ancient Tablet: Slow Mending Draught",
+    "like": "",
+    "kind": "RECIPE",
+    "teaches": "Slow Mending Draught",
+    "icon": "cave_ancient_tablet",
+    "weight": 0.1,
+    "cave": true,
+    "looks": "A stone tablet cut by the old people: read it to learn to make the slow mending draught."
+   },
+   {
+    "name": "Ancient Tablet: Darksight Draught",
+    "like": "",
+    "kind": "RECIPE",
+    "teaches": "Darksight Draught",
+    "icon": "cave_ancient_tablet",
+    "weight": 0.1,
+    "cave": true,
+    "looks": "A stone tablet cut by the old people: read it to learn to make the darksight draught."
+   },
+   {
+    "name": "Ancient Tablet: Sun-glass Weave",
+    "like": "",
+    "kind": "RECIPE",
+    "teaches": "Sun-glass Weave",
+    "icon": "cave_ancient_tablet",
+    "weight": 0.1,
+    "cave": true,
+    "looks": "A stone tablet cut by the old people: read it to learn to make the sun-glass weave."
+   }
+  ],
+  "region_items": {
+   "cold": [
+    "Frozen Ammonite",
+    "Frozen Claw",
+    "Frozen Egg"
+   ],
+   "mountains": [
+    "Highland Ammonite",
+    "Highland Claw",
+    "Highland Egg"
+   ],
+   "volcanic": [
+    "Ashen Ammonite",
+    "Ashen Claw",
+    "Ashen Egg"
+   ],
+   "desert": [
+    "Sandstone Ammonite",
+    "Sandstone Claw",
+    "Sandstone Egg"
+   ],
+   "forest": [
+    "Mossy Ammonite",
+    "Mossy Claw",
+    "Mossy Egg"
+   ],
+   "open": [
+    "Plains Ammonite",
+    "Plains Claw",
+    "Plains Egg"
+   ]
+  },
+  "fossil_sets": [
+   "cold|Frozen Ammonite|Frozen Claw|Frozen Egg",
+   "mountains|Highland Ammonite|Highland Claw|Highland Egg",
+   "volcanic|Ashen Ammonite|Ashen Claw|Ashen Egg",
+   "desert|Sandstone Ammonite|Sandstone Claw|Sandstone Egg",
+   "forest|Mossy Ammonite|Mossy Claw|Mossy Egg",
+   "open|Plains Ammonite|Plains Claw|Plains Egg"
+  ],
+  "fossil_amber": "Amber with an Insect",
+  "fossil_gain": 15,
+  "spell_tablets": 2,
+  "retired": ["Ancient Tablet: Ring of the Echo"],
+  "painting": {
+   "texture": "painting16_decal.png",
+   "share": 0.35
+  }
  }
 }
