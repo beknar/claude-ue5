@@ -190,7 +190,8 @@ void URDCombatComponent::UpdateMaxima()
 	// (whole hit points with the growth only: the other levels keep theirs as they were (the PR review's find))
 	// (the list of 2026-11-20's twelfth phase: the hit points a temple's trade added for good, after her rings and growth: the 10 its
 	// line promises (PR #104's review: on her base they were 26 at a deep tier with a ring))
-	const float RawH = Generator->PlayerMaxHealth * (1.f + GetRingBonus(ERDRingKind::Health)) * Generator->TierHealthMul() + Generator->LastingHealth15();
+	const float RawH = (Generator->PlayerMaxHealth * (1.f + GetRingBonus(ERDRingKind::Health)) * Generator->TierHealthMul() + Generator->LastingHealth15())
+		* FMath::Max(1.f + GetCharm16(TEXT("maxhp")), 0.1f);          // (the list of 2026-11-22's caves: a relic's cost)
 	MaxHealth = FMath::Max(1.f, Generator->bTierGrowth ? FMath::RoundToFloat(RawH) : RawH);
 	// (the Summoner's balance of 2026-11-05: her mana grows with the tiers opened too (her hero's ManaPerTier))
 	// (a whole pool when it grows, as her hit points (the PR review's find): 60 x 1.25 x 1.1 is 82.5; a pool that does not grow
@@ -225,6 +226,14 @@ bool URDCombatComponent::WearRing(FName Item)
 	{
 		WornRings.Remove((uint8)It.RingKind); UpdateMaxima();
 		SetMessage(FString::Printf(TEXT("You take off the %s"), *RDSpLower(Item)));
+		PlayUiSound(TEXT("Player.Inventory"), TEXT("Player.Inventory"));
+		return true;
+	}
+	// (the list of 2026-11-22's caves: the Echo, the lucky stone and the charms are worn by every hero, and say what they do)
+	if (It.RingKind >= ERDRingKind::Echo)
+	{
+		WornRings.Add((uint8)It.RingKind, Item); UpdateMaxima();
+		SetMessage(FString::Printf(TEXT("You put on the %s: %s"), *RDSpLower(Item), *CharmWords16(It)));
 		PlayUiSound(TEXT("Player.Inventory"), TEXT("Player.Inventory"));
 		return true;
 	}

@@ -169,7 +169,7 @@ float URDCombatComponent::GetEffectMax16(ERDItemKind K) const
 void URDCombatComponent::TickDarksight16()
 {
 	// (darksight: a dim, shadowless light of the buff's metres round her while it lasts, gone with it)
-	const float M = FMath::Max(GetEffectMax16(ERDItemKind::Darksight), ArmourPerk16().Darksight);          // (phase 13: the spelunker's armour's too)
+	const float M = FMath::Max3(GetEffectMax16(ERDItemKind::Darksight), ArmourPerk16().Darksight, GetCharm16(TEXT("light")));          // (phase 14: the glow-worm amulet's, a candle's)          // (phase 13: the spelunker's armour's too)
 	APawn* P = Cast<APawn>(GetOwner());
 	if (M <= 0.f || !P || !Generator)
 	{

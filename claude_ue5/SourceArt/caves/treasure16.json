@@ -375,5 +375,138 @@
    "drown_share": 0.08,
    "speed": 0.6
   }
+ },
+ "phase14": {
+  "_note": "The charm slot (a ring of kind CHARM, one at a time beside her rings), the Ring of the Echo and the miner's lucky stone (rings of kinds of their own, worn by every hero). 'amount': the Echo's metres, the lucky stone's share more. 'charm': its good and, for a cursed relic, its cost (a stat and its share: damage, guard, speed, gold, notice, maxhp, bleed (a share of her hit points a second), light (metres)) and the temple's price to lift it (times 1 + 0.25 a game tier past the first). 'like': '' takes the first ring of the map.",
+  "items": [
+   {
+    "name": "Ring of the Echo",
+    "like": "",
+    "kind": "RING",
+    "ring_kind": "ECHO",
+    "amount": 60,
+    "icon": "cave_ring_echo",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "A ring set with a cave pearl that hums with the cave's echoes: monsters within 60 m show on your maps as dim pings.",
+    "recipe": [
+     "",
+     [
+      [
+       "cave pearl",
+       [
+        "Cave Pearl"
+       ],
+       2
+      ],
+      [
+       "deepiron ingot",
+       [
+        "Deepiron Ingot"
+       ],
+       1
+      ]
+     ]
+    ]
+   },
+   {
+    "name": "Miner's Lucky Stone",
+    "like": "",
+    "kind": "RING",
+    "ring_kind": "LUCKY",
+    "amount": 0.5,
+    "icon": "cave_lucky_stone",
+    "weight": 0.12,
+    "cave": true,
+    "looks": "An old miner's lucky stone on a cord: veins and growths give half as much again."
+   },
+   {
+    "name": "Glow-worm Amulet",
+    "like": "",
+    "kind": "RING",
+    "ring_kind": "CHARM",
+    "amount": 0,
+    "icon": "cave_glowworm_amulet",
+    "weight": 0.15,
+    "cave": true,
+    "looks": "A vial of glow-worms on a chain: a faint light round you without a torch, both hands free.",
+    "charm": {
+     "good": "light",
+     "good_amount": 8
+    }
+   },
+   {
+    "name": "Bleeding Idol",
+    "like": "",
+    "kind": "RING",
+    "ring_kind": "CHARM",
+    "amount": 0,
+    "icon": "cave_bleeding_idol",
+    "weight": 0.06,
+    "cave": true,
+    "looks": "A small idol that weeps blood: your blows strike harder while you bleed slowly.",
+    "charm": {
+     "good": "damage",
+     "good_amount": 0.25,
+     "cost": "bleed",
+     "cost_amount": 0.0025,
+     "lift": 300
+    }
+   },
+   {
+    "name": "Gilded Skull",
+    "like": "",
+    "kind": "RING",
+    "ring_kind": "CHARM",
+    "amount": 0,
+    "icon": "cave_gilded_skull",
+    "weight": 0.06,
+    "cave": true,
+    "looks": "A skull gilded long ago: more gold comes to you, but monsters notice you from farther off.",
+    "charm": {
+     "good": "gold",
+     "good_amount": 0.5,
+     "cost": "notice",
+     "cost_amount": 0.3,
+     "lift": 300
+    }
+   },
+   {
+    "name": "Black Candle",
+    "like": "",
+    "kind": "RING",
+    "ring_kind": "CHARM",
+    "amount": 0,
+    "icon": "cave_black_candle",
+    "weight": 0.06,
+    "cave": true,
+    "looks": "A candle of black wax that never burns down: it lights the dark and sharpens your blows, but it draws on your life.",
+    "charm": {
+     "good": "damage",
+     "good_amount": 0.15,
+     "cost": "maxhp",
+     "cost_amount": -0.15,
+     "lift": 350
+    }
+   },
+   {
+    "name": "Thorned Crown",
+    "like": "",
+    "kind": "RING",
+    "ring_kind": "CHARM",
+    "amount": 0,
+    "icon": "cave_thorned_crown",
+    "weight": 0.06,
+    "cave": true,
+    "looks": "A crown of iron thorns: blows on you are lighter, but its weight slows you.",
+    "charm": {
+     "good": "guard",
+     "good_amount": 0.15,
+     "cost": "speed",
+     "cost_amount": -0.1,
+     "lift": 350
+    }
+   }
+  ]
  }
 }

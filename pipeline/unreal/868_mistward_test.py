@@ -8249,6 +8249,125 @@ def step_cave16armour():
         except Exception: pass
 STEPS.update({"cave16armour": step_cave16armour})
 
+
+def cave16charms_inner():
+    """the list of 2026-11-22's caves, phase 14: the charm slot, the Echo, the lucky stone, the cursed relics, the temple's lifting.
+    Measured: the Echo's pings (monsters beyond the maps' 25 m and within 60 m) counted and drawn on the minimap, none without it; a
+    vein's pile with the lucky stone gives half as much again (its count read from F's prompt); the glow-worm amulet's light 8 m;
+    the bleeding idol: her blows 25 % stronger, her hit points falling slowly and never below one; the gilded skull: gold half as
+    much again, a monster at 1.2 of the noticing distance noticing her (none bare); the black candle: her blows 15 % stronger, 15 %
+    fewer hit points; the thorned crown: a blow on her 15 % less, her speed 10 % less; the temple's lines name the relics carried, a
+    lifting takes its price and the cost is gone (the gift kept); one charm at a time (a second takes the first's place)"""
+    c = yield from restart("Warrior"); g = G["gen"]; res = {}
+    pawn = G["pawn"]; at = pawn.get_actor_location(); kill_all_near(at, 9000.0); yield from wait(0.5)
+    T = json.load(open(os.path.join(SA, "caves", "treasure16.json"), encoding="utf-8"))
+    names = [x["name"] for x in T["phase14"]["items"]]
+    items = {str(i.name): i for i in g.get_editor_property("items")}
+    res["items"] = {n: (str(items[n].ring_kind).split(".")[-1].split(":")[0] if n in items else None) for n in names}
+    for n in names: c.add_item(n, 1)
+    def wear(n): return c.wear_ring(n)
+    # ---- the Echo: two monsters 35-55 m off on the set's tiles
+    tl = [list(map(float, str(t).split("|")[:3])) for t in g.get_cave_tiles16(I2(0, 0))]
+    far = [V(x, y, z) for x, y, z in tl if 3500.0 < math.hypot(x - at.x, y - at.y) < 5500.0 and abs(z - at.z) < 800.0]
+    ms = [spawn_dummy(V(q.x, q.y, q.z + 100.0), 30.0) for q in far[:: max(1, len(far) // 2)][:2]] if far else []
+    for m in ms:
+        mm_ = m.get_component_by_class(unreal.CharacterMovementComponent) if m else None
+        if mm_: mm_.set_editor_property("max_walk_speed", 0.0)
+    yield from wait(1.0)
+    pc = unreal.GameplayStatics.get_player_controller(G["w"], 0); hud = pc.get_hud() if pc else None
+    e0 = g.get_echo_pings16(pawn.get_actor_location()); d0 = hud.get_echo_drawn16() if hud else None
+    wear("Ring of the Echo"); yield from wait(1.0)
+    e1 = g.get_echo_pings16(pawn.get_actor_location()); d1 = hud.get_echo_drawn16() if hud else None
+    res["echo"] = {"monsters_placed": len(ms), "pings": [e0, e1], "drawn": [d0, d1]}
+    for m in ms:
+        try: m.destroy_actor()
+        except Exception: pass
+    # ---- the lucky stone: a vein's pile, its count from F's prompt
+    wear("Miner's Lucky Stone"); yield from wait(0.2)
+    nodes = [str(n).split("|") for n in g.get_cave_nodes16(I2(0, 0))]
+    lucky = None
+    for n in nodes[:6]:
+        p_ = V(float(n[2]), float(n[3]), float(n[4])); before = c.get_item_count(n[1])
+        put(V(p_.x - 80.0, p_.y, p_.z), yaw=0.0); yield from wait(0.6)
+        d_ = str(g.describe_nearest(pawn.get_actor_location(), 260.0))
+        if "(" not in d_: continue
+        cnt = int(d_.split("(")[-1].split(")")[0])
+        g.interact_nearest(pawn.get_actor_location(), 260.0); yield from wait(0.6)
+        lucky = {"item": n[1], "pile": cnt, "got": c.get_item_count(n[1]) - before}; break
+    res["lucky"] = lucky
+    put(at, yaw=0.0); yield from wait(0.5)
+    # ---- the glow-worm amulet
+    wear("Glow-worm Amulet"); yield from wait(0.5)
+    res["glow_cm"] = float(str(c.get_cave_buffs16()).split("|")[1])
+    # ---- the bleeding idol
+    d_bare = c.get_damage_of(c.get_weapon_index())
+    wear("Bleeding Idol"); yield from wait(0.3)
+    res["idol_damage"] = round(c.get_damage_of(c.get_weapon_index()) / max(d_bare, 1e-3), 3)
+    c.set_health(c.get_max_health()); h0 = c.get_health(); yield from rwait(8.0)
+    res["idol_bled_8s"] = round(h0 - c.get_health(), 1); res["idol_expected_8s"] = round(0.0025 * c.get_max_health() * 8.0, 1)
+    c.set_health(2.0); yield from rwait(6.0); res["idol_floor"] = round(c.get_health(), 1)
+    c.set_health(c.get_max_health())
+    # ---- the gilded skull: gold, and a monster at 1.2 of the noticing distance
+    ad = g.get_editor_property("aggro_distance")
+    end, yaw = clear_line(at, 0.0, ad * 1.2)
+    def noticed(sec=3.0):
+        m = spawn_dummy(end, 30.0); yield from wait(0.2)
+        mm_ = m.get_component_by_class(unreal.CharacterMovementComponent)
+        if mm_: mm_.set_editor_property("max_walk_speed", 0.0)
+        put(at, yaw=yaw); t0 = time.time(); seen = False
+        while time.time() - t0 < sec:
+            seen = seen or bool(m.is_aggro()); yield from wait(0.1)
+        try: m.destroy_actor()
+        except Exception: pass
+        yield from wait(0.5)
+        return seen
+    c.wear_ring("Glow-worm Amulet") if c.get_worn_ring(unreal.RDRingKind.CHARM) == "Glow-worm Amulet" else None
+    c.take_off_armour()
+    gc0 = g.get_gold(); g.add_gold(100, "test"); gold_bare = g.get_gold() - gc0
+    n_bare = (yield from noticed()) if end is not None else None
+    wear("Gilded Skull"); yield from wait(0.3)
+    gc0 = g.get_gold(); g.add_gold(100, "test"); gold_skull = g.get_gold() - gc0
+    n_skull = (yield from noticed()) if end is not None else None
+    res["skull"] = {"gold": [gold_bare, gold_skull], "noticed_at_1_2": [n_bare, n_skull], "notice_mul": round(c.get_charm16("notice"), 2)}
+    # ---- the temple's lifting of the skull: its price taken, its cost gone, its gift kept
+    lines = [str(l) for l in g.get_lift_lines16()]
+    pr = next((int(l.split("|")[2]) for l in lines if l.split("|")[1] == "Gilded Skull"), None)
+    g.add_gold(5000, "test"); gb = g.get_gold()
+    lifted = g.town_lift_curse16("Gilded Skull"); yield from wait(0.2)
+    gc0 = g.get_gold(); g.add_gold(100, "test"); gold_lifted = g.get_gold() - gc0
+    res["lift"] = {"lines": lines, "price": pr, "lifted": lifted, "paid": gb - gc0, "notice_after": round(c.get_charm16("notice"), 2), "gold_after": gold_lifted,
+                   "lines_after": [str(l) for l in g.get_lift_lines16()]}
+    # ---- the black candle and the thorned crown
+    hm0 = c.get_max_health(); wear("Black Candle"); yield from wait(0.3)
+    res["candle"] = {"damage": round(c.get_damage_of(c.get_weapon_index()) / max(d_bare, 1e-3), 3), "maxhp": round(c.get_max_health() / max(hm0, 1e-3), 3),
+                     "worn": str(c.get_worn_ring(unreal.RDRingKind.CHARM))}
+    mv = pawn.get_component_by_class(unreal.CharacterMovementComponent)
+    def blow():
+        c.set_health(c.get_max_health()); h = c.get_health(); c.apply_damage(20.0, None); return h - c.get_health()
+    c.wear_ring("Black Candle"); yield from wait(0.3)          # (off: the bare speed and blow)
+    s0 = mv.get_editor_property("max_walk_speed"); b0 = blow(); yield from wait(1.2)
+    wear("Thorned Crown"); yield from wait(0.5)
+    s1 = mv.get_editor_property("max_walk_speed"); b1 = blow(); yield from wait(1.2)
+    res["crown"] = {"speed": [round(s0, 1), round(s1, 1)], "blow": [round(b0, 2), round(b1, 2)]}
+    E, L, C_, K = res["echo"], res["lucky"], res["candle"], res["crown"]
+    ok = (all(res["items"].values()) and E["monsters_placed"] > 0 and E["pings"][0] == 0 and E["pings"][1] == E["monsters_placed"] and E["drawn"][1] == E["monsters_placed"]
+          and L and L["got"] == L["pile"] + math.ceil(L["pile"] * 0.5)
+          and abs(res["glow_cm"] - 800.0) < 1.0
+          and abs(res["idol_damage"] - 1.25) < 0.01 and res["idol_bled_8s"] >= res["idol_expected_8s"] - 1.0 and res["idol_floor"] >= 1.0
+          and res["skull"]["gold"] == [100, 150] and res["skull"]["noticed_at_1_2"] == [False, True]
+          and res["lift"]["lifted"] and res["lift"]["paid"] == res["lift"]["price"] and res["lift"]["notice_after"] == 0.0 and res["lift"]["gold_after"] == 150
+          and "Gilded Skull" not in " ".join(res["lift"]["lines_after"])
+          and abs(C_["damage"] - 1.15) < 0.01 and abs(C_["maxhp"] - 0.85) < 0.01 and C_["worn"] == "Black Candle"
+          and abs(K["speed"][1] / K["speed"][0] - 0.9) < 0.01 and abs(K["blow"][1] / max(K["blow"][0], 1e-3) - 0.85) < 0.03)
+    step_result("cave16charms", ok, **res)
+def step_cave16charms():
+    try:
+        yield from cave16charms_inner()
+    finally:
+        try: quiet(False)
+        except Exception: pass
+STEPS.update({"cave16charms": step_cave16charms})
+
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""
     if G.get("gen"): return G["gen"]

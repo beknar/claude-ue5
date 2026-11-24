@@ -713,7 +713,13 @@ enum class ERDRingKind : uint8
 	/** her hit points: Amount more of them */
 	Health,
 	/** her ranged weapons' damage: Amount more */
-	Dexterity
+	Dexterity,
+	/** the list of 2026-11-22's caves: monsters within Amount metres as dim pings on her maps */
+	Echo,
+	/** more from a cave's vein or growth: Amount more of it */
+	Lucky,
+	/** a charm (the charm slot): its good and cost are the generator's Charms16 */
+	Charm
 };
 
 /** random_dungeonmagic_level5: what an anvil breaks a found weapon of these types into (each part Count a tier of the
@@ -1808,6 +1814,20 @@ struct FRDArmourPerk16
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float PoisonGuard = 0.f;
 	/** her breath under water this many times as long */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Breath = 1.f;
+};
+
+/** the list of 2026-11-22's caves, phase 14: a charm's good and, for a cursed relic, its cost (a stat and its share each: "damage",
+ *  "guard", "speed", "gold", "notice", "maxhp", "bleed" (a share of her hit points a second), "light" (metres)); a temple lifts the
+ *  cost for LiftPrice gold (by the game's tier) */
+USTRUCT(BlueprintType)
+struct FRDCharm16
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Good;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float GoodAmount = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Cost;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float CostAmount = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 LiftPrice = 0;
 };
 
 USTRUCT(BlueprintType)

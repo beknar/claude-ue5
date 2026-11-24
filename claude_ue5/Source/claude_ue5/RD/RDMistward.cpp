@@ -620,7 +620,7 @@ bool ARDDungeonGenerator::TakeLootNear(const FVector& From, float Reach)
 	ARDLootPile* Best = nullptr; float BestD = Reach;
 	for (ARDLootPile* P : LootPiles) if (IsValid(P)) { const float D = FVector::Dist2D(P->GetActorLocation(), From); if (D < BestD) { BestD = D; Best = P; } }
 	if (!Best || !Pc) return false;
-	if (Best->bHarvest) Pc->TakeHarvest(Best->Things);
+	if (Best->bHarvest) { TArray<FName> Th = Best->Things; LuckyHarvest16(Th); Pc->TakeHarvest(Th); }          // (the caves' lucky stone: more from a vein)
 	else Pc->TakeBack(Best->Things, Best->Wear, Best->bHers, Best->WornShield);
 	NoteLostBladeTaken16(Best->Things);          // (the list of 2026-11-22's caves: a cave's lost blade taken is laid there no more (PR #119's review))
 	// (the list of 2026-11-16's eighth phase: a dead person's gold into her purse, said with what she took)

@@ -291,7 +291,8 @@ void URDCombatComponent::UpdateWalkSpeed()
 		* FMath::Max(WildRunFactor, 0.1f) * FMath::Max(MountFactor, 0.1f)          // (the list of 2026-11-07: rd.WildRunSpeed; the eighth phase: her horse)
 		* FMath::Max(SwimFactor, 0.1f)                                             // (2026-11-12: swimming)
 		* (1.f + GetSocketBonus16(TEXT("speed")))                                   // (the list of 2026-11-22's caves: a violet stone)
-		* (bUnder16 && Generator ? FMath::Clamp(Generator->UnderwaterSpeed16, 0.1f, 1.f) : 1.f);          // (phase 13: under water)
+		* (bUnder16 && Generator ? FMath::Clamp(Generator->UnderwaterSpeed16, 0.1f, 1.f) : 1.f)          // (phase 13: under water)
+		* FMath::Max(1.f + GetCharm16(TEXT("speed")), 0.1f);          // (phase 14: a charm's)
 	// (the list of 2026-11-07: while she blocks, her slow block walk at most, walking or running (FilterBlockMove gives her
 	// move its full size along her facing); slower still if something else slows her more)
 	if (bBlocking && Generator && Generator->BlockMoveSpeed > 0.f)
@@ -326,7 +327,8 @@ float URDCombatComponent::GetDamageOf(int32 Index) const
 	return W.Damage * (1.f + GetBonusOf(Index)) * WeakMul() * (1.f + GetBlessDamage())        // (the third list: a shrine's blessing of might)
 		* Generator->TierPowerOf(W) * AmbushMul(Index) * SpellBoostMul(W)          // (the sixth phase: the Mage's spell boosts)
 		* (1.f + GetMightBuff14())          // (the list of 2026-11-16's sixth phase: an elixir's or a meal's might)
-		* (1.f + GetSocketDamage16(Index));          // (the list of 2026-11-22's caves: a red stone in this weapon or her armour)
+		* (1.f + GetSocketDamage16(Index))          // (the list of 2026-11-22's caves: a red stone in this weapon or her armour)
+		* (1.f + GetCharm16(TEXT("damage")));          // (phase 14: a charm's)
 }
 
 float URDCombatComponent::GetBonusOf(int32 Index) const
@@ -603,7 +605,7 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 	if (O && Now < RuneUntil && FVector::Dist2D(O->GetActorLocation(), RuneAt) <= RuneRadius) { Amount *= 1.f - RuneShare; ++ZoneBlocks; }
 	// (her armour takes its share off; Iron Skin adds to it)
 	LastBlowBefore = Amount;
-	Amount *= 1.f - FMath::Clamp(GetArmour() + GetSkinBonus() + GetBlessArmour() + GetResistBuff14() + GetSocketBonus16(TEXT("guard")), 0.f, 0.95f);          // (the caves: a white stone)          // (the list of 2026-11-16: an elixir's or a meal's resistance)
+	Amount *= 1.f - FMath::Clamp(GetArmour() + GetSkinBonus() + GetBlessArmour() + GetResistBuff14() + GetSocketBonus16(TEXT("guard")) + GetCharm16(TEXT("guard")), 0.f, 0.95f);          // (the caves: a white stone)          // (the list of 2026-11-16: an elixir's or a meal's resistance)
 	// (mistward: her shield takes its share of what is left, and wears by what it took; the third list: blocking with it, a
 	// share more, and it wears BlockWear times as fast)
 	LastShieldTook = 0.f;
@@ -834,6 +836,7 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	TickDarksight16();          // (the list of 2026-11-22's caves: the darksight's light on her)
 	TickSockets16(Dt);          // (phase 11: a green stone's healing; her speed again when the stones working change)
 	TickBreath16(Dt);          // (phase 13: under a flooded tunnel's water)
+	TickCharms16(Dt);          // (phase 14: a relic's bleeding, a charm's speed)
 	// (the third list: the slashes' burning ground and pulls; quick slots for weapons found or spells learned)
 	if (SlashAreas.Num() > 0 || Echoes.Num() > 0) TickSlashAreas(Dt);          // (the Echo slash's hits too: they waited for an area that never came)
 	if (Generator->Secondaries.Num() > 0) TickSecondary(Dt);          // (the sixth phase's abilities)
