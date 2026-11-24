@@ -1,5 +1,5 @@
 {
- "tag": "c17a",
+ "tag": "c17d",
  "plan": [
   "cave16trade"
  ],
@@ -68,15 +68,27 @@
     "Old Coins of Vael": 35
    },
    "game_tier": 1,
-   "holding": 151,
+   "holding": 312,
    "shares": {
-    "Raw Ruby": 0.02,
-    "Raw Emerald": 0.013,
-    "Raw Sapphire": 0.046,
-    "Raw Topaz": 0.046,
-    "Old Coins of Vael": 0.04,
-    "Dragonglass": 0.02,
-    "Blackstone": 0.02
+    "Raw Ruby": 0.032,
+    "Raw Emerald": 0.029,
+    "Raw Sapphire": 0.016,
+    "Raw Topaz": 0.029,
+    "Old Coins of Vael": 0.077,
+    "Dragonglass": 0.032,
+    "Blackstone": 0.029
+   },
+   "band_by_tier": {
+    "Dragonglass Blade": {
+     "wrong": [],
+     "at_10": "Fine Dragonglass Blade",
+     "at_30": "Divine Dragonglass Blade"
+    },
+    "Blackstone Plate": {
+     "wrong": [],
+     "at_10": "Fine Blackstone Plate",
+     "at_30": "Divine Blackstone Plate"
+    }
    },
    "values_want": {
     "Raw Ruby": 60,

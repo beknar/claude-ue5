@@ -2217,6 +2217,17 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Cave16") bool IsCollectorTown16() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Cave16") int32 TradeValue16(FName Item) const;
 	FName SmithWorkOf16(const FString& Result) const;
+	FName SmithBandAt16(const FString& Result, int32 Tier) const;
+	FString SmithRefusal16(FName Made) const;
+	FString HeroTitle16() const;
+	/** a collector pays his double only within this of his city's middle */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float CollectorReachM16 = 500.f;
+	/** for the tests: the smith's work of a result at a tier; what the smiths forged this session taken off her again */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") FString DebugSmithBand16(const FString& Result, int32 Tier) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") int32 ForgetForged16();
+	/** for the tests: the armory's pick for containers 0 to N-1 of a set (PickupItemFor) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> DebugPickups16(FIntPoint Section, int32 N) const;
+	TArray<FName> Forged16;
 	void AddSmithWorks16(TFunctionRef<void(const FString& Act, const FString& Label, const FString& Tag, const FString& Detail, bool bOn, const FString& Arg)> Add) const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") bool TownForge16(const FString& Result);
 	/** for the tests: "town|<name>|<collector>", "value|<item>|<gold>", "work|<result>|<band made>" */

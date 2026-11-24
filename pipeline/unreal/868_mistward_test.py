@@ -8711,7 +8711,7 @@ def step_cave16trade():
     for sc in sets[1:]:
         g.generate_section_now(sc); yield from built(sc)
     drawn = {n: 0 for n in T["besides"]}; holding = 0; seed0 = g.get_editor_property("session_seed")
-    for sd in range(seed0, seed0 + 6):
+    for sd in range(seed0, seed0 + 12):          # (twelve seeds: a share of 2.5 % in 150 containers is 4 on average, 1 by chance often)
         g.set_session_seed(sd)
         for sc in sets:
             S_ = g.get_section(sc)
@@ -8726,10 +8726,18 @@ def step_cave16trade():
     res["shares"] = {n: round(v / max(holding, 1), 3) for n, v in drawn.items()}
     gt = res["game_tier"]
     want = {n: max(1, round(pr * (1 + 0.25 * (gt - 1)))) for n, pr in T["trade"].items()}
+    # (the smith's band by the tier's place among the bands, 1-5 plain ... 26-30 Divine (PR #124's review: an exact tier match gave the
+    # plain copy at four tiers of five))
+    BANDS = ["", "Fine ", "Masterwork ", "Exalted ", "Celestial ", "Divine "]
+    res["band_by_tier"] = {}
+    for w in T["weapons"] + T["armour"]:
+        got = [str(g.debug_smith_band16(w["name"], t)) for t in range(1, 31)]
+        res["band_by_tier"][w["name"]] = {"wrong": [t for t in range(1, 31) if got[t - 1] != BANDS[(t - 1) // 5] + w["name"]], "at_10": got[9], "at_30": got[29]}
     res["values_want"] = want
     ok = (all(v[0] and v[1] == 0.0 for v in res["items"].values())
-          and all(len(b) >= 1 for b in res["bands"].values()) and len(res["work"]) == 2 and all(l.split("|")[2] for l in res["work"])
-          and all(abs(res["shares"][n] - sh) <= max(0.6 * sh, 0.015) for n, sh in T["besides"].items())
+          and all(len(b) == 6 for b in res["bands"].values()) and len(res["work"]) == 2 and all(l.split("|")[2] for l in res["work"])
+          and all(not v["wrong"] for v in res["band_by_tier"].values())
+          and all(abs(res["shares"][n] - sh) <= 3.0 * math.sqrt(sh * (1.0 - sh) / max(res["holding"], 1)) + 0.002 for n, sh in T["besides"].items())          # (three sigma of the binomial)
           and all(res["values"].get(n) == v for n, v in want.items()))
     step_result("cave16trade", bool(ok), **res)
 STEPS.update({"cave16trade": step_cave16trade})

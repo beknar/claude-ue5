@@ -8680,9 +8680,19 @@ def step_trade16():
         # ---- Graymourne: the collector's double
         yield from into("Graymourne")
         res["graymourne_sell"] = yield from sell_ruby()
-        # ---- Ashenreach: the blade forged (gold enough given: put back at the end)
+        # ---- no cave thing on an armory's table outside the caves (PR #124's review: the cave weapons had leaked there since phase 12)
+        cave_things = set(str(n) for n in g.get_editor_property("cave_items16"))
+        picks = [str(x) for sx in range(0, 3) for x in g.debug_pickups16(unreal.IntPoint(sx, 0), 200)]
+        res["armory_picks"] = len(picks); res["armory_cave_things"] = sorted(set(p_ for p_ in picks if p_ in cave_things))
+        # ---- Ashenreach: the blade forged (gold enough given: put back at the end); the Mage is refused it (no fit for her)
         g.add_gold(2000, "test")
         yield from into("Ashenreach")
+        g.switch_hero("Mage"); yield from rwait(0.8); refresh(); c = cb()          # (a new pawn for the hero switched)
+        ls = yield from smith_lines()
+        res["mage_forge_line"] = ["|".join(p) for p in ls if p[0] == "forge16"]
+        g.close_town_panel(); yield from rwait(0.3)
+        g.switch_hero("Warrior"); yield from rwait(0.8); refresh(); c = cb()
+        c.add_item("Dragonglass", max(0, 4 - c.get_item_count("Dragonglass"))); c.add_item("Blackstone", max(0, 6 - c.get_item_count("Blackstone")))
         ls = yield from smith_lines()
         res["ashenreach_smith"] = [p[0] + "|" + p[1] for p in ls]
         i = line_of("forge16", "Dragonglass"); g0 = g.get_gold(); n0 = c.get_item_count("Dragonglass")
@@ -8691,7 +8701,8 @@ def step_trade16():
                                    "got": [w.split("|")[2] for w in (str(l) for l in g.get_trade16()) if w.startswith("work|Dragonglass Blade|")]})
         made = res["forge_blade"]["got"][0] if res["forge_blade"]["got"] else ""
         # (a weapon made for her hero joins her weapons, not her pack's counts)
-        res["forge_blade"]["held"] = (c.get_item_count(made) + sum(1 for w in g.get_editor_property("weapons") if str(w.item) == made)) if made else 0
+        res["forge_blade"]["in_weapons"] = sum(1 for w in g.get_editor_property("weapons") if str(w.item) == made) if made else 0
+        res["forge_blade"]["in_pack"] = c.get_item_count(made) if made else 0
         g.close_town_panel(); yield from rwait(0.3)
         # ---- Kethrys Spire: the plate forged
         yield from into("Kethrys Spire")
@@ -8703,18 +8714,27 @@ def step_trade16():
         res["forge_plate"].update({"gold": g.get_gold() - g0, "used": n0 - c.get_item_count("Blackstone"), "made": made, "held": c.get_item_count(made) if made else 0})
         g.close_town_panel(); yield from rwait(0.3)
         B, G2, FB, FP = res["brokenspire_sell"], res["graymourne_sell"], res["forge_blade"], res["forge_plate"]
+        gt = g.get_game_tier(); res["game_tier"] = gt
+        cost = lambda base: round(base * (1 + 0.25 * (gt - 1)))
         ok = (B["ok"] and B["gold"] == res["value_here"] and not B["collector_line"] and B["town"] == ["town|Brokenspire|0"]
               and G2["ok"] and G2["gold"] == 2 * B["gold"] and G2["collector_line"] and G2["town"] == ["town|Graymourne|1"]
               and any(l.startswith("none|Dragonglass: only the smith of Ashenreach") for l in res["brokenspire_smith"])
               and any(l.startswith("none|Blackstone: only the smith of Kethrys Spire") for l in res["brokenspire_smith"])
               and not any(l.startswith("forge16|") for l in res["brokenspire_smith"])
-              and FB["ok"] and FB["used"] == 4 and FB["gold"] < 0 and FB["held"] >= 1
-              and FP["ok"] and FP["used"] == 6 and FP["gold"] < 0 and FP["held"] >= 1)
+              and FB["ok"] and FB["used"] == 4 and FB["gold"] == -cost(200) and FB["in_weapons"] == 1 and FB["in_pack"] == 0
+              and FP["ok"] and FP["used"] == 6 and FP["gold"] == -cost(300) and FP["held"] == 1
+              and not any(l.startswith("forge16|") and "Blackstone" in l for l in res["ashenreach_smith"])
+              and not any(l.startswith("forge16|") and "Dragonglass" in l for l in res["kethrys_smith"])
+              and res["mage_forge_line"] and all(l.split("|")[3] == "0" for l in res["mage_forge_line"])
+              and res["armory_picks"] > 0 and not res["armory_cave_things"])
         step_result("trade16", bool(ok), **res)
     finally:
         try: g.close_town_panel()
         except Exception: pass
+        try: res["forged_put_back"] = g.forget_forged16()
+        except Exception: pass
         try:
+            c = cb()
             d_ = g.get_gold() - gold0
             if d_: g.add_gold(-d_, "test")
             for n, v in keep.items():

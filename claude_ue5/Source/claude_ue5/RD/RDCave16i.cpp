@@ -7,6 +7,8 @@
 #include "RD/RDCombat.h"
 #include "RD/RDGameInstance.h"
 #include "RD/RDWild.h"
+#include "RD/RDMistward.h"
+#include "Kismet/GameplayStatics.h"
 DEFINE_LOG_CATEGORY_STATIC(LogRDCave16i, Log, All);
 
 // ================================================================================================ the caves' things besides
@@ -20,15 +22,21 @@ void ARDDungeonGenerator::CaveBesidesOf16(FIntPoint Section, int32 Index, TArray
 		if (!L.Split(TEXT("|"), &N, &Sh)) continue;
 		const FName It(*N);
 		if (FindItem(It) < 0) continue;
-		FRandomStream R((int32)HashCombine(HashCombine((uint32)SessionSeed ^ GetTypeHash(N), GetTypeHash(Section)), GetTypeHash(Index * 7907 + 11)));
-		if (R.FRand() < FCString::Atof(*Sh)) Out.Add(It);
+		// (a CRC of the session's seed, the thing's name, the set and the container: a stream's first number from seeds that differ in a few
+		// bits came out correlated (five of seven shares half their want over twelve session seeds, the first measure))
+		const uint32 Data[5] = { (uint32)SessionSeed, GetTypeHash(N), (uint32)Section.X, (uint32)Section.Y, (uint32)Index };
+		const uint32 Hc = FCrc::MemCrc32(Data, sizeof(Data), 0xB5167u);
+		if ((float)(Hc & 0xFFFFFFu) / 16777216.f < FCString::Atof(*Sh)) Out.Add(It);
 	}
 }
 
 // ================================================================================================ the trade goods and the collector
 bool ARDDungeonGenerator::IsCollectorTown16() const
 {
-	return bWild && Wild && Wild->Towns.IsValidIndex(WildTownIdx) && !CollectorTown16.IsEmpty() && Wild->Towns[WildTownIdx].Name == CollectorTown16;
+	// (the loaded town is his city and she stands in it (PR #124's review: the town stays loaded to 2 km, where a camp's trader could stand))
+	if (!(bWild && Wild && Wild->Towns.IsValidIndex(WildTownIdx) && !CollectorTown16.IsEmpty() && Wild->Towns[WildTownIdx].Name == CollectorTown16)) return false;
+	const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
+	return Her && FVector2D::Distance(FVector2D(Her->GetActorLocation()) / 100.0, Wild->Towns[WildTownIdx].Site) < CollectorReachM16;
 }
 
 int32 ARDDungeonGenerator::TradeValue16(FName Item) const
@@ -48,17 +56,39 @@ int32 ARDDungeonGenerator::TradeValue16(FName Item) const
 // ================================================================================================ the smiths who work them
 FName ARDDungeonGenerator::SmithWorkOf16(const FString& Result) const
 {
-	// (the band of the result made at the game's tier: the copy whose tiers hold it, else the plain one)
-	const int32 T = FMath::Clamp(GetGameTier(), 1, GameTierMax);
-	FName Plain;
-	for (const FRDItemDef& It : Items)
+	return SmithBandAt16(Result, FMath::Clamp(GetGameTier(), 1, GameTierMax));
+}
+
+FName ARDDungeonGenerator::SmithBandAt16(const FString& Result, int32 Tier) const
+{
+	// (the band of the game's tier by its place among the bands (tiers 1-5 the plain, 6-10 Fine, ... 26-30 Divine), the nearest band
+	// below where a map has not that one (PR #124's review: an exact match of the copies' tiers (the like's tier plus 5 a band) found
+	// nothing at four tiers of five, and the plain copy came at a higher price))
+	static const TCHAR* Bands[] = { TEXT(""), TEXT("Fine "), TEXT("Masterwork "), TEXT("Exalted "), TEXT("Celestial "), TEXT("Divine ") };
+	for (int32 B = FMath::Clamp((Tier - 1) / 5, 0, 5); B >= 0; --B)
 	{
-		const FString Nm = It.Name.ToString();
-		if (!Nm.EndsWith(Result)) continue;
-		if (Nm == Result) Plain = It.Name;
-		if (It.Tiers.Contains(T)) return It.Name;
+		const FName Nm(*(FString(Bands[B]) + Result));
+		if (FindItem(Nm) >= 0) return Nm;
 	}
-	return Plain;
+	return NAME_None;
+}
+
+FString ARDDungeonGenerator::SmithRefusal16(FName Made) const
+{
+	// (what her hero cannot use is not offered (PR #124's review; PR #104's rule)): a weapon with no fit for her hero, armour she does not wear
+	const int32 Ix = FindItem(Made);
+	if (Ix < 0) return TEXT("no such work");
+	const FRDItemDef& It = Items[Ix];
+	if (It.Kind == ERDItemKind::Weapon && !It.WeaponFits.ContainsByPredicate([this](const FRDWeaponFit& F) { return F.Hero == CurrentHero; }))
+		return FString::Printf(TEXT("The %s is no weapon for a %s"), *Made.ToString(), *HeroTitle16());
+	if (It.Kind == ERDItemKind::Armour) return ArmourRefusal(It, Made.ToString());
+	return FString();
+}
+
+FString ARDDungeonGenerator::HeroTitle16() const
+{
+	const FRDHeroDef* Hd = FindHero(CurrentHero);
+	return Hd && !Hd->Title.IsEmpty() ? Hd->Title.ToLower() : CurrentHero.ToString().ToLower();
 }
 
 void ARDDungeonGenerator::AddSmithWorks16(TFunctionRef<void(const FString& Act, const FString& Label, const FString& Tag, const FString& Detail, bool bOn, const FString& Arg)> Add) const
@@ -78,8 +108,10 @@ void ARDDungeonGenerator::AddSmithWorks16(TFunctionRef<void(const FString& Act, 
 		{
 			const FName Made = SmithWorkOf16(F[0]);
 			if (Made.IsNone()) continue;
+			const FString No = SmithRefusal16(Made);
 			Add(TEXT("forge16"), FString::Printf(TEXT("Forge a %s from %d %s"), *Made.ToString(), Need, *F[1]), FString::Printf(TEXT("%d g"), Cost),
-				FString::Printf(TEXT("Only the smith of %s works %s. You carry %d."), *F[3], *F[1].ToLower(), Have), Have >= Need && Gold >= Cost, F[0]);
+				No.IsEmpty() ? FString::Printf(TEXT("Only the smith of %s works %s. You carry %d."), *F[3], *F[1].ToLower(), Have) : No + TEXT("."),
+				No.IsEmpty() && Have >= Need && Gold >= Cost, F[0]);
 		}
 		else if (Have > 0)
 			Add(TEXT("none"), FString::Printf(TEXT("%s: only the smith of %s works it"), *F[1], *F[3]), FString(),
@@ -98,10 +130,12 @@ bool ARDDungeonGenerator::TownForge16(const FString& Result)
 		const FName Mat(*F[1]), Made = SmithWorkOf16(F[0]);
 		const int32 Need = FCString::Atoi(*F[2]), Cost = FMath::RoundToInt(FCString::Atoi(*F[4]) * (1.f + 0.25f * (FMath::Clamp(GetGameTier(), 1, GameTierMax) - 1)));
 		if (!PlayerCombat || Made.IsNone() || PlayerCombat->GetItemCount(Mat) < Need) { SetTownNote(FString::Printf(TEXT("The smith needs %d %s"), Need, *F[1].ToLower())); return false; }
+		if (const FString No = SmithRefusal16(Made); !No.IsEmpty()) { SetTownNote(No); return false; }
 		if (GetGold() < Cost) { SetTownNote(TEXT("You have too little gold")); return false; }
 		PlayerCombat->RemoveItem(Mat, Need);
 		AddGold(-Cost, TEXT("the smith's forging"));
 		PlayerCombat->AddItem(Made, 1);
+		Forged16.Add(Made);
 		SetTownNote(FString::Printf(TEXT("The smith of %s forges you a %s"), *F[3], *Made.ToString()));
 		TownCount(TEXT("smith_forged16"));
 		UE_LOG(LogRDCave16i, Log, TEXT("RDCAVE16 the smith of %s forged %s from %d %s for %d gold"), *F[3], *Made.ToString(), Need, *F[1], Cost);
@@ -118,5 +152,43 @@ TArray<FString> ARDDungeonGenerator::GetTrade16() const
 	Out.Add(FString::Printf(TEXT("town|%s|%d"), *Here, IsCollectorTown16() ? 1 : 0));
 	for (const FString& L : TradeGoods16) { FString N, P; if (L.Split(TEXT("|"), &N, &P)) Out.Add(FString::Printf(TEXT("value|%s|%d"), *N, TradeValue16(FName(*N)))); }
 	for (const FString& L : SmithWorks16) { FString N, R; if (L.Split(TEXT("|"), &N, &R)) Out.Add(FString::Printf(TEXT("work|%s|%s"), *N, *SmithWorkOf16(N).ToString())); }
+	return Out;
+}
+
+FString ARDDungeonGenerator::DebugSmithBand16(const FString& Result, int32 Tier) const
+{
+	return SmithBandAt16(Result, Tier).ToString();
+}
+
+int32 ARDDungeonGenerator::ForgetForged16()
+{
+	// (for the tests: what the smiths forged this session taken off her again (a weapon from her weapons, armour from her pack), and its
+	// record of things looted)
+	URDGameInstance* GI = URDGameInstance::Of(this);
+	int32 N = 0;
+	for (const FName& Made : Forged16)
+	{
+		if (!PlayerCombat) break;
+		bool bDone = false;
+		for (int32 I = Weapons.Num() - 1; I >= 0 && !bDone; --I)
+			if (Weapons[I].Item == Made)
+			{
+				const int32 P0 = LootPiles.Num();
+				PlayerCombat->DropWeaponAt(I);
+				for (int32 K = LootPiles.Num() - 1; K >= P0; --K) if (ARDLootPile* Pl = LootPiles[K]) { Pl->Destroy(); LootPiles.RemoveAt(K); }
+				bDone = true;
+			}
+		if (!bDone && PlayerCombat->GetItemCount(Made) > 0) { PlayerCombat->RemoveItem(Made, 1); bDone = true; }
+		if (bDone) ++N;
+		if (GI) GI->LootedItems.Remove(Made);
+	}
+	Forged16.Reset();
+	return N;
+}
+
+TArray<FString> ARDDungeonGenerator::DebugPickups16(FIntPoint Section, int32 N) const
+{
+	TArray<FString> Out;
+	for (int32 I = 0; I < N; ++I) Out.Add(PickupItemFor(Section, I).ToString());
 	return Out;
 }

@@ -219,7 +219,7 @@ The list's "things that link back to the open world". `treasure16.json`'s `phase
 
 `treasure16.json`'s `phase17` through `945 items` / `945 icons` on every map of the game; C++ `RD/RDCave16i.cpp`, with hooks in the store's selling and the smith's panel (`RDTownGame.cpp`).
 
-- **Found in the caves**: a cave's container that holds anything holds, besides, each of these now and then, each on a stream of its own (`CaveBesides16`; weight 0 in every other draw, so no other draw moves):
+- **Found in the caves**: a cave's container that holds anything holds, besides, each of these now and then, each by a hash of its own (a CRC of the session's seed, its name, the set and the container: `CaveBesides16`; weight 0 in every other draw, so no other draw moves):
 
 | Thing | Share | Worth when sold |
 |---|---|---|
@@ -232,12 +232,13 @@ The list's "things that link back to the open world". `treasure16.json`'s `phase
 | Blackstone | 3 % | (worked by Kethrys Spire's smith) |
 
 - **The trade goods** sell at any trader for their worth, a quarter more a game tier (`TradeGoods16`), not the store's share of a price; **the collector** of Graymourne (`CollectorTown16`) pays double, and the store there says so.
-- **Dragonglass and blackstone**: only one city's smith works each (`SmithWorks16`): Ashenreach's forges a Dragonglass Blade from four (a longsword's copy, 1.35 times its damage, 1.3 times its durability, in obsidian glass), Kethrys Spire's a set of Blackstone Plate from six (the Dark Knight's armour's copy, 4 points of protection more, 1.4 times its durability, in black basalt), each of the band of the game's tier, for gold (200 and 300, a quarter more a tier). Any other smith hands the stone back and names the city.
+- **Dragonglass and blackstone**: only one city's smith works each (`SmithWorks16`): Ashenreach's forges a Dragonglass Blade from four (a longsword's copy, 1.35 times its damage, 1.3 times its durability, in obsidian glass), Kethrys Spire's a set of Blackstone Plate from six (the Dark Knight's armour's copy, 4 points of protection more, 1.4 times its durability, in black basalt), each of the band of the game's tier (tiers 1-5 the plain, 6-10 Fine ... 26-30 Divine; the nearest band below where a map lacks one), for gold (200 and 300, a quarter more a tier). A hero who cannot use the work is not offered it (a blade with no fit for her, plate of a weight she does not wear: the line says why). Any other smith hands the stone back and names the city. The collector pays double only within 500 m of Graymourne's middle.
+- **The armory's tables lay no cave thing outside the caves**: the caves' own weapons had been laid there since phase 12 (PR #124's review); now `CaveItemAllowed16` keeps them off.
 
 ### Measured (phase 17)
 
-- `868 cave16trade -lv caves` (`test_c17a.json`): the seven things on every map with weight 0; drawn besides in 0.013 to 0.046 of 151 containers with loot over six session seeds (each within its share's margin); their worth read from the game as the table's at tier 1; the blade and the plate in all six bands, the band of tier 1 the plain one.
-- `888 trade16 -Light` (`test_t17c.json`): a raw ruby sold at Brokenspire's store for 60 gold (its worth at tier 1, no collector there), another at Graymourne's for 120 (its store's line names the collector); at Brokenspire's smith both stones refused with the city that works each and no forging offered; Ashenreach's smith forged a Dragonglass Blade from four dragonglass for 200 gold (it joined her weapons), Kethrys Spire's a Blackstone Plate from six blackstone for 300 (in her pack), each offering only its own.
+- `868 cave16trade -lv caves` (`test_c17d.json`, after PR #124's review): the seven things on every map with weight 0; drawn besides over twelve session seeds in 312 containers with loot at 0.016 to 0.077 (each within three standard deviations of its share; with the first streams, seeded by the seed with the name's hash, five of seven came out at half their share); their worth read from the game as the table's at tier 1; the blade and the plate in all six bands, the smith's band right at every tier 1 to 30 (Fine at 10, Divine at 30).
+- `888 trade16 -Light` (`test_t17d.json`, after PR #124's review): a raw ruby sold at Brokenspire's store for 60 gold (its worth at tier 1, no collector there), another at Graymourne's for 120 (its store's line names the collector); at Brokenspire's smith both stones refused with the city that works each and no forging offered; the Mage at Ashenreach's smith offered the blade's line but not to be taken; the Warrior's: a Dragonglass Blade from four dragonglass for exactly 200 gold (in her weapons, none in her pack), Kethrys Spire's a Blackstone Plate from six blackstone for 300 (in her pack), each offering only its own; 600 armory picks of three sets outside the caves held no cave thing; what was forged taken off her again at the end.
 - `869` gives the plate's basalt (Volstok's layered master) and the blade's obsidian glass the skeletal-mesh usage.
 
 ## Limits

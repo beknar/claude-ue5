@@ -1,5 +1,5 @@
 {
- "tag": "t17c",
+ "tag": "t17e",
  "plan": [
   "trade16"
  ],
@@ -29,6 +29,11 @@
      "town|Graymourne|1"
     ]
    },
+   "armory_picks": 600,
+   "armory_cave_things": [],
+   "mage_forge_line": [
+    "forge16|Forge a Dragonglass Blade from 4 Dragonglass|200 g|0"
+   ],
    "ashenreach_smith": [
     "forge16|Forge a Dragonglass Blade from 4 Dragonglass",
     "none|Blackstone: only the smith of Kethrys Spire works it"
@@ -40,7 +45,8 @@
     "got": [
      "Dragonglass Blade"
     ],
-    "held": 1
+    "in_weapons": 1,
+    "in_pack": 0
    },
    "kethrys_smith": [
     "forge16|Forge a Blackstone Plate from 6 Blackstone"
@@ -51,7 +57,8 @@
     "used": 6,
     "made": "Blackstone Plate",
     "held": 1
-   }
+   },
+   "game_tier": 1
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",

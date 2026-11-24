@@ -892,6 +892,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Rogue12") int32 GetArtCutsLeft() const { return ArtCutsLeft.Num(); }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Rogue12") bool IsVanishLookOn() const { return bVanishLook; }
 	friend class ARDArtProp;
+	friend class ARDDungeonGenerator;          // (the list of 2026-11-22's caves: a test's put-back of a forged weapon goes through DropWeaponAt)
 private:
 	int32 ArtLotusLeft = 0;
 	float ArtLotusNext = 0.f, ArtLotusDmg = 0.f;
