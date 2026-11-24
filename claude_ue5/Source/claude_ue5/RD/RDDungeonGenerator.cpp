@@ -619,6 +619,9 @@ TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) co
 		// draw (a container holds one thing: a tablet that waited for room was never found))
 		if (bCave16)
 			if (const FName Tb = CaveTablet16(Section, Index); !Tb.IsNone()) Out.Add(Tb);
+		// (phase 16: a cave's treasure map or a waystone fragment now and then, besides)
+		if (bCave16)
+			if (const FName Lk = CaveLinkThing16(Section, Index); !Lk.IsNone()) Out.Add(Lk);
 		return Out;
 		}
 
@@ -1404,6 +1407,7 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 	if (bHers && Secondaries.Num() > 0) SecondaryOnKill(Monster);          // (the sixth phase: the wilds' feathers, the soul harvest)
 	if (bWild && Roamers15.Num() > 0) OnRoamerKilled15(Monster, bHers);          // (the list of 2026-11-20's eleventh phase: a named roamer's death and ring)
 	if (bWild && ContractBeasts15.Num() > 0) OnContractKilled15(Monster, bHers);          // (the thirteenth phase: a contract's beast)
+	if (bCave16 && CaveContractBeast16.IsValid()) OnCaveContractKilled16(Monster, bHers);          // (the list of 2026-11-22's caves: one fled into its cave)
 	// (Brokenspire: its gold, the quests' counters)
 	if (bHers && (bTown || bTownLink))
 	{
@@ -1452,6 +1456,7 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 						DropLoot(Monster ? Monster->GetActorLocation() : E.At, { AngelTokenItem }, Wr);
 						TierNotice += FString::Printf(TEXT("  -  AN %s LIES WHERE IT FELL"), *AngelTokenItem.ToString().ToUpper());
 						++CaveTokens16;
+						CaveBossKey16();          // (phase 16: and the broken tower's key)
 					}
 					if (E.bThrone) RoomUses.FindOrAdd(TEXT("usurper"))++;
 					// (the third list: a slash of its tier for her weapons, when her hero takes slashes)
@@ -1505,7 +1510,8 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 		It.RemoveCurrent();
 	}
 	Queue.Reset(); Building = nullptr; MapData.Reset(); HitTexts.Reset();
-	CaveNodesLaid16.Reset(); RubbleCleared16.Reset(); bLostBladeLaid16 = false; DrownedLaid16.Reset(); bDrownedLaid16 = false;          // (phase 12: the rubble and the lost blade laid again)          // (the list of 2026-11-22's caves: a new run lays the veins' and growths' piles again (the old ones go with the piles))
+	CaveNodesLaid16.Reset(); RubbleCleared16.Reset(); bLostBladeLaid16 = false; DrownedLaid16.Reset(); bDrownedLaid16 = false;
+	bCaveContractLaid16 = false; if (ARDMonster* Cb = CaveContractBeast16.Get()) Cb->Destroy(); CaveContractBeast16.Reset();          // (phase 16: a fled contract beast laid again with the run)          // (phase 12: the rubble and the lost blade laid again)          // (the list of 2026-11-22's caves: a new run lays the veins' and growths' piles again (the old ones go with the piles))
 	if (Blood) Blood->Clear();
 	SoundCounts.Reset(); LastSoundPick.Reset(); SoundR.Initialize(RDSoundSeed);
 	StopMusic();
@@ -1596,6 +1602,8 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 	if (bMounted) { DismountHorse(); return TEXT("dismount"); }
 	// (the list of 2026-11-22's caves: a cave painting, when it is nearer than every pile F reaches (what F names is what F takes))
 	if (bCave16 && PaintingFirst16(From, MaxDistance, Best ? BestD : MaxDistance)) { const FString Pn = StudyPainting16(From, MaxDistance); if (!Pn.IsEmpty()) return Pn; }
+	if (bCave16 && TravellerFirst16(From, MaxDistance, Best ? BestD : MaxDistance)) { const FString Tr = FreeTraveller16(From, MaxDistance); if (!Tr.IsEmpty()) return Tr; }          // (phase 16: a lost traveller)
+	if (bWild) { const FString Tw = TowerInteract16(From, MaxDistance); if (!Tw.IsEmpty()) return Tw; }          // (phase 16: the broken tower's lift and top)
 	if (LootPiles.Num() > 0 && TakeLootNear(From, 260.f)) return TEXT("loot");
 	// (the list of 2026-11-20's ninth phase: a landmark tower's cave mouth)
 	if (bWild && CaveMouthFirst15(From) && EnterCave15()) return TEXT("cave");
@@ -1709,6 +1717,8 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 			}
 	// (the list of 2026-11-22's caves: a painting nearer than everything else F reaches (PR #122's review), as F takes it)
 	if (bCave16 && PaintingFirst16(From, MaxDistance, Best ? BestD : MaxDistance)) return TEXT("study the cave painting");
+	if (bCave16 && TravellerFirst16(From, MaxDistance, Best ? BestD : MaxDistance)) return TEXT("help the lost traveller out");          // (phase 16)
+	if (bWild && !bMounted) { const FString Tw = TowerDescribe16(From, MaxDistance); if (!Tw.IsEmpty()) return Tw; }          // (phase 16: the broken tower; mounted, F gets her off first (PR #123's review))
 	// (mistward: her dropped things, a pad, a trap she sees)
 	// (the nearest within reach, the one F takes (TakeLootNear): the first in the list named another pile beside it, the PR
 	// review's find)
@@ -1898,6 +1908,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 	TickCarrySummons();
 	if (bVillageFolk15) TickVillageFolk15();          // (the list of 2026-11-20: the villagers far off left still)
 	TickDungeonKeys();
+	if (bCave16) TickCaveContract16();          // (the list of 2026-11-22's caves: a contract's beast fled into this cave)
 	// input: F interacts, M toggles the map
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
 	{

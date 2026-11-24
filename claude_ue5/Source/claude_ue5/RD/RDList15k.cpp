@@ -307,7 +307,8 @@ void ARDDungeonGenerator::DrawTreasureMap15(int32 Id, const FVector2D& Spot, con
 	if (!Rt) return;
 	TArray<UStaticMeshComponent*> Temp;
 	float TopZ = 0.f;
-	if (T->bTower)
+	if (T->Landmark == TEXT("cave map")) {}          // (the list of 2026-11-22's caves: a cave map's place, seen from its chest's spot at eye height (PR #123's review: it laid region landmark (0, 0)))
+	else if (T->bTower)
 	{
 		if (WildLandmark.IsValid() && FVector2D::Distance(WildLandmarkAt, T->LmAt) < 1.0) TopZ = WildLandmark->Bounds.GetBox().Max.Z;
 		else if (WildLandmarkMesh)

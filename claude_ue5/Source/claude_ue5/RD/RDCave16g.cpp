@@ -125,6 +125,7 @@ bool ARDDungeonGenerator::PaintingFirst16(const FVector& From, float Reach, floa
 	FVector An;
 	if (FindNearestAnvil(From, Dp, An)) return false;
 	if (!StationDescribe(From, Dp).IsEmpty()) return false;
+	if (const ARDPrisoner* T = TravellerNear16(From, Dp); T && FVector::Dist2D(T->GetActorLocation(), From) < Dp) return false;          // (a lost traveller nearer: PR #123's review)
 	return true;
 }
 
