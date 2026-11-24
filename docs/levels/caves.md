@@ -112,7 +112,33 @@ The list's "crystal geode shards, cut at the librarian's table into scroll inks 
 
 ### Measured (phase 11)
 
-- `868 cave16gems -lv caves` (`test_c11f.json`, with `cave16mats`, after PR #118's review): the twelve recipes at the librarian's table, none refused to the Warrior; the six inks in the Fire Bolt scroll's reagent; the red stone in her dagger: its blow 14.3 -> 15.73, and a found longsword's untouched by it (37.7) until a red stone of its own (41.47), the dagger's then still 15.73; the longsword let go of (as broken down or sold): its stone back in her pack; the white in her plate (40 %): a blow of 20 took 12, then 10.4, and none of it with the plate taken off; the violet in the dagger's place: her top speed 279.2 -> 301.5 and the red back in her pack; the blue: the climate's warmth 0 -> 0.4; the green: 0.2 % of her hit points a second more than without it; the sockets kept through `SaveCarry` / `RestoreCarry` and a death.
+- `868 cave16gems -lv caves` (`test_c11f.json`, with `cave16mats`, after PR #118's review; again in `test_c12g.json` with the weapons): the twelve recipes at the librarian's table, none refused to the Warrior; the six inks in the Fire Bolt scroll's reagent; the red stone in her dagger: its blow 14.3 -> 15.73, and a found longsword's untouched by it (37.7) until a red stone of its own (41.47), the dagger's then still 15.73; the longsword let go of (as broken down or sold): its stone back in her pack; the white in her plate (40 %): a blow of 20 took 12, then 10.4, and none of it with the plate taken off; the violet in the dagger's place: her top speed 279.2 -> 301.5 and the red back in her pack; the blue: the climate's warmth 0 -> 0.4; the green: 0.2 % of her hit points a second more than without it; the sockets kept through `SaveCarry` / `RestoreCarry` and a death.
+
+## The caves' weapons (the list of 2026-11-22, phase 12)
+
+`treasure16.json`'s `phase12`, written by `945 items` (and pictured by `945 icons`) on every map of the game; C++ `RD/RDCave16d.cpp`, the side tunnel in `RDCave16.cpp`'s plan.
+
+- **Each weapon in every tier band**: copied from a weapon of the table band by band (its plain, Fine, Masterwork, Exalted, Celestial and Divine items where the map has them: 66 items on the castle's maps, 11 on `martial_arts`), every hero's fit kept, its damage and durability times its figures; they are the caves' own (drawn only in a cave), the lost blades placed only.
+
+| Weapon | Copied from | Damage | Durability | What else |
+|---|---|---|---|---|
+| Miner's Pick | Plate Knight's Sword | x 0.9 | x 1.1 | the Old Mine pack's pickaxe on the sword's grip; breaks rubble in one blow |
+| Shard Blade | Longsword | x 1.45 | x 0.35 | crystal (the Alien Planet pack's ice crystals); mended only by a geode shard, 30 % a shard |
+| Jawbone Club, Rib Dagger | Toothed Bone Sword, Bone Blade | x 0.85 | x 0.45 | dark bone (Bone Temple's) |
+| Lightless Bow | Longbow | x 1 | x 1 | black (the Old Mine's coal stone), no trail; a shot from hiding leaves her hidden and rouses nobody |
+| Six named blades (Maren's Falchion, Corvin's Gladius, the Sandwalker's Khopesh, Old Hessa's Notched Blade, Lysander's Rapier, the Warden's Runed Blade) | Eastern Sabre, Viking Shortsword, Orc Cleaver, Veteran's Sword, Longsword, Templar Sword | x 1.3 | x 1.2 | a note in its description; one a cave |
+
+- **The pick on another weapon's grip**: `854`'s measure of each weapon gives its frame (where the hand closes, the blade's way, the edge's); the pickaxe's frame is measured the same way (its head the blade's end, the hand 22 % up its handle, its edge the head's spread), and every hero's grip of the sword becomes the pick's by the two frames (`grip' = inverse(F') * F * grip`).
+- **Rubble and its cache**: the plan lays a side tunnel to nowhere (14 to 22 m from a room's free opening, the kit's cap at its end; from a stream of its own, so the rest of the set is as it was); one pile of rubble crosses it at 40 %, a chest of its own kind ("cache") lies at 80 %. Without a side tunnel a loop's tunnel takes two piles with the cache between. The rubble's tiles are blocked (the paths go round) and an unseen box closes it; the pick's blow, or three of the Warrior's with anything, breaks it (its pieces gone, its tiles open; the heavy fall's sound: the library has no breaking rock). The cache never counts among a set's chests to loot, so a hero who cannot wield the pick is never held back by it. Broken rubble stays broken for the run.
+- **The lost blade**: in the first set two rings out from the start laid in a run, in its lowest room, by a skeleton (Bone Temple's); which blade is the cave's by its key, its band the highest the set's tier reaches; once its pile is taken, that cave lays it no more (the game instance's `LostBladeCaves16`, saved).
+- **The shard blade at a smith**: the anvil and the town smith refuse it, and the smith's "repair all" passes it by; the cache behind rubble always holds something; the lightless bow's ambush is its first arrow of a stealth only.
+
+### Measured (phase 12)
+
+- `868 cave16weapons -lv caves` (`test_c12g.json`): every weapon in its six bands, a cave thing, its damage against its like's at its figure; the pick in the Warrior's hands (the pickaxe; her hand bone 8 cm off the handle's line, at its end: the wrist stands past the grip) and its picture; rubble in some sets of the 13 it builds (2, 6, 3 and 4 in four sessions: the side tunnel finds room or not with each session's seed; the test asks 2 at least); the pile five rocks to her chest's height across the tunnel (the picture); the Warrior's dagger broke a pile on its third blow (its tiles blocked before, open after; she walked 8.2 m through where it stood), the pick another in one; the cache of kind "cache"; the shard blade: no repair kit offered for it, a red geode shard mended 9.1 of its 30.5 (30 %); the lost blade laid two rings out.
+- `868 cave16 -lv caves` (`test_c12g.json`): the caves with the side tunnels: no hole, nothing blocked but the rubble, every room walked, the containers 7, 7, 7 over two restarts.
+- `868 cave16lightless -lv caves` (`test_c12j.json`, PR #119's review): the Rogue hidden, a monster 8 m off: the lightless bow's arrow took 45.5 (the ambush), she stayed hidden and it was never roused (read every 0.1 s), its second arrow 26.0 (no ambush again); the same shots with a plain longbow took the same, ended her stealth and roused it.
+- **Not measured**: the named blades' and bones' looks in her hands.
 
 ## Limits
 

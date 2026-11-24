@@ -1,0 +1,581 @@
+{
+ "tag": "c12g",
+ "plan": [
+  "cave16weapons",
+  "cave16",
+  "cave16mats",
+  "cave16gems"
+ ],
+ "level": "caves",
+ "steps": [
+  {
+   "step": "cave16weapons",
+   "ok": true,
+   "bands": {
+    "Miner's Pick": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Shard Blade": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Jawbone Club": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Rib Dagger": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Lightless Bow": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Maren's Falchion": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Corvin's Gladius": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "The Sandwalker's Khopesh": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Old Hessa's Notched Blade": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Lysander's Rapier": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "The Warden's Runed Blade": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ]
+   },
+   "damage_vs_like": {
+    "Miner's Pick": 0.9,
+    "Shard Blade": 1.45,
+    "Jawbone Club": 0.85,
+    "Rib Dagger": 0.85,
+    "Lightless Bow": 1.0,
+    "Maren's Falchion": 1.3,
+    "Corvin's Gladius": 1.3,
+    "The Sandwalker's Khopesh": 1.3,
+    "Old Hessa's Notched Blade": 1.3,
+    "Lysander's Rapier": 1.3,
+    "The Warden's Runed Blade": 1.3
+   },
+   "pick": {
+    "index": 1,
+    "mesh": "SM_His_Med_Tools_Pickaxe_Metal_Old_03",
+    "hand_off_handle_cm": 8.0,
+    "along": 0.0
+   },
+   "rubble": {
+    "set": [
+     -1,
+     1
+    ],
+    "piles": 1,
+    "sets_with_rubble": [
+     4,
+     13
+    ],
+    "tile_blocked": true,
+    "warrior_dagger": [
+     [
+      "0",
+      "1"
+     ],
+     [
+      "0",
+      "2"
+     ],
+     [
+      "1",
+      "0"
+     ]
+    ],
+    "tile_open": true,
+    "walked_through_m": 8.13,
+    "pick_once": "1",
+    "cache_kind": "cache"
+   },
+   "shard": {
+    "index": 2,
+    "repair_item": "Repair Kit",
+    "repair_lines_with_it": [],
+    "geode_used": true,
+    "wear": [
+     5.0,
+     14.1,
+     30.5
+    ]
+   },
+   "lost": [
+    "lost|The Warden's Runed Blade|50920|18750|-1329"
+   ]
+  },
+  {
+   "step": "cave16",
+   "ok": true,
+   "pieces": {
+    "rooms": [
+     "large",
+     "small",
+     "small",
+     "small",
+     "small"
+    ],
+    "tunnels": [
+     "medium",
+     "medium",
+     "medium",
+     "medium",
+     "medium",
+     "medium",
+     "medium",
+     "medium"
+    ],
+    "caps": 4
+   },
+   "components": {
+    "spline": 86,
+    "rooms": 5
+   },
+   "room_collision": [
+    {
+     "mesh": "SM_Room_Large",
+     "at": [
+      150,
+      150,
+      0
+     ],
+     "enabled": "<CollisionEnabled.QUERY_AND_PHYSICS: 3>",
+     "profile": "BlockAll",
+     "mobility": "<ComponentMobility.STATIC: 0>",
+     "visible": true,
+     "bounds": [
+      2926,
+      3174,
+      834
+     ],
+     "trace": [
+      "<Struct 'Vector' (0x000001CF0A368100) {x: 150.000000, y: 150.000000, z: 10.142148}>",
+      "<Struct 'Vector' (0x000001CF0A369820) {x: -0.034831, y: -0.062730, z: 0.997423}>",
+      "None"
+     ]
+    },
+    {
+     "mesh": "SM_Room_Small",
+     "at": [
+      7350,
+      -6750,
+      0
+     ],
+     "enabled": "<CollisionEnabled.QUERY_AND_PHYSICS: 3>",
+     "profile": "BlockAll",
+     "mobility": "<ComponentMobility.STATIC: 0>",
+     "visible": true,
+     "bounds": [
+      1161,
+      1162,
+      702
+     ],
+     "trace": [
+      "<Struct 'Vector' (0x000001CF0A36A220) {x: 7350.000000, y: -6750.000000, z: -0.979900}>",
+      "<Struct 'Vector' (0x000001CF0A36ADB0) {x: 0.006081, y: 0.000370, z: 0.999981}>",
+      "None"
+     ]
+    },
+    {
+     "mesh": "SM_Room_Small",
+     "at": [
+      -7050,
+      -7350,
+      0
+     ],
+     "enabled": "<CollisionEnabled.QUERY_AND_PHYSICS: 3>",
+     "profile": "BlockAll",
+     "mobility": "<ComponentMobility.STATIC: 0>",
+     "visible": true,
+     "bounds": [
+      1162,
+      1161,
+      702
+     ],
+     "trace": [
+      "<Struct 'Vector' (0x000001CF0A3689C0) {x: -7050.000000, y: -7350.000000, z: -0.979900}>",
+      "<Struct 'Vector' (0x000001CF0A36B670) {x: -0.000370, y: 0.006081, z: 0.999981}>",
+      "None"
+     ]
+    }
+   ],
+   "walkable_tiles": 541,
+   "tile_groups": [
+    {
+     "tiles": 541,
+     "owners": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+     ]
+    }
+   ],
+   "start": {
+    "at": [
+     150,
+     150,
+     95
+    ],
+    "room": 0,
+    "moving": "<MovementMode.MOVE_WALKING: 1>",
+    "under_her": [
+     [
+      10,
+      1.0,
+      "StaticMeshComponent_256",
+      "SM_Room_Large"
+     ]
+    ],
+    "under_first_room": [
+     [
+      2549,
+      0.89,
+      "StaticMeshComponent_257",
+      "SM_Roof_Hole_01"
+     ]
+    ],
+    "player_starts": [
+     [
+      0,
+      0,
+      100
+     ]
+    ]
+   },
+   "passed_aside": 5,
+   "shell": {
+    "rays": 4400,
+    "holes": 0,
+    "holes_at": [],
+    "floor_off": 0,
+    "floor_off_at": [],
+    "blocked": 0,
+    "blocked_at": []
+   },
+   "fps_first_room": 39.1,
+   "walk": {
+    "0": {
+     "ok": true,
+     "seconds": 0.0,
+     "path_points": 1,
+     "stuck_at": null,
+     "held_by": null
+    },
+    "1": {
+     "ok": true,
+     "seconds": 32.8,
+     "path_points": 47,
+     "stuck_at": null,
+     "held_by": null
+    },
+    "2": {
+     "ok": true,
+     "seconds": 59.7,
+     "path_points": 83,
+     "stuck_at": null,
+     "held_by": null
+    },
+    "3": {
+     "ok": true,
+     "seconds": 67.4,
+     "path_points": 88,
+     "stuck_at": null,
+     "held_by": null
+    },
+    "4": {
+     "ok": true,
+     "seconds": 80.5,
+     "path_points": 106,
+     "stuck_at": null,
+     "held_by": null
+    }
+   },
+   "open2": true,
+   "ring_set": {
+    "from": [
+     12450,
+     7350
+    ],
+    "plan": [
+     "105.5",
+     "3",
+     "a try a frame",
+     "34.7"
+    ],
+    "shell_furnish_frames": [
+     "1026",
+     "3",
+     "55"
+    ],
+    "frames": 147,
+    "worst_frame_ms": 86.8,
+    "frames_over_100ms": 0,
+    "built": true,
+    "pieces": 13
+   },
+   "dressing": {
+    "torches_rooms": 36,
+    "godrays": 5,
+    "torches_tunnels": 31,
+    "dress|SM_SM_SM_Shrub_Cluster_04": 114,
+    "dress|SM_SM_Shrub_Cluster_03": 128,
+    "dress|SM_Shrub_Cluster_01": 25,
+    "dress|SM_Shrub_Cluster_02": 14,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_a": 785,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_b": 782,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_c": 806,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_d": 792,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_e": 786,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_f": 802,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_g": 783,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_h": 794,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_i": 805,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_j": 787,
+    "dress|SM_shrub_sorrel_01_shrub_sorrel_01_k": 782,
+    "dress|SM_SmallRocks_Cluster": 432,
+    "dress|SM_rock_moss_set_02_rock_moss_set_02_rock10": 756,
+    "containers": 7
+   },
+   "boss_pick": [
+    "0|0|1|-428"
+   ],
+   "boss_deepest": true,
+   "lights_restart": [
+    72,
+    72
+   ],
+   "containers_restart": [
+    7,
+    7,
+    7
+   ]
+  },
+  {
+   "step": "cave16mats",
+   "ok": true,
+   "region": "cold|glacial",
+   "draw": {
+    "Frost Quartz": true,
+    "Sun-glass": false,
+    "Geode Shard (Blue)": true,
+    "Geode Shard (Red)": false,
+    "Cave Pearl": true,
+    "Glowcap": true
+   },
+   "draw_gear": [
+    "Viking Shortsword",
+    false
+   ],
+   "recipes": {
+    "made": 7,
+    "bad": []
+   },
+   "refusal": {
+    "Darksight Draught": "",
+    "Frost-quartz Lining": ""
+   },
+   "sold": [],
+   "nodes": {
+    "Deepiron Ore": 4,
+    "Glowcap": 8,
+    "Grave-moss": 3
+   },
+   "took": {
+    "item": "Deepiron Ore",
+    "got": 1,
+    "said": "loot"
+   },
+   "take_tries": [
+    {
+     "item": "Deepiron Ore",
+     "at": [
+      2305,
+      198,
+      7
+     ],
+     "her": [
+      2225,
+      198,
+      89
+     ],
+     "near": "harvest the parts (1)",
+     "said": "loot"
+    }
+   ],
+   "darksight": {
+    "used": true,
+    "light_cm": 1800.0
+   },
+   "poison": {
+    "plain": 14.2,
+    "guarded": 6.1,
+    "guard": 0.6
+   },
+   "oil": {
+    "burn_10s": 10.0,
+    "burn_10s_oiled": 5.0
+   }
+  },
+  {
+   "step": "cave16gems",
+   "ok": true,
+   "craft": {
+    "Blue Ink": "Librarian|",
+    "Blue Socket Stone": "Librarian|",
+    "White Ink": "Librarian|",
+    "White Socket Stone": "Librarian|",
+    "Red Ink": "Librarian|",
+    "Red Socket Stone": "Librarian|",
+    "Yellow Ink": "Librarian|",
+    "Yellow Socket Stone": "Librarian|",
+    "Green Ink": "Librarian|",
+    "Green Socket Stone": "Librarian|",
+    "Violet Ink": "Librarian|",
+    "Violet Socket Stone": "Librarian|"
+   },
+   "ink_in_scroll": [
+    "Blue Ink",
+    "White Ink",
+    "Red Ink",
+    "Yellow Ink",
+    "Green Ink",
+    "Violet Ink"
+   ],
+   "set_red": true,
+   "damage": [
+    14.3,
+    15.73
+   ],
+   "other_weapon": [
+    1,
+    37.7,
+    37.7,
+    41.47,
+    15.73
+   ],
+   "set_red_sword": true,
+   "let_go": true,
+   "stone_back": 1,
+   "armour": "Plate Armour",
+   "set_white": true,
+   "blow": [
+    12.0,
+    10.4,
+    0.4
+   ],
+   "guard_off": 0.0,
+   "set_violet": true,
+   "speed": [
+    279.2,
+    301.5
+   ],
+   "red_back": 1,
+   "set_blue": true,
+   "warm": [
+    0.0,
+    0.4
+   ],
+   "regen_per_s_share": 0.002,
+   "regen_without": 0.0,
+   "sockets": [
+    "socket|Dagger|Green Socket Stone|regen|0.002|1",
+    "socket|Plate Armour|Blue Socket Stone|warm|0.400|1"
+   ],
+   "carry": [
+    0,
+    true
+   ],
+   "death": [
+    "socket|Dagger|Green Socket Stone|regen|0.002|1",
+    "socket|Plate Armour|Blue Socket Stone|warm|0.400|0"
+   ]
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "shots": [
+  "mw_c12g_cave16weapons_pick.png",
+  "mw_c12g_cave16weapons_rubble.png",
+  "mw_c12g_cave16_above.png",
+  "mw_c12g_cave16_room_large.png",
+  "mw_c12g_cave16_room_small.png",
+  "mw_c12g_cave16_tunnel0_medium.png",
+  "mw_c12g_cave16_tunnel1_medium.png",
+  "mw_c12g_cave16_tunnel2_medium.png",
+  "mw_c12g_cave16mats_deepiron.png",
+  "mw_c12g_cave16mats_glowcap.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}

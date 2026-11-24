@@ -1785,6 +1785,16 @@ struct FRDCaveRegion16
 /** the list of 2026-11-22's caves, phase 11: a socket stone's bonus while the weapon in her hands or the armour she wears holds
  *  it. Stat: "damage" (her blows' share more), "guard" (a blow on her a share less), "warm" / "cool" (the climate's cold or heat
  *  that much slower, as a buff of that kind), "regen" (a share of her hit points a second), "speed" (her speed a share more) */
+/** the list of 2026-11-22's caves, phase 12: a weapon mended only by these things (the shard blade: geode shards), each a share
+ *  of its full durability */
+USTRUCT(BlueprintType)
+struct FRDMend16
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FName> By;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Share = 0.25f;
+};
+
 USTRUCT(BlueprintType)
 struct FRDSocket16
 {

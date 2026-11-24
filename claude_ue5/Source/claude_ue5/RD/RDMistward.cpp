@@ -622,6 +622,7 @@ bool ARDDungeonGenerator::TakeLootNear(const FVector& From, float Reach)
 	if (!Best || !Pc) return false;
 	if (Best->bHarvest) Pc->TakeHarvest(Best->Things);
 	else Pc->TakeBack(Best->Things, Best->Wear, Best->bHers, Best->WornShield);
+	NoteLostBladeTaken16(Best->Things);          // (the list of 2026-11-22's caves: a cave's lost blade taken is laid there no more (PR #119's review))
 	// (the list of 2026-11-16's eighth phase: a dead person's gold into her purse, said with what she took)
 	if (Best->Gold > 0)
 	{

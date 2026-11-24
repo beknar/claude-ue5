@@ -283,7 +283,8 @@ bool ARDMonster::ApplyDamageEx(float Amount, AActor* From, const FVector* At, bo
 	CurseAfterHit(Amount);
 	LastHurtTime = GetWorld()->GetTimeSeconds();
 	// (the list of 2026-11-16's tenth phase: lightning wakes no one (bNotHerKill14))
-	if (!(Section && Section->Generator && Section->Generator->bNotHerKill14)) { bAggro = true; WaitTime = 0.f; }
+	// (the list of 2026-11-22's caves: nor the lightless bow's arrow while she is hidden (bQuietHit16))
+	if (!(Section && Section->Generator && (Section->Generator->bNotHerKill14 || Section->Generator->bQuietHit16))) { bAggro = true; WaitTime = 0.f; }
 	if (!bWound)
 	{
 		// (a burn, a cloud: no wound, no flinch; it dies all the same)

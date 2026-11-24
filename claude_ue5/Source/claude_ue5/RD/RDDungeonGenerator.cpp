@@ -569,7 +569,10 @@ TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) co
 				if (FindItem(StartRoomItems[J]) >= 0) Out.Add(StartRoomItems[J]);
 	}
 	// (level 5: a container holds anything at all only so often; the start room's own items are there whatever it says)
-	if (!ContainerHoldsLoot(Section, Index)) return Out;
+	// (the caves' cache behind rubble or water always holds something: it took the pick or the dive to reach (PR #119's review))
+	const ARDSection* Cs = GetSection(Section);
+	const bool bCache = Cs && Cs->GetContainerKind(Index) == TEXT("cache");
+	if (!bCache && !ContainerHoldsLoot(Section, Index)) return Out;
 	float Sum = 0.f;
 	for (const FRDItemDef& It : Items) if (InTier(It)) Sum += FMath::Max(It.Weight, 0.f);
 	if (Sum <= 0.f) return Out;
@@ -1489,7 +1492,7 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 		It.RemoveCurrent();
 	}
 	Queue.Reset(); Building = nullptr; MapData.Reset(); HitTexts.Reset();
-	CaveNodesLaid16.Reset();          // (the list of 2026-11-22's caves: a new run lays the veins' and growths' piles again (the old ones go with the piles))
+	CaveNodesLaid16.Reset(); RubbleCleared16.Reset(); bLostBladeLaid16 = false;          // (phase 12: the rubble and the lost blade laid again)          // (the list of 2026-11-22's caves: a new run lays the veins' and growths' piles again (the old ones go with the piles))
 	if (Blood) Blood->Clear();
 	SoundCounts.Reset(); LastSoundPick.Reset(); SoundR.Initialize(RDSoundSeed);
 	StopMusic();

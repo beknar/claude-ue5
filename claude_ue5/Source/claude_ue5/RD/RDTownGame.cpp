@@ -2139,7 +2139,7 @@ int32 ARDDungeonGenerator::RepairCost(const FString& Ref) const
 	if (Ref == TEXT("all"))
 	{
 		int32 C = 0;
-		for (int32 I = 0; I < Weapons.Num(); ++I) if (!Weapons[I].Item.IsNone() && !Weapons[I].bScroll) C += RepairCost(FString::Printf(TEXT("w:%d"), I));
+		for (int32 I = 0; I < Weapons.Num(); ++I) if (!Weapons[I].Item.IsNone() && !Weapons[I].bScroll && !IsMendOnly16(Weapons[I].Item)) C += RepairCost(FString::Printf(TEXT("w:%d"), I));
 		for (const FRDItemDef& It : Items) if ((It.Kind == ERDItemKind::Armour || It.Kind == ERDItemKind::Shield) && PlayerCombat->GetItemCount(It.Name) > 0) C += RepairCost(FString::Printf(TEXT("a:%s"), *It.Name.ToString()));
 		return C;
 	}
@@ -2149,6 +2149,7 @@ int32 ARDDungeonGenerator::RepairCost(const FString& Ref) const
 		const int32 I = FCString::Atoi(*Ref.Mid(2));
 		if (!Weapons.IsValidIndex(I)) return 0;
 		Item = Weapons[I].Item; Full = PlayerCombat->GetWeaponDurability(I); Miss = Full - PlayerCombat->GetWeaponWear(I);
+		if (IsMendOnly16(Item)) return 0;          // (the caves' shard blade: no smith mends it (PR #119's review))
 	}
 	else
 	{
@@ -2174,7 +2175,7 @@ bool ARDDungeonGenerator::TownRepair(const FString& Ref)
 	};
 	if (Ref == TEXT("all"))
 	{
-		for (int32 I = 0; I < Weapons.Num(); ++I) if (!Weapons[I].Item.IsNone() && !Weapons[I].bScroll) Mend(FString::Printf(TEXT("w:%d"), I));
+		for (int32 I = 0; I < Weapons.Num(); ++I) if (!Weapons[I].Item.IsNone() && !Weapons[I].bScroll && !IsMendOnly16(Weapons[I].Item)) Mend(FString::Printf(TEXT("w:%d"), I));
 		for (const FRDItemDef& It : Items) if ((It.Kind == ERDItemKind::Armour || It.Kind == ERDItemKind::Shield) && PlayerCombat->GetItemCount(It.Name) > 0) Mend(FString::Printf(TEXT("a:%s"), *It.Name.ToString()));
 	}
 	else Mend(Ref);

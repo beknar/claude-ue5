@@ -2084,6 +2084,43 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FName> GetTownStock16() const { return TownStock(); }
 	/** phase 11: the socket stones (item -> its bonus); a weapon or a set of armour holds one (URDCombatComponent::SetSocket16) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TMap<FName, FRDSocket16> SocketStones16;
+	// ---- phase 12: the caves' weapons (RDCave16d.cpp)
+	/** a found weapon's own look (its item -> a material on every slot of its mesh: the shard blade's crystal, the bones' dark) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TMap<FName, TObjectPtr<UMaterialInterface>> WeaponLooks16;
+	/** a found weapon mended only by its things (no repair item mends it) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TMap<FName, FRDMend16> MendOnly16;
+	/** the lightless bow: its shot leaves her stealth on and its hit turns no monster toward her while she is hidden */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FName> Lightless16;
+	/** the rubble across a set's side tunnel: broken by one blow of these weapons (the miner's pick), or RubbleHeroHits16 blows of
+	 *  RubbleHero16's (the Warrior) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FName> RubbleBreakers16;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FName RubbleHero16 = TEXT("Warrior");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") int32 RubbleHeroHits16 = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<TObjectPtr<UStaticMesh>> RubbleMeshes16;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FVector2D RubbleScale16 = FVector2D(0.35f, 0.5f);
+	/** the share of the sets with a side tunnel that get its rubble and the cache behind it */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float RubbleShare16 = 1.f;
+	/** the lost adventurers' blades (each cave picks one by its key) and the skeleton they lie by */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FName> LostBlades16;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TObjectPtr<UStaticMesh> LostSkeleton16 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FRotator LostSkeletonTurn16 = FRotator::ZeroRotator;
+	/** the rubble broken this run (a set's coord and its rubble's index), the lost blade laid this run */
+	TSet<FIntVector> RubbleCleared16;
+	bool bLostBladeLaid16 = false;
+	/** set while the lightless bow's arrow strikes with her hidden: the monster takes the blow and is not roused */
+	bool bQuietHit16 = false;
+	/** her blow from From along Fw with a weapon (its gear key) of Reach: rubble in front of her struck */
+	void StrikeRubble16(const FVector& From, const FVector& Fw, float Reach, FName Gear);
+	/** the lost blade this cave picks */
+	FName LostBladeOf16() const;
+	/** a pile taken: a lost blade among its things is recorded for the cave she is in (laid there no more) */
+	void NoteLostBladeTaken16(const TArray<FName>& Things);
+	/** a found weapon nothing but its own things mend (the anvil, the smith and the repair items pass it by) */
+	bool IsMendOnly16(FName WeaponItem) const { return !WeaponItem.IsNone() && MendOnly16.Contains(WeaponItem); }
+	/** for the tests: "rubble|<i>|<x>|<y>|<z>|<cleared 0/1>|<hits>|<cache x>|<y>|<z>" of a set; "lost|<blade>|<x>|<y>|<z>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetCaveRubble16(FIntPoint Section) const;
+	/** for the tests: whether the tile under a point is walkable (its set's tiles, the blocked ones not) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") bool IsWalkableAt16(FVector At) const;
 	/** whether a container may hold it here (the caves' own items, their regions' items) */
 	bool CaveItemAllowed16(const FRDItemDef& It) const;
 	/** the cave's region (by the tower's biome the game instance keeps; -1: none known) and its name for a test */
