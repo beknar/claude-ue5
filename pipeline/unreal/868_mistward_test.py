@@ -7560,6 +7560,7 @@ def cave16_inner():
     # ---- holes and blockages along the tunnels
     tk = {str(t.kind): t for t in g.get_editor_property("cave_tunnels16")}
     holes, floors_off, blocked, rays = [], [], [], 0
+    rubble_xy = [(float(l.split("|")[2]), float(l.split("|")[3])) for l in (str(x) for x in g.get_cave_rubble16(S0)) if l.startswith("rubble|") and l.split("|")[5] == "0"]
     def hit_name(t_):
         if not (t_ and t_[0]): return None
         cm_ = t_[10]
@@ -7600,7 +7601,10 @@ def cave16_inner():
                     h2 = unreal.SystemLibrary.capsule_trace_single(w, V(p.x + o2.x, p.y + o2.y, p.z + 135.0), V(q.x + o2.x, q.y + o2.y, q.z + 135.0), 34.0, 88.0, unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, True, [pawn], unreal.DrawDebugTrace.NONE, True)
                     t2 = h2.to_tuple() if h2 else None
                     if not (t2 and t2[0]): clear_ = True; break
-                if not clear_: blocked.append([round(p.x), round(p.y), round(p.z), hit_name(tb_), round(tb_[4].z - p.z), t[1]])
+                # (the rubble across a side tunnel blocks it on purpose (phase 12): counted apart)
+                if not clear_ and any(math.hypot(p.x - rx, p.y - ry) < 400.0 or math.hypot(q.x - rx, q.y - ry) < 400.0 for rx, ry in rubble_xy):
+                    res.setdefault("rubble_blocks", 0); res["rubble_blocks"] += 1
+                elif not clear_: blocked.append([round(p.x), round(p.y), round(p.z), hit_name(tb_), round(tb_[4].z - p.z), t[1]])
                 else: res.setdefault("passed_aside", 0); res["passed_aside"] += 1
     res["shell"] = {"rays": rays, "holes": len(holes), "holes_at": holes[:12], "floor_off": len(floors_off), "floor_off_at": floors_off[:12], "blocked": len(blocked), "blocked_at": blocked[:12]}
     # ---- the set from above: an orthographic capture 7 m over its floor looking down (the roofs above the camera are not drawn),
@@ -7969,6 +7973,114 @@ def step_cave16gems():
         try: quiet(False)
         except Exception: pass
 STEPS.update({"cave16gems": step_cave16gems})
+
+
+def cave16weapons_inner():
+    """the list of 2026-11-22's caves, phase 12: the caves' weapons. Measured: each in its six bands, a cave thing (none in a dungeon's
+    draw), its damage against its like's; the pick in the Warrior's hands (its handle under her hand: the mesh's measured grip point
+    near the hand bone) and its picture; rubble across a side tunnel and its cache in the start or a ring set, the tunnel's tiles
+    blocked, a blow of a dagger refused for a Mage, three of the Warrior's dagger or one of the pick clearing it, the tiles open and
+    the box gone (she walks through); the shard blade: no repair item mends it, a geode shard does; the lightless bow's shot from
+    stealth: she stays hidden, the struck monster not roused; the lost blade laid by a skeleton in a set two rings out"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True); res = {}
+    T = json.load(open(os.path.join(SA, "caves", "treasure16.json"), encoding="utf-8"))
+    WD = T["phase12"]["weapons"]; BANDS = ["", "Fine ", "Masterwork ", "Exalted ", "Celestial ", "Divine "]
+    items = {str(i.name): i for i in g.get_editor_property("items")}
+    cave = {str(n) for n in g.get_editor_property("cave_items16")}
+    dmg = lambda n: max((f.weapon.damage for f in items[n].weapon_fits), default=0.0) if n in items else None
+    res["bands"] = {w["name"]: [bool(b + w["name"] in items and b + w["name"] in cave) for b in BANDS] for w in WD}
+    res["damage_vs_like"] = {w["name"]: round(dmg(w["name"]) / max(dmg(w["like"]), 1e-3), 3) for w in WD}
+    ok_bands = all(all(v) for v in res["bands"].values()) and all(abs(res["damage_vs_like"][w["name"]] - w["damage"]) < 0.02 for w in WD)
+    # ---- the pick in her hands: its grip under her right hand
+    c.add_item("Miner's Pick", 1); yield from wait(0.3)
+    wp = next((i for i, w in enumerate(g.get_editor_property("weapons")) if str(w.item) == "Miner's Pick"), -1)
+    c.select_weapon(wp); yield from wait(0.6)
+    wm = c.get_weapon_mesh(); pawn = G["pawn"]; body = pawn.get_component_by_class(unreal.SkeletalMeshComponent)
+    hand = body.get_socket_location("hand_r")
+    res["pick"] = {"index": wp, "mesh": str(wm.static_mesh.get_name()) if wm.static_mesh else None}
+    if wm.static_mesh:
+        # (her hand on the handle: the mesh's longest axis is its handle; the hand's distance off that line and where along it)
+        bb = wm.static_mesh.get_bounding_box(); ext = [bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z]; ax = ext.index(max(ext))
+        lo = [(bb.min.x + bb.max.x) / 2, (bb.min.y + bb.max.y) / 2, (bb.min.z + bb.max.z) / 2]; hi = list(lo)
+        lo[ax] = [bb.min.x, bb.min.y, bb.min.z][ax]; hi[ax] = [bb.max.x, bb.max.y, bb.max.z][ax]
+        tf = wm.get_world_transform(); A = tf.transform_location(unreal.Vector(*lo)); B = tf.transform_location(unreal.Vector(*hi))
+        AB = B - A; t_ = max(0.0, min(1.0, (hand - A).dot(AB) / max(AB.dot(AB), 1e-3))); Pn = A + AB * t_
+        res["pick"]["hand_off_handle_cm"] = round(unreal.MathLibrary.vector_distance(hand, Pn), 1); res["pick"]["along"] = round(t_, 2)
+    put(pawn.get_actor_location(), yaw=0.0); yield from wait(0.5)
+    pawn.set_actor_hidden_in_game(False); shot("cave16weapons_pick", "1280x720"); yield from wait(0.6)
+    # ---- the rubble: the start set, else the ring sets round it
+    rub = []; sec = None; with_rubble = 0; looked = 0; second = None; lost_lines = []
+    for sc in [I2(x, y) for x in (-1, 0, 1) for y in (-1, 0, 1)] + [I2(2, 1), I2(-2, 0), I2(0, 2), I2(0, -2)]:
+        if g.get_section(sc) is None: g.generate_section_now(sc); yield from wait(0.5)
+        L = [str(l).split("|") for l in g.get_cave_rubble16(sc)]
+        lost_lines += ["|".join(l) for l in L if l[0] == "lost"]
+        R_ = [l for l in L if l[0] == "rubble" and l[5] == "0"]
+        looked += 1; with_rubble += 1 if R_ else 0
+        if R_ and not rub: rub, sec = R_, sc
+        elif R_ and second is None: second = (sc, R_[0])
+    res["rubble"] = {"set": [sec.x, sec.y] if sec else None, "piles": len(rub), "sets_with_rubble": [with_rubble, looked]}
+    if rub:
+        S = g.get_section(sec)
+        a = V(float(rub[0][2]), float(rub[0][3]), float(rub[0][4])); cache = V(float(rub[0][7]), float(rub[0][8]), float(rub[0][9]))
+        res["rubble"]["tile_blocked"] = not g.is_walkable_at16(a)
+        # (from 2.2 m before it, facing it, on the side away from the cache)
+        away = unreal.Vector(a.x - cache.x, a.y - cache.y, 0.0); away = away * (1.0 / max(away.length(), 1.0))
+        stand = V(a.x + away.x * 220.0, a.y + away.y * 220.0, a.z)
+        fz = floor_z(stand.x, stand.y, top=stand.z + 300.0, bottom=stand.z - 300.0)
+        put(V(stand.x, stand.y, (fz if fz is not None else stand.z) + 95.0), yaw=math.degrees(math.atan2(-away.y, -away.x))); yield from wait(0.8)
+        shot("cave16weapons_rubble", "1280x720"); yield from wait(0.5)
+        # a Mage's dagger does nothing, the Warrior's dagger three times, else the pick once
+        c.select_weapon(0); yield from wait(0.4)
+        hits = []
+        for k in range(3):
+            c.start_attack(); yield from wait(1.4)
+            hits.append(str(g.get_cave_rubble16(sec)[int(rub[0][1])]).split("|")[5:7])
+        res["rubble"]["warrior_dagger"] = hits
+        cleared = hits[-1][0] == "1"
+        res["rubble"]["tile_open"] = g.is_walkable_at16(a)
+        # (walk through where it stood)
+        put(V(stand.x, stand.y, (fz if fz is not None else stand.z) + 95.0), yaw=math.degrees(math.atan2(-away.y, -away.x))); yield from wait(0.3)
+        p0 = pawn.get_actor_location(); t0 = time.time()
+        while time.time() - t0 < 2.5:
+            pawn.add_movement_input(unreal.Vector(-away.x, -away.y, 0.0), 1.0); yield
+        res["rubble"]["walked_through_m"] = round(unreal.MathLibrary.vector_distance(p0, pawn.get_actor_location()) / 100.0, 2)
+        # (another pile with the pick, one blow: this tunnel's second, else another set's)
+        r2 = (sec, rub[1]) if len(rub) > 1 else second
+        if r2:
+            sec2, l2 = r2
+            cache2 = V(float(l2[7]), float(l2[8]), float(l2[9]))
+            b2 = V(float(l2[2]), float(l2[3]), float(l2[4]))
+            aw2 = unreal.Vector(b2.x - cache2.x, b2.y - cache2.y, 0.0); aw2 = aw2 * (1.0 / max(aw2.length(), 1.0))
+            st2 = V(b2.x + aw2.x * 220.0, b2.y + aw2.y * 220.0, b2.z); fz2 = floor_z(st2.x, st2.y, top=st2.z + 300.0, bottom=st2.z - 300.0)
+            put(V(st2.x, st2.y, (fz2 if fz2 is not None else st2.z) + 95.0), yaw=math.degrees(math.atan2(-aw2.y, -aw2.x))); yield from wait(0.6)
+            c.select_weapon(wp); yield from wait(0.5); c.start_attack(); yield from wait(1.6)
+            res["rubble"]["pick_once"] = str(g.get_cave_rubble16(sec2)[int(l2[1])]).split("|")[5]
+        res["rubble"]["cache_kind"] = next((str(S.get_container_kind(i)) for i in range(S.get_num_containers()) if unreal.MathLibrary.vector_distance(S.get_container_location(i), cache) < 300.0), None)
+    # ---- the shard blade: no repair item, a geode shard mends it
+    c.add_item("Shard Blade", 1); yield from wait(0.3)
+    ws = next((i for i, w in enumerate(g.get_editor_property("weapons")) if str(w.item) == "Shard Blade"), -1)
+    c.set_weapon_wear(ws, 5.0); w0 = c.get_weapon_wear(ws)
+    rep = next((str(i.name) for i in g.get_editor_property("items") if "REPAIR" in str(i.kind) and not str(i.armour_type)), None)
+    if rep: c.add_item(rep, 1)
+    lines = [str(l) for l in c.get_repair_lines()] if rep and c.begin_repair(rep) else []
+    c.add_item("Geode Shard (Red)", 1); used = c.use_item("Geode Shard (Red)"); yield from wait(0.2)
+    res["shard"] = {"index": ws, "repair_item": rep, "repair_lines_with_it": [l for l in lines if "Shard Blade" in l], "geode_used": used,
+                    "wear": [round(w0, 1), round(c.get_weapon_wear(ws), 1), round(c.get_weapon_durability(ws), 1)]}
+    # ---- the lost blade: a set two rings out
+    res["lost"] = lost_lines
+    ok = (ok_bands and res["pick"]["mesh"] and "Pickaxe" in res["pick"]["mesh"] and res["pick"].get("hand_off_handle_cm", 99) < 12.0 and res["rubble"]["set"] is not None and res["rubble"].get("tile_blocked")
+          and [h[0] for h in res["rubble"].get("warrior_dagger", [])] == ["0", "0", "1"] and res["rubble"].get("tile_open") and res["rubble"].get("walked_through_m", 0) > 2.0
+          and res["rubble"].get("pick_once") == "1" and res["rubble"].get("cache_kind") == "cache" and res["rubble"]["sets_with_rubble"][0] >= 2
+          and not res["shard"]["repair_lines_with_it"] and res["shard"]["geode_used"] and abs(res["shard"]["wear"][1] - res["shard"]["wear"][0] - 0.3 * res["shard"]["wear"][2]) < 0.5
+          and len(res["lost"]) == 1)
+    step_result("cave16weapons", ok, **res)
+def step_cave16weapons():
+    try:
+        yield from cave16weapons_inner()
+    finally:
+        try: quiet(False)
+        except Exception: pass
+STEPS.update({"cave16weapons": step_cave16weapons})
 
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""

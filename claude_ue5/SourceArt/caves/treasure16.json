@@ -61,5 +61,153 @@
    {"name": "Violet Socket Stone", "like": "Rare Healing Potion", "kind": "HEALING", "amount": 0, "seconds": 0, "icon": "cave_socket_stone_violet", "weight": 0, "cave": true, "looks": "A violet geode shard cut to a socket's size. Set in the weapon in your hands or the armour you wear: while that weapon is in your hands or that armour on you, you move 8 % faster.", "recipe": ["Librarian", [["violet geode shard", ["Geode Shard (Violet)"], 2]]]}
   ],
   "sockets": {"Blue Socket Stone": ["warm", 0.4], "White Socket Stone": ["guard", 0.08], "Red Socket Stone": ["damage", 0.1], "Yellow Socket Stone": ["cool", 0.4], "Green Socket Stone": ["regen", 0.002], "Violet Socket Stone": ["speed", 0.08]}
+ },
+ "phase12": {
+  "_note": "The caves' weapons: each copied band by band (its plain, Fine, Masterwork, Exalted, Celestial and Divine items, their tiers) from a weapon of the table ('like'), every hero's fit kept; damage and durability times the figures given; 'mesh' another mesh on the like's grip by the two meshes' frames (the pick: its head the blade's end, the grip 22 % up the handle); 'material' its look on every slot; 'mended_by' the only things that mend it; 'breaks_rubble' the rubble's breaker; 'lightless' its shot leaves her hidden and draws no trail; 'lost' a lost adventurer's blade (weight 0: laid by a skeleton deep in a cave, one a cave). Rubble: the meshes across a set's side tunnel.",
+  "weapons": [
+   {
+    "name": "Miner's Pick",
+    "like": "Plate Knight's Sword",
+    "icon": "cave_miners_pick",
+    "damage": 0.9,
+    "durability": 1.1,
+    "weight": 0.25,
+    "breaks_rubble": true,
+    "mesh": "/Game/Scene_OldMine/Assets/Megascans/3D_Assets/His_Med_Tools_Pickaxe_Metal_Old_03/SM_His_Med_Tools_Pickaxe_Metal_Old_03",
+    "looks": "An old miner's pick, heavy in both hands: a weapon at need, and one blow of it breaks the rubble that closes a cave's side tunnels."
+   },
+   {
+    "name": "Shard Blade",
+    "like": "Longsword",
+    "icon": "cave_shard_blade",
+    "damage": 1.45,
+    "durability": 0.35,
+    "weight": 0.2,
+    "material": "/Game/AlienPlanet/Materials/Foliage/MI_IceCrystals",
+    "mended_by": [
+     "Geode Shard (Blue)",
+     "Geode Shard (White)",
+     "Geode Shard (Red)",
+     "Geode Shard (Yellow)",
+     "Geode Shard (Green)",
+     "Geode Shard (Violet)"
+    ],
+    "mend_share": 0.3,
+    "looks": "A blade of cave crystal: it cuts deep and chips fast. No smith's repair holds on it: only a geode shard, used, mends it."
+   },
+   {
+    "name": "Jawbone Club",
+    "like": "Toothed Bone Sword",
+    "icon": "cave_jawbone_club",
+    "damage": 0.85,
+    "durability": 0.45,
+    "weight": 0.5,
+    "material": "/Game/BoneTemple/Materials/MI_Skeleton01_Var02",
+    "looks": "The jaw of some great cave beast, teeth and all: dark, cheap and brittle."
+   },
+   {
+    "name": "Rib Dagger",
+    "like": "Bone Blade",
+    "icon": "cave_rib_dagger",
+    "damage": 0.85,
+    "durability": 0.45,
+    "weight": 0.5,
+    "material": "/Game/BoneTemple/Materials/MI_Skeleton01_Var02",
+    "looks": "A rib ground to a point: dark, cheap and brittle."
+   },
+   {
+    "name": "Lightless Bow",
+    "like": "Longbow",
+    "icon": "cave_lightless_bow",
+    "damage": 1.0,
+    "durability": 1.0,
+    "weight": 0.2,
+    "lightless": true,
+    "material": "/Game/Scene_OldMine/Assets/Megascans/Surfaces/Ground_Stone_Coal_01/MI_Ground_Stone_Coal_01",
+    "looks": "A bow of blackened wood whose arrows leave no trail: shot from hiding, it does not give you away, and the one it strikes does not turn to find you."
+   },
+   {
+    "name": "Maren's Falchion",
+    "like": "Eastern Sabre",
+    "icon": "cave_blade_falchion",
+    "damage": 1.3,
+    "durability": 1.2,
+    "weight": 0,
+    "lost": true,
+    "looks": "A named blade found by a skeleton deep in a cave. A note beside it: Maren Holt of the Brokenspire watch went down after her brother and did not come back up."
+   },
+   {
+    "name": "Corvin's Gladius",
+    "like": "Viking Shortsword",
+    "icon": "cave_blade_gladius",
+    "damage": 1.3,
+    "durability": 1.2,
+    "weight": 0,
+    "lost": true,
+    "looks": "A named blade found by a skeleton deep in a cave. A note beside it: Corvin the map-maker: the map in his pack ends three rooms short of here."
+   },
+   {
+    "name": "The Sandwalker's Khopesh",
+    "like": "Orc Cleaver",
+    "icon": "cave_blade_khopesh",
+    "damage": 1.3,
+    "durability": 1.2,
+    "weight": 0,
+    "lost": true,
+    "looks": "A named blade found by a skeleton deep in a cave. A note beside it: A trader from the canyons, by the red sand still in its scabbard."
+   },
+   {
+    "name": "Old Hessa's Notched Blade",
+    "like": "Veteran's Sword",
+    "icon": "cave_blade_notched",
+    "damage": 1.3,
+    "durability": 1.2,
+    "weight": 0,
+    "lost": true,
+    "looks": "A named blade found by a skeleton deep in a cave. A note beside it: Hessa came down alone; every notch on the edge is a fight she won."
+   },
+   {
+    "name": "Lysander's Rapier",
+    "like": "Longsword",
+    "icon": "cave_blade_rapier",
+    "damage": 1.3,
+    "durability": 1.2,
+    "weight": 0,
+    "lost": true,
+    "looks": "A named blade found by a skeleton deep in a cave. A note beside it: A duellist's blade; a letter to someone named Ilse is folded beside it, never sent."
+   },
+   {
+    "name": "The Warden's Runed Blade",
+    "like": "Templar Sword",
+    "icon": "cave_blade_runed",
+    "damage": 1.3,
+    "durability": 1.2,
+    "weight": 0,
+    "lost": true,
+    "looks": "A named blade found by a skeleton deep in a cave. A note beside it: A warden of the broken tower: the runes on the blade still glow faintly in the dark."
+   }
+  ],
+  "rubble": {
+   "meshes": [
+    "/Game/Hyper/ResourcePack/Environments/Rocks/LargePlainsBoulder002/SM_LargePlainsBoulder002",
+    "/Game/Hyper/ResourcePack/Environments/Rocks/Large_plains_Bulder_001/SM_Large_plains_Bulder_001",
+    "/Game/Hyper/ResourcePack/Environments/Rocks/rock_moss_set_02/Mesh/SM_rock_moss_set_02_rock_moss_set_02_rock10"
+   ],
+   "scale": [
+    0.6,
+    0.8
+   ],
+   "share": 1.0,
+   "hero": "Warrior",
+   "hero_hits": 3
+  },
+  "lost": {
+   "skeleton": "/Game/BoneTemple/Meshes/SM_BonesSkeleton01_Light",
+   "turn": [
+    0,
+    0,
+    0
+   ]
+  }
  }
 }

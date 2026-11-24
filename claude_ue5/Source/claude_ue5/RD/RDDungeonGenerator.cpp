@@ -1489,7 +1489,7 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 		It.RemoveCurrent();
 	}
 	Queue.Reset(); Building = nullptr; MapData.Reset(); HitTexts.Reset();
-	CaveNodesLaid16.Reset();          // (the list of 2026-11-22's caves: a new run lays the veins' and growths' piles again (the old ones go with the piles))
+	CaveNodesLaid16.Reset(); RubbleCleared16.Reset(); bLostBladeLaid16 = false;          // (phase 12: the rubble and the lost blade laid again)          // (the list of 2026-11-22's caves: a new run lays the veins' and growths' piles again (the old ones go with the piles))
 	if (Blood) Blood->Clear();
 	SoundCounts.Reset(); LastSoundPick.Reset(); SoundR.Initialize(RDSoundSeed);
 	StopMusic();

@@ -224,6 +224,7 @@ void URDCombatComponent::SelectWeapon(int32 Index)
 	{
 		if (!C) return;
 		C->SetStaticMesh(Mesh);
+		ApplyWeaponLook16(C, W);          // (the list of 2026-11-22's caves: a crystal blade, dark bones)
 		C->SetVisibility(Mesh != nullptr);
 		if (M && Mesh)
 		{
@@ -477,7 +478,9 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 	if (W->Cooldown > 0.f) ReadyAt.Add(W->Name, GetWorld()->GetTimeSeconds() + W->Cooldown);
 	VeilUntil = FMath::Min(VeilUntil, GetWorld()->GetTimeSeconds());      // (an attack ends her veil: they see her again)
 	// (mistward6: an attack out of stealth ends it, and is an ambush)
-	ArtStrikeFromHiding();          // (out of stealth: an ambush; the vanishing act spares her first blows)
+	// (the list of 2026-11-22's caves: the lightless bow's shot leaves her hidden)
+	if (IsLightless16(Index) && IsStealthed()) bAmbushArmed = true;
+	else ArtStrikeFromHiding();          // (out of stealth: an ambush; the vanishing act spares her first blows)
 	SetSlowed(true);
 	return true;
 }
@@ -517,6 +520,7 @@ void URDCombatComponent::Strike()
 	}
 	if (bAny && bAmbushArmed) ++Ambushes;
 	if (bAny && Mb > 0.f) ManaBladeBonus(true);
+	Generator->StrikeRubble16(L, Fw, W->Reach, WeaponGear16(AttackIndex));          // (the list of 2026-11-22's caves: rubble before her)
 	if (bAny) { LastHitTime = GetWorld()->GetTimeSeconds(); WearOut(AttackIndex); }      // (a blow that landed wears the weapon)
 	// (the list of 2026-11-07: the barracks' training dummies in the blow's reach and arc rock away from her, with the weapon's
 	// hit sound and the blow's number; they wear nothing and count as no hit on a foe)
@@ -1062,6 +1066,7 @@ bool URDCombatComponent::UseItem(FName Name)
 	const FString Lb = RDItemLabel(Name);
 	if (It.Kind == ERDItemKind::Armour) return WearArmour(Name);          // (worn, not used up)
 	if (Generator->SocketStones16.Contains(Name)) return SetSocket16(Name);          // (the list of 2026-11-22's caves: a socket stone set)
+	if (It.Kind == ERDItemKind::Component && MendWith16(Name)) return true;          // (phase 12: a geode shard mends the shard blade)
 	// (mistward: a shield to her left hand, the torch lit or put out, a teleport ring used)
 	if (It.Kind == ERDItemKind::Shield) return WearShield(Name);
 	// (the list of 2026-11-10: the ankh (kind Light) is held as the torch is; one held while the other is used is changed for it)
@@ -1392,6 +1397,7 @@ TArray<FString> URDCombatComponent::GetRepairLines() const
 	{
 		const FRDWeaponDef& W = Generator->Weapons[I];
 		if (W.Durability <= 0.f) continue;
+		if (!W.Item.IsNone() && Generator->MendOnly16.Contains(W.Item)) continue;          // (the caves' shard blade: geode shards only)
 		const float Left = GetWeaponWear(I);
 		Out.Add(FString::Printf(TEXT("weapon|%d|%s|%.0f|%.0f|%.0f"), I, *W.Name.ToString(), Left, W.Durability, FMath::Min(W.Durability, Left + W.Durability * Share)));
 	}
@@ -2674,7 +2680,11 @@ void URDCombatComponent::Burst(FBolt& B, const FVector& At, ARDMonster* Direct)
 	auto Hurt = [&](ARDMonster* Mo, float Amount, const FVector& Where)
 	{
 		const FName WasElement = Generator->HitElement; Generator->HitElement = BoltElement;
+		// (the list of 2026-11-22's caves: a lightless arrow while she is hidden turns no one toward her)
+		const bool bQuiet = IsLightless16(B.Weapon) && IsStealthed();
+		if (bQuiet) Generator->bQuietHit16 = true;
 		const bool bKilled = Mo->ApplyDamageAt(Amount, O, &Where);
+		Generator->bQuietHit16 = false;
 		Generator->HitElement = WasElement;
 		Generator->AddHitText(Mo->GetActorLocation() + FVector(0, 0, Mo->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), Amount, false);
 		DamageDealt += Amount; ++HitsLanded; bAny = true;

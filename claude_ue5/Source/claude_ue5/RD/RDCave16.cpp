@@ -445,6 +445,9 @@ int32 ARDSection::PlanCaveOnce16(FRandomStream& R, int32 Try)
 		}
 		Corners.Add(FVector2D(CB)); Corners.Add(FVector2D(PB));
 		TArray<FVector2D> Flat; RDC16Round(Corners, FMath::Max(2.f * Half, 1300.f), 50.f, Flat);
+		// (a line that doubles back rounds to nothing a tunnel can follow (the first side tunnels to nowhere: a corner of 180 degrees gave
+		// no number, and the sampling below grew without end until the editor ran out of memory))
+		for (const FVector2D& Q : Flat) if (!FMath::IsFinite(Q.X) || !FMath::IsFinite(Q.Y) || FMath::Abs(Q.X) > 1e6f || FMath::Abs(Q.Y) > 1e6f) { ++FailBend; return false; }
 		TArray<FVector> Line; Line.Reserve(Flat.Num());
 		for (const FVector2D& Q : Flat) if (Line.Num() == 0 || FVector2D::Distance(FVector2D(Line.Last()), Q) > 1.f) Line.Add(FVector(Q, 0.f));
 		// (straight runs sampled every 50 cm too: the tiles, the lights and the tests walk the line)
@@ -724,6 +727,57 @@ int32 ARDSection::PlanCaveOnce16(FRandomStream& R, int32 Try)
 		}
 	}
 	for (const FJoin& J : Joins) if (!J.bNeeded && Rooms[J.A].Kind != ERDRoomKind::Junction && Rooms[J.Bn].Kind != ERDRoomKind::Junction) JoinRooms(J.A, J.Bn, false);
+	// (the list of 2026-11-22's caves, phase 12: a side tunnel to nowhere from a room's free opening, capped at its end, for the rubble
+	// and the cache behind it (CaveRubbleSet16). Its own stream: the plan's draws stay where they were. The loops above are tried
+	// after the portals and seldom route (1 set in 13 had one at a loop share of 0.6))
+	if (G->RubbleMeshes16.Num() > 0)
+	{
+		FRandomStream SR(HashCombine((uint32)Seed, 0x5B0E16u + (uint32)Try * 7919u));
+		if (SR.FRand() < G->RubbleShare16)
+		{
+			TArray<int32> Order;
+			for (int32 RI = 0; RI < NumRooms; ++RI) if (Rooms[RI].Kind != ERDRoomKind::Junction && CavePlaced16[RI].Kit >= 0) Order.Add(RI);
+			for (int32 I = Order.Num() - 1; I > 0; --I) Order.Swap(I, SR.RandRange(0, I));
+			int32 MediumKit = TunnelKit(true);
+			bool bSpur = false; int32 Digs = 0;          // (12 digs a try at most: each is a route's search, and the plan's tries go one a frame)
+			for (int32 Oi = 0; !bSpur && Oi < Order.Num() && Digs < 12; ++Oi)
+			{
+				const int32 RI = Order[Oi];
+				for (int32 J = 0; !bSpur && J < CavePlaced16[RI].Used.Num(); ++J)
+				{
+					if (CavePlaced16[RI].Used[J]) continue;
+					FVector At; FVector2D Ou; Joint(RI, J, At, Ou);
+					for (const float L : { 2200.f, 1700.f, 1200.f })
+					{
+						for (const float Ang : { 0.f, 30.f, -30.f, 55.f, -55.f })
+						{
+							const FVector2D Dir = FVector2D(FVector(Ou, 0.f).RotateAngleAxis(Ang, FVector::UpVector));
+							const FVector PB = At + FVector(Dir * L, 0.f);
+							// (its end well past the room's box: the way out of the opening runs straight until clear of the box, and an end short
+							// of that turned the line back on itself)
+							bool bFar = true;
+							for (int32 K = 1; K <= 3 && bFar; ++K)
+							{
+								const FVector Q = PB - FVector(Dir * (S * K), 0.f);
+								const FIntPoint Tq(FMath::FloorToInt(Q.X / S), FMath::FloorToInt(Q.Y / S));
+								bFar = In(Tq) && Box[Idx(Tq)] == 0;
+							}
+							if (!bFar || Digs >= 12) continue;
+							const FIntPoint Tb(FMath::FloorToInt(PB.X / S), FMath::FloorToInt(PB.Y / S));
+							if (Tb.X < 8 || Tb.Y < 8 || Tb.X >= N - 8 || Tb.Y >= N - 8 || Box[Idx(Tb)] != 0) continue;
+							++Digs;
+							if (!Dig(At, Ou, PB, -Dir, MediumKit, RI, CaveSpurTo16, true, false)) continue;
+							CavePlaced16[RI].Used[J] = true;
+							// (the kit's cap a metre back from the end, its open side the tunnel's: as a portal's that found no way)
+							CaveCaps16.Add(FTransform(FRotator(0.f, FMath::RadiansToDegrees(FMath::Atan2(Dir.Y, Dir.X)), 0.f), PB - FVector(Dir * 100.f, 0.f)));
+							bSpur = true; break;
+						}
+						if (bSpur) break;
+					}
+				}
+			}
+		}
+	}
 	// the openings no tunnel took: the kit's cap
 	for (int32 RI = 0; RI < CavePlaced16.Num(); ++RI)
 		for (int32 J = 0; CavePlaced16[RI].Kit >= 0 && J < CavePlaced16[RI].Used.Num(); ++J)
@@ -1067,7 +1121,10 @@ void ARDSection::CaveFurnish16(FRandomStream& R, int32 RI)
 {
 	// (phase 9: the lights are the shell's (torches, god rays: laid in play with it, never twice); a room gets the castle's containers
 	// by its walls: on its floor's edge tiles, pushed 60 cm toward the wall, facing the room's middle)
-	if (RI == 0) CaveContainers16 = 0;
+	if (RI == 0) { CaveContainers16 = 0; CaveRubble16.Reset(); CaveLostLine16.Reset(); }
+	// (phase 12: once a set, with its last room: the rubble across a side tunnel and its cache, the lost blade; the room's furnishing
+	// goes on with its own footprints)
+	if (RI == Rooms.Num() - 1) { Feet.Reset(); CaveRubbleSet16(); CaveLostBlade16(); Feet.Reset(); }
 	if (!CavePlaced16.IsValidIndex(RI) || CavePlaced16[RI].Kit < 0 || !Generator || Rooms[RI].Kind == ERDRoomKind::Junction) return;
 	// (this room's footprints only, as the castle's Furnish keeps them: never reset, every restart's containers stood on the last
 	// one's footprints and fewer were laid each time (7, 8, 3, 2 in one session: PR #117's review run))

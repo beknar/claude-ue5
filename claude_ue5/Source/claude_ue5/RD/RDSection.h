@@ -768,6 +768,16 @@ private:
 	void CaveNodesSet16();
 public:
 	TArray<FString> CaveNodeLines16;
+	/** phase 12: the rubble across a side tunnel (its tiles blocked till it is broken) and the cache behind it; the lost blade */
+	struct FCaveRubble16 { FVector At = FVector::ZeroVector; FVector Dir = FVector::ForwardVector; int32 Index = 0, Hits = 0; TArray<FIntPoint> Tiles; TArray<TObjectPtr<UPrimitiveComponent>> Comps; FVector Cache = FVector::ZeroVector; };
+	TArray<FCaveRubble16> CaveRubble16;
+	/** a side tunnel to nowhere's far end (its run's To) */
+	static constexpr int32 CaveSpurTo16 = -1000;
+	FString CaveLostLine16;
+	void CaveRubbleSet16();
+	void CaveLostBlade16();
+	/** broken: its pieces gone, its tiles open */
+	void ClearRubble16(int32 K);
 private:
 	void CaveTorch16(const FTransform& At);
 	TArray<FString> CaveDressLines16;

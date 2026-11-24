@@ -267,6 +267,10 @@ def dressing():
 
 
 TREASURE = os.path.join(SA, "treasure16.json")
+SA_ROOT = os.path.dirname(SA)
+# (phase 12: a set's side tunnels (rooms joined both ways) carry the rubble and its cache: at 0.2 one loop was tried a set and nearly
+# every set came out a tree (no rubble in five sets)
+LOOP_SHARE = 0.6
 MAPS16 = "/Game/RandomDungeon/Maps/"
 ITEM_KINDS = {"COMPONENT": "COMPONENT", "REPAIR": "REPAIR", "HEALING": "HEALING", "MANA": "MANA", "FOOD": "FOOD", "SCROLL": "SCROLL", "WEAPON": "WEAPON",
               "ARMOUR": "ARMOUR", "RING": "RING", "TOME": "TOME", "TOKEN": "TOKEN", "RECIPE": "RECIPE", "SHIELD": "SHIELD"}
@@ -292,6 +296,104 @@ def each_map(maps, fn, label):
     for l in out: print(l)
 
 
+BANDS = ["", "Fine ", "Masterwork ", "Exalted ", "Celestial ", "Divine "]
+
+
+def w854():
+    """854's measuring functions (pca, slices, verts, the vector helpers), its module's definitions only"""
+    src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "854_rdm5_weapons_meshes.py"), encoding="utf-8").read()
+    ns = {"__name__": "w854"}
+    exec(src[:src.index("\nres = {")], ns)
+    return ns
+
+
+def pick_frame(ns, P):
+    """a pick's frame as 854's blade frame is read: the origin where the hand closes (22 % up the handle from its end), x toward
+    the head, y the head's spread (its point's way), z square to them"""
+    c, (a, b, z) = ns["pca"](P)
+    dot, sub, add, mul, norm, cross = ns["dot"], ns["sub"], ns["add"], ns["mul"], ns["norm"], ns["cross"]
+    t = [dot(sub(q, c), a) for q in P]; t0, t1 = min(t), max(t)
+    def width(lo, hi):
+        Q = [q for q, tt in zip(P, t) if lo <= tt <= hi]
+        if len(Q) < 2: return 0.0
+        return max(max(dot(sub(q, c), b) for q in Q) - min(dot(sub(q, c), b) for q in Q), max(dot(sub(q, c), z) for q in Q) - min(dot(sub(q, c), z) for q in Q))
+    head_hi = width(t1 - 10.0, t1) >= width(t0, t0 + 10.0)
+    X = a if head_hi else mul(a, -1.0)
+    tg = t0 + 0.22 * (t1 - t0) if head_hi else t1 - 0.22 * (t1 - t0)
+    near = [q for q, tt in zip(P, t) if abs(tt - tg) < 2.0] or P
+    ctr = ns["mean"](near)
+    origin = add(c, add(mul(a, tg), add(mul(b, dot(sub(ctr, c), b)), mul(z, dot(sub(ctr, c), z)))))
+    H = [sub(q, c) for q, tt in zip(P, t) if (tt > t1 - 12.0 if head_hi else tt < t0 + 12.0)]
+    Hc = [sub(h, mul(a, dot(h, a))) for h in H]
+    _, (hb, _, _) = ns["pca"]([tuple(h) for h in Hc]) if len(Hc) >= 3 else (None, (b, None, None))
+    Y = norm(sub(hb, mul(X, dot(hb, X)))); Z = norm(cross(X, Y)); Y = norm(cross(Z, X))
+    return {"origin": origin, "x": X, "y": Y, "z": Z, "length": t1 - t0}
+
+
+def frame_tf(fr):
+    """a frame (origin, x, y) as a transform from the frame's space into the mesh's"""
+    rot = unreal.MathLibrary.make_rot_from_xy(unreal.Vector(*fr["x"]), unreal.Vector(*fr["y"]))
+    return unreal.Transform(unreal.Vector(*fr["origin"]), rot, unreal.Vector(1, 1, 1))
+
+
+def cave_weapons(its, P, missing):
+    """phase 12's weapons on a map: (items, looks, mended, lightless, breakers, lost bases, their names)"""
+    W = [w for p_ in P for w in p_.get("weapons", [])]
+    if not W: return [], {}, {}, [], [], [], []
+    frames = json.load(open(os.path.join(SA_ROOT, "random_dungeon_magic5", "weapon_frames.json"), encoding="utf-8"))["weapons"]
+    ns = None; swapped = {}
+    out, looks, mends, lightless, breakers, lost, names = [], {}, {}, [], [], [], []
+    by = {str(i.name): i for i in its}
+    for w in W:
+        for band in BANDS:
+            like = by.get(band + w["like"])
+            # (a map has the bands its tiers have: the plain one always, the others where 910 made them)
+            if not like:
+                if not band: missing.append(f"no {w['like']} for {w['name']}")
+                continue
+            nm = band + w["name"]; names.append(nm)
+            it = unreal.RDItemDef(); it.import_text(like.export_text())
+            it.set_editor_property("name", nm); it.set_editor_property("icon", unreal.Name(w["icon"])); it.set_editor_property("looks", w["looks"])
+            it.set_editor_property("weight", float(w["weight"]))
+            if "durability" in w and like.get_editor_property("durability") > 0: it.set_editor_property("durability", like.get_editor_property("durability") * w["durability"])
+            fits = []
+            for f in it.get_editor_property("weapon_fits"):
+                wd = f.get_editor_property("weapon")
+                wd.set_editor_property("name", nm); wd.set_editor_property("item", nm); wd.set_editor_property("icon", unreal.Name(w["icon"]))
+                wd.set_editor_property("damage", wd.get_editor_property("damage") * w["damage"])
+                if wd.get_editor_property("durability") > 0: wd.set_editor_property("durability", wd.get_editor_property("durability") * w["durability"])
+                if w.get("lightless"):
+                    for k in ("bolt_effect", "bolt_core_effect"): wd.set_editor_property(k, None)
+                if w.get("mesh"):
+                    m = unreal.load_asset(w["mesh"])
+                    if not m: missing.append(f"no mesh {w['mesh']}"); continue
+                    if w["mesh"] not in swapped:
+                        ns = ns or w854()
+                        k_ = "".join(c for c in w["like"].title() if c.isalnum())
+                        if k_ not in frames: missing.append(f"no frame of {w['like']} ({k_})"); continue
+                        nf = pick_frame(ns, ns["verts"](m))
+                        swapped[w["mesh"]] = (frame_tf(frames[k_]), frame_tf(nf), nf)
+                    F, Fn, nf = swapped[w["mesh"]]
+                    g0 = wd.get_editor_property("grip")
+                    # (the new mesh's frame where the old one's was in her hand: grip' = inverse(F') * F * grip)
+                    g1 = unreal.MathLibrary.compose_transforms(unreal.MathLibrary.compose_transforms(unreal.MathLibrary.invert_transform(Fn), F), g0)
+                    wd.set_editor_property("mesh", m); wd.set_editor_property("grip", g1)
+                f.set_editor_property("weapon", wd); fits.append(f)
+            it.set_editor_property("weapon_fits", fits)
+            out.append(it)
+            if w.get("material"):
+                mt = unreal.load_asset(w["material"])
+                if mt: looks[unreal.Name(nm)] = mt
+                else: missing.append(f"no material {w['material']}")
+            if w.get("mended_by"):
+                e = unreal.RDMend16(); e.set_editor_property("by", [unreal.Name(x) for x in w["mended_by"]]); e.set_editor_property("share", float(w.get("mend_share", 0.25))); mends[unreal.Name(nm)] = e
+            if w.get("lightless"): lightless.append(unreal.Name(nm))
+            if w.get("breaks_rubble"): breakers.append(unreal.Name(nm))
+        if w.get("lost"): lost.append(unreal.Name(w["name"]))
+    for k_, (F, Fn, nf) in swapped.items(): print(f"945 weapons: {k_.split('/')[-1]} on its like's grip (its handle {nf['length']:.0f} cm, the hand 22 % up it)")
+    return out, looks, mends, lightless, breakers, lost, names
+
+
 def items():
     """the caves' treasures of every phase written so far (treasure16.json) on every map of the game: each item copied from its 'like'
     (its kind, numbers, buff, picture, tiers, weight, words), its recipe where it has one; the caves' own items (CaveItems16) on every
@@ -299,7 +401,7 @@ def items():
     Run after 910, 905, 911, 918, 925, 928, 929, 937, 938 and 943 (they write the items anew)"""
     T, P = treasure_phases()
     X = [x for p in P for x in p.get("items", [])]
-    mine = {x["name"] for x in X}
+    mine = {x["name"] for x in X} | {b + w["name"] for p in P for w in p.get("weapons", []) for b in BANDS}
     regions = [r for p in P for r in p.get("regions", [])]
     nodes = [n for p in P for n in p.get("nodes", [])]
     def fn(g):
@@ -354,13 +456,26 @@ def items():
                 if q is not None: q.any_of = list(q.any_of) + [unreal.Name(n) for n in inks]
             r.parts = ps; recs2.append(r)
         recs = recs2
+        # (phase 12: the caves' weapons, copied band by band from the table's)
+        wits, looks, mends, lightless, breakers, lost, wnames = cave_weapons(its, P, missing)
+        its = its + wits
         g.set_editor_property("items", its); g.set_editor_property("recipes", recs)
+        g.set_editor_property("weapon_looks16", looks); g.set_editor_property("mend_only16", mends)
+        g.set_editor_property("lightless16", lightless); g.set_editor_property("rubble_breakers16", breakers); g.set_editor_property("lost_blades16", lost)
+        rb = next((p_["rubble"] for p_ in P if p_.get("rubble")), None)
+        if rb:
+            g.set_editor_property("rubble_meshes16", [m for m in (unreal.load_asset(x) for x in rb["meshes"]) if m])
+            g.set_editor_property("rubble_scale16", unreal.Vector2D(*rb["scale"])); g.set_editor_property("rubble_share16", float(rb["share"]))
+            g.set_editor_property("rubble_hero16", rb["hero"]); g.set_editor_property("rubble_hero_hits16", int(rb["hero_hits"]))
+        lb = next((p_["lost"] for p_ in P if p_.get("lost")), None)
+        if lb:
+            g.set_editor_property("lost_skeleton16", unreal.load_asset(lb["skeleton"])); g.set_editor_property("lost_skeleton_turn16", unreal.Rotator(*lb["turn"]))
         sk = {}
         for p_ in P:
             for n, (stat, amt) in p_.get("sockets", {}).items():
                 e = unreal.RDSocket16(); e.set_editor_property("stat", stat); e.set_editor_property("amount", float(amt)); sk[unreal.Name(n)] = e
         g.set_editor_property("socket_stones16", sk)
-        g.set_editor_property("cave_items16", [unreal.Name(x["name"]) for x in X if x.get("cave")])
+        g.set_editor_property("cave_items16", [unreal.Name(x["name"]) for x in X if x.get("cave")] + [unreal.Name(n) for n in wnames])
         # (made at the anvil whatever their kind: a recipe with the anvil's station '' on a kind the tables would send to the
         # alchemist (the linings, kind HEALING for their buff; PR #117's review))
         g.set_editor_property("anvil_made16", [unreal.Name(x["name"]) for x in X if x.get("recipe") and x["recipe"][0] == "" and x["kind"] in ("HEALING", "MANA", "SPEED")])
@@ -381,7 +496,7 @@ def items():
         g.set_editor_property("cave_nodes16", nd)
         assert not missing, f"945 items: {missing}"
         n_ink = sum(1 for r in recs if any(str(a_) in inks for p_ in r.parts for a_ in p_.any_of)) if inks else 0
-        return f"{len(X)} cave things ({sum(1 for x in X if x.get('recipe'))} with recipes), {len(rg)} regions, {len(nd)} veins and growths, {len(sk)} socket stones, inks in {n_ink} scroll recipes"
+        return f"{len(wits)} cave weapons, {len(X)} cave things ({sum(1 for x in X if x.get('recipe'))} with recipes), {len(rg)} regions, {len(nd)} veins and growths, {len(sk)} socket stones, inks in {n_ink} scroll recipes"
     if CHECK: print("945 items: would write", len(X), "things on", T["maps"]); return
     each_map(T["maps"], fn, "items")
 
@@ -393,7 +508,7 @@ def icons():
     ui_texture = importlib.import_module("ui_tex").ui_texture
     T, P = treasure_phases()
     src = os.path.join(SA, "icons16")
-    names = sorted({x["icon"] for p in P for x in p.get("items", [])})
+    names = sorted({x["icon"] for p in P for x in p.get("items", []) + p.get("weapons", [])})
     found = [n for n in names if os.path.exists(os.path.join(src, f"icon_{n}.png"))]
     lost = sorted(set(names) - set(found))
     if lost: print("945 icons: no picture for", lost)
@@ -500,7 +615,7 @@ def level():
     gen.set_editor_property("cave_rooms16", rooms)
     gen.set_editor_property("cave_tunnels16", tunnels)
     gen.set_editor_property("cave_cap16", mesh(kit["cap"]["mesh"]))
-    gen.set_editor_property("cave_rooms_per_set16", unreal.IntPoint(4, 7))
+    gen.set_editor_property("cave_rooms_per_set16", unreal.IntPoint(4, 7)); gen.set_editor_property("cave_loop_share16", LOOP_SHARE)
     # (phase 9: the kit's PCG dressing as measured; the sorrel hung from the roofs at 15 % of the kit's density (about 88 a metre of
     # tunnel at full: 12,000 instances a set))
     dr = []

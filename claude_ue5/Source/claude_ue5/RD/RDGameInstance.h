@@ -164,6 +164,8 @@ public:
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|List15") int32 CaveTier15 = 0;
 	/** the list of 2026-11-22's caves: the biome at the cave's tower (its region: a geode's colour, the cold's or the heat's ores) */
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FString CaveBiome16;
+	/** the caves whose lost blade she has taken (their keys): laid no more */
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FString> LostBladeCaves16;
 	/** the tenth phase: the places the lookouts' tops marked on her map, and the lookouts climbed */
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> WildMarked15;
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> WildLookoutsClimbed15;
