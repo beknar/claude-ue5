@@ -1,0 +1,46 @@
+{
+ "tag": "h18h",
+ "plan": [
+  "heaven16_lamps"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "heaven16_lamps",
+   "ok": true,
+   "poles": 154,
+   "noon": [
+    "lamps|154|0|0"
+   ],
+   "midnight": "lamps|154|154|1",
+   "lamp_cd_radius": [
+    "1000",
+    "1800"
+   ],
+   "pair_m": 21.0,
+   "luma_on": {
+    "under": 133.3,
+    "between": 66.66,
+    "contrast": 2.0
+   },
+   "fps_on": 22.0,
+   "luma_off": {
+    "under": 18.75,
+    "between": 18.62,
+    "contrast": 1.007
+   },
+   "fps_off": 21.6
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_h18h_heaven16_lamp_under_on.png",
+  "bs_h18h_heaven16_lamp_between_on.png",
+  "bs_h18h_heaven16_lamps_night.png",
+  "bs_h18h_heaven16_lamp_under_off.png",
+  "bs_h18h_heaven16_lamp_between_off.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

@@ -4463,12 +4463,14 @@ def heaven16_in():
 
 def step_heaven16_lamps():
     """the list of 2026-11-22: "the street lights in heaven do not provide light": every street light's lamp lit at night (one each),
-    none by day; the brightness of the street under a lamp and half way between two at midnight (her body hidden, the camera
-    looking down at the street from 6 m), against noon's; pictures"""
+    none by day; at midnight the street read from 6 m over it under a lamp and half way between two, with the lamps on and with them
+    off (rd.StreetLamps 0): the light they give is the contrast under / between (the exposure adapts every picture to its own
+    brightness: a whole frame's level says nothing); the frame rate there over 6 s with them on and off; pictures"""
     g = G["gen"]; res = {}; quiet(True)
     S = yield from heaven16_in(); h_was = g.get_town_hour()
     poles = ism_instances("SM_MM00284_Exterior_Light_Streetlight")
     res["poles"] = len(poles)
+    def cvar(v): unreal.SystemLibrary.execute_console_command(G["w"], f"rd.StreetLamps {v}")
     try:
         g.set_town_hour(12.0); yield from wait(2.0)
         res["noon"] = [str(l) for l in g.get_street_lamps16()][:1]
@@ -4477,7 +4479,6 @@ def step_heaven16_lamps():
         res["midnight"] = "|".join(L[0]) if L else None
         lamps = [V(float(q[1]), float(q[2]), float(q[3])) for q in L[1:]]
         res["lamp_cd_radius"] = [L[1][4], L[1][5]] if len(L) > 1 else None
-        # (two lamps of one street, 15 to 25 m apart: under one, and half way between them)
         pair = None
         for a in lamps:
             for b in lamps:
@@ -4485,24 +4486,31 @@ def step_heaven16_lamps():
             if pair: break
         res["pair_m"] = round(dist2(*pair) / 100, 1) if pair else None
         if pair:
-            a, b = pair
+            a, b = pair; mid = V((a.x + b.x) / 2, (a.y + b.y) / 2, 0)
             def street_view(at, name):
                 put(V(at.x, at.y, 0), yaw=0.0, z=0.0); G["pawn"].set_actor_hidden_in_game(True)
-                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-80, yaw=0.0)); yield from wait(2.5)
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-80, yaw=0.0)); yield from wait(3.0)
                 return (yield from shot_luma(name, (0.35, 0.35, 0.65, 0.65)))
-            res["luma_under"] = yield from street_view(a, "heaven16_lamp_under")
-            mid = V((a.x + b.x) / 2, (a.y + b.y) / 2, 0)
-            res["luma_between"] = yield from street_view(mid, "heaven16_lamp_between")
-            G["pawn"].set_actor_hidden_in_game(False)
-            put(V(a.x + 1200, a.y, 0), yaw=180.0, z=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=180.0)); yield from wait(2.0)
-            shot("heaven16_lamps_night", "1280x720"); yield from rwait(1.0)
-            g.set_town_hour(12.0); yield from wait(4.0)
-            res["luma_under_noon"] = yield from street_view(a, "heaven16_lamp_noon")
+            def fps_here(sec=6.0):
+                put(V(a.x + 1200, a.y, 0), yaw=180.0, z=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=180.0)); yield from wait(2.0)
+                xs = []; t0 = time.time()
+                while time.time() - t0 < sec: yield from rwait(0.25); xs.append(g.get_fps())
+                return round(sum(xs) / max(len(xs), 1), 1)
+            for st, v in (("on", 1), ("off", 0)):
+                cvar(v); yield from wait(1.0)
+                u = yield from street_view(a, f"heaven16_lamp_under_{st}"); bt = yield from street_view(mid, f"heaven16_lamp_between_{st}")
+                res[f"luma_{st}"] = {"under": u, "between": bt, "contrast": round(u / max(bt, 1e-3), 3) if u and bt else None}
+                G["pawn"].set_actor_hidden_in_game(False)
+                res[f"fps_{st}"] = yield from fps_here()
+                if st == "on": shot("heaven16_lamps_night", "1280x720"); yield from rwait(1.0)
+            cvar(1)
     finally:
-        G["pawn"].set_actor_hidden_in_game(False); g.set_town_hour(h_was); quiet(False)
+        cvar(1); G["pawn"].set_actor_hidden_in_game(False); g.set_town_hour(h_was); quiet(False)
     n = res["midnight"].split("|") if res.get("midnight") else []
+    on, off = res.get("luma_on", {}), res.get("luma_off", {})
     ok = (res["poles"] > 0 and res["noon"] and res["noon"][0].split("|")[2] == "0" and n and int(n[1]) == res["poles"] and int(n[2]) == res["poles"]
-          and res.get("luma_under") is not None and res.get("luma_between") is not None and res["luma_under"] > 0.08 and res["luma_between"] > 0.03)
+          and on.get("contrast") and off.get("contrast") and on["contrast"] >= 1.15 and on["contrast"] >= off["contrast"] + 0.1
+          and res.get("fps_on") and res.get("fps_off") and res["fps_on"] >= 0.75 * res["fps_off"])
     step_result("heaven16_lamps", bool(ok), **res)
 
 
@@ -4511,7 +4519,7 @@ def step_heaven16_signs():
     panel (no wooden shield board in Heaven), its faces lit pictures of modern words, none of the town's gold ones; a picture of one"""
     g = G["gen"]; res = {}
     S = yield from heaven16_in()
-    res["boards"] = len(ism_instances("SM_HV_SignBoard")); res["shield_boards"] = len(ism_instances("Sign", "/Game/RandomDungeon/Brokenspire"))
+    res["boards"] = len(ism_instances("SM_HV_SignBoard")); res["shield_boards"] = len([x for c in isms(S) if c.get_editor_property("static_mesh") and c.get_editor_property("static_mesh") == g.get_editor_property("pieces").get(unreal.Name("Town.Sign")).mesh for x in range(c.get_instance_count())])
     faces = []
     for c in isms(S):
         m = c.get_material(0)
@@ -4532,7 +4540,7 @@ def step_heaven16_signs():
         G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=5, yaw=math.degrees(math.atan2(-fw.y, -fw.x))))
         g.set_town_hour(20.5); yield from wait(2.5); shot("heaven16_sign", "1280x720"); yield from rwait(1.0)
         G["pawn"].set_actor_hidden_in_game(False); g.set_town_hour(11.0)
-    ok = res["boards"] > 0 and res["gold_faces"] == 0 and sum(res["faces"].values()) >= 2 * res["boards"] - 2 and hv
+    ok = res["boards"] > 0 and res["shield_boards"] == 0 and res["gold_faces"] == 0 and sum(res["faces"].values()) >= 2 * res["boards"] - 2 and hv
     step_result("heaven16_signs", bool(ok), **res)
 
 
@@ -4601,7 +4609,16 @@ def step_heaven16_tower():
     security door still the way in; a picture from the square at noon and at night"""
     g = G["gen"]; res = {}
     S = yield from heaven16_in(); h_was = g.get_town_hour()
-    rt = S.get_editor_property("heaven_research_top_z16"); res["research_top_m"] = round(rt / 100, 1)
+    rt = 0.0
+    for c in isms(S):
+        m = c.get_editor_property("static_mesh")
+        if not m or m != g.get_editor_property("pieces").get(unreal.Name("Lab.Block")).mesh: continue
+        bb = m.get_bounding_box()
+        for i_ in range(c.get_instance_count()):
+            t = c.get_instance_transform(i_, True); t = t[-1] if isinstance(t, tuple) else t
+            rt = max(rt, t.translation.z + bb.max.z * t.scale3d.z)
+    res["research_top_m"] = round(rt / 100, 1); res["code_top_m"] = round(S.get_editor_property("heaven_research_top_z16") / 100, 1)
+    res["air_lights"] = len(ism_instances("SM_HV_AirLight")); res["security_door"] = len(ism_instances("SM_HV_Vault"))
     res["plan_max_skyscraper_m"] = round(g.heaven_sky_max_z16() / 100, 1)
     tops = []
     for c in isms(S):
@@ -4622,7 +4639,8 @@ def step_heaven16_tower():
         g.set_town_hour(12.0); yield from wait(3.0); shot("heaven16_tower_noon", "1280x720"); yield from rwait(1.0)
         g.set_town_hour(22.0); yield from wait(4.0); shot("heaven16_tower_night", "1280x720"); yield from rwait(1.0)
         G["pawn"].set_actor_hidden_in_game(False); g.set_town_hour(h_was)
-    ok = rt > 0 and res["tallest_skyscraper_m"] and res["research_top_m"] >= 1.5 * res["tallest_skyscraper_m"] and res["research_top_m"] >= 1.5 * res["plan_max_skyscraper_m"]
+    ok = (rt > 0 and res["tallest_skyscraper_m"] and res["research_top_m"] >= 1.5 * res["tallest_skyscraper_m"] and res["research_top_m"] >= 1.5 * res["plan_max_skyscraper_m"]
+          and res["air_lights"] >= 13 and res["security_door"] == 1)
     step_result("heaven16_tower", bool(ok), **res)
 
 STEPS.update({"heaven16_lamps": step_heaven16_lamps, "heaven16_signs": step_heaven16_signs, "heaven16_map": step_heaven16_map, "heaven16_sleep": step_heaven16_sleep, "heaven16_tower": step_heaven16_tower})
@@ -4661,10 +4679,17 @@ def step_sleep10():
     # (a body that is not drawn is not posed (OnlyTickPoseWhenRendered): each is read with her 2 m from its bed, looking at it, after a
     # second in view; its clip's place must have moved (it plays))
     meas = [x for x in sl if x["inbed"]][:14]
+    BC0 = {b["i"]: b["c"] for b in blds()}; not_drawn = 0
     for f in meas:
         t = g.get_townsfolk(f["i"]); m = t.get_component_by_class(unreal.SkeletalMeshComponent); b_ = f["bed"]
-        put(V(b_.x + 200, b_.y, 0), yaw=180.0, z=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-30, yaw=180.0))
+        # (from inside its building, 2 m from the bed toward the building's middle (the list of 2026-11-22: a building's interior is hidden
+        # unless she is in it, a door is open or a window shows it; from outside its wall the body was not drawn, so not posed))
+        c_ = BC0.get(f["home"], b_); dx, dy = c_.x - b_.x, c_.y - b_.y; n_ = math.hypot(dx, dy) or 1.0
+        yw = math.degrees(math.atan2(-dy, -dx))
+        put(V(b_.x + dx / n_ * 200, b_.y + dy / n_ * 200, 0), yaw=yw, z=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-30, yaw=yw))
         p0 = m.get_position(); yield from rwait(1.2)
+        drawn_ = {str(l).split("|")[0]: str(l).split("|")[3] == "1" for l in g.get_town_lod_lines16()}
+        if drawn_.get(t.get_name()) is False: not_drawn += 1; continue          # (not drawn (its building's interior hidden): said so, not a bad pose)
         if abs(m.get_position() - p0) <= 0.01: p0 = m.get_position(); yield from rwait(1.5)          # (one in a row of barracks beds: a second look)
         pv = m.get_socket_location("pelvis"); hd = m.get_socket_location("head")
         q = {"role": f["role"], "mesh": m.get_editor_property("skeletal_mesh_asset").get_name(), "hips_over_top": round(pv.z - f["bed"].z, 1), "head_rise": round(hd.z - pv.z, 1),
@@ -4672,7 +4697,7 @@ def step_sleep10():
              "bld": g.get_section(unreal.IntPoint(0, 0)).town_building_at(pv) == f["home"]}
         poses.append(q)
         if not (3 <= q["hips_over_top"] <= 45 and abs(q["head_rise"]) <= 30 and q["head_off"] >= 35 and q["on_bed"] <= 60 and q["bld"] and q["plays"]): bad.append(q)
-    res["poses"] = poses[:12]; res["bad_poses"] = bad[:10]; res["poses_n"] = len(poses)
+    res["poses"] = poses[:12]; res["bad_poses"] = bad[:10]; res["poses_n"] = len(poses); res["poses_not_drawn"] = not_drawn
     # (two pictures from inside a home: a bed of the town's and one put for a sleeper)
     S = section(); shots_ = []
     cand = [x for x in sl if x["inbed"] and x["role"] in ("Townsfolk", "Child")]
@@ -4694,20 +4719,27 @@ def step_sleep10():
         res["night_smith_says"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
         res["night_smith_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); res["night_smith_panel"] = str(g.get_town_panel()); yield from rwait(0.3)
         g.close_town_panel(); cb().set_crafting_open(False); yield from rwait(0.3)
-    tr = talk_to("Trader"); yield from rwait(0.3)
-    if tr:
+    # (a keeper woken: one in bed (the trader if it has a bed, else another keeper in bed): it must be out of bed as the panel opens
+    # (PR #125's work: the check had only ever met traders with no bed))
+    L1 = sleep_lines()
+    keep = next((f for f in L1["folk"] if f["role"] == "Trader" and f["inbed"]), None) or next((f for f in L1["folk"] if f["role"] in ("Healer", "Priest", "Keeper", "Smith") and f["inbed"]), None)
+    res["night_keeper"] = keep["role"] if keep else None
+    tr = talk_to(keep["role"]) if keep else None; yield from rwait(0.3)
+    if tr and keep:
+        res["night_trader_in_bed_before"] = g.get_townsfolk(keep["i"]).is_in_bed()
         res["night_trader_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); res["night_trader_panel"] = str(g.get_town_panel())
-        res["night_trader_in_bed"] = g.get_townsfolk(tr["i"]).is_in_bed(); yield from rwait(0.3)
+        res["night_trader_in_bed"] = g.get_townsfolk(keep["i"]).is_in_bed(); res["night_trader_sleeping"] = g.get_townsfolk(keep["i"]).is_sleeping(); yield from rwait(0.3)
         g.close_town_panel(); yield from rwait(0.3)
     # (the morning: up and out of bed, where they lay down from)
     g.set_town_hour(7.0); yield from rwait(2.0)
     L2 = sleep_lines(); up = [f for f in L2["folk"] if f["hasbed"]]
     res["morning"] = {"asleep": sum(1 for f in up if f["asleep"]), "in_bed": sum(1 for f in up if f["inbed"])}
     g.set_town_hour(h_was); quiet(False)
-    ok = res["sleepers"] > 0 and res["asleep"] >= 0.9 * res["sleepers"] and res["in_bed"] == res["asleep"] and res["on_sleep_clip"] == res["in_bed"] \
+    ok = res["sleepers"] > 0 and res["asleep"] >= 0.9 * res["sleepers"] and res["in_bed"] == res["asleep"] and res["on_sleep_clip"] == res["in_bed"] and res["poses_n"] >= 8 \
         and res["shared_beds"] == 0 and not bad and res["children"]["at_home"] > 0 and res["children"]["in_bed"] >= 0.9 * res["children"]["at_home"] \
         and res["beds"]["given"] == res["beds"]["sleepers"] and res["morning"]["in_bed"] == 0 and res["morning"]["asleep"] == 0 \
-        and "asleep" not in res.get("night_smith_says", "") and res.get("night_trader_panel") == "store" and res.get("night_trader_in_bed") is False
+        and "asleep" not in res.get("night_smith_says", "") and (res.get("night_keeper") is None or (res.get("night_trader_in_bed_before") is True and res.get("night_trader_in_bed") is False
+        and res.get("night_trader_panel") in ("store", "healer", "temple", "stash", "smith")))
     step_result("sleep10", ok, **res)
 
 def step_people10():

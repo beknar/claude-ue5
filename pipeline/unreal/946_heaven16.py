@@ -74,15 +74,20 @@ def lamps(g):
         how = "the bounds (no vertices)"
     g.set_editor_property("heaven_lamp_head16", V(hx, hy, hz))
     mats = hk.materials()
-    glow = hk.boxes("SM_HV_LampGlow", [(-24, 24, -16, 16, -4, 2, "panel")], mats, rebuild=True)
-    set_pieces(g, {"Heaven.LampGlow": raw(glow, collision=False)})
+    glow = hk.boxes("SM_HV_LampGlow", [(-24, 24, -16, 16, -4, 2, "panel")], mats)
+    # (the facility's tower's red air lights and beacon: lit boxes (a point light lights faces round it and is cut at the town's 45 m;
+    # these stand 70 to 160 m up: PR #125's review))
+    air = hk.boxes("SM_HV_AirLight", [(-45, 45, -45, 45, -25, 25, "red")], mats)
+    set_pieces(g, {"Heaven.LampGlow": raw(glow, collision=False), "Heaven.AirLight": raw(air, collision=False)})
     REPORT.append(f"lamps: the head at ({hx:.0f}, {hy:.0f}, {hz:.0f}) cm of the pole (its top {top:.0f}, its arm to {mx:.0f}; {how}); Heaven.LampGlow")
 
 
 # ================================================================================================ the modern signs
 def face_material():
     path = HV16 + "/M_HV_SignFace"
-    if EAL.does_asset_exist(path): EAL.delete_asset(path)
+    # (made once and kept: the faces' instances are its children and the level holds them (PR #125's review: a delete of a used asset
+    # leaves them parentless in memory if the new one is refused))
+    if EAL.does_asset_exist(path): return unreal.load_asset(path)
     m = AT.create_asset("M_HV_SignFace", HV16, unreal.Material, unreal.MaterialFactoryNew())
     m.set_editor_property("used_with_instanced_static_meshes", True)
     t = MEL.create_material_expression(m, unreal.MaterialExpressionTextureSampleParameter2D, -600, 0); t.set_editor_property("parameter_name", "Face")
@@ -105,8 +110,11 @@ def signs(g):
     mats = hk.materials()
     # (the board: a panel 63 x 6 x 47.2 cm about the faces' middle (x 90.4, z -89.5 in the sign's frame), a steel rim round it 2 cm
     # proud and thinner (the faces stand on the panel's), an arm to the wall and its plate)
-    board = hk.boxes("SM_HV_SignBoard", [(58.9, 121.9, -3, 3, -113.1, -65.9, "dark"), (57.6, 123.2, -2.4, 2.4, -114.4, -64.6, "steel"),
-                                         (0, 60, -2, 2, -62, -58, "steel"), (0, 3, -9, 9, -72, -48, "steel")], mats, rebuild=True)
+    # (the panel hung from the arm by two short rods (PR #125's review: it hung 2.6 cm under the arm, unjoined); a new name for the new
+    # shape (the level holds the old one: nothing it uses is deleted))
+    board = hk.boxes("SM_HV_SignBoard2", [(58.9, 121.9, -3, 3, -113.1, -65.9, "dark"), (57.6, 123.2, -2.4, 2.4, -114.4, -64.6, "steel"),
+                                          (0, 124, -2, 2, -62, -58, "steel"), (0, 3, -9, 9, -72, -48, "steel"),
+                                          (64, 67, -1.2, 1.2, -65.5, -58, "steel"), (114, 117, -1.2, 1.2, -65.5, -58, "steel")], mats)
     add = {"Heaven.Town.Sign": raw(board, collision=False)}
     base = face_material()
     plane = unreal.load_asset("/Engine/BasicShapes/Plane")

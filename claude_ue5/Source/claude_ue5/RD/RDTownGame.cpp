@@ -111,7 +111,12 @@ void ARDTownsfolk::PlayAnim(UAnimationAsset* A, float Rate)
 void ARDTownsfolk::FaceToward(const FVector& P, float Seconds)
 {
 	FaceAt = P; FaceUntil = GetWorld()->GetTimeSeconds() + Seconds;
+	// (woken to serve: out of bed at once (the service's panel pauses the game: in its next tick, after the panel, the keeper had served
+	// from its bed), posed standing now for the panel's picture behind it)
+	const bool bWasInBed = bInBed;
+	if (bInBed) { bInBed = false; SetActorLocationAndRotation(PreBed, FRotator(0.f, HomeYaw, 0.f)); }
 	Path.Reset(); SetClip(false);
+	if (bWasInBed && Body) { Body->TickAnimation(0.f, false); Body->RefreshBoneTransforms(); }
 }
 
 void ARDDungeonGenerator::TownLinePool(int32 InDef, ERDTownRole InRole, TArray<FString>& Out) const
@@ -202,6 +207,9 @@ void ARDTownsfolk::Tick(float Dt)
 	{
 		// (woken to serve (a keeper, a quest's giver, PR #41's review): up out of bed to face her, back in it once she has gone)
 		if (bInBed) { bInBed = false; SetActorLocationAndRotation(PreBed, FRotator(0.f, HomeYaw, 0.f)); }
+		// (awake while it faces her: its day decides again once she has gone (back to bed at night, up in the morning); kept asleep, a
+		// morning that came in its 8 s left it up but "asleep" (the day's reset is past this return))
+		bSleeping = false;
 		if (Act != 3) { Turn(FaceAt - GetActorLocation(), 240.f); SetClip(false); }
 		return;
 	}

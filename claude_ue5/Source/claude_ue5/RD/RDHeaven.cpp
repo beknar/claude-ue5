@@ -101,15 +101,16 @@ void ARDSection::ResearchShell(int32 BI)
 				const float Hb = Body * Shares[Ti];
 				AddPiece(TEXT("Lab.Block"), FTransform(FRotator::ZeroRotator, Hc + FVector(0, 0, Z), FVector(Sz.X * Widths[Ti] / FMath::Max((float)Bx->Size.X, 1.f), Sz.Y * Widths[Ti] / FMath::Max((float)Bx->Size.Y, 1.f), Hb / FMath::Max((float)Bx->Size.Z, 1.f))), true);
 				Z += Hb;
+				// (a red air light at each corner: a lit box seen from anywhere (the town's lights are cut at 45 m: PR #125's review))
 				for (int32 Cx = -1; Cx <= 1; Cx += 2)
 					for (int32 Cy = -1; Cy <= 1; Cy += 2)
-						AddLight(Hc + FVector(Cx * Sz.X * Widths[Ti] * 0.5f, Cy * Sz.Y * Widths[Ti] * 0.5f, Z + 30.f), FLinearColor(1.f, 0.08f, 0.05f), 600.f, 2500.f, false, 0.f);
+						AddPieceAt(TEXT("Heaven.AirLight"), Hc + FVector(Cx * Sz.X * Widths[Ti] * 0.5f, Cy * Sz.Y * Widths[Ti] * 0.5f, Z), 0.f, 1.f, true);
 			}
 			// (the spire: a thin block the rest of the way, its beacon at the top)
 			const float Sp = Want - Body;
 			AddPiece(TEXT("Lab.Block"), FTransform(FRotator::ZeroRotator, Hc + FVector(0, 0, Z), FVector(120.f / FMath::Max((float)Bx->Size.X, 1.f), 120.f / FMath::Max((float)Bx->Size.Y, 1.f), Sp / FMath::Max((float)Bx->Size.Z, 1.f))), true);
 			Z += Sp;
-			AddLight(Hc + FVector(0, 0, Z + 40.f), FLinearColor(1.f, 0.05f, 0.03f), 1500.f, 4000.f, false, 0.f);
+			AddPieceAt(TEXT("Heaven.AirLight"), Hc + FVector(0, 0, Z), 0.f, 1.5f, true);          // (the spire's beacon)
 			HeavenTallestZ = FMath::Max(HeavenTallestZ, Z);
 			HeavenResearchTopZ16 = Z;
 		}

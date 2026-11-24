@@ -210,3 +210,8 @@ The starting town: a Save As copy of mistward_castle whose generator has `bTown`
 - **A hidden interior's people are not drawn**: a check of the people's animation bands must not count one not drawn nearer than 110 m as wrong (hidden indoors by the interior rule).
 - **Python cannot read a UPROPERTY without a Blueprint specifier** (`TownPeople` is `Transient` only): a test reads the state through a getter of lines (`GetTownLodLines16`).
 
+
+## PR #125's sleepers (2026-11-24)
+
+- **A test that passes only on one kind of town proves nothing on the others**: `sleep10`'s "a keeper wakes to serve" had only ever met a trader with no bed. A keeper in bed served from it: F turned it to her and its next tick (after the panel, which pauses the game) took it out of bed. Put out of bed where it is woken (`FaceToward`), and awake while it faces her: its day's reset is past the facing's return. Pick the case the check is about (a keeper in bed) and record it.
+- **Read a body where it is drawn**: since the list of 2026-11-22's seventh phase an interior is hidden unless she is in it or sees in; a body behind its wall is not posed (it stood in its bed). Stand inside the building, and count one not drawn apart.

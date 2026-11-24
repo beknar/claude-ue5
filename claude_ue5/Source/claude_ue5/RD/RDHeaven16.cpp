@@ -14,6 +14,8 @@
 #include "Components/InstancedStaticMeshComponent.h"
 DEFINE_LOG_CATEGORY_STATIC(LogRDHeaven16, Log, All);
 
+static TAutoConsoleVariable<int32> CVarRDStreetLamps(TEXT("rd.StreetLamps"), 1, TEXT("Heaven's street lamps: 1 by the hour (lit at night), 0 never lit (tests: the street without them)"));
+
 bool ARDDungeonGenerator::IsStreetNight16() const
 {
 	// (the street lights burn from dusk to dawn: from 19:00 to 6:30; a town without the day's clock is lit as at night)
@@ -42,7 +44,7 @@ void ARDDungeonGenerator::TickStreetLamps16(float Dt)
 		for (UInstancedStaticMeshComponent* I : Is) if (Gp && I->GetStaticMesh() == Gp->Mesh) StreetLampGlows16.Add(I);
 		StreetLampsOf16 = S; StreetLampNight16 = -1;
 	}
-	const int32 Night = IsStreetNight16() ? 1 : 0;
+	const int32 Night = IsStreetNight16() && CVarRDStreetLamps.GetValueOnGameThread() != 0 ? 1 : 0;
 	if (Night == StreetLampNight16) return;
 	StreetLampNight16 = Night;
 	for (const TWeakObjectPtr<UPointLightComponent>& L : StreetLamps16) if (UPointLightComponent* P = L.Get()) P->SetVisibility(Night == 1);
@@ -69,7 +71,13 @@ void ARDSection::HeavenLamp16(const FVector& At, float Yaw)
 	const FVector Head = Generator->HeavenLampHead16.IsNearlyZero() ? FVector(260.f, 0.f, 740.f) : Generator->HeavenLampHead16;
 	const FVector P = At + FRotator(0, Yaw, 0).RotateVector(Head);
 	if (UPointLightComponent* L = AddLight(P - FVector(0, 0, 25.f), FLinearColor(1.f, 0.88f, 0.70f), Generator->HeavenLampCd16, Generator->HeavenLampRadius16, false, 0.f))
-		L->ComponentTags.Add(ARDDungeonGenerator::StreetLampTag16());          // (the list of 2026-11-22: a street lamp keeps its 90 m)
+	{
+		L->ComponentTags.Add(ARDDungeonGenerator::StreetLampTag16());          // (the list of 2026-11-22: a street lamp keeps its own draw distance)
+		// (its light near her only, the glowing head seen from afar: 154 lamps' lights drawn to 90 m at 24 m each dropped the frame rate from
+		// 20.1 to 4.4 a second at midnight (PR #125's review measured it); no indirect light (Lumen's cost), none on the see-through)
+		L->MaxDrawDistance = Generator->HeavenLampDraw16; L->MaxDistanceFadeRange = 1000.f;
+		L->SetIndirectLightingIntensity(0.f); L->bAffectTranslucentLighting = false;
+	}
 	if (Generator->Piece(TEXT("Heaven.LampGlow"))) AddPieceAt(TEXT("Heaven.LampGlow"), P, Yaw, 1.f, true);
 }
 

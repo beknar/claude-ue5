@@ -2235,8 +2235,10 @@ public:
 	// ---- the list of 2026-11-22's eighteenth phase: Heaven's first fixes (RDHeaven16.cpp)
 	/** a street lamp's head in its pole's frame (946 lamps measures it on the mesh: the arm's end, the head's underside), its light */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven16") FVector HeavenLampHead16 = FVector::ZeroVector;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven16") float HeavenLampCd16 = 1400.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven16") float HeavenLampRadius16 = 2400.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven16") float HeavenLampCd16 = 1000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven16") float HeavenLampRadius16 = 1800.f;
+	/** a street lamp's light drawn this far (its glowing head beyond) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven16") float HeavenLampDraw16 = 3500.f;
 	/** the hours the street lamps burn: from LampsOn to LampsOff */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven16") float HeavenLampsOn16 = 19.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven16") float HeavenLampsOff16 = 6.5f;

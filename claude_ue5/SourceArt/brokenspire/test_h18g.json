@@ -1,0 +1,405 @@
+{
+ "tag": "h18g",
+ "plan": [
+  "sleep10",
+  "heaven16_lamps",
+  "heaven16_signs",
+  "heaven16_map",
+  "heaven16_sleep",
+  "heaven16_tower"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "sleep10",
+   "ok": true,
+   "walk_home_s": 12.4,
+   "still_walking": 0,
+   "beds": {
+    "recorded": 70,
+    "made": 48,
+    "sleepers": 67,
+    "given": 67
+   },
+   "no_bed_with_building": [
+    [
+     "Drunk",
+     true
+    ],
+    [
+     "Smith",
+     true
+    ],
+    [
+     "Witch",
+     false
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ]
+   ],
+   "sleepers": 67,
+   "asleep": 67,
+   "in_bed": 67,
+   "on_sleep_clip": 67,
+   "children": {
+    "at_home": 10,
+    "in_bed": 10,
+    "square": 0
+   },
+   "awake_sample": [],
+   "shared_beds": 0,
+   "poses": [
+    {
+     "role": "Priest",
+     "mesh": "SKM_NPC_Character_05_Full_02",
+     "hips_over_top": 9.1,
+     "head_rise": 7.3,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Innkeeper",
+     "mesh": "SKM_NPC_Character_01_Full_02",
+     "hips_over_top": 9.1,
+     "head_rise": 7.8,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Scholar",
+     "mesh": "SK_UE5_NPC_Plague_doctor_Full_02",
+     "hips_over_top": 9.1,
+     "head_rise": 7.4,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Trader",
+     "mesh": "SKM_NPC_Character_03_Full_01",
+     "hips_over_top": 9.1,
+     "head_rise": 7.9,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Healer",
+     "mesh": "SK_UE5_NPC_Queen_Full_02",
+     "hips_over_top": 9.1,
+     "head_rise": 8.5,
+     "head_off": 66.2,
+     "on_bed": 0.6,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Keeper",
+     "mesh": "SK_UE5_NPC_Servant_Full_01",
+     "hips_over_top": 9.1,
+     "head_rise": 8.1,
+     "head_off": 66.2,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SKM_Viking_Full_010",
+     "hips_over_top": 9.1,
+     "head_rise": 8.3,
+     "head_off": 66.2,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SKM_Knight_05_Full_01",
+     "hips_over_top": 9.1,
+     "head_rise": 7.3,
+     "head_off": 66.3,
+     "on_bed": 0.7,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SKM_Viking_Full_010",
+     "hips_over_top": 9.1,
+     "head_rise": 8.1,
+     "head_off": 66.2,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SKM_NPC_Character_04_Full_01",
+     "hips_over_top": 9.1,
+     "head_rise": 7.4,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SK_UE5_NPC_Beggar_03_Full_01",
+     "hips_over_top": 7.7,
+     "head_rise": 7.0,
+     "head_off": 63.0,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SK_UE5_NPC_Beggar_03_Full_01",
+     "hips_over_top": 7.7,
+     "head_rise": 7.5,
+     "head_off": 63.0,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    }
+   ],
+   "bad_poses": [],
+   "poses_n": 14,
+   "poses_not_drawn": 0,
+   "shots": [
+    "sleep10_a",
+    "sleep10_b"
+   ],
+   "night_smith_says": "talk to Brom Hollowhand",
+   "night_smith_f": "bark",
+   "night_smith_panel": "smith",
+   "night_keeper": "Trader",
+   "night_trader_in_bed_before": true,
+   "night_trader_f": "bark",
+   "night_trader_panel": "store",
+   "night_trader_in_bed": false,
+   "night_trader_sleeping": true,
+   "morning": {
+    "asleep": 0,
+    "in_bed": 0
+   }
+  },
+  {
+   "step": "heaven16_lamps",
+   "ok": false,
+   "poles": 154,
+   "noon": [
+    "lamps|154|0|0"
+   ],
+   "midnight": "lamps|154|154|1",
+   "lamp_cd_radius": [
+    "1400",
+    "2400"
+   ],
+   "pair_m": 21.0,
+   "luma_on": {
+    "under": 133.22,
+    "between": 103.62,
+    "contrast": 1.286
+   },
+   "fps_on": 4.4,
+   "luma_off": {
+    "under": 19.13,
+    "between": 18.89,
+    "contrast": 1.013
+   },
+   "fps_off": 20.1
+  },
+  {
+   "step": "heaven16_signs",
+   "ok": true,
+   "boards": 41,
+   "shield_boards": 0,
+   "faces": {
+    "MI_HV_Sign_CHAPEL": 4,
+    "MI_HV_Sign_BAR": 2,
+    "MI_HV_Sign_GEARSHOP": 2,
+    "MI_HV_Sign_GROCERY": 2,
+    "MI_HV_Sign_CLINIC": 2,
+    "MI_HV_Sign_STORAGE": 2,
+    "MI_HV_Sign_SECURITY": 2,
+    "MI_HV_Sign_TOWER": 18,
+    "MI_HV_Sign_OFFICES": 24,
+    "MI_HV_Sign_SHOP": 24
+   },
+   "gold_faces": 0
+  },
+  {
+   "step": "heaven16_map",
+   "ok": true,
+   "badges": {
+    "hvmap_chapel": 2,
+    "hvmap_bar": 1,
+    "hvmap_gear_shop": 1,
+    "hvmap_grocery": 1,
+    "hvmap_clinic": 1,
+    "hvmap_storage": 1,
+    "hvmap_security": 1,
+    "hvmap_skyscraper": 9,
+    "hvmap_office": 12,
+    "hvmap_shop": 12,
+    "hvmap_research_lab": 1
+   },
+   "legend": [
+    "hvmap_chapel|chapel: blessings",
+    "hvmap_bar|bar: food and drink",
+    "hvmap_gear_shop|gear shop: repairs, the anvil",
+    "hvmap_grocery|grocery: buy and sell",
+    "hvmap_clinic|clinic: healing",
+    "hvmap_storage|storage: your storage",
+    "hvmap_security|security: the city's guard",
+    "hvmap_skyscraper|skyscraper",
+    "hvmap_office|offices",
+    "hvmap_shop|shop: buy and sell",
+    "hvmap_research_lab|Kratos Aurorim Research: the way into the fortress",
+    "@seal|a quest giver: ! offers, ? to hand in"
+   ],
+   "drawn_medieval": [],
+   "drawn_hvmap": [
+    "hvmap_bar",
+    "hvmap_chapel",
+    "hvmap_clinic",
+    "hvmap_gear_shop",
+    "hvmap_grocery",
+    "hvmap_office",
+    "hvmap_research_lab",
+    "hvmap_security",
+    "hvmap_shop",
+    "hvmap_skyscraper",
+    "hvmap_storage"
+   ]
+  },
+  {
+   "step": "heaven16_sleep",
+   "ok": true,
+   "in_bed": 57,
+   "poses": [
+    {
+     "role": "Priest",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_860"
+    },
+    {
+     "role": "Innkeeper",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_861"
+    },
+    {
+     "role": "Scholar",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_862"
+    },
+    {
+     "role": "Smith",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_863"
+    },
+    {
+     "role": "Trader",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_864"
+    },
+    {
+     "role": "Healer",
+     "hips_over_mattress": 12.5,
+     "hit": "InstancedStaticMeshComponent_109"
+    },
+    {
+     "role": "Soldier",
+     "hips_over_mattress": 12.5,
+     "hit": "InstancedStaticMeshComponent_116"
+    },
+    {
+     "role": "Soldier",
+     "hips_over_mattress": 12.5,
+     "hit": "InstancedStaticMeshComponent_116"
+    },
+    {
+     "role": "Soldier",
+     "hips_over_mattress": 12.5,
+     "hit": "InstancedStaticMeshComponent_116"
+    },
+    {
+     "role": "Worker",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_865"
+    }
+   ]
+  },
+  {
+   "step": "heaven16_tower",
+   "ok": true,
+   "research_top_m": 161.8,
+   "code_top_m": 161.8,
+   "air_lights": 13,
+   "security_door": 1,
+   "plan_max_skyscraper_m": 101.1,
+   "skyscrapers": 9,
+   "tallest_skyscraper_m": 101.3
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_h18g_sleep10_a.png",
+  "bs_h18g_sleep10_b.png",
+  "bs_h18g_heaven16_lamp_under_on.png",
+  "bs_h18g_heaven16_lamp_between_on.png",
+  "bs_h18g_heaven16_lamps_night.png",
+  "bs_h18g_heaven16_lamp_under_off.png",
+  "bs_h18g_heaven16_lamp_between_off.png",
+  "bs_h18g_heaven16_sign.png",
+  "bs_h18g_heaven16_map.png",
+  "bs_h18g_heaven16_sleeper.png",
+  "bs_h18g_heaven16_tower_noon.png",
+  "bs_h18g_heaven16_tower_night.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

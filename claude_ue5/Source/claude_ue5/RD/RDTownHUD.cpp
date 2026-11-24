@@ -705,7 +705,7 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 		}
 		const float Grow = Bd.Kind == TK_Castle ? 1.12f : Bd.Kind == TK_Home ? 1.3f : 1.22f;
 		// (the list of 2026-11-22: in Heaven no painted medieval building: the picture from above shows it, its modern pictogram marks it)
-		const bool bHvPic = Gen->TownPlan == 5 && UI.Has(ARDDungeonGenerator::HeavenMapSymbol16(Bd.Kind));
+		const bool bHvPic = Gen->TownPlan == 5 && Bd.Kind != TK_Home && UI.Has(ARDDungeonGenerator::HeavenMapSymbol16(Bd.Kind));          // (the homes keep theirs: no badge for them (PR #125's review))
 		if (!bHvPic) Pic(Nm, Ctr, FMath::Max(Hw, Hh * 0.8f) * Grow, FMath::Max(Hh, Hw * 0.8f) * Grow, (Bd.Seed & 1u) != 0u && Bd.Kind != TK_Castle, true);
 		if (Bd.Kind != TK_Home) Taken.Add(FBox2D(Ctr - FVector2D(Hw, Hh) * 0.9f, Ctr + FVector2D(Hw, Hh) * 0.9f));
 		if (Gen->bTownSymbols15 && !RDTLabelOf(Bd.Kind).IsEmpty()) Badges15.Add({ Bd.Kind, Ctr, FVector((W0 + W1) * 0.5f, 0.f) });
