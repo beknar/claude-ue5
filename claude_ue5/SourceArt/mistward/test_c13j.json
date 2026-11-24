@@ -1,0 +1,174 @@
+{
+ "tag": "c13j",
+ "plan": [
+  "cave16weapons"
+ ],
+ "level": "caves",
+ "steps": [
+  {
+   "step": "cave16weapons",
+   "ok": true,
+   "bands": {
+    "Miner's Pick": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Shard Blade": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Jawbone Club": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Rib Dagger": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Lightless Bow": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Maren's Falchion": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Corvin's Gladius": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "The Sandwalker's Khopesh": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Old Hessa's Notched Blade": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "Lysander's Rapier": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "The Warden's Runed Blade": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ]
+   },
+   "damage_vs_like": {
+    "Miner's Pick": 0.9,
+    "Shard Blade": 1.45,
+    "Jawbone Club": 0.85,
+    "Rib Dagger": 0.85,
+    "Lightless Bow": 1.0,
+    "Maren's Falchion": 1.3,
+    "Corvin's Gladius": 1.3,
+    "The Sandwalker's Khopesh": 1.3,
+    "Old Hessa's Notched Blade": 1.3,
+    "Lysander's Rapier": 1.3,
+    "The Warden's Runed Blade": 1.3
+   },
+   "pick": {
+    "index": 1,
+    "mesh": "SM_His_Med_Tools_Pickaxe_Metal_Old_03",
+    "hand_off_handle_cm": 8.0,
+    "along": 0.0
+   },
+   "rubble": {
+    "set": [
+     -1,
+     2
+    ],
+    "piles": 2,
+    "sets_with_rubble": [
+     3,
+     25
+    ],
+    "tile_blocked": true,
+    "warrior_dagger": [
+     [
+      "0",
+      "1"
+     ],
+     [
+      "0",
+      "2"
+     ],
+     [
+      "1",
+      "0"
+     ]
+    ],
+    "tile_open": true,
+    "walked_through_m": 8.09,
+    "pick_once": "1",
+    "cache_kind": "cache"
+   },
+   "shard": {
+    "index": 2,
+    "repair_item": "Repair Kit",
+    "repair_lines_with_it": [],
+    "geode_used": true,
+    "wear": [
+     5.0,
+     14.1,
+     30.5
+    ]
+   },
+   "lost": [
+    "lost|The Warden's Runed Blade|-54680|-47550|-1327"
+   ]
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "shots": [
+  "mw_c13j_cave16weapons_pick.png",
+  "mw_c13j_cave16weapons_rubble.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}

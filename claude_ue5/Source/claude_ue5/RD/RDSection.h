@@ -775,6 +775,10 @@ public:
 	static constexpr int32 CaveSpurTo16 = -1000;
 	FString CaveLostLine16;
 	void CaveRubbleSet16();
+	/** phase 13: a flooded side tunnel (its stretch under water, the water's face) */
+	struct FCaveFlood16 { TArray<FVector> Pts; float Half = 300.f, WaterZ = 0.f; TArray<TObjectPtr<UPrimitiveComponent>> Comps; };
+	TArray<FCaveFlood16> CaveFloods16;
+	bool CaveFloodSet16(const FCaveRun16& Run, float Half, float F0, float F1);
 	void CaveLostBlade16();
 	/** broken: its pieces gone, its tiles open */
 	void ClearRubble16(int32 K);

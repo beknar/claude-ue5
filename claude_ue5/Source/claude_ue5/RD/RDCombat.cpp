@@ -290,7 +290,8 @@ void URDCombatComponent::UpdateWalkSpeed()
 		* (bBlocking && Generator && Generator->BlockMoveSpeed <= 0.f ? 1.f - FMath::Clamp(Generator->BlockSlow, 0.f, 0.95f) : 1.f)          // (the third list: blocking)
 		* FMath::Max(WildRunFactor, 0.1f) * FMath::Max(MountFactor, 0.1f)          // (the list of 2026-11-07: rd.WildRunSpeed; the eighth phase: her horse)
 		* FMath::Max(SwimFactor, 0.1f)                                             // (2026-11-12: swimming)
-		* (1.f + GetSocketBonus16(TEXT("speed")));                                  // (the list of 2026-11-22's caves: a violet stone)
+		* (1.f + GetSocketBonus16(TEXT("speed")))                                   // (the list of 2026-11-22's caves: a violet stone)
+		* (bUnder16 && Generator ? FMath::Clamp(Generator->UnderwaterSpeed16, 0.1f, 1.f) : 1.f);          // (phase 13: under water)
 	// (the list of 2026-11-07: while she blocks, her slow block walk at most, walking or running (FilterBlockMove gives her
 	// move its full size along her facing); slower still if something else slows her more)
 	if (bBlocking && Generator && Generator->BlockMoveSpeed > 0.f)
@@ -831,6 +832,7 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	TickLightBurn15(Dt);          // (the list of 2026-11-20: the torch or ankh held lit burns down)
 	TickDarksight16();          // (the list of 2026-11-22's caves: the darksight's light on her)
 	TickSockets16(Dt);          // (phase 11: a green stone's healing; her speed again when the stones working change)
+	TickBreath16(Dt);          // (phase 13: under a flooded tunnel's water)
 	// (the third list: the slashes' burning ground and pulls; quick slots for weapons found or spells learned)
 	if (SlashAreas.Num() > 0 || Echoes.Num() > 0) TickSlashAreas(Dt);          // (the Echo slash's hits too: they waited for an area that never came)
 	if (Generator->Secondaries.Num() > 0) TickSecondary(Dt);          // (the sixth phase's abilities)
@@ -1962,6 +1964,8 @@ bool URDCombatComponent::WearArmour(FName Item)
 		C->SetCastShadow(true);
 		C->RegisterComponent();
 		C->SetLeaderPoseComponent(M);              // (her bones move it: it was made on her skeleton, in her rest pose)
+		// (the list of 2026-11-22's caves: a set in a material of its own: chitin, barnacles, deepiron)
+		if (const TObjectPtr<UMaterialInterface>* Mt = Generator->WeaponLooks16.Find(Item); Mt && *Mt) for (int32 K = 0; K < C->GetNumMaterials(); ++K) C->SetMaterial(K, *Mt);
 		ArmourComps.Add(C);
 	}
 	WornArmour = Item; ++ArmourChanges;

@@ -307,6 +307,22 @@ void ARDHUD::DrawCombat(float Sc)
 		UI.Text(N, FLinearColor(0.f, 0.f, 0.f, Al * 0.8f), S.X - Tw * 0.5f + 2.f, S.Y - Th + 2.f, Medium, K, ERDType::Title);
 		UI.Text(N, T.bOnPlayer ? FLinearColor(1.f, 0.25f, 0.2f, Al) : FLinearColor(1.f, 0.9f, 0.35f, Al), S.X - Tw * 0.5f, S.Y - Th, Medium, K, ERDType::Title);
 	}
+	// ---- the list of 2026-11-22's caves, phase 13: her breath under a flooded tunnel's water (a bar over the quick bar while it is not
+	// full; red and pulsing when it is gone and the water takes her hit points)
+	if (Cb->IsUnderWater16() || Cb->GetBreathLeft16() < Cb->GetBreathMax16() - 0.05f)
+	{
+		const float Bf = FMath::Clamp(Cb->GetBreathLeft16() / FMath::Max(Cb->GetBreathMax16(), 0.1f), 0.f, 1.f);
+		const float Bw = 360.f * Sc, Bh2 = 22.f * Sc;
+		const FVector2D B0((Canvas->ClipX - Bw) * 0.5f, Canvas->ClipY - 150.f * Sc), B1 = B0 + FVector2D(Bw, Bh2);
+		const bool bOut = Bf <= 0.f;
+		const float Pulse = bOut ? 0.6f + 0.4f * FMath::Sin(Now * 9.f) : 1.f;
+		Box(B0, B1, FLinearColor(0.02f, 0.05f, 0.08f, 0.85f));
+		Box(B0 + FVector2D(2.f), FVector2D(B0.X + 2.f + (Bw - 4.f) * Bf, B1.Y - 2.f), FLinearColor(0.35f, 0.75f, 0.95f, 0.95f));
+		Frame(B0, B1, bOut ? FLinearColor(1.f, 0.3f, 0.25f, Pulse) : FLinearColor(0.6f, 0.85f, 1.f, 0.9f), 1.5f * Sc);
+		const FString Bt = bOut ? FString(TEXT("NO BREATH: GET OUT OF THE WATER")) : FString::Printf(TEXT("BREATH  %.0f s"), FMath::CeilToFloat(Cb->GetBreathLeft16()));
+		float Btw, Bth; UI.TextSize(Bt, Btw, Bth, Small, Sc, ERDType::Label);
+		UI.Text(Bt, FLinearColor::White, (B0.X + B1.X - Btw) * 0.5f, (B0.Y + B1.Y - Bth) * 0.5f, Small, Sc, ERDType::Label);
+	}
 	// ---- status panel (bottom right): hit points (and mana), the weapons with their damage, kills
 	{
 		const bool bDex = Cb->GetMaxMana() <= 0.f && Cb->GetMaxDexEnergy() > 0.f;          // (mistward6: the Rogue's energy in the mana bar's place)

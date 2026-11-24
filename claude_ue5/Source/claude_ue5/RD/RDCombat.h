@@ -695,6 +695,18 @@ public:
 	bool IsLightless16(int32 Index) const;
 	/** the stealth (its end time) whose ambush a lightless arrow has taken */
 	float LightlessAmbushFor16 = -1.f;
+	// ---- phase 13: her armour's perks and her breath (RDCave16e.cpp)
+	FRDArmourPerk16 ArmourPerk16() const;
+	float GetNoticeMul16() const { return FMath::Clamp(ArmourPerk16().Notice, 0.1f, 1.f); }
+	float GetBreathMax16() const;
+	void TickBreath16(float Dt);
+	/** for the tests: "breath|<left>|<max>|<under 0/1>|<dives>|<drowned hp>|notice|..|darksight|..|poisonguard|.." */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") FString GetBreath16() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Cave16") float GetBreathLeft16() const { return Breath16 < 0.f ? GetBreathMax16() : Breath16; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Cave16") bool IsUnderWater16() const { return bUnder16; }
+	float Breath16 = -1.f, DrownAcc16 = 0.f, DrownTaken16 = 0.f, LastDrownMsg16 = -100.f;
+	bool bUnder16 = false; int32 Dives16 = 0;
+	FPostProcessSettings SavedCamPP16; float SavedCamPPWeight16 = 0.f; bool bCamPPSaved16 = false;
 	/** a thing that alone mends one of her weapons (the shard blade and the geode shards) used on it */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") bool MendWith16(FName Item);
 	UPROPERTY() TMap<FName, FName> Sockets16;

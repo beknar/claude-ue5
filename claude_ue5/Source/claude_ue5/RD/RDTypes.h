@@ -1795,6 +1795,21 @@ struct FRDMend16
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Share = 0.25f;
 };
 
+/** the list of 2026-11-22's caves, phase 13: what a set of armour does while it is worn (beside its share of a blow) */
+USTRUCT(BlueprintType)
+struct FRDArmourPerk16
+{
+	GENERATED_BODY()
+	/** monsters notice her from this share of their distance (the spelunker's quiet steps: 0.8) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Notice = 1.f;
+	/** a darksight light of this many metres on her */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Darksight = 0.f;
+	/** a poison's hurt this share less */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float PoisonGuard = 0.f;
+	/** her breath under water this many times as long */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Breath = 1.f;
+};
+
 USTRUCT(BlueprintType)
 struct FRDSocket16
 {

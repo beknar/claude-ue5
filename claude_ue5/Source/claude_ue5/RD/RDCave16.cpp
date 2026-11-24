@@ -1121,7 +1121,7 @@ void ARDSection::CaveFurnish16(FRandomStream& R, int32 RI)
 {
 	// (phase 9: the lights are the shell's (torches, god rays: laid in play with it, never twice); a room gets the castle's containers
 	// by its walls: on its floor's edge tiles, pushed 60 cm toward the wall, facing the room's middle)
-	if (RI == 0) { CaveContainers16 = 0; CaveRubble16.Reset(); CaveLostLine16.Reset(); }
+	if (RI == 0) { CaveContainers16 = 0; CaveRubble16.Reset(); CaveLostLine16.Reset(); CaveFloods16.Reset(); }
 	// (phase 12: once a set, with its last room: the rubble across a side tunnel and its cache, the lost blade; the room's furnishing
 	// goes on with its own footprints)
 	if (RI == Rooms.Num() - 1) { Feet.Reset(); CaveRubbleSet16(); CaveLostBlade16(); Feet.Reset(); }

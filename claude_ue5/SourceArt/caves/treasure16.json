@@ -209,5 +209,171 @@
     0
    ]
   }
+ },
+ "phase13": {
+  "_note": "The caves' armour: copies of the fitted sets in new materials, band by band (where a map has the bands), every hero's fit kept: 'amount' added to the share of a blow it takes (the deepiron sets one band's 0.04 better), 'durability' times; 'perk' what it does while worn (notice: monsters notice her from that share of their distance; darksight: metres; poison: a poison's hurt that share less; breath: her breath that many times as long); 'recipe' at its station, by band ('ingots': the deepiron ingots of the plain band, one more a band). The drowned knight's four pieces lie one in each cave (by its key) in its flooded side tunnel's dry end, and make the set at the anvil. 'flood': the flooded side tunnels' share and the water's material, her breath, the water's bite and her speed under it.",
+  "items": [
+   {
+    "name": "Drowned Knight's Helm",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_drowned_helm",
+    "weight": 0,
+    "cave": true,
+    "looks": "The drowned knight's helm, crusted with barnacles, found in a flooded cave's dry end. The helm, cuirass, gauntlets and greaves together make his armour at an anvil."
+   },
+   {
+    "name": "Drowned Knight's Cuirass",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_drowned_cuirass",
+    "weight": 0,
+    "cave": true,
+    "looks": "The drowned knight's cuirass, crusted with barnacles, found in a flooded cave's dry end. The helm, cuirass, gauntlets and greaves together make his armour at an anvil."
+   },
+   {
+    "name": "Drowned Knight's Gauntlets",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_drowned_gauntlets",
+    "weight": 0,
+    "cave": true,
+    "looks": "The drowned knight's gauntlets, crusted with barnacles, found in a flooded cave's dry end. The helm, cuirass, gauntlets and greaves together make his armour at an anvil."
+   },
+   {
+    "name": "Drowned Knight's Greaves",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_drowned_greaves",
+    "weight": 0,
+    "cave": true,
+    "looks": "The drowned knight's greaves, crusted with barnacles, found in a flooded cave's dry end. The helm, cuirass, gauntlets and greaves together make his armour at an anvil."
+   }
+  ],
+  "armour": [
+   {
+    "name": "Spelunker's Armour",
+    "like": "Desert Hero’s Armour",
+    "icon": "cave_spelunker_leathers",
+    "amount": 0.0,
+    "durability": 1.0,
+    "weight": 0.3,
+    "material": "/Game/Scene_Bazaar_Vol1/Assets/MS/3D/His_Baz_Container_Pouch_Leather_S_01/MI_His_Baz_Container_Pouch_Leather_S_01",
+    "perk": {
+     "notice": 0.8,
+     "darksight": 6
+    },
+    "looks": "Soft, dark leathers a cave-walker wears: monsters hear her steps from four fifths as far, and her eyes see a little into the dark."
+   },
+   {
+    "name": "Chitin Plate",
+    "like": "Plate Armour",
+    "icon": "cave_chitin_plate",
+    "amount": 0.0,
+    "durability": 1.0,
+    "weight": 0.25,
+    "material": "/Game/Creatures_Insects_Pack/Materials/MI_Creature_Insect_01",
+    "perk": {
+     "poison": 0.5
+    },
+    "looks": "Plates of a giant crawler's shell over padding: heavy, and a poison hurts its wearer half as much."
+   },
+   {
+    "name": "Drowned Knight's Armour",
+    "like": "Templar’s Armour",
+    "icon": "cave_drowned_cuirass",
+    "amount": 0.0,
+    "durability": 1.1,
+    "weight": 0,
+    "bands": false,
+    "material": "/Game/PitchBlackTemple/Materials/Instances/MI_Barnacle_A",
+    "perk": {
+     "breath": 3
+    },
+    "recipe": [
+     "",
+     [
+      [
+       "helm",
+       [
+        "Drowned Knight's Helm"
+       ],
+       1
+      ],
+      [
+       "cuirass",
+       [
+        "Drowned Knight's Cuirass"
+       ],
+       1
+      ],
+      [
+       "gauntlets",
+       [
+        "Drowned Knight's Gauntlets"
+       ],
+       1
+      ],
+      [
+       "greaves",
+       [
+        "Drowned Knight's Greaves"
+       ],
+       1
+      ]
+     ]
+    ],
+    "looks": "The drowned knight's armour, put together again: whoever wears it holds her breath three times as long under water."
+   },
+   {
+    "name": "Deepiron Mail",
+    "like": "Orc Bruiser’s Armour",
+    "icon": "cave_deepiron_armour",
+    "amount": 0.04,
+    "durability": 1.15,
+    "weight": 0,
+    "material": "/Game/Feather/Materials/MI_IronRust_01",
+    "ingots": 3,
+    "looks": "Light mail of deepiron: a band better than any smith's of its kind."
+   },
+   {
+    "name": "Deepiron Scale",
+    "like": "Split Armour",
+    "icon": "cave_deepiron_armour",
+    "amount": 0.04,
+    "durability": 1.15,
+    "weight": 0,
+    "material": "/Game/Feather/Materials/MI_IronRust_01",
+    "ingots": 4,
+    "looks": "Scale armour of deepiron: a band better than any smith's of its kind."
+   },
+   {
+    "name": "Deepiron Plate",
+    "like": "Dark Knight’s Armour",
+    "icon": "cave_deepiron_armour",
+    "amount": 0.04,
+    "durability": 1.15,
+    "weight": 0,
+    "material": "/Game/Feather/Materials/MI_IronRust_01",
+    "ingots": 6,
+    "looks": "Plate of deepiron: a band better than any smith's of its kind."
+   }
+  ],
+  "drowned_pieces": [
+   "Drowned Knight's Helm",
+   "Drowned Knight's Cuirass",
+   "Drowned Knight's Gauntlets",
+   "Drowned Knight's Greaves"
+  ],
+  "flood": {
+   "share": 0.5,
+   "water": "/Game/RandomDungeon/Caves16/MI_Cave16_Water",
+   "parent": "/Game/RandomDungeon/Wild13/Kit/M_N13_Translucent",
+   "tint": [0.06, 0.22, 0.26, 1.0],
+   "opacity": 0.55,
+   "breath": 15,
+   "drown_share": 0.08,
+   "speed": 0.6
+  }
  }
 }

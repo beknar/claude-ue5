@@ -394,6 +394,65 @@ def cave_weapons(its, P, missing):
     return out, looks, mends, lightless, breakers, lost, names
 
 
+def flood_water(fl):
+    """the flooded tunnels' water: an instance of our own two-sided translucent material, tinted (the packs' cave waters fade with
+    depth and showed nothing between a tunnel's walls: the first pictures)"""
+    path = fl["water"]
+    if unreal.EditorAssetLibrary.does_asset_exist(path):
+        mi = unreal.load_asset(path)
+    else:
+        d, n = path.rsplit("/", 1)
+        mi = unreal.AssetToolsHelpers.get_asset_tools().create_asset(n, d, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+    parent = unreal.load_asset(fl["parent"])
+    if not mi or not parent: return None
+    unreal.MaterialEditingLibrary.set_material_instance_parent(mi, parent)
+    unreal.MaterialEditingLibrary.set_material_instance_vector_parameter_value(mi, "Tint", unreal.LinearColor(*fl["tint"]))
+    unreal.MaterialEditingLibrary.set_material_instance_scalar_parameter_value(mi, "Opacity", float(fl["opacity"]))
+    unreal.EditorAssetLibrary.save_loaded_asset(mi, False)
+    return mi
+
+
+def cave_armour(its, P, missing):
+    """phase 13's armour on a map: (items, recipes, looks, perks, their names), each band of its like's that the map has"""
+    A = [a for p_ in P for a in p_.get("armour", [])]
+    out, recs, looks, perks, names = [], [], {}, {}, []
+    by = {str(i.name): i for i in its}
+    for a in A:
+        for k, band in enumerate(BANDS if a.get("bands", True) else [""]):
+            like = by.get(band + a["like"])
+            if not like:
+                if not band: missing.append(f"no {a['like']} for {a['name']}")
+                continue
+            nm = band + a["name"]; names.append(nm)
+            it = unreal.RDItemDef(); it.import_text(like.export_text())
+            it.set_editor_property("name", nm); it.set_editor_property("icon", unreal.Name(a["icon"])); it.set_editor_property("looks", a["looks"])
+            it.set_editor_property("weight", float(a["weight"]))
+            it.set_editor_property("amount", like.get_editor_property("amount") + float(a.get("amount", 0.0)))
+            if like.get_editor_property("durability") > 0: it.set_editor_property("durability", like.get_editor_property("durability") * float(a.get("durability", 1.0)))
+            out.append(it)
+            if a.get("material"):
+                mt = unreal.load_asset(a["material"])
+                if mt: looks[unreal.Name(nm)] = mt
+                else: missing.append(f"no material {a['material']}")
+            pk = a.get("perk", {})
+            if pk:
+                e = unreal.RDArmourPerk16()
+                e.set_editor_property("notice", float(pk.get("notice", 1.0))); e.set_editor_property("darksight", float(pk.get("darksight", 0.0)))
+                e.set_editor_property("poison_guard", float(pk.get("poison", 0.0))); e.set_editor_property("breath", float(pk.get("breath", 1.0)))
+                perks[unreal.Name(nm)] = e
+            parts = None
+            if a.get("recipe") and not band: st, parts = a["recipe"]
+            elif a.get("ingots"): st, parts = "", [["deepiron ingots", ["Deepiron Ingot"], int(a["ingots"]) + k], ["leather", ["Leather Strips", "Bat-wing Leather"], 2]]
+            if parts:
+                rc = unreal.RDRecipe(); rc.item = nm; rc.station = st
+                tiers = list(like.get_editor_property("tiers")); rc.tier = int(tiers[0]) if tiers else 0
+                ps = []
+                for lb, any_of, n in parts:
+                    q = unreal.RDRecipePart(); q.label = lb; q.any_of = [unreal.Name(x) for x in any_of]; q.count = int(n); ps.append(q)
+                rc.parts = ps; recs.append(rc)
+    return out, recs, looks, perks, names
+
+
 def items():
     """the caves' treasures of every phase written so far (treasure16.json) on every map of the game: each item copied from its 'like'
     (its kind, numbers, buff, picture, tiers, weight, words), its recipe where it has one; the caves' own items (CaveItems16) on every
@@ -401,7 +460,7 @@ def items():
     Run after 910, 905, 911, 918, 925, 928, 929, 937, 938 and 943 (they write the items anew)"""
     T, P = treasure_phases()
     X = [x for p in P for x in p.get("items", [])]
-    mine = {x["name"] for x in X} | {b + w["name"] for p in P for w in p.get("weapons", []) for b in BANDS}
+    mine = {x["name"] for x in X} | {b + w["name"] for p in P for w in p.get("weapons", []) + p.get("armour", []) for b in BANDS}
     regions = [r for p in P for r in p.get("regions", [])]
     nodes = [n for p in P for n in p.get("nodes", [])]
     def fn(g):
@@ -458,7 +517,18 @@ def items():
         recs = recs2
         # (phase 12: the caves' weapons, copied band by band from the table's)
         wits, looks, mends, lightless, breakers, lost, wnames = cave_weapons(its, P, missing)
-        its = its + wits
+        # (phase 13: the caves' armour, band by band; their recipes (the deepiron sets', the drowned knight's); their looks with the weapons')
+        aits, arecs, alooks, perks, anames = cave_armour(its, P, missing)
+        its = its + wits + aits; recs = recs + arecs; looks.update(alooks); wnames = wnames + anames
+        g.set_editor_property("armour_perks16", perks)
+        fl = next((p_["flood"] for p_ in P if p_.get("flood")), None)
+        if fl:
+            g.set_editor_property("flood_share16", float(fl["share"])); g.set_editor_property("breath16", float(fl["breath"]))
+            g.set_editor_property("drown_share16", float(fl["drown_share"])); g.set_editor_property("underwater_speed16", float(fl["speed"]))
+            wm = flood_water(fl)
+            if not wm: missing.append(f"no water {fl['water']}")
+            g.set_editor_property("flood_water16", wm)
+        g.set_editor_property("drowned_pieces16", [unreal.Name(n) for p_ in P for n in p_.get("drowned_pieces", [])])
         g.set_editor_property("items", its); g.set_editor_property("recipes", recs)
         g.set_editor_property("weapon_looks16", looks); g.set_editor_property("mend_only16", mends)
         g.set_editor_property("lightless16", lightless); g.set_editor_property("rubble_breakers16", breakers); g.set_editor_property("lost_blades16", lost)
@@ -496,7 +566,7 @@ def items():
         g.set_editor_property("cave_nodes16", nd)
         assert not missing, f"945 items: {missing}"
         n_ink = sum(1 for r in recs if any(str(a_) in inks for p_ in r.parts for a_ in p_.any_of)) if inks else 0
-        return f"{len(wits)} cave weapons, {len(X)} cave things ({sum(1 for x in X if x.get('recipe'))} with recipes), {len(rg)} regions, {len(nd)} veins and growths, {len(sk)} socket stones, inks in {n_ink} scroll recipes"
+        return f"{len(wits)} cave weapons, {len(aits)} cave armour ({len(arecs)} recipes), {len(X)} cave things ({sum(1 for x in X if x.get('recipe'))} with recipes), {len(rg)} regions, {len(nd)} veins and growths, {len(sk)} socket stones, inks in {n_ink} scroll recipes"
     if CHECK: print("945 items: would write", len(X), "things on", T["maps"]); return
     each_map(T["maps"], fn, "items")
 
