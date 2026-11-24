@@ -1249,7 +1249,7 @@ void ARDSection::LightRoom(FRandomStream& R, const FRoom& Rm, int32 RoomIndex)
 		for (int32 Side = 0; Side < 4; ++Side)
 			for (const FVector& W : WallSlots(Rm, Side, Spacing, 40.f, 140.f))
 				AddTorch(W + FVector(0, 0, 250.f), InwardYaw(Side), TorchCd * R.FRandRange(0.8f, 1.2f), R.FRand() >= Unlit);
-	if (FillCd > 0.f) AddLight(Ctr + FVector(0, 0, Generator->RoomHeight - 120.f), Fill, FillCd * Big / 900.f, Big * 0.9f, false, 0.f);
+	if (FillCd > 0.f) AddLight(Ctr + FVector(0, 0, Theme == FName(TEXT("Heaven")) ? 230.f : Generator->RoomHeight - 120.f), Fill, FillCd * Big / 900.f, Big * 0.9f, false, 0.f);
 }
 
 void ARDSection::EnsureAnvil()
@@ -1319,7 +1319,8 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 	// (mistward: the footprints placed in this room, so that nothing is set on anything else)
 	FurnRoom = RI; Feet.Reset();
 	ON_SCOPE_EXIT { FurnRoom = -1; };
-	auto Center = [&](FName Nm, const FVector& P, float Yaw, bool bBlock = true, bool bLaneToo = false) -> bool
+	AddCoreFeet20(RI);          // (the list of 2026-11-22's twentieth phase: Heaven's stair and lift core kept free)
+	auto Center =[&](FName Nm, const FVector& P, float Yaw, bool bBlock = true, bool bLaneToo = false) -> bool
 	{
 		const FRDPiece* Pc = this->Pc(Nm);
 		if (!Pc) return false;
@@ -1336,6 +1337,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		float Ch = Rm.Shape != 0 || Rm.Ceil != 0 ? CeilAt(Tl) : RH;
 		// (mistward5: under a vault, from the vault at that point)
 		if (const float Vh = VaultHeightAt(RI, P); Vh > 0.f) Ch = Vh;
+		if (Theme == FName(TEXT("Heaven"))) Ch = FMath::Min(Ch, 272.f);          // (a storey's ceiling, not the room's 6 m: the twentieth phase's floors)
 		if (Pc) AddPieceAt(Nm, P + FVector(0, 0, Ch - Pc->Size.Z), Yaw, 1.f, true);
 	};
 	auto Candles = [&](const FVector& P, float Cd)

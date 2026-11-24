@@ -40,3 +40,11 @@ The city is a wilderness town on `brokenspire` with the modern plan (`FRDWildTow
   - **A theme replaces the light as well as the mesh**: the desk lamps kept the candles' flickering orange light and the bollards the fire basket's. In Heaven a warm light is a steady white (`AddLight`).
   - **A count of instances the code made is checked against the code's own plan**: the side of a stop line is read apart from it, from the moving cars' own lanes.
 
+## The list of 2026-11-22: the storeys (phase 20: `946 storeys`, `RD/RDHeaven20.cpp`, `884 heaven20_*`)
+
+- **A roof that was only seen has no collision**: `ModernRoof` laid the slabs and parapet with none. Climbed to by the new stair, she stood on a wall's top 24 cm under the roof, and would have fallen through it elsewhere. Where a core reaches the roof, the slab and parapet collide (`946 storeys` makes the pieces collide; the section asks for it only there).
+- **A room's height is not a storey's**: Heaven's rooms are 6 m high in the generator. The hanging lights and the fill light (`RoomHeight - 120`) hung in the storey above once there were floors. Under Heaven's theme they are capped to 272 cm.
+- **What takes ground-floor room takes beds**: with the cores, 57 sleepers in bed fell to 49. The flats upstairs lay their beds under the town's name ("Bed", recorded in `TownBeds`), and a sleeper is laid in its bed from where it stands: 77.
+- **A test's "reached" is the tile, not its middle**: walking to a landing tile's middle she stopped 55 cm off it, on the tile. Points that are tiles' middles are reached within 70 cm.
+- **Sizes of a themed piece come from `Pc`, not `Generator->Piece`**: the plain name's piece is the medieval one.
+

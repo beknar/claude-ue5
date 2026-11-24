@@ -141,3 +141,42 @@ A modern city surrounded by a shimmering shield, with skyscrapers, office buildi
   - 11.6 shown again.
 - **Pictures**: a crossing from its approach, a signal at green, at red and from its other side, each sign, a lay-by, a lot, the media wall, a trailer, a dumpster, a wall lamp.
 - **Packaging**: the phase adds settings to the generator (`HeavenStreetNames19`...) and assets saved into `brokenspire`. A package needs a full cook (no `-SkipCook`) and `869` first (phase 28).
+
+## The list of 2026-11-22: the storeys (phase 20)
+
+`946 storeys` (the flight, rail, shaft wall, lift platform and ceiling panel from boxes; the roofs' slab and parapet made to collide; run it after `908`) and C++ `RD/RDHeaven20.cpp`, hooked into `TownShellBuilding` (before the roof), `ModernRoof` (the openings, the collision), `Furnish` (the core kept free on the ground floor) and `TownFurnish` (the upper storeys). Each building's own seed draws its furnishing: the plan's streams are unchanged.
+
+- **Which buildings**: every home and office block, and every trade 8 tiles wide or more, of two storeys or more that is lived in. In this town that is 71 buildings: 56 homes, 12 office blocks, the temple, the tavern and the storehouse. The shops and the skyscrapers' lobbies are one storey.
+- **The core**: three strips of four tiles along the back wall, in the back corner away from the door, never over the door or a doorway between rooms. Its ground floor is kept free of furniture and of the townsfolk's ways.
+- **The floors**: a slab between every two storeys, its top at 4 + 300 k cm, its underside 268 cm over the floor below. It is open over the flight that comes up through it and over the lift's shaft. The roof is open the same way, and its slabs and parapet collide on these buildings.
+- **The stairs**: flight k rises from storey k to k + 1 (the last to the roof): 15 steps of 20 cm over two tiles, a box each.
+  - The even flights go up the back strip toward the far tile, the odd ones up the next strip back toward the corner, each with a landing tile at both ends.
+  - Glass rails stand round every opening, along its open sides and across its low end.
+- **The lift**: a steel platform she rides (`LiftSpeed20` 220 cm a second) in a shaft at the core's corner, glass on its two inner sides, to every floor and the roof.
+  - On it, F rides up a floor, and from the roof back to the street ("ride the lift to floor 2", "... the roof", "... the street").
+  - At its door, F calls it to her floor.
+  - Each floor's door is an invisible gate, shut unless the platform stands there.
+  - After `RestartPlay` the platform and gates are found again by their building's tag.
+- **The upper storeys**:
+  - each furnished as its building's kind: an office's desks and chairs with shelves and planters along the walls; a flat's beds (town beds: its residents sleep in them), media wall, kitchen, sofa and table; a trade's shelves and tables;
+  - a ceiling light panel on every other tile;
+  - all of it the building's interior: hidden from the street, shown from inside (the seventh phase).
+- **The ground floor's ceiling**: under Heaven's theme a room's hanging lights and its fill light are capped to the storey (272 cm). With the room's 6 m height they had hung in the storey above.
+
+### Measured
+
+- `884 heaven20_floors,heaven20_stairs,heaven20_lift,heaven16_sleep -Light` (`test_h20c.json`).
+- **Floors**:
+  - 71 cores (the 68 homes and office blocks all have one): 3 of two storeys, 62 of three, 3 of four, 3 of five;
+  - a floor traced at every upper storey's height over each core's lift strip, all 148 there (none missing, within 6 cm);
+  - 219 flights, 811 rails, 1409 pieces of furniture upstairs.
+- **Roof**: traced at its surface exactly. Stood on, her height over it is 84.6 cm (on the first run she stood on a wall's top 24 cm under it: the roof did not collide). Pushed at its parapet for 2.5 s, she stayed on it.
+- **Hidden interiors**: the tallest office's interior is hidden from the street and shown from its second storey ("inside").
+- **Stairs**: in the five-storey office, she walked herself from the lift's strip round to the first flight and up all five flights and across every landing to the roof. All 12 points were reached within 60 cm, her height over each 84.5 to 84.7 cm.
+- **Lift**:
+  - she rode it a floor at a time to the roof and back to the street, its words each time the floor it goes to, her height over each floor 84.7 cm;
+  - from floor 2's door with the lift at the street, pushed at the shaft for 2 s, she came no nearer than 1.92 m to its middle and stayed on her floor;
+  - F there called it ("lift called"), it came to floor 2 with the other 5 gates shut, and she walked onto it.
+- **Sleepers**: 77 in bed at night (57 before the storeys; 49 with the cores and no beds upstairs).
+- **Pictures**: the stairwell beside the lift's shaft; an office's upper storey.
+

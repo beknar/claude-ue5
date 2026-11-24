@@ -1,0 +1,265 @@
+{
+ "tag": "h20c",
+ "plan": [
+  "heaven20_floors",
+  "heaven20_stairs",
+  "heaven20_lift",
+  "heaven16_sleep"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "heaven20_floors",
+   "ok": true,
+   "homes_offices": 68,
+   "cores": 71,
+   "cores_by_kind": {
+    "temple": 1,
+    "tavern": 1,
+    "storehouse": 1,
+    "office block": 12,
+    "home": 56
+   },
+   "storeys_by_core": {
+    "2": 3,
+    "3": 62,
+    "4": 3,
+    "5": 3
+   },
+   "floors_traced": 148,
+   "floors_missing": [],
+   "floors_missing_n": 0,
+   "flights": 219,
+   "rails": 811,
+   "furnished_pieces": 1409,
+   "unfurnished_cores": [],
+   "interior_from_street": false,
+   "interior_from_storey_1": [
+    true,
+    "inside"
+   ],
+   "roof_traced_over_want": 0.0,
+   "roof": {
+    "her_z_over_roof": 84.6,
+    "lowest_pushed_at_parapet": 84.6
+   },
+   "shots": [
+    "upper",
+    "stair"
+   ]
+  },
+  {
+   "step": "heaven20_stairs",
+   "ok": true,
+   "building": 20,
+   "storeys": 5,
+   "points": [
+    {
+     "i": 1,
+     "reached": true,
+     "off_cm": 56,
+     "her_z_over_point": 84.6
+    },
+    {
+     "i": 2,
+     "reached": true,
+     "off_cm": 39,
+     "her_z_over_point": 84.6
+    },
+    {
+     "i": 3,
+     "reached": true,
+     "off_cm": 47,
+     "her_z_over_point": 84.6
+    },
+    {
+     "i": 4,
+     "reached": true,
+     "off_cm": 37,
+     "her_z_over_point": 84.5
+    },
+    {
+     "i": 5,
+     "reached": true,
+     "off_cm": 41,
+     "her_z_over_point": 84.5
+    },
+    {
+     "i": 6,
+     "reached": true,
+     "off_cm": 49,
+     "her_z_over_point": 84.6
+    },
+    {
+     "i": 7,
+     "reached": true,
+     "off_cm": 57,
+     "her_z_over_point": 84.6
+    },
+    {
+     "i": 8,
+     "reached": true,
+     "off_cm": 43,
+     "her_z_over_point": 84.7
+    },
+    {
+     "i": 9,
+     "reached": true,
+     "off_cm": 58,
+     "her_z_over_point": 84.7
+    },
+    {
+     "i": 10,
+     "reached": true,
+     "off_cm": 58,
+     "her_z_over_point": 84.6
+    },
+    {
+     "i": 11,
+     "reached": true,
+     "off_cm": 47,
+     "her_z_over_point": 84.6
+    },
+    {
+     "i": 12,
+     "reached": true,
+     "off_cm": 59,
+     "her_z_over_point": 84.6
+    }
+   ],
+   "roof_reached": true
+  },
+  {
+   "step": "heaven20_lift",
+   "ok": true,
+   "building": 20,
+   "floors": 6,
+   "platform": true,
+   "rides": [
+    {
+     "to": 1,
+     "said": "ride the lift to floor 1",
+     "f": "lift ride",
+     "lift_at": 1,
+     "her_z_over_floor": 84.6
+    },
+    {
+     "to": 2,
+     "said": "ride the lift to floor 2",
+     "f": "lift ride",
+     "lift_at": 2,
+     "her_z_over_floor": 84.6
+    },
+    {
+     "to": 3,
+     "said": "ride the lift to floor 3",
+     "f": "lift ride",
+     "lift_at": 3,
+     "her_z_over_floor": 84.6
+    },
+    {
+     "to": 4,
+     "said": "ride the lift to floor 4",
+     "f": "lift ride",
+     "lift_at": 4,
+     "her_z_over_floor": 84.6
+    },
+    {
+     "to": 5,
+     "said": "ride the lift to the roof",
+     "f": "lift ride",
+     "lift_at": 5,
+     "her_z_over_floor": 84.6
+    },
+    {
+     "to": 0,
+     "said": "ride the lift to the street",
+     "f": "lift ride",
+     "lift_at": 0,
+     "her_z_over_floor": 84.6
+    }
+   ],
+   "gate": {
+    "nearest_to_shaft_middle_cm": 192,
+    "lowest_over_floor": 84.6
+   },
+   "call": {
+    "floor": 2,
+    "said": "call the lift",
+    "f": "lift called",
+    "lift_at": 2,
+    "gates_shut": 5
+   },
+   "stepped_on": {
+    "off_cm": 59,
+    "her_z_over_floor": 84.6
+   }
+  },
+  {
+   "step": "heaven16_sleep",
+   "ok": true,
+   "in_bed": 77,
+   "poses": [
+    {
+     "role": "Priest",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_804"
+    },
+    {
+     "role": "Innkeeper",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_805"
+    },
+    {
+     "role": "Scholar",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_806"
+    },
+    {
+     "role": "Smith",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_807"
+    },
+    {
+     "role": "Trader",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_808"
+    },
+    {
+     "role": "Healer",
+     "hips_over_mattress": 12.5,
+     "hit": "InstancedStaticMeshComponent_129"
+    },
+    {
+     "role": "Soldier",
+     "hips_over_mattress": 12.5,
+     "hit": "InstancedStaticMeshComponent_139"
+    },
+    {
+     "role": "Soldier",
+     "hips_over_mattress": 12.5,
+     "hit": "InstancedStaticMeshComponent_139"
+    },
+    {
+     "role": "Soldier",
+     "hips_over_mattress": 12.5,
+     "hit": "InstancedStaticMeshComponent_139"
+    },
+    {
+     "role": "Worker",
+     "hips_over_mattress": 12.5,
+     "hit": "StaticMeshComponent_809"
+    }
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_h20c_heaven20_upper_storey.png",
+  "bs_h20c_heaven20_stair.png",
+  "bs_h20c_heaven16_sleeper.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

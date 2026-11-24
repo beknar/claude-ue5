@@ -2280,6 +2280,10 @@ public:
 	float SignalLook19 = 0.f;
 	int32 Streets19Shown = -1;
 	TWeakObjectPtr<ARDSection> Streets19Of;
+	// ---- the list of 2026-11-22's twentieth phase: Heaven's storeys (RDHeaven20.cpp)
+	/** a lift platform's speed (cm a second) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven20") float LiftSpeed20 = 220.f;
+	void TickLifts20(float Dt);
 	/** for the tests: the marks and found ids the cave links made this session taken off again */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") int32 ForgetCaveLinkMarks16();
 	TArray<int32> CaveLinkMarked16;

@@ -160,13 +160,19 @@ void ARDSection::ModernRoof(int32 BI, float Top)
 	// ---- the roof: a slab a tile, a parapet round its edge
 	for (int32 I = 0; I < Nx; ++I)
 		for (int32 J = 0; J < Ny; ++J)
-			AddPiece(TEXT("Modern.Roof"), FTransform(FRotator(0, Yaw0, 0), TownBldPoint(B, (I + 0.5f) * M - Hx, (J + 0.5f) * M - Hy, Top)), true);
+		{
+			const FVector Rp = TownBldPoint(B, (I + 0.5f) * M - Hx, (J + 0.5f) * M - Hy, Top);
+			if (CoreOpenAt20(BI, B.Storeys, Rp)) continue;          // (the last flight's and the lift's way up through it: the twentieth phase)
+			// (a roof she reaches by the core's stair and lift is stood on: its slabs and parapet collide (the first test: she stood on a
+			// wall's top 24 cm under the roof, which had none))
+			AddPiece(TEXT("Modern.Roof"), FTransform(FRotator(0, Yaw0, 0), Rp), !Cores20.Contains(BI));
+		}
 	const struct { FVector2D Out; int32 N; } Sides[4] = { { FVector2D(1, 0), Ny }, { FVector2D(-1, 0), Ny }, { FVector2D(0, 1), Nx }, { FVector2D(0, -1), Nx } };
 	for (int32 Si = 0; Si < 4; ++Si)
 		for (int32 K = 0; K < Sides[Si].N; ++K)
 		{
 			const FVector2D P = Si < 2 ? FVector2D(Sides[Si].Out.X * Hx, (K + 0.5f) * M - Hy) : FVector2D((K + 0.5f) * M - Hx, Sides[Si].Out.Y * Hy);
-			AddPiece(TEXT("Modern.Parapet"), WallT(P, Sides[Si].Out, Top), true);
+			AddPiece(TEXT("Modern.Parapet"), WallT(P, Sides[Si].Out, Top), !Cores20.Contains(BI));
 		}
 	HeavenTallestZ = FMath::Max(HeavenTallestZ, Top);
 	// ---- a tower: its floors stacked over the lobby, fitted to the lobby's footprint, its rooftop; how many floors by its seed

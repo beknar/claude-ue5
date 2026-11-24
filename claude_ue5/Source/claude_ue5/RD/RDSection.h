@@ -803,6 +803,30 @@ public:
 	TArray<FString> Streets19;
 	/** Heaven's yard things by the homes (a trailer, a parked car, a dumpster, pallets, a bin): "yard|<x>|<y>|<yaw>|<length>|<width>" */
 	TArray<FString> YardLines19;
+	// ---- the list of 2026-11-22's twentieth phase: Heaven's storeys (RDHeaven20.cpp)
+	/** a building's stair and lift core: three strips of four tiles from its back wall (X0, its local X), from a back corner (Y0) along Sgn */
+	struct FCore20 { int32 Bld = -1; int32 N = 0; float Sgn = 1.f; float X0 = 0.f, Y0 = 0.f; };
+	/** a lift: its shaft's middle (z 0), the way out of its door, each floor's height (the roof's last), where it stands and goes */
+	struct FLift20 { int32 Bld = -1; FVector Shaft = FVector::ZeroVector, Entry = FVector::ZeroVector; TArray<float> Floors; int32 At = 0, Target = 0; float Z = 0.f; bool bMoving = false;
+		TWeakObjectPtr<class UStaticMeshComponent> Platform; TArray<TWeakObjectPtr<class UPrimitiveComponent>> Gates; };
+	TMap<int32, FCore20> Cores20;
+	TArray<FLift20> Lifts20;
+	TArray<FString> Storeys20;
+	bool HeavenCorePlan20(int32 BI);
+	FVector CorePoint20(const FCore20& C, float Strip, float Tile, float Z) const;
+	bool CoreOpenAt20(int32 BI, int32 Storey, const FVector& W) const;
+	void HeavenStoreys20(int32 BI);
+	void AddCoreFeet20(int32 RI);
+	void FurnishStoreys20(int32 BI);
+	void UpdateLiftGates20(FLift20& L);
+	void TickLifts20(float Dt);
+	int32 LiftNear20(const FVector& From, int32& OutFloor, bool& bOnIt) const;
+	FString LiftFloorName20(const FLift20& L, int32 K) const;
+	FString LiftDescribe20(const FVector& From) const;
+	FString LiftUse20(const FVector& From);
+	/** for the tests: "core|<building>|<kind>|<storeys>|<x>|<y>|<slabs>|<flights>|<rails>", "route|<building>|<x>|<y>|<z>" (the way up),
+	 *  "furnished|<building>|<pieces>", "lift|...", "liftfloor|<i>|<k>|<z>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven20") TArray<FString> GetStoreys20() const;
 	void HeavenSignal19(const FTownSpot& Sp);
 	void TickSignals19(float Now);
 	void HeavenRuns19();
