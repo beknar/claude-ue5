@@ -130,5 +130,7 @@ float URDCombatComponent::GetClimateBuff15(ERDItemKind K) const
 	// (the strongest of the kind on her: two stews do not add up)
 	float B = 0.f;
 	for (const FEffect& E : Effects) if (E.Kind == K) B = FMath::Max(B, E.Amount);
+	// (the list of 2026-11-22's caves: a blue stone warms, a yellow one cools, beside the strongest buff)
+	B += GetSocketBonus16(K == ERDItemKind::Warmth ? FName(TEXT("warm")) : K == ERDItemKind::Cooling ? FName(TEXT("cool")) : NAME_None);
 	return FMath::Min(B, 0.8f);
 }

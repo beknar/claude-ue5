@@ -7878,6 +7878,98 @@ def step_cave16mats():
         try: quiet(False)
         except Exception: pass
 STEPS.update({"cave16mats": step_cave16mats})
+
+def cave16gems_inner():
+    """the list of 2026-11-22's caves, phase 11: the geodes cut at the librarian's table into inks and socket stones (each recipe
+    there, none refused to the Warrior); an ink in a scroll recipe's reagent; the stones set, each measured on the thing it changes:
+    red her blow's damage, white a blow on her, violet her top speed, blue the climate's warmth, green her hit points coming back;
+    a second stone into the armour, a third replacing the weapon's (the old one back in her pack); the sockets kept over a trip"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True); res = {}
+    T = json.load(open(os.path.join(SA, "caves", "treasure16.json"), encoding="utf-8"))
+    X = T["phase11"]["items"]
+    res["craft"] = {x["name"]: str(g.get_cave_craft16(x["name"])) for x in X}
+    craft_ok = all(v == "Librarian|" for v in res["craft"].values())
+    recs = {str(r.item): r for r in g.get_editor_property("recipes")}
+    fb = recs.get("Scroll of Fire Bolt")
+    res["ink_in_scroll"] = [str(a) for p in (fb.parts if fb else []) for a in p.any_of if "Ink" in str(a)]
+    for x in X: c.add_item(x["name"], 2)
+    # ---- red into the weapon in her hands: her blow
+    wi = c.get_weapon_index(); d0 = c.get_damage_of(wi)
+    res["set_red"] = c.use_item("Red Socket Stone"); yield from wait(0.2)
+    d1 = c.get_damage_of(wi); res["damage"] = [round(d0, 2), round(d1, 2)]
+    # (another weapon's damage untouched by the stone in this one (PR #118's review): a found sword taken up)
+    c.add_item("Longsword", 1); yield from wait(0.3)
+    wl = next((i for i, w in enumerate(g.get_editor_property("weapons")) if str(w.item) == "Longsword"), -1)
+    res["other_weapon"] = [wl, round(c.get_damage_of(wl), 2) if wl >= 0 else None]
+    if wl >= 0:
+        dl0 = c.get_damage_of(wl); c.select_weapon(wl); yield from wait(0.3)
+        res["set_red_sword"] = c.use_item("Red Socket Stone"); yield from wait(0.2)
+        res["other_weapon"] += [round(dl0, 2), round(c.get_damage_of(wl), 2), round(c.get_damage_of(wi), 2)]
+        # (the sword let go of (sold, broken down): its stone back in her pack)
+        r0 = c.get_item_count("Red Socket Stone"); c.select_weapon(wi); yield from wait(0.2)
+        wl2 = next((i for i, w in enumerate(g.get_editor_property("weapons")) if str(w.item) == "Longsword"), -1)
+        res["let_go"] = c.let_go_weapon16(wl2); yield from wait(0.2)
+        res["stone_back"] = c.get_item_count("Red Socket Stone") - r0
+    # ---- white into the armour she wears: a blow on her
+    arm = None
+    for i in g.get_editor_property("items"):
+        if "ARMOUR" not in str(i.kind): continue
+        c.add_item(str(i.name), 1)
+        if c.wear_armour(str(i.name)): arm = str(i.name); break
+        c.remove_item(str(i.name), 1)
+    res["armour"] = arm; yield from wait(0.2)
+    def blow():
+        c.set_health(c.get_max_health()); h = c.get_health(); c.apply_damage(20.0, None); return h - c.get_health()
+    b0 = blow(); yield from wait(1.2)
+    res["set_white"] = c.use_item("White Socket Stone"); yield from wait(0.2)
+    b1 = blow(); yield from wait(1.2)
+    res["blow"] = [round(b0, 2), round(b1, 2), round(c.get_armour(), 3)]
+    # (armour taken off: its stone no longer works)
+    c.take_off_armour(); yield from wait(0.2); res["guard_off"] = round(c.get_socket_bonus16("guard"), 3); c.wear_armour(arm); yield from wait(0.2)
+    # ---- violet replaces the red in the weapon: her speed; the red back in her pack
+    mv = G["pawn"].get_component_by_class(unreal.CharacterMovementComponent)
+    s0 = mv.get_editor_property("max_walk_speed"); red0 = c.get_item_count("Red Socket Stone")
+    res["set_violet"] = c.use_item("Violet Socket Stone"); yield from wait(0.3)
+    s1 = mv.get_editor_property("max_walk_speed")
+    res["speed"] = [round(s0, 1), round(s1, 1)]; res["red_back"] = c.get_item_count("Red Socket Stone") - red0
+    # ---- blue for the white in the armour? (the weapon's socket is full: a stone goes to the weapon's, so: blue replaces violet)
+    w0 = c.get_climate_guard16(True)
+    res["set_blue"] = c.use_item("Blue Socket Stone"); yield from wait(0.3)
+    res["warm"] = [round(w0, 3), round(c.get_climate_guard16(True), 3)]
+    # ---- green: her hit points back over 5 s, against the same 5 s before it (her own healing out of a fight, if any)
+    def back():
+        c.set_health(c.get_max_health() * 0.5); h0 = c.get_health(); t0 = time.time()
+        while time.time() - t0 < 5.0: yield
+        return (c.get_health() - h0) / (time.time() - t0) / c.get_max_health()
+    r0 = yield from back()
+    c.use_item("Green Socket Stone"); yield from wait(0.3)
+    r1 = yield from back()
+    res["regen_per_s_share"] = round(r1 - r0, 5); res["regen_without"] = round(r0, 5)
+    res["sockets"] = [str(l) for l in c.get_sockets16()]
+    # ---- kept over a trip's carry (SaveCarry / RestoreCarry, as a level change does)
+    g.save_carry(); c.clear_items(); n_cleared = len(c.get_sockets16()); g.restore_carry(); yield from wait(0.3)
+    res["carry"] = [n_cleared, sorted(str(l) for l in c.get_sockets16()) == sorted(res["sockets"])]
+    # ---- a death keeps them: her gear goes to her pile with its stones, and comes back with it
+    c.set_health(1.0); c.apply_damage(50.0, None); yield from wait(1.0)
+    res["death"] = [str(l) for l in c.get_sockets16()]
+    exp_d = d0 * 1.10
+    ok = (craft_ok and len(res["ink_in_scroll"]) == 6 and res["set_red"] and abs(d1 - exp_d) < 0.02 * exp_d
+          and arm and res["set_white"] and b0 > 0 and abs(b1 / b0 - (1 - (res["blow"][2] + 0.08)) / (1 - res["blow"][2])) < 0.02
+          and res["set_violet"] and abs(s1 / s0 - 1.08) < 0.01 and res["red_back"] == 1
+          and res["set_blue"] and abs(res["warm"][1] - res["warm"][0] - 0.4) < 0.01
+          and abs(res["regen_per_s_share"] - 0.002) < 0.0006 and res["carry"] == [0, True] and len(res["sockets"]) == 2
+          and len(res["death"]) == 2 and res.get("guard_off") == 0.0
+          and len(res["other_weapon"]) == 5 and abs(res["other_weapon"][3] / res["other_weapon"][2] - 1.10) < 0.01 and abs(res["other_weapon"][4] - d1) < 0.01
+          and res.get("stone_back") == 1)
+    step_result("cave16gems", ok, **res)
+def step_cave16gems():
+    try:
+        yield from cave16gems_inner()
+    finally:
+        try: quiet(False)
+        except Exception: pass
+STEPS.update({"cave16gems": step_cave16gems})
+
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""
     if G.get("gen"): return G["gen"]

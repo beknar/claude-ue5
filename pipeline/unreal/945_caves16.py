@@ -336,7 +336,30 @@ def items():
                     if not any(a in have for a in any_of): missing.append(f"{x['name']}: no {any_of}")
                     p = unreal.RDRecipePart(); p.label = lb; p.any_of = [unreal.Name(a) for a in any_of if a in have]; p.count = int(n); ps.append(p)
                 rc.parts = ps; recs.append(rc)
+        # (phase 11: the inks stand in for every scroll recipe's reagent (its part that is not an essence); taken off every recipe first,
+        # so a re-run adds them once)
+        inks = [x["name"] for x in X if x.get("ink")]
+        kinds = {str(i.name): str(i.kind) for i in its}
+        recs2 = []
+        for r in recs:
+            ps = []
+            for p_ in r.parts:
+                q = unreal.RDRecipePart(); q.label = p_.label; q.count = p_.count
+                q.any_of = [a_ for a_ in p_.any_of if str(a_) not in inks]
+                ps.append(q)
+            if inks and "SCROLL" in kinds.get(str(r.item), "") and str(r.item) not in mine:
+                # (the reagent: the first part that is not an essence, only it (PR #118's review: Starfall's and Singularity's seraph
+                # feather, their second, was an ink away))
+                q = next((q for q in ps if "essence" not in str(q.label).lower()), None)
+                if q is not None: q.any_of = list(q.any_of) + [unreal.Name(n) for n in inks]
+            r.parts = ps; recs2.append(r)
+        recs = recs2
         g.set_editor_property("items", its); g.set_editor_property("recipes", recs)
+        sk = {}
+        for p_ in P:
+            for n, (stat, amt) in p_.get("sockets", {}).items():
+                e = unreal.RDSocket16(); e.set_editor_property("stat", stat); e.set_editor_property("amount", float(amt)); sk[unreal.Name(n)] = e
+        g.set_editor_property("socket_stones16", sk)
         g.set_editor_property("cave_items16", [unreal.Name(x["name"]) for x in X if x.get("cave")])
         # (made at the anvil whatever their kind: a recipe with the anvil's station '' on a kind the tables would send to the
         # alchemist (the linings, kind HEALING for their buff; PR #117's review))
@@ -357,7 +380,8 @@ def items():
             nd.append(e)
         g.set_editor_property("cave_nodes16", nd)
         assert not missing, f"945 items: {missing}"
-        return f"{len(X)} cave things ({sum(1 for x in X if x.get('recipe'))} with recipes), {len(rg)} regions, {len(nd)} veins and growths"
+        n_ink = sum(1 for r in recs if any(str(a_) in inks for p_ in r.parts for a_ in p_.any_of)) if inks else 0
+        return f"{len(X)} cave things ({sum(1 for x in X if x.get('recipe'))} with recipes), {len(rg)} regions, {len(nd)} veins and growths, {len(sk)} socket stones, inks in {n_ink} scroll recipes"
     if CHECK: print("945 items: would write", len(X), "things on", T["maps"]); return
     each_map(T["maps"], fn, "items")
 

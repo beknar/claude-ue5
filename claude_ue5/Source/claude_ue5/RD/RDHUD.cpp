@@ -2488,6 +2488,8 @@ void ARDHUD::DrawInventory(float Sc)
 			Para(Wp.bAlongside ? TEXT("Cast with RMB or E (LB) while your weapon stays drawn") : Wi == Cb->GetWeaponIndex() ? InHands : (bPad ? TEXT("A  wield it") : TEXT("Enter  wield it")), Gold, Sc * 1.05f);
 			// (the third list: its slash, its quick slot)
 			if (const FRDSlashDef* Sl = Cb->SlashOf(Wi)) Para(FString::Printf(TEXT("%s:  +%.0f %s on every hit;  %s   (T / X takes it off)"), *Sl->Name.ToString(), Sl->Bonus, *Sl->Type.ToLower(), *Sl->Text), RDCyan, Sc * 1.05f);
+			// (the caves' sockets: a weapon's own (PR #118's review: shown only for armour))
+			if (const FString Sw = Cb->SocketWords16(Cb->WeaponGear16(Wi), true); !Sw.IsEmpty()) Para(Sw.TrimStart(), RDInk, Sc);
 			if (Gen->bQuickSlots && !Wp.bAlongside)
 			{
 				const int32 Qs = Cb->GetQuickSlots().IndexOfByKey(Wp.Name);
@@ -2499,7 +2501,7 @@ void ARDHUD::DrawInventory(float Sc)
 		else
 		{
 			const int32 Ix = Gen->FindItem(FName(*Sel[1]));
-			if (Ix >= 0) Para(DescribeItem(Gen->Items[Ix]), RDInk, Sc * 1.1f);
+			if (Ix >= 0) Para(DescribeItem(Gen->Items[Ix]) + (Gen->GetPlayerCombat() ? Gen->GetPlayerCombat()->SocketWords16(Gen->Items[Ix].Name) : FString()), RDInk, Sc * 1.1f);          // (the caves' sockets)
 			Ry += 6.f * Sc;
 			const FString Use = bPad ? TEXT("A") : TEXT("Enter");
 			if (Sel[0] == TEXT("item")) Para(Use + TEXT("  use it"), Gold, Sc * 1.05f);

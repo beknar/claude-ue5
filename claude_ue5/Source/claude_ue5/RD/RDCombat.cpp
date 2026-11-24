@@ -288,7 +288,8 @@ void URDCombatComponent::UpdateWalkSpeed()
 		* (1.f - FMath::Clamp(ShieldSlow, 0.f, 0.9f)) * (bHeldOn ? 0.f : 1.f)
 		* (bBlocking && Generator && Generator->BlockMoveSpeed <= 0.f ? 1.f - FMath::Clamp(Generator->BlockSlow, 0.f, 0.95f) : 1.f)          // (the third list: blocking)
 		* FMath::Max(WildRunFactor, 0.1f) * FMath::Max(MountFactor, 0.1f)          // (the list of 2026-11-07: rd.WildRunSpeed; the eighth phase: her horse)
-		* FMath::Max(SwimFactor, 0.1f);                                            // (2026-11-12: swimming)
+		* FMath::Max(SwimFactor, 0.1f)                                             // (2026-11-12: swimming)
+		* (1.f + GetSocketBonus16(TEXT("speed")));                                  // (the list of 2026-11-22's caves: a violet stone)
 	// (the list of 2026-11-07: while she blocks, her slow block walk at most, walking or running (FilterBlockMove gives her
 	// move its full size along her facing); slower still if something else slows her more)
 	if (bBlocking && Generator && Generator->BlockMoveSpeed > 0.f)
@@ -322,7 +323,8 @@ float URDCombatComponent::GetDamageOf(int32 Index) const
 	// (mistward6: her spells, chi and fists grow with the tiers opened; her first blow out of stealth an ambush)
 	return W.Damage * (1.f + GetBonusOf(Index)) * WeakMul() * (1.f + GetBlessDamage())        // (the third list: a shrine's blessing of might)
 		* Generator->TierPowerOf(W) * AmbushMul(Index) * SpellBoostMul(W)          // (the sixth phase: the Mage's spell boosts)
-		* (1.f + GetMightBuff14());          // (the list of 2026-11-16's sixth phase: an elixir's or a meal's might)
+		* (1.f + GetMightBuff14())          // (the list of 2026-11-16's sixth phase: an elixir's or a meal's might)
+		* (1.f + GetSocketDamage16(Index));          // (the list of 2026-11-22's caves: a red stone in this weapon or her armour)
 }
 
 float URDCombatComponent::GetBonusOf(int32 Index) const
@@ -595,7 +597,7 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 	if (O && Now < RuneUntil && FVector::Dist2D(O->GetActorLocation(), RuneAt) <= RuneRadius) { Amount *= 1.f - RuneShare; ++ZoneBlocks; }
 	// (her armour takes its share off; Iron Skin adds to it)
 	LastBlowBefore = Amount;
-	Amount *= 1.f - FMath::Clamp(GetArmour() + GetSkinBonus() + GetBlessArmour() + GetResistBuff14(), 0.f, 0.95f);          // (the list of 2026-11-16: an elixir's or a meal's resistance)
+	Amount *= 1.f - FMath::Clamp(GetArmour() + GetSkinBonus() + GetBlessArmour() + GetResistBuff14() + GetSocketBonus16(TEXT("guard")), 0.f, 0.95f);          // (the caves: a white stone)          // (the list of 2026-11-16: an elixir's or a meal's resistance)
 	// (mistward: her shield takes its share of what is left, and wears by what it took; the third list: blocking with it, a
 	// share more, and it wears BlockWear times as fast)
 	LastShieldTook = 0.f;
@@ -738,7 +740,7 @@ void URDCombatComponent::Fall()
 			// (a dungeon's key and map stay hers (the list of 2026-11-08b): given back after the rest goes)
 			TArray<TPair<FName, int32>> KeptKeys;
 			for (const FName& N : CarriedOrder) if (Generator->IsDungeonChainItem(N) && GetItemCount(N) > 0) KeptKeys.Add({ N, GetItemCount(N) });
-			WornRings.Reset(); Spares.Reset(); Carried.Reset(); CarriedOrder.Reset(); ArmourWear.Reset();
+			WornRings.Reset(); Spares.Reset(); Carried.Reset(); CarriedOrder.Reset(); ArmourWear.Reset();          // (the sockets stay: her gear comes back with her pile, its stones in it)
 			for (const TPair<FName, int32>& Kk : KeptKeys) AddItem(Kk.Key, Kk.Value);
 			if (const FRDHeroDef* H = Generator->FindHero(Generator->CurrentHero))
 			{
@@ -823,6 +825,7 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	TickScrollWeapon();          // (mistward: a scroll's weapon gone once its cast and bolts are done)
 	TickLightBurn15(Dt);          // (the list of 2026-11-20: the torch or ankh held lit burns down)
 	TickDarksight16();          // (the list of 2026-11-22's caves: the darksight's light on her)
+	TickSockets16(Dt);          // (phase 11: a green stone's healing; her speed again when the stones working change)
 	// (the third list: the slashes' burning ground and pulls; quick slots for weapons found or spells learned)
 	if (SlashAreas.Num() > 0 || Echoes.Num() > 0) TickSlashAreas(Dt);          // (the Echo slash's hits too: they waited for an area that never came)
 	if (Generator->Secondaries.Num() > 0) TickSecondary(Dt);          // (the sixth phase's abilities)
@@ -986,6 +989,7 @@ void URDCombatComponent::ClearItems()
 {
 	TakeOffArmour();
 	WornRings.Reset(); UpdateMaxima();
+	Sockets16.Reset();          // (the list of 2026-11-22's caves: a new game's gear holds no stones; RestoreCarry gives hers back after)
 	ReadyAt.Reset(); SpellsLearned = WeaponsBrokenDown = 0;
 	Carried.Reset(); CarriedOrder.Reset(); ArmourWear.Reset();
 	Spares.Reset(); WornShield = NAME_None; bTorchHeld = false; TorchItem = NAME_None; ShieldBlocks = ShieldsBroken = GearBrokenDown = 0; HeldUntil = -100.f; bHeldOn = false;
@@ -1019,6 +1023,13 @@ void URDCombatComponent::RemoveCarried(FName Name, int32 Count)
 	if (*N <= 0)
 	{
 		Carried.Remove(Name); CarriedOrder.Remove(Name); ArmourWear.Remove(Name); Spares.Remove(Name);
+		// (the caves' sockets: gear sold, broken down or broken gives its stone back (PR #118's review: it was lost with it))
+		if (const FName* St = Sockets16.Find(Name))
+		{
+			const FName Back = *St; Sockets16.Remove(Name); SocketSerial16.Remove(Name);
+			AddItem(Back, 1);
+			SetMessage(FString::Printf(TEXT("The %s comes out of the %s: back in your pack"), *Back.ToString().ToLower(), *Name.ToString()));
+		}
 		// (a ring she no longer has is not on her)
 		for (auto It = WornRings.CreateIterator(); It; ++It) if (It->Value == Name) { It.RemoveCurrent(); UpdateMaxima(); break; }
 		// (mistward: nor a set, a shield or a torch)
@@ -1050,6 +1061,7 @@ bool URDCombatComponent::UseItem(FName Name)
 	const FRDItemDef& It = Generator->Items[Ix];
 	const FString Lb = RDItemLabel(Name);
 	if (It.Kind == ERDItemKind::Armour) return WearArmour(Name);          // (worn, not used up)
+	if (Generator->SocketStones16.Contains(Name)) return SetSocket16(Name);          // (the list of 2026-11-22's caves: a socket stone set)
 	// (mistward: a shield to her left hand, the torch lit or put out, a teleport ring used)
 	if (It.Kind == ERDItemKind::Shield) return WearShield(Name);
 	// (the list of 2026-11-10: the ankh (kind Light) is held as the torch is; one held while the other is used is changed for it)
