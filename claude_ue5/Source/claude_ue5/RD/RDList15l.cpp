@@ -199,6 +199,8 @@ void ARDDungeonGenerator::TickContracts15(float Dt, const FVector& Her)
 			MakeGlow15(R, At, FLinearColor(0.85f, 0.25f, 0.15f), 0.25f);
 			ContractSignsLaid15.Add(Key, R);
 		}
+		// (the list of 2026-11-22's caves: fled into its cave, it is not at its lair)
+		if (GI->ContractsInCave16.ContainsByPredicate([Id](const FString& E) { return E.StartsWith(FString::FromInt(Id) + TEXT("|")); })) continue;
 		// (the beast at its lair within 400 m; its weakness known once the three signs are read)
 		TWeakObjectPtr<ARDMonster>* Have = ContractBeasts15.Find(Id);
 		ARDMonster* M = Have ? Have->Get() : nullptr;
@@ -216,6 +218,22 @@ void ARDDungeonGenerator::TickContracts15(float Dt, const FVector& Her)
 			}
 		}
 		if (M && !M->IsDead()) M->WeakShare15 = ContractSignsRead15(Id) >= 3 ? ContractWeakShare15 : 0.f;
+		// (the list of 2026-11-22's caves: struck under half its hit points with a broken tower within ContractCaveKm16 of its lair, it
+		// retreats underground into the tower's cave; the contract is finished there)
+		if (M && !M->IsDead() && M->GetHealth() < 0.5f * M->GetMaxHealth() && WildLandmarkMesh)
+		{
+			FVector2D Ts; double Td = 0.0;
+			if (NearestTowerSite15(C.Lair, 1, Ts, Td) && Td < ContractCaveKm16 * 1000.0)
+			{
+				const FIntPoint Cell(FMath::FloorToInt(Ts.X / WildLandmarkCellM), FMath::FloorToInt(Ts.Y / WildLandmarkCellM));
+				GI->ContractsInCave16.Add(FString::Printf(TEXT("%d|cave:%d_%d|%s|%d|%.2f|%s"), Id, Cell.X, Cell.Y, *K.Kind.ToString(), C.Tier, K.Hp, *K.Name));
+				ContractBeasts15.Remove(Id);
+				M->Destroy();
+				if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("%s retreats underground into the cave beneath the broken tower: finish it there"), *K.Name));
+				UE_LOG(LogRDList15l, Log, TEXT("RDCONTRACT15 %s fled into cave:%d_%d (%.1f km from its lair)"), *K.Name, Cell.X, Cell.Y, Td / 1000.0);
+				WildAutosave(TEXT("found"));
+			}
+		}
 	}
 	for (auto It = ContractSignsLaid15.CreateIterator(); It; ++It)
 		if (!WantSigns.Contains(It.Key())) { DropReward15(It.Value()); It.RemoveCurrent(); }
@@ -304,6 +322,12 @@ void ARDDungeonGenerator::DrawContractMarks15(TFunctionRef<void(const FVector2D&
 		const FContractKind15& K = ContractKinds15[C.Line];
 		int32 Next = -1;
 		for (int32 S = 0; S < 3 && Next < 0; ++S) if (!GI->ContractSigns15.Contains(Id * 4 + S)) Next = S;
+		// (fled into a cave: its mark is the tower over the cave)
+		if (const FString* E = GI->ContractsInCave16.FindByPredicate([Id](const FString& X) { return X.StartsWith(FString::FromInt(Id) + TEXT("|")); }))
+		{
+			FVector2D Ts; double Td = 0.0;
+			if (NearestTowerSite15(C.Lair, 1, Ts, Td)) { Each(Ts, FString::Printf(TEXT("%s's cave"), *K.Name)); continue; }
+		}
 		if (Next >= 0) Each(C.Sign[Next], FString::Printf(TEXT("Signs of %s"), *K.Name));
 		else Each(C.Lair, FString::Printf(TEXT("%s's lair"), *K.Name));
 	}

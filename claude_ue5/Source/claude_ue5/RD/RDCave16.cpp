@@ -1124,7 +1124,7 @@ void ARDSection::CaveFurnish16(FRandomStream& R, int32 RI)
 	if (RI == 0) { CaveContainers16 = 0; CaveRubble16.Reset(); CaveLostLine16.Reset(); CaveFloods16.Reset(); }
 	// (phase 12: once a set, with its last room: the rubble across a side tunnel and its cache, the lost blade; the room's furnishing
 	// goes on with its own footprints)
-	if (RI == Rooms.Num() - 1) { Feet.Reset(); CaveRubbleSet16(); CaveLostBlade16(); CavePaintingSet16(); Feet.Reset(); }
+	if (RI == Rooms.Num() - 1) { Feet.Reset(); CaveRubbleSet16(); CaveLostBlade16(); CavePaintingSet16(); CaveTravellerSet16(); Feet.Reset(); }
 	if (!CavePlaced16.IsValidIndex(RI) || CavePlaced16[RI].Kit < 0 || !Generator || Rooms[RI].Kind == ERDRoomKind::Junction) return;
 	// (this room's footprints only, as the castle's Furnish keeps them: never reset, every restart's containers stood on the last
 	// one's footprints and fewer were laid each time (7, 8, 3, 2 in one session: PR #117's review run))

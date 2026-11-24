@@ -159,6 +159,7 @@ void ARDDungeonGenerator::LayCampWaypoint15(const FRDWildPlace& P)
 	{
 		L.Folk.Add(T); L.Trader = T; L.TraderAt = T->GetActorLocation();
 	}
+	AddRescuedSettlers16(P.Id, Fire, Yaw, L.Folk);          // (the list of 2026-11-22's caves: the travellers rescued, settled here)
 	CampsLaid15.Add(P.Id, L);
 	UE_LOG(LogRDList15m, Log, TEXT("RDRECLAIM15 the waypoint at %s laid (%d pieces, %s)"), *P.Name, L.Comps.Num(), L.Folk.Num() ? TEXT("a trader") : TEXT("no trader"));
 }

@@ -299,6 +299,7 @@ void ARDDungeonGenerator::WildKnownPlaces(TArray<FRDWildPlace>& Out) const
 		WildMarkedCacheFor15 = WildMarked15.Num();
 	}
 	for (const FRDWildPlace& P : WildMarkedCache15) if (!WildFound.Contains(P.Id)) Out.Add(P);
+	AddCaveMouths16(Out);          // (the list of 2026-11-22's caves: the mouths a fragment attuned)
 	// (a quest's place while its quest is taken: the captain said where; not found, so no travel there)
 	for (const FRDWildPlace& Q : Wild->QuestPlaces)
 		if (!WildFound.Contains(Q.Id) && IsWildQuestShown(Q.Id)) Out.Add(Q);
@@ -375,7 +376,7 @@ bool ARDDungeonGenerator::WildFastTravel(int32 PlaceId)
 	WildTravelRefusal.Reset();
 	if (!IsWildReady()) { WildTravelRefusal = TEXT("not ready"); return false; }
 	FRDWildPlace P;
-	if (!Wild->FindPlace(PlaceId, P)) { WildTravelRefusal = TEXT("no such place"); return false; }
+	if (!Wild->FindPlace(PlaceId, P) && !CaveMouthPlace16(PlaceId, P)) { WildTravelRefusal = TEXT("no such place"); return false; }          // (a cave's mouth: phase 16)
 	if (!WildFound.Contains(PlaceId)) { WildTravelRefusal = FString::Printf(TEXT("You have not found %s yet"), *P.Name); if (PlayerCombat) PlayerCombat->ShowMessage(WildTravelRefusal); return false; }
 	// (the list of 2026-11-20's sixteenth phase: a waystone is travelled to once lit)
 	if (P.Kind == TEXT("waystone") && !IsWaystoneLit15(PlaceId)) { WildTravelRefusal = FString::Printf(TEXT("%s is not lit: light it to travel there"), *P.Name); if (PlayerCombat) PlayerCombat->ShowMessage(WildTravelRefusal); return false; }
@@ -413,6 +414,7 @@ bool ARDDungeonGenerator::WildFastTravel(int32 PlaceId)
 		// another place: a stand clear of its props, toward where she came from
 		const FVector2D Dir = (From - P.At).GetSafeNormal();
 		To = P.At + (Dir.IsNearlyZero() ? FVector2D(-1, 0) : Dir) * 28.0;
+		if (P.Id >= CaveMouthIdBase16 && P.Id < CaveMouthIdBase16 + (1 << 20)) To = P.At;          // (a cave's mouth: before it, its place is already out from the tower)
 		if (WildTownIdx >= 0 && Wild->Towns.IsValidIndex(WildTownIdx) && FVector2D::Distance(To, Wild->Towns[WildTownIdx].Site) > WildTownDropM) UnloadWildTown();
 	}
 	WildPutHer(To.X, To.Y);

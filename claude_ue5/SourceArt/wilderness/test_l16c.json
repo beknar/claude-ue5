@@ -1,0 +1,117 @@
+{
+ "tag": "l16c",
+ "plan": [
+  "cavelinks16"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "cavelinks16",
+   "ok": true,
+   "tower": [
+    "0",
+    "-1",
+    "4177",
+    "-1450",
+    "4422"
+   ],
+   "map_rec": [
+    "map|cave:0_-1|0|344612"
+   ],
+   "map_target": [
+    "maptarget|344612|2664|-6078|2661|-6088|ruins|Ruins of Oakdale"
+   ],
+   "map_marked": 1,
+   "map_target_km_from_tower": 4.87,
+   "map_in_treasure_maps": true,
+   "dig_her_m_from_spot": 1.2,
+   "dig_prompt": "dig up the buried chest",
+   "dig_f": "treasure",
+   "dig": {
+    "gold": 60,
+    "dug": true
+   },
+   "mouth": [
+    "mouthat|1007157759|4167|-1425|1"
+   ],
+   "travel": true,
+   "after_travel_m_from_mouth": 0.4,
+   "mouth_prompt": "go down into the cave",
+   "door": [
+    "door|0|-1|418502|-146845|4744|0.391|-0.921"
+   ],
+   "door_her_m": 1.21,
+   "door_prompt_nokey": "a locked iron door (its key is in the cave below)",
+   "door_f_nokey": "tower locked",
+   "door_prompt": "take the lift to the tower's top",
+   "up": "tower up",
+   "top_rel_m": 157.9,
+   "top": [
+    "top|417713|-144985|20525|1319|1"
+   ],
+   "marked": 7,
+   "top_held_m": 157.9,
+   "chest_prompt": "open the tower's chest",
+   "chest_f": "tower chest",
+   "chest_gold": 150,
+   "chest_line": [
+    "chest|1|150|Viking Sword,Small Speed Potion,Bread"
+   ],
+   "down_prompt": "take the lift down",
+   "down": "tower down",
+   "down_rel_m": -0.0,
+   "traveller_waiting": [
+    "traveller|Test Wanderer|cave:0_-1|1_0|2"
+   ],
+   "traveller_home": [
+    "traveller|Test Wanderer|cave:0_-1|1_0|3"
+   ],
+   "traveller_gold": 120,
+   "traveller_msg": "7|Test Wanderer made it out of the cave and waits for you: bring word to the next town you come to",
+   "board_opened": true,
+   "flee": {
+    "taken": [
+     [
+      0,
+      "Silkwidow"
+     ],
+     [
+      1,
+      "Redclaw"
+     ]
+    ],
+    "with_tower": [
+     [
+      0,
+      "0_0",
+      1.54
+     ],
+     [
+      1,
+      "0_-1",
+      2.38
+     ]
+    ],
+    "beast": true,
+    "gone": true,
+    "rec": [
+     "contract|0|cave:0_0|Spider|3|2.50|Silkwidow"
+    ],
+    "want_cave": "cave:0_0",
+    "marks": [
+     "3825|4202|Silkwidow's cave",
+     "908|190|Signs of Redclaw"
+    ]
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "wd_l16c_cavelinks16_mouth.png",
+  "wd_l16c_cavelinks16_top.png",
+  "wd_l16c_cavelinks16_platform.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

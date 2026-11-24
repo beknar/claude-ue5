@@ -8547,6 +8547,148 @@ def step_cave16relics():
         except Exception: pass
 STEPS.update({"cave16relics": step_cave16relics})
 
+def cave16links_inner(res):
+    """the list of 2026-11-22's caves, phase 16: the caves and the wilds, the cave's side (as the cave under the tower of square (0, -1)).
+    Measured: the map and the fragment drawn in the caves' containers besides (their shares over six session seeds); the map read: its
+    record (the cave's key, its number, no place yet); the fragment used: the mouth attuned, a second refused and kept; a lost traveller
+    in a set beyond the first (sets made over restarts until one holds one): F's prompt, F frees them, their record, the set made again
+    holds nobody; a contract beast fled into this cave: in the first set's deepest room after a restart, slain by her: the contract done,
+    its record gone; the cave's last boss: the broken tower's key recorded. Pictures of the traveller"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    gi = GS.get_game_instance(G["w"]); gi.set_editor_property("cave_key15", "cave:0_-1")
+    T = json.load(open(os.path.join(SA, "caves", "treasure16.json"), encoding="utf-8"))["phase16"]
+    mi, fi = T["cave_map_item"], T["cave_fragment_item"]
+    res["props"] = {"map": str(g.get_editor_property("cave_map_item16")), "fragment": str(g.get_editor_property("cave_fragment_item16")),
+                    "names": len(g.get_editor_property("traveller_names16"))}
+    L = lambda pre: [str(l) for l in g.get_cave_links16() if str(l).startswith(pre)]
+    pawn = G["pawn"]; at0 = pawn.get_actor_location(); kill_all_near(at0, 9000.0); yield from wait(0.5)
+    S0 = I2(0, 0); sets = [S0] + [I2(x, y) for x in range(-1, 2) for y in range(-1, 2) if not (x == 0 and y == 0)]
+    g.debug_clear_section(S0, 0, g.get_start_room_center()); yield from wait(0.5)
+    for sc in sets[1:]:
+        g.generate_section_now(sc); yield from built(sc)
+    # ---- the draws besides, over six session seeds (the seed put back)
+    drawn = {mi: 0, fi: 0}; holding = 0; seed0 = g.get_editor_property("session_seed")
+    for sd in range(seed0, seed0 + 6):
+        g.set_session_seed(sd)
+        for sc in sets:
+            S_ = g.get_section(sc)
+            if not S_: continue
+            for i in range(S_.get_num_containers()):
+                L_ = [str(x) for x in g.loot_list_of(sc, i)]
+                if L_: holding += 1
+                for x in L_:
+                    if x in drawn: drawn[x] += 1
+    g.set_session_seed(seed0)
+    res["draws"] = {"holding": holding, "map": round(drawn[mi] / max(holding, 1), 3), "fragment": round(drawn[fi] / max(holding, 1), 3)}
+    # ---- the map read, the fragment used (and a second refused)
+    c.add_item(mi, 1); res["map_used"] = c.use_item(mi); yield from wait(0.2)
+    res["map_left"] = c.get_item_count(mi); res["map_rec"] = L("map|"); res["map_msg"] = str(c.message)
+    c.add_item(fi, 2); res["frag_used"] = c.use_item(fi); yield from wait(0.2)
+    res["frag_again"] = c.use_item(fi); res["frag_left"] = c.get_item_count(fi); res["mouth_rec"] = L("mouth|")
+    # ---- a lost traveller (sets made over restarts until one holds one)
+    lost = L("lost|"); tries = 0
+    while not lost and tries < 4:
+        tries += 1
+        c = yield from restart("Warrior"); g = G["gen"]; quiet(True); pawn = G["pawn"]
+        gi = GS.get_game_instance(G["w"]); gi.set_editor_property("cave_key15", "cave:0_-1")
+        g.debug_clear_section(S0, 0, g.get_start_room_center()); yield from wait(0.5)
+        for sc in sets[1:]:
+            g.generate_section_now(sc); yield from built(sc)
+        lost = L("lost|")
+    res["lost"] = lost; res["lost_restarts"] = tries
+    if lost:
+        q = lost[0].split("|"); P_ = V(float(q[3]), float(q[4]), float(q[5])); setxy = q[1] + "_" + q[2]
+        kill_all_near(P_, 3000.0)
+        fz = floor_z(P_.x + 120.0, P_.y, top=P_.z + 200.0, bottom=P_.z - 400.0)
+        put(V(P_.x + 120.0, P_.y, P_.z), yaw=180.0, z=(fz if fz is not None else P_.z) + 100.0); yield from wait(0.8)
+        pawn.set_actor_hidden_in_game(True)
+        put(V(P_.x + 380.0, P_.y, P_.z), yaw=180.0, z=(fz if fz is not None else P_.z) + 100.0); yield from wait(1.0); shot("cave16_traveller", "1280x720"); yield from rwait(1.0)
+        pawn.set_actor_hidden_in_game(False)
+        put(V(P_.x + 120.0, P_.y, P_.z), yaw=180.0, z=(fz if fz is not None else P_.z) + 100.0); yield from wait(0.6)
+        res["lost_prompt"] = str(g.describe_nearest(pawn.get_actor_location(), 260.0))
+        res["lost_f"] = str(g.interact_nearest(pawn.get_actor_location(), 260.0)); yield from wait(0.3)
+        res["lost_msg"] = str(c.message); res["traveller_rec"] = L("traveller|"); res["lost_after"] = L("lost|")
+        # (the set made again: nobody there now)
+        g.restart_play(0); yield from wait(1.5); refresh(); g = G["gen"]
+        sx, sy = int(q[1]), int(q[2]); g.generate_section_now(I2(sx, sy)); yield from built(I2(sx, sy))
+        res["lost_again"] = [l for l in L("lost|") if l.split("|")[1] == q[1] and l.split("|")[2] == q[2]]
+        res["lost_set"] = setxy
+    # ---- a contract beast fled into this cave: after a restart in the first set's deepest room; slain, the contract done
+    kinds = [str(m.name) for m in g.get_editor_property("monsters") if m.weight > 0]
+    kind = kinds[0] if kinds else ""
+    cic0 = list(gi.get_editor_property("contracts_in_cave16")); done0 = list(gi.get_editor_property("contracts_done15"))
+    gi.set_editor_property("contracts_in_cave16", cic0 + ["99991|cave:0_-1|%s|%d|2.00|The Test Beast" % (kind, 3)])
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True); pawn = G["pawn"]; gi = GS.get_game_instance(G["w"])
+    beast = []
+    for _ in range(40):
+        beast = L("beast|")
+        if beast: break
+        yield from rwait(0.25)
+    res["beast"] = beast[:1]
+    if beast:
+        b = beast[0].split("|"); bl = V(float(b[2]), float(b[3]), float(b[4]))
+        res["beast_from_start_m"] = round(dist2(bl, g.get_start_room_center()) / 100.0, 1)
+        for mo in g.get_monsters():
+            if alive(mo) and dist2(mo.get_actor_location(), bl) < 300.0 and str(mo.get_editor_property("title")) == "The Test Beast": mo.apply_damage(1e7, pawn)
+        yield from wait(1.0)
+    res["contract_done"] = 99991 in list(gi.get_editor_property("contracts_done15"))
+    res["contract_rec_after"] = [l for l in L("contract|") if l.startswith("contract|99991|")]
+    gi.set_editor_property("contracts_in_cave16", cic0); gi.set_editor_property("contracts_done15", done0)
+    # ---- the cave's last boss: the tower's key
+    keys0 = list(gi.get_editor_property("tower_keys16"))
+    mt = g.get_editor_property("max_tier")
+    g.debug_clear_section(S0, 0, g.get_start_room_center()); yield from wait(0.5)
+    if mt > 2: g.debug_open_tiers(mt - 1, False); yield from wait(0.5)
+    Sp = I2(mt - 2, 0) if mt > 1 else S0; span = g.get_editor_property("section_tiles") * g.get_editor_property("tile_size")
+    cm_ = pawn.get_editor_property("character_movement"); cm_.set_movement_mode(unreal.MovementMode.MOVE_FLYING)
+    pawn.set_actor_location(V(Sp.x * span, Sp.y * span, g.section_floor_z(Sp) + 400.0), False, True); yield from wait(0.3)
+    g.generate_section_now(Sp); yield from built(Sp)
+    secp = g.get_section(Sp)
+    if secp: put(secp.get_room_center(0)); cm_.set_movement_mode(unreal.MovementMode.MOVE_WALKING); yield from wait(0.5); g.debug_clear_section(Sp, 0, secp.get_room_center(0)); yield from wait(0.5)
+    else: cm_.set_movement_mode(unreal.MovementMode.MOVE_WALKING)
+    g.debug_open_tiers(mt, True); yield from wait(1.0)
+    boss = []
+    for _ in range(80):
+        boss = [e for e in (str(l).split("|") for l in g.get_encounter_lines()) if e[0] == "boss" and e[6] == str(mt) and "USURPER" not in e[7]]
+        if boss: break
+        yield from rwait(0.25)
+    if boss:
+        at = V(float(boss[0][1]), float(boss[0][2]), float(boss[0][3]))
+        for mo in g.get_monsters():
+            if alive(mo) and mo.boss and dist2(mo.get_actor_location(), at) < 600: mo.apply_damage(1e7, None)
+        yield from wait(1.0)
+    res["boss"] = boss[0][4] if boss else None
+    res["key_rec"] = L("key|"); res["notice"] = str(g.get_editor_property("tier_notice"))
+    gi.set_editor_property("tower_keys16", keys0)
+    D_ = res["draws"]
+    ok = (res["props"]["map"] == mi and res["props"]["fragment"] == fi and res["props"]["names"] >= 4
+          and 0.02 <= D_["map"] <= 0.10 and 0.015 <= D_["fragment"] <= 0.08
+          and res["map_used"] and res["map_left"] == 0 and res["map_rec"] == ["map|cave:0_-1|0|-1"]
+          and res["frag_used"] and not res["frag_again"] and res["frag_left"] == 1 and len(res["mouth_rec"]) == 1 and res["mouth_rec"][0].startswith("mouth|0|-1|")
+          and res.get("lost") and res.get("lost_prompt") == "help the lost traveller out" and res.get("lost_f") == "traveller"
+          and any(l.endswith("|cave:0_-1|%s|0" % res.get("lost_set")) for l in res.get("traveller_rec", [])) and not res.get("lost_again")
+          and res["beast"] and res["contract_done"] and not res["contract_rec_after"]
+          and res["boss"] and "key|0|-1" in res["key_rec"])
+    step_result("cave16links", bool(ok), **res)
+
+def step_cave16links():
+    res = {}
+    gi = GS.get_game_instance(G["w"])
+    keep = {k: list(gi.get_editor_property(k)) for k in ("cave_maps16", "rescued_travellers16", "cave_mouths_attuned16", "tower_keys16", "contracts_in_cave16", "contracts_done15")}
+    key0 = gi.get_editor_property("cave_key15")
+    try:
+        yield from cave16links_inner(res)
+    finally:
+        try: quiet(False)
+        except Exception: pass
+        try:
+            gi = GS.get_game_instance(G["w"]); gi.set_editor_property("cave_key15", key0)
+            for k, v in keep.items(): gi.set_editor_property(k, v)
+        except Exception: pass
+        try: G["pawn"].set_actor_hidden_in_game(False)
+        except Exception: pass
+STEPS.update({"cave16links": step_cave16links})
+
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""
     if G.get("gen"): return G["gen"]

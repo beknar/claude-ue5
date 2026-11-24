@@ -2164,6 +2164,57 @@ public:
 	/** the share of a cave's containers with loot that hold an ancient tablet (a recipe or a spell the old people cut in stone) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float TabletShare16 = 0.12f;
 	FName CaveTablet16(FIntPoint Section, int32 Index) const;
+	// ---- phase 16: the caves and the wilds (RDCave16h.cpp)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FName CaveMapItem16;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FName CaveFragmentItem16;
+	/** the share of a cave's containers with loot that hold a map besides, a fragment besides; a set beyond the first with a lost traveller */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float CaveMapShare16 = 0.05f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float CaveFragmentShare16 = 0.04f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float TravellerShare16 = 0.25f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FString> TravellerNames16;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FString> TravellerLines16;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") int32 RescueGold16 = 120;
+	/** a map's place within this of its tower; a contract's lair within this of a tower flees into its cave */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float CaveMapKm16 = 6.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float ContractCaveKm16 = 5.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") float TowerRevealM16 = 3000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") int32 TowerChestItems16 = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") int32 TowerChestGold16 = 150;
+	static constexpr int32 CaveMouthIdBase16 = (1 << 29) + (1 << 28) + (1 << 27) + (1 << 26);
+	static int32 CaveMouthIdOf16(FIntPoint Cell);
+	int32 UseCaveThing16(FName Item);
+	FName CaveLinkThing16(FIntPoint Section, int32 Index) const;
+	class ARDPrisoner* TravellerNear16(const FVector& From, float Reach, ARDSection** OutS = nullptr) const;
+	bool TravellerFirst16(const FVector& From, float Reach, float OtherD) const;
+	FString FreeTraveller16(const FVector& From, float Reach);
+	void TickCaveContract16();
+	void OnCaveContractKilled16(ARDMonster* Monster, bool bHers);
+	void CaveBossKey16();
+	bool CaveMouthPlace16(int32 Id, FRDWildPlace& Out) const;
+	void AddCaveMouths16(TArray<FRDWildPlace>& Out) const;
+	void TickCaveLinks16(float Dt, const FVector& Her);
+	void AddRescuedSettlers16(int32 CampId, const FVector2D& Fire, float Yaw, TArray<TWeakObjectPtr<AActor>>& Folk);
+	void TickTowerLift16(const FVector2D& H2);
+	bool LayTowerTop16();
+	void DropTowerTop16();
+	FString TowerDescribe16(const FVector& From, float Reach) const;
+	FString TowerInteract16(const FVector& From, float Reach);
+	/** for the tests: "map|", "contract|", "traveller|", "mouth|", "key|", "climbed|", "towerchest|" records, "door|", "top|", "chest|",
+	 *  "beast|", "lost|<set x>|<y>|<x>|<y>|<z>|<name>|<freed>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetCaveLinks16() const;
+	/** for the tests: the broken tower nearest (Xm, Ym) (metres): "<i>|<j>|<x>|<y>|<metres off>", or "" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") FString DebugNearestTower16(float Xm, float Ym) const;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Cave16") int32 TowerMarked16 = 0;
+	float CaveLinkLook16 = 0.f;
+	bool bCaveContractLaid16 = false;
+	TWeakObjectPtr<ARDMonster> CaveContractBeast16;
+	int32 CaveContractId16 = -1;
+	FVector TowerDoorAt16 = FVector::ZeroVector, TowerDoorOut16 = FVector::ForwardVector;
+	FIntPoint TowerDoorCell16 = FIntPoint(INT32_MAX, INT32_MAX), TowerTopCell16 = FIntPoint(INT32_MAX, INT32_MAX);
+	float TowerTopZ16 = 0.f, TowerTopRadius16 = 0.f;
+	TArray<TWeakObjectPtr<USceneComponent>> TowerComps16;
+	int32 TowerChestId16 = -1; FVector TowerChestAt16 = FVector::ZeroVector; TWeakObjectPtr<UStaticMeshComponent> TowerChestMesh16;
+	FString LastTowerChest16;
 	/** the Angel Tokens a cave's last boss left this run (for the tests) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Cave16") int32 CaveTokens16 = 0;
 	/** "fossil|<region>|<1: whole>|<n of m>" for each set she carries a piece of */

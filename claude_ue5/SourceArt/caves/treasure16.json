@@ -753,5 +753,52 @@
    "texture": "painting16_decal.png",
    "share": 0.35
   }
+ },
+ "phase16": {
+  "_note": "Caves and the open world: a cave's treasure map (read in its cave: a ruin or a structure within 6 km of the tower over it marked, a chest buried there), a waystone fragment (used in its cave: the cave's mouth a place to travel to), drawn in a cave's containers besides (their own streams, weight 0 in every other draw); the lost travellers' names and their lines once settled at a camp she cleared. C++: RDCave16h.cpp (the contract beast that flees into a cave, the tower's key from a cave's last boss, its lift and top).",
+  "items": [
+   {
+    "name": "Cave Treasure Map",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_treasure_map",
+    "weight": 0.0,
+    "cave": true,
+    "looks": "An old map of the land over a cave, a cross on a ruin near the broken tower. Use it in the cave where you found it: the place is marked on your map, a chest buried there."
+   },
+   {
+    "name": "Waystone Fragment",
+    "like": "Herbs",
+    "kind": "COMPONENT",
+    "icon": "cave_waystone_fragment",
+    "weight": 0.0,
+    "cave": true,
+    "looks": "A shard of a waystone, humming faintly. Use it in a cave beneath a broken tower: the cave's mouth becomes a place you can travel to from your map."
+   }
+  ],
+  "cave_map_item": "Cave Treasure Map",
+  "cave_fragment_item": "Waystone Fragment",
+  "shares": {
+   "map": 0.05,
+   "fragment": 0.04,
+   "traveller": 0.25
+  },
+  "traveller_names": [
+   "Edda the tinker",
+   "Old Brannoc",
+   "Mirela of the mill",
+   "Tobin the shepherd",
+   "Halvard the trapper",
+   "Sanne the herbwife",
+   "Corwin the carter",
+   "Ysolde the pilgrim"
+  ],
+  "traveller_lines": [
+   "You found me in the dark. I will not forget it.",
+   "I keep the fire here now. Rest whenever you pass.",
+   "I still dream of that cave. Mind the deep places.",
+   "The trader says the roads are safer since you came."
+  ],
+  "rescue_gold": 120
  }
 }

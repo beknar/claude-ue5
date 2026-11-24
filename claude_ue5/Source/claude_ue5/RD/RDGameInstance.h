@@ -174,6 +174,16 @@ public:
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FString> Paintings16;
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FString> PaintingsApplied16;
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FIntPoint> KnownCaves16;
+	/** phase 16: the caves' maps read ("<cave key>|<n>|<target place id>", -1 not yet found, -2 none), the contract beasts fled into a cave
+	 *  ("<id>|<cave key>|<kind>|<tier>|<hp>|<name>"), the travellers rescued ("<name>|<cave key>|<set>|<state>": 0 out, c<camp> settled,
+	 *  2 waiting for a town, 3 brought home), the mouths attuned, the towers' keys, the towers climbed and their chests opened */
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FString> CaveMaps16;
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FString> ContractsInCave16;
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FString> RescuedTravellers16;
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FIntPoint> CaveMouthsAttuned16;
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FIntPoint> TowerKeys16;
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FIntPoint> TowersClimbed16;
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FIntPoint> TowerChests16;
 	/** the tenth phase: the places the lookouts' tops marked on her map, and the lookouts climbed */
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> WildMarked15;
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|List15") TArray<int32> WildLookoutsClimbed15;

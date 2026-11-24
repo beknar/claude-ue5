@@ -630,6 +630,17 @@ def items():
         if fa: g.set_editor_property("fossil_amber16", fa)
         fg = next((p_["fossil_gain"] for p_ in P if p_.get("fossil_gain")), None)
         if fg: g.set_editor_property("fossil_gain16", int(fg))
+        # (phase 16: the map and the fragment, their shares, the travellers)
+        for p_ in P:
+            if p_.get("cave_map_item"): g.set_editor_property("cave_map_item16", p_["cave_map_item"])
+            if p_.get("cave_fragment_item"): g.set_editor_property("cave_fragment_item16", p_["cave_fragment_item"])
+            sh = p_.get("shares", {})
+            if "map" in sh: g.set_editor_property("cave_map_share16", float(sh["map"]))
+            if "fragment" in sh: g.set_editor_property("cave_fragment_share16", float(sh["fragment"]))
+            if "traveller" in sh: g.set_editor_property("traveller_share16", float(sh["traveller"]))
+            if p_.get("traveller_names"): g.set_editor_property("traveller_names16", list(p_["traveller_names"]))
+            if p_.get("traveller_lines"): g.set_editor_property("traveller_lines16", list(p_["traveller_lines"]))
+            if p_.get("rescue_gold"): g.set_editor_property("rescue_gold16", int(p_["rescue_gold"]))
         pt = next((p_["painting"] for p_ in P if p_.get("painting")), None)
         if pt:
             g.set_editor_property("painting_decal16", painting_decal(pt)); g.set_editor_property("painting_share16", float(pt["share"]))

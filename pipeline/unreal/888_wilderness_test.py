@@ -8451,6 +8451,176 @@ def step_paintings16():
         try: quiet(False)
         except Exception: pass
 STEPS["paintings16"] = step_paintings16
+
+
+def step_cavelinks16():
+    """the list of 2026-11-22's caves, phase 16: the caves and the wilds, the wilds' side, as if the cave under the broken tower nearest
+    Brokenspire had given: a cave's map (resolved to a ruin or a structure within 6 km of the tower, marked, a chest buried there, dug up
+    by F: gold); a fragment (the cave's mouth a place found, travelled to by the map's travel: she stands before the mouth); the
+    tower's key (at the tower's foot without it the lift's door is locked; with it F takes her up: on the top, over 40 m above the foot,
+    places round it marked; the tower's chest opened: gold; the lift down); a rescued traveller (no camp cleared: waits for a town; in
+    Brokenspire: paid); a contract taken at Brokenspire's board whose lair has a tower within 5 km: its beast struck under half flees
+    into the cave (its record, its mark on the map at the tower). Pictures of the top and of the mouth. The game instance's records put
+    back in a finally"""
+    g = G["gen"]; res = {}; quiet(True)
+    gi = GS.get_game_instance(G["w"])
+    KEYS = ("cave_maps16", "rescued_travellers16", "cave_mouths_attuned16", "tower_keys16", "towers_climbed16", "tower_chests16", "contracts_in_cave16",
+            "treasure_maps15", "treasures_dug15", "contracts_taken15", "contracts_done15", "contract_signs15", "camps_cleared15")
+    keep = {k: list(gi.get_editor_property(k)) for k in KEYS}
+    m0 = len(gi.get_editor_property("wild_marked15"))
+    gold0 = g.get_gold()
+    L = lambda pre: [str(l) for l in g.get_cave_links16() if str(l).startswith(pre)]
+    try:
+        T = towns(); b = T.get("Brokenspire", {"x": 0.0, "y": 0.0})
+        g.wild_put_her(b["x"] + 20.0, b["y"]); yield from wait_ready(90); yield from wait_chunks(30, 50); yield from rwait(3.0)
+        tw = str(g.debug_nearest_tower16(b["x"], b["y"])).split("|")
+        res["tower"] = tw
+        if len(tw) < 5:
+            step_result("cavelinks16", False, **res); return
+        ci, cj, tx, ty = int(tw[0]), int(tw[1]), float(tw[2]), float(tw[3])
+        key = "cave:%d_%d" % (ci, cj)
+        # ---- the cave's map: resolved, marked, its chest dug up
+        gi.set_editor_property("cave_maps16", ["%s|0|-1" % key])
+        t0 = time.time(); mt = []
+        while time.time() - t0 < 6.0:
+            mt = L("maptarget|")
+            if mt: break
+            yield from rwait(0.25)
+        res["map_rec"] = L("map|"); res["map_target"] = mt
+        res["map_marked"] = len(gi.get_editor_property("wild_marked15")) - m0
+        dug = None
+        if mt:
+            q = mt[0].split("|"); tid = int(q[1]); px, py, sx, sy = float(q[2]), float(q[3]), float(q[4]), float(q[5])
+            res["map_target_km_from_tower"] = round(math.hypot(px - tx, py - ty) / 1000.0, 2)
+            res["map_in_treasure_maps"] = tid in list(gi.get_editor_property("treasure_maps15"))
+            g.wild_put_her(sx + 1.2, sy); yield from wait_chunks(30, 50); ground_put(sx + 1.2, sy); yield from rwait(3.0)
+            hp_ = G["pawn"].get_actor_location()
+            res["dig_her_m_from_spot"] = round(math.hypot(hp_.x / 100.0 - sx, hp_.y / 100.0 - sy), 2)
+            res["dig_prompt"] = str(g.describe_nearest(hp_, 300.0))
+            gd = g.get_gold(); res["dig_f"] = str(g.interact_nearest(hp_, 300.0)); yield from rwait(0.5)
+            dug = {"gold": g.get_gold() - gd, "dug": tid in list(gi.get_editor_property("treasures_dug15"))}
+        res["dig"] = dug
+        # ---- the fragment: the mouth a place found, travelled to
+        gi.set_editor_property("cave_mouths_attuned16", [unreal.IntPoint(ci, cj)])
+        yield from rwait(1.5)
+        ma = L("mouthat|"); res["mouth"] = ma
+        if ma:
+            q = ma[0].split("|"); mid, mx, my = int(q[1]), float(q[2]), float(q[3])
+            res["travel"] = g.wild_fast_travel(mid); yield from wait_chunks(30, 50); yield from rwait(3.0)
+            hp_ = G["pawn"].get_actor_location()
+            res["after_travel_m_from_mouth"] = round(math.hypot(hp_.x / 100.0 - mx, hp_.y / 100.0 - my), 1)
+            # (the travel's place is 8 m before the mouth: she walks 6 m on to it for the mouth's F)
+            ox_, oy_ = (tx - mx), (ty - my); n_ = math.hypot(ox_, oy_) or 1.0
+            G["pawn"].set_actor_location(V(hp_.x + ox_ / n_ * 600.0, hp_.y + oy_ / n_ * 600.0, hp_.z + 50.0), False, True); yield from rwait(1.0)
+            res["mouth_prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 300.0))
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=5, yaw=math.degrees(math.atan2(ty - hp_.y / 100.0, tx - hp_.x / 100.0))))
+            G["pawn"].set_actor_hidden_in_game(True); yield from rwait(1.5); shot("cavelinks16_mouth", "1280x720"); yield from rwait(1.0); G["pawn"].set_actor_hidden_in_game(False)
+        # ---- the tower's lift: locked without the key, up with it, its top, its chest, down
+        door = []
+        for _ in range(20):
+            door = [l for l in L("door|") if l.split("|")[1] == str(ci) and l.split("|")[2] == str(cj)]
+            if door: break
+            yield from rwait(0.5)
+        res["door"] = door
+        if door:
+            q = door[0].split("|"); dx, dy, dz, ox, oy = float(q[3]), float(q[4]), float(q[5]), float(q[6]), float(q[7])
+            # (stood 1.2 m out from the lift's door, on the door's own ground (a put down that steps aside from pieces moved her off it))
+            G["pawn"].set_actor_location(V(dx + ox * 120.0, dy + oy * 120.0, dz + 100.0), False, True); yield from rwait(1.5)
+            hp_ = G["pawn"].get_actor_location(); foot_z = hp_.z
+            res["door_her_m"] = round(math.hypot(hp_.x - dx, hp_.y - dy) / 100.0, 2)
+            res["door_prompt_nokey"] = str(g.describe_nearest(hp_, 260.0)); res["door_f_nokey"] = str(g.interact_nearest(hp_, 260.0)); yield from rwait(0.3)
+            gi.set_editor_property("tower_keys16", [unreal.IntPoint(ci, cj)])
+            res["door_prompt"] = str(g.describe_nearest(hp_, 260.0))
+            res["up"] = str(g.interact_nearest(hp_, 260.0)); yield from rwait(1.5)
+            hp_ = G["pawn"].get_actor_location()
+            res["top_rel_m"] = round((hp_.z - foot_z) / 100.0, 1); res["top"] = L("top|"); res["marked"] = g.get_editor_property("tower_marked16")
+            yield from rwait(2.0); hp2 = G["pawn"].get_actor_location(); res["top_held_m"] = round((hp2.z - foot_z) / 100.0, 1)
+            # (the view from the top, outward)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=0.0))
+            G["pawn"].set_actor_hidden_in_game(True); yield from rwait(2.0); shot("cavelinks16_top", "1280x720"); yield from rwait(1.0)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-35, yaw=180.0)); yield from rwait(1.0); shot("cavelinks16_platform", "1280x720"); yield from rwait(1.0)
+            G["pawn"].set_actor_hidden_in_game(False)
+            if res["top"]:
+                q = res["top"][0].split("|"); ax, ay, tz, rr = float(q[1]), float(q[2]), float(q[3]), float(q[4])
+                G["pawn"].set_actor_location(V(ax + rr * 0.55 - 120.0, ay, tz + 110.0), False, True); yield from rwait(0.8)
+                hp_ = G["pawn"].get_actor_location()
+                res["chest_prompt"] = str(g.describe_nearest(hp_, 260.0))
+                gd = g.get_gold(); res["chest_f"] = str(g.interact_nearest(hp_, 260.0)); yield from rwait(0.5)
+                res["chest_gold"] = g.get_gold() - gd; res["chest_line"] = L("chest|")
+                G["pawn"].set_actor_location(V(ax - 100.0, ay, tz + 110.0), False, True); yield from rwait(0.8)
+                hp_ = G["pawn"].get_actor_location()
+                res["down_prompt"] = str(g.describe_nearest(hp_, 260.0)); res["down"] = str(g.interact_nearest(hp_, 260.0)); yield from rwait(1.5)
+                res["down_rel_m"] = round((G["pawn"].get_actor_location().z - foot_z) / 100.0, 1)
+        # ---- a rescued traveller: no camp cleared, waits for a town; in Brokenspire, paid
+        gi.set_editor_property("camps_cleared15", [])
+        gi.set_editor_property("rescued_travellers16", ["Test Wanderer|%s|1_0|0" % key])
+        yield from rwait(1.5)
+        res["traveller_waiting"] = L("traveller|")
+        gt = g.get_gold()
+        g.wild_put_her(b["x"] + 20.0, b["y"]); yield from wait_chunks(30, 50); yield from rwait(4.0)
+        res["traveller_home"] = L("traveller|"); res["traveller_gold"] = g.get_gold() - gt
+        msgs = [str(m_) for m_ in cb().get_message_log()] if cb() else []
+        res["traveller_msg"] = next((m_ for m_ in reversed(msgs) if "Test Wanderer" in m_), None)
+        # ---- a contract whose lair has a tower within 5 km: its beast flees into the cave
+        res["board_opened"] = g.open_town_panel("board", -1); yield from rwait(0.5)
+        flee = {}
+        for _ in range(2):
+            li = line_of("contract", "Contract")
+            if li < 0: break
+            g.activate_town_entry(li); yield from rwait(0.4)
+        g.close_town_panel(); yield from rwait(0.3)
+        mine = [c_ for c_ in contracts15_lines(g) if c_["town"] == "Brokenspire" and c_["state"] == "taken"]
+        cand = []
+        for c_ in mine:
+            t_ = str(g.debug_nearest_tower16(c_["lair"][0], c_["lair"][1])).split("|")
+            if len(t_) >= 5 and float(t_[4]) < 5000.0: cand.append((c_, t_))
+        flee["taken"] = [(c_["id"], c_["name"]) for c_ in mine]; flee["with_tower"] = [(c_["id"], t_[0] + "_" + t_[1], round(float(t_[4]) / 1000.0, 2)) for c_, t_ in cand]
+        if cand:
+            c_, t_ = cand[0]; lx, ly = c_["lair"]
+            g.wild_put_her(lx + 25.0, ly); yield from wait_chunks(30, 50); ground_put(lx + 25.0, ly); yield from rwait(3.0)
+            beast = None
+            for _ in range(20):
+                for m in monsters_near(lx, ly, 40.0):
+                    if str(m.get_editor_property("title")) == c_["name"]: beast = m
+                if beast: break
+                yield from rwait(0.5)
+            flee["beast"] = bool(beast)
+            if beast:
+                beast.apply_damage(beast.get_health() - beast.get_max_health() * 0.4, G["pawn"]); yield from rwait(1.5)
+                flee["gone"] = not alive(beast)
+                flee["rec"] = [l for l in L("contract|") if l.startswith("contract|%d|" % c_["id"])]
+                flee["want_cave"] = "cave:%s_%s" % (t_[0], t_[1])
+                g.set_map_open(True); g.set_wild_map_view(float(t_[2]), float(t_[3]), 30.0)
+                t1 = time.time()
+                while time.time() - t1 < 20 and map_state()["asked"] > 0: yield
+                yield from rwait(1.0)
+                flee["marks"] = [str(m_) for m_ in G["pc"].get_hud().get_contract_marks_drawn15()]
+                g.set_map_open(False)
+        res["flee"] = flee
+        D, F_ = res.get("dig") or {}, flee
+        ok = (res["map_target"] and res["map_rec"] and res["map_rec"][0].split("|")[3] == res["map_target"][0].split("|")[1] and res.get("map_target_km_from_tower", 99) <= 6.0
+              and res.get("map_in_treasure_maps") and res["map_marked"] >= 1 and "dig" in res.get("dig_prompt", "") and res.get("dig_f") == "treasure" and D.get("gold", 0) > 0 and D.get("dug")
+              and res.get("travel") and res.get("after_travel_m_from_mouth", 99) < 6.0 and "cave" in res.get("mouth_prompt", "")
+              and res.get("door") and "locked" in res.get("door_prompt_nokey", "") and res.get("door_f_nokey") == "tower locked" and res.get("door_prompt") == "take the lift to the tower's top"
+              and res.get("up") == "tower up" and res.get("top_rel_m", 0) > 40.0 and res.get("top_held_m", 0) > 40.0
+              and res.get("chest_f") == "tower chest" and res.get("chest_gold", 0) > 0 and res.get("down") == "tower down" and abs(res.get("down_rel_m", 99)) < 5.0
+              and res["traveller_waiting"] == ["traveller|Test Wanderer|%s|1_0|2" % key] and res["traveller_home"] == ["traveller|Test Wanderer|%s|1_0|3" % key] and res["traveller_gold"] > 0
+              and (not F_.get("with_tower") or (F_.get("beast") and F_.get("gone") and F_.get("rec") and F_["rec"][0].split("|")[2] == F_["want_cave"]
+                   and any("cave" in m_ for m_ in F_.get("marks", [])))))
+        step_result("cavelinks16", bool(ok), **res)
+    finally:
+        try: g.set_map_open(False); g.close_town_panel()
+        except Exception: pass
+        for k, v in keep.items():
+            try: gi.set_editor_property(k, v)
+            except Exception: pass
+        try:
+            d_ = g.get_gold() - gold0
+            if d_: g.add_gold(-d_, "test")
+        except Exception: pass
+        try: quiet(False); G["pawn"].set_actor_hidden_in_game(False)
+        except Exception: pass
+STEPS["cavelinks16"] = step_cavelinks16
 SAVES = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SaveGames")
 def saves_snapshot():
     """the save folder's files and their bytes: put back at the end, the tests' own new saves deleted (PR #61's review)"""

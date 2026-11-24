@@ -1,0 +1,72 @@
+{
+ "tag": "c16b",
+ "plan": [
+  "cave16links"
+ ],
+ "level": "caves",
+ "steps": [
+  {
+   "step": "cave16links",
+   "ok": true,
+   "props": {
+    "map": "Cave Treasure Map",
+    "fragment": "Waystone Fragment",
+    "names": 8
+   },
+   "draws": {
+    "holding": 138,
+    "map": 0.043,
+    "fragment": 0.051
+   },
+   "map_used": true,
+   "map_left": 0,
+   "map_rec": [
+    "map|cave:0_-1|0|-1"
+   ],
+   "map_msg": "The map shows a place on the land over this cave, a chest buried there: it is marked on your map in the wilds",
+   "frag_used": true,
+   "frag_again": false,
+   "frag_left": 1,
+   "mouth_rec": [
+    "mouth|0|-1|1007157759"
+   ],
+   "lost": [
+    "lost|-1|1|-31050|31650|-879|Tobin the shepherd|0",
+    "lost|0|1|-3150|23850|-877|Ysolde the pilgrim|0",
+    "lost|1|-1|28350|-29250|-879|Tobin the shepherd|0"
+   ],
+   "lost_restarts": 0,
+   "lost_prompt": "help the lost traveller out",
+   "lost_f": "traveller",
+   "lost_msg": "Tobin the shepherd: \"I thought I would die down here!\" They follow your trail out: look for them in the wilds",
+   "traveller_rec": [
+    "traveller|Tobin the shepherd|cave:0_-1|-1_1|0"
+   ],
+   "lost_after": [
+    "lost|-1|1|-31050|31650|-879|Tobin the shepherd|1",
+    "lost|0|1|-3150|23850|-877|Ysolde the pilgrim|0",
+    "lost|1|-1|28350|-29250|-879|Tobin the shepherd|0"
+   ],
+   "lost_again": [],
+   "lost_set": "-1_1",
+   "beast": [
+    "beast|99991|-7350|5250|-104|RDMonster_31"
+   ],
+   "beast_from_start_m": 90.7,
+   "contract_done": true,
+   "contract_rec_after": [],
+   "boss": "Half_Creature_05",
+   "key_rec": [
+    "key|0|-1"
+   ],
+   "notice": "THE BOSS OF TIER 3 IS SLAIN  -  AN ANGEL TOKEN LIES WHERE IT FELL"
+  }
+ ],
+ "windows_hidden": "Content Browser, Message Log",
+ "shots": [
+  "mw_c16b_cave16_traveller.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}

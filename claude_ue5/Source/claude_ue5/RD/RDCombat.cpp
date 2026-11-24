@@ -1073,6 +1073,7 @@ bool URDCombatComponent::UseItem(FName Name)
 	const FString Lb = RDItemLabel(Name);
 	if (It.Kind == ERDItemKind::Armour) return WearArmour(Name);          // (worn, not used up)
 	if (Generator->SocketStones16.Contains(Name)) return SetSocket16(Name);          // (the list of 2026-11-22's caves: a socket stone set)
+	if (const int32 Ct = Generator->UseCaveThing16(Name); Ct >= 0) { if (Ct > 0) RemoveItem(Name, 1); return Ct > 0; }          // (phase 16: a cave's map, a fragment)
 	if (It.Kind == ERDItemKind::Component && MendWith16(Name)) return true;          // (phase 12: a geode shard mends the shard blade)
 	// (mistward: a shield to her left hand, the torch lit or put out, a teleport ring used)
 	if (It.Kind == ERDItemKind::Shield) return WearShield(Name);

@@ -779,6 +779,10 @@ public:
 	struct FCavePainting16 { FVector At = FVector::ZeroVector, Normal = FVector::ForwardVector; };
 	TArray<FCavePainting16> CavePaintings16;
 	void CavePaintingSet16();
+	/** phase 16: a lost traveller in the set's deepest room (a set beyond the first, by its seed's hash), freed by F */
+	void CaveTravellerSet16();
+	TWeakObjectPtr<class ARDPrisoner> CaveTraveller16;
+	FString CaveTravellerName16;
 	/** phase 13: a flooded side tunnel (its stretch under water, the water's face) */
 	struct FCaveFlood16 { TArray<FVector> Pts; float Half = 300.f, WaterZ = 0.f; TArray<TObjectPtr<UPrimitiveComponent>> Comps; };
 	TArray<FCaveFlood16> CaveFloods16;
