@@ -15,6 +15,15 @@
 DEFINE_LOG_CATEGORY_STATIC(LogRDCave16g, Log, All);
 
 // ================================================================================================ the cave painting
+// ("<i>_<j>": a landmark tower's square, as the cave's key names it)
+static bool RDCave16CellOf(const FString& Cell, int32& I, int32& J)
+{
+	FString A, B;
+	if (!Cell.Split(TEXT("_"), &A, &B) || !A.IsNumeric() || !B.IsNumeric()) return false;
+	I = FCString::Atoi(*A); J = FCString::Atoi(*B);
+	return true;
+}
+
 void ARDSection::CavePaintingSet16()
 {
 	CavePaintings16.Reset();
@@ -59,6 +68,15 @@ void ARDSection::CavePaintingSet16()
 						Avg += Hg.ImpactNormal;
 					}
 				if (!bFlat) continue;
+				// (4 m clear of every door, container and anvil of the set (PR #122's review: a chest under it shared F's reach))
+				{
+					bool bDoor = false; int32 Ix = -1;
+					FindNearestInteractive(Hh.ImpactPoint, 400.f, bDoor, Ix);
+					if (Ix >= 0) continue;
+					bool bAnvil = false;
+					for (const FVector& A : GetAnvilPoints()) bAnvil |= FVector::Dist2D(A, Hh.ImpactPoint) < 400.f;
+					if (bAnvil) continue;
+				}
 				Avg = FVector(Avg.X, Avg.Y, 0.f).GetSafeNormal();
 				FCavePainting16 P; P.At = Hh.ImpactPoint; P.Normal = Avg;
 				if (bBuildInteractive && W->IsGameWorld())
@@ -95,29 +113,39 @@ bool ARDDungeonGenerator::PaintingNear16(const FVector& From, float Reach, FVect
 	return false;
 }
 
-bool ARDDungeonGenerator::PaintingFirst16(const FVector& From) const
+bool ARDDungeonGenerator::PaintingFirst16(const FVector& From, float Reach, float OtherD) const
 {
+	// (PR #122's review: weighed against piles alone, a chest under the painting answered its F only from its reach's far edge)
 	FVector At;
-	if (!PaintingNear16(From, 300.f, &At)) return false;
+	if (!PaintingNear16(From, Reach, &At)) return false;
 	const float Dp = FVector::Dist2D(At, From);
+	if (Dp >= OtherD) return false;
 	for (const ARDLootPile* P : LootPiles)
-		if (IsValid(P) && FVector::Dist2D(P->GetActorLocation(), From) < FMath::Min(Dp, 260.f)) return false;
+		if (IsValid(P) && FVector::Dist2D(P->GetActorLocation(), From) < Dp) return false;
+	FVector An;
+	if (FindNearestAnvil(From, Dp, An)) return false;
+	if (!StationDescribe(From, Dp).IsEmpty()) return false;
 	return true;
 }
 
-FString ARDDungeonGenerator::StudyPainting16(const FVector& From)
+FString ARDDungeonGenerator::StudyPainting16(const FVector& From, float Reach)
 {
-	if (!PaintingNear16(From, 300.f)) return FString();
+	if (!PaintingNear16(From, Reach)) return FString();
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	const FString Key = GI && !GI->CaveKey15.IsEmpty() ? GI->CaveKey15 : FString(TEXT("cave"));
 	const int32 Rg = CaveRegion16();
 	const FString Region = CaveRegions16.IsValidIndex(Rg) ? CaveRegions16[Rg].Name.ToString() : FString();
 	const FString Entry = Key + TEXT("|") + Region;
-	const bool bNew = GI && !GI->Paintings16.Contains(Entry);
-	if (GI) GI->Paintings16.AddUnique(Entry);
+	// (a cave entered with no tower's cell in its key (a test's or the package's run: "cave:go", "cave") or no region known shows her
+	// nothing to find (PR #122's review: such a key parsed as Brokenspire's square))
+	FString CellS; int32 Ci = 0, Cj = 0;
+	const bool bCell = Key.Split(TEXT(":"), nullptr, &CellS) && RDCave16CellOf(CellS, Ci, Cj);
+	const bool bMarks = bCell && !Region.IsEmpty();
+	const bool bNew = GI && bMarks && !GI->Paintings16.Contains(Entry);
+	if (GI && bMarks) GI->Paintings16.AddUnique(Entry);
 	if (PlayerCombat)
-		PlayerCombat->ShowMessage(!bNew ? FString(TEXT("You know this painting: its caves are on your map"))
-			: Region.IsEmpty() ? FString(TEXT("Hunters and a stag in red ochre: the old people knew these caves"))
+		PlayerCombat->ShowMessage(!bMarks ? FString(TEXT("Hunters and a stag in red ochre: the old people knew these caves"))
+			: !bNew ? FString(TEXT("You know this painting: its caves are on your map"))
 			: FString::Printf(TEXT("You study the painting: it shows the %s lands' caves and their hidden places (on your map once you are back in the wilds)"), *Region));
 	UE_LOG(LogRDCave16g, Log, TEXT("RDCAVE16 painting studied: %s (%s)"), *Entry, bNew ? TEXT("new") : TEXT("known"));
 	return TEXT("painting");
@@ -153,8 +181,9 @@ void ARDDungeonGenerator::ApplyPaintings16()
 		GI->PaintingsApplied16.Add(Entry);
 		FString Key, Region; Entry.Split(TEXT("|"), &Key, &Region);
 		FString Cell; int32 Ci = 0, Cj = 0;
-		if (Key.Split(TEXT(":"), nullptr, &Cell)) { FString A, B; if (Cell.Split(TEXT("_"), &A, &B)) { Ci = FCString::Atoi(*A); Cj = FCString::Atoi(*B); } }
 		const FRDCaveRegion16* Rg = CaveRegions16.FindByPredicate([&Region](const FRDCaveRegion16& R) { return R.Name.ToString() == Region; });
+		// (no tower's cell or no region known: nothing to mark (PR #122's review))
+		if (!Key.Split(TEXT(":"), nullptr, &Cell) || !RDCave16CellOf(Cell, Ci, Cj) || !Rg) { UE_LOG(LogRDCave16g, Log, TEXT("RDCAVE16 painting %s: no cell or region, nothing marked"), *Entry); continue; }
 		int32 Caves = 0, Secrets = 0;
 		// (the region's caves round the painted one: the towers' squares within 7 whose land is the region's, the nearest twelve (near
 		// Brokenspire the open lands' were 53: a map full of caves says nothing))
@@ -165,7 +194,7 @@ void ARDDungeonGenerator::ApplyPaintings16()
 			{
 				FVector2D S;
 				if ((I == Ci && J == Cj) || !WildTowerSite13(I, J, S)) continue;
-				if (Rg && !Rg->Biomes.Contains(Wild->BiomeName(Wild->BiomeAt(S.X, S.Y)))) continue;
+				if (!Rg->Biomes.Contains(Wild->BiomeName(Wild->BiomeAt(S.X, S.Y)))) continue;
 				Found.Add(TPair<double, FIntPoint>(bHere ? FVector2D::Distance(S, Here) : (double)(FMath::Square(I - Ci) + FMath::Square(J - Cj)), FIntPoint(I, J)));
 			}
 		Found.Sort([](const TPair<double, FIntPoint>& A, const TPair<double, FIntPoint>& B) { return A.Key < B.Key; });
@@ -180,7 +209,8 @@ void ARDDungeonGenerator::ApplyPaintings16()
 			for (int32 A = P0.X; A <= P1.X; ++A) for (int32 B = P0.Y; B <= P1.Y; ++B) Wild->PlacesIn(FIntPoint(A, B), Ps);
 			for (const FRDWildPlace& P : Ps)
 			{
-				if (P.Town >= 0 || (P.Kind != TEXT("lair") && P.Kind != TEXT("ruins")) || FVector2D::Distance(P.At, S) > 3000.0) continue;
+				// (the captain's quest places (QuestIdBase on) are listed as ruins: they are no painting's secret (PR #122's review))
+				if (P.Town >= 0 || P.Id >= FRDWildWorld::QuestIdBase || (P.Kind != TEXT("lair") && P.Kind != TEXT("ruins")) || FVector2D::Distance(P.At, S) > 3000.0) continue;
 				if (WildFound.Contains(P.Id) || WildMarked15.Contains(P.Id)) continue;
 				WildMarked15.Add(P.Id); GI->WildMarked15.AddUnique(P.Id); PaintingMarked16.Add(P.Id); ++Secrets;
 			}

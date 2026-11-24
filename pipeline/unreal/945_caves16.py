@@ -496,6 +496,7 @@ def items():
     T, P = treasure_phases()
     X = [x for p in P for x in p.get("items", [])]
     mine = {x["name"] for x in X} | {b + w["name"] for p in P for w in p.get("weapons", []) + p.get("armour", []) for b in BANDS}
+    mine |= {n for p in P for n in p.get("retired", [])}          # (things an earlier run made and the data no longer has)
     regions = [r for p in P for r in p.get("regions", [])]
     nodes = [n for p in P for n in p.get("nodes", [])]
     def fn(g):
@@ -568,7 +569,9 @@ def items():
             for t in picked:
                 it = unreal.RDItemDef(); it.import_text(t.export_text())
                 nm = f"Ancient Tablet of {t.spell}"; it.set_editor_property("name", nm); it.set_editor_property("icon", unreal.Name("cave_ancient_tablet"))
-                it.set_editor_property("weight", 0.08); it.set_editor_property("looks", f"A stone tablet cut by the old people: read it to learn {t.spell}.")
+                # (no weight in any draw: a tablet comes by CaveTablet16's own draw only (PR #122's review: as a tome it joined the main
+                # draw and the shelves'))
+                it.set_editor_property("weight", 0.0); it.set_editor_property("looks", f"A stone tablet cut by the old people: read it to learn {t.spell}.")
                 its.append(it); mine.add(nm); tablet_names.append(nm)
         # (phase 12: the caves' weapons, copied band by band from the table's)
         wits, looks, mends, lightless, breakers, lost, wnames = cave_weapons(its, P, missing)

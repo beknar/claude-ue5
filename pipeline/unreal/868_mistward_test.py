@@ -8432,6 +8432,12 @@ def cave16relics_inner(res):
             res["prompt"] = str(g.describe_nearest(pawn.get_actor_location(), 300.0)); tries.append([out_, side_, res["prompt"]])
             if "painting" in res["prompt"]: break
         res["prompt_tries"] = tries
+        # (a cave played from the editor has no tower's cell in its key ("cave"): the study shows nothing to find (PR #122's review);
+        # then as the cave under the tower of square (0, -1): it records the painting for the wilds)
+        res["f_nocell"] = str(g.interact_nearest(pawn.get_actor_location(), 300.0)); yield from wait(0.3)
+        res["studied_nocell"] = [str(l) for l in g.get_paintings16() if str(l).startswith("studied|")]
+        res["message_nocell"] = str(c.message)
+        gi.set_editor_property("cave_key15", "cave:0_-1")
         res["f"] = str(g.interact_nearest(pawn.get_actor_location(), 300.0)); yield from wait(0.3)
         res["studied"] = [str(l) for l in g.get_paintings16() if str(l).startswith("studied|")]
         res["message"] = str(c.message)
@@ -8474,7 +8480,8 @@ def cave16relics_inner(res):
         W0 = [str(w.name) for w in g.get_editor_property("weapons")]
         c.add_item(sp[0], 1); used = c.use_item(sp[0]); yield from wait(0.5)
         W1 = [str(w.name) for w in g.get_editor_property("weapons")]
-        res["spell_tablet"] = {"item": sp[0], "spell": res["tablets"][sp[0]][2], "used": used, "new": [w for w in W1 if w not in W0], "message": str(c.message)}
+        # (a tome is read as it is picked up: the tablet is gone and the spell learned before use_item asks (False: none left))
+        res["spell_tablet"] = {"item": sp[0], "spell": res["tablets"][sp[0]][2], "used": used, "left": c.get_item_count(sp[0]), "new": [w for w in W1 if w not in W0], "message": str(c.message)}
     # ---- a cave's last boss: its Angel Token
     c = yield from restart("Warrior"); g = G["gen"]; quiet(True); pawn = G["pawn"]
     mt = g.get_editor_property("max_tier"); res["max_tier"] = mt
@@ -8511,28 +8518,29 @@ def cave16relics_inner(res):
     H, K, O = res["hp"], res["token"], res["one_piece"]
     ok = (res["region"].startswith("cold|") and res["fossils_known"] and len(tablets) >= 4
           and res.get("paintings") and "M_Cave16_Painting" in (res.get("decal") or []) and "painting" in res.get("prompt", "") and res.get("f") == "painting"
-          and any("|cold|waiting" in l for l in res.get("studied", []))
+          and res.get("f_nocell") == "painting" and not res.get("studied_nocell") and "old people knew" in res.get("message_nocell", "")
+          and res.get("studied") == ["studied|cave:0_-1|cold|waiting"]
           and any(l.split("|")[2] == "1" for l in res["fossil_lines"] if l.startswith("fossil|cold|"))
           and H["traded"] and abs(H["gain"] - 15.0) < 0.5 and H["left"] == [0, 0, 0]
           and K["traded"] and K["tokens"] == 1 and K["amber_spent"] == 1 and K["left"] == [0, 0, 0]
           and not O["traded"] and abs(O["gain"]) < 0.01 and O["kept"] == 1 and not res["mana_trade_warrior"]
           and 0.04 <= res["tablet_share"] <= 0.25 and len(drawn) >= 3
           and rec and all(r["locked_before"] and r["used"] and r["known_after"] for r in res["recipes"].values())
-          and res.get("spell_tablet", {}).get("new")
+          and res.get("spell_tablet", {}).get("new") == [res["spell_tablet"]["spell"]] and res["spell_tablet"]["left"] == 0
           and res["boss_token"]["cave_tokens"] == 1 and res["boss_token"]["tokens_gained"] == 1)
     step_result("cave16relics", bool(ok), **res)
 
 def step_cave16relics():
     res = {}
     gi = GS.get_game_instance(G["w"]); keep = {k: list(gi.get_editor_property(k)) for k in ("paintings16", "paintings_applied16", "known_caves16")}
-    h0 = gi.get_editor_property("lasting_health15")
+    h0 = gi.get_editor_property("lasting_health15"); key0 = gi.get_editor_property("cave_key15")
     try:
         yield from cave16relics_inner(res)
     finally:
         try: quiet(False)
         except Exception: pass
         try:
-            gi = GS.get_game_instance(G["w"]); gi.set_editor_property("lasting_health15", h0)
+            gi = GS.get_game_instance(G["w"]); gi.set_editor_property("lasting_health15", h0); gi.set_editor_property("cave_key15", key0)
             for k, v in keep.items(): gi.set_editor_property(k, v)
         except Exception: pass
         try: G["pawn"].set_actor_hidden_in_game(False)

@@ -685,14 +685,14 @@
     "looks": "A stone tablet cut by the old people: read it to learn to make the slow mending draught."
    },
    {
-    "name": "Ancient Tablet: Ring of the Echo",
+    "name": "Ancient Tablet: Darksight Draught",
     "like": "",
     "kind": "RECIPE",
-    "teaches": "Ring of the Echo",
+    "teaches": "Darksight Draught",
     "icon": "cave_ancient_tablet",
     "weight": 0.1,
     "cave": true,
-    "looks": "A stone tablet cut by the old people: read it to learn to make the ring of the echo."
+    "looks": "A stone tablet cut by the old people: read it to learn to make the darksight draught."
    },
    {
     "name": "Ancient Tablet: Sun-glass Weave",
@@ -748,6 +748,7 @@
   "fossil_amber": "Amber with an Insect",
   "fossil_gain": 15,
   "spell_tablets": 2,
+  "retired": ["Ancient Tablet: Ring of the Echo"],
   "painting": {
    "texture": "painting16_decal.png",
    "share": 0.35

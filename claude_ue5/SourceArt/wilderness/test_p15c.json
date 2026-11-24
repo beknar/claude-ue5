@@ -1,5 +1,5 @@
 {
- "tag": "p15b",
+ "tag": "p15c",
  "plan": [
   "paintings16"
  ],
@@ -150,12 +150,13 @@
    "marked_new": 4,
    "message": "0|From the cave painting you studied: 12 caves and 4 hidden places marked on your map",
    "drawn": 12,
-   "caves_after_2s": 12
+   "caves_after_2s": 12,
+   "applied_lines": 1
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
  "shots": [
-  "wd_p15b_paintings16_map.png"
+  "wd_p15c_paintings16_map.png"
  ],
  "error": null,
  "saves_put_back": 1,

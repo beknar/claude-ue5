@@ -138,6 +138,7 @@ TArray<FName> ARDDungeonGenerator::ShelfLootOf(FIntPoint Section, int32 Index) c
 		if (!Low(It)) return -1;
 		// (the list of 2026-11-16's sixth phase: what only a found recipe makes is never on a shelf made; recipes are drawn apart, below)
 		if (bRecipes14 && IsLockedRecipe14(It.Name)) return -1;
+		if (!CaveItemAllowed16(It)) return -1;          // (the caves' own things: never on a dungeon's shelf (PR #122's review: the tablets, the inks))
 		if (It.Kind == ERDItemKind::Scroll) return 0;
 		if (It.Kind == ERDItemKind::Component && Parts.Contains(It.Name)) return 1;
 		if (It.Kind == ERDItemKind::Tome) return 2;

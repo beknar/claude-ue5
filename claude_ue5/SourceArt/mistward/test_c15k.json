@@ -1,5 +1,5 @@
 {
- "tag": "c15i",
+ "tag": "c15k",
  "plan": [
   "cave16relics"
  ],
@@ -16,9 +16,9 @@
      "Slow Mending Draught",
      "None"
     ],
-    "Ancient Tablet: Ring of the Echo": [
+    "Ancient Tablet: Darksight Draught": [
      "RECIPE",
-     "Ring of the Echo",
+     "Darksight Draught",
      "None"
     ],
     "Ancient Tablet: Sun-glass Weave": [
@@ -40,27 +40,32 @@
    "fossils_known": true,
    "paintings": [
     [
-     -1,
+     0,
      -1
     ],
     [
-     -1,
+     0,
      1
     ],
     [
      1,
      -1
+    ],
+    [
+     1,
+     1
     ]
    ],
    "sets_made": 9,
    "tablets_drawn": {
+    "Ancient Tablet: Darksight Draught": 4,
+    "Ancient Tablet: Slow Mending Draught": 6,
+    "Ancient Tablet of Singularity": 4,
     "Ancient Tablet: Sun-glass Weave": 3,
-    "Ancient Tablet: Slow Mending Draught": 8,
-    "Ancient Tablet: Ring of the Echo": 4,
-    "Ancient Tablet of Doom": 6
+    "Ancient Tablet of Doom": 2
    },
-   "containers_with_loot": 160,
-   "tablet_share": 0.131,
+   "containers_with_loot": 159,
+   "tablet_share": 0.119,
    "decal": [
     "M_Cave16_Painting"
    ],
@@ -72,9 +77,12 @@
      "study the cave painting"
     ]
    ],
+   "f_nocell": "painting",
+   "studied_nocell": [],
+   "message_nocell": "Hunters and a stag in red ochre: the old people knew these caves",
    "f": "painting",
    "studied": [
-    "studied|cave|cold|waiting"
+    "studied|cave:0_-1|cold|waiting"
    ],
    "message": "You study the painting: it shows the cold lands' caves and their hidden places (on your map once you are back in the wilds)",
    "fossil_lines": [
@@ -111,7 +119,7 @@
      "used": true,
      "known_after": true
     },
-    "Ancient Tablet: Ring of the Echo": {
+    "Ancient Tablet: Darksight Draught": {
      "locked_before": true,
      "used": true,
      "known_after": true
@@ -126,6 +134,7 @@
     "item": "Ancient Tablet of Singularity",
     "spell": "Singularity",
     "used": false,
+    "left": 0,
     "new": [
      "Singularity"
     ],
@@ -142,10 +151,10 @@
    }
   }
  ],
- "windows_hidden": "Content Browser, Message Log",
+ "windows_hidden": "Message Log, Content Browser",
  "shots": [
-  "mw_c15i_cave16_painting.png",
-  "mw_c15i_cave16_painting_close.png"
+  "mw_c15k_cave16_painting.png",
+  "mw_c15k_cave16_painting_close.png"
  ],
  "error": null,
  "saves_put_back": 0,

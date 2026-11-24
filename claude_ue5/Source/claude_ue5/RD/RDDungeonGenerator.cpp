@@ -1595,7 +1595,7 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 	// (the eighth phase: F off her horse; beside it, on it)
 	if (bMounted) { DismountHorse(); return TEXT("dismount"); }
 	// (the list of 2026-11-22's caves: a cave painting, when it is nearer than every pile F reaches (what F names is what F takes))
-	if (bCave16 && PaintingFirst16(From)) { const FString Pn = StudyPainting16(From); if (!Pn.IsEmpty()) return Pn; }
+	if (bCave16 && PaintingFirst16(From, MaxDistance, Best ? BestD : MaxDistance)) { const FString Pn = StudyPainting16(From, MaxDistance); if (!Pn.IsEmpty()) return Pn; }
 	if (LootPiles.Num() > 0 && TakeLootNear(From, 260.f)) return TEXT("loot");
 	// (the list of 2026-11-20's ninth phase: a landmark tower's cave mouth)
 	if (bWild && CaveMouthFirst15(From) && EnterCave15()) return TEXT("cave");
@@ -1697,7 +1697,6 @@ int32 ARDDungeonGenerator::LootCountIn(const TArray<FName>& L, FIntPoint Section
 
 FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) const
 {
-	if (bCave16 && PaintingFirst16(From)) return TEXT("study the cave painting");          // (the list of 2026-11-22's caves: nearer than any pile)
 	const ARDSection* Best = nullptr; bool bBestDoor = false; int32 BestI = -1; float BestD = MaxDistance;
 	const FIntPoint Here = WorldToSection(From);
 	for (int32 Dx = -1; Dx <= 1; ++Dx)
@@ -1708,6 +1707,8 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 				const float D = S->FindNearestInteractive(From, BestD, bDoor, I);
 				if (I >= 0 && D < BestD) { BestD = D; Best = S; bBestDoor = bDoor; BestI = I; }
 			}
+	// (the list of 2026-11-22's caves: a painting nearer than everything else F reaches (PR #122's review), as F takes it)
+	if (bCave16 && PaintingFirst16(From, MaxDistance, Best ? BestD : MaxDistance)) return TEXT("study the cave painting");
 	// (mistward: her dropped things, a pad, a trap she sees)
 	// (the nearest within reach, the one F takes (TakeLootNear): the first in the list named another pile beside it, the PR
 	// review's find)

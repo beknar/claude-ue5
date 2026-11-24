@@ -2147,9 +2147,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FName FossilAmber16;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Cave16") int32 FossilGain16 = 15;
 	bool PaintingNear16(const FVector& From, float Reach, FVector* OutAt = nullptr) const;
-	/** a painting within F's reach and nearer than every pile F reaches: the prompt and F both ask it */
-	bool PaintingFirst16(const FVector& From) const;
-	FString StudyPainting16(const FVector& From);
+	/** a painting within F's reach (Reach) and nearer than everything else F reaches: the nearest door or container (OtherD), every
+	 *  pile, anvil and station; the prompt and F both ask it */
+	bool PaintingFirst16(const FVector& From, float Reach, float OtherD) const;
+	FString StudyPainting16(const FVector& From, float Reach);
 	/** for the tests: "studied|<cave>|<region>|applied/waiting", "cave|<i>|<j>" known, "painting|<set x>|<y>|<x>|<y>|<z>" laid */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetPaintings16() const;
 	void ApplyPaintings16();

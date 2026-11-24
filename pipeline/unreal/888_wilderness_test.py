@@ -8397,6 +8397,7 @@ def step_paintings16():
     gi = GS.get_game_instance(G["w"])
     keep = {k: list(gi.get_editor_property(k)) for k in ("paintings16", "paintings_applied16", "known_caves16")}
     m0 = len(gi.get_editor_property("wild_marked15"))
+    logp = os.path.join(unreal.Paths.project_log_dir(), "claude_ue5.log"); log0 = os.path.getsize(logp)
     try:
         T = towns(); b = T.get("Brokenspire", {"x": 0.0, "y": 0.0})
         g.wild_put_her(b["x"] + 20.0, b["y"]); yield from wait_ready(90); yield from wait_chunks(30, 50); yield from rwait(3.0)
@@ -8430,10 +8431,13 @@ def step_paintings16():
             shot("paintings16_map", "1280x720"); yield from rwait(1.0)
             g.set_map_open(False)
         res["drawn"] = drawn
-        # (applied once: a second look adds nothing)
+        # (applied once: its log line once in the step, however many looks went by (PR #122's review: the counts alone could not tell))
         n_c = len(caves); yield from rwait(2.0)
         res["caves_after_2s"] = len([l for l in g.get_paintings16() if str(l).startswith("cave|")])
+        tail = open(logp, encoding="utf-8", errors="replace").read()[log0:]
+        res["applied_lines"] = tail.count("RDCAVE16 painting " + e.rsplit("|", 1)[0] + " applied")
         ok = (1 <= len(caves) <= 12 and not res["off_region"] and (drawn or 0) >= 1 and res["caves_after_2s"] == n_c
+              and res["marked_new"] >= 1 and res["applied_lines"] == 1
               and any(l.endswith("|applied") for l in res["studied"]))
         step_result("paintings16", ok, **res)
     finally:
