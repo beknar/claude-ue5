@@ -781,6 +781,8 @@ public:
 	void CavePaintingSet16();
 	/** phase 16: a lost traveller in the set's deepest room (a set beyond the first, by its seed's hash), freed by F */
 	void CaveTravellerSet16();
+	/** the kit's room with the lowest floor at least 15 m from Away: its walkable tile nearest its middle, on the floor */
+	bool CaveDeepSpot16(const FVector& Away, FVector& Out) const;
 	TWeakObjectPtr<class ARDPrisoner> CaveTraveller16;
 	FString CaveTravellerName16;
 	/** phase 13: a flooded side tunnel (its stretch under water, the water's face) */

@@ -2204,6 +2204,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") TArray<FString> GetCaveLinks16() const;
 	/** for the tests: the broken tower nearest (Xm, Ym) (metres): "<i>|<j>|<x>|<y>|<metres off>", or "" */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") FString DebugNearestTower16(float Xm, float Ym) const;
+	/** for the tests: the marks and found ids the cave links made this session taken off again */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") int32 ForgetCaveLinkMarks16();
+	TArray<int32> CaveLinkMarked16;
+	bool bTowerSaveDue16 = false;
+	void GatherPlacesAndSites16(const FVector2D& At, double RadiusM, TArray<FRDWildPlace>& Out) const;
+	bool CaveMapSpot16(const FRDWildPlace& P, FVector2D& Spot) const;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Cave16") int32 TowerMarked16 = 0;
 	float CaveLinkLook16 = 0.f;
 	bool bCaveContractLaid16 = false;

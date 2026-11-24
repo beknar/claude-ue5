@@ -117,8 +117,12 @@ void ARDSection::CaveTravellerSet16()
 	const float Yaw = (float)(Hh % 360u);
 	ARDPrisoner* P = W->SpawnActor<ARDPrisoner>(ARDPrisoner::StaticClass(), FTransform(FRotator(0, Yaw, 0), At), Sp);
 	if (!P) return;
-	const FVector Fw = FRotator(0, Yaw, 0).Vector();
-	P->Init(D, At + Fw * 150.f, At + Fw * 300.f, At + Fw * 450.f);
+	// (freed, a short way toward the room's open middle and out of sight: walked straight, nothing between (PR #123's review: a random
+	// way walked into the rock))
+	FVector Fw = (Want - At).GetSafeNormal2D();
+	if (Fw.IsNearlyZero()) Fw = FRotator(0, Yaw, 0).Vector();
+	const float Go = FMath::Clamp((float)FVector::Dist2D(Want, At), 60.f, 180.f);
+	P->Init(D, At + Fw * Go / 3.f, At + Fw * Go * 2.f / 3.f, At + Fw * Go);
 	OtherActors.Add(P);          // (not MistActors: the castle's cells clear every prisoner there, and took the traveller (the first test))
 	CaveTraveller16 = P;
 	CaveTravellerName16 = Generator->TravellerNames16.Num() > 0 ? Generator->TravellerNames16[(Hh >> 8) % (uint32)Generator->TravellerNames16.Num()] : FString(TEXT("A lost traveller"));
@@ -145,6 +149,10 @@ bool ARDDungeonGenerator::TravellerFirst16(const FVector& From, float Reach, flo
 	const float Dp = FVector::Dist2D(P->GetActorLocation(), From);
 	if (Dp >= OtherD) return false;
 	for (const ARDLootPile* L : LootPiles) if (IsValid(L) && FVector::Dist2D(L->GetActorLocation(), From) < Dp) return false;
+	// (as the painting: an anvil, a table, a painting nearer takes F (PR #123's review))
+	FVector An, Pa;
+	if (FindNearestAnvil(From, Dp, An) || !StationDescribe(From, Dp).IsEmpty()) return false;
+	if (PaintingNear16(From, Dp, &Pa) && FVector::Dist2D(Pa, From) < Dp) return false;
 	return true;
 }
 
@@ -176,22 +184,16 @@ void ARDDungeonGenerator::TickCaveContract16()
 		if (F.Num() < 6 || F[1] != GI->CaveKey15) continue;
 		const int32 Kind = Monsters.IndexOfByPredicate([&F](const FRDMonsterDef& M) { return M.Name.ToString() == F[2]; });
 		if (Kind < 0) { UE_LOG(LogRDCave16h, Warning, TEXT("RDCAVE16 contract beast %s: no kind %s on this level"), *F[5], *F[2]); continue; }
-		// (the deepest room of the first set but the one she starts in)
-		const FVector Start = GetStartRoomCenter();
-		int32 Deep = -1; float DeepZ = 1e9f;
-		for (int32 I = 0; I < S0->GetNumRooms(); ++I)
-		{
-			const FVector C = S0->GetRoomCenter(I);
-			if (FVector::Dist2D(C, Start) < 1500.f || S0->GetRoomKindEnum(I) == ERDRoomKind::Junction) continue;
-			if (C.Z < DeepZ) { DeepZ = C.Z; Deep = I; }
-		}
-		if (Deep < 0) continue;
+		// (the deepest room of the first set but the one she starts in, by the rooms' own floors (a cave room's centre is the set's height:
+		// PR #123's review), stood on its walkable tile nearest its middle, on the floor a trace finds)
+		FVector At;
+		if (!S0->CaveDeepSpot16(GetStartRoomCenter(), At)) continue;
 		const int32 TierUp = FMath::Max(0, FCString::Atoi(*F[3]) - (GI->CaveTier15 > 0 ? GI->CaveTier15 : 1));
 		const float Hp = FCString::Atof(*F[4]) * (1.f + 0.35f * TierUp);
-		ARDMonster* M = SpawnMonsterKind(Kind, S0->GetRoomCenter(Deep) + FVector(0, 0, 100.f), 1, Hp, 1.f + 0.15f * TierUp, 1.15f, F[5]);
+		ARDMonster* M = SpawnMonsterKind(Kind, At + FVector(0, 0, 100.f), 1, Hp, 1.f + 0.15f * TierUp, 1.15f, F[5]);
 		if (!M) continue;
 		CaveContractBeast16 = M; CaveContractId16 = FCString::Atoi(*F[0]);
-		UE_LOG(LogRDCave16h, Log, TEXT("RDCAVE16 contract beast %s (%s) waits in room %d of the first set"), *F[5], *F[2], Deep);
+		UE_LOG(LogRDCave16h, Log, TEXT("RDCAVE16 contract beast %s (%s) waits in the first set's deepest room at (%.0f, %.0f, %.0f)"), *F[5], *F[2], At.X, At.Y, At.Z);
 		break;          // (one a visit)
 	}
 }
@@ -254,7 +256,7 @@ void ARDDungeonGenerator::TickCaveLinks16(float Dt, const FVector& Her)
 	if (!GI) return;
 	const FVector2D H2(Her.X / 100.0, Her.Y / 100.0);
 	// ---- the attuned mouths: places found (travel targets)
-	for (const FIntPoint& C : GI->CaveMouthsAttuned16) WildFound.Add(CaveMouthIdOf16(C));
+	for (const FIntPoint& C : GI->CaveMouthsAttuned16) { const int32 Mid = CaveMouthIdOf16(C); if (!WildFound.Contains(Mid)) { WildFound.Add(Mid); CaveLinkMarked16.Add(Mid); } }
 	// ---- the cave maps: each its place (a ruin or a structure near the tower, the map's n-th nearest not taken by another), its chest's
 	// spot at the place itself (TreasureSpots15 told before the buried chests ask), the place marked
 	for (FString& E : GI->CaveMaps16)
@@ -266,45 +268,38 @@ void ARDDungeonGenerator::TickCaveLinks16(float Dt, const FVector& Her)
 		if (Target < 0)
 		{
 			TArray<FRDWildPlace> Ps, Cand;
-			const FIntPoint P0 = Wild->PlaceCellOf(S.X - CaveMapKm16 * 1000.0, S.Y - CaveMapKm16 * 1000.0), P1 = Wild->PlaceCellOf(S.X + CaveMapKm16 * 1000.0, S.Y + CaveMapKm16 * 1000.0);
-			for (int32 A = P0.X; A <= P1.X; ++A) for (int32 B = P0.Y; B <= P1.Y; ++B) { Wild->PlacesIn(FIntPoint(A, B), Ps); Wild->SitesIn(FIntPoint(A, B), Ps); }
+			GatherPlacesAndSites16(S, CaveMapKm16 * 1000.0, Ps);
 			TSet<int32> Taken;
 			for (const FString& O : GI->CaveMaps16) { TArray<FString> G; O.ParseIntoArray(G, TEXT("|"), false); if (G.Num() >= 3) Taken.Add(FCString::Atoi(*G[2])); }
 			for (const FRDWildPlace& P : Ps)
 			{
 				const bool bSite = P.Id >= FRDWildWorld::SiteIdBase && P.Id < FRDWildWorld::FarmIdBase;
-				const bool bRuin = P.Kind == TEXT("ruins") && P.Id < FRDWildWorld::QuestIdBase && !RuinHasMap15(P);
+				bool bRuin = P.Kind == TEXT("ruins") && P.Id < FRDWildWorld::QuestIdBase && !RuinHasMap15(P);
+				if (bRuin) { const int32 Rk = WildRuinKindOf(P); if (Rk >= 0 && WildRuinKinds[Rk].bWater) bRuin = false; }          // (no water kind: their middles lie in the water (PR #123's review))
 				if ((!bSite && !bRuin) || P.Town >= 0 || Taken.Contains(P.Id) || GI->TreasuresDug15.Contains(P.Id) || FVector2D::Distance(P.At, S) > CaveMapKm16 * 1000.0) continue;
 				if (!Cand.ContainsByPredicate([&P](const FRDWildPlace& Q) { return Q.Id == P.Id; })) Cand.Add(P);
 			}
 			Cand.Sort([&S](const FRDWildPlace& A, const FRDWildPlace& B) { return FVector2D::DistSquared(A.At, S) < FVector2D::DistSquared(B.At, S); });
+			{
+				FVector2D Sp;
+				Cand.RemoveAll([this, &Sp](const FRDWildPlace& P) { return !CaveMapSpot16(P, Sp); });          // (a place with no spot for its chest is passed over)
+			}
 			if (Cand.Num() == 0) { UE_LOG(LogRDCave16h, Log, TEXT("RDCAVE16 cave map %s: no ruin or structure within %.0f km"), *E, CaveMapKm16); E = F[0] + TEXT("|") + F[1] + TEXT("|-2"); continue; }
 			Target = Cand[0].Id;
 			E = F[0] + TEXT("|") + F[1] + TEXT("|") + FString::FromInt(Target);
 			GI->TreasureMaps15.AddUnique(Target);
-			WildMarked15.Add(Target); GI->WildMarked15.AddUnique(Target); WildMarkedCacheFor15 = -1;
+			WildMarked15.Add(Target); GI->WildMarked15.AddUnique(Target); CaveLinkMarked16.Add(Target); WildMarkedCacheFor15 = -1;
 			if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("The cave's map: %s is marked on your map, a chest buried there"), *Cand[0].Name));
 			UE_LOG(LogRDCave16h, Log, TEXT("RDCAVE16 cave map %s points at %s (%d) at (%.0f, %.0f), %.1f km from its tower"), *F[0], *Cand[0].Name, Target, Cand[0].At.X, Cand[0].At.Y, FVector2D::Distance(Cand[0].At, S) / 1000.0);
 			WildAutosave(TEXT("found"));
 		}
 		if (Target < 0 || GI->TreasuresDug15.Contains(Target)) continue;
-		// (the chest's spot at the place: 8 to 20 m from its middle, dry and gentle, by the place's own hash; told to the buried chests)
+		// (the chest's spot at the place, told to the buried chests before they ask (CaveMapSpot16: the same spot every look))
 		if (!TreasureSpots15.Contains(Target) || TreasureSpots15[Target].Landmark != TEXT("cave map"))
 		{
-			FRDWildPlace P;
-			if (!Wild->FindPlace(Target, P)) continue;
-			FTreasureSpot15 T; T.LmAt = P.At; T.Landmark = TEXT("cave map"); T.Spot = P.At;
-			for (int32 Try = 0; Try < 16; ++Try)
-			{
-				const float A = FRDWildWorld::Rand01(Target, 1960 + Try, Wild->Seed) * 2.f * PI, D = 8.f + 12.f * FRDWildWorld::Rand01(Target, 1980 + Try, Wild->Seed);
-				const FVector2D Q = P.At + FVector2D(FMath::Cos(A), FMath::Sin(A)) * D;
-				FRDWSample Sm; Wild->Sample(Q.X, Q.Y, Sm, false);
-				if (Sm.WaterKind != 0 || Sm.Lava > 0.05f) continue;
-				const double H0 = Wild->Height(Q.X, Q.Y);
-				bool bSteep = false;
-				for (int32 K = 0; K < 4 && !bSteep; ++K) bSteep = FMath::Abs(Wild->Height(Q.X + 3.0 * FMath::Cos(K * PI / 2.0), Q.Y + 3.0 * FMath::Sin(K * PI / 2.0)) - H0) > 1.2;
-				if (!bSteep) { T.Spot = Q; break; }
-			}
+			FRDWildPlace P; FVector2D Sp;
+			if (!Wild->FindPlace(Target, P) || !CaveMapSpot16(P, Sp)) continue;
+			FTreasureSpot15 T; T.LmAt = P.At; T.Landmark = TEXT("cave map"); T.Spot = Sp;
 			TreasureSpots15.Add(Target, T);
 		}
 	}
@@ -388,6 +383,17 @@ void ARDDungeonGenerator::TickTowerLift16(const FVector2D& H2)
 	TowerDoorAt16 = FVector(F2.X, F2.Y, Wild->ToZ(Wild->Height(F2.X / 100.0, F2.Y / 100.0)));
 	TowerDoorOut16 = -Out;
 	TowerDoorCell16 = Cell;
+	// (she stands inside the tower's foot, under its top (a save made up there, loaded on the ground): put out at the lift's door)
+	if (APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0))
+	{
+		const FVector L = Her->GetActorLocation();
+		const bool bOnTop = TowerTopCell16 == Cell && FMath::Abs(L.Z - TowerTopZ16) < 600.f;
+		if (!bOnTop && FVector2D::Distance(FVector2D(L.X, L.Y) / 100.0, WildLandmarkAt) * 100.0 < CaveFootRadius15 - 300.f && L.Z < Lm->Bounds.GetBox().Min.Z + 0.5f * (Lm->Bounds.GetBox().Max.Z - Lm->Bounds.GetBox().Min.Z))
+		{
+			Her->SetActorLocation(TowerDoorAt16 + TowerDoorOut16 * 250.f + FVector(0, 0, 110.f), false, nullptr, ETeleportType::TeleportPhysics);
+			UE_LOG(LogRDCave16h, Log, TEXT("RDCAVE16 she stood inside the tower %d_%d: put out at its lift's door"), Cell.X, Cell.Y);
+		}
+	}
 }
 
 bool ARDDungeonGenerator::LayTowerTop16()
@@ -482,8 +488,15 @@ FString ARDDungeonGenerator::TowerDescribe16(const FVector& From, float Reach) c
 	const URDGameInstance* GI = URDGameInstance::Of(this);
 	if (TowerTopCell16.X != INT32_MAX && FMath::Abs(From.Z - TowerTopZ16) < 400.f && FVector::Dist2D(From, FVector(WildLandmarkAt.X * 100.0, WildLandmarkAt.Y * 100.0, 0.0)) < TowerTopRadius16 + 200.f)
 	{
-		if (TowerChestId16 > 0 && FVector::Dist2D(TowerChestAt16, From) < Reach) return TEXT("open the tower's chest");
-		return TEXT("take the lift down");
+		// (the lift a point at the platform's middle (marked by its light), the chest by its place; each only when no pile F reaches is
+		// nearer (PR #123's review: anywhere on the top F took the lift, and the chest's things lay there for good))
+		const FVector Lift(WildLandmarkAt.X * 100.0, WildLandmarkAt.Y * 100.0, TowerTopZ16);
+		float PileD = Reach;
+		for (const ARDLootPile* L : LootPiles) if (IsValid(L)) PileD = FMath::Min(PileD, (float)FVector::Dist2D(L->GetActorLocation(), From));
+		const float Cd = TowerChestId16 > 0 ? FVector::Dist2D(TowerChestAt16, From) : 1e9f, Ld = FVector::Dist2D(Lift, From);
+		if (Cd < Reach && Cd <= Ld && Cd < PileD) return TEXT("open the tower's chest");
+		if (Ld < Reach && Ld < PileD) return TEXT("take the lift down");
+		return FString();
 	}
 	if (!TowerDoorAt16.IsZero() && FVector::Dist2D(TowerDoorAt16, From) < Reach + 100.f && FMath::Abs(TowerDoorAt16.Z - From.Z) < 300.f)
 		return GI && GI->TowerKeys16.Contains(TowerDoorCell16) ? FString(TEXT("take the lift to the tower's top")) : FString(TEXT("a locked iron door (its key is in the cave below)"));
@@ -510,15 +523,14 @@ FString ARDDungeonGenerator::TowerInteract16(const FVector& From, float Reach)
 		{
 			GI->TowersClimbed16.Add(TowerDoorCell16);
 			TArray<FRDWildPlace> Ps;
-			const FIntPoint P0 = Wild->PlaceCellOf(WildLandmarkAt.X - TowerRevealM16, WildLandmarkAt.Y - TowerRevealM16), P1 = Wild->PlaceCellOf(WildLandmarkAt.X + TowerRevealM16, WildLandmarkAt.Y + TowerRevealM16);
-			for (int32 Ia = P0.X; Ia <= P1.X; ++Ia) for (int32 Ib = P0.Y; Ib <= P1.Y; ++Ib) { Wild->PlacesIn(FIntPoint(Ia, Ib), Ps); Wild->SitesIn(FIntPoint(Ia, Ib), Ps); }
+			GatherPlacesAndSites16(WildLandmarkAt, TowerRevealM16, Ps);
 			for (const FRDWildPlace& P : Ps)
 			{
 				if (P.Town >= 0 || P.Id >= FRDWildWorld::QuestIdBase || FVector2D::Distance(P.At, WildLandmarkAt) > TowerRevealM16 || WildFound.Contains(P.Id) || WildMarked15.Contains(P.Id)) continue;
-				WildMarked15.Add(P.Id); GI->WildMarked15.AddUnique(P.Id); ++Marked;
+				WildMarked15.Add(P.Id); GI->WildMarked15.AddUnique(P.Id); CaveLinkMarked16.Add(P.Id); ++Marked;
 			}
 			WildMarkedCacheFor15 = -1;
-			WildAutosave(TEXT("found"));
+			bTowerSaveDue16 = true;          // (saved at the foot: a save on the top would load her on the ground under it (PR #123's review))
 		}
 		TowerMarked16 = Marked;
 		if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("The lift creaks up the broken tower: the land below lies open%s"), Marked > 0 ? *FString::Printf(TEXT(", %d places marked on your map"), Marked) : TEXT("")));
@@ -528,6 +540,7 @@ FString ARDDungeonGenerator::TowerInteract16(const FVector& From, float Reach)
 	if (D == TEXT("take the lift down"))
 	{
 		Put(TowerDoorAt16 + TowerDoorOut16 * 250.f + FVector(0, 0, 110.f));
+		if (bTowerSaveDue16) { bTowerSaveDue16 = false; WildAutosave(TEXT("found")); }
 		return TEXT("tower down");
 	}
 	if (D == TEXT("open the tower's chest") && TowerChestId16 > 0)
@@ -553,7 +566,7 @@ FString ARDDungeonGenerator::TowerInteract16(const FVector& From, float Reach)
 		LastTowerChest16 = FString::Printf(TEXT("%d|%d|%s"), Tier, Gold, *FString::JoinBy(Things, TEXT(","), [](const FName& N) { return N.ToString(); }));
 		if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("The tower's chest: %d gold and %d things (tier %d)"), Gold, Things.Num(), Tier));
 		PlaySoundAt(TEXT("Player.Loot"), TowerChestAt16);
-		WildAutosave(TEXT("found"));
+		bTowerSaveDue16 = true;
 		return TEXT("tower chest");
 	}
 	return FString();
@@ -611,4 +624,67 @@ FString ARDDungeonGenerator::DebugNearestTower16(float Xm, float Ym) const
 	FVector2D S; double D = 0.0;
 	if (!IsWildReady() || !NearestTowerSite15(FVector2D(Xm, Ym), 2, S, D)) return FString();
 	return FString::Printf(TEXT("%d|%d|%.0f|%.0f|%.0f"), FMath::FloorToInt(S.X / WildLandmarkCellM), FMath::FloorToInt(S.Y / WildLandmarkCellM), S.X, S.Y, D);
+}
+
+void ARDDungeonGenerator::GatherPlacesAndSites16(const FVector2D& At, double RadiusM, TArray<FRDWildPlace>& Out) const
+{
+	// (the places by the places' 2 km cells, the structures by their own 1.58 km cells (PR #123's review: the structures had been asked with
+	// the places' cell numbers, 10 to 20 km off))
+	const FIntPoint P0 = Wild->PlaceCellOf(At.X - RadiusM, At.Y - RadiusM), P1 = Wild->PlaceCellOf(At.X + RadiusM, At.Y + RadiusM);
+	for (int32 A = P0.X; A <= P1.X; ++A) for (int32 B = P0.Y; B <= P1.Y; ++B) Wild->PlacesIn(FIntPoint(A, B), Out);
+	const FIntPoint S0 = Wild->SiteCellOf(At.X - RadiusM, At.Y - RadiusM), S1 = Wild->SiteCellOf(At.X + RadiusM, At.Y + RadiusM);
+	for (int32 A = S0.X; A <= S1.X; ++A) for (int32 B = S0.Y; B <= S1.Y; ++B) Wild->SitesIn(FIntPoint(A, B), Out);
+}
+
+bool ARDDungeonGenerator::CaveMapSpot16(const FRDWildPlace& P, FVector2D& Spot) const
+{
+	// (22 to 35 m from the place's middle, outside its pieces as the buried chests stand by a landmark: dry, off the roads and lava, gentle;
+	// by the place's own hash, the same every look. None of 16: no spot (PR #123's review: the middle itself was the fallback, in a weir's
+	// water or a keep's wall))
+	for (int32 Try = 0; Try < 16; ++Try)
+	{
+		const float A = FRDWildWorld::Rand01(P.Id, 1960 + Try, Wild->Seed) * 2.f * PI, D = 22.f + 13.f * FRDWildWorld::Rand01(P.Id, 1980 + Try, Wild->Seed);
+		const FVector2D Q = P.At + FVector2D(FMath::Cos(A), FMath::Sin(A)) * D;
+		FRDWSample Sm; Wild->Sample(Q.X, Q.Y, Sm, false);
+		if (Sm.WaterKind != 0 || Sm.Lava > 0.05f || Sm.Road > 0.05f) continue;
+		const double H0 = Wild->Height(Q.X, Q.Y);
+		bool bSteep = false;
+		for (int32 K = 0; K < 4 && !bSteep; ++K) bSteep = FMath::Abs(Wild->Height(Q.X + 3.0 * FMath::Cos(K * PI / 2.0), Q.Y + 3.0 * FMath::Sin(K * PI / 2.0)) - H0) > 1.2;
+		if (!bSteep) { Spot = Q; return true; }
+	}
+	return false;
+}
+
+bool ARDSection::CaveDeepSpot16(const FVector& Away, FVector& Out) const
+{
+	// (the room of the kit with the lowest floor, 15 m or more from Away, its walkable tile nearest its middle, on the floor)
+	const float S = Generator ? Generator->TileSize : 300.f;
+	int32 Deep = -1; float DeepZ = 1e9f;
+	for (int32 I = 0; I < CavePlaced16.Num(); ++I)
+	{
+		if (CavePlaced16[I].Kit < 0 || !Rooms.IsValidIndex(I) || Rooms[I].Kind == ERDRoomKind::Junction || !CaveRoomTiles16.IsValidIndex(I) || CaveRoomTiles16[I].Num() < 6) continue;
+		const FVector Mid = GetActorLocation() + FVector((CavePlaced16[I].At.X + 0.5f) * S, (CavePlaced16[I].At.Y + 0.5f) * S, CavePlaced16[I].Z);
+		if (FVector::Dist2D(Mid, Away) < 1500.f) continue;
+		if (CavePlaced16[I].Z < DeepZ) { DeepZ = CavePlaced16[I].Z; Deep = I; }
+	}
+	if (Deep < 0) return false;
+	const FVector Want = GetActorLocation() + FVector((CavePlaced16[Deep].At.X + 0.5f) * S, (CavePlaced16[Deep].At.Y + 0.5f) * S, CavePlaced16[Deep].Z + 60.f);
+	float BestD = 1e9f; Out = Want;
+	for (const FIntPoint& T : CaveRoomTiles16[Deep])
+	{
+		const FVector Tw = GetActorLocation() + FVector((T.X + 0.5f) * S, (T.Y + 0.5f) * S, CavePlaced16[Deep].Z + 60.f);
+		const float D = FVector::Dist2D(Tw, Want); if (D < BestD) { BestD = D; Out = Tw; }
+	}
+	FHitResult H;
+	if (UWorld* W = GetWorld(); W && W->LineTraceSingleByChannel(H, Out + FVector(0, 0, 200.f), Out - FVector(0, 0, 600.f), ECC_Visibility)) Out = H.ImpactPoint;
+	return true;
+}
+
+int32 ARDDungeonGenerator::ForgetCaveLinkMarks16()
+{
+	URDGameInstance* GI = URDGameInstance::Of(this);
+	const int32 N = CaveLinkMarked16.Num();
+	for (const int32 Id : CaveLinkMarked16) { WildMarked15.Remove(Id); WildFound.Remove(Id); if (GI) GI->WildMarked15.Remove(Id); }
+	CaveLinkMarked16.Reset(); WildMarkedCacheFor15 = -1;
+	return N;
 }

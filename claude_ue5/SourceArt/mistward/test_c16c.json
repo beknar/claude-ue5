@@ -1,5 +1,5 @@
 {
- "tag": "c16b",
+ "tag": "c16c",
  "plan": [
   "cave16links"
  ],
@@ -14,9 +14,9 @@
     "names": 8
    },
    "draws": {
-    "holding": 138,
-    "map": 0.043,
-    "fragment": 0.051
+    "holding": 135,
+    "map": 0.037,
+    "fragment": 0.067
    },
    "map_used": true,
    "map_left": 0,
@@ -31,28 +31,27 @@
     "mouth|0|-1|1007157759"
    ],
    "lost": [
-    "lost|-1|1|-31050|31650|-879|Tobin the shepherd|0",
-    "lost|0|1|-3150|23850|-877|Ysolde the pilgrim|0",
-    "lost|1|-1|28350|-29250|-879|Tobin the shepherd|0"
+    "lost|-1|0|-30150|-5550|-877|Mirela of the mill|0",
+    "lost|1|-1|30750|-31650|-879|Old Brannoc|0"
    ],
    "lost_restarts": 0,
    "lost_prompt": "help the lost traveller out",
    "lost_f": "traveller",
-   "lost_msg": "Tobin the shepherd: \"I thought I would die down here!\" They follow your trail out: look for them in the wilds",
+   "lost_msg": "Mirela of the mill: \"I thought I would die down here!\" They follow your trail out: look for them in the wilds",
    "traveller_rec": [
-    "traveller|Tobin the shepherd|cave:0_-1|-1_1|0"
+    "traveller|Mirela of the mill|cave:0_-1|-1_0|0"
    ],
    "lost_after": [
-    "lost|-1|1|-31050|31650|-879|Tobin the shepherd|1",
-    "lost|0|1|-3150|23850|-877|Ysolde the pilgrim|0",
-    "lost|1|-1|28350|-29250|-879|Tobin the shepherd|0"
+    "lost|-1|0|-30150|-5550|-877|Mirela of the mill|1",
+    "lost|1|-1|30750|-31650|-879|Old Brannoc|0"
    ],
    "lost_again": [],
-   "lost_set": "-1_1",
+   "lost_set": "-1_0",
    "beast": [
-    "beast|99991|-7350|5250|-104|RDMonster_31"
+    "beast|99991|-7350|5250|-323|RDMonster_29"
    ],
    "beast_from_start_m": 90.7,
+   "beast_over_floor_m": 1.06,
    "contract_done": true,
    "contract_rec_after": [],
    "boss": "Half_Creature_05",
@@ -64,7 +63,7 @@
  ],
  "windows_hidden": "Content Browser, Message Log",
  "shots": [
-  "mw_c16b_cave16_traveller.png"
+  "mw_c16c_cave16_traveller.png"
  ],
  "error": null,
  "saves_put_back": 0,

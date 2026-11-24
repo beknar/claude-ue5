@@ -1,5 +1,5 @@
 {
- "tag": "l16c",
+ "tag": "l16e",
  "plan": [
   "cavelinks16"
  ],
@@ -16,13 +16,13 @@
     "4422"
    ],
    "map_rec": [
-    "map|cave:0_-1|0|344612"
+    "map|cave:0_-1|0|134332461"
    ],
    "map_target": [
-    "maptarget|344612|2664|-6078|2661|-6088|ruins|Ruins of Oakdale"
+    "maptarget|134332461|5234|-3106|5230|-3134|site|An abandoned village"
    ],
    "map_marked": 1,
-   "map_target_km_from_tower": 4.87,
+   "map_target_km_from_tower": 1.96,
    "map_in_treasure_maps": true,
    "dig_her_m_from_spot": 1.2,
    "dig_prompt": "dig up the buried chest",
@@ -32,8 +32,9 @@
     "dug": true
    },
    "mouth": [
-    "mouthat|1007157759|4167|-1425|1"
+    "mouthat|1007157759|4167|-1425|0"
    ],
+   "combat_before_travel": false,
    "travel": true,
    "after_travel_m_from_mouth": 0.4,
    "mouth_prompt": "go down into the cave",
@@ -49,7 +50,7 @@
    "top": [
     "top|417713|-144985|20525|1319|1"
    ],
-   "marked": 7,
+   "marked": 11,
    "top_held_m": 157.9,
    "chest_prompt": "open the tower's chest",
    "chest_f": "tower chest",
@@ -57,9 +58,15 @@
    "chest_line": [
     "chest|1|150|Viking Sword,Small Speed Potion,Bread"
    ],
+   "pile_prompt": "take up what lies here (3)",
+   "pile_f": "loot",
+   "pile_got": 2,
    "down_prompt": "take the lift down",
    "down": "tower down",
    "down_rel_m": -0.0,
+   "traveller_camp": [
+    "traveller|Camp Wanderer|cave:0_-1|2_0|c123459"
+   ],
    "traveller_waiting": [
     "traveller|Test Wanderer|cave:0_-1|1_0|2"
    ],
@@ -107,9 +114,9 @@
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
  "shots": [
-  "wd_l16c_cavelinks16_mouth.png",
-  "wd_l16c_cavelinks16_top.png",
-  "wd_l16c_cavelinks16_platform.png"
+  "wd_l16e_cavelinks16_mouth.png",
+  "wd_l16e_cavelinks16_top.png",
+  "wd_l16e_cavelinks16_platform.png"
  ],
  "error": null,
  "saves_put_back": 1,

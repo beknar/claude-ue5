@@ -8628,6 +8628,9 @@ def cave16links_inner(res):
     if beast:
         b = beast[0].split("|"); bl = V(float(b[2]), float(b[3]), float(b[4]))
         res["beast_from_start_m"] = round(dist2(bl, g.get_start_room_center()) / 100.0, 1)
+        # (on its room's floor (PR #123's review: a cave room's centre is the set's height)): the floor a trace finds under it
+        fz_ = floor_z(bl.x, bl.y, top=bl.z + 50.0, bottom=bl.z - 800.0)
+        res["beast_over_floor_m"] = None if fz_ is None else round((bl.z - fz_) / 100.0, 2)
         for mo in g.get_monsters():
             if alive(mo) and dist2(mo.get_actor_location(), bl) < 300.0 and str(mo.get_editor_property("title")) == "The Test Beast": mo.apply_damage(1e7, pawn)
         yield from wait(1.0)
@@ -8667,7 +8670,8 @@ def cave16links_inner(res):
           and res["frag_used"] and not res["frag_again"] and res["frag_left"] == 1 and len(res["mouth_rec"]) == 1 and res["mouth_rec"][0].startswith("mouth|0|-1|")
           and res.get("lost") and res.get("lost_prompt") == "help the lost traveller out" and res.get("lost_f") == "traveller"
           and any(l.endswith("|cave:0_-1|%s|0" % res.get("lost_set")) for l in res.get("traveller_rec", [])) and not res.get("lost_again")
-          and res["beast"] and res["contract_done"] and not res["contract_rec_after"]
+          and res["beast"] and res["contract_done"] and not res["contract_rec_after"] and res.get("beast_from_start_m", 0) >= 15.0
+          and res.get("beast_over_floor_m") is not None and 0.0 <= res["beast_over_floor_m"] <= 2.5
           and res["boss"] and "key|0|-1" in res["key_rec"])
     step_result("cave16links", bool(ok), **res)
 

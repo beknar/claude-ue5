@@ -8506,7 +8506,11 @@ def step_cavelinks16():
         ma = L("mouthat|"); res["mouth"] = ma
         if ma:
             q = ma[0].split("|"); mid, mx, my = int(q[1]), float(q[2]), float(q[3])
+            # (travelled from Brokenspire's gate: from the map's place (a structure's monsters about her) travel is refused in a fight)
+            g.wild_put_her(b["x"] + 20.0, b["y"]); yield from wait_chunks(30, 50); yield from rwait(2.0)
+            res["combat_before_travel"] = g.is_wild_combat()
             res["travel"] = g.wild_fast_travel(mid); yield from wait_chunks(30, 50); yield from rwait(3.0)
+            if not res["travel"]: res["travel_refused"] = next((str(m_) for m_ in reversed(list(cb().get_message_log())) if "travel" in str(m_).lower()), None)
             hp_ = G["pawn"].get_actor_location()
             res["after_travel_m_from_mouth"] = round(math.hypot(hp_.x / 100.0 - mx, hp_.y / 100.0 - my), 1)
             # (the travel's place is 8 m before the mouth: she walks 6 m on to it for the mouth's F)
@@ -8547,10 +8551,21 @@ def step_cavelinks16():
                 res["chest_prompt"] = str(g.describe_nearest(hp_, 260.0))
                 gd = g.get_gold(); res["chest_f"] = str(g.interact_nearest(hp_, 260.0)); yield from rwait(0.5)
                 res["chest_gold"] = g.get_gold() - gd; res["chest_line"] = L("chest|")
+                # (its things in a pile by it: F there names and takes the pile, not the lift (PR #123's review))
+                things = res["chest_line"][0].split("|")[3].split(",") if res["chest_line"] else []
+                n0_ = {t_: cb().get_item_count(t_) for t_ in things}
+                res["pile_prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 260.0))
+                res["pile_f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from rwait(0.5)
+                res["pile_got"] = sum(1 for t_ in things if cb().get_item_count(t_) > n0_[t_])
                 G["pawn"].set_actor_location(V(ax - 100.0, ay, tz + 110.0), False, True); yield from rwait(0.8)
                 hp_ = G["pawn"].get_actor_location()
                 res["down_prompt"] = str(g.describe_nearest(hp_, 260.0)); res["down"] = str(g.interact_nearest(hp_, 260.0)); yield from rwait(1.5)
                 res["down_rel_m"] = round((G["pawn"].get_actor_location().z - foot_z) / 100.0, 1)
+        # ---- a rescued traveller: with a camp cleared, settled at the last one (the rule's choice; the settler at its fire is not walked to)
+        gi.set_editor_property("camps_cleared15", [123457, 123459])
+        gi.set_editor_property("rescued_travellers16", ["Camp Wanderer|%s|2_0|0" % key])
+        yield from rwait(1.5)
+        res["traveller_camp"] = L("traveller|")
         # ---- a rescued traveller: no camp cleared, waits for a town; in Brokenspire, paid
         gi.set_editor_property("camps_cleared15", [])
         gi.set_editor_property("rescued_travellers16", ["Test Wanderer|%s|1_0|0" % key])
@@ -8604,12 +8619,16 @@ def step_cavelinks16():
               and res.get("door") and "locked" in res.get("door_prompt_nokey", "") and res.get("door_f_nokey") == "tower locked" and res.get("door_prompt") == "take the lift to the tower's top"
               and res.get("up") == "tower up" and res.get("top_rel_m", 0) > 40.0 and res.get("top_held_m", 0) > 40.0
               and res.get("chest_f") == "tower chest" and res.get("chest_gold", 0) > 0 and res.get("down") == "tower down" and abs(res.get("down_rel_m", 99)) < 5.0
+              and res.get("marked", 0) >= 1 and res.get("pile_f") == "loot" and res.get("pile_got", 0) >= 1 and res.get("down_prompt") == "take the lift down"
+              and res.get("traveller_camp") == ["traveller|Camp Wanderer|%s|2_0|c123459" % key]
               and res["traveller_waiting"] == ["traveller|Test Wanderer|%s|1_0|2" % key] and res["traveller_home"] == ["traveller|Test Wanderer|%s|1_0|3" % key] and res["traveller_gold"] > 0
-              and (not F_.get("with_tower") or (F_.get("beast") and F_.get("gone") and F_.get("rec") and F_["rec"][0].split("|")[2] == F_["want_cave"]
-                   and any("cave" in m_ for m_ in F_.get("marks", [])))))
+              and F_.get("with_tower") and F_.get("beast") and F_.get("gone") and F_.get("rec") and F_["rec"][0].split("|")[2] == F_["want_cave"]
+              and any("cave" in m_ for m_ in F_.get("marks", [])))
         step_result("cavelinks16", bool(ok), **res)
     finally:
         try: g.set_map_open(False); g.close_town_panel()
+        except Exception: pass
+        try: res["marks_put_back"] = g.forget_cave_link_marks16()
         except Exception: pass
         for k, v in keep.items():
             try: gi.set_editor_property(k, v)

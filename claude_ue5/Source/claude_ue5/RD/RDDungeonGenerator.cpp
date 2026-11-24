@@ -1718,7 +1718,7 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 	// (the list of 2026-11-22's caves: a painting nearer than everything else F reaches (PR #122's review), as F takes it)
 	if (bCave16 && PaintingFirst16(From, MaxDistance, Best ? BestD : MaxDistance)) return TEXT("study the cave painting");
 	if (bCave16 && TravellerFirst16(From, MaxDistance, Best ? BestD : MaxDistance)) return TEXT("help the lost traveller out");          // (phase 16)
-	if (bWild) { const FString Tw = TowerDescribe16(From, MaxDistance); if (!Tw.IsEmpty()) return Tw; }          // (phase 16: the broken tower)
+	if (bWild && !bMounted) { const FString Tw = TowerDescribe16(From, MaxDistance); if (!Tw.IsEmpty()) return Tw; }          // (phase 16: the broken tower; mounted, F gets her off first (PR #123's review))
 	// (mistward: her dropped things, a pad, a trap she sees)
 	// (the nearest within reach, the one F takes (TakeLootNear): the first in the list named another pile beside it, the PR
 	// review's find)
