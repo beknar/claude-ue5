@@ -2258,6 +2258,26 @@ public:
 	TWeakObjectPtr<ARDSection> StreetLampsOf16;
 	TArray<TWeakObjectPtr<class UPointLightComponent>> StreetLamps16;
 	TArray<TWeakObjectPtr<class UInstancedStaticMeshComponent>> StreetLampGlows16;
+	// ---- the list of 2026-11-22's nineteenth phase: Heaven's streets (RDHeaven19.cpp; 946 streets fills them from SourceArt/heaven/streets19.json)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven19") TArray<FString> HeavenStreetNames19;
+	/** the four quarters round the square: -X -Y, +X -Y, -X +Y, +X +Y */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven19") TArray<FString> HeavenDistrictNames19;
+	/** a signal's seconds: each road's green, its amber, all red between */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven19") float SignalGreen19 = 14.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven19") float SignalAmber19 = 3.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven19") float SignalAllRed19 = 2.f;
+	/** the signal's head (its pole's frame): X a face's distance from the pole's middle, Z the amber lens's height (red 30 over, green 30 under) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven19") FVector SignalHead19 = FVector(22.f, 0.f, 355.f);
+	/** the stop sign's face middle over the ground; the street sign's blades (X its middle along, Y the first's height, Z the second's);
+	 *  the district board's middle */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven19") float StopSignFace19 = 225.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven19") FVector StreetBlade19 = FVector(75.f, 311.f, 337.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven19") float DistrictFace19 = 255.f;
+	/** the most lots (nose-in parking two tiles deep) a town lays */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven19") int32 HeavenLots19 = 6;
+	int32 SignalPhase19(float T, float Offset, bool bAlongX) const;
+	void TickSignals19(float Dt);
+	float SignalLook19 = 0.f;
 	/** for the tests: the marks and found ids the cave links made this session taken off again */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") int32 ForgetCaveLinkMarks16();
 	TArray<int32> CaveLinkMarked16;

@@ -9,7 +9,15 @@
                               bs_signs.py --modern's pictures in SourceArt/heaven/signs16, an emissive material of our own)
     946_heaven16.py symbols   the 19 map pictograms of SourceArt/heaven/art16/map (hvmap_*.png) into the generator's UI art
                               under their ids (T_RDM4_<id> under /Game/RandomDungeon/UI)
-    946_heaven16.py all       the three
+    946_heaven16.py streets   phase 19, Heaven's streets: the markings' paint (Heaven.Mark, a unit square stretched to each line), the
+                              four-way signal (Heaven.Signal19) and its lens (Heaven.SignalLens19 in M_HV_SignalLens: its colour and
+                              light per instance), the stop, street-name and district signs, the names and timings of
+                              SourceArt/heaven/streets19.json; and the medieval things' modern stand-ins under Heaven's theme (the
+                              wall lamp for the torch, a desk lamp for the candles, a ceiling light, a media wall for the hearth, a
+                              cooker and pot for the tripod and cauldron, a wall shelf, a picture for the shield; in the streets a
+                              trailer for the cart, a parked car for the wagon, a dumpster for the hay, pallets for the logs, a bin
+                              for the sacks, a bollard light for the fire basket)
+    946_heaven16.py all       the four
 
 Run on the editor with any level open (it opens brokenspire and saves it)."""
 import os, sys, json, importlib
@@ -157,7 +165,103 @@ def symbols(g):
     REPORT.append(f"symbols: {len(files)} pictograms into the UI art")
 
 
-PARTS = {"lamps": lamps, "signs": signs, "symbols": symbols}
+# ================================================================================================ phase 19: the streets
+def lens_material():
+    path = HV16 + "/M_HV_SignalLens"
+    # (made once and kept, as the sign faces' (the level's lenses use it); its colour and light per instance: data 0-2 the colour,
+    # 3 lit; dim when not lit)
+    if EAL.does_asset_exist(path): return unreal.load_asset(path)
+    m = AT.create_asset("M_HV_SignalLens", HV16, unreal.Material, unreal.MaterialFactoryNew())
+    m.set_editor_property("used_with_instanced_static_meshes", True)
+    col = MEL.create_material_expression(m, unreal.MaterialExpressionPerInstanceCustomData3Vector, -800, 0); col.set_editor_property("data_index", 0)
+    lit = MEL.create_material_expression(m, unreal.MaterialExpressionPerInstanceCustomData, -800, 200); lit.set_editor_property("data_index", 3)
+    k = MEL.create_material_expression(m, unreal.MaterialExpressionConstant, -800, 350); k.set_editor_property("r", 30.0)
+    k0 = MEL.create_material_expression(m, unreal.MaterialExpressionConstant, -800, 450); k0.set_editor_property("r", 0.04)
+    mk = MEL.create_material_expression(m, unreal.MaterialExpressionMultiply, -550, 250)
+    assert MEL.connect_material_expressions(lit, "", mk, "A") and MEL.connect_material_expressions(k, "", mk, "B")
+    ad = MEL.create_material_expression(m, unreal.MaterialExpressionAdd, -400, 300)
+    assert MEL.connect_material_expressions(mk, "", ad, "A") and MEL.connect_material_expressions(k0, "", ad, "B")
+    em = MEL.create_material_expression(m, unreal.MaterialExpressionMultiply, -250, 150)
+    assert MEL.connect_material_expressions(col, "", em, "A") and MEL.connect_material_expressions(ad, "", em, "B")
+    kb = MEL.create_material_expression(m, unreal.MaterialExpressionConstant, -550, -100); kb.set_editor_property("r", 0.05)
+    bc = MEL.create_material_expression(m, unreal.MaterialExpressionMultiply, -250, -50)
+    assert MEL.connect_material_expressions(col, "", bc, "A") and MEL.connect_material_expressions(kb, "", bc, "B")
+    r = MEL.create_material_expression(m, unreal.MaterialExpressionConstant, -250, 400); r.set_editor_property("r", 0.2)
+    assert MEL.connect_material_property(bc, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    assert MEL.connect_material_property(em, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    assert MEL.connect_material_property(r, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    print("946 streets: the lens material's last compile follows")
+    MEL.recompile_material(m); EAL.save_loaded_asset(m, False)
+    return m
+
+
+def octagon(x0, x1, zc, w, mk):
+    """a regular octagon w across in the y-z plane (its middle at y 0, z zc), x0 to x1 thick, as three boxes"""
+    s_ = w / (1 + 2 ** 0.5); c = (w - s_) / 2
+    return [(x0, x1, -w / 2, w / 2, zc - s_ / 2, zc + s_ / 2, mk), (x0, x1, -s_ / 2, s_ / 2, zc - w / 2, zc + w / 2, mk),
+            (x0, x1, -(w - c) / 2, (w - c) / 2, zc - (w - c) / 2, zc + (w - c) / 2, mk)]
+
+
+def copy_piece(src, collision=None):
+    p = unreal.RDPiece(); p.mesh = src.mesh; p.adjust = src.adjust; p.size = src.size; p.material = src.material
+    p.collision = src.collision if collision is None else collision
+    return p
+
+
+def streets(g):
+    data = json.load(open(os.path.join(SA, "heaven", "streets19.json"), encoding="utf-8"))
+    mats = hk.materials()
+    lens = lens_material()
+    pcs = g.get_editor_property("pieces")
+    B = lambda n, parts: hk.boxes(n, parts, mats)
+    add = {}
+    # ---- the streets: paint, the signal, its lens, the signs (each sign's frame: its face +X, the street sign's blades along +X and +Y)
+    add["Heaven.Mark"] = raw(B("SM_HV_Mark19", [(-50, 50, -50, 50, 2.3, 3.5, "paint")]))
+    sig = B("SM_HV_Signal19", [(-20, 20, -20, 20, 0, 4, "steel"), (-8, 8, -8, 8, 4, 300, "steel"), (-22, 22, -22, 22, 300, 410, "dark"), (-24, 24, -24, 24, 410, 414, "steel")])
+    add["Heaven.Signal19"] = raw(sig, collision=True)
+    lp = raw(B("SM_HV_SignalLens19", [(0, 3, -10, 10, -10, 10, "steel")])); lp.material = lens
+    add["Heaven.SignalLens19"] = lp
+    add["Heaven.StopSign19"] = raw(B("SM_HV_StopSign19", [(-3, 3, -3, 3, 0, 262, "steel")] + octagon(-1.5, 0, 225, 78, "steel") + octagon(0, 1.5, 225, 76, "stopred")), collision=True)
+    add["Heaven.StreetSign19"] = raw(B("SM_HV_StreetSign19", [(-4, 4, -4, 4, 0, 350, "steel"), (8, 142, -2, 2, 300, 322, "signgreen"), (-2, 2, 8, 142, 326, 348, "signgreen")]), collision=True)
+    add["Heaven.DistrictSign19"] = raw(B("SM_HV_DistrictSign19", [(-4, 4, -144, -136, 0, 300, "steel"), (-4, 4, 136, 144, 0, 300, "steel"), (-4, 4, -150, 150, 210, 300, "signblue")]), collision=True)
+    # ---- the medieval things' stand-ins (each in its original's frame: the torch's back on the wall at x 0, out +X, its light's point the
+    # hinge; the hearth's front +X; the shield's picture as its board stood; things on the floor at z 0)
+    t = raw(B("SM_HV_WallLamp19", [(0, 3, -9, 9, 40, 72, "steel"), (3, 15, -7, 7, 44, 68, "panel")])); t.hinge = V(15, 0, 56)
+    add["Heaven.Torch"] = t
+    add["Heaven.Candles"] = raw(B("SM_HV_DeskLamp19", [(-7, 7, -7, 7, 0, 2, "steel"), (-1, 1, -1, 1, 2, 30, "steel"), (-10, 10, -10, 10, 30, 40, "white"), (-7, 7, -7, 7, 28.5, 30, "panel")]))
+    add["Heaven.Chandelier"] = raw(B("SM_HV_CeilingLight19", [(-1.5, 1.5, -1.5, 1.5, 12, 60, "steel"), (-50, 50, -50, 50, 6, 12, "white"), (-46, 46, -46, 46, 3, 6, "panel")]))
+    add["Heaven.Fireplace"] = raw(B("SM_HV_Media19", [(-25, 20, -110, 110, 0, 55, "dark"), (-25, 20, -110, 110, 55, 58, "white"), (-25, -21, -80, 80, 95, 190, "glass"),
+                                                       (-21, -20.5, -76, 76, 99, 186, "screen"), (-25, -22, -6, 6, 58, 95, "steel")]), collision=True)
+    add["Heaven.Tripod"] = raw(B("SM_HV_Cooker19", [(-38, 38, -30, 30, 0, 88, "white"), (-38, 38, -30, 30, 88, 92, "dark"), (38, 39, -24, 24, 25, 65, "glass")]), collision=True)
+    add["Heaven.Cauldron"] = raw(B("SM_HV_Pot19", [(-15, 15, -15, 15, 92, 110, "steel"), (-2, 2, 15, 26, 104, 107, "dark")]))
+    add["Heaven.PotRack"] = raw(B("SM_HV_WallShelf19", [(-12, 12, -65, 65, 150, 153, "steel"), (-12, -9, -60, -57, 130, 150, "steel"), (-12, -9, 57, 60, 130, 150, "steel"),
+                                                         (-8, 8, -50, -30, 153, 163, "steel"), (-9, 9, -10, 10, 153, 168, "steel"), (-7, 7, 30, 48, 153, 160, "steel")]))
+    add["Heaven.Shield"] = raw(B("SM_HV_Picture19", [(27, 31, -42, 42, -30, 30, "dark"), (31, 32, -38, 38, -26, 26, "art")]))
+    add["Heaven.Town.Cart"] = raw(B("SM_HV_Trailer19", [(-160, 140, -75, 75, 45, 55, "steel"), (-150, 140, -72, 72, 55, 60, "dark"), (-150, 140, 72, 75, 60, 100, "steel"),
+                                                         (-150, 140, -75, -72, 60, 100, "steel"), (-153, -150, -75, 75, 60, 100, "steel"), (137, 140, -75, 75, 60, 100, "steel"),
+                                                         (140, 235, -3, 3, 45, 52, "steel"), (-45, 15, 78, 96, 0, 60, "tyre"), (-45, 15, -96, -78, 0, 60, "tyre"),
+                                                         (-45, 15, 75, 100, 58, 64, "steel"), (-45, 15, -100, -75, 58, 64, "steel")]), collision=True)
+    add["Heaven.Town.Hay"] = raw(B("SM_HV_Dumpster19", [(-90, 90, -55, 55, 15, 125, "dumpster"), (-92, 92, -57, 57, 125, 131, "dark"), (-80, -65, -45, -30, 0, 15, "tyre"),
+                                                         (65, 80, -45, -30, 0, 15, "tyre"), (-80, -65, 30, 45, 0, 15, "tyre"), (65, 80, 30, 45, 0, 15, "tyre")]), collision=True)
+    pal = []
+    for k in range(3):
+        z0 = k * 14
+        pal += [(-60, 60, y0, y0 + 10, z0, z0 + 11, "pallet") for y0 in (-50, -5, 40)] + [(-60, 60, -50, 50, z0 + 11, z0 + 14, "pallet")]
+    add["Heaven.Town.Logs"] = raw(B("SM_HV_Pallets19", pal + [(-55, 55, -45, 45, 42, 120, "carton")]), collision=True)
+    add["Heaven.Town.Lamp"] = raw(B("SM_HV_Bollard19", [(-10, 10, -10, 10, 0, 100, "steel"), (-10.5, 10.5, -10.5, 10.5, 78, 92, "panel"), (-11, 11, -11, 11, 100, 104, "dark")]), collision=True)
+    car = pcs.get(unreal.Name("Heaven.Car_3")); bin_ = pcs.get(unreal.Name("Heaven.Bin"))
+    assert car and car.mesh and bin_ and bin_.mesh, "946 streets: no Heaven.Car_3 or Heaven.Bin (908 first)"
+    add["Heaven.Town.Cart2"] = copy_piece(car, True); add["Heaven.Town.Sacks"] = copy_piece(bin_, True)
+    set_pieces(g, add)
+    g.set_editor_property("heaven_street_names19", data["street_names"]); g.set_editor_property("heaven_district_names19", data["districts"])
+    g.set_editor_property("signal_green19", data["signal"]["green"]); g.set_editor_property("signal_amber19", data["signal"]["amber"])
+    g.set_editor_property("signal_all_red19", data["signal"]["all_red"]); g.set_editor_property("heaven_lots19", data["lots"])
+    g.set_editor_property("signal_head19", V(22.0, 0.0, 355.0)); g.set_editor_property("stop_sign_face19", 225.0)
+    g.set_editor_property("street_blade19", V(75.0, 311.0, 337.0)); g.set_editor_property("district_face19", 255.0)
+    REPORT.append(f"streets: {len(add)} pieces ({', '.join(sorted(add))}); {len(data['street_names'])} street names, districts {', '.join(data['districts'])}")
+
+
+PARTS = {"lamps": lamps, "signs": signs, "symbols": symbols, "streets": streets}
 args = sys.argv[1:] or ["all"]
 todo = list(PARTS) if args[0] == "all" else args[0].split(",")
 g = gen()

@@ -4514,6 +4514,354 @@ def step_heaven16_lamps():
     step_result("heaven16_lamps", bool(ok), **res)
 
 
+def step_heaven19_survey():
+    """Heaven's section's contents by kind: every instanced and plain mesh by name (counts), every effect by its system, the lights
+    (the survey of what the medieval town leaves in Heaven: phase 19's list)"""
+    g = G["gen"]; res = {}
+    S = yield from heaven16_in(); yield from wait(1.0)
+    meshes = {}
+    for c in S.get_components_by_class(unreal.StaticMeshComponent):
+        if c.component_has_tag("RDSeeProxy"): continue
+        m = c.get_editor_property("static_mesh")
+        if not m: continue
+        n = m.get_path_name().split(".")[0].replace("/Game/", "")
+        meshes[n] = meshes.get(n, 0) + (c.get_instance_count() if isinstance(c, unreal.InstancedStaticMeshComponent) else 1)
+    res["meshes"] = dict(sorted(meshes.items(), key=lambda kv: -kv[1]))
+    fx = {}
+    for c in S.get_components_by_class(unreal.NiagaraComponent):
+        a_ = c.get_asset(); n = a_.get_name() if a_ else "?"; fx[n] = fx.get(n, 0) + 1
+    res["effects"] = fx
+    res["point_lights"] = len(S.get_components_by_class(unreal.PointLightComponent))
+    step_result("heaven19_survey", True, **res)
+
+
+# ------------------------------------------------------------------------------------------------ the list of 2026-11-22's phase 19
+MEDIEVAL19 = ("SM_Torch_A", "SM_Candle_low", "SM_Kit_Fireplace15", "SM_WoodWagons", "SM_WoodenCart", "SM_HaySquare", "sm_WoodLog_01d",
+              "SM_FireBasket", "SM_Chandelier_A", "SM_Kit_Tripod", "SM_Kit_Cauldron", "SM_Kit_PotRack", "SM_Shield_1")
+FIRES19 = ("P_TorchFire", "NS_Candle_Fire_A", "NS_Fireplace_Low", "NS_Brazier", "P_Brazier")
+MODERN19 = ("SM_HV_WallLamp19", "SM_HV_DeskLamp19", "SM_HV_CeilingLight19", "SM_HV_Media19", "SM_HV_Cooker19", "SM_HV_Pot19",
+            "SM_HV_WallShelf19", "SM_HV_Picture19", "SM_HV_Trailer19", "SM_HV_Dumpster19", "SM_HV_Pallets19", "SM_HV_Bollard19")
+
+
+def mesh_counts19(S, names):
+    out = {n: 0 for n in names}
+    for c in S.get_components_by_class(unreal.StaticMeshComponent):
+        if c.component_has_tag("RDSeeProxy"): continue
+        m = c.get_editor_property("static_mesh")
+        if not m: continue
+        mn = m.get_name()
+        for n in names:
+            if mn.startswith(n): out[n] += c.get_instance_count() if isinstance(c, unreal.InstancedStaticMeshComponent) else 1
+    return out
+
+
+def fire_counts19(S):
+    out = {}
+    for c in S.get_components_by_class(unreal.NiagaraComponent):
+        a_ = c.get_asset(); n = a_.get_name() if a_ else "?"
+        if any(n.startswith(f) for f in FIRES19): out[n] = out.get(n, 0) + 1
+    return out
+
+
+def streets19():
+    L = [str(l).split("|") for l in section().get_heaven_streets19()]
+    d = {"head": None, "roads": [], "junctions": [], "stoplines": [], "stopsigns": [], "namesigns": [], "districts": [], "cars": []}
+    for q in L:
+        if q[0] == "streets":
+            k = ["runs", "dashes", "edges", "zebras", "stops", "stopsigns", "namesigns", "districts", "crossings", "signalled", "parked", "bays", "lots", "signals", "marks"]
+            d["head"] = {k[i]: int(q[i + 1]) for i in range(min(len(k), len(q) - 1))}
+        elif q[0] == "road": d["roads"].append({"i": int(q[1]), "axis": q[2], "len": int(q[3]), "dashes": int(q[4]), "edges": int(q[5]), "zebras": int(q[6]), "stops": int(q[7]), "name": q[8]})
+        elif q[0] == "junction": d["junctions"].append({"at": V(float(q[1]), float(q[2]), 0), "signal": int(q[3])})
+        elif q[0] == "stopline": d["stoplines"].append({"at": V(float(q[1]), float(q[2]), 0), "way": V(float(q[3]), float(q[4]), 0), "signal": int(q[5])})
+        elif q[0] == "stopsign": d["stopsigns"].append({"at": V(float(q[1]), float(q[2]), 0), "yaw": float(q[3])})
+        elif q[0] == "namesign": d["namesigns"].append({"at": V(float(q[1]), float(q[2]), 0), "names": q[3:5]})
+        elif q[0] == "district": d["districts"].append({"at": V(float(q[1]), float(q[2]), 0), "words": q[3]})
+        elif q[0] == "car": d["cars"].append({"at": V(float(q[1]), float(q[2]), 0), "yaw": float(q[3]), "lot": q[4] == "1", "len": float(q[5]) if len(q) > 5 else 500.0, "wid": float(q[6]) if len(q) > 6 else 216.0})
+    return d
+
+
+def png_colours19(path, box):
+    """the pixels of a part of a PNG that are a bright red (r over 120, over 1.8 times g and b) and a bright green (g over 110, over
+    1.4 times r): how many of each"""
+    import zlib, struct
+    data = open(path, "rb").read(); pos = 8; w = h = 0; ct = 6; idat = b""
+    while pos + 8 <= len(data):
+        ln, typ = struct.unpack(">I4s", data[pos:pos + 8]); body = data[pos + 8:pos + 8 + ln]; pos += 12 + ln
+        if typ == b"IHDR": w, h, bd, ct = struct.unpack(">IIBB", body[:10])
+        elif typ == b"IDAT": idat += body
+        elif typ == b"IEND": break
+    bpp = 4 if ct == 6 else 3; raw = zlib.decompress(idat); stride = w * bpp
+    prev = bytearray(stride); x0, y0, x1, y1 = int(box[0] * w), int(box[1] * h), int(box[2] * w), int(box[3] * h)
+    red = green = 0
+    for y in range(h):
+        f = raw[y * (stride + 1)]; line = bytearray(raw[y * (stride + 1) + 1:(y + 1) * (stride + 1)])
+        if f == 1:
+            for i in range(bpp, stride): line[i] = (line[i] + line[i - bpp]) & 255
+        elif f == 2:
+            for i in range(stride): line[i] = (line[i] + prev[i]) & 255
+        elif f == 3:
+            for i in range(stride): line[i] = (line[i] + (((line[i - bpp] if i >= bpp else 0) + prev[i]) >> 1)) & 255
+        elif f == 4:
+            for i in range(stride):
+                a = line[i - bpp] if i >= bpp else 0; b = prev[i]; c_ = prev[i - bpp] if i >= bpp else 0
+                p_ = a + b - c_; pa, pb, pc = abs(p_ - a), abs(p_ - b), abs(p_ - c_)
+                line[i] = (line[i] + (a if pa <= pb and pa <= pc else b if pb <= pc else c_)) & 255
+        if y0 <= y < y1:
+            for x in range(x0, x1):
+                i = x * bpp; r, g_, b_ = line[i], line[i + 1], line[i + 2]
+                if r > 120 and r > 1.8 * g_ and r > 1.8 * b_: red += 1
+                elif g_ > 110 and g_ > 1.4 * r: green += 1
+        prev = line
+    return red, green
+
+
+def shot_file19(name, res="1280x720"):
+    p_ = os.path.join(SHOTS, f"bs_{TAG}_{name}.png")
+    if os.path.exists(p_): os.remove(p_)
+    shot(name, res); t0 = time.time()
+    while time.time() - t0 < 10:
+        yield from rwait(0.3)
+        if os.path.exists(p_) and os.path.getsize(p_) > 1000:
+            yield from rwait(0.4)
+            return p_
+    return None
+
+
+def look_at19(stand, target, dist_up=0.0):
+    """her (hidden) at stand, the camera turned to the target"""
+    d = V(target.x - stand.x, target.y - stand.y, 0); yaw = math.degrees(math.atan2(d.y, d.x))
+    put(V(stand.x, stand.y, 0), yaw=yaw, z=0.0); G["pawn"].set_actor_hidden_in_game(True)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=dist_up, yaw=yaw))
+
+
+def step_heaven19_medieval():
+    """the list of 2026-11-22: "the carts and medieval leftovers replaced": none of the medieval town's carts, hay, logs, fire baskets,
+    torches, candles, hearths, chandeliers, kitchen tripods and cauldrons, pot racks or wall shields in Heaven and no fire burning, their
+    modern stand-ins there instead; Brokenspire keeps its own (counted there first when the run starts in it); a picture of a home's
+    media wall and a street's trailer or dumpster"""
+    g = G["gen"]; res = {}
+    st = str(g.get_wild_town_state()).split("|")
+    if not (len(st) > 1 and st[1] == "Heaven"):
+        S0 = section(); res["elsewhere_town"] = st[1] if len(st) > 1 else "?"
+        res["elsewhere_medieval"] = {k: v for k, v in mesh_counts19(S0, MEDIEVAL19).items() if v}; res["elsewhere_fires"] = fire_counts19(S0)
+    S = yield from heaven16_in(); yield from wait(1.5)
+    res["medieval"] = {k: v for k, v in mesh_counts19(S, MEDIEVAL19).items() if v}
+    res["fires"] = fire_counts19(S)
+    res["modern"] = mesh_counts19(S, MODERN19)
+    shots = []
+    try:
+        for nm, mesh in (("media", "SM_HV_Media19"), ("trailer", "SM_HV_Trailer19"), ("dumpster", "SM_HV_Dumpster19"), ("walllamp", "SM_HV_WallLamp19")):
+            pts = ism_instances(mesh)
+            if not pts: continue
+            t = pts[0]
+            # (2.6 m off it along its +X (each faces +X), her eyes over it)
+            for c in isms(S):
+                m = c.get_editor_property("static_mesh")
+                if m and m.get_name() == mesh:
+                    tr = c.get_instance_transform(0, True); tr = tr[-1] if isinstance(tr, tuple) else tr
+                    fw = unreal.MathLibrary.get_forward_vector(tr.rotation.rotator())
+                    stand = V(tr.translation.x + fw.x * 300, tr.translation.y + fw.y * 300, 0)
+                    look_at19(stand, tr.translation, -12.0); yield from wait(2.0)
+                    pth = yield from shot_file19(f"heaven19_{nm}"); shots.append(nm if pth else nm + "?")
+                    break
+    finally:
+        G["pawn"].set_actor_hidden_in_game(False)
+    res["shots"] = shots
+    ok = not res["medieval"] and not res["fires"] and res["modern"]["SM_HV_WallLamp19"] > 0 and sum(res["modern"].values()) >= 20 \
+        and ("elsewhere_medieval" not in res or sum(res["elsewhere_medieval"].values()) > 0)
+    step_result("heaven19_medieval", bool(ok), **res)
+
+
+def step_heaven19_markings():
+    """the list of 2026-11-22: lane and centre lines, crossings and stop lines: on every street between its crossings a dashed centre
+    line and two edge lines, a zebra and a stop line before every crossing; the paint counted as laid (the instances of Heaven.Mark
+    against the plan's count); a picture of a crossing from above"""
+    g = G["gen"]; res = {}
+    S = yield from heaven16_in(); yield from wait(1.0)
+    d = streets19(); h = d["head"] or {}
+    res["head"] = h
+    res["marks_laid"] = len(ism_instances("SM_HV_Mark19"))
+    long_roads = [r for r in d["roads"] if r["len"] >= 10]
+    res["roads"] = len(d["roads"]); res["roads_without_lines"] = [r for r in long_roads if r["dashes"] < 2 or r["edges"] < 2]
+    res["road_sample"] = d["roads"][:4]
+    cross = [j for j in d["junctions"]]
+    res["crossings"] = len(cross)
+    sl = [x for x in d["stoplines"] if x["signal"] >= 0]
+    if sl:
+        x = sl[0]; w_ = x["way"]
+        stand = V(x["at"].x - w_.x * 1200, x["at"].y - w_.y * 1200, 0)
+        look_at19(stand, V(x["at"].x + w_.x * 600, x["at"].y + w_.y * 600, 0), -16.0); yield from wait(2.5)
+        pth = yield from shot_file19("heaven19_crossing")
+        G["pawn"].set_actor_hidden_in_game(False)
+        res["shot"] = bool(pth)
+    ok = h.get("marks", 0) > 0 and res["marks_laid"] == h.get("marks") and not res["roads_without_lines"] and h.get("zebras", 0) > 0 \
+        and h.get("stops", 0) >= 2 * h.get("crossings", 99) and h.get("dashes", 0) > 0
+    step_result("heaven19_markings", bool(ok), **res)
+
+
+def step_heaven19_signals():
+    """the list of 2026-11-22: traffic lights with phases and their lamps lit: at every signalled crossing our four-way signal; over a
+    whole cycle each one's two roads green, amber and red in turn and never both moving at once; four lenses lit at every read, the
+    lit ones the phases' (the lens's per-instance light read back); pictures of a signal's face toward the X road at its green and at
+    its red, the lens colours counted in them"""
+    g = G["gen"]; res = {}
+    S = yield from heaven16_in(); h_was = g.get_town_hour()
+    g.set_town_hour(12.0); yield from wait(1.5)
+    res["poles"] = len(ism_instances("SM_HV_Signal19")); res["old_poles"] = len(ism_instances("SM_MM00277_Traffic_Light"))
+    seen = {}; both = 0; wrong_lit = 0; reads = 0; lagging = 0
+    cyc = g.get_editor_property("signal_green19") * 2 + g.get_editor_property("signal_amber19") * 2 + g.get_editor_property("signal_all_red19") * 2
+    t0 = time.time()
+    while time.time() - t0 < cyc + 4:
+        L = [str(l).split("|") for l in section().get_signals19()]
+        for q in L[1:]:
+            i, x, y, lit = int(q[1]), int(q[4]), int(q[5]), int(q[6])
+            which = sorted(int(w) for w in q[7].split(",") if w)
+            want = sorted([0 * 3 + x, 1 * 3 + x, 2 * 3 + y, 3 * 3 + y])
+            if x > 0 and y > 0: both += 1
+            if lit != 4 or which != want: wrong_lit += 1
+            if (int(q[8]), int(q[9])) != (x, y): lagging += 1
+            s_ = seen.setdefault(i, {"x": set(), "y": set(), "xs": []})
+            s_["x"].add(x); s_["y"].add(y)
+            if not s_["xs"] or s_["xs"][-1] != x: s_["xs"].append(x)
+        reads += 1
+        yield from wait(0.5)
+    res["signals"] = len(seen); res["reads"] = reads; res["both_moving"] = both; res["wrong_lenses"] = wrong_lit
+    res["lenses_behind_the_clock"] = lagging; res["lens_reads"] = sum(1 for _ in range(reads)) * len(seen)
+    res["full_cycles"] = sum(1 for v in seen.values() if v["x"] == {0, 1, 2} and v["y"] == {0, 1, 2})
+    # (green, then amber, then red: each change of the X road's phase steps down, or from red back to green)
+    res["out_of_order"] = sum(1 for v in seen.values() for a, b in zip(v["xs"], v["xs"][1:]) if not (b == a - 1 or (a == 0 and b == 2)))
+    # ---- the pictures: signal 0's +X face from 6 m along +X, at its X road's green and at its red
+    L = [str(l).split("|") for l in section().get_signals19()]
+    pics = {}
+    try:
+        if len(L) > 1:
+            q = L[1]; at = V(float(q[2]), float(q[3]), 0)
+            for want, nm in ((2, "green"), (0, "red")):
+                t1 = time.time()
+                while time.time() - t1 < cyc + 2:
+                    q2 = str(section().get_signals19()[1]).split("|")
+                    if int(q2[4]) == want and (want == 2 or int(q2[5]) == 2): break
+                    yield from wait(0.25)
+                look_at19(V(at.x + 600, at.y, 0), at, 14.0); yield from wait(1.2)
+                # (each lens of the +X face boxed where it is on the screen (its middle 1.5 cm out of the face), its own colour read)
+                hd = g.get_editor_property("signal_head19")
+                boxes = {}
+                for k_, dz in (("red", 30.0), ("amber", 0.0), ("green", -30.0)):
+                    pw = V(at.x + hd.x + 1.5, at.y, S.get_actor_location().z + hd.z + dz)
+                    ok_ = unreal.GameplayStatics.project_world_to_screen(G["pc"], pw, False)
+                    ok2, sp = (ok_[0], ok_[1]) if isinstance(ok_, tuple) else (ok_ is not None, ok_)
+                    vs = unreal.WidgetLayoutLibrary.get_viewport_size(G["w"])
+                    if ok2 and sp is not None:
+                        fx, fy = sp.x / max(vs.x, 1.0), sp.y / max(vs.y, 1.0)
+                        boxes[k_] = (fx - 0.012, fy - 0.02, fx + 0.012, fy + 0.02)
+                pth = yield from shot_file19(f"heaven19_signal_{nm}", "960x540")
+                pics[nm] = {k_: png_colours19(pth, b_) for k_, b_ in boxes.items()} if pth else None
+    finally:
+        G["pawn"].set_actor_hidden_in_game(False); g.set_town_hour(h_was)
+    res["pictures_red_green_px"] = pics
+    gp, rp = pics.get("green") or {}, pics.get("red") or {}
+    # (at its green the green lens green and the red lens not red; at its red the reverse)
+    lit_ok = (len(gp) == 3 and len(rp) == 3 and gp["green"][1] >= 8 and gp["red"][0] < gp["green"][1] / 4
+              and rp["red"][0] >= 8 and rp["green"][1] < rp["red"][0] / 4)
+    res["pictures_ok"] = lit_ok
+    ok = res["poles"] > 0 and res["poles"] == res["signals"] and res["old_poles"] == 0 and res["both_moving"] == 0 and res["wrong_lenses"] == 0 \
+        and res["full_cycles"] == res["signals"] and res["out_of_order"] == 0 and res["lenses_behind_the_clock"] <= 0.02 * max(res["lens_reads"], 1) and lit_ok
+    step_result("heaven19_signals", bool(ok), **res)
+
+
+def step_heaven19_signs():
+    """the list of 2026-11-22: stop signs and street-name signs at the crossings, and district signs: a stop sign at the kerb of most
+    approaches to a crossing without lights, a street-name sign at most crossings naming its two streets, a district board in each
+    quarter round the square; the signs' words there (their text components); pictures of each kind"""
+    g = G["gen"]; res = {}
+    S = yield from heaven16_in(); yield from wait(1.0)
+    d = streets19(); h = d["head"] or {}
+    res["head"] = {k: h.get(k) for k in ("crossings", "signalled", "stopsigns", "namesigns", "districts")}
+    unsig = [s_ for s_ in d["stoplines"] if s_["signal"] < 0]
+    res["unsignalled_approaches"] = len(unsig)
+    res["sign_meshes"] = {"stop": len(ism_instances("SM_HV_StopSign19")), "name": len(ism_instances("SM_HV_StreetSign19")), "district": len(ism_instances("SM_HV_DistrictSign19"))}
+    texts = [c for c in S.get_components_by_class(unreal.TextRenderComponent) if c.component_has_tag("HeavenSign19")]
+    res["texts"] = len(texts); res["districts"] = [x["words"] for x in d["districts"]]; res["names_sample"] = [x["names"] for x in d["namesigns"][:5]]
+    shots = []
+    try:
+        for nm, lst, back in (("stop", d["stopsigns"], 320), ("name", d["namesigns"], 380), ("district", d["districts"], 650)):
+            if not lst: continue
+            x = lst[0]; at = x["at"]
+            if nm == "stop":
+                fw = V(math.cos(math.radians(x["yaw"])), math.sin(math.radians(x["yaw"])), 0)
+                stand = V(at.x + fw.x * back, at.y + fw.y * back, 0)
+            else:
+                to = V(at.x - S.get_actor_location().x, at.y - S.get_actor_location().y, 0); n_ = math.hypot(to.x, to.y) or 1
+                stand = V(at.x - to.x / n_ * back * 0.7 + to.y / n_ * back * 0.7, at.y - to.y / n_ * back * 0.7 - to.x / n_ * back * 0.7, 0)
+            look_at19(stand, at, 18.0 if nm != "district" else 8.0); yield from wait(2.0)
+            pth = yield from shot_file19(f"heaven19_sign_{nm}"); shots.append(nm if pth else nm + "?")
+    finally:
+        G["pawn"].set_actor_hidden_in_game(False)
+    res["shots"] = shots
+    ok = h.get("districts") == 4 and res["sign_meshes"]["district"] == 4 and h.get("namesigns", 0) >= 0.7 * max(h.get("crossings", 1), 1) \
+        and res["sign_meshes"]["stop"] == h.get("stopsigns") and res["sign_meshes"]["name"] == h.get("namesigns") \
+        and (len(unsig) == 0 or h.get("stopsigns", 0) >= 0.6 * len(unsig)) \
+        and res["texts"] == h.get("stopsigns", 0) + 4 * h.get("namesigns", 0) + 2 * h.get("districts", 0)
+    step_result("heaven19_signs", bool(ok), **res)
+
+
+def step_heaven19_parking():
+    """the list of 2026-11-22: parked cars along the kerbs and in lots: cars in lay-bys cut into the pavement (along the street) and in
+    lots (nose in), each clear of the street's lanes (outside every street's tiles: its middle more than half the street's width from
+    the nearest stop line's lane middle line ... measured as no lane car path within 1.5 m) and of the other parked cars; pictures of
+    a lay-by and a lot"""
+    g = G["gen"]; res = {}
+    S = yield from heaven16_in(); yield from wait(1.0)
+    d = streets19(); h = d["head"] or {}
+    res["head"] = {k: h.get(k) for k in ("parked", "bays", "lots")}
+    cars = d["cars"]
+    res["laybys_cars"] = sum(1 for c in cars if not c["lot"]); res["lot_cars"] = sum(1 for c in cars if c["lot"])
+    # (each parked car's own footprint (its length and width turned by its yaw): two parked cars' footprints apart, and over 30 s
+    # every moving car's middle kept 1.6 m off every parked car's footprint (a moving car is 2.2 m wide: half of it and a margin))
+    def inside(p, c, grow):
+        f = V(math.cos(math.radians(c["yaw"])), math.sin(math.radians(c["yaw"])), 0)
+        dx, dy = p.x - c["at"].x, p.y - c["at"].y
+        return abs(dx * f.x + dy * f.y) < c["len"] / 2 + grow and abs(-dx * f.y + dy * f.x) < c["wid"] / 2 + grow
+    def corners(c):
+        f = V(math.cos(math.radians(c["yaw"])), math.sin(math.radians(c["yaw"])), 0); s_ = V(-f.y, f.x, 0)
+        return [V(c["at"].x + f.x * a * c["len"] / 2 + s_.x * b * c["wid"] / 2, c["at"].y + f.y * a * c["len"] / 2 + s_.y * b * c["wid"] / 2, 0) for a in (-1, 1) for b in (-1, 1)]
+    close = 0
+    for i, a in enumerate(cars):
+        for b in cars[i + 1:]:
+            if dist2(a["at"], b["at"]) < 900 and (any(inside(p, b, 5) for p in corners(a)) or any(inside(p, a, 5) for p in corners(b))): close += 1
+    res["parked_overlapping"] = close; res["longest_parked_cm"] = max((c["len"] for c in cars), default=0)
+    moving = [c.get_world_location() for c in S.get_components_by_class(unreal.SceneComponent) if c.component_has_tag("HeavenCar") and not isinstance(c, unreal.StaticMeshComponent)]
+    res["moving_cars"] = len(moving)
+    near = 0
+    for t_ in range(20):
+        moving = [c.get_world_location() for c in S.get_components_by_class(unreal.SceneComponent) if c.component_has_tag("HeavenCar") and not isinstance(c, unreal.StaticMeshComponent)]
+        near += sum(1 for m in moving for c in cars if dist2(m, c["at"]) < 1000 and inside(m, c, 160))
+        yield from wait(1.5)
+    res["moving_into_parked_footprints"] = near
+    shots = []
+    try:
+        for nm, lot in (("layby", False), ("lot", True)):
+            c = next((c for c in cars if c["lot"] == lot), None)
+            if not c: continue
+            near_sl = min(d["stoplines"], key=lambda x: dist2(x["at"], c["at"])) if d["stoplines"] else None
+            fw = V(math.cos(math.radians(c["yaw"])), math.sin(math.radians(c["yaw"])), 0)
+            if near_sl:
+                w_ = near_sl["way"]; across = V(-w_.y, w_.x, 0)
+                to = (near_sl["at"].x - c["at"].x) * across.x + (near_sl["at"].y - c["at"].y) * across.y
+                side = V(across.x * (1 if to > 0 else -1), across.y * (1 if to > 0 else -1), 0); along = w_
+            else:
+                side = V(-fw.y, fw.x, 0); along = fw
+            stand = V(c["at"].x + side.x * 650 + along.x * 700, c["at"].y + side.y * 650 + along.y * 700, 0)
+            look_at19(stand, c["at"], -14.0); yield from wait(2.0)
+            pth = yield from shot_file19(f"heaven19_{nm}"); shots.append(nm if pth else nm + "?")
+    finally:
+        G["pawn"].set_actor_hidden_in_game(False)
+    res["shots"] = shots
+    ok = h.get("parked", 0) >= 15 and h.get("lots", 0) >= 1 and res["lot_cars"] > 0 and res["laybys_cars"] > 0 and close == 0 and near == 0 \
+        and res["longest_parked_cm"] <= 580
+    step_result("heaven19_parking", bool(ok), **res)
+
+
 def step_heaven16_signs():
     """the list of 2026-11-22: "the signs for the buildings in heaven should be modern style signs": every trade's board Heaven's lit
     panel (no wooden shield board in Heaven), its faces lit pictures of modern words, none of the town's gold ones; a picture of one"""
@@ -4643,7 +4991,7 @@ def step_heaven16_tower():
           and res["air_lights"] >= 13 and res["security_door"] == 1)
     step_result("heaven16_tower", bool(ok), **res)
 
-STEPS.update({"heaven16_lamps": step_heaven16_lamps, "heaven16_signs": step_heaven16_signs, "heaven16_map": step_heaven16_map, "heaven16_sleep": step_heaven16_sleep, "heaven16_tower": step_heaven16_tower})
+STEPS.update({"heaven19_survey": step_heaven19_survey, "heaven19_medieval": step_heaven19_medieval, "heaven19_markings": step_heaven19_markings, "heaven19_signals": step_heaven19_signals, "heaven19_signs": step_heaven19_signs, "heaven19_parking": step_heaven19_parking, "heaven16_lamps": step_heaven16_lamps, "heaven16_signs": step_heaven16_signs, "heaven16_map": step_heaven16_map, "heaven16_sleep": step_heaven16_sleep, "heaven16_tower": step_heaven16_tower})
 
 
 def step_sleep10():

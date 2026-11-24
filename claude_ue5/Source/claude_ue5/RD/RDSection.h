@@ -783,6 +783,38 @@ public:
 	void CaveTravellerSet16();
 	/** the list of 2026-11-22: a Heaven street lamp's light and glowing head */
 	void HeavenLamp16(const FVector& At, float Yaw);
+	// ---- the list of 2026-11-22's nineteenth phase: Heaven's streets (RDHeaven19.cpp)
+	struct FSignal19 { FVector At = FVector::ZeroVector; float Offset = 0.f; int32 First = -1; uint8 Shown = 255; };
+	/** a stretch of a street between its crossings: its road, along X or Y, its tiles along [S, E), across [C0, C1); its ends at a
+	 *  crossing (and which, -1 a road beyond its end) */
+	struct FRun19 { int32 Road = -1; bool bX = true; int32 S = 0, E = 0, C0 = 0, C1 = 0; bool bStartJ = false, bEndJ = false; int32 StartJ = -1, EndJ = -1; };
+	struct FJunction19 { FIntPoint Min = FIntPoint::ZeroValue, Max = FIntPoint::ZeroValue; FVector Mid = FVector::ZeroVector; bool bPlaza = false; int32 Signal = -1; FString NameX, NameY; };
+	struct FPark19 { int32 Run = -1; int32 Side = 1; int32 A = 0, B = 0; bool bLot = false; };
+	/** a stop line: its lane's middle, the way its lane drives, the crossing's signal (-1: a stop sign or none), the road's axis */
+	struct FStop19 { FVector At = FVector::ZeroVector; FVector Way = FVector::ZeroVector; int32 Signal = -1; bool bAlongX = true; };
+	TArray<FSignal19> Signals19;
+	TWeakObjectPtr<class UInstancedStaticMeshComponent> SignalLenses19;
+	TArray<FRun19> Runs19;
+	TArray<int32> JGroup19;
+	TArray<FJunction19> Junctions19;
+	TSet<int32> ParkTiles19;
+	TArray<FPark19> Parks19;
+	TArray<FStop19> StopLines19;
+	TArray<FString> Streets19;
+	void HeavenSignal19(const FTownSpot& Sp);
+	void TickSignals19(float Now);
+	void HeavenRuns19();
+	bool ParkFree19(const FIntPoint& T) const;
+	void HeavenStreets19Plan();
+	void HeavenStreets19Build();
+	void AddText19(const FString& Text, const FTransform& T, float MaxW, float MaxH, const FColor& Col);
+	FString StreetName19(int32 Road) const;
+	/** for the tests: "signals|<n>|<time>", "sig|<i>|<x>|<y>|<x phase>|<y phase>|<lenses lit>|<which>" (phase 2 green, 1 amber, 0 red) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven19") TArray<FString> GetSignals19() const;
+	/** for the tests: "streets|<runs>|<dashes>|<edges>|<zebra bars>|<stop lines>|<stop signs>|<name signs>|<districts>|<crossings>|
+	 *  <signalled>|<parked>|<bays>|<lots>|<signals>", "road|...", "junction|...", "stopline|...", "stopsign|...", "namesign|...",
+	 *  "district|...", "car|<x>|<y>|<yaw>|<lot>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven19") TArray<FString> GetHeavenStreets19() const;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") float HeavenResearchTopZ16 = 0.f;
 	/** the kit's room with the lowest floor at least 15 m from Away: its walkable tile nearest its middle, on the floor */
 	bool CaveDeepSpot16(const FVector& Away, FVector& Out) const;

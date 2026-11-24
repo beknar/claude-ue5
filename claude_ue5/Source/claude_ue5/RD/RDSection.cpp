@@ -699,6 +699,8 @@ UPointLightComponent* ARDSection::AddLight(const FVector& Loc, const FLinearColo
 
 void ARDSection::AddEffect(FName Name, const FVector& Loc, float Scale)
 {
+	// (the list of 2026-11-22's phase 19: Heaven burns no torch, candle, brazier or hearth: its pieces are lamps (946 streets))
+	if (Theme == FName(TEXT("Heaven")) && (Name == TEXT("TorchFire") || Name == TEXT("CandleFire") || Name == TEXT("BrazierFire") || Name == TEXT("HearthFire"))) return;
 	// in play the fires are heard: where they are (also when the effect itself was saved with the start section)
 	if (const UWorld* W = GetWorld(); W && W->IsGameWorld())
 	{
@@ -754,7 +756,9 @@ void ARDSection::AddTorch(const FVector& WallPoint, float InYaw, float Candelas,
 	if (!bLit || !P) return;
 	const FVector Flame = WallPoint + FRotator(0, InYaw, 0).RotateVector(P->Hinge);
 	AddEffect(TEXT("TorchFire"), Flame, 0.6f);
-	AddLight(Flame + FRotator(0, InYaw, 0).RotateVector(FVector(25, 0, 10)), FLinearColor(1.f, 0.55f, 0.24f), Candelas, 1300.f, false, 0.18f);
+	// (Heaven's wall lamp: a steady white light, no flame)
+	const bool bLamp = Theme == FName(TEXT("Heaven"));
+	AddLight(Flame + FRotator(0, InYaw, 0).RotateVector(FVector(25, 0, 10)), bLamp ? FLinearColor(1.f, 0.93f, 0.82f) : FLinearColor(1.f, 0.55f, 0.24f), Candelas, 1300.f, false, bLamp ? 0.f : 0.18f);
 }
 
 USceneComponent* ARDSection::AddPivot(USceneComponent* Parent, const FTransform& Rel)
@@ -1626,7 +1630,9 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 				const FVector P = Wall + Rt.RotateVector(FVector(Fp->Size.X * 0.5f + 30.f, 0, 0));
 				Center(TEXT("Fireplace"), P, Yaw, true, true);      // (on the lane at a wall without a door: block it)
 				AddEffect(TEXT("HearthFire"), P + Rt.RotateVector(FVector(0, 0, 0)) + FVector(0, 0, 42), RDHearthFlame);
-				if (UPointLightComponent* Hl = AddLight(P + Rt.RotateVector(FVector(80, 0, 0)) + FVector(0, 0, 90), FLinearColor(1.f, 0.48f, 0.18f), 260.f, 1800.f, true, 0.25f))
+				if (Theme == FName(TEXT("Heaven")))
+					AddLight(P + Rt.RotateVector(FVector(160, 0, 0)) + FVector(0, 0, 170), FLinearColor(0.6f, 0.72f, 1.f), 25.f, 800.f, false, 0.f);          // (the list of 2026-11-22: a screen's glow, no fire)
+				else if (UPointLightComponent* Hl = AddLight(P + Rt.RotateVector(FVector(80, 0, 0)) + FVector(0, 0, 90), FLinearColor(1.f, 0.48f, 0.18f), 260.f, 1800.f, true, 0.25f))
 					Hl->ComponentTags.Add(TEXT("RDHearth15"));          // (the list of 2026-11-20: a hearth's glow burns with its fire)
 			}
 		}

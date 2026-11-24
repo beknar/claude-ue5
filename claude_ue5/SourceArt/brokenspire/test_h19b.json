@@ -1,0 +1,260 @@
+{
+ "tag": "h19b",
+ "plan": [
+  "heaven19_medieval",
+  "heaven19_markings",
+  "heaven19_signals",
+  "heaven19_signs",
+  "heaven19_parking"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "heaven19_medieval",
+   "ok": true,
+   "elsewhere_town": "Brokenspire",
+   "elsewhere_medieval": {
+    "SM_Torch_A": 154,
+    "SM_Candle_low": 252,
+    "SM_Kit_Fireplace15": 38,
+    "SM_WoodWagons": 14,
+    "SM_WoodenCart": 10,
+    "SM_HaySquare": 8,
+    "sm_WoodLog_01d": 4,
+    "SM_FireBasket": 4,
+    "SM_Chandelier_A": 12,
+    "SM_Kit_Tripod": 39,
+    "SM_Kit_Cauldron": 48,
+    "SM_Kit_PotRack": 38,
+    "SM_Shield_1": 159
+   },
+   "elsewhere_fires": {
+    "P_TorchFire": 177,
+    "NS_Candle_Fire_A": 290,
+    "NS_Fireplace_Low": 38
+   },
+   "medieval": {},
+   "fires": {},
+   "modern": {
+    "SM_HV_WallLamp19": 48,
+    "SM_HV_DeskLamp19": 157,
+    "SM_HV_CeilingLight19": 8,
+    "SM_HV_Media19": 29,
+    "SM_HV_Cooker19": 28,
+    "SM_HV_Pot19": 29,
+    "SM_HV_WallShelf19": 29,
+    "SM_HV_Picture19": 71,
+    "SM_HV_Trailer19": 6,
+    "SM_HV_Dumpster19": 6,
+    "SM_HV_Pallets19": 6,
+    "SM_HV_Bollard19": 4
+   },
+   "shots": [
+    "media",
+    "trailer",
+    "dumpster",
+    "walllamp"
+   ]
+  },
+  {
+   "step": "heaven19_markings",
+   "ok": true,
+   "head": {
+    "runs": 85,
+    "dashes": 452,
+    "edges": 158,
+    "zebras": 1026,
+    "stops": 129,
+    "stopsigns": 4,
+    "namesigns": 33,
+    "districts": 4,
+    "crossings": 36,
+    "signalled": 36,
+    "parked": 239,
+    "bays": 316,
+    "lots": 6,
+    "signals": 36,
+    "marks": 2382
+   },
+   "marks_laid": 2382,
+   "roads": 18,
+   "roads_without_lines": [],
+   "road_sample": [
+    {
+     "i": 0,
+     "axis": "y",
+     "len": 66,
+     "dashes": 16,
+     "edges": 6,
+     "zebras": 40,
+     "stops": 4,
+     "name": "GLASSWORKS AVENUE"
+    },
+    {
+     "i": 2,
+     "axis": "x",
+     "len": 109,
+     "dashes": 29,
+     "edges": 12,
+     "zebras": 88,
+     "stops": 9,
+     "name": "MERIDIAN WAY"
+    },
+    {
+     "i": 3,
+     "axis": "x",
+     "len": 119,
+     "dashes": 43,
+     "edges": 12,
+     "zebras": 80,
+     "stops": 10,
+     "name": "SERAPH STREET"
+    },
+    {
+     "i": 4,
+     "axis": "y",
+     "len": 27,
+     "dashes": 13,
+     "edges": 2,
+     "zebras": 5,
+     "stops": 1,
+     "name": "CLEARWATER STREET"
+    }
+   ],
+   "crossings": 36,
+   "shot": true
+  },
+  {
+   "step": "heaven19_signals",
+   "ok": true,
+   "poles": 36,
+   "old_poles": 0,
+   "signals": 36,
+   "reads": 79,
+   "both_moving": 0,
+   "wrong_lenses": 0,
+   "lenses_behind_the_clock": 40,
+   "lens_reads": 2844,
+   "full_cycles": 36,
+   "out_of_order": 0,
+   "pictures_red_green_px": {
+    "green": {
+     "red": [
+      10,
+      0
+     ],
+     "amber": [
+      5,
+      70
+     ],
+     "green": [
+      0,
+      292
+     ]
+    },
+    "red": {
+     "red": [
+      93,
+      0
+     ],
+     "amber": [
+      36,
+      0
+     ],
+     "green": [
+      0,
+      12
+     ]
+    }
+   },
+   "pictures_ok": true
+  },
+  {
+   "step": "heaven19_signs",
+   "ok": true,
+   "head": {
+    "crossings": 36,
+    "signalled": 36,
+    "stopsigns": 4,
+    "namesigns": 33,
+    "districts": 4
+   },
+   "unsignalled_approaches": 4,
+   "sign_meshes": {
+    "stop": 4,
+    "name": 33,
+    "district": 4
+   },
+   "texts": 144,
+   "districts": [
+    "ELYSIAN DISTRICT",
+    "MERIDIAN DISTRICT",
+    "SANCTUM DISTRICT",
+    "ASCENT DISTRICT"
+   ],
+   "names_sample": [
+    [
+     "AURORA AVENUE",
+     "LANTERN STREET"
+    ],
+    [
+     "AURORA AVENUE",
+     "GLASSWORKS AVENUE"
+    ],
+    [
+     "AURORA AVENUE",
+     "ASCENSION WAY"
+    ],
+    [
+     "HALCYON STREET",
+     "BEACON AVENUE"
+    ],
+    [
+     "HALCYON STREET",
+     "LANTERN STREET"
+    ]
+   ],
+   "shots": [
+    "stop",
+    "name",
+    "district"
+   ]
+  },
+  {
+   "step": "heaven19_parking",
+   "ok": true,
+   "head": {
+    "parked": 239,
+    "bays": 316,
+    "lots": 6
+   },
+   "laybys_cars": 227,
+   "lot_cars": 12,
+   "parked_closer_than_2_8m": 0,
+   "moving_cars": 84,
+   "moving_within_2_5m_of_parked": 0,
+   "shots": [
+    "layby",
+    "lot"
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_h19b_heaven19_media.png",
+  "bs_h19b_heaven19_trailer.png",
+  "bs_h19b_heaven19_dumpster.png",
+  "bs_h19b_heaven19_walllamp.png",
+  "bs_h19b_heaven19_crossing.png",
+  "bs_h19b_heaven19_signal_green.png",
+  "bs_h19b_heaven19_signal_red.png",
+  "bs_h19b_heaven19_sign_stop.png",
+  "bs_h19b_heaven19_sign_name.png",
+  "bs_h19b_heaven19_sign_district.png",
+  "bs_h19b_heaven19_layby.png",
+  "bs_h19b_heaven19_lot.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}
