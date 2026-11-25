@@ -2396,6 +2396,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") int32 TowerCaptureSize24 = 768;
 	/** the windows' pictures as the city is seen (tone mapped, its exposure), not as its light is (HDR) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") bool bTowerCaptureLDR24 = false;
+	/** the clouds hidden while the windows' pictures are taken */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") bool bTowerCaptureNoClouds24 = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") float TowerViewRadius24 = 8000.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") float TowerViewScale24 = 1.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") float TowerViewNoneScale24 = 0.f;
@@ -2407,8 +2409,9 @@ public:
 	static FString TowerName24(uint32 Seed);
 	static int32 TowerFloors24(uint32 Seed);
 	int32 TowerDoorNear24(const FVector& From, FVector* OutDoor = nullptr, FVector* OutOut = nullptr) const;
-	FString TowerDescribe24(const FVector& From) const;
-	FString TowerUse24(const FVector& From);
+	bool TowerDoorFirst24(const FVector& From, int32 I, float NearerThan, const class ARDSection* BestS, bool bBestDoor, int32 BestI) const;
+	FString TowerDescribe24(const FVector& From, float NearerThan = 1e9f, const class ARDSection* BestS = nullptr, bool bBestDoor = false, int32 BestI = -1) const;
+	FString TowerUse24(const FVector& From, float NearerThan = 1e9f, const class ARDSection* BestS = nullptr, bool bBestDoor = false, int32 BestI = -1);
 	bool EnterTower24(int32 BI);
 	void CaptureTowerViews24(int32 BI);
 	/** a tower's own pieces taken out of the town for a capture (moved far down), and put back; the components to hide from it */
@@ -2446,6 +2449,8 @@ public:
 	FString TowerUseHere24(const FVector& From);
 	/** for the tests: the tower's plan, rooms, stairs, lifts, way out, the floor she is on and its picture, the counts */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Tower24") TArray<FString> GetTower24() const;
+	/** for the tests: the capture's time, and each picture's faces read back: their mean light and its spread */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Tower24") TArray<FString> GetTowerViewStats24() const;
 	/** for the tests: a picture of the world from a point (the city as seen from where a tower's window stands), written as a PNG */
 	/** for the tests: the tower's own pieces hidden (the city's picture seen alone) or shown */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Tower24") void SetTowerHidden24(bool bHide);

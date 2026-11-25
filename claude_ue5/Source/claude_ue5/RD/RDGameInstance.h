@@ -177,6 +177,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Tower24") TArray<int32> TowerViewFloors24;
 	/** where each picture was taken (in Heaven) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Tower24") TArray<FVector> TowerViewAt24;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Tower24") float TowerCaptureMs24 = 0.f;
+	/** the tower she went into forgotten (a new game, a load, leaving it: its pictures' memory let go) */
+	void ForgetTower24() { TowerSeed24 = 0; TowerFloors24 = 0; TowerName24.Reset(); TowerViews24.Reset(); TowerViewFloors24.Reset(); TowerViewAt24.Reset(); TowerViewHour24 = -1.f; }
 	/** the caves whose lost blade she has taken (their keys): laid no more */
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FString> LostBladeCaves16;
 	/** the caves whose drowned knight's piece she has taken (their keys): laid no more */

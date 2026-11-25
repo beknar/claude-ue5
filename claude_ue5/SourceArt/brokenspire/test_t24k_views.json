@@ -1,0 +1,29 @@
+{
+ "n": {
+  "correlation": 0.996,
+  "block_rank_correlation": 0.996
+ },
+ "e": {
+  "correlation": 0.986,
+  "block_rank_correlation": 0.995
+ },
+ "s": {
+  "correlation": 0.992,
+  "block_rank_correlation": 0.992
+ },
+ "w": {
+  "correlation": 0.994,
+  "block_rank_correlation": 0.996
+ },
+ "up": {
+  "correlation": 0.847,
+  "block_rank_correlation": 0.95
+ },
+ "down": {
+  "correlation": 0.999,
+  "block_rank_correlation": 1.0
+ },
+ "baseline_n_vs_e": {
+  "correlation": 0.209
+ }
+}

@@ -653,6 +653,8 @@ bool ARDDungeonGenerator::ReturnToTown()
 	LastTravel = TEXT("town");
 	if (bTravelDryRun) return true;
 	SaveCarry();
+	// (out of a tower: its pictures' memory let go (PR #131's review: three cubes kept for the session))
+	if (bTower24) if (URDGameInstance* Gt = URDGameInstance::Of(this)) Gt->ForgetTower24();
 	if (URDGameInstance* GI = URDGameInstance::Of(this))
 	{
 		GI->Arrive = TEXT("castle");

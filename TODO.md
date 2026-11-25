@@ -16,9 +16,10 @@ Built and compiled, but no test has run it yet:
 
 ## The list of 2026-11-22 ([docs/improvements16.txt](docs/improvements16.txt)), its twenty-fourth phase: the skyscrapers' level
 
-- [ ] **The windows' city has a pale veil on three sides** ([Heaven](docs/levels/heaven.md#the-list-of-2026-11-22-the-skyscrapers-level-phase-24-948-rdtower24cpp-884-tower24_)): against Heaven pictured from the same point with the tower taken out, east matches at 0.91 to 0.96 and up at 0.76 to 0.82, but north, south and west only at 0.26 to 0.45: near buildings show pale and see-through in the cube pictures, dark in the flat ones. Not the fog, bloom, the capture's kind or the instances' update. To find: the cube capture's view of near translucent or masked pieces.
+- [x] **The windows' city against Heaven**: north, east, south and west 0.99, down 1.0, up 0.85 (`test_t24k_views.json`), once the clouds were hidden from the capture (they made a pale veil over near buildings); the windows' sky has no clouds.
 - [ ] **The tower level has no people, no map and no containers**: the tower's offices are empty of workers; the minimap and the big map show nothing there; nothing is looted in it.
-- [ ] **A game saved in the tower level** loads it from its default seed with no city pictures (they are kept by the game instance only, not saved).
+- [ ] **A game saved in the tower level** loads it from its default seed with no city pictures (they are kept by the game instance only, not saved), and her things dropped there are not laid again (the level has no sets).
+- [ ] **No tower of the seeds tested faced its door other than -Y**: the picture's turn ran with 0 only (the tests take a turned tower when there is one).
 
 ## The list of 2026-11-20 ([docs/improvements15.txt](docs/improvements15.txt)), its ninth phase: the caves
 

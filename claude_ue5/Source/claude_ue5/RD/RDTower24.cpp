@@ -25,6 +25,8 @@
 #include "Components/PostProcessComponent.h"
 #include "Components/SceneCaptureComponentCube.h"
 #include "Engine/TextureRenderTargetCube.h"
+#include "TextureResource.h"
+#include "Components/VolumetricCloudComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "GameFramework/Character.h"
@@ -70,19 +72,33 @@ int32 ARDDungeonGenerator::TowerDoorNear24(const FVector& From, FVector* OutDoor
 	return Best;
 }
 
-FString ARDDungeonGenerator::TowerDescribe24(const FVector& From) const
+bool ARDDungeonGenerator::TowerDoorFirst24(const FVector& From, int32 I, float NearerThan, const ARDSection* BestS, bool bBestDoor, int32 BestI) const
+{
+	// (PR #131's review: a nearer door, container or person keeps F, as every town target yields (PR #127's rule); the tower's own door
+	// leaf is no rival (F at it goes in))
+	const ARDSection* S = GetSection(FIntPoint::ZeroValue);
+	if (!S || !S->TownBlds.IsValidIndex(I)) return false;
+	if (bBestDoor && BestS == S && BestI == S->TownBlds[I].Door) return true;
+	FVector Door; TowerDoorNear24(From, &Door);
+	const float D = FVector::Dist2D(Door, From);
+	if (D >= NearerThan) return false;
+	for (const ARDTownsfolk* T : TownPeople) if (T && FVector::Dist2D(T->GetActorLocation(), From) < FMath::Min(D, 250.f) && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) return false;          // (a person nearer: talking first)
+	return true;
+}
+
+FString ARDDungeonGenerator::TowerDescribe24(const FVector& From, float NearerThan, const ARDSection* BestS, bool bBestDoor, int32 BestI) const
 {
 	const int32 I = TowerDoorNear24(From);
-	if (I < 0) return FString();
+	if (I < 0 || !TowerDoorFirst24(From, I, NearerThan, BestS, bBestDoor, BestI)) return FString();
 	const ARDSection::FTownBld& B = GetSection(FIntPoint::ZeroValue)->TownBlds[I];
 	return FString::Printf(TEXT("enter %s (%d floors)"), *TowerName24(B.Seed), TowerFloors24(B.Seed));
 }
 
-FString ARDDungeonGenerator::TowerUse24(const FVector& From)
+FString ARDDungeonGenerator::TowerUse24(const FVector& From, float NearerThan, const ARDSection* BestS, bool bBestDoor, int32 BestI)
 {
 	FVector Door, Out;
 	const int32 I = TowerDoorNear24(From, &Door, &Out);
-	if (I < 0) return FString();
+	if (I < 0 || !TowerDoorFirst24(From, I, NearerThan, BestS, bBestDoor, BestI)) return FString();
 	return EnterTower24(I) ? FString(TEXT("tower")) : FString();
 }
 
@@ -141,7 +157,8 @@ void ARDDungeonGenerator::TowerOutOfCity24(int32 BI, TArray<FTowerMoved24>& Move
 			}
 			if (bAny) Is->MarkRenderStateDirty();
 		}
-		else if (UPrimitiveComponent* P = Cast<UPrimitiveComponent>(Ac); P && P->IsVisible() && Inside(P->Bounds.Origin)) Hidden.Add(P);
+		// (a component of the tower's size or less: the town's ground, walk and floor are centred anywhere)
+		else if (UPrimitiveComponent* P = Cast<UPrimitiveComponent>(Ac); P && P->IsVisible() && Inside(P->Bounds.Origin) && P->Bounds.BoxExtent.X < Foot.GetExtent().X + 100.f && P->Bounds.BoxExtent.Y < Foot.GetExtent().Y + 100.f) Hidden.Add(P);
 	}
 	if (APawn* Pw = UGameplayStatics::GetPlayerPawn(this, 0)) HiddenActors.Add(Pw);
 	for (ARDTownsfolk* Fp : TownPeople) if (Fp && Inside(Fp->GetActorLocation())) HiddenActors.Add(Fp);
@@ -177,22 +194,32 @@ void ARDDungeonGenerator::CaptureTowerViews24(int32 BI)
 	GI->TowerViews24.SetNum(3); GI->TowerViewFloors24.SetNum(3); GI->TowerViewAt24.SetNum(3);
 	const float Shares[3] = { 0.12f, 0.5f, 0.88f };
 	const FVector Ctr = S->TownBldPoint24(B, 0.f, 0.f, 0.f);
+	(void)Height;
+	// (the clouds hidden for the capture: their render-target mode drew them over near things without their depth in a cube)
+	UVolumetricCloudComponent* Cl = bTowerCaptureNoClouds24 ? SkyClouds.Get() : nullptr;
+	const bool bClouds = Cl && Cl->IsVisible();
+	if (bClouds) Cl->SetVisibility(false);
 	for (int32 K = 0; K < 3; ++K)
 	{
 		TObjectPtr<UTextureRenderTargetCube>& Rt = GI->TowerViews24[K];
 		if (!Rt) { Rt = NewObject<UTextureRenderTargetCube>(GI); Rt->Init(FMath::Clamp(TowerCaptureSize24, 128, 2048), PF_FloatRGBA); }
 		Cap->TextureTarget = Rt;
-		const float Z = Z0 + 160.f + Shares[K] * (Height - 300.f);
+		// (PR #131's review: at the level's own eye on the floor it stands for (its storeys), not a share of the city tower's height (the
+		// lobby saw the street from 6 m up))
+		const int32 Fk = FMath::Clamp(FMath::RoundToInt(Shares[K] * (Floors - 1)), 0, Floors - 1);
+		const float Z = Z0 + 160.f + Fk * TowerStoreyH24;
 		Cap->SetWorldLocation(FVector(Ctr.X, Ctr.Y, Z));
 		GI->TowerViewAt24[K] = FVector(Ctr.X, Ctr.Y, Z);
 		// (twice: the first capture drew the tower's pieces where they stood before they were moved (the GPU's copy of the instances is
 		// brought up to date with the first one): the north and west pictures showed its own floors from inside)
 		Cap->CaptureScene(); Cap->CaptureScene();
-		GI->TowerViewFloors24[K] = FMath::Clamp(FMath::RoundToInt(Shares[K] * (Floors - 1)), 0, Floors - 1);
+		GI->TowerViewFloors24[K] = Fk;
 	}
+	if (bClouds) Cl->SetVisibility(true);
 	Cap->DestroyComponent();
 	TowerBackInCity24(Moved);
 	GI->TowerViewHour24 = GetTownHour();
+	GI->TowerCaptureMs24 = (float)((FPlatformTime::Seconds() - T0) * 1000.0);
 	UE_LOG(LogRDTower24, Log, TEXT("RDTOWER24 views of %s: 3 cubes of %d at %.1f h, %d pieces and %d components taken out, %.0f ms"),
 		*TowerName24(B.Seed), TowerCaptureSize24, GI->TowerViewHour24, Moved.Num(), Hidden.Num(), (FPlatformTime::Seconds() - T0) * 1000.0);
 }
@@ -213,7 +240,12 @@ bool ARDDungeonGenerator::CaptureCity24(int32 BI, FVector At, FRotator Rot, floa
 		for (UPrimitiveComponent* P : Hidden) Cap->HiddenComponents.Add(P);
 		for (AActor* A : HiddenA) Cap->HiddenActors.Add(A);
 		Cap->SetWorldLocationAndRotation(At, Rot);
+		// (as the windows' pictures were taken: the clouds hidden)
+		UVolumetricCloudComponent* Cl = bTowerCaptureNoClouds24 ? SkyClouds.Get() : nullptr;
+		const bool bClouds = Cl && Cl->IsVisible();
+		if (bClouds) Cl->SetVisibility(false);
 		Cap->CaptureScene(); Cap->CaptureScene();
+		if (bClouds) Cl->SetVisibility(true);
 		UKismetRenderingLibrary::ExportRenderTarget(this, Rt, Dir, File);
 		Cap->DestroyComponent();
 		bOk = true;
@@ -270,7 +302,7 @@ void ARDDungeonGenerator::ApplyTower24()
 	TowerSeedNow24 = GI && GI->TowerSeed24 != 0 ? GI->TowerSeed24 : TowerDefaultSeed24;
 	TowerFloorsNow24 = GI && GI->TowerFloors24 > 0 ? GI->TowerFloors24 : TowerFloors24((uint32)TowerSeedNow24);
 	TowerNameNow24 = GI && !GI->TowerName24.IsEmpty() ? GI->TowerName24 : TowerName24((uint32)TowerSeedNow24);
-	DungeonKey = FString::Printf(TEXT("tower:%d"), TowerSeedNow24);
+	DungeonKey = TEXT("tower");          // (one key for every tower (PR #131's review: a key a seed grew the save's dungeon table at every tower))
 	DungeonTitle = TowerNameNow24;
 	bFinalBossOn = false;
 	UE_LOG(LogRDTower24, Log, TEXT("RDTOWER24 the level: %s, seed %d, %d floors"), *TowerNameNow24, TowerSeedNow24, TowerFloorsNow24);
@@ -608,6 +640,8 @@ void ARDDungeonGenerator::BuildTower24()
 			TowerBox24(FVector(Hl0.X, Hl0.Y, Z + H * 0.5f - 20.f), FVector(Hl1.X, Hl1.Y, Z + H * 0.5f), TowerStairMat24, true);
 			const float Xm = TowerCell24(Sc0 + 0.5f, 0, 0).X;
 			TowerBox24(FVector(Xm - 6.f, Yb, Z), FVector(Xm + 6.f, Ya, Z + H), TowerCoreMat24, true);
+			// (the lobby: the space under flight B and the half landing filled (PR #131's review: she could wedge herself under it))
+			if (K == 0) TowerBox24(FVector(Xm + 6.f, TowerCell24(0, R3 - 0.5f, 0).Y, Z), FVector(TowerCell24(Sc1 + 0.5f, 0, 0).X, Ya, Z + 150.f), TowerCoreMat24, true);
 			TowerStairs24.Add(FString::Printf(TEXT("stair|%d|%.0f|%.0f|%.0f|%.0f|%.0f|%.0f"), K, (XaL + XaR) * 0.5f, Ya + C * 0.5f, Z, (XbL + XbR) * 0.5f, Ya + C * 0.5f, Z + H));
 		}
 		else
@@ -638,7 +672,7 @@ void ARDDungeonGenerator::BuildTower24()
 		if (TowerLiftMat24) P->SetMaterial(0, TowerLiftMat24);
 		P->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 		P->SetCastShadow(false);
-		P->SetWorldScale3D(FVector((2.f * C - 20.f) / 100.f, (2.f * C - 20.f) / 100.f, 0.2f));
+		P->SetWorldScale3D(FVector((2.f * C - 44.f) / 100.f, (2.f * C - 44.f) / 100.f, 0.2f));          // (the shaft is 270 cm between its walls)
 		P->RegisterComponent();
 		P->SetWorldLocation(Lf.Shaft - FVector(0, 0, 10.f));
 		P->ComponentTags.Add(TEXT("TowerLift24"));
@@ -693,7 +727,7 @@ void ARDDungeonGenerator::BuildTower24()
 		L->SetMobility(EComponentMobility::Movable);
 		L->SetIntensityUnits(ELightUnits::Candelas);
 		L->SetIntensity(TowerLightCd24);
-		L->SetAttenuationRadius(1100.f);
+		L->SetAttenuationRadius(750.f);          // (no shadows: kept short, so little shines through a wall into the next room)
 		L->SetCastShadows(false);
 		L->SetLightColor(FLinearColor(1.f, 0.97f, 0.92f));
 		L->RegisterComponent();
@@ -1021,6 +1055,10 @@ void ARDDungeonGenerator::TickTower24(float Dt)
 		int32 Li = 0;
 		const float Zc = Floor * TowerStoreyH24 + TowerStoreyH24 - 70.f;
 		auto Put = [&](const FVector& P) { if (TowerLights24.IsValidIndex(Li)) { TowerLights24[Li]->SetWorldLocation(FVector(P.X, P.Y, Zc)); TowerLights24[Li]->SetVisibility(true); ++Li; } };
+		// (the corridor's first (PR #131's review: the rooms used up the budget and the corridor went dark))
+		const int32 Nc = TowerCells24, Cb0 = Nc / 2 - 4, Cb1 = Nc / 2 + 3;
+		if (Floor > 0) { Put(TowerCell24(Nc * 0.5f - 0.5f, Cb0 + 0.5f, 0)); Put(TowerCell24(Nc * 0.5f - 0.5f, Cb1 - 0.5f, 0)); Put(TowerCell24(Cb0 + 0.5f, Nc * 0.5f - 0.5f, 0)); Put(TowerCell24(Cb1 - 0.5f, Nc * 0.5f - 0.5f, 0)); }
+		const FVector CoreLo = TowerCell24(Nc / 2 - 2.5f, Nc / 2 - 2.5f, 0.f), CoreHi = TowerCell24(Nc / 2 + 1.5f, Nc / 2 + 1.5f, 0.f);
 		for (const FRoom24& Rm : TowerRooms24)
 		{
 			if (Rm.Floor != Floor) continue;
@@ -1028,11 +1066,12 @@ void ARDDungeonGenerator::TickTower24(float Dt)
 			// (a big room (the lobby, a band) a light every 6 m along it)
 			const int32 Nx = FMath::Max(1, FMath::RoundToInt((B.X - A.X) / 600.f)), Ny = FMath::Max(1, FMath::RoundToInt((B.Y - A.Y) / 600.f));
 			for (int32 I = 0; I < Nx; ++I) for (int32 J = 0; J < Ny; ++J)
-				Put(FVector(FMath::Lerp(A.X, B.X, Nx == 1 ? 0.5f : (float)I / (Nx - 1)), FMath::Lerp(A.Y, B.Y, Ny == 1 ? 0.5f : (float)J / (Ny - 1)), 0.f));
+			{
+				const FVector Lp(FMath::Lerp(A.X, B.X, Nx == 1 ? 0.5f : (float)I / (Nx - 1)), FMath::Lerp(A.Y, B.Y, Ny == 1 ? 0.5f : (float)J / (Ny - 1)), 0.f);
+				if (Lp.X > CoreLo.X - 60.f && Lp.X < CoreHi.X + 60.f && Lp.Y > CoreLo.Y - 60.f && Lp.Y < CoreHi.Y + 60.f) continue;          // (none inside the core's walls)
+				Put(Lp);
+			}
 		}
-		// (the corridor's four sides)
-		const int32 N = TowerCells24, B0 = N / 2 - 4, B1 = N / 2 + 3;
-		if (Floor > 0) { Put(TowerCell24(N * 0.5f - 0.5f, B0 + 0.5f, 0)); Put(TowerCell24(N * 0.5f - 0.5f, B1 - 0.5f, 0)); Put(TowerCell24(B0 + 0.5f, N * 0.5f - 0.5f, 0)); Put(TowerCell24(B1 - 0.5f, N * 0.5f - 0.5f, 0)); }
 		for (; Li < TowerLights24.Num(); ++Li) TowerLights24[Li]->SetVisibility(false);
 	}
 	// ---- the city's picture: the capture nearest this floor; the sphere kept round her floor
@@ -1062,9 +1101,15 @@ FString ARDDungeonGenerator::TowerLiftNear24(const FVector& From, int32& OutLift
 		const FTowerLift24& L = TowerLifts24[I];
 		const FVector D = From - L.Shaft;
 		if (FMath::Abs(D.X) < C - 50.f && FMath::Abs(D.Y) < C - 50.f && FMath::Abs(From.Z - L.Z - 92.f) < 80.f) { bOnIt = true; OutLift = I; OutFloor = L.At; return FString(); }
-		const FVector E = L.Door + FVector(90.f, 0.f, 0.f);
-		if (FVector::Dist2D(From, E) < 170.f)
-			for (int32 K = 0; K < L.Floors.Num(); ++K) if (FMath::Abs(From.Z - L.Floors[K] - 92.f) < 80.f) { OutLift = I; OutFloor = K; return FString(); }
+	}
+	// (before a door: the nearest door's lift (PR #131's review: the doors are 1.5 m apart, and the first within reach took the express's F))
+	float Best = 170.f;
+	for (int32 I = 0; I < TowerLifts24.Num(); ++I)
+	{
+		const FTowerLift24& L = TowerLifts24[I];
+		const float Dd = FVector::Dist2D(From, L.Door + FVector(90.f, 0.f, 0.f));
+		if (Dd >= Best) continue;
+		for (int32 K = 0; K < L.Floors.Num(); ++K) if (FMath::Abs(From.Z - L.Floors[K] - 92.f) < 80.f) { OutLift = I; OutFloor = K; Best = Dd; }
 	}
 	return FString();
 }
@@ -1138,6 +1183,32 @@ bool ARDDungeonGenerator::CaptureView24(FVector At, FRotator Rot, float Fov, int
 	UKismetRenderingLibrary::ExportRenderTarget(this, Rt, Dir, File);
 	Cap->DestroyComponent();
 	return true;
+}
+
+TArray<FString> ARDDungeonGenerator::GetTowerViewStats24() const
+{
+	// (for the tests: each picture's six faces read back, "face|<picture>|<face>|<mean luminance>|<spread>|<pixels>" (a blank or black
+	// cube reads a spread of 0))
+	TArray<FString> Out;
+	const URDGameInstance* GI = URDGameInstance::Of(this);
+	if (!GI) return Out;
+	Out.Add(FString::Printf(TEXT("capture|%.0f"), GI->TowerCaptureMs24));
+	for (int32 K = 0; K < GI->TowerViews24.Num(); ++K)
+	{
+		UTextureRenderTargetCube* Rt = GI->TowerViews24[K];
+		FTextureRenderTargetCubeResource* Rs = Rt ? (FTextureRenderTargetCubeResource*)Rt->GameThread_GetRenderTargetResource() : nullptr;
+		if (!Rs) { Out.Add(FString::Printf(TEXT("face|%d|-1|0|0|0"), K)); continue; }
+		for (int32 F = 0; F < 6; ++F)
+		{
+			TArray<FFloat16Color> Px;
+			Rs->ReadFloat16Pixels(Px, (ECubeFace)F);
+			double Sum = 0.0, Sum2 = 0.0; const int32 Nn = Px.Num();
+			for (int32 I = 0; I < Nn; I += 7) { const double Y = 0.2126 * Px[I].R.GetFloat() + 0.7152 * Px[I].G.GetFloat() + 0.0722 * Px[I].B.GetFloat(); Sum += Y; Sum2 += Y * Y; }
+			const double M = Nn ? Sum / ((Nn + 6) / 7) : 0.0, Var = Nn ? FMath::Max(0.0, Sum2 / ((Nn + 6) / 7) - M * M) : 0.0;
+			Out.Add(FString::Printf(TEXT("face|%d|%d|%.4f|%.4f|%d"), K, F, M, FMath::Sqrt(Var), Nn));
+		}
+	}
+	return Out;
 }
 
 TArray<FString> ARDDungeonGenerator::GetTower24() const

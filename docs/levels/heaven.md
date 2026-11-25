@@ -498,7 +498,7 @@ The user's words: "the skyscrapers and very tall office buildings can have the f
 
 ### The way in and out
 
-- **The door**: F at a tower's door in Heaven (its towers are the only buildings over five storeys; the offices have three to five) reads "enter <name> Tower (<n> floors)". The name comes from the tower's seed; its floors are the lobby and the floors drawn over it in the city (5 to 11).
+- **The door**: F at a tower's door in Heaven (a tower has 5 to 11 storeys; the offices three to five; only towers have the door) reads "enter <name> Tower (<n> floors)". The name comes from the tower's seed; its floors are the lobby and the floors drawn over it in the city (5 to 11).
 - **The trip**: as into a dungeon (`DescendToCatacombs`): her state carried, the autosave, the way back kept 4.5 m before the door.
 - **The level**: `heaven_tower` is a Save As copy of the castle with `bTower24`: no sets of rooms, no monsters, no map. The tower is built at play's start from the seed the game instance carries (`TowerSeed24`, `TowerFloors24`, `TowerName24`); played from the editor, from `TowerDefaultSeed24`.
 - **The way back**: the lobby's glass doors. F reads "leave <name> for the street" and puts her back in Heaven before the tower's door.
@@ -532,7 +532,7 @@ The user's words: "the skyscrapers and very tall office buildings can have the f
 
 ### The city from the windows
 
-- **The pictures**: as she goes in, the city is captured from the tower's middle at three heights (a share 0.12, 0.5 and 0.88 of the tower's height), at the hour she enters, in cube pictures of 768 (HDR scene colour).
+- **The pictures**: as she goes in, the city is captured from the tower's middle at three heights (the level's own eye on the floors at 0.12, 0.5 and 0.88 of its floors), at the hour she enters, in cube pictures of 768 (HDR scene colour), the clouds hidden.
   - The tower's own pieces are moved out of the town's instanced components for the capture and put back; its other components and the people in it are hidden from it.
   - Each picture is taken twice: the first of a capture can draw instances where they stood a moment before.
   - The game instance keeps them.
@@ -542,20 +542,47 @@ The user's words: "the skyscrapers and very tall office buildings can have the f
 
 ### Measured
 
-All six steps pass in one run (`884 tower24_enter,tower24_floors,tower24_stairs,tower24_lifts,tower24_window,tower24_exit -Light`, `test_t24e.json`; the window steps again in `test_t24h.json`):
+On the tallest tower, Zenith Tower (11 floors): `884 tower24_enter,tower24_floors,tower24_stairs,tower24_lifts,tower24_window,tower24_exit -Light`, `test_t24i.json`; the lifts again in `test_t24j.json`, the windows in `test_t24k.json`.
 
-- **Enter**: F named "Meridian Tower (5 floors)"; the level opened with its seed, name and floors, no monsters, and no piece of the table missing. She stood in the lobby.
-- **Floors**: 5 floors, 39 rooms: 1 lobby, 6 bathrooms, 5 closets, 14 offices, 1 cubicle farm, 2 meeting rooms, 1 cafeteria, 2 data centre rooms, 6 executive offices and 1 boardroom. Every floor has a bathroom and a closet, and no room is empty. There is a picture of each kind from its doorway.
-- **Stairs**: she walked (her own movement) every flight from the lobby to the top floor: the landing, the half landing, across it, the next landing; on each point within 45 cm, 84.6 cm over it (her capsule's half height).
+- **Enter**:
+  - F named "Zenith Tower (11 floors)".
+  - The level opened with its seed, name and floors, no monsters, and none of the table's pieces missing: 9,258 boxes and 1,788 pieces in 47 instanced components.
+  - She stood in the lobby.
+  - The three pictures took 63 ms to capture together. Their 18 faces read back with light in each.
+- **Floors**: 11 floors, 143 rooms:
+  - 1 lobby, 12 bathrooms, 11 closets, 54 offices, 3 cubicle farms, 12 meeting rooms;
+  - 1 cafeteria, 2 data centre rooms, 6 executive offices and 1 boardroom.
+
+  Every floor has a bathroom and a closet, and no room is empty. There is a picture of each kind from its doorway.
+- **Stairs**: she walked (her own movement) every flight from the lobby to the top floor: the landing, the half landing, across it, the next landing. On each point she stood within 45 cm, 84.6 cm over it (her capsule's half height).
 - **Lifts**:
-  - The local lift rode floor by floor to floor 4 and back to the lobby, her height 84.6 cm over each floor. The express rode from the lobby to floor 4 and back.
+  - The local lift rode floor by floor to floor 10 and back to the lobby, her height 84.6 cm over each floor. The express rode from the lobby to floor 10 and back.
   - From floor 2's landing, the lift's gate held her 2.1 m from the shaft's middle while the lift was in the lobby. F called it, and she walked onto it.
-- **Frame rate**: 59 frames a second in the lobby, 48 at the windows of floor 2 (the editor's play, 1280 x 720).
-- **Way back**: F at the lobby's doors named the street; she stood in Heaven 4.5 m from the tower's door.
-- **The windows against the city** (`blender_numpy/t24_view_check.py`): the city's picture in the tower, the tower hidden, from the floor's middle each way, against Heaven itself pictured from the capture's point with the tower taken out. Correlations of grey levels at 64 x 64:
-  - east 0.91 to 0.96 and up 0.76 to 0.82 (two different ways: 0.03 to 0.08);
-  - north 0.37 to 0.45, south 0.27 to 0.31, west 0.26 to 0.29, down 0.43 to 0.53.
-
-  In those four ways the window's picture has a pale veil of near buildings over it (a building 12 m north of the tower is a haze), which the flat capture of the same place does not have. It is not the fog, bloom, the capture's kind (HDR or the finished picture: the same scores) nor the instances' update (each capture taken twice). It is open in TODO.md.
+  - Before the express's own door in the lobby, F named the express and called it down from the top (not the local lift, whose door is 1.5 m away).
+- **Frame rate**: 62 frames a second in the lobby, 54 at the windows of floor 5 (the editor's play, 1280 x 720).
+- **Way back**: F at the lobby's doors named the street. She stood in Heaven 4.5 m from the tower's door.
+- **The windows against the city** (`blender_numpy/t24_view_check.py`, `test_t24k_views.json`):
+  - What was compared: the city's picture in the tower, the tower hidden, from the floor's middle each way, against Heaven itself. Heaven was pictured from the capture's point with the tower taken out, at the pictures' hour.
+  - Correlations of grey levels at 64 x 64: north 0.996, east 0.986, south 0.992, west 0.994, up 0.847, down 0.999. Two different ways: 0.21.
+  - How it got there: the first pictures had a pale veil over near buildings in four ways (0.26 to 0.45). It was the volumetric clouds, drawn in their render-target mode without depth in a cube capture. They are hidden while the pictures are taken, so the windows' sky has no clouds.
 - **What could not be measured**: whether the rooms read as an office to a person (pictures are in the record).
+
+### After PR #131's review
+
+- **F at a tower's door**: it yields to a nearer door, container or person, but not to the tower's own door leaf.
+- **The lifts' doors**: F takes the nearest door's lift (the two doors are 1.5 m apart).
+- **The pictures**:
+  - They are taken at the level's own eye height for their floor.
+  - The clouds are hidden while they are taken.
+  - Their memory is let go once she leaves the tower; a new game or a load forgets the tower (a load in the tower builds it from its default seed).
+- **The save**: one dungeon key for all towers ("tower").
+- **The lights**: the corridor's first, none inside the core, 7.5 m reach.
+- **The platform**: 2.6 m, so it fits the shaft.
+- **The lobby**: the space under the stair is filled.
+- **Music**: no castle music in the offices.
+- **The tests**:
+  - They take the tallest tower.
+  - They read back the pictures' faces (a blank cube fails).
+  - They call the express from its own door.
+  - They compare the windows at the pictures' hour.
 

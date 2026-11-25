@@ -120,4 +120,11 @@ The city is a wilderness town on `brokenspire` with the modern plan (`FRDWildTow
 - **A picture of a real sky blooms**: the window's HDR sky washed every view; bloom and lens flare are off in the tower level.
 - **Compare a capture with a capture of the same kind from the same point**: Heaven pictured 17 m beyond the tower's wall stood past a building 12 m north of it; the comparison now takes the cube's own point with the tower taken out (`CaptureCity24`).
 - **A C++ file changed while a background build runs may be compiled half old**: build again after it, before trusting a run.
+- **PR #131's review**:
+  - **The volumetric clouds veil near things in a cube capture**: in their render-target mode they are drawn without depth. A building 12 m away showed as a pale haze, and the views matched Heaven at 0.26 to 0.45. Hidden for the capture, they match at 0.99.
+  - **A new F target yields to what is nearer**, except to the thing it replaces (the tower's own door leaf).
+  - **Two targets near each other: take the nearest, not the first in reach** (the lifts' doors 1.5 m apart).
+  - **A capture for a level is taken where the level's eye will be**: the city tower's storeys are 9.6 m, the level's 3.5 m.
+  - **Session state carried for one visit is let go after it, and forgotten by a load**: three cubes of 28 MB each.
+  - **A test that reads a value after leaving the place that held it reads the reset**: the hour came back -1 and the comparison was taken at night.
 

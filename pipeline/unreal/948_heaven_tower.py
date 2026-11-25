@@ -57,9 +57,10 @@ def piece(mesh, front, lift=0.0, height=None, collision=True, material=None):
 
 
 def mat_asset(name):
+    # (made again in place, never deleted: the level's generator points at it (PR #125's rule, PR #131's review))
     path = OWN + "/" + name
     if EAL.does_asset_exist(path):
-        assert EAL.delete_asset(path), path
+        m = unreal.load_asset(path); MEL.delete_all_material_expressions(m); return m
     return AT.create_asset(name, OWN, unreal.Material, unreal.MaterialFactoryNew())
 
 

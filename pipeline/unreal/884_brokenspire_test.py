@@ -7743,6 +7743,8 @@ def tower24_in():
     if os.environ.get("T24_LDR"): g.set_editor_property("tower_capture_ldr24", os.environ["T24_LDR"] == "1")
     doors = [str(l).split("|") for l in g.get_tower_doors24()]
     if not doors: return None
+    # (the tallest, and of those one whose door does not face -Y: the picture's turn exercised (PR #131's review))
+    doors.sort(key=lambda q: (-int(q[8]), float(q[6]) < -0.5))
     p = doors[0]
     door = {"bld": int(p[1]), "at": V(float(p[2]), float(p[3]), float(p[4])), "out": V(float(p[5]), float(p[6]), 0), "name": p[7], "floors": int(p[8])}
     stand = V(door["at"].x + door["out"].x * 150, door["at"].y + door["out"].y * 150, 0)
@@ -7767,10 +7769,17 @@ def step_tower24_enter():
     res["her"] = [round(p.x), round(p.y), round(p.z)]
     res["key"] = str(g.get_editor_property("dungeon_key")); res["return_town"] = str(G["gi"].get_editor_property("return_town"))
     res["monsters"] = g.get_num_monsters()
+    res["turn_deg"] = round(float(G["gi"].get_editor_property("tower_yaw24")) + 90.0, 1)
+    # (each picture's six faces read back: a blank or black picture has no spread)
+    st = [str(l).split("|") for l in g.get_tower_view_stats24()]
+    res["capture_ms"] = next((float(q[1]) for q in st if q[0] == "capture"), None)
+    faces = [{"k": int(q[1]), "f": int(q[2]), "mean": float(q[3]), "spread": float(q[4])} for q in st if q[0] == "face"]
+    res["faces_flat"] = [(x["k"], x["f"]) for x in faces if x["spread"] < 0.002]
+    res["faces"] = len(faces)
     shot("t24_lobby"); yield from rwait(1.2)
     t = d.get("tower") or {}
     ok = door is not None and door["said"].startswith("enter ") and res["level"] == "heaven_tower" and t.get("name") == door["name"] and t.get("floors") == door["floors"] \
-        and d.get("count", {}).get("missing", 1) == 0 and len(d["views"]) == 3 and p.z < 300 and res["monsters"] == 0
+        and d.get("count", {}).get("missing", 1) == 0 and len(d["views"]) == 3 and p.z < 300 and res["monsters"] == 0 and res["faces"] == 18 and not res["faces_flat"]
     step_result("tower24_enter", bool(ok), **res)
 
 
@@ -7891,12 +7900,22 @@ def step_tower24_lifts():
         res["call"] = {"floor": k2, "said": said, "f": f_, "at": x["at"]}
         best, z = yield from walk20(V(sh.x, L["door"].y, 0), 4.0, 60.0)
         res["stepped_on"] = {"off_cm": best, "her_z_over": round(z - L["floors"][k2], 1)}
+        # (the express, at the top, called from before its own door in the lobby (its door 1.5 m from the local lift's: PR #131's review))
+        E = d["lifts"][1]
+        put(V(E["door"].x + 120, E["door"].y, 0), yaw=180.0, z=E["floors"][0]); yield from wait(0.5)
+        if lift(1)["at"] == 0:
+            put(V(E["shaft"].x, E["shaft"].y, 0), z=E["floors"][0]); yield from wait(0.5); g.interact_nearest(G["pawn"].get_actor_location()); yield from settle(1, 30.0)
+            put(V(E["door"].x + 120, E["door"].y, 0), yaw=180.0, z=E["floors"][0]); yield from wait(0.5)
+        said = str(g.describe_nearest(G["pawn"].get_actor_location())); f_ = str(g.interact_nearest(G["pawn"].get_actor_location()))
+        x = yield from settle(1, 30.0)
+        res["express_call"] = {"said": said, "f": f_, "at": x["at"], "local_target": lift(0)["target"]}
         shot("t24_lift"); yield from rwait(1.2)
     finally:
         quiet(False)
     def good(rs, n): return len(rs) == n and all(r_["f"] == "lift ride" and r_["at"] == r_["to"] and 75 < r_["her_z_over"] < 110 for r_ in rs)
     ok = good(res.get("local", []), len(d["lifts"][0]["floors"])) and good(res.get("express", []), 2) and res["gate"]["nearest_x_to_shaft_cm"] > 100 \
-        and res["gate"]["lowest_over_floor"] > 60 and res["call"]["f"] == "lift called" and res["call"]["at"] == res["call"]["floor"] and res["stepped_on"]["off_cm"] < 60
+        and res["gate"]["lowest_over_floor"] > 60 and res["call"]["f"] == "lift called" and res["call"]["at"] == res["call"]["floor"] and res["stepped_on"]["off_cm"] < 60 \
+        and res["express_call"]["said"] == "call the express lift" and res["express_call"]["at"] == 0
     step_result("tower24_lifts", bool(ok), **res)
 
 
@@ -7974,7 +7993,8 @@ def step_tower24_exit():
         along = (wx - v["at"].x) * dx + (wy - v["at"].y) * dy
         push = max(0.0, cam["hw"] * 1.45 + 150.0 - along)
         at = V(wx + dx * push, wy + dy * push, wz)
-        g.set_town_hour(float(G["gi"].get_editor_property("tower_view_hour24"))); yield from wait(2.0)
+        # (the pictures' hour read in the tower: leaving it forgets them (PR #131's review))
+        g.set_town_hour(float(d["here"]["hour"])); yield from wait(2.0); res["hour"] = d["here"]["hour"]
         okc = g.capture_view24(at, unreal.Rotator(roll=0, pitch=0, yaw=yaw), 90.0, 1280, 720, os.path.join(SHOTS, ""), f"bs_{TAG}_t24_city.png")
         # (and the six ways from the picture's own point with the tower taken out, as its windows' picture was taken: beside the tower's
         # look_* pictures (the city's picture alone, the tower hidden), the same ways turned by the tower's turn)
@@ -7987,37 +8007,6 @@ def step_tower24_exit():
     step_result("tower24_exit", bool(ok), **res)
 
 
-def step_tower24_probe():
-    """what stands round a tower of Heaven over its lobby, outside its footprint: every component and instance of the town within 25 m of
-    its middle and 1.5 to 3 m round the middle picture's height, by name (a capture of the city from inside it found something north)"""
-    res = {}
-    g = G["gen"]; S = yield from heaven16_in(); yield from wait(1.0)
-    doors = [str(l).split("|") for l in g.get_tower_doors24()]
-    p = doors[0]; door = V(float(p[2]), float(p[3]), float(p[4])); out = V(float(p[5]), float(p[6]), 0)
-    c = V(door.x - out.x * 1050, door.y - out.y * 1050, 0)
-    res["centre"] = [round(c.x), round(c.y)]
-    z0 = S.get_actor_location().z
-    found = {}
-    for comp in S.get_components_by_class(unreal.PrimitiveComponent):
-        o, e, _r = unreal.SystemLibrary.get_component_bounds(comp)
-        if abs(o.x - c.x) > 2500 + e.x or abs(o.y - c.y) > 2500 + e.y: continue
-        nm = comp.get_name()
-        if isinstance(comp, unreal.InstancedStaticMeshComponent):
-            mn = comp.get_editor_property("static_mesh").get_name() if comp.get_editor_property("static_mesh") else "?"
-            for i in range(comp.get_instance_count()):
-                t = comp.get_instance_transform(i, True); q = t.translation
-                if abs(q.x - c.x) < 2500 and abs(q.y - c.y) < 2500 and q.z - z0 > -100:
-                    ins = abs(q.x - c.x) < 1110 and abs(q.y - c.y) < 1110
-                    k = (mn, "in" if ins else "out", int((q.y - c.y) // 300), int((q.x - c.x) // 300))
-                    found[str(k)] = found.get(str(k), 0) + 1
-        else:
-            ins = abs(o.x - c.x) < 1110 and abs(o.y - c.y) < 1110
-            k = (type(comp).__name__, nm[:30], "in" if ins else "out", round(o.x - c.x), round(o.y - c.y), round(o.z - z0), round(e.x), round(e.y), round(e.z))
-            found[str(k)] = found.get(str(k), 0) + 1
-    res["near"] = sorted(found.items())[:400]
-    step_result("tower24_probe", True, **res)
-
-STEPS.update({"tower24_probe": step_tower24_probe})
 
 STEPS.update({"tower24_enter": step_tower24_enter, "tower24_floors": step_tower24_floors, "tower24_stairs": step_tower24_stairs, "tower24_lifts": step_tower24_lifts,
               "tower24_window": step_tower24_window, "tower24_exit": step_tower24_exit})
