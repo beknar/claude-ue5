@@ -147,4 +147,9 @@ The city is a wilderness town on `brokenspire` with the modern plan (`FRDWildTow
 - **A theme takes every piece by name**: furniture, props and doors too, not only walls and floors. The first office tiers still showed the castle's arches, gibbets, braziers and tombs; each castle piece needs an office piece, or a hidden one to leave it out.
 - **A replacement is built in the box the original takes**: the castle piece's mesh box through its Adjust, so a doorway fills the wall's gap and a door leaf hangs on the castle's hinge.
 - **What is special about Heaven's theme is special about a modern one**: the fires cut, white lamps, upright locker doors and the containers' words (`IsModernTheme26`).
+- **PR #133's review**:
+  - **A stage never deletes a mesh the open level uses**: `947 building` made its boxes with `rebuild` on, deleting every office wall and floor under the open fortress on a second run. Made once; a changed shape takes a new name.
+  - **A piece gameplay is anchored to is replaced, never hidden**: the shrine's glow and prayer pointed at nothing; it is a water dispenser now.
+  - **A rule kept to Heaven by name misses the Office**: the desk lamp's "never on the floor" asked for Heaven; it asks `IsModernTheme26` now.
+  - **Count what is left, not only what is there**: the test counted office pieces and passed with cells, seals, books and chains of the castle standing. It lists every visible mesh of the sets against the castle's pieces' (traps' and weapons' aside) and wants none.
 

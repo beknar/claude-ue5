@@ -895,7 +895,9 @@ bool ARDSection::AddContainer(FName Name, const FVector& Loc, float Yaw, const F
 	const bool bWardrobe = Kind == TEXT("wardrobe");
 	// (the list of 2026-11-22's phase 21: Heaven's containers: a part taller than it is deep is a door on an upright hinge (a fridge's,
 	// a safe's), a flat one a lid; and her word for it)
-	auto Upright = [&](UStaticMesh* Mm) { if (bWardrobe) return true; if (!IsModernTheme26() || !Mm) return false; const FBox Bb = Mm->GetBoundingBox(); return Bb.GetSize().Z > 2.f * Bb.GetSize().X; };
+	// (a modern piece's own parts only: a castle container left in an office keeps its lid (PR #133's review))
+	const bool bModernPiece = PcName(Name).ToString().StartsWith(TEXT("Heaven.")) || PcName(Name).ToString().StartsWith(TEXT("Office."));
+	auto Upright = [&](UStaticMesh* Mm) { if (bWardrobe) return true; if (!IsModernTheme26() || !bModernPiece || !Mm) return false; const FBox Bb = Mm->GetBoundingBox(); return Bb.GetSize().Z > 2.f * Bb.GetSize().X; };
 	const FString* Wd = IsModernTheme26() || Name.ToString().StartsWith(TEXT("Heaven.")) ? Generator->ContainerWords21.Find(PcName(Name)) : nullptr;
 	const int32 I0 = AddMoving(P->Moving, P->Hinge, Upright(P->Moving), -1);
 	if (Wd) Containers[I0].Word = *Wd;
@@ -1352,7 +1354,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 	auto Candles = [&](const FVector& P, float Cd)
 	{
 		// (Heaven: a desk lamp on a table, never one on the floor (PR #126's review); the draw is taken all the same)
-		if (Theme == FName(TEXT("Heaven")) && P.Z - GetActorLocation().Z < 30.f) { R.FRandRange(0, 360); return; }
+		if (IsModernTheme26() && P.Z - GetActorLocation().Z < 30.f) { R.FRandRange(0, 360); return; }          // (the fortress's offices too (PR #133's review))
 		AddPieceAt(TEXT("Candles"), P, R.FRandRange(0, 360), 1.f, true);
 		AddEffect(TEXT("CandleFire"), P + FVector(0, 0, 18), 1.f);
 		AddLight(P + FVector(0, 0, 45), FLinearColor(1.f, 0.62f, 0.32f), Cd, 700.f, false, 0.12f);

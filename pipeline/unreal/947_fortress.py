@@ -267,21 +267,22 @@ def building():
         # (the room's face +X: a steel skirting, a dado of wood or plaster to 1 m, white plaster above, a white cornice; pilasters at the ends)
         return hk.boxes(name, [(-40, 0, -H, H, 0, 600, "plaster"), (-40, 2, -H, H, 0, 14, "steel"), (-40, 1.5, -H, H, 14, 100, dado),
                                (-40, 1.5, -H, H, 100, 104, "steel"), (-40, 3, -H, -145, 0, 560, "white"), (-40, 3, 145, H, 0, 560, "white"),
-                               (-40, 4, -H, H, 560, 600, "white")], MAT, True)
+                               (-40, 4, -H, H, 560, 600, "white")], MAT, False)
     w1 = wall("SM_HVO_Wall", "wood"); w2 = wall("SM_HVO_WallPlain", "plaster")
     P = {}
     for n, w in (("Wall_Block", w1), ("Wall_Stone", w2), ("Wall_Corr", w2), ("Wall_Rough", w1), ("Wall_Rough_2", w2), ("Wall_Rough_3", w1), ("Wall_Rough_4", w2), ("Wall_Rough_5", w1)):
         P["Office." + n] = piece(w, mode="wallface")
-    f1 = piece(hk.boxes("SM_HVO_Floor", [(-H, H, -H, H, -20, 0, "terrazzo")], MAT, True), mode="floor")
-    f2 = piece(hk.boxes("SM_HVO_FloorWood", [(-H, H, -H, H, -20, 0, "wood")], MAT, True), mode="floor")
-    f3 = piece(hk.boxes("SM_HVO_FloorCarpet", [(-H, H, -H, H, -20, 0, "carpetgrey")], MAT, True), mode="floor")
+    f1 = piece(hk.boxes("SM_HVO_Floor", [(-H, H, -H, H, -20, 0, "terrazzo")], MAT, False), mode="floor")
+    f2 = piece(hk.boxes("SM_HVO_FloorWood", [(-H, H, -H, H, -20, 0, "wood")], MAT, False), mode="floor")
+    f3 = piece(hk.boxes("SM_HVO_FloorCarpet", [(-H, H, -H, H, -20, 0, "carpetgrey")], MAT, False), mode="floor")
     for n in ("Floor_Stone", "Floor_Brick", "Floor_Brick2", "Floor_Random", "Floor_Tiles", "Floor_Corr"):
         P["Office." + n] = f1; P["Office." + n + "_Alt"] = f3
     P["Office.Floor_Wood"] = f2; P["Office.Floor_Wood_Alt"] = f2
-    P["Office.Ceil_Room"] = piece(hk.boxes("SM_HVO_Ceil", [(-H, H, -H, H, 0, 15, "white"), (-70, 70, -70, 70, 15, 16.5, "panel"), (-H, H, -1, 1, 15, 15.6, "steel"), (-1, 1, -H, H, 15, 15.6, "steel")], MAT, True), mode="ceil")
+    P["Office.Ceil_Room"] = piece(hk.boxes("SM_HVO_Ceil", [(-H, H, -H, H, 0, 15, "white"), (-70, 70, -70, 70, 15, 16.5, "panel"), (-H, H, -1, 1, 15, 15.6, "steel"), (-1, 1, -H, H, 15, 15.6, "steel")], MAT, False), mode="ceil")
     P["Office.Ceil_Corr"] = P["Office.Ceil_Room"]
-    # ---- the furniture: Heaven's modern pieces under the castle's names
+    # ---- the furniture: Heaven's modern pieces under the castle's names (never over the shell's own pieces)
     for n, txt in texts.items():
+        if ("Office." + n) in P: continue
         p = unreal.RDPiece(); p.import_text(txt); P["Office." + n] = p
     # ---- the castle's pieces an office has no use for: each given an office's own in the box the castle's takes (its mesh's box through
     # its Adjust), or left out (the gibbets, cages, bones, hay, tombs, weapons on the walls)
@@ -295,21 +296,39 @@ def building():
         p.hinge = like.hinge
         return p
     (x0, x1, y0, y1, z0, z1), dw = box_of("Doorway")
-    ow = 75.0          # (half the opening: the two leaves of 70 cm and their frame)
+    (x0_, x1_, y0_, y1_, z0_, z1_), dl0 = box_of("DoorLeaf")
+    ow = float(dl0.hinge.y) + 5.0          # (half the opening: from the leaves' hinges (PR #133's review), and a margin)
     P["Office.Doorway"] = raw(hk.boxes("SM_HVO_Doorway", [(x0, x1, y0, -ow, z0, z1, "plaster"), (x0, x1, ow, y1, z0, z1, "plaster"), (x0, x1, -ow, ow, 230, z1, "plaster"),
-                                                           (x0 - 1, x1 + 1, -ow - 6, -ow, z0, 236, "steel"), (x0 - 1, x1 + 1, ow, ow + 6, z0, 236, "steel"), (x0 - 1, x1 + 1, -ow, ow, 230, 236, "steel")], MAT, True), dw)
+                                                           (x0 - 1, x1 + 1, -ow - 6, -ow, z0, 236, "steel"), (x0 - 1, x1 + 1, ow, ow + 6, z0, 236, "steel"), (x0 - 1, x1 + 1, -ow, ow, 230, 236, "steel")], MAT, False), dw)
     (x0, x1, y0, y1, z0, z1), dl = box_of("DoorLeaf")
     P["Office.DoorLeaf"] = raw(hk.boxes("SM_HVO_DoorLeaf", [(x0, x1, y0, y1, z0, z1, "glass"), (x0 - 0.5, x1 + 0.5, y0, y0 + 5, z0, z1, "steel"), (x0 - 0.5, x1 + 0.5, y1 - 5, y1, z0, z1, "steel"),
-                                                            (x0 - 0.5, x1 + 0.5, y0, y1, z0, z0 + 8, "steel"), (x0 - 0.5, x1 + 0.5, y0, y1, z1 - 5, z1, "steel")], MAT, True), dl)
+                                                            (x0 - 0.5, x1 + 0.5, y0, y1, z0, z0 + 8, "steel"), (x0 - 0.5, x1 + 0.5, y0, y1, z1 - 5, z1, "steel")], MAT, False), dl)
     for n, parts in (("Column", lambda b: [(b[0], b[1], b[2], b[3], b[4], b[5], "white"), (b[0] - 2, b[1] + 2, b[2] - 2, b[3] + 2, b[4], b[4] + 14, "steel")]),
                      ("CornerColumn", lambda b: [(b[0], b[1], b[2], b[3], b[4], b[5], "white")]),
                      ("Dais", lambda b: [(b[0], b[1], b[2], b[3], b[4], b[5] - 3, "white"), (b[0], b[1], b[2], b[3], b[5] - 3, b[5], "steel")]),
                      ("Carpet", lambda b: [(b[0], b[1], b[2], b[3], 0, 2, "carpetgrey")]), ("CarpetLong", lambda b: [(b[0], b[1], b[2], b[3], 0, 2, "carpetgrey")])):
         bb, like = box_of(n)
-        P["Office." + n] = raw(hk.boxes("SM_HVO_" + n, parts(bb), MAT, True), like, n not in ("Carpet", "CarpetLong"))
+        P["Office." + n] = raw(hk.boxes("SM_HVO_" + n, parts(bb), MAT, False), like, n not in ("Carpet", "CarpetLong"))
+    # (the cells, the gratings and the tiers' seals: steel frames round glass in the castle pieces' boxes, their collision theirs; the
+    # cell's door a glass leaf on the castle's hinge (PR #133's review: they stood in castle iron))
+    def panel(b):
+        return [(b[0], b[1], b[2], b[3], b[4], b[5], "glass"), (b[0] - 1, b[1] + 1, b[2], b[2] + 6, b[4], b[5], "steel"), (b[0] - 1, b[1] + 1, b[3] - 6, b[3], b[4], b[5], "steel"),
+                (b[0] - 1, b[1] + 1, b[2], b[3], b[4], b[4] + 8, "steel"), (b[0] - 1, b[1] + 1, b[2], b[3], b[5] - 6, b[5], "steel")]
+    for n in ("CellFrame", "CellBlock", "CellBlockHalf", "Grating", "CellDoor"):
+        if unreal.Name(n) not in cp or not cp[unreal.Name(n)].mesh: continue
+        bb, like = box_of(n)
+        q = raw(hk.boxes("SM_HVO_" + n, panel(bb), MAT, False), like)
+        if like.moving: q.moving = like.moving
+        P["Office." + n] = q
+    for n, mk in (("ShrinePlinth", "white"), ("Wall_Rough_Back", "plaster")):
+        if unreal.Name(n) not in cp or not cp[unreal.Name(n)].mesh: continue
+        bb, like = box_of(n)
+        P["Office." + n] = raw(hk.boxes("SM_HVO_" + n, [(bb[0], bb[1], bb[2], bb[3], bb[4], bb[5], mk)], MAT, False), like)
+    if "Bench" in texts and "Pew" not in texts:
+        p = unreal.RDPiece(); p.import_text(texts["Bench"]); P["Office.Pew"] = p
     cube = unreal.load_asset("/Engine/BasicShapes/Cube")
-    for n in ("Gibbet", "CageHanging", "CageLarge", "Chain", "Shackles", "Bones", "BonePile", "BonePile2", "HayPile", "Firewood", "Debris", "Tomb1", "Tomb2", "Tomb3", "Tomb4",
-              "ShrineStatue", "Crystal", "Spear", "SpearFlat", "Axe", "AxeFlat", "Sword", "SwordFlat"):
+    for n in ("Books", "Gibbet", "CageHanging", "CageLarge", "Chain", "Shackles", "Bones", "BonePile", "BonePile2", "HayPile", "Firewood", "Debris", "Tomb1", "Tomb2", "Tomb3", "Tomb4",
+              "Crystal", "Spear", "SpearFlat", "Axe", "AxeFlat", "Sword", "SwordFlat"):
         if unreal.Name(n) not in cp: continue
         h = unreal.RDPiece(); h.mesh = cube; h.adjust = unreal.Transform(V(0, 0, -100000), unreal.Rotator(), V(0.001, 0.001, 0.001)); h.size = V(1, 1, 1); h.collision = False; h.hidden = True
         P["Office." + n] = h
@@ -324,7 +343,7 @@ def building():
         P["Office.Fortress." + fort] = tp(tw)
     # (and the castle's furniture an office reads as other things: the brazier and the plinth planters, the altar a desk, the thrones a
     # chair, the stool a chair, the tool board a cork board, the banner and painting a picture)
-    for n, tw in (("Brazier", "Tower.Planter"), ("Pedestal", "Tower.PlanterBox"), ("Altar", "Tower.Desk"), ("Throne", "Tower.OfficeChair"), ("ThroneRoyal", "Tower.OfficeChair"),
+    for n, tw in (("ShrineStatue", "Tower.WaterDispenser"), ("Brazier", "Tower.Planter"), ("Pedestal", "Tower.PlanterBox"), ("Altar", "Tower.Desk"), ("Throne", "Tower.OfficeChair"), ("ThroneRoyal", "Tower.OfficeChair"),
                   ("Stool", "Tower.Chair"), ("ToolBoard", "Tower.CorkBoard"), ("Banner", "Tower.Painting"), ("Painting", "Tower.Painting")):
         if n not in texts: P["Office." + n] = tp(tw)
     pieces = dict(g.get_editor_property("pieces"))

@@ -8902,21 +8902,47 @@ def step_fortress26():
     g.debug_clear_section(I2(0, 0), 0, V(0, 0, 0)); yield from wait(0.5)
     s2 = I2(1, 0)
     if g.is_tier_open(2) and not g.is_section_generated(s2): g.generate_section_now(s2); yield from built(s2)
+    # (the castle's own meshes: those of pieces without a theme that no Office piece also draws (doors and containers are plain
+    # components: counted too (PR #133's review)))
+    P_ = g.get_editor_property("pieces")
+    office_m = {P_[k].mesh.get_name() for k in P_.keys() if str(k).startswith("Office.") and P_[k].mesh}
+    office_m |= {P_[k].moving.get_name() for k in P_.keys() if str(k).startswith("Office.") and P_[k].moving}
+    castle_m = {P_[k].mesh.get_name() for k in P_.keys() if "." not in str(k) and P_[k].mesh} - office_m - {"Cube"}
+    # (the traps' plates and chains and the weapons she finds are the game's own things, the same in every theme: left out)
+    for d_ in g.get_editor_property("traps"):
+        for f_ in ("mesh", "missile"):
+            try:
+                m_ = d_.get_editor_property(f_)
+                if m_: castle_m.discard(m_.get_name())
+            except Exception: pass
+    for d_ in g.get_editor_property("weapons"):
+        try:
+            m_ = d_.get_editor_property("mesh")
+            if m_: castle_m.discard(m_.get_name())
+        except Exception: pass
     def census(si):
         S = g.get_section(si)
         if not S: return None
         n = {}
-        for comp in S.get_components_by_class(unreal.InstancedStaticMeshComponent):
+        for comp in S.get_components_by_class(unreal.StaticMeshComponent):
             m = comp.get_editor_property("static_mesh")
-            if not m: continue
-            k = m.get_name(); n[k] = n.get(k, 0) + comp.get_instance_count()
+            if not m or not comp.is_visible(): continue
+            k = m.get_name(); n[k] = n.get(k, 0) + (comp.get_instance_count() if isinstance(comp, unreal.InstancedStaticMeshComponent) else 1)
+            if k in castle_m and len(where) < 12:
+                try:
+                    tr = comp.get_instance_transform(0, True) if isinstance(comp, unreal.InstancedStaticMeshComponent) else comp.get_world_transform()
+                    p_ = tr.translation; o_ = p_ - S.get_actor_location()
+                    where.append({"mesh": k, "comp": comp.get_name(), "theme": str(S.get_editor_property("theme")), "at": [round(o_.x), round(o_.y), round(o_.z)],
+                                  "scale": [round(tr.scale3d.x, 2), round(tr.scale3d.y, 2), round(tr.scale3d.z, 2)]})
+                except Exception as e: where.append({"mesh": k, "err": str(e)[:120]})
         return n
+    where = []
     for nm, si in (("tier1", I2(0, 0)), ("tier2", s2)):
         n = census(si) or {}
         res[nm] = {"office": sum(v for k, v in n.items() if "HVO" in k), "facility": sum(v for k, v in n.items() if "HVF" in k),
                    "heaven_furniture": sum(v for k, v in n.items() if k.startswith("SM_HV_") or k.startswith("SM_HV2") or k.startswith("SM_HV3")),
                    "office_things": sum(v for k, v in n.items() if any(x in k for x in ("Printer", "Water_Dispenser", "Shelving", "Planters", "Drawer"))),
-                   "tier": g.get_section_tier(si) if hasattr(g, "get_section_tier") else None}
+                   "castle_left": {k: v for k, v in n.items() if k in castle_m}}
     # (pictures: the first hall from its middle, and a room of the tier-2 set from its middle)
     hc = g.get_start_room_center()
     put(V(hc.x - 600, hc.y, hc.z), yaw=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=0.0))
@@ -8932,8 +8958,8 @@ def step_fortress26():
             shot(f"f26_tier2_{done}"); shots.append(f"f26_tier2_{done}"); yield from rwait(1.3); done += 1
             if done >= 3: break
     G["pawn"].set_actor_hidden_in_game(False); quiet(False)
-    res["pictures"] = shots
-    ok = res["themes"][:2] == ["Office", "Office"] and all(res[t]["office"] > 50 and res[t]["facility"] == 0 and res[t]["heaven_furniture"] > 0 for t in ("tier1", "tier2"))
+    res["pictures"] = shots; res["castle_where"] = where
+    ok = res["themes"][:2] == ["Office", "Office"] and all(res[t]["office"] > 50 and res[t]["facility"] == 0 and res[t]["heaven_furniture"] > 0 and not res[t]["castle_left"] for t in ("tier1", "tier2"))
     step_result("fortress26", bool(ok), **res)
 
 
