@@ -135,6 +135,9 @@ public static class RDWin {
               @{ name = "sewers"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:graymourne", "-RDAllKeys", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "sewers" },
     @{ name = "kethrys_spire"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:kethrysspire", "-RDAllKeys", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "kethrys_spire" },
     @{ name = "heaven_fortress"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:heaven", "-RDAllKeys", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "heaven_fortress" },
+# (2026-11-25, the list of 2026-11-22's phase 27: the fortress's open tiers: down into it, tier 3 opened and a set of it generated round
+# her (-RDOpen27, RD/RDAlien27.cpp); its mark once the sky is up: "open27|open=1|ground=...|clusters=...|... sky=1.00|<hero>")
+@{ name = "fortress_open"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:heaven", "-RDAllKeys", "-RDOpen27", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "open27|open=1*sky=1.00|Warrior*" },
     # (2026-11-21: the caves under the landmark towers (935): down into the cave level at tier 12 from where she stands)
     @{ name = "caves"; args = @("-RDStartHero=Warrior", "-RDTownGo=cave:12", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "caves" },
 # (2026-11-22, the list of 2026-11-20's eighteenth phase: the wilds' runs (RD/RDList15q.cpp): her horse called, mounted and ridden 15 s

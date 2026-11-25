@@ -8964,6 +8964,143 @@ def step_fortress26():
 
 
 STEPS.update({"fortress26": step_fortress26})
+
+
+def step_fortress27():
+    """the list of 2026-11-22 ("eventually opening up into a wider open world that uses the Alien Planet ... for Tiers 3-5"): a set of each of
+    tiers 3, 4 and 5 built in the open Alien theme: no walls, ceilings or doors; ground on every tile; the ridges' blockers and rocks; the
+    pack's clusters (count, and the blocking ones' tiles blocked for the monsters' paths); a force wall toward a shut tier; the sky up out
+    there and down in the office; she walks each set's clearing on its ground; the frame rate; pictures"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    res = {"themes": [str(t) for t in g.get_editor_property("tier_themes")], "open_themes": [str(t) for t in g.get_editor_property("open_themes27")]}
+    g.debug_clear_section(I2(0, 0), 0, V(0, 0, 0)); yield from wait(0.5)
+    # (tier 3 open, tier 4 shut: the tier-3 set has force walls toward it)
+    g.debug_open_tiers(3, False); yield from wait(0.5)
+    coords = {3: I2(2, 0), 4: I2(3, 0), 5: I2(4, 0)}
+    if not g.is_section_generated(coords[3]): g.generate_section_now(coords[3]); yield from built(coords[3])
+    S3 = g.get_section(coords[3])
+    forces = len(S3.get_components_by_tag(unreal.StaticMeshComponent, "AlienForce27")) if S3 else 0
+    res["force_walls_tier3"] = forces; res["seals_tier3"] = S3.get_num_seals(0) if S3 else 0
+    # (pushed at a force wall from 3.5 m in front of it for 3 s: she stays on her side of the border (PR #134's review: it was only counted))
+    pushes = []
+    if S3:
+        ts_ = g.get_editor_property("tile_size"); sc = S3.get_actor_location() + V(42 * ts_, 42 * ts_, 0)
+        for b in list(S3.get_seal_points27())[:2]:
+            d = b - sc; out = V(1 if d.x > 0 else -1, 0, 0) if abs(d.x) > abs(d.y) else V(0, 1 if d.y > 0 else -1, 0)
+            put(V(b.x - out.x * 350, b.y - out.y * 350, b.z + 100)); yield from wait(0.4)
+            for i in range(150):
+                G["pawn"].add_movement_input(out, 1.0); yield from wait(0.02)
+            p = G["pawn"].get_actor_location(); past = (p.x - b.x) * out.x + (p.y - b.y) * out.y
+            pushes.append(round(past))
+    res["force_push_past_cm"] = pushes
+    g.debug_open_tiers(5, False); yield from wait(0.5)
+    for t in (4, 5):
+        if not g.is_section_generated(coords[t]): g.generate_section_now(coords[t]); yield from built(coords[t])
+    P_ = g.get_editor_property("pieces")
+    castle_m = {P_[k].mesh.get_name() for k in P_.keys() if "." not in str(k) and P_[k].mesh}
+    alien_m = {P_[k].mesh.get_name() for k in P_.keys() if str(k).startswith("Alien") and P_[k].mesh}
+    castle_m -= alien_m | {"Cube"}
+    # (the shell's meshes of every theme: walls, ceilings, doorways, columns (the alien ground reuses the office's floor box: not counted))
+    shell_m = {P_[k].mesh.get_name() for k in P_.keys() if P_[k].mesh and any(x in str(k).split(".")[-1] for x in ("Wall", "Ceil", "Doorway", "Column", "DoorLeaf"))} - alien_m - {"Cube"}
+    for d_ in g.get_editor_property("traps"):
+        try:
+            if d_.get_editor_property("mesh"): castle_m.discard(d_.get_editor_property("mesh").get_name())
+        except Exception: pass
+    for d_ in g.get_editor_property("weapons"):
+        try:
+            if d_.get_editor_property("mesh"): castle_m.discard(d_.get_editor_property("mesh").get_name())
+        except Exception: pass
+    shots = []
+    for t, si in coords.items():
+        S = g.get_section(si); r = {"generated": bool(S)}
+        if not S: res["tier%d" % t] = r; continue
+        st = dict(kv.split("=") for kv in str(S.get_alien_stats27()).split("|"))
+        r.update({k: int(v) for k, v in st.items()})
+        # (what the shell drew: no wall, ceiling or doorway of any theme; the castle's meshes left)
+        n = {}
+        for comp in S.get_components_by_class(unreal.StaticMeshComponent):
+            m = comp.get_editor_property("static_mesh")
+            if not m or not comp.is_visible(): continue
+            k = m.get_name(); n[k] = n.get(k, 0) + (comp.get_instance_count() if isinstance(comp, unreal.InstancedStaticMeshComponent) else 1)
+        r["walls_ceilings"] = sum(v for k, v in n.items() if k in shell_m)
+        r["castle_left"] = {k: v for k, v in n.items() if k in castle_m and not k.startswith("SM_Shield_")}          # (a shield on an armory's table is an item to take)
+        r["alien_instances"] = sum(v for k, v in n.items() if k.startswith("SM_") and any(x in k for x in ("Rock", "Pebble", "Spike", "Tree", "Flower", "Moss", "Mushroom", "Plant", "Root", "IceCrystal")))
+        # (the blocking clusters' tiles blocked for the monsters' paths)
+        bl = list(S.get_alien_blocking27())
+        r["blocking_tiles_blocked"] = sum(1 for p in bl if S.is_tile_blocked27(p)); r["blocking_n"] = len(bl)
+        # (the blocking clusters' parts placed, not refused by the furniture's footprints (PR #134's review))
+        r["parts_placed_share"] = round(r.get("placed", 0) / max(r.get("parts", 1), 1), 3)
+        # (she walks a clearing on its ground: from a room's middle along +X for 4 s; the ground under her the whole way)
+        rc = None
+        for k in range(S.get_num_rooms()):
+            q = S.get_room_center(k)
+            if q and not (q.x == 0 and q.y == 0): rc = q; break
+        if rc:
+            put(V(rc.x, rc.y, rc.z + 100), yaw=0.0); yield from wait(2.5)
+            r["sky_out"] = round(g.get_alien_sky27(), 2); r["fog_out"] = round(g.get_fog_density27(), 4)
+            # (four ways out of the room's middle, each pushed every frame for 1.5 s: the farthest she got, the ground under her all the way)
+            pw = G["pawn"]; z0 = pw.get_actor_location().z; low = 0.0; fps = []; best = 0.0
+            for dv in (V(1, 0, 0), V(-1, 0, 0), V(0, 1, 0), V(0, -1, 0)):
+                put(V(rc.x, rc.y, rc.z + 100)); yield from wait(0.4); a0 = pw.get_actor_location()
+                for i in range(75):
+                    pw.add_movement_input(dv, 1.0); yield from wait(0.02)
+                    loc = pw.get_actor_location(); low = min(low, loc.z - z0)
+                fps.append(g.get_fps()); best = max(best, (pw.get_actor_location() - a0).length())
+            r["walk_m"] = round(best / 100.0, 1)
+            # (out to the clearing's edges: each of four ways for 6 s from its middle; she ends on walked ground, never past it onto a ridge)
+            edges = []
+            for dv in (V(1, 0, 0), V(-1, 0, 0), V(0, 1, 0), V(0, -1, 0)):
+                put(V(rc.x, rc.y, rc.z + 100)); yield from wait(0.4)
+                for i in range(300):
+                    pw.add_movement_input(dv, 1.0); yield from wait(0.02)
+                p = pw.get_actor_location()
+                edges.append({"walked": bool(S.is_walkable_at27(p) or S.is_tile_blocked27(p) or (g.world_to_section(p).x, g.world_to_section(p).y) != (si.x, si.y)), "m": round((p - V(rc.x, rc.y, p.z)).length() / 100.0, 1)})
+            r["edges"] = edges
+            r["walk_lowest_cm"] = round(low); r["fps"] = round(sum(fps) / len(fps), 1)
+            put(V(rc.x - 400, rc.y, rc.z + 100), yaw=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=0.0))
+            G["pawn"].set_actor_hidden_in_game(True); yield from wait(1.5); shot("f27_tier%d" % t); shots.append("f27_tier%d" % t); yield from rwait(1.4)
+            G["pawn"].set_actor_hidden_in_game(False)
+        res["tier%d" % t] = r
+    # (a monster chases her across a clearing's doorway into the path: the doorway has no door in the open (PR #134's review: monsters
+    # stood at every doorway waiting for a door that was not there))
+    S4 = g.get_section(coords[4]); chase = {}
+    if S4:
+        dw = list(S4.get_doorways27())
+        for i in range(0, len(dw), 2):
+            a_, o_ = dw[i], dw[i + 1]; d = (o_ - a_); d = V(d.x / 300.0, d.y / 300.0, 0)
+            her = V(o_.x + d.x * 900, o_.y + d.y * 900, o_.z); mon = V(a_.x - d.x * 450, a_.y - d.y * 450, a_.z)
+            if not (S4.is_walkable_at27(her) and S4.is_walkable_at27(mon) and S4.is_walkable_at27(V(o_.x + d.x * 300, o_.y + d.y * 300, o_.z))): continue
+            quiet(False)
+            put(V(her.x, her.y, her.z + 100)); yield from wait(0.3)
+            m = g.spawn_monster_named("Soldier", V(mon.x, mon.y, mon.z + 100), 4, 1.0, 0.0, 1.0); yield from wait(0.3)
+            if not m: continue
+            try: m.set_editor_property("aggro_distance", 3000.0)
+            except Exception: pass
+            start = (m.get_actor_location() - her).length(); closest = start
+            for k in range(60):
+                yield from wait(0.25); closest = min(closest, (m.get_actor_location() - G["pawn"].get_actor_location()).length())
+            crossed = ((m.get_actor_location().x - a_.x) * d.x + (m.get_actor_location().y - a_.y) * d.y) > 150
+            chase = {"start_m": round(start / 100.0, 1), "closest_m": round(closest / 100.0, 1), "crossed": bool(crossed)}
+            m.destroy_actor()
+            quiet(True)
+            break
+    res["chase"] = chase
+    # (the sky back down in the office's first hall)
+    hc = g.get_start_room_center(); put(V(hc.x, hc.y, hc.z + 100), yaw=0.0); yield from wait(3.0)
+    res["sky_in"] = round(g.get_alien_sky27(), 2); res["fog_in"] = round(g.get_fog_density27(), 4)
+    quiet(False); res["pictures"] = shots
+    ok = res["open_themes"] == ["Alien"] and res["themes"][2:5] == ["Alien"] * 3 and res["force_walls_tier3"] > 0 and res["sky_in"] < 0.05 \
+         and pushes and all(p < -10 for p in pushes) and chase.get("crossed") and chase.get("closest_m", 99) < 3.0
+    for t in (3, 4, 5):
+        r = res.get("tier%d" % t, {})
+        ok = ok and r.get("generated") and r.get("open") == 1 and r.get("walls_ceilings", 1) == 0 and r.get("ground", 0) > 100 and r.get("blockers", 0) > 50 \
+             and r.get("clusters", 0) > 20 and r.get("alien_instances", 0) > 200 and r.get("blocking_n", 0) > 0 and r.get("blocking_tiles_blocked") == r.get("blocking_n") \
+             and r.get("sky_out", 0) > 0.95 and r.get("walk_m", 0) > 3.0 and r.get("walk_lowest_cm", -999) > -60 \
+             and r.get("parts_placed_share", 0) > 0.99 and all(e["walked"] for e in r.get("edges", [])) and abs(r.get("fog_out", 0) - res["fog_in"]) > 1e-4
+    step_result("fortress27", bool(ok), **res)
+
+
+STEPS.update({"fortress27": step_fortress27})
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""
     if G.get("gen"): return G["gen"]

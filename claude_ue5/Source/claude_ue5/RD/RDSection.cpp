@@ -100,7 +100,7 @@ bool ARDSection::IsWalkable(FIntPoint T) const
 int32 ARDSection::DoorBetween(FIntPoint A, FIntPoint B) const
 {
 	const int32* D = DoorEdges.Find(EdgeKey(A, B));
-	return D ? *D : -1;
+	return D && Doors.IsValidIndex(*D) ? *D : -1;          // (an edge with no door (the open tiers' doorways) is no door (PR #134's review))
 }
 
 // ------------------------------------------------------------------------------------------------ plan
@@ -754,6 +754,7 @@ int32 ARDSection::GetEffectParticlesNear(FVector Location, float Radius) const
 void ARDSection::AddTorch(const FVector& WallPoint, float InYaw, float Candelas, bool bLit)
 {
 	// sconce on the wall (piece frame: back on the wall at x = 0, flame above its origin at FlameOffset = Hinge)
+	if (IsOpenTheme27()) return;          // (phase 27: no walls to hang it on)
 	const FRDPiece* P = this->Pc(TEXT("Torch"));
 	AddPieceAt(TEXT("Torch"), WallPoint, InYaw, 1.f, true);
 	if (!bLit || !P) return;
@@ -1067,7 +1068,7 @@ void ARDSection::ShellColumn(FRandomStream& R, int32 X)
 		{
 			const FIntPoint T(X, Y);
 			const uint8 Ty = Type[Idx(T)];
-			if (!Ty) continue;
+			if (!Ty) { if (IsOpenTheme27()) AlienSolid27(T); continue; }          // (phase 27: the open ground's ridges)
 			const int32 O = Owner[Idx(T)];
 			const bool bRoom = O < 1000;
 			const ERDRoomKind K = bRoom ? Rooms[O].Kind : ERDRoomKind::Junction;
@@ -1100,6 +1101,7 @@ void ARDSection::ShellColumn(FRandomStream& R, int32 X)
 			else
 			{
 				AddPieceAt(F, C, FloorYaw);
+				if (IsOpenTheme27()) continue;          // (phase 27: open ground: no ceiling, no walls, no doorways)
 				if (!(bRoom && Rooms[O].Ceil >= 3)) AddPieceAt(bLow ? TEXT("Ceil_Corr") : TEXT("Ceil_Room"), C + FVector(0, 0, Hgt), CeilYaw);
 			}
 			// walls
@@ -1139,6 +1141,7 @@ void ARDSection::ShellColumn(FRandomStream& R, int32 X)
 void ARDSection::ShellCorners()
 {
 	const float S = Generator->TileSize;
+	if (IsOpenTheme27()) return;          // (phase 27: no columns, no vaults under the sky)
 	// room corners: columns hide the wall joints
 	for (const FRoom& Rm : Rooms)
 	{
@@ -1340,6 +1343,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 	};
 	auto Hang = [&](FName Nm, const FVector& P, float Yaw)   // from the ceiling (piece bottom at z 0: placed at ceiling - height)
 	{
+		if (IsOpenTheme27()) return;          // (phase 27: no ceiling to hang it from)
 		const FRDPiece* Pc = this->Pc(Nm);
 		// (mistward: under its own tile's ceiling: a dome's is higher; not over a tile cut out of a shaped room)
 		const FIntPoint Tl = WorldToLocal(P);
@@ -1992,6 +1996,8 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		FRandomStream Rp((int32)HashCombine((uint32)Seed ^ 0x7E3Au, (uint32)RI));
 		FurnishWalls(Rp, Rm, Generator->ThemeProps, Generator->ThemePropSpacing, Generator->ThemePropChance, false);
 	}
+	// (phase 27: under the sky the sun lights a clearing; the pack's clusters dress it. its furnishing's draws are its own: the sets are new)
+	if (IsOpenTheme27()) { AlienDress27(RI); return; }
 	LightRoom(R, Rm, RI);
 }
 
@@ -2000,6 +2006,7 @@ void ARDSection::DecorateCorridor(FRandomStream& R, int32 CI)
 	const FCorr& C = Corrs[CI];
 	const int32 Len = C.bHoriz ? C.Max.X - C.Min.X : C.Max.Y - C.Min.Y;
 	const float S = Generator->TileSize;
+	if (IsOpenTheme27()) { AlienCorridor27(CI); return; }          // (phase 27: a path, dressed; no torches, no wall props)
 	// torches every 3 tiles alternating sides; theme 0 = well lit passage, 1 = dim (some sconces dark), 2 = old tunnel (candles)
 	const float Cd = C.Theme == 0 ? 75.f : C.Theme == 1 ? 45.f : 0.f;
 	for (int32 K = 1; K < Len; K += 3)
@@ -2076,10 +2083,14 @@ void ARDSection::ClearInteractive()
 void ARDSection::AddDoors()
 {
 	// one double door per doorway (same room / side order as the plan)
+	// (phase 27: in the open only a vault's and an arena's (a force field on the castle's hinges): their locks and bars are the
+	// doors'; every other doorway is the path's way into the clearing, its edge kept with no door (PR #134's review))
+	const bool bOpen = IsOpenTheme27();
 	for (int32 RI = 0; RI < Rooms.Num(); ++RI)
 	{
 		const FRoom& Rm = Rooms[RI];
 		if (Rm.Kind == ERDRoomKind::Junction) continue;
+		if (bOpen && Rm.Kind != ERDRoomKind::Vault && Rm.Kind != ERDRoomKind::Arena) continue;
 		for (int32 Side = 0; Side < 4; ++Side)
 		{
 			if (!Rm.bDoorSide[Side]) continue;
@@ -2091,6 +2102,12 @@ void ARDSection::AddDoors()
 	// door edge -> first leaf index (two leaves per doorway)
 	TMap<int64, int32> Remap;
 	for (int32 I = 0; I < Doors.Num(); ++I) if (Doors[I].TileA.X >= 0 && !Remap.Contains(EdgeKey(Doors[I].TileA, Doors[I].TileB))) Remap.Add(EdgeKey(Doors[I].TileA, Doors[I].TileB), I);
+	if (bOpen)
+	{
+		// (every doorway's edge stays (the paths cross it); its door, if any, by the remap, else none)
+		for (auto& E : DoorEdges) { const int32* Rd = Remap.Find(E.Key); E.Value = Rd ? *Rd : INDEX_NONE; }
+		return;
+	}
 	if (Doors.Num() > 0) DoorEdges = Remap;
 }
 
@@ -2102,6 +2119,7 @@ void ARDSection::BeginGenerate(ARDDungeonGenerator* InGenerator, FIntPoint InCoo
 	NumInstances = 0; NumLights = 0; NextRoom = 0; NextCorr = 0; GenTicks = 0; FurnishMs = 0.0; AnvilPoints.Reset(); AnvilRoom = -1; Shelves.Reset(); ShelfSwing15.Reset(); Chapels15.Reset(); ForgePoints.Reset(); AlchemistPoints.Reset(); LibrarianPoints.Reset(); if (!Generator || !Generator->bTown) TownOvens.Reset();
 	Theme = Generator->ThemeOf(Coord);
 	ThemeNames.Reset(); ThemeNamesOf = Theme;
+	AlienGround27N = AlienBlockers27N = AlienRocks27N = AlienClusters27N = AlienParts27N = AlienPartsPlaced27N = 0; AlienBlocking27.Reset();          // (PR #134's review)
 	GenR.Initialize(Seed);
 	// (Brokenspire: the start section is the town)
 	if (Generator->bTown && Generator->IsStartSection(Coord))
@@ -2646,6 +2664,8 @@ void ARDSection::UpdateSeals()
 		const int32 Kind = Generator->GetSealKind(Coord, Next);
 		if (Kind == 0) continue;
 		if (Generator->bCave16) { CaveSeal16(Border, Out, Kind); continue; }          // (the caves: the kit's cap across the tunnel)
+		const bool bOpen27 = IsOpenTheme27() && Generator->Piece(Generator->AlienForce27);
+		if (bOpen27) AlienSeal27(Border, Out);          // (phase 27: a force wall, not a grating)
 		// the piece's front (+X) faces back into this section; it stands just inside the border, across the hallway
 		const FRotator Yaw = (-Out).Rotation();
 		const FVector Across = FVector::CrossProduct(FVector::UpVector, Out);
@@ -2662,7 +2682,8 @@ void ARDSection::UpdateSeals()
 			C->SetWorldTransform(P->Adjust * FTransform(Yaw, At));
 			SealComps.Add(C);
 		};
-		if (Kind == 2)
+		if (bOpen27) {}
+		else if (Kind == 2)
 		{
 			const FRDPiece* P = this->Pc(Generator->EndPiece);
 			Place(Generator->EndPiece, Border - Out * ((P ? P->Size.X : 60.f) * 0.5f + 2.f));
@@ -2682,16 +2703,16 @@ void ARDSection::UpdateSeals()
 			Place(Generator->SealPiece, Border - Out * Dp - Across * Half);
 		}
 		// the blocker: the hallway's full width and height (nobody climbs over it), at the grating or the wall
-		const FRDPiece* Ep = Kind == 1 ? this->Pc(Generator->EndPiece) : nullptr;
+		const FRDPiece* Ep = Kind == 1 && !bOpen27 ? this->Pc(Generator->EndPiece) : nullptr;
 		const float Front = (Ep && Ep->Mesh) ? Ep->Size.X + 6.f : 0.f;
 		UBoxComponent* B = NewObject<UBoxComponent>(this);
 		B->SetMobility(EComponentMobility::Movable);
 		B->SetupAttachment(RootComponent);
-		B->SetBoxExtent(FVector(20.f, TS * 0.5f, Hh * 0.5f));
+		B->SetBoxExtent(FVector(20.f, TS * 0.5f, (bOpen27 ? Generator->RoomHeight : Hh) * 0.5f));
 		B->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
 		B->SetHiddenInGame(true);
 		B->RegisterComponent();
-		B->SetWorldLocationAndRotation(Border - Out * (22.f + Front) + FVector(0, 0, Hh * 0.5f), Yaw);
+		B->SetWorldLocationAndRotation(Border - Out * (22.f + Front) + FVector(0, 0, (bOpen27 ? Generator->RoomHeight : Hh) * 0.5f), Yaw);
 		SealComps.Add(B);
 		SealAt.Add(Border); SealKinds.Add(Kind);
 	}

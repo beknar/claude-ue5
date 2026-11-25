@@ -1,0 +1,170 @@
+{
+ "tag": "f27h",
+ "plan": [
+  "fortress27"
+ ],
+ "level": "heaven_fortress",
+ "steps": [
+  {
+   "step": "fortress27",
+   "ok": true,
+   "themes": [
+    "Office",
+    "Office",
+    "Alien",
+    "Alien",
+    "Alien"
+   ],
+   "open_themes": [
+    "Alien"
+   ],
+   "force_walls_tier3": 3,
+   "seals_tier3": 3,
+   "force_push_past_cm": [
+    -78,
+    -78
+   ],
+   "tier3": {
+    "generated": true,
+    "open": 1,
+    "ground": 4858,
+    "blockers": 1734,
+    "rocks": 5430,
+    "clusters": 669,
+    "parts": 9891,
+    "placed": 9891,
+    "blocking": 64,
+    "walls_ceilings": 0,
+    "castle_left": {},
+    "alien_instances": 15353,
+    "blocking_tiles_blocked": 64,
+    "blocking_n": 64,
+    "parts_placed_share": 1.0,
+    "sky_out": 1.0,
+    "fog_out": 0.035,
+    "walk_m": 9.7,
+    "edges": [
+     {
+      "walked": true,
+      "m": 4.1
+     },
+     {
+      "walked": true,
+      "m": 4.1
+     },
+     {
+      "walked": true,
+      "m": 40.1
+     },
+     {
+      "walked": true,
+      "m": 4.1
+     }
+    ],
+    "walk_lowest_cm": -1,
+    "fps": 26.5
+   },
+   "tier4": {
+    "generated": true,
+    "open": 1,
+    "ground": 4679,
+    "blockers": 1804,
+    "rocks": 5509,
+    "clusters": 710,
+    "parts": 10937,
+    "placed": 10937,
+    "blocking": 68,
+    "walls_ceilings": 0,
+    "castle_left": {},
+    "alien_instances": 16481,
+    "blocking_tiles_blocked": 68,
+    "blocking_n": 68,
+    "parts_placed_share": 1.0,
+    "sky_out": 1.0,
+    "fog_out": 0.035,
+    "walk_m": 10.8,
+    "edges": [
+     {
+      "walked": true,
+      "m": 42.4
+     },
+     {
+      "walked": true,
+      "m": 13.9
+     },
+     {
+      "walked": true,
+      "m": 10.1
+     },
+     {
+      "walked": true,
+      "m": 10.1
+     }
+    ],
+    "walk_lowest_cm": -2,
+    "fps": 26.1
+   },
+   "tier5": {
+    "generated": true,
+    "open": 1,
+    "ground": 4621,
+    "blockers": 1815,
+    "rocks": 5478,
+    "clusters": 752,
+    "parts": 10546,
+    "placed": 10546,
+    "blocking": 70,
+    "walls_ceilings": 0,
+    "castle_left": {},
+    "alien_instances": 16070,
+    "blocking_tiles_blocked": 70,
+    "blocking_n": 70,
+    "parts_placed_share": 1.0,
+    "sky_out": 1.0,
+    "fog_out": 0.035,
+    "walk_m": 11.0,
+    "edges": [
+     {
+      "walked": true,
+      "m": 43.1
+     },
+     {
+      "walked": true,
+      "m": 4.1
+     },
+     {
+      "walked": true,
+      "m": 42.3
+     },
+     {
+      "walked": true,
+      "m": 4.1
+     }
+    ],
+    "walk_lowest_cm": 0,
+    "fps": 25.0
+   },
+   "chase": {
+    "start_m": 16.6,
+    "closest_m": 2.9,
+    "crossed": true
+   },
+   "sky_in": 0.0,
+   "fog_in": 0.02,
+   "pictures": [
+    "f27_tier3",
+    "f27_tier4",
+    "f27_tier5"
+   ]
+  }
+ ],
+ "windows_hidden": "Content Browser, Message Log",
+ "shots": [
+  "mw_f27h_f27_tier3.png",
+  "mw_f27h_f27_tier4.png",
+  "mw_f27h_f27_tier5.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}
