@@ -280,6 +280,10 @@ void ARDSection::HeavenWorks()
 			HeavenDomeRadius = Rad;
 		}
 	}
+	// ---- the list of 2026-11-22's phase 23: the road graph's drivers and buses (RDHeaven23.cpp); the old cars without it
+	// (made once the town is built (TickTraffic23's caller): here the streets' runs and signals are not planned yet, and a replan with
+	// static building off never plans them (the first test: 0 lanes))
+	if (Generator->bTraffic23) { bTraffic23Due = true; return; }
 	// ---- the traffic: on every street 14 tiles long or more, a car every 70 m or so in each lane, of the kinds 908 made (at 45 m
 	// 160 cars drove the streets)
 	TArray<const FRDPiece*> Kinds;

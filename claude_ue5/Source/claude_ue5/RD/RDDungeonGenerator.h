@@ -2342,6 +2342,25 @@ public:
 	float CityVol22 = 0.f, CrowdVol22 = 0.f;
 	bool bNeonHum22 = false;
 	TMap<int32, float> CarPassed22;
+	// ---- the list of 2026-11-22's twenty-third phase: Heaven's traffic (RDHeaven23.cpp; 946 traffic)
+	/** the road graph's drivers, buses and laws (off: phase 19's cars going up and down their streets) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven23") bool bTraffic23 = true;
+	/** a car every this many cm of lane */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven23") float TrafficSpacing23 = 9000.f;
+	/** the driver's seat in the car's frame: X and Y as shares of its length and width (front +X, the left -Y), Z cm over the street */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven23") FVector DriverSeat23 = FVector(0.04f, -0.2f, 2.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven23") FVector BusSeat23 = FVector(0.40f, -0.24f, 45.f);
+	/** a bus's seconds at a stop */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven23") float BusDwell23 = 6.f;
+	struct FBusWait23 { int32 Stop = -1; TWeakObjectPtr<class ARDTownsfolk> F; };
+	TArray<FBusWait23> BusWait23;
+	int32 BusWaitMade23 = 0;
+	int32 BusWaiting23(int32 Stop) const;
+	int32 BoardBus23(int32 Stop, const FVector& At, float Yaw, int32 Off, int32 Room);
+	void TickBusStops23(const FVector& Her, class ARDSection* S, bool bNight);
+	float SignalAmberLeft23(float T, float Offset, bool bAlongX) const;
+	float SignalGoLeft23(float T, float Offset, bool bAlongX) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven23") TArray<FString> GetTraffic23() const;
 	/** a lift platform's speed (cm a second) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven20") float LiftSpeed20 = 220.f;
 	void TickLifts20(float Dt);

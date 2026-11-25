@@ -380,3 +380,115 @@ The user's words: "food, items and other things bought in the city of heaven sho
     - 13.0 frames a second with them against 13.7 without.
 - **The test leaves no trace**: the goods' test gives back the gold and takes back what she bought and ate.
 
+## The list of 2026-11-22: the traffic (phase 23: `946 traffic`, `RD/RDHeaven23.cpp`, `884 heaven23_*`)
+
+The user's words: "the movement of vehicles in heaven is not natural, they follow each other instead of following a set route. none of the vehicles have anyone driving them and there are never any passengers on the buses ... have each driver with a goal tree ... follow typical traffic laws, traffic lights and signs. buses in particular should have a route, and passengers that get on and off of the bus."
+
+### The road graph
+
+- **Lanes**:
+  - Each street's run between its crossings has a lane each way, on the right, 2.2 m from the street's middle.
+  - A lane starts past the last crossing's zebra.
+  - It ends at its stop line 4.2 m before the next zebra (the painted line is 1.9 m; at that line a bus's turn swept over cars waiting at the other lines), or turns back at a street's end.
+  - The square's and the facility's streets are left to people.
+  - Heaven has 142 lanes, every crossing with lights (as phase 19 laid them: 36 of 36).
+- **Turns**: a car crosses a crossing on a curve from its lane's line to the next lane's start.
+- **Routes**: the shortest by length, a turn back costing more.
+- **Parking bays**: the free lay-bys and lot bays (those phase 19 left without a parked car): 68.
+- **Bus stops and loops**: the bus stops are the street props of that kind, 16. The two loops each go from stop to nearest stop through one half of the town, east and west.
+
+### The drivers
+
+- **Who drives**: every car has a driver, a townsperson seated at the front left on the Drive clip.
+  - The clip was made in Blender by `town_work_clips.py`: seated as at the table, both fists round a wheel's rim at ten to two, the wheel turning 4 degrees each way.
+  - Measured on the clip: the fists on the rim to 0 cm, the wrists within their limits, no arm in the body, the largest step between frames 2.6 degrees.
+  - It was given by `946 traffic` to the 177 townsfolk bodies on the NPC skeleton.
+- **The goal tree by the hour** (each driver's times moved up to 45 minutes either way):
+  - work 7:00 to 11:30 and 13:00 to 16:30;
+  - lunch 11:30 to 13:00;
+  - errands 16:30 to 18:30;
+  - home in the evening and at night.
+  - Each goal is a building (its home, its work, a place to eat, a shop), reached at the free bay nearest the lane by its door.
+  - The driver parks there 20 to 60 s (at home at night until the morning), then drives to the next.
+  - It looks at its goal again every 10 s as the hour moves on.
+
+### The laws
+
+- **Lights**:
+  - A red light stops a car at its line.
+  - On amber it goes on only when it reaches the line before the amber ends; otherwise it stops when it can stop at its usual braking.
+- **Stop signs**: a car makes a full stop of a second at a stop sign. Heaven has no crossing without lights, so none applies there.
+- **Left turns**: a left turn yields to an oncoming car that is moving, or that stands at its line to go straight or right.
+- **Entering a crossing**: a car goes into a crossing only when its whole curve is clear: of cars waiting at the other lines by their footprints and 30 cm, and of every car crossing it now, along that car's whole remaining way.
+- **On the curve**: its next few metres are checked against every car's footprint.
+- **Distance and speed**: it keeps 2.6 m to the car ahead, and to her and to pedestrians. It eases its speed by the room ahead, down to the crossing's speed before the line.
+- **Parking**: a car turning into or out of its bay is still in its lane.
+
+### The buses
+
+- **Loops**: the two buses drive their loops and stop at each stop for 6 s.
+- **Getting off**: a third of their passengers get off, at least one, and walk away as pedestrians.
+- **Getting on**: the people waiting there get on, up to six aboard.
+- **Waiting and riding**:
+  - Now and then someone comes to wait at a stop within 150 m of her, up to three a stop, none at night.
+  - Those aboard sit in the bus's seats on the seated talk clip.
+
+### By distance
+
+- **Collision**: a car collides only within 30 m of her.
+- **Drawing**: its driver and riders are drawn within 60 m and the car within 200 m.
+- **Far cars**: a car beyond 150 m moves four times a second.
+- **Switch**: `rd.Traffic23 0` holds them all still (tests).
+
+### Measured
+
+All five steps pass in one run: `884 heaven23_roads,heaven23_laws,heaven23_buses,heaven23_goals,heaven23_distance -Light`, `test_h23s.json`.
+
+- **Roads**:
+  - 142 lanes, 68 free bays, 16 bus stops, 2 loops.
+  - 40 cars and 2 buses, each with its driver seated inside its footprint on its left.
+  - Pictures of a driver at the wheel and of a street.
+- **Laws** (120 s at 9:00):
+  - Lights: no car crossed its line on red; 35 cars were read standing at a red line.
+  - Gaps:
+    - the least gap between two footprints anywhere was 55 cm (a bus passing a parked car);
+    - between moving cars 1.17 m;
+    - in a lane bumper to bumper 2.27 m.
+  - Speed: one change over 16 m/s² in a quarter second (an amber stop); none from 10.7 to 6.5 m/s onto a curve, as there had been before the cars eased to the crossing's speed.
+  - Routes: the median car drove six lanes; 21 parked at their goals.
+- **Buses** (240 s):
+  - Each stopped at the stops of its loop in turn: 12, 5, 11, 10, 1 and 8, 6, 2, 3.
+  - 21 got on and 14 got off; up to three waited at a stop; 12 were seen seated.
+- **Goals**:
+  - At 9:00, 38 of 38 drove to work; at 12:00, 34 of 38 to lunch; at 21:00, 38 of 38 home.
+  - 8 parked at lunch in the step's minutes.
+- **Distance**:
+  - Every car drawn and colliding as its distance from her says.
+  - The frame rate driving, held still and driving again in one place: 22.7, 23.3, 22.4.
+- **What could not be measured**: whether it looks natural. The rules were measured; the pictures are in the step's record.
+- **How it got there**, the traffic failing its first runs:
+  - The streets were not planned when the traffic was made (0 lanes): it is made once the town is built.
+  - Lane by lane, 8 cars came of 142 lanes: one every 90 m over all of them now.
+  - A gap measured along the line between two middles read a bus beside a parked car as 2.4 m "into" it: footprints by separating axes now.
+  - Cars held each other in knots: a car going straight behind the car waiting across the crossing; two left turns waiting for each other; a bus's turn sweeping over cars at their lines; a car rolling into a turning bus; two cars turning across each other entering together.
+
+### After PR #130's review
+
+- **Lights**: a car on a green or amber that reaches its line before the red, at no more than the crossing's speed, is committed and goes. A car not committed stops 40 cm before its line. A car whose front is already past its line is never stopped there. A red run is counted at the line itself.
+- **Crossings**: a car goes into a crossing only when all of it fits in the next lane beyond.
+- **Goals**: a car whose way to its goal was lost, or that has no bay, looks again at its next look. At a lane's end it takes the next lane that leads to its goal.
+- **Drivers and riders**: they are drawn by their own rule again when their car comes back into view (empty seats are never shown). They go with their car when it is made again.
+- **Bays**: a car turning into or out of a bay waits for her and for pedestrians.
+- **After a restart**: the streets' runs and parking are the static build's, kept.
+- **Bus stops**: only the stops a bus calls at get people waiting. Those off the bus walk away only within her reach.
+- **Far away**: the traffic stands still while she is far beyond the shield.
+- **Measured again** (all five steps pass: `884 heaven23_roads,heaven23_laws,heaven23_buses,heaven23_goals,heaven23_distance -Light`, `test_h23x.json`):
+  - **Laws**:
+    - no red run, and no car stopped over its line by the light (one stood over it held by the queue ahead after going in on green);
+    - the least gap between footprints anywhere was 66 cm, in a lane 2.12 m;
+    - no change of speed over 16 m/s² in a quarter second;
+    - every car drove three lanes or more.
+  - **Buses**: their loops, 12 got on and 11 got off, and no rider was seen in a bus carrying nobody.
+  - **Distance**: drivers drawn only within 60 m.
+  - **Pictures**: a bus at its stop, from behind it along its lane.
+

@@ -2823,6 +2823,17 @@ void ARDSection::Tick(float Dt)
 	const FVector PL = Pawn ? Pawn->GetActorLocation() : FVector(1e9);
 	if (TownDummies.Num() > 0) TickTownDummies(Now);          // (the list of 2026-11-07: a struck dummy rocks)
 	if (HeavenCars.Num() > 0) TickHeavenCars(Dt, PL);          // (Heaven's traffic)
+	if (bTraffic23Due && !IsBuilding())
+	{
+		bTraffic23Due = false;
+		// (a replan with static building off leaves the runs unplanned: the static build's own, kept (planned again now, the furniture
+		// and spots already standing, its bays came out other than those painted: PR #130's review))
+		if (Runs19.Num() == 0 && KeptRuns19.Num() > 0 && KeptSeed19 == Seed)
+		{ Runs19 = KeptRuns19; Junctions19 = KeptJunctions19; JGroup19 = KeptJGroup19; Parks19 = KeptParks19; ParkTiles19 = KeptParkTiles19; Pave22.Reset(); PaveTiles22.Reset(); }
+		else if (Runs19.Num() == 0) HeavenStreets19Plan();
+		HeavenTraffic23();
+	}
+	if (Cars23.Num() > 0) TickTraffic23(Dt, PL);          // (the list of 2026-11-22's phase 23: its drivers)
 	if (ShelfSwing15.Num() > 0) TickShelfDoors15(Dt);          // (the list of 2026-11-20: a searched shelf's doors swing open)
 	// cinematics: doors open by themselves in front of the tracked actor
 	if (Generator && Generator->TrackedActor && Generator->TrackedAutoDoorDistance > 0.f)

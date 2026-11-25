@@ -60,7 +60,10 @@ the FBX holds only those clips (the list of 2026-11-10's Sleep: its own out_dir,
 Sleep (the list of 2026-11-10: "if an NPC is supposed to be sleeping at night, have them sleep in their beds with a new animation
 or clip in blender"): lying on her back, the pelvis tipped back a quarter turn (the whole body with it: her feet toward her
 forward, her head behind), lowered until the lowest skin rests 1 cm over the root (the bed's top in the game), a slow breath
-over 4 s (the chest and the head), the loop closed."""
+over 4 s (the chest and the head), the loop closed.
+Drive (the list of 2026-11-22's phase 23: Heaven's drivers): seated as at the table, both fists round a steering wheel's rim
+(WHEEL_C, 18 cm radius, tipped 30 degrees back) at ten to two, the wheel turning 9 degrees either way over 4 s; only=Drive
+writefbx into SourceArt/brokenspire/work_clips/drive, imported by 946 traffic."""
 import json, math, os, sys
 import bpy
 import numpy as np
@@ -1369,6 +1372,80 @@ def make_sit(B, name, length, drink):
     return Ws, info, extra, summary, {"sit": True, "mug": info.get("socket_mug_hand_r")}
 
 
+# ---- Drive (the list of 2026-11-22's phase 23: "someone should at least be driving the vehicles in motion")
+DRIVE_LEN = 4.0
+WHEEL_C, WHEEL_R, WHEEL_TIP = (0.0, 44.0, 86.0), 18.0, 30.0     # the wheel's middle (her right, forward, up), its rim's radius, tipped back from upright (deg)
+DRIVE_GRIP_DEG, DRIVE_TURN_DEG = 62.0, 4.0                    # the fists at ten to two (degrees each side of the top); the wheel's slow turn either way
+
+
+def ensure_seat(B):
+    """the seat's height for the pelvis (the buttocks' lowest skin on the 45 cm seat), as make_sit finds it"""
+    if hasattr(B, "seat_z"): return
+    P = B.poser; m = B.meter; z = 56.0
+    for it in range(6):
+        seat(B, z, 12.0); W = P.finish(); set_world(B.arm, W); co = m.coords()
+        low = float(co[seat_sel(W, co), 2].min())
+        if abs(low - SEAT_Z) < 0.1: break
+        z += SEAT_Z - low
+    B.seat_z = z
+
+
+def make_drive(B):
+    """seated as at the table, both fists round a steering wheel's rim before her chest at ten to two (the rim along the fist's
+    hole), the wheel turning a little either way and back over the clip, a small lean and look; the legs as seated"""
+    ctx = B.ctx; P = B.poser
+    ensure_seat(B)
+    loc_m, loc_h = {}, {}
+    for s in "lr":
+        loc_m[s], loc_h[s], d = calib_hole(B, s, STIR_CURL, 0.7)
+    n = int(round(DRIVE_LEN * FPS))
+    C0 = from_her(*WHEEL_C); tip = math.radians(WHEEL_TIP)
+    up_w = (U * math.cos(tip) - F * math.sin(tip)).normalized()          # (the wheel's "up" in its plane, its top leaning toward her)
+    hands = {}; hands.update(fingers("r", STIR_CURL, 0.7)); hands.update(fingers("l", STIR_CURL, 0.7))
+    def rim(s, t):
+        turn = DRIVE_TURN_DEG * math.sin(2.0 * math.pi * t / DRIVE_LEN)
+        a = math.radians((DRIVE_GRIP_DEG if s == "r" else -DRIVE_GRIP_DEG) + turn)
+        p = C0 + RT * (math.sin(a) * WHEEL_R) + up_w * (math.cos(a) * WHEEL_R)
+        tang = (RT * math.cos(a) - up_w * math.sin(a)).normalized()          # (the rim's way at the grip, clockwise seen by her)
+        return p, tang
+    def body(t):
+        seat(B, B.seat_z, 4.0 + 0.8 * math.sin(2.0 * math.pi * t / DRIVE_LEN), look=-2.0); P.hands(hands)
+    pole = {s: C.D(s, 1.0, 0.0, -0.6) for s in "lr"}
+    # (the rim may run either way through the fist: held one way the right elbow rose over her shoulder (the first preview))
+    full = [(float(p), tau, fl) for fl in (1.0, -1.0) for tau in (-25.0, 0.0, 25.0) for p in range(0, 360, 15)]
+    worst = {s: [0.0] * len(full) for s in "lr"}; overs = {s: [0.0] * len(full) for s in "lr"}
+    ctx["prev_arm"] = {}
+    for k in range(6):
+        t = k * DRIVE_LEN / 6; body(t)
+        for s in "rl":
+            g, tang = rim(s, t)
+            for i, (c_, ov) in enumerate(P.hold_costs(s, g, lambda c, s=s, tg=tang: grip_q(ctx, s, tg, c[0], c[1], c[2]), loc_h[s], pole[s], full)):
+                worst[s][i] = max(worst[s][i], c_); overs[s][i] = max(overs[s][i], ov)
+    anchor = {s: full[int(np.argmin(worst[s]))] for s in "rl"}
+    for s in "rl": log("drive: the %s fist rolled %.0f deg about the rim: the wrist at most %.1f deg past its limits" % (s, anchor[s][0], overs[s][int(np.argmin(worst[s]))]))
+    st = dict(anchor)
+    def make(t):
+        body(t)
+        for s in "rl":
+            g, tang = rim(s, t)
+            cands = [((st[s][0] + d) % 360.0, st[s][1], st[s][2]) for d in (-10, -5, -2.5, 0, 2.5, 5, 10)]
+            st[s] = P.hold_free(s, g, lambda c, s=s, tg=tang: grip_q(ctx, s, tg, c[0], c[1], c[2]), loc_h[s], pole[s], cands, st[s], anchor[s])
+        return P.finish()
+    Ws = solve_frames(B, n, make)
+    info = {"seat_z_cm": SEAT_Z, "pelvis_height_cm": round(B.seat_z, 1), "wheel": {"middle_her": list(WHEEL_C), "middle_ue": ue(C0), "radius_cm": WHEEL_R,
+            "tipped_back_deg": WHEEL_TIP, "grips_deg_from_top": DRIVE_GRIP_DEG, "turn_deg": DRIVE_TURN_DEG}}
+    def extra(i, W, co):
+        r = {}
+        for s in "rl":
+            g, _ = rim(s, i / FPS); r[f"grip_{s}"] = ((W[f"hand_{s}"] @ loc_m[s]) - g).length
+        sel = seat_sel(W, co); k = sel[int(np.argmin(co[sel, 2]))]; r["seat"] = Vector(co[k])
+        return r
+    def summary(rows):
+        return {"fists_off_the_rim_cm_max": round(max(max(r["grip_r"], r["grip_l"]) for r in rows), 2),
+                "seat_point_root": {"her": rnd(her(rows[0]["seat"])), "ue": ue(rows[0]["seat"]), "note": "the buttocks' lowest skin: the seat under it"}}
+    return Ws, info, extra, summary, {"wheel": (C0, up_w)}
+
+
 def sit_pose(B, t, tg, lean, act, look=0.0, twist=0.0):
     ctx = B.ctx; P = B.poser
     seat(B, B.seat_z, lean, look=look, twist=twist)
@@ -1709,7 +1786,7 @@ def previews(B, clips, props):
         for o in made.values(): o.hide_render = True
         pr = props.get(name, {}); paths = []
         L = len(frames) - 1; picks = [0, L // 4, L // 2, (3 * L) // 4]
-        seated = name in ("SitDrink", "SitTalk", "Tend")
+        seated = name in ("SitDrink", "SitTalk", "Tend", "Drive")
         for fi in picks:
             set_basis(B.arm, frames[fi]); W = world(B.arm)
             if "ladle" in pr:
@@ -1723,6 +1800,10 @@ def previews(B, clips, props):
                 o = get("spit", "cyl", (1.2, 0.0, 120.0), COLS["iron"]); o.matrix_world = frame_of(c0, F, RT)
                 o = get("crank_arm", "cyl", (0.9, 0.0, CRANK_R), COLS["iron"]); o.matrix_world = frame_of(c0, g - c0, F)
                 o = get("handle", "cyl", (LADLE_R, -6.0, 6.0), COLS["wood"]); o.matrix_world = frame_of(g, F, RT)
+            if "wheel" in pr:
+                c0, upw = pr["wheel"]
+                o = get("wheel", "ring", (WHEEL_R, 1.6), COLS["iron"]); o.matrix_world = frame_of(c0, upw.cross(RT).normalized() * -1.0, RT)
+                o = get("seat", "box", (50.0, 50.0, SEAT_Z), COLS["wood"]); o.matrix_world = Matrix.Translation(from_her(0.0, 0.0, SEAT_Z / 2))
             if "weed" in pr:
                 o = get("weed", "ball", (3.0,), COLS["green"]); o.matrix_world = Matrix.Translation(pr["weed"])
             if "bowl" in pr:
@@ -1927,6 +2008,8 @@ def main():
             Ws, info, extra, summ, pr = make_talk(B, base); info["idle_window"] = wi
         elif name == "Sleep":
             Ws, info, extra, summ, pr = make_sleep(B); legs = False
+        elif name == "Drive":
+            Ws, info, extra, summ, pr = make_drive(B)
         rep, rows, frames = measure(B, name, Ws, extra, legs)
         if summ: rep.update(summ(rows))
         rep.update(info)

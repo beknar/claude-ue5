@@ -1,0 +1,605 @@
+{
+ "tag": "h23x",
+ "plan": [
+  "heaven23_roads",
+  "heaven23_laws",
+  "heaven23_buses",
+  "heaven23_goals",
+  "heaven23_distance"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "heaven23_roads",
+   "ok": true,
+   "head": {
+    "lanes": 142,
+    "bays": 68,
+    "stops": 16,
+    "cars": 40,
+    "buses": 2,
+    "drivers": 40,
+    "red_runs": 0,
+    "stop_sign_stops": 0,
+    "stop_rolls": 0,
+    "boarded": 0,
+    "alighted": 0,
+    "parked": 0,
+    "arrived": 0,
+    "min_gap": 223.0,
+    "loops": 2
+   },
+   "lanes_to_a_signal": 119,
+   "lanes_to_a_stop_sign": 0,
+   "drivers_out_of_place": [],
+   "shot_driver": true,
+   "shot_street": true
+  },
+  {
+   "step": "heaven23_laws",
+   "ok": true,
+   "least_gap_pair": {
+    "cars": [
+     1,
+     11
+    ],
+    "states": [
+     1,
+     0
+    ],
+    "lanes": [
+     46,
+     106
+    ],
+    "at": [
+     5721461.0,
+     -5544840.0
+    ],
+    "cm": 66.0,
+    "bus": [
+     "1",
+     "0"
+    ]
+   },
+   "least_gap_cars_now": [
+    {
+     "i": 1,
+     "yaw": -90.0,
+     "len": 1236.0,
+     "wid": 288.0,
+     "state": 0,
+     "lane": 30,
+     "s": 3253.0,
+     "v": 0.0,
+     "bus": true,
+     "side_cm": 0.0
+    },
+    {
+     "i": 11,
+     "yaw": 0.0,
+     "len": 567.0,
+     "wid": 208.0,
+     "state": 0,
+     "lane": 97,
+     "s": 2905.0,
+     "v": 516.0,
+     "bus": false,
+     "side_cm": 0.0
+    }
+   ],
+   "longest_still": [
+    {
+     "i": 19,
+     "s": 119,
+     "why": 9,
+     "state": 3,
+     "bus": false,
+     "lane": 97
+    },
+    {
+     "i": 9,
+     "s": 107,
+     "why": 9,
+     "state": 3,
+     "bus": false,
+     "lane": 20
+    },
+    {
+     "i": 2,
+     "s": 103,
+     "why": 9,
+     "state": 3,
+     "bus": false,
+     "lane": 57
+    },
+    {
+     "i": 36,
+     "s": 103,
+     "why": 9,
+     "state": 3,
+     "bus": false,
+     "lane": 123
+    },
+    {
+     "i": 37,
+     "s": 102,
+     "why": 9,
+     "state": 3,
+     "bus": false,
+     "lane": 34
+    },
+    {
+     "i": 29,
+     "s": 101,
+     "why": 9,
+     "state": 3,
+     "bus": false,
+     "lane": 2
+    }
+   ],
+   "head": {
+    "lanes": 142,
+    "bays": 68,
+    "stops": 16,
+    "cars": 40,
+    "buses": 2,
+    "drivers": 40,
+    "red_runs": 0,
+    "stop_sign_stops": 0,
+    "stop_rolls": 0,
+    "boarded": 7,
+    "alighted": 1,
+    "parked": 23,
+    "arrived": 23,
+    "min_gap": 66.0,
+    "loops": 2
+   },
+   "cars_waited_at_red": 37,
+   "speed_jumps": 0,
+   "least_gap_cm_test": 51,
+   "least_following_gap_cm": 212,
+   "lanes_visited": {
+    "median": 6,
+    "cars_on_3_or_more": 37,
+    "cars": 40
+   },
+   "stood_over_the_line_at_red": 0,
+   "held_over_the_line_by_the_queue": 1,
+   "lanes_to_a_stop_sign": 0
+  },
+  {
+   "step": "heaven23_buses",
+   "ok": true,
+   "bus_states": [
+    [
+     {
+      "i": 0,
+      "state": 1,
+      "lane": 97,
+      "v": 650,
+      "why": 0,
+      "still": 0,
+      "goal_lane": 86,
+      "route": 2
+     },
+     {
+      "i": 1,
+      "state": 0,
+      "lane": 30,
+      "v": 0,
+      "why": 4,
+      "still": 2,
+      "goal_lane": 28,
+      "route": 1
+     }
+    ],
+    [
+     {
+      "i": 0,
+      "state": 1,
+      "lane": 97,
+      "v": 650,
+      "why": 0,
+      "still": 0,
+      "goal_lane": 86,
+      "route": 2
+     },
+     {
+      "i": 1,
+      "state": 0,
+      "lane": 30,
+      "v": 152,
+      "why": 0,
+      "still": 0,
+      "goal_lane": 28,
+      "route": 1
+     }
+    ],
+    [
+     {
+      "i": 0,
+      "state": 0,
+      "lane": 86,
+      "v": 800,
+      "why": 9,
+      "still": 0,
+      "goal_lane": 86,
+      "route": 0
+     },
+     {
+      "i": 1,
+      "state": 0,
+      "lane": 29,
+      "v": 850,
+      "why": 4,
+      "still": 0,
+      "goal_lane": 101,
+      "route": 3
+     }
+    ],
+    [
+     {
+      "i": 0,
+      "state": 0,
+      "lane": 86,
+      "v": 584,
+      "why": 9,
+      "still": 0,
+      "goal_lane": 86,
+      "route": 0
+     },
+     {
+      "i": 1,
+      "state": 0,
+      "lane": 29,
+      "v": 850,
+      "why": 4,
+      "still": 0,
+      "goal_lane": 101,
+      "route": 3
+     }
+    ],
+    [
+     {
+      "i": 0,
+      "state": 0,
+      "lane": 57,
+      "v": 850,
+      "why": 0,
+      "still": 0,
+      "goal_lane": 61,
+      "route": 2
+     },
+     {
+      "i": 1,
+      "state": 0,
+      "lane": 101,
+      "v": 428,
+      "why": 9,
+      "still": 0,
+      "goal_lane": 101,
+      "route": 0
+     }
+    ],
+    [
+     {
+      "i": 0,
+      "state": 0,
+      "lane": 61,
+      "v": 662,
+      "why": 9,
+      "still": 0,
+      "goal_lane": 61,
+      "route": 0
+     },
+     {
+      "i": 1,
+      "state": 1,
+      "lane": 29,
+      "v": 650,
+      "why": 0,
+      "still": 0,
+      "goal_lane": 101,
+      "route": 3
+     }
+    ],
+    [
+     {
+      "i": 0,
+      "state": 0,
+      "lane": 61,
+      "v": 547,
+      "why": 9,
+      "still": 0,
+      "goal_lane": 61,
+      "route": 0
+     },
+     {
+      "i": 1,
+      "state": 0,
+      "lane": 8,
+      "v": 748,
+      "why": 0,
+      "still": 0,
+      "goal_lane": 101,
+      "route": 2
+     }
+    ],
+    [
+     {
+      "i": 0,
+      "state": 0,
+      "lane": 19,
+      "v": 207,
+      "why": 9,
+      "still": 0,
+      "goal_lane": 19,
+      "route": 0
+     },
+     {
+      "i": 1,
+      "state": 0,
+      "lane": 42,
+      "v": 850,
+      "why": 4,
+      "still": 0,
+      "goal_lane": 101,
+      "route": 1
+     }
+    ],
+    [
+     {
+      "i": 0,
+      "state": 0,
+      "lane": 19,
+      "v": 349,
+      "why": 9,
+      "still": 0,
+      "goal_lane": 19,
+      "route": 0
+     },
+     {
+      "i": 1,
+      "state": 0,
+      "lane": 42,
+      "v": 850,
+      "why": 4,
+      "still": 0,
+      "goal_lane": 101,
+      "route": 1
+     }
+    ],
+    [
+     {
+      "i": 0,
+      "state": 0,
+      "lane": 19,
+      "v": 0,
+      "why": 6,
+      "still": 12,
+      "goal_lane": 5,
+      "route": 10
+     },
+     {
+      "i": 1,
+      "state": 0,
+      "lane": 29,
+      "v": 0,
+      "why": 4,
+      "still": 0,
+      "goal_lane": 22,
+      "route": 4
+     }
+    ],
+    [
+     {
+      "i": 0,
+      "state": 0,
+      "lane": 19,
+      "v": 0,
+      "why": 6,
+      "still": 13,
+      "goal_lane": 5,
+      "route": 10
+     },
+     {
+      "i": 1,
+      "state": 0,
+      "lane": 29,
+      "v": 0,
+      "why": 4,
+      "still": 1,
+      "goal_lane": 22,
+      "route": 4
+     }
+    ],
+    [
+     {
+      "i": 0,
+      "state": 0,
+      "lane": 105,
+      "v": 0,
+      "why": 4,
+      "still": 0,
+      "goal_lane": 5,
+      "route": 7
+     },
+     {
+      "i": 1,
+      "state": 0,
+      "lane": 22,
+      "v": 850,
+      "why": 9,
+      "still": 0,
+      "goal_lane": 22,
+      "route": 0
+     }
+    ],
+    [
+     {
+      "i": 0,
+      "state": 0,
+      "lane": 105,
+      "v": 0,
+      "why": 4,
+      "still": 1,
+      "goal_lane": 5,
+      "route": 7
+     },
+     {
+      "i": 1,
+      "state": 0,
+      "lane": 22,
+      "v": 850,
+      "why": 9,
+      "still": 0,
+      "goal_lane": 22,
+      "route": 0
+     }
+    ],
+    [
+     {
+      "i": 0,
+      "state": 0,
+      "lane": 18,
+      "v": 850,
+      "why": 0,
+      "still": 0,
+      "goal_lane": 5,
+      "route": 5
+     },
+     {
+      "i": 1,
+      "state": 0,
+      "lane": 20,
+      "v": 0,
+      "why": 4,
+      "still": 9,
+      "goal_lane": 33,
+      "route": 3
+     }
+    ],
+    [
+     {
+      "i": 0,
+      "state": 0,
+      "lane": 18,
+      "v": 850,
+      "why": 0,
+      "still": 0,
+      "goal_lane": 5,
+      "route": 5
+     },
+     {
+      "i": 1,
+      "state": 0,
+      "lane": 20,
+      "v": 0,
+      "why": 4,
+      "still": 10,
+      "goal_lane": 33,
+      "route": 3
+     }
+    ]
+   ],
+   "head": {
+    "lanes": 142,
+    "bays": 68,
+    "stops": 16,
+    "cars": 40,
+    "buses": 2,
+    "drivers": 40,
+    "red_runs": 0,
+    "stop_sign_stops": 0,
+    "stop_rolls": 0,
+    "boarded": 12,
+    "alighted": 11,
+    "parked": 4,
+    "arrived": 4,
+    "min_gap": 125.0,
+    "loops": 2
+   },
+   "stops_visited": {
+    "1": [
+     5,
+     11,
+     10,
+     1
+    ],
+    "0": [
+     8,
+     6,
+     2,
+     3
+    ]
+   },
+   "max_waiting_at_a_stop": 3,
+   "riders_seen_seated": 5,
+   "shots": [
+    true
+   ],
+   "riders_seen_in_empty_buses": 0
+  },
+  {
+   "step": "heaven23_goals",
+   "ok": true,
+   "goals_by_hour": {
+    "9.0": {
+     "0": 0,
+     "1": 38,
+     "2": 0,
+     "3": 0
+    },
+    "12.0": {
+     "0": 0,
+     "1": 5,
+     "2": 33,
+     "3": 0
+    },
+    "21.0": {
+     "0": 38,
+     "1": 0,
+     "2": 0,
+     "3": 0
+    }
+   },
+   "lunch_head": {
+    "lanes": 142,
+    "bays": 68,
+    "stops": 16,
+    "cars": 40,
+    "buses": 2,
+    "drivers": 40,
+    "red_runs": 1,
+    "stop_sign_stops": 0,
+    "stop_rolls": 0,
+    "boarded": 12,
+    "alighted": 6,
+    "parked": 22,
+    "arrived": 22,
+    "min_gap": 164.0,
+    "loops": 2
+   }
+  },
+  {
+   "step": "heaven23_distance",
+   "ok": true,
+   "by_distance_wrong": [],
+   "drivers_by_distance_wrong_m": [],
+   "fps_driving_held_driving": [
+    21.9,
+    23.5,
+    21.9
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_h23x_heaven23_driver.png",
+  "bs_h23x_heaven23_street.png",
+  "bs_h23x_heaven23_bus.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

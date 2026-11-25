@@ -86,3 +86,27 @@ The city is a wilderness town on `brokenspire` with the modern plan (`FRDWildTow
   - **A twin is a new name to every rule that asks by name** (recipes): add it where the like is asked for.
   - **A refresh that resets the state it guards repeats the work**: compare what changed before writing again.
 
+## The list of 2026-11-22: the traffic (phase 23: `946 traffic`, `RD/RDHeaven23.cpp`, `884 heaven23_*`)
+
+- **What a town's plan makes later is not there when its works are made**: `HeavenWorks` runs before the streets' runs and signals are planned, and a replan with static building off never plans them. The traffic is made from the section's tick once the town is built, the runs planned again if a replan left them empty.
+- **A count per piece of something short gives nothing**: a car per 90 m of each lane gave 8 cars on 142 lanes. Spread it over the whole.
+- **A gap between two long things is measured on their footprints**: the projection of each half-length on the line between their middles read a bus beside a parked car as 2.4 m into it. Use separating axes (`RDH23Overlap`), the largest margin they keep apart.
+- **Every rule that holds a car can hold another that holds it**: each of these stood cars for minutes:
+  - a distance rule held a car going straight behind the car waiting across the crossing;
+  - two left turns each yielded to the other standing at its line;
+  - a bus's turn and the car at its line waited for each other;
+  - a car in a crossing and the car that came in after it each held the other.
+
+  Record why each car is held and for how long (`Why`, `StillSince`) and read the longest held, not the counts.
+- **A decision made late is a hard stop**: checked at the line, a blocked curve stopped cars from 6 to 8 m/s in a quarter second. Check from the braking distance, and ease down to the crossing's speed before it.
+- **Committing through a light runs reds**: a car committed while still held by the car ahead went through on red. Decide amber by the time to the line against the amber left.
+- **Sample a long thing's way densely**: at six places along a bus's turn the overlap with a car at its line fell between two of them; at twelve it is found.
+- **A crossing is reserved, not only checked at its entry**: two cars turning across each other from opposite sides went in together, each seeing the other at its line. Check the whole way against every crossing car's remaining way.
+- **A test's picture stand point must be outside**: "across the street" from a bus at its stop stood in buildings twice. Stand behind it along its lane.
+- **PR #130's review**:
+  - **A decision kept from one frame must be kept**: a car that went on amber was stopped dead across its line at the red, because the light was asked again every frame. Commit when it reaches its line before the red, timed at no more than the speed it slows to. Never stop one already past its line.
+  - **Count an offence where it happens**: a red run at the line, not where the curve starts. A car stopping aimed at its line slid over it and read as "already over"; stop 40 cm short.
+  - **A fallback that fakes a route ends the re-routing**: a lost car's random next lane was written as its route, so it was never routed again, and its bay stayed reserved.
+  - **Showing a parent shows its children**: drivers and empty seats came back with their car; apply the children's own rule at once.
+  - **A replan must not re-plan what the static build placed**: keep it.
+
