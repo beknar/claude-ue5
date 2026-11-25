@@ -43,11 +43,12 @@ static FString RDTSignText(uint8 Kind, bool bModern = false)
 		switch (Kind)
 		{
 		case TK_Smithy: case TK_Workshop: return TEXT("GEAR\nSHOP");
-		case TK_Store: return TEXT("GROCERY");
+		case TK_Store: return TEXT("MARKET");          // (the list of 2026-11-22's phase 21: the market; the grocery is a shop's)
 		case TK_Healer: return TEXT("CLINIC");
 		case TK_Temple: case TK_Chapel: return TEXT("CHAPEL");
-		case TK_Storehouse: case TK_Warehouse: return TEXT("STORAGE");
-		case TK_Tavern: return TEXT("BAR");
+		case TK_Storehouse: return TEXT("BANK");          // (phase 21: the bank keeps her things)
+		case TK_Warehouse: return TEXT("STORAGE");
+		case TK_Tavern: return TEXT("HOTEL");          // (phase 21: the inn a hotel)
 		case TK_Barracks: return TEXT("SECURITY");
 		default: break;
 		}
@@ -137,7 +138,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 	Rooms.Reset(); Corrs.Reset(); DoorEdges.Reset(); Portals.Reset(); Cells.Reset(); Fixtures.Reset(); SpecialChests.Reset();
 	Pickups.Reset();
 	Type.Init(0, N * N); Owner.Init(-1, N * N); Blocked.Init(0, N * N); CeilH.Init(0.f, N * N);
-	TownBlds.Reset(); TownSpots.Reset(); TownRoads.Reset(); TownPosts.Reset(); TownGreens.Reset(); Signals19.Reset(); SignalLenses19 = nullptr; YardLines19.Reset(); Cores20.Reset(); CoreTiles20.Reset(); Lifts20.Reset(); Storeys20.Reset(); Runs19.Reset(); Junctions19.Reset(); ParkTiles19.Reset(); Parks19.Reset(); StopLines19.Reset(); Streets19.Reset();
+	TownBlds.Reset(); TownSpots.Reset(); TownRoads.Reset(); TownPosts.Reset(); TownGreens.Reset(); Signals19.Reset(); SignalLenses19 = nullptr; YardLines19.Reset(); Cores20.Reset(); CoreTiles20.Reset(); Shops21.Reset(); Lifts20.Reset(); Storeys20.Reset(); Runs19.Reset(); Junctions19.Reset(); ParkTiles19.Reset(); Parks19.Reset(); StopLines19.Reset(); Streets19.Reset();
 	CastleHallRoom = -1; CastleBld = -1; CastleTowers.Reset(); CastleStairTower = -1;
 	FRDTFrame F; F.O = FMath::Max(4, (N - 160) / 2); F.S = N - 2 * F.O; F.G = R.RandRange(0, 3);
 	const int32 S = F.S;
@@ -1210,7 +1211,8 @@ void ARDSection::PlanTown(FRandomStream& R)
 			switch (B.Kind)
 			{
 			case TK_Smithy: Post(ERDTownRole::Smith, Inside); break;
-			case TK_Store: Post(ERDTownRole::Trader, Inside); break;
+			// (Heaven's market and shops: the clerk behind the checkout, beside the door's way in (phase 21))
+			case TK_Store: Post(ERDTownRole::Trader, Generator->TownPlan == 5 ? Inside + FVector(In_.Y, -In_.X, 0.f) * (ShopSide21(BI) * 230.f) : Inside); break;
 			case TK_Healer: Post(ERDTownRole::Healer, Inside); break;
 			case TK_Temple: Post(ERDTownRole::Priest, Inside + In_ * 300.f); break;
 			case TK_Storehouse: Post(ERDTownRole::Keeper, Inside); break;
@@ -1231,7 +1233,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 			case TK_Study: Post(ERDTownRole::Pilgrim, Ctr, 150.f, 10 + BI); break;
 			// (Heaven: office workers at their desks, a clerk in each shop)
 			case TK_SkyTower: case TK_Office: Post(ERDTownRole::Worker, Ctr, 300.f, 10 + BI); break;
-			case TK_Shop: Post(ERDTownRole::Worker, Inside, 0.f, 30 + BI); break;
+			case TK_Shop: Post(ERDTownRole::Worker, Generator->TownPlan == 5 ? Inside + FVector(In_.Y, -In_.X, 0.f) * (ShopSide21(BI) * 230.f) : Inside, 0.f, 30 + BI); break;
 			case TK_Meditation: Post(ERDTownRole::Pilgrim, Ctr + FVector(In_.Y, -In_.X, 0) * 230.f, 0.f, 10 + BI); Post(ERDTownRole::Pilgrim, Ctr - FVector(In_.Y, -In_.X, 0) * 230.f, 0.f, 30 + BI); break;
 			case TK_Monastery: Post(ERDTownRole::Monk, Inside, 0.f, 0); Post(ERDTownRole::Monk, Ctr, 600.f, 1); Post(ERDTownRole::Monk, TileWorld(B.DoorTile) - In_ * 300.f, 3500.f, 2); Post(ERDTownRole::Monk, TileWorld(B.DoorTile) - In_ * 300.f, 3500.f, 3); break;
 			case TK_Cathedral:
@@ -1529,7 +1531,7 @@ void ARDSection::TownShellBuilding(int32 BI)
 		// outside buildings look like they're floating"))
 		const FTransform Sg = WallT(FVector2D(Hx + 9.f, (DoorK + 0.5f) * M - Hy + 140.f), FVector2D(1, 0), 262.f);
 		AddPiece(TEXT("Town.Sign"), Sg, true);
-		AddSignText(Sg, RDTSignText(B.Kind, Generator->TownPlan == 5));
+		AddSignText(Sg, Generator->TownPlan == 5 && B.Kind == TK_Shop ? ShopWord21(BI) : RDTSignText(B.Kind, Generator->TownPlan == 5));          // (phase 21: a shop's own trade)
 	}
 }
 
@@ -1644,7 +1646,12 @@ void ARDSection::TownFurnish(FRandomStream& R, int32 BI)
 	// (the list of 2026-11-22's seventh phase: what is laid in it is its interior, batched as its own (not the special shells'))
 	Bld16 = (BI == CastleBld || B.Kind == TK_Castle || B.Kind == TK_Cathedral || B.Kind == TK_Foundry || B.Kind == TK_Spire || B.Kind == TK_Research) ? -1 : BI;
 	ON_SCOPE_EXIT { Bld16 = -1; };
-	for (const int32 RI : B.Rooms) Furnish(R, RI);
+	// (the list of 2026-11-22's phase 21: Heaven's market and shops are shops: a checkout and rows of shelves full of goods, not a
+	// storeroom's barrels and crates)
+	const bool bShop21 = Generator->TownPlan == 5 && (B.Kind == TK_Shop || B.Kind == TK_Store);
+	FTransform Checkout21 = FTransform::Identity;
+	if (bShop21) Checkout21 = ShopFurnish21(BI);
+	else for (const int32 RI : B.Rooms) Furnish(R, RI);
 	FurnishStoreys20(BI);          // (the list of 2026-11-22's twentieth phase: Heaven's upper storeys, the building's interior too)
 	if (B.Rooms.Num() == 0) return;
 	// what the trades add to the dungeon's furnishing: their service's piece (a counter, a basin, the stash's chest) by the wall
@@ -1677,7 +1684,8 @@ void ARDSection::TownFurnish(FRandomStream& R, int32 BI)
 	const float FaceDoor = (-In_).Rotation().Yaw;
 	switch (B.Kind)
 	{
-	case TK_Store: Service(TS_Counter, TEXT("TableLong"), Back, FaceDoor + 90.f); break;
+	case TK_Store: if (bShop21) Service(TS_Counter, NAME_None, Checkout21.GetLocation(), FaceDoor); else Service(TS_Counter, TEXT("TableLong"), Back, FaceDoor + 90.f); break;
+	case TK_Shop: if (bShop21) Service(TS_Counter, NAME_None, Checkout21.GetLocation(), FaceDoor); break;          // (phase 21: F at a shop's checkout opens its store)
 	case TK_Healer: Service(TS_Basin, TEXT("Fountain"), Back, FaceDoor); break;
 	case TK_Temple: Service(TS_Altar, NAME_None, Back, FaceDoor); break;
 	case TK_Storehouse: Service(TS_Stash, TEXT("Town.StashChest"), Back, FaceDoor); break;
@@ -2214,7 +2222,9 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 						if (!Free(Q) || TownRoadMask[Idx(Q)] != 0) bClear = false;
 					}
 				if (!bClear) continue;
-				AddPieceAt(Nm, P, Yw);
+				// (the list of 2026-11-22's phase 21: the dumpster opens: a container with its lid)
+				if (Pick == 1 && Generator->Piece(TEXT("Heaven.Dumpster21"))) AddContainer(TEXT("Heaven.Dumpster21"), P, Yw, TEXT("crate"));
+				else AddPieceAt(Nm, P, Yw);
 				MarkBlocked(P, Yw, Hs * 2.f, true);
 				YardLines19.Add(FString::Printf(TEXT("yard|%.0f|%.0f|%.0f|%.0f|%.0f"), P.X, P.Y, Yw, Hs.X * 2.f - 40.f, Hs.Y * 2.f - 40.f));
 				continue;

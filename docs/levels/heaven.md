@@ -193,3 +193,89 @@ A modern city surrounded by a shimmering shield, with skyscrapers, office buildi
   - 9.5 with them again.
   - No cost is seen. A reading of 4.8 in an earlier run (the editor long open) was not the storeys': the run that left them out read about the same.
 - **Pictures**: the stairwell beside the lift's shaft; an office's upper storey.
+
+## The list of 2026-11-22: shops, services and containers (phase 21)
+
+`946 shops` (the shelves, the checkout and the services' and containers' pieces from boxes, the containers' words; after `908`), `946 signs` again (the new words from `blender_numpy/bs_signs.py <dir> --modern`), and C++ `RD/RDHeaven21.cpp`, hooked into the plan's posts and signs, `TownFurnish` (Heaven's shops furnished as shops), `AddContainer` (upright doors, words), the town's F and its panels (`RDTownGame.cpp`).
+
+- **Shops as shops**: the market (the trader's store) and every shop: a checkout by the door, its clerk behind it, and rows of double-sided gondola shelves full of goods.
+  - The rows run across the building 6.45 m in from the door's wall and every 2.7 m, with aisles of 1.5 m at the walls and a cross aisle in a long row.
+  - There are three looks of goods: a grocery's, a pharmacy's and a hardware store's. The market mixes them.
+  - Light panels hang under the ceiling.
+  - F at the checkout, or at its clerk, opens the shop's store with its own stock only:
+    - the grocery's food;
+    - the pharmacy's healing, mana and speed potions;
+    - the hardware store's repair kits and torches;
+    - the market everything the trader sells.
+  - Each shop's kind comes from its seed, and its sign says it: GROCERY, PHARMACY or HARDWARE.
+  - The shops' own furnishing (a storeroom's barrels) is not laid. The furnishing's stream then moves on differently in Heaven only.
+- **The services**: the trader's store is the market (its sign MARKET), the healer the clinic, the smith the gear shop, the storehouse the bank (BANK), the inn the hotel (HOTEL), the temple the chapel. Their panels' names and words are modern.
+  - The clinic has a reception desk.
+  - The bank keeps her things in a safe-deposit box, with its vault's door against the back wall.
+  - The gear shop has a workbench with a pegboard, a vice on a stand (the anvil's piece, so its crafting stays) and a parts bin, in place of the forge, anvil and quench tub.
+  - The hotel's keeper rents a room for the night: she sleeps until seven and wakes with all her hit points and mana, her afflictions gone (8 gold a tier, 10 at least). The hotel also sells food.
+- **Modern containers**: Heaven's theme replaces each medieval container with a modern one, each a body and its moving part on its hinge (an upright door where the part is taller than it is deep, else a lid), and names it:
+
+  | Medieval | Heaven | Opens by |
+  |---|---|---|
+  | barrel | fridge | door |
+  | second barrel | filing cabinet | door |
+  | crate | tool chest | lid |
+  | second crate | bin | lid |
+  | chest | safe | door |
+  | wardrobe | double locker | two doors |
+  | (a yard's hay) | dumpster | lid |
+
+  - Their kinds (barrel, crate, chest, wardrobe) are kept, so what they hold is drawn as before.
+  - Only her words change: "open the fridge".
+- **Built from boxes**: the containers and the shops' pieces are built from boxes in Heaven's kit, as its other pieces are. No pack mesh's door is split in Blender: none of the packs' fridges, safes or lockers is used.
+
+### Measured
+
+- `884 heaven21_shops` (`test_h21b.json`), `heaven21_services,heaven16_signs` (`test_h21a.json`), `heaven21_containers` (`test_h21d.json`), all `-Light`.
+- **Shops**:
+  - 13 shops (the market and 12), each with its checkout;
+  - every shop's gondolas counted inside its rectangle as laid: 12 to 22 each, the market 44.
+  - At the market and at a grocery, a pharmacy and a hardware store, F at the checkout opened the store:
+    - "The market": 27 lines;
+    - "The grocery": 15, all food;
+    - "The pharmacy": 6, all potions;
+    - "The hardware store": 6, repair kits and torches.
+  - None sold anything outside its trade. Each sold one thing: its price taken, the thing in her pack.
+- **Services**:
+  - lit faces MARKET, BANK, HOTEL, CLINIC, GEARSHOP, PHARMACY (2), HARDWARE (10), GROCERY (12), and none of the old STORAGE, BAR or SHOP;
+  - the clinic's desk, the vault, the workbench, the vice and the parts bin there, and no forge, anvil or quench tub;
+  - the keepers' panels: "The market", "The clinic", "The gear shop", "Your safe-deposit box", "The hotel", "The chapel";
+  - a night at the hotel from 22:00 at 40 % health: woken at 7:00, whole, 10 gold.
+- **Containers**:
+  - none of the 13 medieval container meshes in Heaven (Brokenspire, counted first, keeps 1078);
+  - 134 containers: 36 fridges, 31 safes, 44 locker doors, 16 tool chests, 3 filing cabinets, 3 bins, 1 dumpster.
+  - One of each opened by F from 90 cm before it: its words "open fridge" and so on, only it opened (both doors of the locker), its door or lid turned 100 degrees from shut.
+  - On the first runs F from 1.4 m took another container across a storeroom's aisle: nearer, as F should.
+- **Pictures**: a shop's shelves and checkout, the clinic, the bank, the gear shop, an open fridge and locker.
+
+### After PR #128's review
+
+- **The hotel**:
+  - It is open at night: the innkeeper wakes to serve, as the keepers do.
+  - A night moves the day on: to seven next morning, and from before seven to that same day's seven. It is autosaved as the camp's rest is.
+  - Its price is what the clinic would ask now for the same (hit points, mana, cures) plus a room priced by the tier as the town's prices are.
+- **The shops**:
+  - They have their lights: one steady light every two tiles under the ceiling.
+  - Their shelves and checkout block their tiles for the tile paths.
+  - The market's light panels hang under its roof (its hall is two storeys high).
+- **Leaving Heaven**: its words and the shops' stock hold only while Heaven stands round her (`InHeaven21`), and a store forgets its shop when its panel shuts.
+- **The map**: it names the market, the bank and the hotel, and a shop as a grocery, a pharmacy or a hardware store.
+- **The bank's vault** stands against its back wall.
+- **Old saves**: a save made in Heaven before this phase keeps its looted containers by their order. The shops' storeroom containers are gone and the yards' dumpsters come first, so it marks others as looted. No save version was raised for it.
+- **Measured again** (`884 heaven21_containers,heaven21_services -Light`, `test_h21e.json`; `heaven21_shops -Light`, `test_h21f.json`):
+  - **Shops**:
+    - 2 to 4 rows of shelves a shop, every shelf 6 m and more in from its door's wall and turned across the room;
+    - the three shelves' meshes 4104, 4266 and 4212 vertices (their frames and boards alone about 290: the goods are there);
+    - the four kinds' stores as before, and F from beside a pharmacy's clerk opened "The pharmacy".
+  - **Services**:
+    - the clinic's desk, the vault, the bench and the vice each in its own building;
+    - at 23:00 the innkeeper was asleep and served;
+    - the night woke her at 7:00 the next day, whole, for 31 gold against the clinic's 21 for the same body.
+  - **Containers**: each part's middle moved where it should: the doors 20 to 28 cm out in front of their bodies, the lids 16 to 28 cm up (a door turning into its body would have read inward).
+

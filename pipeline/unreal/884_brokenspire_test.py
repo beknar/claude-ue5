@@ -5240,6 +5240,269 @@ def step_heaven20_lift():
     step_result("heaven20_lift", bool(ok), **res)
 
 
+# ------------------------------------------------------------------------------------------------ the list of 2026-11-22's phase 21
+MEDIEVAL_CONT21 = ("SM_barrel_01", "SM_barrel_02", "SM_crate_01", "SM_crate_02", "SM_Kit_Chest", "SM_Kit_Wardrobe")
+MEDIEVAL_SERV21 = ("SM_Kit_Forge", "SM_Kit_Anvil", "SM_Kit_QuenchTub")
+
+
+def shops21():
+    out = []
+    for l in section().get_shops21():
+        q = str(l).split("|")
+        out.append({"bld": int(q[1]), "kind": int(q[2]), "gondolas": int(q[3]), "checkout": V(float(q[4]), float(q[5]), 0),
+                    "rect": (float(q[6]), float(q[7]), float(q[8]), float(q[9])), "clerk": V(float(q[10]), float(q[11]), 0), "customer": V(float(q[12]), float(q[13]), 0),
+                    "door": V(float(q[14]), float(q[15]), 0) if len(q) > 17 else None, "in": V(float(q[16]), float(q[17]), 0) if len(q) > 17 else None, "yaw": float(q[18]) if len(q) > 18 else None})
+        # (the customer's place: just before the counter on the aisle's side (the line's 1.4 m out stood out of the clerk's reach))
+        x = out[-1]; d_ = V(x["customer"].x - x["checkout"].x, x["customer"].y - x["checkout"].y, 0); n_ = math.hypot(d_.x, d_.y) or 1.0
+        x["customer"] = V(x["checkout"].x + d_.x / n_ * 85, x["checkout"].y + d_.y / n_ * 85, 0)
+    return out
+
+
+def containers21():
+    out = []
+    for l in section().get_container_lines21():
+        q = str(l).split("|")
+        out.append({"i": int(q[1]), "kind": q[2], "word": q[3], "at": V(float(q[4]), float(q[5]), float(q[6])), "yaw": float(q[7]), "target": float(q[8]),
+                    "alpha": float(q[9]), "turn": float(q[10]), "body": q[11], "part": V(float(q[12]), float(q[13]), float(q[14])) if len(q) > 14 else None})
+    return out
+
+
+def stop21():
+    cm_ = G["pawn"].get_component_by_class(unreal.CharacterMovementComponent)
+    if cm_: cm_.stop_movement_immediately()
+
+
+def item_kinds21():
+    return {str(i.name): str(i.kind).split(".")[-1].split(":")[0].strip("<> ").upper() for i in G["gen"].get_editor_property("items")}
+
+
+def step_heaven21_shops():
+    """the list of 2026-11-22: "the insides of shops in Heaven should look like typical shops with rows and shelves full of food and
+    other things that can be purchased from the sales person manning that shop": every shop and the market with rows of gondola
+    shelves full of goods inside it (their instances counted in its rectangle, in rows 6 m and more in from the door and turned across
+    the room; the goods counted in the shelves' meshes) and a checkout; F at each kind's checkout (and from beside a clerk) opens its
+    store with its own stock only (a grocery's food, a pharmacy's potions, a hardware store's repair kits and
+    torches; the market everything) and sells one; pictures inside a shop"""
+    g = G["gen"]; res = {}; quiet(True)
+    S = yield from heaven16_in(); yield from wait(1.5)
+    sh = shops21()
+    gond = ism_instances("SM_HV_Gondola21_")
+    res["shops"] = len(sh); res["checkouts"] = len(ism_instances("SM_HV_Checkout21"))
+    per = []
+    for x in sh:
+        x0, y0, x1, y1 = x["rect"]
+        n = sum(1 for t in gond if x0 <= t.x <= x1 and y0 <= t.y <= y1)
+        per.append({"bld": x["bld"], "kind": x["kind"], "reported": x["gondolas"], "in_rect": n})
+    res["gondolas"] = per
+    # (the rows: every gondola instance's distance in from its shop's door wall and its turn; the rows it makes)
+    bad_rows = []; rows_per = []
+    for x in sh:
+        if not x["door"]: continue
+        x0, y0, x1, y1 = x["rect"]; ds = set()
+        for c in isms(S):
+            m = c.get_editor_property("static_mesh")
+            if not m or not m.get_name().startswith("SM_HV_Gondola21_"): continue
+            for i_ in range(c.get_instance_count()):
+                t = c.get_instance_transform(i_, True); t = t[-1] if isinstance(t, tuple) else t; p_ = t.translation
+                if not (x0 <= p_.x <= x1 and y0 <= p_.y <= y1): continue
+                d_ = (p_.x - x["door"].x) * x["in"].x + (p_.y - x["door"].y) * x["in"].y
+                dyaw = abs(((t.rotation.rotator().yaw - x["yaw"]) + 180) % 360 - 180)
+                ds.add(round((d_ - 645) / 270))
+                if d_ < 600 or min(dyaw, 180 - dyaw) > 2: bad_rows.append({"bld": x["bld"], "in_cm": round(d_), "yaw_off": round(dyaw, 1)})
+        rows_per.append(len(ds))
+    res["rows_per_shop"] = rows_per; res["gondolas_off_their_rows"] = bad_rows[:5]
+    # (the goods: a shelf's mesh with its goods has many more vertices than its frame and boards alone (about 290))
+    verts = {}
+    for k in range(3):
+        m = unreal.load_asset(f"/Game/RandomDungeon/Heaven/Meshes/SM_HV_Gondola21_{k}")
+        n_ = 0
+        try:
+            for sec in range(m.get_num_sections(0)): n_ += len(unreal.ProceduralMeshLibrary.get_section_from_static_mesh(m, 0, sec)[0])
+        except Exception: n_ = None
+        verts[k] = n_ if m else None
+    res["gondola_vertices"] = verts
+    kinds = item_kinds21()
+    want = {-1: None, 0: {"FOOD"}, 1: {"HEALING", "MANA", "SPEED"}, 2: {"REPAIR", "TORCH"}}
+    sales = []; shots = []
+    g.add_gold(5000, "the test")
+    F = folk()
+    try:
+        for k in (-1, 0, 1, 2):
+            x = next((y for y in sh if y["kind"] == k), None)
+            if not x: continue
+            clerk = min(F, key=lambda f: dist2(f["at"], x["clerk"])) if F else None
+            put(x["customer"], z=0.0); stop21(); yield from wait(0.4)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=math.degrees(math.atan2(x["clerk"].y - x["customer"].y, x["clerk"].x - x["customer"].x))))
+            f_ = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.3)
+            pnl = str(g.get_town_panel()); title = str(g.get_town_title21())
+            buys = [pp for pp in panel() if pp[0] == "buy"]
+            wrong = [pp[1] for pp in buys if want[k] is not None and kinds.get(pp[1]) not in want[k]]
+            sale = None
+            i = next((j for j, pp in enumerate(panel()) if pp[0] == "buy" and pp[3] == "1"), -1)
+            if i >= 0:
+                nm = panel()[i][1]; g0 = gold(); n0 = cb().get_item_count(nm)
+                ok_ = g.activate_town_entry(i)
+                sale = {"item": nm, "ok": ok_, "gold": gold() - g0, "count": cb().get_item_count(nm) - n0}
+            g.close_town_panel(); yield from rwait(0.3)
+            sales.append({"kind": k, "clerk_role": clerk["role"] if clerk else None, "clerk_off_cm": round(dist2(clerk["at"], x["clerk"])) if clerk else None,
+                          "f": f_, "panel": pnl, "title": title, "buy_lines": len(buys), "not_its_trade": wrong[:4], "sale": sale})
+        # (F from beside the clerk, on its side of the checkout: the store of that shop opens (by the clerk, or by its checkout's spot, the
+        # nearer: either names the shop's building))
+        x = next((y for y in sh if y["kind"] >= 0), None)
+        if x and x["in"]:
+            put(V(x["clerk"].x + x["in"].x * 110, x["clerk"].y + x["in"].y * 110, 0), z=0.0); stop21(); yield from wait(0.3)
+            f_ = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.3)
+            res["clerk_spoken_to"] = {"kind": x["kind"], "f": f_, "panel": str(g.get_town_panel()), "title": str(g.get_town_title21())}
+            g.close_town_panel(); yield from rwait(0.3)
+        # (a picture inside a shop from by its door, toward its shelves)
+        if sh:
+            x = sh[0]; x0, y0, x1, y1 = x["rect"]; ctr = V((x0 + x1) / 2, (y0 + y1) / 2, 0)
+            put(x["customer"], z=0.0); stop21(); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=math.degrees(math.atan2(ctr.y - x["customer"].y, ctr.x - x["customer"].x))))
+            yield from wait(1.5)
+            pth = yield from shot_file19("heaven21_shop"); shots.append("shop" if pth else "shop?")
+    finally:
+        if g.is_town_panel_open(): g.close_town_panel()
+        quiet(False)
+    res["sales"] = sales; res["shots"] = shots
+    titles = {-1: "The market", 0: "The grocery", 1: "The pharmacy", 2: "The hardware store"}
+    cs_ = res.get("clerk_spoken_to") or {}
+    ok = res["shops"] >= 4 and res["checkouts"] == res["shops"] and all(p_["in_rect"] >= 2 and p_["in_rect"] == p_["reported"] for p_ in per) \
+        and not bad_rows and all(r_ >= 2 for r_ in rows_per) and all(v and v > 1000 for v in verts.values()) \
+        and cs_.get("f") in ("bark", "store") and cs_.get("panel") == "store" and cs_.get("title") == titles[cs_.get("kind", -1)] \
+        and len(sales) >= 3 and all(x["panel"] == "store" and x["title"] == titles[x["kind"]] and x["buy_lines"] > 0 and not x["not_its_trade"]
+                                     and x["sale"] and x["sale"]["ok"] and x["sale"]["count"] == 1 and x["sale"]["gold"] < 0 for x in sales)
+    step_result("heaven21_shops", bool(ok), **res)
+
+
+def step_heaven21_services():
+    """the list of 2026-11-22: "typical modern services": the market, the clinic, the gear shop, the bank, the hotel and the chapel by
+    their signs (lit faces with their words, none of the old STORAGE, BAR or SHOP faces) and their keepers' panels' names; the clinic's
+    desk, the bank's vault, the gear shop's bench and vice there, no forge, anvil or quench tub; a night at the hotel: until seven, whole,
+    its price paid; pictures inside the clinic, the bank and the gear shop"""
+    g = G["gen"]; res = {}; quiet(True)
+    S = yield from heaven16_in(); yield from wait(1.5)
+    faces = {}
+    for c in isms(S):
+        m = c.get_material(0)
+        if m and m.get_name().startswith("MI_HV_Sign_"): faces[m.get_name()[11:]] = faces.get(m.get_name()[11:], 0) + c.get_instance_count()
+    res["faces"] = faces
+    res["pieces"] = {"clinic_desk": len(ism_instances("SM_HV_ClinicDesk21")), "vault": len(ism_instances("SM_HV_Vault21")), "workbench": len(ism_instances("SM_HV_Workbench21")),
+                     "vice": len(ism_instances("SM_HV_Vice21")), "parts_bin": len(ism_instances("SM_HV_PartsBin21"))}
+    res["medieval_service_pieces"] = {k: v for k, v in mesh_counts19(S, MEDIEVAL_SERV21).items() if v}
+    # (each in its own building: an instance within 15 m of its building's middle)
+    B_ = blds()
+    def near(mesh, kind):
+        b = next((x for x in B_ if x["kind"] == kind), None)
+        return bool(b) and any(dist2(t, b["c"]) < 1500 for t in ism_instances(mesh))
+    res["in_their_buildings"] = {"clinic_desk": near("SM_HV_ClinicDesk21", "healer"), "vault": near("SM_HV_Vault21", "storehouse"),
+                                 "workbench": near("SM_HV_Workbench21", "smithy"), "vice": near("SM_HV_Vice21", "smithy")}
+    want = {"Trader": ("store", "The market"), "Healer": ("healer", "The clinic"), "Smith": ("smith", "The gear shop"), "Keeper": ("stash", "Your safe-deposit box"),
+            "Innkeeper": ("hotel", "The hotel"), "Priest": ("temple", "The chapel")}
+    got = {}; shots = []
+    try:
+        # (the clinic's price for a 40 % body, to set the hotel's against)
+        c = cb(); c.set_health(c.get_max_health() * 0.4)
+        if talk_to("Healer"):
+            stop21(); g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(0.3)
+            hl = next((pp for pp in panel() if pp[0] == "heal"), None)
+            res["clinic_price"] = int(hl[2].split()[0]) if hl and hl[2].split() and hl[2].split()[0].isdigit() else 0
+            g.close_town_panel(); yield from rwait(0.3)
+        for role, (pn, ti) in want.items():
+            if role == "Innkeeper": g.set_town_hour(23.0); yield from wait(2.0)          # (asleep at night: woken to serve)
+            t = talk_to(role)
+            if not t: got[role] = None; continue
+            stop21(); yield from rwait(0.2)
+            f_ = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.3)
+            got[role] = {"f": f_, "panel": str(g.get_town_panel()), "title": str(g.get_town_title21())}
+            if role == "Innkeeper" and str(g.get_town_panel()) == "hotel":
+                got[role]["was_asleep"] = bool(g.get_townsfolk(g.find_townsfolk(unreal.RDTownRole.INNKEEPER)).is_sleeping()) if g.find_townsfolk(unreal.RDTownRole.INNKEEPER) >= 0 else None
+                g.add_gold(2000, "the test"); c = cb(); c.set_health(c.get_max_health() * 0.4)
+                g.close_town_panel(); yield from rwait(0.2); talk_to(role); stop21(); g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(0.3)
+                i = line_of("room"); g0 = gold(); d0 = g.get_town_day()
+                ok_ = g.activate_town_entry(i) if i >= 0 else False
+                got[role]["night"] = {"ok": ok_, "hour": round(g.get_town_hour(), 2), "day_on": g.get_town_day() - d0, "health_full": abs(c.get_health() - c.get_max_health()) < 0.5, "gold": gold() - g0}
+            g.close_town_panel(); yield from rwait(0.3)
+        # (pictures inside the clinic, the bank and the gear shop: from 2.5 m inside the door toward the building's middle)
+        for kind, nm in (("healer", "clinic"), ("storehouse", "bank"), ("smithy", "gearshop")):
+            b = next((x for x in blds() if x["kind"] == kind), None)
+            if not b: continue
+            d = V(b["c"].x - b["door"].x, b["c"].y - b["door"].y, 0); n_ = math.hypot(d.x, d.y) or 1.0
+            st = V(b["door"].x + d.x / n_ * 250, b["door"].y + d.y / n_ * 250, 0)
+            put(st, z=0.0); stop21(); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=math.degrees(math.atan2(d.y, d.x)))); yield from wait(1.5)
+            pth = yield from shot_file19(f"heaven21_{nm}"); shots.append(nm if pth else nm + "?")
+    finally:
+        if g.is_town_panel_open(): g.close_town_panel()
+        g.set_town_hour(12.0); quiet(False)
+    res["keepers"] = got; res["shots"] = shots
+    night = (got.get("Innkeeper") or {}).get("night") or {}
+    ok = all(faces.get(w, 0) > 0 for w in ("MARKET", "BANK", "HOTEL", "CLINIC", "GEARSHOP")) and not any(faces.get(w, 0) for w in ("STORAGE", "BAR", "SHOP")) \
+        and all(v > 0 for v in res["pieces"].values()) and not res["medieval_service_pieces"] and all(res["in_their_buildings"].values()) \
+        and night.get("day_on") == 1 and -night.get("gold", 0) >= res.get("clinic_price", 0) \
+        and all(got.get(r) and got[r]["panel"] == pn and got[r]["title"] == ti for r, (pn, ti) in want.items()) \
+        and night.get("ok") and abs(night.get("hour", 0) - 7.0) < 0.3 and night.get("health_full") and night.get("gold", 0) < 0
+    step_result("heaven21_services", bool(ok), **res)
+
+
+def step_heaven21_containers():
+    """the list of 2026-11-22: "the containers in heaven should be modern ones instead of medieval structures": none of the medieval
+    barrels, crates, chests or wardrobes in Heaven (Brokenspire, counted first, keeps them); its containers fridges, filing cabinets,
+    tool chests, bins, safes, lockers and the yards' dumpsters, each told by its word; one of each word opened by F from before it: its
+    door or lid turned open (its moving part's turn from shut read on it); pictures of an open fridge and locker"""
+    g = G["gen"]; res = {}; quiet(True)
+    st = str(g.get_wild_town_state()).split("|")
+    if not (len(st) > 1 and st[1] == "Heaven"):
+        res["elsewhere"] = {k: v for k, v in mesh_counts19(section(), MEDIEVAL_CONT21).items() if v}
+    S = yield from heaven16_in(); yield from wait(1.5)
+    res["medieval"] = {k: v for k, v in mesh_counts19(S, MEDIEVAL_CONT21).items() if v}
+    cs = containers21()
+    res["containers"] = len(cs)
+    byw = {}
+    for c in cs: byw[c["word"]] = byw.get(c["word"], 0) + 1
+    res["by_word"] = byw
+    opened = {}; shots = []
+    try:
+        for w in ("fridge", "filing cabinet", "tool chest", "bin", "safe", "locker", "dumpster"):
+            # (one with no other container within 2 m: in a storeroom's row F took the nearer neighbour)
+            # (F takes the nearest: stand 90 cm before it, and take one whose every other container is 50 cm farther from that spot (one
+            # across a storeroom's aisle was nearer to a spot 1.4 m out))
+            def spot(x):
+                f_ = V(math.cos(math.radians(x["yaw"])), math.sin(math.radians(x["yaw"])), 0)
+                return V(x["at"].x + f_.x * 90, x["at"].y + f_.y * 90, 0)
+            def clear(x):
+                sp = spot(x); dx = dist2(sp, x["at"])
+                return all(y["i"] == x["i"] or (y["word"] == x["word"] and dist2(y["at"], x["at"]) < 5) or dist2(sp, y["at"]) > dx + 50 for y in cs)
+            c = next((x for x in cs if x["word"] == w and x["target"] < 0.5 and clear(x)), None) or next((x for x in cs if x["word"] == w and x["target"] < 0.5), None)
+            if not c: opened[w] = None; continue
+            stand = spot(c)
+            put(stand, z=c["at"].z - S.get_actor_location().z); stop21()
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=c["yaw"] + 180.0)); yield from wait(0.5)
+            said = str(g.describe_nearest(G["pawn"].get_actor_location()))
+            before = {x["i"]: x["target"] for x in containers21()}
+            p0 = c["part"]
+            f_ = str(g.interact_nearest(G["pawn"].get_actor_location()))
+            yield from wait(1.6)
+            after = containers21()
+            changed = [(x["i"], x["word"], round(dist2(x["at"], c["at"]))) for x in after if before.get(x["i"]) is not None and abs(before[x["i"]] - x["target"]) > 0.5]
+            c2 = next((x for x in after if x["i"] == c["i"]), None)
+            fw_ = V(math.cos(math.radians(c["yaw"])), math.sin(math.radians(c["yaw"])), 0)
+            mv = None
+            if c2 and p0 and c2["part"]:
+                d_ = V(c2["part"].x - p0.x, c2["part"].y - p0.y, c2["part"].z - p0.z)
+                mv = {"out_front_cm": round(d_.x * fw_.x + d_.y * fw_.y, 1), "up_cm": round(d_.z, 1)}
+            opened[w] = {"said": said, "f": f_, "alpha": c2["alpha"] if c2 else None, "turn_deg": c2["turn"] if c2 else None, "body": c["body"], "part_moved": mv,
+                         "changed": changed[:4], "target": c2["target"] if c2 else None, "her_off_cm": round(dist2(G["pawn"].get_actor_location(), c["at"])),
+                         "nearest_other_m": round(min((dist2(y["at"], c["at"]) for y in cs if y["i"] != c["i"] and dist2(y["at"], c["at"]) > 5), default=99999) / 100, 1)}
+            if w in ("fridge", "locker"):
+                pth = yield from shot_file19(f"heaven21_open_{w.replace(' ', '_')}"); shots.append(w if pth else w + "?")
+    finally:
+        quiet(False)
+    res["opened"] = opened; res["shots"] = shots
+    ok = not res["medieval"] and ("elsewhere" not in res or sum(res["elsewhere"].values()) > 0) and res["containers"] > 0 \
+        and all(o and w in o["said"] and o["alpha"] is not None and o["alpha"] > 0.95 and o["turn_deg"] > 60 and o["part_moved"]
+                and (o["part_moved"]["up_cm"] > 15 if w in ("tool chest", "bin", "dumpster") else o["part_moved"]["out_front_cm"] > 15) for w, o in opened.items())
+    step_result("heaven21_containers", bool(ok), **res)
+
+
 def step_heaven16_signs():
     """the list of 2026-11-22: "the signs for the buildings in heaven should be modern style signs": every trade's board Heaven's lit
     panel (no wooden shield board in Heaven), its faces lit pictures of modern words, none of the town's gold ones; a picture of one"""
@@ -5369,7 +5632,7 @@ def step_heaven16_tower():
           and res["air_lights"] >= 13 and res["security_door"] == 1)
     step_result("heaven16_tower", bool(ok), **res)
 
-STEPS.update({"heaven20_floors": step_heaven20_floors, "heaven20_stairs": step_heaven20_stairs, "heaven20_lift": step_heaven20_lift, "heaven20_restart": step_heaven20_restart, "heaven20_fps": step_heaven20_fps, "heaven19_survey": step_heaven19_survey, "heaven19_medieval": step_heaven19_medieval, "heaven19_markings": step_heaven19_markings, "heaven19_signals": step_heaven19_signals, "heaven19_signs": step_heaven19_signs, "heaven19_parking": step_heaven19_parking, "heaven19_fps": step_heaven19_fps, "heaven19_restart": step_heaven19_restart, "heaven16_lamps": step_heaven16_lamps, "heaven16_signs": step_heaven16_signs, "heaven16_map": step_heaven16_map, "heaven16_sleep": step_heaven16_sleep, "heaven16_tower": step_heaven16_tower})
+STEPS.update({"heaven21_shops": step_heaven21_shops, "heaven21_services": step_heaven21_services, "heaven21_containers": step_heaven21_containers, "heaven20_floors": step_heaven20_floors, "heaven20_stairs": step_heaven20_stairs, "heaven20_lift": step_heaven20_lift, "heaven20_restart": step_heaven20_restart, "heaven20_fps": step_heaven20_fps, "heaven19_survey": step_heaven19_survey, "heaven19_medieval": step_heaven19_medieval, "heaven19_markings": step_heaven19_markings, "heaven19_signals": step_heaven19_signals, "heaven19_signs": step_heaven19_signs, "heaven19_parking": step_heaven19_parking, "heaven19_fps": step_heaven19_fps, "heaven19_restart": step_heaven19_restart, "heaven16_lamps": step_heaven16_lamps, "heaven16_signs": step_heaven16_signs, "heaven16_map": step_heaven16_map, "heaven16_sleep": step_heaven16_sleep, "heaven16_tower": step_heaven16_tower})
 
 
 def step_sleep10():

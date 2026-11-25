@@ -2281,6 +2281,18 @@ public:
 	int32 Streets19Shown = -1;
 	TWeakObjectPtr<ARDSection> Streets19Of;
 	// ---- the list of 2026-11-22's twentieth phase: Heaven's storeys (RDHeaven20.cpp)
+	// ---- the list of 2026-11-22's twenty-first phase: Heaven's shops, services and containers (RDHeaven21.cpp; 946 shops)
+	/** a themed container piece's word for her ("Heaven.Barrel" -> "fridge") */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven21") TMap<FName, FString> ContainerWords21;
+	int32 ShopKindOfWho21() const;
+	bool InHeaven21() const;
+	/** the building whose counter or keeper opened the store (a shop's stock by its kind) */
+	int32 StoreBld21 = -1;
+	bool ShopSells21(int32 Kind, FName Item) const;
+	int32 HotelPrice21() const;
+	bool HotelRent21();
+	/** the open panel's title (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Heaven21") FString GetTownTitle21() const { return TownTitle; }
 	/** a lift platform's speed (cm a second) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven20") float LiftSpeed20 = 220.f;
 	void TickLifts20(float Dt);

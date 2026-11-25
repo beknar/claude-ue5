@@ -21,7 +21,13 @@
                               box each so each step is stood on), the rail round an opening (Heaven.Rail20), the lift shaft's glass side
                               (Heaven.LiftWall20), its platform (Heaven.LiftPlatform20), the upper storeys' ceiling panel
                               (Heaven.CeilingPanel20)
-    946_heaven16.py all       the five
+    946_heaven16.py shops     phase 21, Heaven's shops, services and containers: three gondola shelves full of goods (a grocery's, a
+                              pharmacy's, a hardware store's: Heaven.Gondola21_<0-2>), the checkout (Heaven.Checkout21), the clinic's
+                              desk (Heaven.Fountain), the bank's vault (Heaven.Town.StashChest), the gear shop's bench, vice and parts bin
+                              (Heaven.Forge, .Anvil, .QuenchTub), the modern containers, each a body and its door or lid on its hinge
+                              (Heaven.Barrel a fridge, .Barrel2 a filing cabinet, .Crate a tool chest, .Crate2 a bin, .Chest a safe,
+                              .Wardrobe a locker, Heaven.Dumpster21 the yards' dumpster) and their words (ContainerWords21)
+    946_heaven16.py all       the six
 
 Run on the editor with any level open (it opens brokenspire and saves it)."""
 import os, sys, json, importlib
@@ -297,7 +303,95 @@ def storeys(g):
     REPORT.append(f"storeys: {len(add)} pieces ({', '.join(sorted(add))})")
 
 
-PARTS = {"lamps": lamps, "signs": signs, "symbols": symbols, "streets": streets, "storeys": storeys}
+# ================================================================================================ phase 21: shops, services, containers
+GOODS21 = {0: ["prod_red", "prod_yellow", "prod_orange", "prod_green", "prod_blue", "prod_brown", "white"],
+           1: ["white", "white", "prod_mint", "prod_blue", "prod_green", "prod_mint"],
+           2: ["steel", "prod_orange", "prod_yellow", "dark", "prod_red", "hazard"]}
+
+
+def gondola21(kind):
+    """a double-sided gondola shelf in its frame (long along Y, 120 cm; 90 deep along X; 170 tall), four shelves each side, each shelf
+    full of the shop's goods (boxes of the kind's colours, sizes by a seeded draw)"""
+    import random
+    rr = random.Random(2100 + kind)
+    parts = [(-45, 45, -60, 60, 0, 10, "dark"), (-2, 2, -60, 60, 10, 170, "white"), (-45, 45, -61, -59, 0, 170, "steel"), (-45, 45, 59, 61, 0, 170, "steel")]
+    levels = [10, 50, 90, 130]
+    for sgn in (-1, 1):
+        for z in levels:
+            parts.append((2 if sgn > 0 else -45, 45 if sgn > 0 else -2, -59, 59, z, z + 2, "white"))
+            y = -57.0
+            while True:
+                w = rr.uniform(7.0, 17.0)
+                if y + w > 57.0: break
+                d = rr.uniform(24.0, 38.0); h = rr.uniform(11.0, 34.0)
+                x0, x1 = (3.0, 3.0 + d) if sgn > 0 else (-3.0 - d, -3.0)
+                parts.append((x0, x1, y, y + w, z + 2, z + 2 + h, rr.choice(GOODS21[kind])))
+                y += w + rr.uniform(0.6, 2.0)
+    return parts
+
+
+def shops(g):
+    mats = hk.materials()
+    B = lambda n, parts: hk.boxes(n, parts, mats)
+    add = {}
+    for k in range(3):
+        add[f"Heaven.Gondola21_{k}"] = raw(B(f"SM_HV_Gondola21_{k}", gondola21(k)), collision=True)
+    # (the checkout: its length along its X, the clerk's side its +Y (the screen toward the clerk), the belt and scanner on its top)
+    add["Heaven.Checkout21"] = raw(B("SM_HV_Checkout21", [(-90, 90, -35, 35, 0, 95, "dark"), (-92, 92, -37, 37, 95, 98, "steel"), (-85, 20, -30, 30, 98, 99, "tyre"),
+                                                           (25, 45, -20, 0, 98, 99, "glass"), (40, 44, 10, 30, 110, 140, "glass"), (41, 43, 18, 22, 98, 110, "steel")]), collision=True)
+    # (the clinic's desk, its front +X toward the door, a cyan band across it, a screen on it)
+    add["Heaven.Fountain"] = raw(B("SM_HV_ClinicDesk21", [(-40, 40, -100, 100, 0, 105, "white"), (-42, 42, -102, 102, 105, 108, "steel"), (40, 41, -100, 100, 60, 72, "cyan"),
+                                                          (-20, -16, -30, 10, 108, 150, "glass"), (-19, -17, -12, -8, 108, 115, "steel")]), collision=True)
+    # (the bank's vault: its door in a steel plate against the back wall, its front +X, a wheel and bolts)
+    vault = raw(B("SM_HV_Vault21", [(-15, -5, -110, 110, 0, 230, "steel"), (-5, 8, -80, 80, 20, 210, "plate"), (8, 14, -25, 25, 100, 106, "steel"),
+                                                            (8, 14, -3, 3, 78, 128, "steel"), (8, 12, -60, -50, 60, 170, "dark"), (8, 12, 50, 60, 60, 170, "dark")]), collision=True)
+    # (the service's point is 90 cm in from the back wall's line: the plate's back set onto the wall's face (PR #128's review: it stood
+    # 75 cm out))
+    vault.adjust = unreal.Transform(V(-55, 0, 0), unreal.Rotator(0, 0, 0), V(1, 1, 1)); add["Heaven.Town.StashChest"] = vault
+    # (the gear shop: a workbench with a pegboard of tools for the forge, a vice on a stand for the anvil, a parts bin for the quench tub)
+    add["Heaven.Forge"] = raw(B("SM_HV_Workbench21", [(-40, 40, -95, 95, 0, 86, "steel"), (-42, 42, -97, 97, 86, 92, "pallet"), (-45, -42, -95, 95, 92, 200, "plate"),
+                                                      (-42, -38, -70, -60, 120, 170, "hazard"), (-42, -38, -30, -25, 110, 180, "dark"), (-42, -38, 20, 40, 130, 150, "prod_red"), (-42, -38, 60, 66, 115, 175, "steel")]), collision=True)
+    add["Heaven.Anvil"] = raw(B("SM_HV_Vice21", [(-25, 25, -40, 40, 0, 85, "steel"), (-27, 27, -42, 42, 85, 88, "dark"), (-10, 10, -15, 15, 88, 104, "dark"), (8, 14, -3, 3, 92, 98, "steel")]), collision=True)
+    add["Heaven.QuenchTub"] = raw(B("SM_HV_PartsBin21", [(-40, 40, -40, 40, 0, 50, "prod_blue"), (-38, 38, -38, 38, 50, 52, "dark")]), collision=True)
+    # (the containers: a body, its moving part's mesh from its hinge (a door along +Y or -Y from an upright hinge, a lid along +X from its
+    # back), the piece's hinge in the body's frame; front +X)
+    def cont(name, body, mov, hinge, mov2=None, hinge2=None, word=None):
+        p = raw(B(f"SM_HV_{name}21", body), collision=True)
+        p.moving = B(f"SM_HV_{name}21_Door", mov); p.hinge = V(*hinge)
+        if mov2:
+            p.moving2 = B(f"SM_HV_{name}21_Door2", mov2); p.hinge2 = V(*hinge2)
+        return p
+    def shell(x0, x1, y0, y1, z0, z1, t, mk, open_x=True):
+        """a box open at its front (+X): back, sides, top, bottom"""
+        return [(x0, x0 + t, y0, y1, z0, z1, mk), (x0, x1, y0, y0 + t, z0, z1, mk), (x0, x1, y1 - t, y1, z0, z1, mk), (x0, x1, y0, y1, z1 - t, z1, mk), (x0, x1, y0, y1, z0, z0 + t, mk)]
+    add["Heaven.Barrel"] = cont("Fridge", shell(-32, 30, -33, 33, 0, 175, 4, "white") + [(-28, 28, -29, 29, z, z + 1.5, "glass") for z in (55, 105, 140)],
+                                [(0, 5, 0, 66, 0, 165, "white"), (5, 8, 58, 61, 80, 130, "steel")], (30, -33, 6))
+    add["Heaven.Barrel2"] = cont("Filing", shell(-25, 23, -23, 23, 0, 132, 3, "steel") + [(-22, 20, -20, 20, z, z + 1.5, "dark") for z in (33, 66, 99)],
+                                 [(0, 3, 0, 46, 0, 128, "steel")] + [(3, 5, 18, 28, z, z + 3, "dark") for z in (25, 57, 89, 121)], (23, -23, 2))
+    add["Heaven.Crate"] = cont("ToolChest", [(-22, 22, -38, 38, 0, 80, "stopred"), (-22, 22, -38, -35, 80, 95, "stopred"), (-22, 22, 35, 38, 80, 95, "stopred"), (-22, -19, -38, 38, 80, 95, "stopred"),
+                                             (19, 22, -38, 38, 80, 95, "stopred"), (-19, 19, -35, 35, 79, 81, "dark")] + [(22, 23, -34, 34, z, z + 2, "dark") for z in (15, 35, 55, 75)],
+                               [(0, 44, -38, 38, 0, 6, "stopred"), (18, 26, -15, 15, 6, 9, "steel")], (-22, 0, 95))
+    add["Heaven.Crate2"] = cont("Bin", [(-30, 30, -28, -25, 10, 105, "dumpster"), (-30, 30, 25, 28, 10, 105, "dumpster"), (-30, -27, -28, 28, 10, 105, "dumpster"), (27, 30, -28, 28, 10, 105, "dumpster"),
+                                        (-30, 30, -28, 28, 10, 13, "dumpster"), (-34, -24, -30, -20, 0, 10, "tyre"), (-34, -24, 20, 30, 0, 10, "tyre")],
+                               [(0, 62, -30, 30, 0, 4, "dumpster")], (-30, 0, 105))
+    add["Heaven.Chest"] = cont("Safe", shell(-30, 30, -30, 30, 0, 70, 6, "plate") + [(-24, 24, -24, 24, 35, 36, "steel")],
+                               [(0, 8, 0, 60, 0, 64, "plate"), (8, 11, 38, 46, 36, 44, "steel"), (8, 11, 44, 48, 20, 30, "steel")], (30, -30, 3))
+    add["Heaven.Wardrobe"] = cont("Locker", shell(-30, 30, -60, 60, 0, 196, 3, "steel") + [(-27, 27, -1, 1, 3, 193, "steel"), (-27, 27, -57, 57, 160, 161.5, "steel")],
+                                  [(0, 3, 0, 59, 0, 186, "steel")] + [(3, 4, 15, 45, z, z + 2, "dark") for z in (160, 165, 170)], (30, -60, 4),
+                                  [(0, 3, -59, 0, 0, 186, "steel")] + [(3, 4, -45, -15, z, z + 2, "dark") for z in (160, 165, 170)], (30, 60, 4))
+    add["Heaven.Dumpster21"] = cont("Dumpster", [(-90, 90, -55, -52, 15, 125, "dumpster"), (-90, 90, 52, 55, 15, 125, "dumpster"), (-90, -87, -55, 55, 15, 125, "dumpster"), (87, 90, -55, 55, 15, 125, "dumpster"),
+                                                 (-90, 90, -55, 55, 15, 18, "dumpster"), (-80, -65, -45, -30, 0, 15, "tyre"), (65, 80, -45, -30, 0, 15, "tyre"), (-80, -65, 30, 45, 0, 15, "tyre"), (65, 80, 30, 45, 0, 15, "tyre")],
+                                    [(0, 182, -57, 57, 0, 5, "dark")], (-90, 0, 125))
+    set_pieces(g, add)
+    words = g.get_editor_property("container_words21")
+    for k, w in {"Heaven.Barrel": "fridge", "Heaven.Barrel2": "filing cabinet", "Heaven.Crate": "tool chest", "Heaven.Crate2": "bin", "Heaven.Chest": "safe",
+                 "Heaven.Wardrobe": "locker", "Heaven.Dumpster21": "dumpster"}.items():
+        words[unreal.Name(k)] = w
+    g.set_editor_property("container_words21", words)
+    REPORT.append(f"shops: {len(add)} pieces ({', '.join(sorted(add))}); the containers' words")
+
+
+PARTS = {"lamps": lamps, "signs": signs, "symbols": symbols, "streets": streets, "storeys": storeys, "shops": shops}
 args = sys.argv[1:] or ["all"]
 todo = list(PARTS) if args[0] == "all" else args[0].split(",")
 g = gen()

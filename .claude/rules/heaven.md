@@ -55,3 +55,18 @@ The city is a wilderness town on `brokenspire` with the modern plan (`FRDWildTow
   - **A test's placement keeps her speed**: put somewhere after a walk, she slid 57 cm on. Stop her movement after a `put` that a reading depends on.
   - **What a test says it pushed at must be the nearest**: the roof push went 10 to 20 m toward a far parapet. It now goes out over the edge tile and records where she stops.
 
+## The list of 2026-11-22: shops, services and containers (phase 21: `946 shops`, `RD/RDHeaven21.cpp`, `884 heaven21_*`)
+
+- **F reaches a spot, not always the person behind it**: the shops' clerks stood behind their checkouts out of F's reach from the aisle, and the market only worked through its counter's spot (`TS_Counter`). Every shop has that spot at its checkout, and the store opened there knows its building (`StoreBld21`) for its stock.
+- **A test that picks a container must stand nearer to it than to any other**: from 1.4 m before a filing cabinet, F opened another one across the storeroom's aisle, the nearer. Stand 90 cm before it, and take one whose neighbours are 50 cm farther from that spot.
+- **A container's kind is the loot's, its word her own**: Heaven's containers keep their kinds (barrel, crate, chest, wardrobe) and add a word (`FMover::Word`, `ContainerWords21`); the describe line uses the word.
+- **An upright door is told by its part's shape**: under Heaven's theme a moving part taller than twice its depth turns on an upright hinge; the medieval rule (only "wardrobe") is unchanged elsewhere.
+- **PR #128's review**:
+  - **A keeper who sleeps shuts his service**: the innkeeper slept from 22:00 and was not among those woken to serve. The hotel was shut at night, and its test had opened the panel before setting the hour.
+  - **Setting the hour back is not a night slept**: `SetTownHour(7)` at 22:00 went back 15 hours to the same day. Move the day on as the camp's rest does (`TownDay`).
+  - **A service's price follows the town's prices** (`RDTierPrice`), and covers what a dearer service would charge for the same.
+  - **Skipping a room's furnishing skips its lights and blocked tiles**: give a shop its own.
+  - **`TownPlan` outlives the town**: it stays 5 after Heaven is unloaded. Words chosen by it alone came to the wilds' trader; ask whether Heaven's section stands there (`InHeaven21`).
+  - **An editor call can read nothing in play**: `EditorStaticMeshLibrary.get_number_verts` gave 0. Read a mesh's vertices through its sections (`ProceduralMeshLibrary.get_section_from_static_mesh`).
+  - **A container's open value is no measure of where its part went**: the test reads the part's middle before and after.
+

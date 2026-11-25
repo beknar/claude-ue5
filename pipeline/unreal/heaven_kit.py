@@ -93,7 +93,12 @@ MATS = {"stone": ("MI_HV_Stone", (0.2, 0.21, 0.23), 0.0, 0.7), "brick": ("MI_HV_
         "signblue": ("MI_HV_SignBlue", (0.02, 0.08, 0.3), 0.0, 0.35), "stopred": ("MI_HV_StopRed", (0.6, 0.02, 0.02), 0.0, 0.35),
         "dumpster": ("MI_HV_Dumpster", (0.05, 0.18, 0.1), 0.3, 0.6), "pallet": ("MI_HV_Pallet", (0.5, 0.38, 0.22), 0.0, 0.85),
         "carton": ("MI_HV_Carton", (0.45, 0.33, 0.2), 0.0, 0.9), "tyre": ("MI_HV_Tyre", (0.02, 0.02, 0.02), 0.0, 0.9),
-        "screen": ("MI_HV_Screen", (0.05, 0.08, 0.12), 0.0, 0.2, 0.8), "art": ("MI_HV_Art", (0.1, 0.42, 0.5), 0.0, 0.7)}
+        "screen": ("MI_HV_Screen", (0.05, 0.08, 0.12), 0.0, 0.2, 0.8), "art": ("MI_HV_Art", (0.1, 0.42, 0.5), 0.0, 0.7),
+        # (the list of 2026-11-22's phase 21: the goods' packaging on the shops' shelves)
+        "prod_red": ("MI_HV_ProdRed", (0.7, 0.08, 0.06), 0.0, 0.45), "prod_yellow": ("MI_HV_ProdYellow", (0.85, 0.7, 0.1), 0.0, 0.45),
+        "prod_orange": ("MI_HV_ProdOrange", (0.85, 0.35, 0.05), 0.0, 0.45), "prod_green": ("MI_HV_ProdGreen", (0.15, 0.5, 0.15), 0.0, 0.45),
+        "prod_blue": ("MI_HV_ProdBlue", (0.1, 0.25, 0.7), 0.0, 0.45), "prod_brown": ("MI_HV_ProdBrown", (0.4, 0.25, 0.12), 0.0, 0.6),
+        "prod_mint": ("MI_HV_ProdMint", (0.55, 0.85, 0.75), 0.0, 0.4)}
 
 
 def materials():

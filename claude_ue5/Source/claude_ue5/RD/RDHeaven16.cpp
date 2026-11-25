@@ -108,13 +108,14 @@ FString ARDDungeonGenerator::HeavenMapMeaning16(uint8 Kind)
 	case TK_Research: return TEXT("Kratos Aurorim Research: the way into the fortress");
 	case TK_SkyTower: return TEXT("skyscraper");
 	case TK_Office: return TEXT("offices");
-	case TK_Shop: return TEXT("shop: buy and sell");
-	case TK_Store: return TEXT("grocery: buy and sell");
+	case TK_Shop: return TEXT("shop: a grocery, a pharmacy or a hardware store");
+	case TK_Store: return TEXT("market: buy and sell");
 	case TK_Smithy: case TK_Workshop: return TEXT("gear shop: repairs, the anvil");
 	case TK_Healer: return TEXT("clinic: healing");
 	case TK_Temple: case TK_Chapel: return TEXT("chapel: blessings");
-	case TK_Storehouse: case TK_Warehouse: return TEXT("storage: your storage");
-	case TK_Tavern: return TEXT("bar: food and drink");
+	case TK_Storehouse: return TEXT("bank: your safe-deposit box");
+	case TK_Warehouse: return TEXT("storage: your storage");
+	case TK_Tavern: return TEXT("hotel: a room for the night");
 	case TK_Barracks: return TEXT("security: the city's guard");
 	case TK_Home: return TEXT("apartments");
 	default: return FString();
