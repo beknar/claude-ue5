@@ -32,7 +32,10 @@
                               (SourceArt/heaven/art22/icons), the map's HeavenGoods22; run it after the item stages
     946_heaven16.py life      phase 22, Heaven's life on brokenspire: the neon tube, the billboard's frame and faces
                               (SourceArt/heaven/art22/billboards), the tables' modern food, the city's sounds (SourceArt/heaven/city22.json)
-    946_heaven16.py all       the eight but goods (every map: ask for it by name)
+    946_heaven16.py traffic   phase 23, Heaven's drivers: the Drive clip (town_work_clips.py only=Drive writefbx into
+                              SourceArt/brokenspire/work_clips/drive) imported and given to every townsfolk def on the NPC pack's
+                              skeleton, with the seated talk for the buses' passengers
+    946_heaven16.py all       the nine but goods (every map: ask for it by name)
 
 Run on the editor with any level open (it opens brokenspire and saves it)."""
 import os, sys, json, importlib
@@ -533,7 +536,57 @@ def life(g):
     REPORT.append(f"life: {len(add)} pieces ({len(files)} billboard faces: {', '.join(f[3:-4] for f in files)}); {len(J['sets'])} sound sets, {n} files")
 
 
-PARTS = {"lamps": lamps, "signs": signs, "symbols": symbols, "streets": streets, "storeys": storeys, "shops": shops, "life": life}
+# ================================================================================================ phase 23: the traffic's drivers
+def traffic(g):
+    """the drivers' clip: AS_Town_Drive (blender_numpy/town_work_clips.py only=Drive writefbx into SourceArt/brokenspire/work_clips/drive)
+    imported on the NPC pack's skeleton (into a scratch folder, then moved: an import over a used clip keeps its old keys), and every
+    townsfolk def on that skeleton given it as "Drive" and the seated talk (AS_Town_SitTalk) as "SitTalk" for the buses' passengers
+    (the cities' own defs had no work clips); the traffic's switch on"""
+    src = os.path.join(SA, "brokenspire", "work_clips", "drive")
+    fbx = os.path.join(src, "SK_Manny_Town_Work_Clips.fbx")
+    assert os.path.exists(fbx), "946 traffic: build the Drive clip first (town_work_clips.py ... only=Drive writefbx)"
+    js = json.load(open(os.path.join(src, "town_work_clips.json"), encoding="utf-8"))
+    DW = "/Game/RandomDungeon/Anims/Town/Work"; DST = DW + "/AS_Town_Drive"; tmp = DW + "/_import_drive"
+    skel = unreal.load_asset("/Game/NPC_Characters_Pack/Demoscene_UE5/Mesh/SKM_Manny_Skeleton")
+    sit = unreal.load_asset(DW + "/AS_Town_SitTalk")
+    assert skel and sit, "946 traffic: no NPC skeleton or AS_Town_SitTalk"
+    o = unreal.FbxImportUI(); o.set_editor_property("import_mesh", False); o.set_editor_property("import_as_skeletal", True)
+    o.set_editor_property("mesh_type_to_import", unreal.FBXImportType.FBXIT_ANIMATION); o.set_editor_property("skeleton", skel)
+    o.set_editor_property("import_animations", True); o.set_editor_property("import_materials", False); o.set_editor_property("import_textures", False)
+    t = unreal.AssetImportTask(); t.filename = fbx; t.destination_path = tmp; t.automated = True; t.replace_existing = True; t.save = True; t.options = o
+    AT.import_asset_tasks([t])
+    new = next((p for p in t.imported_object_paths if isinstance(unreal.load_asset(p), unreal.AnimSequence)), None)
+    assert new, "946 traffic: the Drive clip was not imported"
+    def give(clip):
+        tf = list(g.get_editor_property("townsfolk")); n = 0
+        for d in tf:
+            m = d.get_editor_property("mesh"); ms = m.get_editor_property("skeleton") if m else None
+            on = ms is not None and ms.get_name() == skel.get_name()
+            if on and ms != skel and not any(x == skel for x in ms.get_editor_property("compatible_skeletons")):
+                ms.add_compatible_skeleton(skel); EAL.save_loaded_asset(ms, only_if_is_dirty=False)
+            wc = d.get_editor_property("work_clips")
+            if on:
+                wc[unreal.Name("Drive")] = clip; n += 1
+                if unreal.Name("SitTalk") not in wc: wc[unreal.Name("SitTalk")] = sit
+            elif unreal.Name("Drive") in wc: wc.pop(unreal.Name("Drive"))
+            d.set_editor_property("work_clips", wc)
+        g.set_editor_property("townsfolk", tf)
+        return n
+    na = unreal.load_asset(new)
+    if EAL.does_asset_exist(DST): give(na); EAL.delete_asset(DST)
+    EAL.rename_asset(new.split(".")[0], DST); clip = unreal.load_asset(DST)
+    L = float(js["clips"]["Drive"].get("length_s", clip.get_play_length()))
+    if L > 0 and abs(clip.get_play_length() - L) > 0.02: clip.set_editor_property("rate_scale", clip.get_play_length() / L)
+    clip.set_editor_property("enable_root_motion", False); clip.set_editor_property("force_root_lock", True); EAL.save_loaded_asset(clip, False)
+    for p in EAL.list_assets(tmp, recursive=True):
+        if EAL.does_asset_exist(p.split(".")[0]): EAL.delete_asset(p.split(".")[0])
+    EAL.delete_directory(tmp)
+    n = give(clip)
+    g.set_editor_property("b_traffic23", True) if hasattr(g, "b_traffic23") else g.set_editor_property("traffic23", True)
+    REPORT.append(f"traffic: AS_Town_Drive ({clip.get_play_length():.2f} s) for {n} defs, SitTalk where missing")
+
+
+PARTS = {"lamps": lamps, "signs": signs, "symbols": symbols, "streets": streets, "storeys": storeys, "shops": shops, "life": life, "traffic": traffic}
 args = sys.argv[1:] or ["all"]
 todo = list(PARTS) if args[0] == "all" else args[0].split(",")
 if "goods" in todo:

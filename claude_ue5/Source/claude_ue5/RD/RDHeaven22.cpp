@@ -313,6 +313,8 @@ void ARDDungeonGenerator::TickCitySound22(float Dt, const FVector& Her, ARDSecti
 	if (HornAt22 < 0.f || HornAt22 > Now + HornEvery22.Y) HornAt22 = Now + SoundR.FRandRange(HornEvery22.X, HornEvery22.Y);
 	TArray<FVector> Cars; TArray<int32> CarIx;
 	for (int32 I = 0; I < S->HeavenCars.Num(); ++I) if (const USceneComponent* C = S->HeavenCars[I].C.Get()) { Cars.Add(C->GetComponentLocation()); CarIx.Add(I); }
+	// (the list of 2026-11-22's phase 23: the drivers' cars, moving)
+	for (int32 I = 0; I < S->Cars23.Num(); ++I) if (S->Cars23[I].State <= 1 && S->Cars23[I].V > 100.f) { Cars.Add(S->Cars23[I].Pos); CarIx.Add(10000 + I); }
 	if (Now >= HornAt22 && !bNight)
 	{
 		HornAt22 = Now + SoundR.FRandRange(HornEvery22.X, HornEvery22.Y);
@@ -335,6 +337,8 @@ void ARDDungeonGenerator::TickCitySound22(float Dt, const FVector& Her, ARDSecti
 void ARDDungeonGenerator::StopHeaven22()
 {
 	if (Peds22.Num() > 0) ClearPeds22();
+	for (const FBusWait23& W : BusWait23) if (ARDTownsfolk* F = W.F.Get()) { TownPeople.Remove(F); F->Destroy(); }
+	BusWait23.Reset();
 	for (UAudioComponent* A : { CityAudio22.Get(), CrowdAudio22.Get(), NeonAudio22.Get() }) if (A && A->IsPlaying()) A->FadeOut(1.5f, 0.f);
 	CityKey22 = CrowdKey22 = NAME_None; CityVol22 = CrowdVol22 = 0.f; bNeonHum22 = false;
 }
@@ -345,7 +349,7 @@ void ARDDungeonGenerator::TickHeaven22(float Dt)
 	// city's sound and its walkers go then too (PR #129's review: the loop played on in Graymourne))
 	if (TownPlan != 5)
 	{
-		if (Peds22.Num() > 0 || (CityAudio22 && CityAudio22->IsPlaying()) || (CrowdAudio22 && CrowdAudio22->IsPlaying()) || (NeonAudio22 && NeonAudio22->IsPlaying())) StopHeaven22();
+		if (Peds22.Num() > 0 || BusWait23.Num() > 0 || (CityAudio22 && CityAudio22->IsPlaying()) || (CrowdAudio22 && CrowdAudio22->IsPlaying()) || (NeonAudio22 && NeonAudio22->IsPlaying())) StopHeaven22();
 		return;
 	}
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
@@ -366,7 +370,7 @@ void ARDDungeonGenerator::TickHeaven22(float Dt)
 	Heaven22Clock = 0.5f;
 	if (!bHeaven)
 	{
-		if (Peds22.Num() > 0) ClearPeds22();
+		if (Peds22.Num() > 0 || BusWait23.Num() > 0) StopHeaven22();
 		TickCitySound22(0.5f, Her, nullptr, false, bNight);
 		return;
 	}
@@ -436,7 +440,7 @@ void ARDDungeonGenerator::TickHeaven22(float Dt)
 	// ---- the pedestrians, once a second
 	PedsClock22 -= 0.5f;
 	// (outside the walls those there are kept within her reach, none made (PR #129's review: they were topped up out in the wilds))
-	if (PedsClock22 <= 0.f) { PedsClock22 = 1.f; if (bIn || Peds22.Num() > 0) TickPeds22(Her, S, bNight, bIn); }
+	if (PedsClock22 <= 0.f) { PedsClock22 = 1.f; if (bIn || Peds22.Num() > 0) TickPeds22(Her, S, bNight, bIn); TickBusStops23(Her, S, bNight || !bIn); }
 	TickCitySound22(0.5f, Her, S, bIn, bNight);
 }
 

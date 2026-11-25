@@ -838,6 +838,58 @@ public:
 	TArray<FString> Fronts22;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven22") TArray<FString> GetFronts22() const { return Fronts22; }
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven22") TArray<FString> GetPave22Lines() const;
+	// ---- the list of 2026-11-22's twenty-third phase: Heaven's traffic (RDHeaven23.cpp)
+	/** a lane: one way along a street's run between its crossings, on the right; from A (past the last crossing's zebra) to B (its
+	 *  stop line, or a street's end); the crossing it ends at, its signal or stop sign, the lane the other way */
+	struct FLane23 { int32 Run = -1; int32 Dir = 1; FVector A = FVector::ZeroVector, B = FVector::ZeroVector, Way = FVector::ZeroVector; float Len = 0.f;
+		int32 FromJ = -1, ToJ = -1, Reverse = -1, Signal = -1; bool bStopSign = false, bAlongX = true; };
+	TArray<FLane23> Lanes23;
+	TMap<int32, TArray<int32>> LanesOut23;
+	/** a free parking bay (a lay-by or a lot's bay with no parked car): its lane and place along it, where it is, its heading, its car */
+	struct FBay23 { int32 Lane = -1; float S = 0.f; FVector At = FVector::ZeroVector; float Yaw = 0.f; int32 Car = -1; };
+	TArray<FBay23> Bays23;
+	struct FStop23 { int32 Lane = -1; float S = 0.f; FVector At = FVector::ZeroVector; float Yaw = 0.f; int32 Boarded = 0, Alighted = 0; };
+	TArray<FStop23> BusStops23;
+	TArray<TArray<int32>> BusRoutes23;
+	/** a car: its pivot, body, driver and riders; its lane and place, speed; its state (0 along its lane, 1 across a crossing, 2 into
+	 *  its bay, 3 parked, 4 out of it); the curve across; its goals (0 home, 1 work, 2 lunch, 3 errand, 4 a bus's stop) and route */
+	struct FCar23
+	{
+		TWeakObjectPtr<USceneComponent> C; TWeakObjectPtr<UStaticMeshComponent> Body; TWeakObjectPtr<class USkeletalMeshComponent> Driver;
+		TArray<TWeakObjectPtr<class USkeletalMeshComponent>> Riders;
+		int32 Lane = -1, Next = -1, Goal = -1, GoalLane = -1, Bay = -1, Home = -1, Work = -1, Lunch = -1, Errand = -1, BusRoute = -1, BusNext = 0, Passengers = 0, DriverDef = -1;
+		float S = 0.f, V = 0.f, VMax = 1000.f, Len = 450.f, Wid = 200.f, T = 0.f, CrossLen = 0.f, StopAt = -1.f, Until = 0.f, GoalS = 0.f, Yaw = 0.f;
+		uint8 State = 0; bool bBus = false, bStoppedHere = false, bShown = true, bDriverShown = true, bCol = true; uint32 Seed = 0; float Rethink = 0.f;
+		/** what held it last (0 nothing, 1 the car ahead, 2 her, 3 a pedestrian, 4 a red or amber light, 5 a stop sign, 6 a left turn's
+		 *  yield, 7 its curve not clear, 8 a car coming into its lane, 9 its bay or stop) and since when it has stood */
+		uint8 Why = 0; float StillSince = -1.f, Entered = 0.f; bool bCommitted = false;
+		FVector P0 = FVector::ZeroVector, P1 = FVector::ZeroVector, P2 = FVector::ZeroVector, Pos = FVector::ZeroVector;
+		TArray<int32> Route;
+	};
+	TArray<FCar23> Cars23;
+	int32 RedRuns23 = 0, StopSignStops23 = 0, StopSignRolls23 = 0, Boarded23 = 0, Alighted23 = 0, Parks23 = 0, Arrivals23 = 0, BusStops23Made = 0;
+	float MinGap23 = 1e9f, FarClock23 = 0.f;
+	bool bTraffic23Due = false;
+	FString MinGapWhat23;
+	FVector LanePoint23(int32 L, float S) const;
+	void BuildRoads23();
+	TArray<int32> NextLanes23(int32 L) const;
+	bool Route23(int32 From, int32 To, TArray<int32>& Out) const;
+	int32 AddressLane23(int32 Bld, float& OutS) const;
+	int32 GoalOf23(const FCar23& Cr, float Hour) const;
+	int32 GoalBuilding23(const FCar23& Cr, int32 Goal) const;
+	void SetGoal23(int32 Ci, float Hour);
+	class USkeletalMeshComponent* SeatPerson23(USceneComponent* Pv, int32 Def, const FVector& At, FName Clip, bool bDriver);
+	void HeavenTraffic23();
+	void PlaceCar23(FCar23& Cr);
+	void TickTraffic23(float Dt, const FVector& Her);
+	void BusArrive23(int32 Ci);
+	bool CurveClear23(int32 I, const FVector& P0, const FVector& P1, const FVector& P2, float T0, float T1, float Margin, bool bStillTight = false) const;
+	void CurveOf23(int32 L, int32 Nx, FVector& P0, FVector& P1, FVector& P2) const;
+	/** for the tests: "traffic|<lanes>|<bays>|<stops>|<cars>|<buses>|<drivers>|<red runs>|<stop sign stops>|<rolled stops>|<boarded>|
+	 *  <alighted>|<parked>|<arrived>|<least gap cm>|<bus loops>", "car|...", "lane|...", "busstop|..." */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven23") TArray<FString> GetTraffic23Lines() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven23") void ResetTrafficCounts23() { RedRuns23 = StopSignStops23 = StopSignRolls23 = Boarded23 = Alighted23 = Parks23 = Arrivals23 = 0; MinGap23 = 1e9f; MinGapWhat23.Reset(); }
 	// ---- the list of 2026-11-22's twentieth phase: Heaven's storeys (RDHeaven20.cpp)
 	/** a building's stair and lift core: three strips of four tiles from its back wall (X0, its local X), from a back corner (Y0) along Sgn */
 	struct FCore20 { int32 Bld = -1; int32 N = 0; float Sgn = 1.f; float X0 = 0.f, Y0 = 0.f; };
