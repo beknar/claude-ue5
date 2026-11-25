@@ -686,7 +686,7 @@ UPointLightComponent* ARDSection::AddLight(const FVector& Loc, const FLinearColo
 	// level's tint; 0 on every other level)
 	L->SetLightColor(Generator && !Generator->bTown && Generator->DungeonLightTintShare > 0.f ? FMath::Lerp(Color, Generator->DungeonLightTint, FMath::Clamp(Generator->DungeonLightTintShare, 0.f, 1.f)) : Color);
 	// (Heaven (PR #126's review): no flame's light: a warm light (a candle's, a chandelier's, a torch's) is a lamp's steady white)
-	const bool bHeavenLamp = Theme == FName(TEXT("Heaven")) && Color.G < 0.8f * Color.R;
+	const bool bHeavenLamp = IsModernTheme26() && Color.G < 0.8f * Color.R;
 	if (bHeavenLamp) { L->SetLightColor(FMath::Lerp(Color, FLinearColor(1.f, 0.95f, 0.88f), 0.8f)); Flicker = 0.f; }
 	L->SetAttenuationRadius(Radius);
 	L->SetSourceRadius(6.f);
@@ -703,7 +703,7 @@ UPointLightComponent* ARDSection::AddLight(const FVector& Loc, const FLinearColo
 void ARDSection::AddEffect(FName Name, const FVector& Loc, float Scale)
 {
 	// (the list of 2026-11-22's phase 19: Heaven burns no torch, candle, brazier or hearth: its pieces are lamps (946 streets))
-	if (Theme == FName(TEXT("Heaven")) && (Name == TEXT("TorchFire") || Name == TEXT("CandleFire") || Name == TEXT("BrazierFire") || Name == TEXT("HearthFire"))) return;
+	if (IsModernTheme26() && (Name == TEXT("TorchFire") || Name == TEXT("CandleFire") || Name == TEXT("BrazierFire") || Name == TEXT("HearthFire"))) return;
 	// in play the fires are heard: where they are (also when the effect itself was saved with the start section)
 	if (const UWorld* W = GetWorld(); W && W->IsGameWorld())
 	{
@@ -760,7 +760,7 @@ void ARDSection::AddTorch(const FVector& WallPoint, float InYaw, float Candelas,
 	const FVector Flame = WallPoint + FRotator(0, InYaw, 0).RotateVector(P->Hinge);
 	AddEffect(TEXT("TorchFire"), Flame, 0.6f);
 	// (Heaven's wall lamp: a steady white light, no flame)
-	const bool bLamp = Theme == FName(TEXT("Heaven"));
+	const bool bLamp = IsModernTheme26();
 	AddLight(Flame + FRotator(0, InYaw, 0).RotateVector(FVector(25, 0, 10)), bLamp ? FLinearColor(1.f, 0.93f, 0.82f) : FLinearColor(1.f, 0.55f, 0.24f), Candelas, 1300.f, false, bLamp ? 0.f : 0.18f);
 }
 
@@ -895,8 +895,10 @@ bool ARDSection::AddContainer(FName Name, const FVector& Loc, float Yaw, const F
 	const bool bWardrobe = Kind == TEXT("wardrobe");
 	// (the list of 2026-11-22's phase 21: Heaven's containers: a part taller than it is deep is a door on an upright hinge (a fridge's,
 	// a safe's), a flat one a lid; and her word for it)
-	auto Upright = [&](UStaticMesh* Mm) { if (bWardrobe) return true; if (Theme != FName(TEXT("Heaven")) || !Mm) return false; const FBox Bb = Mm->GetBoundingBox(); return Bb.GetSize().Z > 2.f * Bb.GetSize().X; };
-	const FString* Wd = Theme == FName(TEXT("Heaven")) || Name.ToString().StartsWith(TEXT("Heaven.")) ? Generator->ContainerWords21.Find(PcName(Name)) : nullptr;
+	// (a modern piece's own parts only: a castle container left in an office keeps its lid (PR #133's review))
+	const bool bModernPiece = PcName(Name).ToString().StartsWith(TEXT("Heaven.")) || PcName(Name).ToString().StartsWith(TEXT("Office."));
+	auto Upright = [&](UStaticMesh* Mm) { if (bWardrobe) return true; if (!IsModernTheme26() || !bModernPiece || !Mm) return false; const FBox Bb = Mm->GetBoundingBox(); return Bb.GetSize().Z > 2.f * Bb.GetSize().X; };
+	const FString* Wd = IsModernTheme26() || Name.ToString().StartsWith(TEXT("Heaven.")) ? Generator->ContainerWords21.Find(PcName(Name)) : nullptr;
 	const int32 I0 = AddMoving(P->Moving, P->Hinge, Upright(P->Moving), -1);
 	if (Wd) Containers[I0].Word = *Wd;
 	if (P->Moving2)
@@ -1352,7 +1354,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 	auto Candles = [&](const FVector& P, float Cd)
 	{
 		// (Heaven: a desk lamp on a table, never one on the floor (PR #126's review); the draw is taken all the same)
-		if (Theme == FName(TEXT("Heaven")) && P.Z - GetActorLocation().Z < 30.f) { R.FRandRange(0, 360); return; }
+		if (IsModernTheme26() && P.Z - GetActorLocation().Z < 30.f) { R.FRandRange(0, 360); return; }          // (the fortress's offices too (PR #133's review))
 		AddPieceAt(TEXT("Candles"), P, R.FRandRange(0, 360), 1.f, true);
 		AddEffect(TEXT("CandleFire"), P + FVector(0, 0, 18), 1.f);
 		AddLight(P + FVector(0, 0, 45), FLinearColor(1.f, 0.62f, 0.32f), Cd, 700.f, false, 0.12f);
