@@ -350,3 +350,33 @@ The user's words: "food, items and other things bought in the city of heaven sho
   - The first neon stood inside Heaven's walls (13 cm out against walls 23 cm thick) and made no difference until it was measured on the wall piece.
 - **The medieval things** (`heaven19_medieval`, `test_h22b.json`): none left in Heaven, the still's stand-ins included.
 
+### After PR #129's review
+
+- **Leaving Heaven**:
+  - The city's sound and its walkers go when another town is loaded straight from Heaven (a fast travel, the map, a respawn), as when she walks out.
+  - Outside the walls the walkers there are kept within her reach and none are made.
+- **The goods**:
+  - The twins are sold only inside Heaven's walls (a cleared camp's trader within 2 km had sold them).
+  - A recipe that asks for an item with a twin takes the twin too: 26 recipe parts on each map, 7 on `martial_arts`.
+- **Pedestrians**:
+  - A walker's draws move with every failed search (six searches a call at most).
+  - One that fails six times in a row is taken away, so none holds the traffic on a zebra.
+  - The pavements are never read while the town is still being built.
+  - At night, the walkers over the night's number more than 15 m from her go.
+- **Neon**: it is lit again only when what it lights has changed.
+- **Sound**:
+  - The sounds draw on their own stream.
+  - The loops follow the sound volume, and the hum follows the menu while it plays.
+  - Nothing is written to a sound asset in play.
+- **Measured again** (`884 heaven22_goods,heaven22_neon,heaven22_sound,heaven22_peds -Light`, `test_h22e.json`, all four pass):
+  - **Goods**: 60 m out of the gate the store's list has no twin; no recipe part asks for an item without its twin.
+  - **Neon**: the frame boxed where it is on the screen: the front 1.39 times as bright at midnight with the neon on, a billboard 2.51.
+  - **Sound**:
+    - with every other set silent, -22.9 dB with the city's sound against -43.6 without (20.7 dB);
+    - 60 m out of the gate the bed, the crowd and the walkers are 0.
+  - **Pedestrians**:
+    - one crossed a zebra and none stood on one 15 s;
+    - 20 walked new ways;
+    - 13.0 frames a second with them against 13.7 without.
+- **The test leaves no trace**: the goods' test gives back the gold and takes back what she bought and ate.
+

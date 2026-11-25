@@ -79,4 +79,10 @@ The city is a wilderness town on `brokenspire` with the modern plan (`FRDWildTow
 - **A frame rate on a loaded machine wanders**: one reading said 4.2 with the pedestrians against 7.5 without; read with, without and with again in one place (13.2, 14.0, 14.9).
 - **A timer drawn from a range keeps its old draw when the range shrinks**: the test's shortened horn range waited out the long draw already made (1 horn in 30 s). A wait longer than the range allows is drawn again.
 - **Pictures for a game are painted without words or makers**: FLUX painted a real sportswear maker's mark on every pair of running shoes; they were left out. Look at every ad's picture before using it.
+- **PR #129's review**:
+  - **A town loaded straight from another changes `TownPlan` in the same call that unloads it**: a rule gated on `TownPlan == 5` never ran its "Heaven is gone" branch, and the city's loop played on in Graymourne. Stop what Heaven started whenever the plan is not Heaven's.
+  - **A retry that draws from the same seed fails the same way for ever**: mix the failures into the stream, and give up after a few.
+  - **"Heaven's section loaded" reaches 2 km out**: a rule for what she meets in Heaven asks whether she is inside its walls.
+  - **A twin is a new name to every rule that asks by name** (recipes): add it where the like is asked for.
+  - **A refresh that resets the state it guards repeats the work**: compare what changed before writing again.
 

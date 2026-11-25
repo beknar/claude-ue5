@@ -432,6 +432,19 @@ def goods(g):
             its.append(it); tw[unreal.Name(x["like"])] = unreal.Name(x["name"])
         gg.set_editor_property("items", its)
         gg.set_editor_property("heaven_goods22", tw)
+        # (a recipe that asks for a like takes its twin as well (PR #129's review: Heaven sells no Jerky, and its Beef Jerky Pack did not
+        # count for the recipes that ask for Jerky); the twins taken out of every part first, so a rerun adds them once)
+        twin_of = {str(k): str(v) for k, v in tw.items()}
+        recs = []; joined = 0
+        for r in gg.get_editor_property("recipes"):
+            ps = []
+            for p_ in r.parts:
+                q = unreal.RDRecipePart(); q.label = p_.label; q.count = p_.count
+                keep = [a_ for a_ in p_.any_of if str(a_) not in mine]
+                add = [twin_of[str(a_)] for a_ in keep if str(a_) in twin_of and twin_of[str(a_)] not in [str(b_) for b_ in keep]]
+                q.any_of = keep + [unreal.Name(n_) for n_ in add]; joined += len(add); ps.append(q)
+            r.parts = ps; recs.append(r)
+        gg.set_editor_property("recipes", recs)
         ua = gg.get_editor_property("ui_art")
         for n, t in tex.items():
             art = unreal.RDUIArt(); art.set_editor_property("texture", t)
@@ -439,7 +452,7 @@ def goods(g):
             ua[unreal.Name(n)] = art
         gg.set_editor_property("ui_art", ua)
         gg.modify(); les.save_current_level()
-        out.append(f"goods {m}: {len(tw)} twins, {len(tex)} pictures" + (f"; no like for {missing}" if missing else ""))
+        out.append(f"goods {m}: {len(tw)} twins, {len(tex)} pictures, {joined} recipe parts take a twin" + (f"; no like for {missing}" if missing else ""))
         gg = None; import gc as _gc; _gc.collect(); unreal.SystemLibrary.execute_console_command(None, "obj gc")
     REPORT.extend(out)
 

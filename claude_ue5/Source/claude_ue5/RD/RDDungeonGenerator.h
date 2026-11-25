@@ -2316,7 +2316,9 @@ public:
 	mutable TSet<FName> HeavenTwins22;
 	mutable int32 HeavenTwinsN22 = -1;
 	void TickHeaven22(float Dt);
-	void TickPeds22(const FVector& Her, class ARDSection* S, bool bNight);
+	void TickPeds22(const FVector& Her, class ARDSection* S, bool bNight, bool bSpawn);
+	/** the walkers taken away and the city's sounds faded (another town loaded, Heaven left) */
+	void StopHeaven22();
 	void TickCitySound22(float Dt, const FVector& Her, class ARDSection* S, bool bIn, bool bNight);
 	bool NextPavePath22(class ARDTownsfolk* F, TArray<FVector>& Out) const;
 	/** for the tests: "life22|<peds>|<on a zebra>|<on the asphalt>|<neon tubes>|<neon lit 0..1>|<boards>|<boards' glow>|<city set>|<city

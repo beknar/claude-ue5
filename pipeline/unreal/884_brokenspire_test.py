@@ -5669,7 +5669,7 @@ def step_heaven22_goods():
     """the list of 2026-11-22: "food, items and other things bought in the city of heaven should be modern in looks": every everyday
     item's modern twin on the map (its picture, no weight in any draw, the draws refuse it); Heaven's stores sell the twins in their
     likes' place (the market's list, a twin bought); the tables' food in Heaven is modern and gives the twins"""
-    g = G["gen"]; res = {}; quiet(True)
+    g = G["gen"]; res = {}
     tw = {str(k): str(v) for k, v in g.get_editor_property("heaven_goods22").items()}
     items = {str(i.name): i for i in g.get_editor_property("items")}
     ua = {str(k) for k in g.get_editor_property("ui_art").keys()}
@@ -5679,7 +5679,15 @@ def step_heaven22_goods():
     res["twins_no_picture"] = [v for v in tw.values() if v in items and str(items[v].icon) not in ua]
     res["twins_kind_differs"] = [v for k, v in tw.items() if v in items and k in items and str(items[v].kind) != str(items[k].kind)]
     res["twins_drawn"] = [v for v in tw.values() if g.cave_may_draw16(v)]
+    # (every recipe part that asks for an item with a twin takes the twin too)
+    lone = []
+    for r in g.get_editor_property("recipes"):
+        for p_ in r.parts:
+            names = [str(a_) for a_ in p_.any_of]
+            lone += [f"{r.item}:{n}" for n in names if n in tw and tw[n] not in names]
+    res["recipe_parts_without_twin"] = lone[:6]
     S = yield from heaven16_in(); yield from wait(1.5)
+    quiet(True); g0_ = gold(); have0 = {v: cb().get_item_count(v) for v in tw.values()}
     stock = [str(x) for x in g.get_town_stock22()]
     res["stock"] = len(stock)
     res["stock_twins"] = sum(1 for x in stock if x in tw.values())
@@ -5725,12 +5733,24 @@ def step_heaven22_goods():
             took = {"said": d_, "f": r_, "got": got}
             break
         res["table_food"] = took
+        # (out of Heaven's walls, 60 m from its gate within its 2 km, the store's list has no twin: the cleared camp's trader there)
+        gate = place("gate")
+        if gate:
+            sq = place("square") or gate
+            dx, dy = gate.x - sq.x, gate.y - sq.y; n_ = math.hypot(dx, dy) or 1.0
+            put(V(gate.x + dx / n_ * 6000, gate.y + dy / n_ * 6000, 0)); stop21(); yield from wait(1.0)
+            res["outside_walls"] = {"in_walls": g.is_in_town_walls(G["pawn"].get_actor_location()), "stock_twins": sum(1 for x in g.get_town_stock22() if str(x) in tw.values())}
     finally:
         if g.is_town_panel_open(): g.close_town_panel()
+        for v, n0 in have0.items():
+            d_ = cb().get_item_count(v) - n0
+            if d_ > 0: cb().remove_item(v, d_)
+        g.add_gold(g0_ - gold(), "the test")
         quiet(False)
     res["sale"] = sale
     ok = (res["twins"] >= 38 and not res["twins_missing"] and not res["twins_weighted"] and not res["twins_no_picture"] and not res["twins_kind_differs"]
-          and not res["twins_drawn"] and res["stock_twins"] >= 10 and not res["stock_likes_with_twins"] and res.get("market_twins", 0) >= 10
+          and not res["twins_drawn"] and not res["recipe_parts_without_twin"] and res.get("outside_walls", {}).get("in_walls") is False
+          and res["outside_walls"]["stock_twins"] == 0 and res["stock_twins"] >= 10 and not res["stock_likes_with_twins"] and res.get("market_twins", 0) >= 10
           and sale and sale["ok"] and sale["count"] == 1 and sale["gold"] < 0
           and not any(k in res["food_meshes"] for k in ("SM_Bread", "SM_BreadRound", "SM_Cheese")) and took and took["f"] == "food" and took["got"])
     step_result("heaven22_goods", bool(ok), **res)
@@ -5747,7 +5767,7 @@ def step_heaven22_peds():
     try:
         g.set_town_hour(12.0); cvar(1)
         yield from wait(8.0)
-        reads = 0; on_road = 0; zebra_seen = set(); walks0 = {}; near_car = 1e9; counts = []
+        reads = 0; on_road = 0; zebra_seen = set(); walks0 = {}; near_car = 1e9; counts = []; crossed = set(); zebra_since = {}; held = 0
         t0 = time.time()
         while time.time() - t0 < 40.0:
             d = life22(); P = d.get("peds_at", []); counts.append(d.get("peds", 0))
@@ -5755,14 +5775,19 @@ def step_heaven22_peds():
             for p in P:
                 reads += 1
                 if p["pave"] == 0: on_road += 1
-                if p["pave"] == 2: zebra_seen.add(p["name"])
+                if p["pave"] == 2:
+                    zebra_seen.add(p["name"])
+                    z0 = zebra_since.setdefault(p["name"], (time.time(), p["at"]))
+                    if time.time() - z0[0] > 15 and dist2(z0[1], p["at"]) < 50: held += 1          # (stood on a zebra 15 s)
+                elif p["name"] in zebra_since:
+                    crossed.add(p["name"]); zebra_since.pop(p["name"], None)
                 walks0.setdefault(p["name"], p["walks"])
                 for c in cars: near_car = min(near_car, dist2(p["at"], c))
             yield from rwait(0.5)
         d = life22(); P = d.get("peds_at", [])
         res["peds_min_max"] = [min(counts) if counts else 0, max(counts) if counts else 0]
         res["readings"] = reads; res["on_asphalt"] = on_road; res["share_on_asphalt"] = round(on_road / max(reads, 1), 4)
-        res["crossed_at_zebra"] = len(zebra_seen)
+        res["on_a_zebra"] = len(zebra_seen); res["crossed_at_zebra"] = len(crossed); res["stood_on_a_zebra_15s"] = held
         res["walked"] = sum(1 for p in P if p["name"] in walks0 and p["walks"] > walks0[p["name"]])
         res["nearest_car_cm"] = round(near_car) if near_car < 1e8 else None
         res["pave"] = [str(l) for l in S.get_pave22_lines()]
@@ -5789,7 +5814,7 @@ def step_heaven22_peds():
         res["peds_night"] = life22().get("peds"); res["night_max"] = g.get_editor_property("peds22_night")
     finally:
         cvar(1); g.set_town_hour(h_was); quiet(False)
-    ok = (res["peds_min_max"][1] >= 15 and res["share_on_asphalt"] <= 0.02 and res["crossed_at_zebra"] >= 1 and res["walked"] >= 5
+    ok = (res["peds_min_max"][1] >= 15 and res["share_on_asphalt"] <= 0.02 and res["crossed_at_zebra"] >= 1 and res["stood_on_a_zebra_15s"] == 0 and res["walked"] >= 5
           and (res["nearest_car_cm"] is None or res["nearest_car_cm"] >= 150) and res["peds_off"] == 0
           and res["peds_night"] <= res["night_max"] and res["fps_with"] >= 0.8 * res["fps_without"])
     step_result("heaven22_peds", bool(ok), **res)
@@ -5798,8 +5823,8 @@ def step_heaven22_peds():
 def step_heaven22_neon():
     """the list of 2026-11-22: "billboards, neon at night": a neon frame over every shop's, the market's, the hotel's, the clinic's and
     the gear shop's door; billboards on the roofs; dim by day and lit at night (the game's numbers, then the light they make: a shop's
-    front and a billboard read from the street at midnight with them on and off (rd.Neon22 0), the contrast against the rest of the
-    picture); pictures by day and at night"""
+    front and a billboard read from the street at midnight with them on and off (rd.Neon22 0): each one's own box on the screen, on
+    against off); pictures by day and at night"""
     g = G["gen"]; res = {}; quiet(True)
     S = yield from heaven16_in(); h_was = g.get_town_hour()
     fr = fronts22(); res["fronts"] = len(fr["front"]); res["boards"] = len(fr["board"])
@@ -5817,18 +5842,26 @@ def step_heaven22_neon():
     else: res["tubes_component"] = None
     res["front_kinds"] = sorted({f["kind"] for f in fr["front"]}); res["neon_out_from_wall_line_cm"] = sorted({f["face_cm"] for f in fr["front"]})
     def cvar(v): unreal.SystemLibrary.execute_console_command(G["w"], f"rd.Neon22 {v}")
-    def view(stand, target, name, half=(0.1, 0.06)):
-        """her hidden at stand, the camera turned to the target; the brightness of the picture where the target is on the screen"""
+    def view(stand, target, name, corners):
+        """her hidden at stand, the camera turned to the target; the brightness of the picture inside the box its corners make on the
+        screen (the thing itself, a little margin)"""
         cam_h = 170.0
         pitch = math.degrees(math.atan2(target.z - cam_h, max(dist2(stand, target), 1.0)))
         look_at19(stand, target, pitch); stop21(); yield from wait(2.0)
-        ok_ = unreal.GameplayStatics.project_world_to_screen(G["pc"], target, False)
-        ok2, sp_ = (ok_[0], ok_[1]) if isinstance(ok_, tuple) else (ok_ is not None, ok_)
-        vs = unreal.WidgetLayoutLibrary.get_viewport_size(G["w"])
-        if not ok2 or sp_ is None: return None
-        fx, fy = sp_.x / max(vs.x, 1.0), sp_.y / max(vs.y, 1.0)
-        box = (max(fx - half[0], 0.0), max(fy - half[1], 0.0), min(fx + half[0], 1.0), min(fy + half[1], 1.0))
+        vs = unreal.WidgetLayoutLibrary.get_viewport_size(G["w"]); xs = []; ys = []
+        for c_ in corners:
+            ok_ = unreal.GameplayStatics.project_world_to_screen(G["pc"], c_, False)
+            ok2, sp_ = (ok_[0], ok_[1]) if isinstance(ok_, tuple) else (ok_ is not None, ok_)
+            if ok2 and sp_ is not None: xs.append(sp_.x / max(vs.x, 1.0)); ys.append(sp_.y / max(vs.y, 1.0))
+        if len(xs) < 2: return None
+        box = (max(min(xs) - 0.005, 0.0), max(min(ys) - 0.008, 0.0), min(max(xs) + 0.005, 1.0), min(max(ys) + 0.008, 1.0))
         return (yield from shot_luma(name, box))
+    def frame_corners(f):
+        a = math.radians(f["yaw"] + 90.0); ux, uy = math.cos(a), math.sin(a)
+        return [V(f["at"].x + ux * s_ * 132, f["at"].y + uy * s_ * 132, f["at"].z + h_) for s_ in (-1, 1) for h_ in (-27, 27)]
+    def board_corners(b, face):
+        a = math.radians(b["yaw"] + 90.0); ux, uy = math.cos(a), math.sin(a)
+        return [V(face.x + ux * s_ * 320, face.y + uy * s_ * 320, face.z + h_) for s_ in (-1, 1) for h_ in (-160, 160)]
     try:
         g.set_town_hour(12.0); yield from wait(2.0)
         d = life22(); res["day"] = {"tubes": d.get("tubes"), "lit": d.get("neon_lit"), "boards": d.get("boards"), "glow": d.get("board_glow")}
@@ -5844,18 +5877,18 @@ def step_heaven22_neon():
             return None
         if f0:
             sp = front_spot(f0)
-            if sp: res["day_front"] = yield from view(sp, f0["at"], "heaven22_front_day", (0.12, 0.05))
+            if sp: res["day_front"] = yield from view(sp, f0["at"], "heaven22_front_day", frame_corners(f0))
         g.set_town_hour(23.5); yield from wait(2.0)
         d = life22(); res["night"] = {"tubes": d.get("tubes"), "lit": d.get("neon_lit"), "boards": d.get("boards"), "glow": d.get("board_glow"), "hum": d.get("hum")}
         lum = {}
         for st, v in (("on", 1), ("off", 0)):
             cvar(v); yield from wait(1.0)
             if f0 and sp:
-                lum[f"front_{st}"] = yield from view(sp, f0["at"], f"heaven22_front_{st}", (0.12, 0.05))
+                lum[f"front_{st}"] = yield from view(sp, f0["at"], f"heaven22_front_{st}", frame_corners(f0))
             if b0:
                 yw = b0["yaw"]; p = V(b0["at"].x + math.cos(math.radians(yw)) * 2600, b0["at"].y + math.sin(math.radians(yw)) * 2600, 0)
                 face = V(b0["at"].x + math.cos(math.radians(yw)) * 2, b0["at"].y + math.sin(math.radians(yw)) * 2, b0["at"].z + 425)
-                lum[f"board_{st}"] = yield from view(p, face, f"heaven22_board_{st}", (0.07, 0.045))
+                lum[f"board_{st}"] = yield from view(p, face, f"heaven22_board_{st}", board_corners(b0, face))
         res["luma"] = lum
     finally:
         cvar(1); G["pawn"].set_actor_hidden_in_game(False); g.set_town_hour(h_was); quiet(False)
@@ -5881,6 +5914,12 @@ def step_heaven22_sound():
     mv0 = g.get_editor_property("music_volume"); he0 = g.get_editor_property("horn_every22")
     out = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "BSCity", TAG); os.makedirs(out, exist_ok=True)
     def cvar(v): unreal.SystemLibrary.execute_console_command(G["w"], f"rd.CitySound22 {v}")
+    vols = {str(k_): v_.volume for k_, v_ in g.get_editor_property("sounds").items()}
+    def only_city(on):
+        snd = g.get_editor_property("sounds")
+        for k_ in list(snd.keys()):
+            st_ = snd[k_]; st_.volume = vols[str(k_)] if (not on or str(k_).startswith("Heaven.")) else 0.0; snd[k_] = st_
+        g.set_editor_property("sounds", snd)
     def rec(name):
         g.start_recording_output(4.5); yield from rwait(4.0); g.stop_recording_output(out, name); yield from rwait(0.8)
         p = os.path.join(out, name + ".wav"); t0 = time.time()
@@ -5906,17 +5945,26 @@ def step_heaven22_sound():
         g.set_editor_property("horn_every22", unreal.Vector2D(2.0, 4.0))
         h0 = life22().get("horns", 0); yield from wait(30.0); res["horns_30s"] = life22().get("horns", 0) - h0
         g.set_editor_property("horn_every22", he0)
+        only_city(True); yield from wait(1.0)
         res["db_on"] = yield from rec("city_on")
-        cvar(0); yield from wait(3.0); res["db_off"] = yield from rec("city_off"); cvar(1); yield from wait(3.0)
+        cvar(0); yield from wait(3.0); res["db_off"] = yield from rec("city_off"); cvar(1); only_city(False); yield from wait(3.0)
+        # (out of the walls, 60 m past the gate: the city's sound fades)
+        gate = place("gate")
+        if gate and sqp:
+            dx, dy = gate.x - sqp.x, gate.y - sqp.y; n_ = math.hypot(dx, dy) or 1.0
+            put(V(gate.x + dx / n_ * 6000, gate.y + dy / n_ * 6000, 0)); stop21(); yield from wait(5.0)
+            d = life22(); res["outside"] = {"vol": d.get("city_vol"), "crowd": d.get("crowd_vol"), "in": g.is_in_town_walls(G["pawn"].get_actor_location()), "peds": d.get("peds")}
+            put(V(sqp.x, sqp.y, 0), z=0.0); stop21(); yield from wait(3.0)
         g.set_town_hour(23.5); yield from wait(5.0)
         d = life22(); res["night"] = {"city": d.get("city"), "vol": d.get("city_vol"), "crowd": d.get("crowd_vol")}
     finally:
-        cvar(1); g.set_editor_property("horn_every22", he0); g.set_editor_property("music_volume", mv0); lms.set_editor_property("bAllowBackgroundAudio", bg0)
+        only_city(False); cvar(1); g.set_editor_property("horn_every22", he0); g.set_editor_property("music_volume", mv0); lms.set_editor_property("bAllowBackgroundAudio", bg0)
         g.set_town_hour(h_was); quiet(False)
     ds, df, nt = res.get("day_square", {}), res.get("day_far", {}), res.get("night", {})
     res["db_rise"] = round(res["db_on"] - res["db_off"], 1) if res.get("db_on") is not None and res.get("db_off") is not None else None
     ok = (ds.get("city") == "Heaven.City" and ds.get("vol", 0) > 0 and ds.get("crowd", 0) > 0 and df and df.get("crowd", 1) < ds.get("crowd", 0)
           and res["horns_30s"] >= 3 and nt.get("city") == "Heaven.CityNight" and nt.get("crowd", 1) == 0
+          and res.get("outside", {}).get("in") is False and res["outside"]["vol"] == 0 and res["outside"]["crowd"] == 0
           and res["db_rise"] is not None and res["db_rise"] >= 3.0)
     step_result("heaven22_sound", bool(ok), **res)
 

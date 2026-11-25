@@ -26,7 +26,14 @@ static const FIntPoint RDH22Dir4[4] = { FIntPoint(-1, 0), FIntPoint(1, 0), FIntP
 // ------------------------------------------------------------------------------------------------ the goods
 FName ARDDungeonGenerator::HeavenGood22(FName Like, bool bHeaven) const
 {
-	if (HeavenGoods22.Num() == 0 || !(bHeaven || InHeaven21())) return Like;
+	// (inside Heaven's walls: its section loaded is not enough, it stays loaded 2 km out (PR #129's review: a cleared camp's trader there
+	// sold the twins))
+	if (HeavenGoods22.Num() == 0) return Like;
+	if (!bHeaven)
+	{
+		const APawn* P = UGameplayStatics::GetPlayerPawn(this, 0);
+		if (!(InHeaven21() && P && IsInTownWalls(P->GetActorLocation()))) return Like;
+	}
 	const FName* T = HeavenGoods22.Find(Like);
 	return T && FindItem(*T) >= 0 ? *T : Like;
 }
@@ -119,7 +126,6 @@ bool ARDSection::FindPavePath22(const FVector& From, const FVector& To, TArray<F
 		{
 			const FIntPoint U = T + D;
 			if (!Ok(U) || Prev[Idx(U)] != -1) continue;
-			// (onto a zebra only along it, across the street: never along the street from one zebra tile's side)
 			Prev[Idx(U)] = Idx(T); Q.Add(U);
 		}
 	}
@@ -145,20 +151,24 @@ TArray<FString> ARDSection::GetPave22Lines() const
 bool ARDDungeonGenerator::NextPavePath22(ARDTownsfolk* F, TArray<FVector>& Out) const
 {
 	const ARDSection* S = GetSection(FIntPoint::ZeroValue);
-	if (!S || !F || !InHeaven21()) return false;
+	if (!S || !F || !InHeaven21() || S->IsBuilding()) return false;
 	S->MakePave22();
 	if (S->PaveTiles22.Num() == 0) return false;
 	const FVector L = F->GetActorLocation();
 	const FVector Fw = F->GetActorForwardVector();
-	FRandomStream R((int32)HashCombine(GetTypeHash(F->GetName()), (uint32)(F->Walks * 2654435761u)));
-	// (a pavement's tile 15 to 60 m off, ahead of it more often than not: on along the street, or round a corner, or across at a zebra)
-	for (int32 Try = 0; Try < 40; ++Try)
+	// (its draws move with every failure too (PR #129's review: drawn from its walks alone, one that failed tried the same 40 again for
+	// good, and on a zebra it held the traffic))
+	FRandomStream R((int32)HashCombine(GetTypeHash(F->GetName()), (uint32)(F->Walks * 2654435761u) ^ (uint32)(F->PaveFails22 * 40503u)));
+	// (a pavement's tile 15 to 60 m off, ahead of it more often than not: on along the street, or round a corner, or across at a zebra;
+	// six searches at most a call)
+	for (int32 Try = 0, Searches = 0; Try < 40 && Searches < 6; ++Try)
 	{
 		const int32 K = R.RandRange(0, S->PaveTiles22.Num() - 1);
 		const FVector W = S->PaveTileWorld22(K);
 		const float D = FVector::Dist2D(W, L);
 		if (D < 1500.f || D > 6000.f) continue;
 		if (Try < 25 && FVector::DotProduct((W - L).GetSafeNormal2D(), Fw) < -0.2f) continue;
+		++Searches;
 		if (S->FindPavePath22(L, W, Out) && Out.Num() >= 2) return true;
 	}
 	return false;
@@ -171,8 +181,8 @@ void ARDTownsfolk::TickPave22(float Dt, float Now)
 	{
 		if (Now < NextTrip) { SetClip(false); return; }
 		TArray<FVector> P;
-		if (Gen && Gen->NextPavePath22(this, P) && P.Num() >= 2) { P.RemoveAt(0); for (FVector& Q : P) Q.Z = L.Z; Path = P; ++Walks; }
-		else NextTrip = Now + R.FRandRange(1.f, 3.f);
+		if (Gen && Gen->NextPavePath22(this, P) && P.Num() >= 2) { P.RemoveAt(0); for (FVector& Q : P) Q.Z = L.Z; Path = P; ++Walks; PaveFails22 = 0; }
+		else { NextTrip = Now + R.FRandRange(1.f, 3.f); ++PaveFails22; }          // (six in a row: the generator takes it away)
 		return;
 	}
 	FVector D = Path[0] - L; D.Z = 0.f;
@@ -205,22 +215,23 @@ int32 ARDDungeonGenerator::ClearPeds22()
 	return N_;
 }
 
-void ARDDungeonGenerator::TickPeds22(const FVector& Her, ARDSection* S, bool bNight)
+void ARDDungeonGenerator::TickPeds22(const FVector& Her, ARDSection* S, bool bNight, bool bSpawn)
 {
-	// (gone: those beyond her reach, and at night those over the night's few out of her sight's 40 m)
+	// (gone: those beyond her reach, those that found no way six times in a row, and at night those over the night's few more than
+	// 15 m from her)
 	const int32 Want = CVarRDPeds22.GetValueOnGameThread() == 0 ? 0 : (bNight ? Peds22Night : Peds22Day);
 	for (int32 I = Peds22.Num() - 1; I >= 0; --I)
 	{
 		ARDTownsfolk* F = Peds22[I].Get();
-		const bool bFar = !F || FVector::Dist2D(F->GetActorLocation(), Her) > Peds22Reach * 1.35f;
-		const bool bOver = F && Peds22.Num() > Want && (Want == 0 || FVector::Dist2D(F->GetActorLocation(), Her) > 4000.f);
+		const bool bFar = !F || FVector::Dist2D(F->GetActorLocation(), Her) > Peds22Reach * 1.35f || F->PaveFails22 >= 6;
+		const bool bOver = F && Peds22.Num() > Want && (Want == 0 || FVector::Dist2D(F->GetActorLocation(), Her) > 1500.f);
 		if (bFar || bOver)
 		{
 			if (F) { TownPeople.Remove(F); F->Destroy(); }
 			Peds22.RemoveAt(I);
 		}
 	}
-	if (Peds22.Num() >= Want || !GetWorld()) return;
+	if (!bSpawn || Peds22.Num() >= Want || !GetWorld() || S->IsBuilding()) return;
 	S->MakePave22();
 	if (S->PaveTiles22.Num() == 0) return;
 	// (their people: the town's own townsfolk, else the shared ones)
@@ -271,13 +282,13 @@ void ARDDungeonGenerator::TickCitySound22(float Dt, const FVector& Her, ARDSecti
 			A->bAutoActivate = false; A->bAutoDestroy = false; A->bAllowSpatialization = false;
 			A->SetupAttachment(RootComponent); A->RegisterComponent();
 		}
-		const float Target = Vol * Set->Volume * UserVolumeOf(TEXT("Atmos.Explore"));
+		const float Target = Vol * Set->Volume * SoundVolume * UserVolumeOf(TEXT("Atmos.Explore"));
 		if (Vol <= 0.001f) { if (A->IsPlaying()) A->FadeOut(2.f, 0.f); Was = NAME_None; return 0.f; }
 		if (Was != Key || !A->IsPlaying())
 		{
 			// (one of its loops by the session's seed; a new one when the day turns to night)
+			// (the loops' assets loop by 946 life's import: nothing is written to an asset in play)
 			USoundBase* Snd = Set->Sounds[FMath::Abs(SessionSeed + (int32)GetTypeHash(Key)) % Set->Sounds.Num()];
-			if (USoundWave* Wv = Cast<USoundWave>(Snd)) Wv->bLooping = true;
 			A->SetSound(Snd); A->FadeIn(2.5f, Target); Was = Key;
 		}
 		else A->AdjustVolume(0.5f, Target);
@@ -298,15 +309,16 @@ void ARDDungeonGenerator::TickCitySound22(float Dt, const FVector& Her, ARDSecti
 	const float Now = GetWorld()->GetTimeSeconds();
 	// (a horn now and then from a car in the streets 15 to 80 m off; a car passing close by heard once a pass)
 	// (a wait longer than the range now allows is drawn again: the range was shortened)
-	if (HornAt22 < 0.f || HornAt22 > Now + HornEvery22.Y) HornAt22 = Now + FMath::FRandRange(HornEvery22.X, HornEvery22.Y);
+	// (the sounds' own stream, never the play's (SoundR))
+	if (HornAt22 < 0.f || HornAt22 > Now + HornEvery22.Y) HornAt22 = Now + SoundR.FRandRange(HornEvery22.X, HornEvery22.Y);
 	TArray<FVector> Cars; TArray<int32> CarIx;
 	for (int32 I = 0; I < S->HeavenCars.Num(); ++I) if (const USceneComponent* C = S->HeavenCars[I].C.Get()) { Cars.Add(C->GetComponentLocation()); CarIx.Add(I); }
 	if (Now >= HornAt22 && !bNight)
 	{
-		HornAt22 = Now + FMath::FRandRange(HornEvery22.X, HornEvery22.Y);
+		HornAt22 = Now + SoundR.FRandRange(HornEvery22.X, HornEvery22.Y);
 		TArray<int32> Pick;
 		for (int32 I = 0; I < Cars.Num(); ++I) { const float D = FVector::Dist2D(Cars[I], Her); if (D > 1500.f && D < 8000.f) Pick.Add(I); }
-		if (Pick.Num() > 0 && PlaySoundAt(TEXT("Heaven.Horn"), Cars[Pick[FMath::RandRange(0, Pick.Num() - 1)]] + FVector(0, 0, 100.f))) ++Horns22;
+		if (Pick.Num() > 0 && PlaySoundAt(TEXT("Heaven.Horn"), Cars[Pick[SoundR.RandRange(0, Pick.Num() - 1)]] + FVector(0, 0, 100.f))) ++Horns22;
 	}
 	if (Now >= PassByAt22)
 		for (int32 I = 0; I < Cars.Num(); ++I)
@@ -320,9 +332,22 @@ void ARDDungeonGenerator::TickCitySound22(float Dt, const FVector& Her, ARDSecti
 }
 
 // ------------------------------------------------------------------------------------------------ the generator's look at Heaven
+void ARDDungeonGenerator::StopHeaven22()
+{
+	if (Peds22.Num() > 0) ClearPeds22();
+	for (UAudioComponent* A : { CityAudio22.Get(), CrowdAudio22.Get(), NeonAudio22.Get() }) if (A && A->IsPlaying()) A->FadeOut(1.5f, 0.f);
+	CityKey22 = CrowdKey22 = NAME_None; CityVol22 = CrowdVol22 = 0.f; bNeonHum22 = false;
+}
+
 void ARDDungeonGenerator::TickHeaven22(float Dt)
 {
-	if (TownPlan != 5) return;
+	// (another town loaded straight from Heaven (a fast travel, the map, a respawn) changes the plan in the same call that unloads it: the
+	// city's sound and its walkers go then too (PR #129's review: the loop played on in Graymourne))
+	if (TownPlan != 5)
+	{
+		if (Peds22.Num() > 0 || (CityAudio22 && CityAudio22->IsPlaying()) || (CrowdAudio22 && CrowdAudio22->IsPlaying()) || (NeonAudio22 && NeonAudio22->IsPlaying())) StopHeaven22();
+		return;
+	}
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	const APawn* P = UGameplayStatics::GetPlayerPawn(this, 0);
 	const bool bHeaven = S && !S->IsBuilding() && InHeaven21();
@@ -330,7 +355,7 @@ void ARDDungeonGenerator::TickHeaven22(float Dt)
 	const bool bIn = bHeaven && P && IsInTownWalls(Her);
 	const bool bNight = IsStreetNight16();
 	// (the pedestrians on the street: the cars wait for them, every frame)
-	if (S)
+	if (S && !S->IsBuilding())
 	{
 		S->CarYield22.Reset();
 		for (const TWeakObjectPtr<ARDTownsfolk>& F : Peds22)
@@ -351,12 +376,17 @@ void ARDDungeonGenerator::TickHeaven22(float Dt)
 	for (const TWeakObjectPtr<UStaticMeshComponent>& B : Boards22) if (!B.IsValid()) bStale = true;
 	if (bStale || (BoardsN22 -= 1) <= 0)
 	{
+		// (lit again only when what it lights changed (PR #129's review: every 5 s it wrote every tube and board and logged))
 		if (S != Heaven22Of.Get()) CarPassed22.Reset();
-		Heaven22Of = S; Boards22.Reset(); Neon22Lit = -1; BoardsN22 = 10; BoardGlowNow22 = NeonLitNow22 = -1.f;
+		const UInstancedStaticMeshComponent* Was = S->Neon22.Get();
+		const int32 Had = Boards22.Num();
+		Heaven22Of = S; Boards22.Reset(); BoardsN22 = 10;
 		if (!S->Neon22.IsValid())
 			for (UActorComponent* C : S->GetComponentsByTag(UInstancedStaticMeshComponent::StaticClass(), TEXT("HeavenNeon22"))) { S->Neon22 = Cast<UInstancedStaticMeshComponent>(C); break; }
+		bool bNew = false;
 		for (UActorComponent* C : S->GetComponentsByTag(UStaticMeshComponent::StaticClass(), TEXT("HeavenBoard22")))
-			if (UStaticMeshComponent* M = Cast<UStaticMeshComponent>(C)) { if (!Cast<UMaterialInstanceDynamic>(M->GetMaterial(0))) M->CreateAndSetMaterialInstanceDynamic(0); Boards22.Add(M); }
+			if (UStaticMeshComponent* M = Cast<UStaticMeshComponent>(C)) { if (!Cast<UMaterialInstanceDynamic>(M->GetMaterial(0))) { M->CreateAndSetMaterialInstanceDynamic(0); bNew = true; } Boards22.Add(M); }
+		if (bStale || bNew || Was != S->Neon22.Get() || Had != Boards22.Num()) { Neon22Lit = -1; BoardGlowNow22 = NeonLitNow22 = -1.f; }
 	}
 	const bool bLit = bNight && CVarRDNeon22.GetValueOnGameThread() != 0;
 	if ((bLit ? 1 : 0) != Neon22Lit)
@@ -391,13 +421,13 @@ void ARDDungeonGenerator::TickHeaven22(float Dt)
 					if (!NeonAudio22) { NeonAudio22 = NewObject<UAudioComponent>(this); NeonAudio22->bAutoActivate = false; NeonAudio22->SetupAttachment(RootComponent); NeonAudio22->RegisterComponent(); }
 					if (!NeonAudio22->IsPlaying())
 					{
-						if (USoundWave* Wv = Cast<USoundWave>(Set->Sounds[0])) Wv->bLooping = true;
 						NeonAudio22->SetSound(Set->Sounds[0]);
 						FSoundAttenuationSettings At_; At_.bAttenuate = true; At_.bSpatialize = AreSoundsSpatialized();
 						At_.AttenuationShapeExtents = FVector(Set->InnerRadius); At_.FalloffDistance = Set->FalloffDistance;
 						NeonAudio22->bOverrideAttenuation = true; NeonAudio22->AttenuationOverrides = At_;
-						NeonAudio22->FadeIn(1.f, Set->Volume * UserVolumeOf(TEXT("Heaven.Neon")));
+						NeonAudio22->FadeIn(1.f, Set->Volume * SoundVolume * UserVolumeOf(TEXT("Heaven.Neon")));
 					}
+					else NeonAudio22->AdjustVolume(0.5f, Set->Volume * SoundVolume * UserVolumeOf(TEXT("Heaven.Neon")));
 					NeonAudio22->SetWorldLocation(At);
 					bNeonHum22 = true;
 				}
@@ -405,7 +435,8 @@ void ARDDungeonGenerator::TickHeaven22(float Dt)
 	if (!bNeonHum22 && NeonAudio22 && NeonAudio22->IsPlaying()) NeonAudio22->FadeOut(1.f, 0.f);
 	// ---- the pedestrians, once a second
 	PedsClock22 -= 0.5f;
-	if (PedsClock22 <= 0.f) { PedsClock22 = 1.f; if (bIn) TickPeds22(Her, S, bNight); else if (Peds22.Num() > 0 && !bIn) TickPeds22(Her, S, bNight); }
+	// (outside the walls those there are kept within her reach, none made (PR #129's review: they were topped up out in the wilds))
+	if (PedsClock22 <= 0.f) { PedsClock22 = 1.f; if (bIn || Peds22.Num() > 0) TickPeds22(Her, S, bNight, bIn); }
 	TickCitySound22(0.5f, Her, S, bIn, bNight);
 }
 
