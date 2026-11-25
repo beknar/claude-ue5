@@ -8742,6 +8742,137 @@ def step_cave16trade():
     step_result("cave16trade", bool(ok), **res)
 STEPS.update({"cave16trade": step_cave16trade})
 
+
+# ------------------------------------------------------------------------------------------------ the list of 2026-11-22's phase 25
+def fort25_kinds():
+    """the fortress's defenders: 909's five and 947's (SourceArt/heaven_fortress/*.json), by tier"""
+    SAF = os.path.join(os.path.dirname(OUT), "heaven_fortress") if "OUT" in globals() else r"E:\code\claude-ue5\claude_ue5\SourceArt\heaven_fortress"
+    out = []
+    for fn in ("monsters.json", "defenders25.json"):
+        p = os.path.join(r"E:\code\claude-ue5\claude_ue5\SourceArt\heaven_fortress", fn)
+        out += [(e["name"], e["tier"]) for e in json.load(open(p, encoding="utf-8"))["monsters"]]
+    return out
+
+
+def fort25_pose(m):
+    c = m.get_component_by_class(unreal.SkeletalMeshComponent); a = m.get_actor_location(); pts = []
+    for i in range(0, min(c.get_num_bones(), 60), 2):
+        q = c.get_socket_location(c.get_bone_name(i)); pts.append((q.x - a.x, q.y - a.y, q.z - a.z))
+    return pts
+
+
+def step_fortress25():
+    """the list of 2026-11-22 ("vary the Heaven dungeon with soldier variants, medics, differently colored/designed drones and differently
+    colored/designed mechs ... also use aliens and monsters from the Aliens Warrior Pack"): every defender kind spawned (in rows of six,
+    pictured), its clip playing (its bones move), its feet on the floor or a drone at its hover; then each one alone: shooting at her from
+    7 m (a shooter: its rounds counted) or striking her at 1.5 m (its blows counted); hit (its hit points down); and killed (dead, its death
+    clip moving it); a medic's heal of a hurt trooper beside it in a fight"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    defs = {str(m.name): m for m in g.get_editor_property("monsters")}
+    kinds = [(k, t) for k, t in fort25_kinds() if k in defs]
+    res = {"kinds": len(kinds), "missing": [k for k, _ in fort25_kinds() if k not in defs]}
+    ctr = g.get_start_room_center()
+    per = {}
+    shots = []
+    # ---- the rows: spawned, posed, their bottoms, pictured
+    for b in range(0, len(kinds), 6):
+        made = []
+        for j, (k, t) in enumerate(kinds[b:b + 6]):
+            m = g.spawn_monster_named(k, V(ctr.x + 700, ctr.y - 550 + j * 220, ctr.z), t, 50.0, 0.0, 1.0)
+            if m: made.append((k, m)); m.set_actor_rotation(unreal.Rotator(roll=0, pitch=0, yaw=180.0), False)
+            else: per[k] = {"spawned": False}
+        yield from wait(1.5)
+        p0 = {k: fort25_pose(m) for k, m in made}
+        bottoms = {k: [] for k, _ in made}
+        for _ in range(6):
+            for k, m in made:
+                try: bottoms[k].append(m.get_drawn_bottom(0.01, True))
+                except Exception: pass
+            yield from wait(0.25)
+        for k, m in made:
+            p1 = fort25_pose(m)
+            mv = max(math.dist(x_, y_) for x_, y_ in zip(p0[k], p1)) if p0[k] and p1 else 0.0
+            d = defs[k]; bt = sorted(bottoms[k])[len(bottoms[k]) // 2] if bottoms[k] else None
+            hov = float(d.hover_height)
+            per[k] = {"spawned": True, "bones_moved_cm": round(mv, 1), "bottom_cm": round(bt, 1) if bt is not None else None, "hover": hov,
+                      "height_cm": round(float(d.capsule_half_height) * 2), "variant_slots": len(d.get_editor_property("materials"))}
+        put(V(ctr.x + 150, ctr.y, ctr.z), yaw=0.0)
+        G["pawn"].set_actor_hidden_in_game(True)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4, yaw=0.0)); yield from wait(1.0)
+        nm = f"f25_row{b // 6}"; shot(nm); shots.append([nm, [k for k, _ in made]]); yield from rwait(1.4)
+        G["pawn"].set_actor_hidden_in_game(False)
+        for _, m in made:
+            try: m.destroy_actor()
+            except Exception: pass
+        yield from wait(0.3)
+    res["pictures"] = shots
+    # ---- each alone: its attack on her, a hit, its death
+    quiet(False)
+    mcs = g.get_editor_property("max_chase_speed"); agg = g.get_editor_property("aggro_distance")
+    g.set_editor_property("max_chase_speed", 1.0); g.set_editor_property("aggro_distance", 2500.0)
+    try:
+        for k, t in kinds:
+            d = defs[k]
+            put(V(ctr.x, ctr.y, ctr.z), yaw=0.0); yield from wait(0.2)
+            c.set_health(c.get_max_health())
+            dist = 700.0 if d.shoots else 120.0
+            g.set_editor_property("max_chase_speed", 1.0 if d.shoots else mcs)          # (a shooter held where it stands; one of blows comes in)
+            m = g.spawn_monster_named(k, V(ctr.x + dist, ctr.y, ctr.z), t, 50.0, 0.3, 1.0)
+            if not m: continue
+            m.apply_damage(0.01, G["pawn"]); s0 = m.shots_fired; a0 = m.attacks_made; t0 = now()
+            while now() - t0 < 10.0:
+                yield from wait(0.1)
+                c.set_health(c.get_max_health())
+                if (d.shoots and m.shots_fired - s0 >= 2) or (not d.shoots and m.attacks_made - a0 >= 2): break
+            r = per.setdefault(k, {})
+            r["shots"] = m.shots_fired - s0; r["attacks"] = m.attacks_made - a0; r["shoots"] = bool(d.shoots)
+            h0 = m.get_health(); m.apply_damage(h0 * 0.2, G["pawn"]); yield from wait(0.3)
+            r["hit_lost"] = round(h0 - m.get_health(), 1)
+            pz = fort25_pose(m); m.apply_damage(m.get_health() * 10 + 10, G["pawn"]); yield from wait(1.2)
+            pd = fort25_pose(m)
+            r["dead"] = bool(m.is_dead()); r["dead_bottom_cm"] = round(m.get_drawn_bottom(0.01, True), 1) if hasattr(m, "get_drawn_bottom") else None
+            r["death_moved_cm"] = round(max(math.dist(x_, y_) for x_, y_ in zip(pz, pd)) if pz and pd else 0.0, 1)
+            try: m.destroy_actor()
+            except Exception: pass
+            yield from wait(0.2)
+        # ---- a medic's heal: a trooper hurt beside it, both in a fight with her 8 m off
+        medics = [(k, t) for k, t in kinds if defs[k].heals]
+        heal = {}
+        for k, t in medics[:2]:
+            put(V(ctr.x, ctr.y, ctr.z), yaw=0.0); yield from wait(0.2)
+            md_ = g.spawn_monster_named(k, V(ctr.x + 800, ctr.y + 120, ctr.z), t, 50.0, 0.0, 1.0)
+            tr = g.spawn_monster_named("Kratos_Trooper", V(ctr.x + 800, ctr.y - 120, ctr.z), t, 50.0, 0.0, 1.0)
+            if not (md_ and tr): continue
+            yield from wait(0.5)
+            tr.apply_damage(tr.get_max_health() * 0.5, G["pawn"]); md_.apply_damage(0.01, G["pawn"])
+            hp0 = tr.get_health(); t0 = now()
+            while now() - t0 < 14.0 and md_.get_heals_given() < 1:
+                yield from wait(0.1); c.set_health(c.get_max_health())
+            heal[k] = {"heals": md_.get_heals_given(), "healed": round(md_.get_healed_total(), 1), "trooper_hp_before": round(hp0, 1), "trooper_hp_after": round(tr.get_health(), 1),
+                       "trooper_max": round(tr.get_max_health(), 1), "seconds": round(now() - t0, 1)}
+            for x in (md_, tr):
+                try: x.destroy_actor()
+                except Exception: pass
+        res["heal"] = heal
+    finally:
+        g.set_editor_property("max_chase_speed", mcs); g.set_editor_property("aggro_distance", agg); quiet(False)
+    res["per"] = per
+    bad = []
+    for k, t in kinds:
+        r = per.get(k, {})
+        hov = r.get("hover", 0) or 0
+        # (a flyer off the floor and below the ceiling; a walker's feet on the floor)
+        okb = r.get("bottom_cm") is not None and ((hov > 0 and 60 <= r["bottom_cm"] <= 330) or (hov == 0 and -8 <= r["bottom_cm"] <= 8))          # (an idle's sway moves the feet some 6 cm from run to run)
+        if not (r.get("spawned") and r.get("bones_moved_cm", 0) > 0.3 and okb and (r.get("shots", 0) >= 1 if r.get("shoots") else r.get("attacks", 0) >= 1)
+                and r.get("hit_lost", 0) > 0 and r.get("dead") and r.get("dead_bottom_cm") is not None and -15 <= r["dead_bottom_cm"] <= 60):          # (a dead drone on the floor)
+            bad.append(k)
+    res["failed_kinds"] = bad
+    ok = not res["missing"] and not bad and heal and all(h["heals"] >= 1 and h["trooper_hp_after"] > h["trooper_hp_before"] for h in heal.values())
+    step_result("fortress25", bool(ok), **res)
+
+
+STEPS.update({"fortress25": step_fortress25})
+
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""
     if G.get("gen"): return G["gen"]

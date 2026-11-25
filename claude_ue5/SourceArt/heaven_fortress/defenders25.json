@@ -1,0 +1,671 @@
+{
+ "_doc": "The list of 2026-11-22's phase 25 (947 monsters, RDFortress25.cpp): the fortress's defenders beyond 909's five (the user's: 'vary the Heaven dungeon with soldier variants, medics, differently colored/designed drones and differently colored/designed mechs from the Dystopia and Sci-fi packs. also use aliens and monsters from the Aliens Warrior Pack'). Read as 909 reads monsters.json (pack: where its clips are found by name; a mesh's skeleton made compatible with its clips'), with: variant (the mesh's materials, slot by slot, swapped for the pack's numbered colour set: M_X_1 -> M_X_<n>, M_X_01 -> M_X_0<n>, or M_X -> M_X_Set_0<n>), heals (a medic: its heal clip, range, share, wait), hover (a drone: cm over its capsule, bob), ranged null (blows only), sound (its voice set; Horned if the map has none of that name). The guns, ranges, damages, waits and speeds are monsters.json's.",
+ "heal_fx": "/Game/LootDropsV2/Particles/NiagaraSystems/LootDrop02/NS_LootDrop02_lvl2_green",
+ "guns_extra": {
+  "grenade": {
+   "projectile": "/Game/SciFi_Impacts/FX/NS_Tracer_Orange",
+   "muzzle": "/Game/MuzzleFlash3D/FX/Modern/NS_MuzzleFlash_4X",
+   "hit": "/Game/SciFi_Impacts/FX/NS_Energy_Impact_1",
+   "theme": "a grenade"
+  },
+  "flame": {
+   "projectile": "/Game/SciFi_Impacts/FX/NS_Tracer_Orange",
+   "muzzle": "/Game/MuzzleFlash3D/FX/Futuristic/NS_MuzzleFlash_Blast_Futuristic",
+   "hit": "/Game/SciFi_Impacts/FX/NS_Energy_Impact_1",
+   "theme": "a gout of flame"
+  },
+  "plasma": {
+   "projectile": "/Game/SciFi_Impacts/FX/NS_Tracer_Blue",
+   "muzzle": "/Game/MuzzleFlash3D/FX/Futuristic/NS_MuzzleFlash_Blast_Futuristic",
+   "hit": "/Game/SciFi_Impacts/FX/NS_Energy_Impact_1",
+   "theme": "a plasma bolt"
+  }
+ },
+ "monsters": [
+  {
+   "name": "Kratos_Defender",
+   "title": "Kratos Defender",
+   "tier": 1,
+   "weight": 3,
+   "mesh": "/Game/Sci_Fi_Characters_Pack_Vol_2/Mesh/Sci_Fi_Character_10/Defender/SK_Defender_Full",
+   "pack": "/Game/Sci_Fi_Characters_Pack_Vol_2",
+   "idle": "Anim_Defender_Idle_01",
+   "walk": "Anim_Defender_Walk",
+   "attacks": [
+    "Anim_Defender_Attack_01",
+    "Anim_Defender_Attack_02"
+   ],
+   "hit": "Anim_Defender_Get_Hit",
+   "death": "Anim_Defender_Dead_01",
+   "shot": "Anim_Defender_Shot_01",
+   "sound": "Horned",
+   "ability": "None",
+   "ranged": {
+    "range": "medium",
+    "gun": "rifle"
+   }
+  },
+  {
+   "name": "Kratos_Defender_Grey",
+   "title": "Kratos Defender (grey)",
+   "tier": 1,
+   "weight": 2,
+   "variant": 3,
+   "mesh": "/Game/Sci_Fi_Characters_Pack_Vol_2/Mesh/Sci_Fi_Character_10/Defender/SK_Defender_Full",
+   "pack": "/Game/Sci_Fi_Characters_Pack_Vol_2",
+   "idle": "Anim_Defender_Idle_02",
+   "walk": "Anim_Defender_Walk",
+   "attacks": [
+    "Anim_Defender_Attack_03",
+    "Anim_Defender_Attack_01"
+   ],
+   "hit": "Anim_Defender_Get_Hit_02",
+   "death": "Anim_Defender_Dead_02",
+   "shot": "Anim_Defender_Shot_02",
+   "sound": "Horned",
+   "ability": "None",
+   "ranged": {
+    "range": "medium",
+    "gun": "rifle"
+   }
+  },
+  {
+   "name": "Kratos_Sentry_Drone",
+   "title": "Kratos Sentry Drone",
+   "tier": 1,
+   "weight": 3,
+   "mesh": "/Game/Military_Pack/Mesh/Drone/SK_Dron_Skeleton",
+   "pack": "/Game/Military_Pack/Animations/Drone",
+   "idle": "Anim_Dron_Idle",
+   "walk": "Anim_Drone_Flight_Front",
+   "attacks": [
+    "Anim_Drone_Fire_Attack"
+   ],
+   "hit": "Anim_Drone_Get_Hit",
+   "death": "Anim_Drone_Dead",
+   "shot": "Anim_Drone_Gun_Fire_Right_Left",
+   "hover": {
+    "height": 10,
+    "bob": 12,
+    "period": 1.8
+   },
+   "sound": "Insect",
+   "ability": "None",
+   "ranged": {
+    "range": "medium",
+    "gun": "rifle"
+   },
+   "drop": -174
+  },
+  {
+   "name": "Kratos_Medic",
+   "title": "Kratos Medic",
+   "tier": 1,
+   "weight": 2,
+   "mesh": "/Game/Dystopia_Pack/Medic_Dystopia/Mesh/Mesh_UE4/Full/SK_UE4_Medic_Dystopia_Full_01",
+   "pack": "/Game/Sci_Fi_Characters_Pack_Vol_2",
+   "idle": "Anim_Defender_Idle_03",
+   "walk": "Anim_Defender_Walk",
+   "attacks": [
+    "Anim_Defender_Attack_04"
+   ],
+   "hit": "Anim_Defender_Get_Hit",
+   "death": "Anim_Defender_Dead_01",
+   "shot": "Anim_Defender_Shot_03",
+   "heals": {
+    "clip": "Anim_Defender_Reload",
+    "range": 1000,
+    "share": 0.3,
+    "below": 0.15,
+    "cooldown": 6
+   },
+   "sound": "Horned",
+   "ability": "None",
+   "ranged": null
+  },
+  {
+   "name": "Kratos_Guard_Red",
+   "title": "Facility Guard (red)",
+   "tier": 2,
+   "weight": 2,
+   "variant": 2,
+   "mesh": "/Game/Sci_Fi_Characters_Pack_Vol_2/Mesh/Guard/SK_Guard",
+   "pack": "/Game/Sci_Fi_Characters_Pack_Vol_2",
+   "idle": "Anim_Defender_Idle_01",
+   "walk": "Anim_Defender_Walk",
+   "attacks": [
+    "Anim_Defender_Attack_02",
+    "Anim_Defender_Attack_05"
+   ],
+   "hit": "Anim_Defender_Get_Hit",
+   "death": "Anim_Defender_Dead_02",
+   "shot": "Anim_Defender_Shot_01",
+   "sound": "Horned",
+   "ability": "None",
+   "ranged": {
+    "range": "medium",
+    "gun": "rifle"
+   }
+  },
+  {
+   "name": "Kratos_Guard_Blue",
+   "title": "Facility Guard (blue)",
+   "tier": 2,
+   "weight": 2,
+   "variant": 3,
+   "mesh": "/Game/Sci_Fi_Characters_Pack_Vol_2/Mesh/Guard/SK_Guard",
+   "pack": "/Game/Sci_Fi_Characters_Pack_Vol_2",
+   "idle": "Anim_Defender_Idle_02",
+   "walk": "Anim_Defender_Walk",
+   "attacks": [
+    "Anim_Defender_Attack_01",
+    "Anim_Defender_Attack_03"
+   ],
+   "hit": "Anim_Defender_Get_Hit_02",
+   "death": "Anim_Defender_Dead_01",
+   "shot": "Anim_Defender_Shot_02",
+   "sound": "Horned",
+   "ability": "Slow",
+   "ranged": {
+    "range": "medium",
+    "gun": "rifle"
+   }
+  },
+  {
+   "name": "Kratos_Grenadier_Drone",
+   "scale": 2.5,
+   "drop": 157,
+   "death_drop": 160,
+   "title": "Grenadier Drone",
+   "tier": 2,
+   "weight": 2,
+   "mesh": "/Game/Military_Drone/Mesh/SK_Military_Drone_01_Full",
+   "pack": "/Game/Military_Drone/Animations",
+   "idle": "Anim_Military_Drone_Idle",
+   "walk": "Anim_Military_Drone_Fly_Front",
+   "attacks": [
+    "Anim_Military_Drone_Dropping_Grenade_01"
+   ],
+   "hit": "Anim_Military_Drone_Idle",
+   "death": "Anim_Military_Drone_Idle",
+   "shot": "Anim_Military_Drone_Dropping_Grenade_02",
+   "hover": {
+    "height": 10,
+    "bob": 15,
+    "period": 2.2
+   },
+   "sound": "Insect",
+   "ability": "None",
+   "ranged": {
+    "range": "medium",
+    "gun": "grenade"
+   }
+  },
+  {
+   "name": "Kratos_Grenadier_Drone_Olive",
+   "scale": 2.5,
+   "drop": 157,
+   "death_drop": 160,
+   "title": "Grenadier Drone (olive)",
+   "tier": 2,
+   "weight": 2,
+   "variant": 3,
+   "mesh": "/Game/Military_Drone/Mesh/SK_Military_Drone_01_Full",
+   "pack": "/Game/Military_Drone/Animations",
+   "idle": "Anim_Military_Drone_Idle",
+   "walk": "Anim_Military_Drone_Fly_Front",
+   "attacks": [
+    "Anim_Military_Drone_Dropping_Grenade_03"
+   ],
+   "hit": "Anim_Military_Drone_Idle",
+   "death": "Anim_Military_Drone_Idle",
+   "shot": "Anim_Military_Drone_Dropping_Grenade_01",
+   "hover": {
+    "height": 10,
+    "bob": 15,
+    "period": 2.2
+   },
+   "sound": "Insect",
+   "ability": "Slow",
+   "ranged": {
+    "range": "medium",
+    "gun": "grenade"
+   }
+  },
+  {
+   "name": "Kratos_Field_Medic",
+   "title": "Kratos Field Medic",
+   "tier": 2,
+   "weight": 2,
+   "variant": 2,
+   "mesh": "/Game/Dystopia_Pack/Medic_Dystopia/Mesh/Mesh_UE4/Full/SK_UE4_Medic_Dystopia_Full_02",
+   "pack": "/Game/Sci_Fi_Characters_Pack_Vol_2",
+   "idle": "Anim_Defender_Idle_03",
+   "walk": "Anim_Defender_Walk",
+   "attacks": [
+    "Anim_Defender_Attack_04"
+   ],
+   "hit": "Anim_Defender_Get_Hit",
+   "death": "Anim_Defender_Dead_02",
+   "shot": "Anim_Defender_Shot_03",
+   "heals": {
+    "clip": "Anim_Defender_Reload",
+    "range": 1100,
+    "share": 0.3,
+    "below": 0.15,
+    "cooldown": 6
+   },
+   "sound": "Horned",
+   "ability": "None",
+   "ranged": {
+    "range": "medium",
+    "gun": "rifle"
+   }
+  },
+  {
+   "name": "Kratos_Operative_Black",
+   "title": "Kratos Operative (black)",
+   "tier": 3,
+   "weight": 2,
+   "mesh": "/Game/Sci_Fi_Characters_Pack_Vol_2/Mesh/Sci_Fi_Character_09/SK_Sci_Fi_Character_09_Full_02",
+   "pack": "/Game/Sci_Fi_Characters_Pack_Vol_2",
+   "idle": "Anim_Defender_Idle_02",
+   "walk": "Anim_Defender_Walk",
+   "attacks": [
+    "Anim_Defender_Attack_03",
+    "Anim_Defender_Attack_05"
+   ],
+   "hit": "Anim_Defender_Get_Hit_02",
+   "death": "Anim_Defender_Dead_02",
+   "shot": "Anim_Defender_Shot_02",
+   "sound": "Horned",
+   "ability": "Weaken",
+   "ranged": {
+    "range": "long",
+    "gun": "rifle"
+   }
+  },
+  {
+   "name": "Kratos_Flamer",
+   "title": "Kratos Flame Trooper",
+   "tier": 3,
+   "weight": 3,
+   "mesh": "/Game/Dystopia_Pack/Dystopia_Soldier_02/Mesh_UE4/Full/SK_Dystopia_Soldier_02_Full",
+   "pack": "/Game/Dystopia_Pack/Dystopia_Mech/Animations",
+   "idle": "Anim_Dystopia_Mech_Idle_01",
+   "walk": "Anim_Dystopia_Mech_Walk",
+   "attacks": [
+    "Anim_Dystopia_Mech_Attack_01",
+    "Anim_Dystopia_Mech_Attack_02"
+   ],
+   "hit": "Anim_Dystopia_Mech_Get_Hit",
+   "death": "Anim_Dystopia_Mech_Dead_01",
+   "shot": "Anim_Dystopia_Mech_Shot_02",
+   "sound": "Horned",
+   "ability": "Poison",
+   "ranged": {
+    "range": "medium",
+    "gun": "flame"
+   }
+  },
+  {
+   "name": "Kratos_Medic_Masked",
+   "title": "Kratos Medic (masked)",
+   "tier": 3,
+   "weight": 2,
+   "variant": 3,
+   "mesh": "/Game/Dystopia_Pack/Medic_Dystopia/Mesh/Mesh_UE4/Full/SK_UE4_Medic_Dystopia_Full_03",
+   "pack": "/Game/Sci_Fi_Characters_Pack_Vol_2",
+   "idle": "Anim_Defender_Idle_03",
+   "walk": "Anim_Defender_Walk",
+   "attacks": [
+    "Anim_Defender_Attack_04"
+   ],
+   "hit": "Anim_Defender_Get_Hit_02",
+   "death": "Anim_Defender_Dead_01",
+   "shot": "Anim_Defender_Shot_03",
+   "heals": {
+    "clip": "Anim_Defender_Reload",
+    "range": 1200,
+    "share": 0.35,
+    "below": 0.15,
+    "cooldown": 5.5
+   },
+   "sound": "Horned",
+   "ability": "None",
+   "ranged": {
+    "range": "medium",
+    "gun": "rifle"
+   }
+  },
+  {
+   "name": "Alien_Warrior",
+   "title": "Alien Warrior",
+   "tier": 3,
+   "weight": 3,
+   "mesh": "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_05/Full/SK_UE4_Alien_Warrior_05_Full_01",
+   "pack": "/Game/Aliens_Warrior_Pack/Animations/Alien_Warrior_05",
+   "idle": "Anim_Defender_Idle_01_Anim",
+   "walk": "Anim_Defender_Walk_Anim",
+   "attacks": [
+    "Anim_Defender_Attack_01_Anim",
+    "Anim_Defender_Attack_02_Anim"
+   ],
+   "hit": "Anim_Defender_Get_Hit_Anim",
+   "death": "Anim_Defender_Dead_01_Anim",
+   "shot": "Anim_Defender_Shot_01_Anim",
+   "sound": "Horned",
+   "ability": "Weaken",
+   "ranged": {
+    "range": "long",
+    "gun": "plasma"
+   }
+  },
+  {
+   "name": "Kratos_Gunner",
+   "title": "Kratos Heavy Gunner",
+   "tier": 4,
+   "weight": 3,
+   "mesh": "/Game/Dystopia_Pack/Dystopia_Soldier/Mesh_UE4/Character/SM_Dystopia_Soldier_FULL",
+   "pack": "/Game/Dystopia_Pack/Dystopia_Mech/Animations",
+   "idle": "Anim_Dystopia_Mech_Idle_02",
+   "walk": "Anim_Dystopia_Mech_Walk",
+   "attacks": [
+    "Anim_Dystopia_Mech_Attack_03",
+    "Anim_Dystopia_Mech_Attack_04"
+   ],
+   "hit": "Anim_Dystopia_Mech_Get_Hit_02",
+   "death": "Anim_Dystopia_Mech_Dead_02",
+   "shot": "Anim_Dystopia_Mech_Shot_01",
+   "sound": "Horned",
+   "ability": "None",
+   "ranged": {
+    "range": "long",
+    "gun": "rifle"
+   }
+  },
+  {
+   "name": "Kratos_Mech",
+   "title": "Kratos Combat Mech",
+   "tier": 4,
+   "weight": 3,
+   "scale": 1.4,
+   "mesh": "/Game/Dystopia_Pack/Dystopia_Mech/Mesh_UE4/Mech_Full/SK_Mech_Full",
+   "pack": "/Game/Dystopia_Pack/Dystopia_Mech/Animations",
+   "idle": "Anim_Dystopia_Mech_Idle_01",
+   "walk": "Anim_Dystopia_Mech_Walk",
+   "attacks": [
+    "Anim_Dystopia_Mech_Attack_01",
+    "Anim_Dystopia_Mech_Attack_05"
+   ],
+   "hit": "Anim_Dystopia_Mech_Get_Hit",
+   "death": "Anim_Dystopia_Mech_Dead_01",
+   "shot": "Anim_Dystopia_Mech_Shot_03",
+   "sound": "Troll",
+   "ability": "Slow",
+   "ranged": {
+    "range": "long",
+    "gun": "heavy"
+   }
+  },
+  {
+   "name": "Alien_Brute",
+   "title": "Alien Brute",
+   "tier": 4,
+   "weight": 2,
+   "mesh": "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_02/Full/SK_UE4_Alien_Warrior_02_Full_01",
+   "pack": "/Game/Aliens_Warrior_Pack/Animations/Alien_Warrior_05",
+   "idle": "Anim_Defender_Idle_02_Anim",
+   "walk": "Anim_Defender_Walk_Anim",
+   "attacks": [
+    "Anim_Defender_Attack_03_Anim",
+    "Anim_Defender_Attack_04_Anim"
+   ],
+   "hit": "Anim_Defender_Get_Hit_02_Anim",
+   "death": "Anim_Defender_Dead_02_Anim",
+   "shot": "Anim_Defender_Attack_03_Anim",
+   "sound": "Horned",
+   "ability": "Weaken",
+   "ranged": null
+  },
+  {
+   "name": "Alien_Stalker",
+   "title": "Alien Stalker",
+   "tier": 4,
+   "weight": 2,
+   "mesh": "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_04/Full/SK_UE4_Alien_Warrior_04_Full_01",
+   "pack": "/Game/Aliens_Warrior_Pack/Animations/Alien_Warrior_05",
+   "idle": "Anim_Defender_Idle_03_Anim",
+   "walk": "Anim_Defender_Walk_Anim",
+   "attacks": [
+    "Anim_Defender_Attack_05_Anim",
+    "Anim_Defender_Attack_01_Anim"
+   ],
+   "hit": "Anim_Defender_Get_Hit_Anim",
+   "death": "Anim_Defender_Dead_01_Anim",
+   "shot": "Anim_Defender_Shot_02_Anim",
+   "sound": "Horned",
+   "ability": "Poison",
+   "ranged": {
+    "range": "medium",
+    "gun": "plasma"
+   }
+  },
+  {
+   "name": "Kratos_Bomber_Drone",
+   "scale": 2.5,
+   "drop": 147,
+   "death_drop": 204,
+   "title": "Bomber Drone",
+   "tier": 4,
+   "weight": 2,
+   "mesh": "/Game/Military_Drone/Mesh/SK_Military_Drone_02_Full_01",
+   "pack": "/Game/Military_Drone/Animations",
+   "idle": "Anim_Military_Drone_Idle",
+   "walk": "Anim_Military_Drone_Fly_Front",
+   "attacks": [
+    "Anim_Military_Drone_Dropping_Grenade_02"
+   ],
+   "hit": "Anim_Military_Drone_Idle",
+   "death": "Anim_Military_Drone_Idle",
+   "shot": "Anim_Military_Drone_Dropping_Grenade_03",
+   "hover": {
+    "height": 10,
+    "bob": 18,
+    "period": 2.4
+   },
+   "sound": "Insect",
+   "ability": "None",
+   "ranged": {
+    "range": "long",
+    "gun": "grenade"
+   }
+  },
+  {
+   "name": "Kratos_Chief_Medic",
+   "title": "Kratos Chief Medic",
+   "tier": 4,
+   "weight": 2,
+   "mesh": "/Game/Dystopia_Pack/Medic_Dystopia/Mesh/Mesh_UE4/Full/SK_UE4_Medic_Dystopia_Full_04",
+   "pack": "/Game/Sci_Fi_Characters_Pack_Vol_2",
+   "idle": "Anim_Defender_Idle_03",
+   "walk": "Anim_Defender_Walk",
+   "attacks": [
+    "Anim_Defender_Attack_04"
+   ],
+   "hit": "Anim_Defender_Get_Hit",
+   "death": "Anim_Defender_Dead_02",
+   "shot": "Anim_Defender_Shot_03",
+   "heals": {
+    "clip": "Anim_Defender_Reload",
+    "range": 1300,
+    "share": 0.4,
+    "below": 0.15,
+    "cooldown": 5
+   },
+   "sound": "Horned",
+   "ability": "None",
+   "ranged": {
+    "range": "medium",
+    "gun": "rifle"
+   }
+  },
+  {
+   "name": "Kratos_Mech_Crimson",
+   "title": "Kratos Siege Mech",
+   "tier": 5,
+   "weight": 3,
+   "scale": 1.6,
+   "variant": 2,
+   "mesh": "/Game/Dystopia_Pack/Dystopia_Mech/Mesh_UE4/Mech_Full/SK_Mech_Full",
+   "pack": "/Game/Dystopia_Pack/Dystopia_Mech/Animations",
+   "idle": "Anim_Dystopia_Mech_Idle_03",
+   "walk": "Anim_Dystopia_Mech_Walk",
+   "attacks": [
+    "Anim_Dystopia_Mech_Attack_02",
+    "Anim_Dystopia_Mech_Attack_04"
+   ],
+   "hit": "Anim_Dystopia_Mech_Get_Hit_02",
+   "death": "Anim_Dystopia_Mech_Dead_02",
+   "shot": "Anim_Dystopia_Mech_Shot_02",
+   "sound": "Troll",
+   "ability": "Slow",
+   "ranged": {
+    "range": "long",
+    "gun": "heavy"
+   }
+  },
+  {
+   "name": "Alien_Sniper",
+   "title": "Alien Sniper",
+   "tier": 5,
+   "weight": 2,
+   "mesh": "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_03/Full/SK_UE4_Alien_Warrior_03_Full_01",
+   "pack": "/Game/Aliens_Warrior_Pack/Animations/Alien_Warrior_05",
+   "idle": "Anim_Defender_Idle_01_Anim",
+   "walk": "Anim_Defender_Walk_Anim",
+   "attacks": [
+    "Anim_Defender_Attack_02_Anim"
+   ],
+   "hit": "Anim_Defender_Get_Hit_Anim",
+   "death": "Anim_Defender_Dead_02_Anim",
+   "shot": "Anim_Defender_Shot_03_Anim",
+   "sound": "Horned",
+   "ability": "None",
+   "ranged": {
+    "range": "long",
+    "gun": "plasma"
+   }
+  },
+  {
+   "name": "Alien_Warlord",
+   "title": "Alien Warlord",
+   "tier": 5,
+   "weight": 2,
+   "scale": 1.15,
+   "variant": 3,
+   "mesh": "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_05/Full/SK_UE4_Alien_Warrior_05_Full_02",
+   "pack": "/Game/Aliens_Warrior_Pack/Animations/Alien_Warrior_05",
+   "idle": "Anim_Defender_Idle_03_Anim",
+   "walk": "Anim_Defender_Walk_Anim",
+   "attacks": [
+    "Anim_Defender_Attack_04_Anim",
+    "Anim_Defender_Attack_05_Anim"
+   ],
+   "hit": "Anim_Defender_Get_Hit_02_Anim",
+   "death": "Anim_Defender_Dead_01_Anim",
+   "shot": "Anim_Defender_Shot_02_Anim",
+   "sound": "Horned",
+   "ability": "Weaken",
+   "ranged": {
+    "range": "long",
+    "gun": "plasma"
+   }
+  },
+  {
+   "name": "Alien_Hunter",
+   "title": "Alien Hunter",
+   "tier": 5,
+   "weight": 2,
+   "mesh": "/Game/Creatures_Pack/Mesh/SK_Alien",
+   "pack": "/Game/Creatures_Pack/Animations",
+   "idle": "Anim_Alien_Idle",
+   "walk": "Anim_Alien_Walk",
+   "attacks": [
+    "Anim_Alien_Attack_1",
+    "Anim_Alien_Attack_2"
+   ],
+   "hit": "Anim_Alien_GetHit",
+   "death": "Anim_Alien_Death",
+   "shot": "Anim_Alien_Attack_3",
+   "sound": "Alien",
+   "ability": "Poison",
+   "ranged": null
+  },
+  {
+   "name": "Alien_Exterminator",
+   "title": "Alien Exterminator",
+   "tier": 5,
+   "weight": 2,
+   "mesh": "/Game/Creatures_Pack/Mesh/SK_Exterminator",
+   "pack": "/Game/Creatures_Pack/Animations",
+   "idle": "Anim_Exterminator_Idle",
+   "walk": "Anim_Exterminator_Walk",
+   "attacks": [
+    "Anim_Exterminator_Attack_1",
+    "Anim_Exterminator_Attack_2",
+    "Anim_Exterminator_Attack_3"
+   ],
+   "hit": "Anim_Exterminator_GetHit",
+   "death": "Anim_Exterminator_Death",
+   "shot": "Anim_Exterminator_Attack_1",
+   "sound": "Exterminator",
+   "ability": "None",
+   "ranged": null
+  }
+ ],
+ "feet": {
+  "_doc": "868 fortress25's drawn bottoms (cm over the floor, test_f25a) taken off the kind's MeshZ: 909's kinds by the MeshZ measured with (idempotent), 947's own as made (they are made again each run)",
+  "Kratos_Operative": {
+   "bottom": -9.2,
+   "mesh_z": -97.1
+  },
+  "Kratos_Commander": {
+   "bottom": 8.8,
+   "mesh_z": -106.0
+  },
+  "Kratos_Tank": {
+   "bottom": 18.8,
+   "mesh_z": -87.9
+  },
+  "Kratos_Trooper": {
+   "bottom": 3.8,
+   "mesh_z": -91.6
+  },
+  "Kratos_Guard": {
+   "bottom": 3.3,
+   "mesh_z": -95.2
+  },
+  "Kratos_Operative_Black": {
+   "bottom": -7.2
+  },
+  "Kratos_Guard_Red": {
+   "bottom": 5.3
+  },
+  "Kratos_Guard_Blue": {
+   "bottom": 6.0
+  },
+  "Kratos_Medic_Masked": {
+   "bottom": 6.1
+  },
+  "Kratos_Flamer": {
+   "bottom": 3.7
+  },
+  "Alien_Sniper": {
+   "bottom": 4.5
+  },
+  "Alien_Warlord": {
+   "bottom": 4.2
+  }
+ }
+}

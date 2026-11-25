@@ -58,6 +58,9 @@ def tier_power(t):
 HOME = D["monsters"]["home"]; own = {}
 for m, j in HOME.items():
     names = {e["name"] for e in json.load(open(os.path.join(SA, j, "monsters.json"), encoding="utf-8"))["monsters"]}
+    # (the fortress's defenders of the list of 2026-11-22's phase 25 (947): its own kinds too)
+    if os.path.exists(os.path.join(SA, j, "defenders25.json")):
+        names |= {e["name"] for e in json.load(open(os.path.join(SA, j, "defenders25.json"), encoding="utf-8"))["monsters"]}
     g = open_map(m)
     for d in g.get_editor_property("monsters"):
         if str(d.get_editor_property("name")) in names: own[str(d.get_editor_property("name"))] = (m, d.export_text())

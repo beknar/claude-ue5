@@ -56,6 +56,10 @@ public:
 	bool ApplyDamageAt(float Amount, AActor* From, const FVector* At);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetHealth() const { return Health; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetMaxHealth() const { return MaxHealth; }
+	/** the list of 2026-11-22's phase 25: a medic's heals given and the hit points they gave back (RDFortress25.cpp) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Fortress25") int32 GetHealsGiven() const { return HealsGiven; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Fortress25") float GetHealedTotal() const { return HealedTotal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Fortress25") bool IsHealer() const { return bHeals; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetDamage() const { return Damage; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsDead() const { return bDead; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsAggro() const { return bAggro; }
@@ -339,8 +343,20 @@ private:
 	/** a shot begun at its foe (P), out of reach of its blows and in its range with a sight line: true when it stands to shoot */
 	bool TryShoot(AActor* P, const FVector& D, float Dist, float Dz, float Gap, float Dt);
 	void ReleaseShot(AActor* P);
+	// the list of 2026-11-22's phase 25: a medic heals its side (FRDMonsterDef's Heal*; RDFortress25.cpp)
+	bool bHeals = false, bHealSwing = false;
+	float HealRange = 1000.f, HealShare = 0.3f, HealBelow = 0.15f, HealWait = 6.f, HealWaitLeft = 0.f, HealRelease = 0.5f, HealFxScale = 1.f;
+	TObjectPtr<UAnimationAsset> HealClip = nullptr;
+	TObjectPtr<UFXSystemAsset> HealFx = nullptr;
+	TWeakObjectPtr<ARDMonster> HealTarget;
+	void SetupHeal(const FRDMonsterDef& Def);
+	/** a heal begun on the most hurt of its side near it: true when it stands to heal */
+	bool TryHeal(float Dt);
+	void ReleaseHeal();
+	int32 HealsGiven = 0;
+	float HealedTotal = 0.f;
 	// the final boss (FRDMonsterDef's Hover*, RangedMesh*, Beam*, Fist*)
-	float HoverHeight = 0.f, HoverBob = 0.f, HoverPeriod = 1.6f, HoverNow = 0.f, HoverTime = 0.f, BaseMeshZ = 0.f;
+	float HoverHeight = 0.f, HoverBob = 0.f, HoverPeriod = 1.6f, HoverNow = 0.f, HoverTime = 0.f, BaseMeshZ = 0.f, DeathDrop = 0.f;
 	UPROPERTY(Transient) TObjectPtr<UStaticMesh> RangedMesh;
 	float RangedMeshScale = 1.f; FRotator RangedMeshRot = FRotator::ZeroRotator;
 	bool bSkyBeam = false, bBeamSwing = false;
