@@ -673,29 +673,31 @@ The user's words: "eventually opening up into a wider open world that uses the A
 
 - **The pack's graphs and the game's sets**: the Alien Planet's PCG graphs (`PCG_Main` and its subgraphs) read a landscape (Get Landscape Data, the surface sampler, its projections) and splines; the game's sets are tiles of instanced floors with no landscape, and running PCG in a packaged game would need its plugin, its graphs cooked and a ground they can sample. The plan's spike chose the third of its ways: the pack's baked point data placed by the game. Those are the level instances its graphs copy (`LI_*`: flowers, ice crystals, moss, mushrooms, plants, roots, pebbles, spike formations, trees). `947 study27` reads each one's mesh instances into `SourceArt/heaven_fortress/alien27.json` (58 clusters, 709 parts), and the game lays them itself, as the caves lay the Hyper kit's dressing.
 - **The sets are open**: tiers 3 to 5 are drawn in the `Alien` theme, which the generator's `OpenThemes27` names open. A set keeps its plan of rooms and hallways and its tiles (so monsters, maps, progress and saves are unchanged), but:
-  - it has no walls, ceilings, doorways, doors, columns, torches, hung things or room lights;
+  - it has no walls, ceilings, doorways, columns, torches, hung things or room lights, and no doors but a vault's and an arena's (a force field on the castle's hinges: the vault's key and the arena's bars are the doors'); the other doorways' edges stay, with no door, so monsters and paths cross them;
   - every tile is the pack's ground (`MI_Ground01`, triplanar);
   - where the plan has no tile, a ridge of the pack's rocks stands, and next to a walked tile an invisible blocker two rooms high keeps her (and the monsters' sight) out;
   - the clearings and paths are dressed with the clusters: plants and pebbles to walk through, and spike formations and trees that block the tiles they stand on (a tree its trunk's), never a lane's;
   - the castle's furniture is the steel facility's where it has one, else the office's modern pieces (an outpost's camp); the crystals are the pack's ice crystals, the hall's pillars spike rocks of their height, and the tombs, bones, candles, cages and pews are left out.
 - **Seals**: a shut tier is sealed across the path by a force wall (a see-through cyan sheet, brighter at its edges: `M_Alien27_Force`) and its blocker, not a grating.
-- **The sky**: the sun, sky atmosphere, sky light and fog (components of the generator) come up over 1.5 s as she walks into an open set, and go as she walks back into the office.
+- **The sky**: the sun, sky atmosphere and sky light (components of the generator) come up over 1.5 s as she walks into an open set, and the level's own height fog eases from the castle's haze to the alien air (0.035, violet); all go back as she walks into the office.
+- **Seals' backs**: behind each force wall, past the border where the next set is not yet made, a few of the ridges' rocks (taken down with the seal).
+- **The blockers** stop her and the monsters' sight, not the camera's boom.
 - **No draw from the plan's stream**: each solid tile, clearing and path has a stream of its own (a hash of the set's seed and its place).
 
 ### Measured
 
-`868 fortress27 -lv heaven_fortress` (`test_f27e.json` in `SourceArt/mistward`): with tier 3 open and tier 4 shut, the tier-3 set had 3 force walls; then a set of each tier, generated:
+`868 fortress27 -lv heaven_fortress` (`test_f27h.json` in `SourceArt/mistward`): with tier 3 open and tier 4 shut, the tier-3 set had 3 force walls, and pushed at two of them for 3 s from 3.5 m she stopped 78, 78 cm short of the border; then a set of each tier, generated:
 
-| Tier | Ground tiles | Blockers | Ridge rocks | Pack instances | Blocking clusters' tiles blocked | Walked | Frames a second |
-|---|---|---|---|---|---|---|---|
-| 3 | 4633 | 1802 | 5461 | 15879 | 73 of 73 | 17.1 m | 19.5 |
-| 4 | 4839 | 1759 | 5481 | 15351 | 63 of 63 | 10.2 m | 22.3 |
-| 5 | 4529 | 1769 | 5394 | 16811 | 72 of 72 | 5.7 m | 23.2 |
+| Tier | Ground tiles | Blockers | Ridge rocks | Pack instances | Blocking clusters' tiles blocked | Their parts placed | Walked | Frames a second |
+|---|---|---|---|---|---|---|---|---|
+| 3 | 4858 | 1734 | 5430 | 15353 | 64 of 64 | 100 % | 9.7 m | 26.5 |
+| 4 | 4679 | 1804 | 5509 | 16481 | 68 of 68 | 100 % | 10.8 m | 26.1 |
+| 5 | 4621 | 1815 | 5478 | 16070 | 70 of 70 | 100 % | 11.0 m | 25.0 |
 
 - **No shell**: none of any theme's wall, ceiling, doorway or column meshes in the three sets, and no castle mesh left (traps' and weapons' aside).
-- **The sky**: 1.0 in each open set after 2.5 s, 0.0 back in the office's first hall.
-- **The walk**: from a clearing's middle each of four ways for 1.5 s; the farthest is in the table, her feet never more than 2 cm under where she began.
+- **The sky and the fog**: the sky 1.0 in each open set after 2.5 s, 0.0 back in the office's first hall; the level's fog 0.035 outside, 0.02 inside.
+- **The walks**: from a clearing's middle each of four ways for 1.5 s (the farthest in the table), her feet never more than 2 cm under where she began; then each of four ways for 6 s, to the clearing's edge: every one ended on walked ground (or across the border into the next set), never on a ridge.
+- **A monster across a doorway**: a Soldier in a tier-4 clearing came at her across its doorway into the path, from 16.6 m to 2.9 m.
 - **Pictures**: one from each tier's first clearing.
-- **The packaged game**: `package_mistward.ps1`'s `fortress_open` run goes down into the fortress and opens tier 3 round her (`-RDOpen27`); its mark is written once the sky is up.
-- **What could not be measured**: whether the world reads as alien to a player; the pictures show rock spires, white ice formations and a purple sky over brown ground.
-
+- **The packaged game**: `package_mistward.ps1`'s `fortress_open` run goes down into the fortress and opens tier 3 round her on a free tile (`-RDOpen27`); its mark is written once the sky is up.
+- **What could not be measured**: whether the world reads as alien to a player; the pictures show rock spires, white ice formations and dead trees under a violet sky over brown ground.

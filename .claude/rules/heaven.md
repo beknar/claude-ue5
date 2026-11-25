@@ -161,4 +161,11 @@ The city is a wilderness town on `brokenspire` with the modern plan (`FRDWildTow
 - **A pack's numbered materials are not variants of one look**: `MI_Ground02` is snow, and its tiles drew white squares on the brown ground.
 - **An open theme leaves the theme's furniture standing in the sun**: every castle piece needs an open-air piece, or one left out. Count what is left after each change.
 - **A walk test pushes her every frame**: an input given once per 0.2 s moved her 0.3 m in 4 s.
+- **PR #134's review**:
+  - **A map of edges to doors outlives the doors**: with no doors laid, the plan's door numbers stayed in `DoorEdges`, and monsters waited at every doorway for a door that was not there (or opened a cell's). An edge with no door keeps its key (the paths cross it) with no door, and `DoorBetween` asks that the door exists.
+  - **A footprint added before its parts refuses them**: the cluster's own footprint, added first, refused every part near the floor (the trees' trunks, the spikes' bases). Parts are placed outside the room's footprint rule.
+  - **The renderer draws one height fog**: a second fog fought the level's haze. The level's own is eased between its values and the alien ones; the test reads its density.
+  - **A blocker for her is not a blocker for the camera**: the ridges' blockers ignore the camera channel.
+  - **A test that reads back what the code just wrote proves nothing**: the blocked tiles were asked where `MarkBlocked` had marked them. Walk her to the edges, push her at the force wall, and have a monster chase her across a doorway.
+  - **A rule that leaves a piece out must win over a copy that brings it in**: the office's cork board was copied in before the "left out" list ran, and stood on no wall.
 

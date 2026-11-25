@@ -485,6 +485,9 @@ def world():
     # (the hall's pillars spike rocks of their height; the cells' doors the office's glass leaf on the castle's hinge)
     for n, rk in (("Column", "SM_SpikeRockSharp01"), ("CornerColumn", "SM_SpikeRockSmooth02")):
         if unreal.Name(n) in cp: P["Alien." + n] = piece(find_mesh(rk, "AlienPlanet"), mode="center", collision=True, height=float(cp[unreal.Name(n)].size.z))
+    # (a vault's and an arena's doors (the only doors in the open): the office's leaf drawn as a force field on the castle's hinge)
+    if unreal.Name("Office.DoorLeaf") in cp:
+        q = unreal.RDPiece(); q.import_text(cp[unreal.Name("Office.DoorLeaf")].export_text()); q.material = force_material27(); P["Alien.DoorLeaf"] = q
     if unreal.Name("Office.Dais") in cp:          # (the throne's dais a white platform, the outpost's)
         q = unreal.RDPiece(); q.import_text(cp[unreal.Name("Office.Dais")].export_text()); P["Alien.Dais"] = q
     if unreal.Name("Office.CellDoor") in cp:
@@ -497,7 +500,7 @@ def world():
     for n in ("Torch", "Banner", "Painting", "Chain", "Chandelier", "Books", "Debris", "Spear", "SpearFlat", "Axe", "AxeFlat", "Sword", "SwordFlat", "Shield",
               "Gibbet", "CageHanging", "CageLarge", "Shackles", "Carpet", "CarpetLong", "Bookshelf", "Bookshelf2", "ToolBoard", "Wall_Rough_Back",
               "Candles", "CandleStand", "Tomb1", "Tomb2", "Tomb3", "Tomb4", "Bones", "BonePile", "BonePile2", "HayPile", "Firewood", "Pew"):
-        if unreal.Name(n) not in cp or ("Alien." + n) in P: continue
+        if unreal.Name(n) not in cp: continue          # (left out even where the office has one: a cork board or a picture hung on no wall)
         hd = unreal.RDPiece(); hd.mesh = cube; hd.adjust = unreal.Transform(V(0, 0, -100000), unreal.Rotator(), V(0.001, 0.001, 0.001)); hd.size = V(1, 1, 1); hd.collision = False; hd.hidden = True
         P["Alien." + n] = hd
     pieces = dict(g.get_editor_property("pieces"))
@@ -512,6 +515,8 @@ def world():
     g.set_editor_property("alien_clusters27", clusters)
     g.set_editor_property("alien_rocks27", [unreal.Name(r) for r in rocks])
     g.set_editor_property("open_themes27", [unreal.Name("Alien")])
+    # (the alien air thicker than the castle's haze (770's DungeonHaze is 0.02, the same as the default: the change showed in colour only))
+    g.set_editor_property("alien_fog_density27", 0.035)
     tt = [str(t) for t in g.get_editor_property("tier_themes")]
     while len(tt) < 5: tt.append("None")
     tt[2] = tt[3] = tt[4] = "Alien"

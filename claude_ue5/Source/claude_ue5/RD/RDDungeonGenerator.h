@@ -2390,6 +2390,9 @@ public:
 	UPROPERTY(Transient) TObjectPtr<class USkyLightComponent> AlienSkyLight27;
 	UPROPERTY(Transient) TObjectPtr<class UExponentialHeightFogComponent> AlienFog27;
 	float AlienSky27 = 0.f;
+	float FogDensity0_27 = 0.f; FLinearColor FogColor0_27 = FLinearColor::Black; bool bFogVolumetric0_27 = false;
+	/** for the tests: the level's height fog's density now */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Alien27") float GetFogDensity27() const;
 	/** -RDOpen27 (the packaged game's run): tier 3 opened, a set of it generated, she put in it; its mark written once the sky is up */
 	int32 Open27Go = 0;
 	void TickOpen27Go();

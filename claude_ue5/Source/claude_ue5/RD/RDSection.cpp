@@ -100,7 +100,7 @@ bool ARDSection::IsWalkable(FIntPoint T) const
 int32 ARDSection::DoorBetween(FIntPoint A, FIntPoint B) const
 {
 	const int32* D = DoorEdges.Find(EdgeKey(A, B));
-	return D ? *D : -1;
+	return D && Doors.IsValidIndex(*D) ? *D : -1;          // (an edge with no door (the open tiers' doorways) is no door (PR #134's review))
 }
 
 // ------------------------------------------------------------------------------------------------ plan
@@ -2083,11 +2083,14 @@ void ARDSection::ClearInteractive()
 void ARDSection::AddDoors()
 {
 	// one double door per doorway (same room / side order as the plan)
-	if (IsOpenTheme27()) return;          // (phase 27: no doors in the open: the doorway is the path's way into the clearing)
+	// (phase 27: in the open only a vault's and an arena's (a force field on the castle's hinges): their locks and bars are the
+	// doors'; every other doorway is the path's way into the clearing, its edge kept with no door (PR #134's review))
+	const bool bOpen = IsOpenTheme27();
 	for (int32 RI = 0; RI < Rooms.Num(); ++RI)
 	{
 		const FRoom& Rm = Rooms[RI];
 		if (Rm.Kind == ERDRoomKind::Junction) continue;
+		if (bOpen && Rm.Kind != ERDRoomKind::Vault && Rm.Kind != ERDRoomKind::Arena) continue;
 		for (int32 Side = 0; Side < 4; ++Side)
 		{
 			if (!Rm.bDoorSide[Side]) continue;
@@ -2099,6 +2102,12 @@ void ARDSection::AddDoors()
 	// door edge -> first leaf index (two leaves per doorway)
 	TMap<int64, int32> Remap;
 	for (int32 I = 0; I < Doors.Num(); ++I) if (Doors[I].TileA.X >= 0 && !Remap.Contains(EdgeKey(Doors[I].TileA, Doors[I].TileB))) Remap.Add(EdgeKey(Doors[I].TileA, Doors[I].TileB), I);
+	if (bOpen)
+	{
+		// (every doorway's edge stays (the paths cross it); its door, if any, by the remap, else none)
+		for (auto& E : DoorEdges) { const int32* Rd = Remap.Find(E.Key); E.Value = Rd ? *Rd : INDEX_NONE; }
+		return;
+	}
 	if (Doors.Num() > 0) DoorEdges = Remap;
 }
 
@@ -2110,6 +2119,7 @@ void ARDSection::BeginGenerate(ARDDungeonGenerator* InGenerator, FIntPoint InCoo
 	NumInstances = 0; NumLights = 0; NextRoom = 0; NextCorr = 0; GenTicks = 0; FurnishMs = 0.0; AnvilPoints.Reset(); AnvilRoom = -1; Shelves.Reset(); ShelfSwing15.Reset(); Chapels15.Reset(); ForgePoints.Reset(); AlchemistPoints.Reset(); LibrarianPoints.Reset(); if (!Generator || !Generator->bTown) TownOvens.Reset();
 	Theme = Generator->ThemeOf(Coord);
 	ThemeNames.Reset(); ThemeNamesOf = Theme;
+	AlienGround27N = AlienBlockers27N = AlienRocks27N = AlienClusters27N = AlienParts27N = AlienPartsPlaced27N = 0; AlienBlocking27.Reset();          // (PR #134's review)
 	GenR.Initialize(Seed);
 	// (Brokenspire: the start section is the town)
 	if (Generator->bTown && Generator->IsStartSection(Coord))

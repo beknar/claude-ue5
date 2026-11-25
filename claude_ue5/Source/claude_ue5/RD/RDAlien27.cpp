@@ -29,6 +29,8 @@
 #include "GameFramework/Pawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
+#include "Engine/ExponentialHeightFog.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 
@@ -63,6 +65,9 @@ void ARDSection::AlienSolid27(FIntPoint T)
 	{
 		AddPieceAt(Generator->AlienBlock27, C, 0.f);
 		++AlienBlockers27N;
+		// (the blockers stop her and the monsters' sight, not the camera's boom (PR #134's review: it snapped in front of open ground))
+		if (const FRDPiece* Bp = Generator->Piece(Generator->AlienBlock27))
+			if (UInstancedStaticMeshComponent** H = HismsHidden.Find(Bp->Mesh)) if (*H && (*H)->GetCollisionResponseToChannel(ECC_Camera) != ECR_Ignore) (*H)->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	}
 	if (Generator->AlienRocks27.Num() == 0) return;
 	// (a ridge: two or three rocks a tile at its edge, one tile in three inside it, bigger)
@@ -96,13 +101,19 @@ int32 ARDSection::AlienCluster27(FRandomStream& Ra, const FVector& At, bool bBlo
 		MarkBlocked(At, Yaw, Sz, false);
 		AlienBlocking27.Add(FVector(At.X, At.Y, At.Z));
 	}
+	// (the parts are placed outside the room's footprint rule: the cluster's own footprint, just added, would refuse every part near the
+	// floor (PR #134's review: a tree's trunk, a spike's base)); their collision kept
 	int32 Made = 0;
+	const int32 Fr = FurnRoom; FurnRoom = -1;
 	for (const FRDAlienPart27& Pt : Cl.Parts)
 	{
 		const FTransform W = Pt.Xf * Base;
+		const int32 Before = NumInstances;
 		AddPiece(Pt.Piece, W, !bBlocking);
+		if (NumInstances > Before) ++AlienPartsPlaced27N;
 		++Made;
 	}
+	FurnRoom = Fr;
 	++AlienClusters27N; AlienParts27N += Made;
 	return Made;
 }
@@ -168,12 +179,55 @@ void ARDSection::AlienSeal27(const FVector& Border, const FVector& Out)
 	C->SetWorldTransform(P->Adjust * FTransform((-Out).Rotation(), Border - Out * 24.f, Sc));
 	C->ComponentTags.Add(TEXT("AlienForce27"));
 	SealComps.Add(C);
+	// (behind it, past the border where the next set is not yet made, a few of the ridges' rocks: through the see-through wall she saw the
+	// void (PR #134's review); they go with the seal when the tier opens)
+	if (Generator->AlienRocks27.Num() > 0)
+	{
+		const FVector Across = FVector::CrossProduct(FVector::UpVector, Out);
+		const uint32 Hs = RDA27Hash((uint32)Seed, (uint32)FMath::RoundToInt(Border.X), (uint32)FMath::RoundToInt(Border.Y));
+		FRandomStream Ra((int32)Hs);
+		for (int32 K = -1; K <= 1; ++K)
+		{
+			const FRDPiece* Rk = Generator->Piece(Generator->AlienRocks27[Ra.RandRange(0, Generator->AlienRocks27.Num() - 1)]);
+			if (!Rk || !Rk->Mesh) continue;
+			UStaticMeshComponent* R = NewObject<UStaticMeshComponent>(this);
+			R->SetMobility(EComponentMobility::Movable);
+			R->SetStaticMesh(Rk->Mesh);
+			R->SetupAttachment(RootComponent);
+			R->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			R->RegisterComponent();
+			const FVector At = Border + Out * Ra.FRandRange(220.f, 380.f) + Across * (K * TS * 0.55f);
+			R->SetWorldTransform(Rk->Adjust * FTransform(FRotator(0, Ra.FRandRange(0.f, 360.f), 0), At, FVector(Ra.FRandRange(3.2f, 4.5f))));
+			R->ComponentTags.Add(TEXT("AlienSealRock27"));
+			SealComps.Add(R);
+		}
+	}
+}
+
+TArray<FVector> ARDSection::GetDoorways27() const
+{
+	TArray<FVector> Out;
+	for (int32 RI = 0; RI < Rooms.Num(); ++RI)
+	{
+		const FRoom& Rm = Rooms[RI];
+		if (Rm.Kind == ERDRoomKind::Junction) continue;
+		for (int32 Side = 0; Side < 4; ++Side)
+		{
+			if (!Rm.bDoorSide[Side]) continue;
+			const FIntPoint In_ = Side == 0 ? FIntPoint(Rm.Min.X, Rm.Lane.Y) : Side == 1 ? FIntPoint(Rm.Max.X - 1, Rm.Lane.Y) : Side == 2 ? FIntPoint(Rm.Lane.X, Rm.Min.Y) : FIntPoint(Rm.Lane.X, Rm.Max.Y - 1);
+			const FIntPoint Dv = Side == 0 ? FIntPoint(-1, 0) : Side == 1 ? FIntPoint(1, 0) : Side == 2 ? FIntPoint(0, -1) : FIntPoint(0, 1);
+			const FIntPoint OutT = In_ + Dv;
+			if (!DoorEdges.Contains(EdgeKey(In_, OutT))) continue;
+			Out.Add(TileWorld(In_)); Out.Add(TileWorld(OutT));
+		}
+	}
+	return Out;
 }
 
 FString ARDSection::GetAlienStats27() const
 {
-	return FString::Printf(TEXT("open=%d|ground=%d|blockers=%d|rocks=%d|clusters=%d|parts=%d|blocking=%d"),
-		IsOpenTheme27() ? 1 : 0, AlienGround27N, AlienBlockers27N, AlienRocks27N, AlienClusters27N, AlienParts27N, AlienBlocking27.Num());
+	return FString::Printf(TEXT("open=%d|ground=%d|blockers=%d|rocks=%d|clusters=%d|parts=%d|placed=%d|blocking=%d"),
+		IsOpenTheme27() ? 1 : 0, AlienGround27N, AlienBlockers27N, AlienRocks27N, AlienClusters27N, AlienParts27N, AlienPartsPlaced27N, AlienBlocking27.Num());
 }
 
 bool ARDSection::IsTileBlocked27(FVector At) const
@@ -205,11 +259,12 @@ void ARDDungeonGenerator::TickOpen27Go()
 		if (!IsSectionGenerated(S3)) GenerateSectionNow(S3);
 		ARDSection* S = GetSection(S3);
 		if (!S || S->IsBuilding()) return;
+		// (a free tile of the first room that has one: a room's middle can be a cell or furniture (PR #134's review))
 		for (int32 I = 0; I < S->GetNumRooms(); ++I)
 		{
-			const FVector C = S->GetRoomCenter(I);
-			if (C.IsNearlyZero()) continue;
-			Her->SetActorLocation(C + FVector(0, 0, 120.f), false, nullptr, ETeleportType::TeleportPhysics);
+			const TArray<FVector> Free = S->GetRoomFreeTiles(I);
+			if (Free.Num() == 0) continue;
+			Her->SetActorLocation(Free[Free.Num() / 2] + FVector(0, 0, 120.f), false, nullptr, ETeleportType::TeleportPhysics);
 			break;
 		}
 		Open27Go = 2;
@@ -254,12 +309,14 @@ void ARDDungeonGenerator::TickAlienSky27(float Dt)
 		AlienSkyLight27->SetupAttachment(RootComponent);
 		AlienSkyLight27->bRealTimeCapture = true;
 		AlienSkyLight27->RegisterComponent();
-		AlienFog27 = NewObject<UExponentialHeightFogComponent>(this, TEXT("AlienFog27"));
-		AlienFog27->SetupAttachment(RootComponent);
-		AlienFog27->SetFogInscatteringColor(AlienFogColor27);
-		AlienFog27->RegisterComponent();
-		AlienFog27->SetWorldLocation(GetActorLocation() + FVector(0, 0, -200.f));
-		AddInstanceComponent(AlienSun27); AddInstanceComponent(AlienAtmos27); AddInstanceComponent(AlienSkyLight27); AddInstanceComponent(AlienFog27);
+		// (the level's own height fog (770's DungeonHaze), eased between its values and the alien ones: the renderer draws one height fog
+		// only, and a second one fought it (PR #134's review))
+		for (TActorIterator<AExponentialHeightFog> It(W); It; ++It) { AlienFog27 = It->GetComponent(); break; }
+		if (AlienFog27)
+		{
+			FogDensity0_27 = AlienFog27->FogDensity; FogColor0_27 = AlienFog27->FogInscatteringLuminance; bFogVolumetric0_27 = AlienFog27->bEnableVolumetricFog;
+		}
+		AddInstanceComponent(AlienSun27); AddInstanceComponent(AlienAtmos27); AddInstanceComponent(AlienSkyLight27);
 	}
 	// (eased over a second and a half, as she walks out of the building's last hallway)
 	AlienSky27 = FMath::FInterpConstantTo(AlienSky27, Want, Dt, 0.7f);
@@ -269,8 +326,18 @@ void ARDDungeonGenerator::TickAlienSky27(float Dt)
 	AlienAtmos27->SetVisibility(bOn);
 	AlienSkyLight27->SetIntensity(AlienSkyLight27Scale * AlienSky27);
 	AlienSkyLight27->SetVisibility(bOn);
-	AlienFog27->SetFogDensity(AlienFogDensity27 * AlienSky27);
-	AlienFog27->SetVisibility(bOn);
+	if (AlienFog27)
+	{
+		AlienFog27->SetFogDensity(FMath::Lerp(FogDensity0_27, AlienFogDensity27, AlienSky27));
+		AlienFog27->SetFogInscatteringColor(FMath::Lerp(FogColor0_27, AlienFogColor27, AlienSky27));
+		AlienFog27->SetVolumetricFog(AlienSky27 > 0.5f ? false : bFogVolumetric0_27);
+	}
 }
 
 float ARDDungeonGenerator::GetAlienSky27() const { return AlienSky27; }
+float ARDDungeonGenerator::GetFogDensity27() const
+{
+	if (AlienFog27) return AlienFog27->FogDensity;
+	for (TActorIterator<AExponentialHeightFog> It(GetWorld()); It; ++It) return It->GetComponent()->FogDensity;
+	return -1.f;
+}
