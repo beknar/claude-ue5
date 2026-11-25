@@ -1,0 +1,114 @@
+{
+ "tag": "t24h",
+ "plan": [
+  "tower24_enter",
+  "tower24_window",
+  "tower24_exit"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "tower24_enter",
+   "ok": true,
+   "door": {
+    "bld": 8,
+    "at": "<Struct 'Vector' (0x000001847B244F10) {x: 5717177.000000, y: -5538112.000000, z: 0.000000}>",
+    "out": "<Struct 'Vector' (0x000001847B245050) {x: 0.000000, y: -1.000000, z: 0.000000}>",
+    "name": "Meridian Tower",
+    "floors": 5,
+    "said": "enter Meridian Tower (5 floors)"
+   },
+   "level": "heaven_tower",
+   "tower": {
+    "name": "Meridian Tower",
+    "seed": 1614219264,
+    "floors": 5,
+    "cells": 14,
+    "cell": 150.0,
+    "storey": 350.0
+   },
+   "count": {
+    "boxes": 4269,
+    "props": 784,
+    "components": 47,
+    "missing": 0
+   },
+   "views": [
+    {
+     "k": 0,
+     "floor": 0,
+     "z": 629
+    },
+    {
+     "k": 1,
+     "floor": 2,
+     "z": 2114
+    },
+    {
+     "k": 2,
+     "floor": 4,
+     "z": 3599
+    }
+   ],
+   "her": [
+    0,
+    -750,
+    85
+   ],
+   "key": "tower:1614219264",
+   "return_town": "Heaven",
+   "monsters": 0
+  },
+  {
+   "step": "tower24_window",
+   "ok": true,
+   "camera": {
+    "at": [
+     69,
+     888,
+     816
+    ],
+    "yaw": 90.0,
+    "pitch": 0.0,
+    "fov": 90.0
+   },
+   "here": {
+    "floor": 2,
+    "view": 1,
+    "view_floor": 2,
+    "hour": 11.0
+   },
+   "fps": {
+    "lobby": 57.9,
+    "window_floor": 49.2
+   }
+  },
+  {
+   "step": "tower24_exit",
+   "ok": true,
+   "said": "leave Meridian Tower for the street",
+   "back_in": "brokenspire",
+   "from_door_m": 4.5,
+   "city": {
+    "at": [
+     5717252,
+     -5535390,
+     2114
+    ],
+    "yaw": 90.0,
+    "pushed_cm": 682,
+    "captured": true
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_t24h_t24_lobby.png",
+  "bs_t24h_t24_window.png",
+  "bs_t24h_t24_eye.png",
+  "bs_t24h_t24_city.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

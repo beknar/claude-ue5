@@ -165,7 +165,7 @@ void ARDDungeonGenerator::TickCover16(float Dt)
 			}
 		}
 	}
-	else bBuilt = S && !S->IsBuilding();
+	else bBuilt = bTower24 ? bTowerPlaced24 : (S && !S->IsBuilding());          // (the skyscrapers' level has no sets: the tower is built at play's start)
 	if (!bBuilt) { Cover16ReadyAt = -1.0; Cover16Steady = 0; Cover16Frames = 0; Cover16FrameSum = 0.0; return; }
 	if (Cover16ReadyAt < 0.0) Cover16ReadyAt = Now;
 	++Cover16Frames; Cover16FrameSum += FApp::GetDeltaTime();

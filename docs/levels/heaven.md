@@ -492,3 +492,70 @@ All five steps pass in one run: `884 heaven23_roads,heaven23_laws,heaven23_buses
   - **Distance**: drivers drawn only within 60 m.
   - **Pictures**: a bus at its stop, from behind it along its lane.
 
+## The list of 2026-11-22: the skyscrapers' level (phase 24: `948`, `RD/RDTower24.cpp`, `884 tower24_*`)
+
+The user's words: "the skyscrapers and very tall office buildings can have the front door or entrances transport them to a new level that holds only the skyscraper's floors ... office furniture and rooms that look like an office, as well as typical rooms that are in a modern building, like bathrooms, offices, cubicles, datacenter rooms, equipment closets, a cafeteria ... if the player looks out the window, she should see the layout of the city, but not be able to interact with it ... procedurally generated."
+
+### The way in and out
+
+- **The door**: F at a tower's door in Heaven (its towers are the only buildings over five storeys; the offices have three to five) reads "enter <name> Tower (<n> floors)". The name comes from the tower's seed; its floors are the lobby and the floors drawn over it in the city (5 to 11).
+- **The trip**: as into a dungeon (`DescendToCatacombs`): her state carried, the autosave, the way back kept 4.5 m before the door.
+- **The level**: `heaven_tower` is a Save As copy of the castle with `bTower24`: no sets of rooms, no monsters, no map. The tower is built at play's start from the seed the game instance carries (`TowerSeed24`, `TowerFloors24`, `TowerName24`); played from the editor, from `TowerDefaultSeed24`.
+- **The way back**: the lobby's glass doors. F reads "leave <name> for the street" and puts her back in Heaven before the tower's door.
+
+### The tower
+
+- **Its plan, every floor**: a grid of 14 x 14 cells of 1.5 m (the tower's 21 m square in the city), storeys of 3.5 m.
+  - The core in the middle (6 m square): a stair and two lift shafts.
+  - A corridor ring round the core.
+  - Four bands of rooms along the windows, split by the floor's own stream; each room has a doorway onto the corridor.
+- **Its floors**:
+  - The lobby: a reception desk, two seating groups by the front windows, planters, palms, a water dispenser; a bathroom, a second bathroom and a closet in its east band.
+  - A cafeteria floor and a data centre floor (by the seed, for towers of more than three and four floors).
+  - The executive floor at the top: a boardroom across its north band, executive offices.
+  - The other floors: offices, a cubicle farm (three floors in five), meeting rooms.
+  - Every floor has a bathroom and an equipment closet.
+- **Its rooms' furniture** (`SourceArt/heaven_tower/tower24.json`: the office, data centre and bathroom packs' meshes, each turned front to +X by a picture of it from +X and +Y):
+  - offices: a desk and chair facing the door, a screen and keyboard, shelving and drawers against the walls, a cork board, a plant;
+  - cubicle farms: pods of 3 m with partitions, a desk, a chair, a screen and a computer each, printers;
+  - meeting rooms and the boardroom: a table along the room, chairs round it, a whiteboard on a solid wall; glass toward the corridor;
+  - bathrooms: toilets in stalls, sinks, a towel dispenser, a bin, tiled walls and floor;
+  - closets: storage shelving, a cleaning cart or a generator, a mop, a cabinet;
+  - the cafeteria: kitchen units with a sink, a fridge, a water dispenser, tables with chairs;
+  - the data centre: two rows of server racks facing a cold aisle, cooling units at the ends.
+- **Walls, floors, glass**: the engine's cube stretched over each wall, slab and pane, in the office packs' materials, drawn through one instanced component per mesh and material (47 for 5 floors: 4,269 boxes and 784 pieces).
+- **The stair**: a switchback of two flights of ten steps (17.5 cm by 30 cm) a storey, a half landing between them; the steps are thin treads, so the flight above leaves 3 m of head room.
+- **The lifts**:
+  - Two, at the core's east face: one stops at every floor, the express runs between the lobby and the top.
+  - F on the platform rides to the next stop (the top's next is the lobby); F at a landing calls it; while it is elsewhere a gate keeps her out of the shaft.
+- **Lights**: 28 point lights moved to the rooms and corridor of the floor she is on, and a ceiling light on every other cell of every floor.
+
+### The city from the windows
+
+- **The pictures**: as she goes in, the city is captured from the tower's middle at three heights (a share 0.12, 0.5 and 0.88 of the tower's height), at the hour she enters, in cube pictures of 768 (HDR scene colour).
+  - The tower's own pieces are moved out of the town's instanced components for the capture and put back; its other components and the people in it are hidden from it.
+  - Each picture is taken twice: the first of a capture can draw instances where they stood a moment before.
+  - The game instance keeps them.
+- **In the level**: a sphere 80 m round her floor draws the picture of the nearest height, by the view's way. It is turned by the tower's turn, so the street before the lobby's doors is the street before the tower's door in Heaven.
+  - The castle's height fog is turned off inside the tower, and so are bloom and lens flare: the picture's sky, as bright as a real sky, bloomed over the windows.
+- **Not reached**: the city is a picture: nothing in it can be walked to or touched.
+
+### Measured
+
+All six steps pass in one run (`884 tower24_enter,tower24_floors,tower24_stairs,tower24_lifts,tower24_window,tower24_exit -Light`, `test_t24e.json`; the window steps again in `test_t24h.json`):
+
+- **Enter**: F named "Meridian Tower (5 floors)"; the level opened with its seed, name and floors, no monsters, and no piece of the table missing. She stood in the lobby.
+- **Floors**: 5 floors, 39 rooms: 1 lobby, 6 bathrooms, 5 closets, 14 offices, 1 cubicle farm, 2 meeting rooms, 1 cafeteria, 2 data centre rooms, 6 executive offices and 1 boardroom. Every floor has a bathroom and a closet, and no room is empty. There is a picture of each kind from its doorway.
+- **Stairs**: she walked (her own movement) every flight from the lobby to the top floor: the landing, the half landing, across it, the next landing; on each point within 45 cm, 84.6 cm over it (her capsule's half height).
+- **Lifts**:
+  - The local lift rode floor by floor to floor 4 and back to the lobby, her height 84.6 cm over each floor. The express rode from the lobby to floor 4 and back.
+  - From floor 2's landing, the lift's gate held her 2.1 m from the shaft's middle while the lift was in the lobby. F called it, and she walked onto it.
+- **Frame rate**: 59 frames a second in the lobby, 48 at the windows of floor 2 (the editor's play, 1280 x 720).
+- **Way back**: F at the lobby's doors named the street; she stood in Heaven 4.5 m from the tower's door.
+- **The windows against the city** (`blender_numpy/t24_view_check.py`): the city's picture in the tower, the tower hidden, from the floor's middle each way, against Heaven itself pictured from the capture's point with the tower taken out. Correlations of grey levels at 64 x 64:
+  - east 0.91 to 0.96 and up 0.76 to 0.82 (two different ways: 0.03 to 0.08);
+  - north 0.37 to 0.45, south 0.27 to 0.31, west 0.26 to 0.29, down 0.43 to 0.53.
+
+  In those four ways the window's picture has a pale veil of near buildings over it (a building 12 m north of the tower is a haze), which the flat capture of the same place does not have. It is not the fog, bloom, the capture's kind (HDR or the finished picture: the same scores) nor the instances' update (each capture taken twice). It is open in TODO.md.
+- **What could not be measured**: whether the rooms read as an office to a person (pictures are in the record).
+

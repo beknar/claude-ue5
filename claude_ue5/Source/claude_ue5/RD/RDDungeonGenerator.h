@@ -2364,6 +2364,106 @@ public:
 	/** a lift platform's speed (cm a second) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven20") float LiftSpeed20 = 220.f;
 	void TickLifts20(float Dt);
+	// ---- the list of 2026-11-22's twenty-fourth phase: the skyscrapers' level (RDTower24.cpp; 948)
+	/** brokenspire: the level a Heaven tower's door opens (heaven_tower); empty: the towers' doors are plain doors */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") FString TowerLevel24;
+	/** heaven_tower: the level is a tower (no sets of rooms, no monsters), built from the seed the game instance carries */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") bool bTower24 = false;
+	/** its pieces (furniture and fittings: 948 from the office, data centre and bathroom packs), front +X, centred, on z 0 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TMap<FName, FRDPiece> TowerPieces24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UStaticMesh> TowerCube24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UStaticMesh> TowerSphere24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UMaterialInterface> TowerWallMat24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UMaterialInterface> TowerTileWallMat24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UMaterialInterface> TowerCoreMat24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UMaterialInterface> TowerFloorMat24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UMaterialInterface> TowerLobbyFloorMat24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UMaterialInterface> TowerTileMat24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UMaterialInterface> TowerWoodMat24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UMaterialInterface> TowerConcreteMat24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UMaterialInterface> TowerCeilMat24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UMaterialInterface> TowerGlassMat24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UMaterialInterface> TowerDoorGlassMat24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UMaterialInterface> TowerInnerGlassMat24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UMaterialInterface> TowerMetalMat24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UMaterialInterface> TowerStairMat24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UMaterialInterface> TowerLiftMat24;
+	/** the city's picture: an unlit two-sided material sampling the cube "View" by the view's way, times "Scale" */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") TObjectPtr<UMaterialInterface> TowerViewMat24;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") float TowerCellSize24 = 150.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") int32 TowerCells24 = 14;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") float TowerStoreyH24 = 350.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") int32 TowerCaptureSize24 = 768;
+	/** the windows' pictures as the city is seen (tone mapped, its exposure), not as its light is (HDR) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") bool bTowerCaptureLDR24 = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") float TowerViewRadius24 = 8000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") float TowerViewScale24 = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") float TowerViewNoneScale24 = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") int32 TowerLightCount24 = 28;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") float TowerLightCd24 = 600.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") float TowerLiftSpeed24 = 500.f;
+	/** played from the editor with no tower carried: this seed */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") int32 TowerDefaultSeed24 = 24680;
+	static FString TowerName24(uint32 Seed);
+	static int32 TowerFloors24(uint32 Seed);
+	int32 TowerDoorNear24(const FVector& From, FVector* OutDoor = nullptr, FVector* OutOut = nullptr) const;
+	FString TowerDescribe24(const FVector& From) const;
+	FString TowerUse24(const FVector& From);
+	bool EnterTower24(int32 BI);
+	void CaptureTowerViews24(int32 BI);
+	/** a tower's own pieces taken out of the town for a capture (moved far down), and put back; the components to hide from it */
+	struct FTowerMoved24 { TWeakObjectPtr<class UInstancedStaticMeshComponent> C; int32 I = 0; FTransform T; };
+	void TowerOutOfCity24(int32 BI, TArray<FTowerMoved24>& Moved, TArray<UPrimitiveComponent*>& Hidden, TArray<AActor*>& HiddenActors);
+	void TowerBackInCity24(const TArray<FTowerMoved24>& Moved);
+	/** for the tests: a picture of Heaven from a point with a tower's own pieces taken out, as its windows' pictures were taken */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Tower24") bool CaptureCity24(int32 BI, FVector At, FRotator Rot, float Fov, int32 Width, int32 Height, const FString& Dir, const FString& File);
+	float HeavenTowerHeight24(const class ARDSection* S, int32 BI) const;
+	/** for the tests: "door|<building>|<x>|<y>|<z>|<out x>|<out y>|<name>|<floors>" for every tower of Heaven */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Tower24") TArray<FString> GetTowerDoors24() const;
+	void ApplyTower24();
+	void PlanTower24();
+	FVector TowerCell24(float I, float J, float Z) const;
+	class UInstancedStaticMeshComponent* TowerIsm24(UStaticMesh* Mesh, UMaterialInterface* Mat, bool bCollide);
+	void TowerBox24(const FVector& Min, const FVector& Max, UMaterialInterface* Mat, bool bCollide);
+	bool TowerPiece24(FName Name, const FVector& At, float Yaw, bool bCollide = true);
+	FVector TowerPieceSize24(FName Name) const;
+	void BuildTower24();
+	void FurnishTower24(int32 Ri);
+	void BeginTower24();
+	struct FRoom24 { int32 Floor = 0; FIntPoint Min = FIntPoint::ZeroValue, Max = FIntPoint::ZeroValue; uint8 Kind = 0; FIntPoint DoorCell = FIntPoint::ZeroValue; int32 DoorDir = 0; int32 Props = 0; };
+	struct FTowerLift24
+	{
+		bool bExpress = false; FVector Shaft = FVector::ZeroVector, Entry = FVector::ZeroVector, Door = FVector::ZeroVector; TArray<float> Floors;
+		int32 At = 0, Target = 0; float Z = 0.f; bool bMoving = false;
+		TWeakObjectPtr<UStaticMeshComponent> Platform; TArray<TWeakObjectPtr<UPrimitiveComponent>> Gates, Bars;
+	};
+	void UpdateTowerGates24(FTowerLift24& L);
+	void TickTower24(float Dt);
+	FString TowerLiftNear24(const FVector& From, int32& OutLift, int32& OutFloor, bool& bOnIt) const;
+	FString TowerFloorName24(const FTowerLift24& L, int32 K) const;
+	int32 TowerLiftNext24(const FTowerLift24& L) const;
+	FString TowerDescribeHere24(const FVector& From) const;
+	FString TowerUseHere24(const FVector& From);
+	/** for the tests: the tower's plan, rooms, stairs, lifts, way out, the floor she is on and its picture, the counts */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Tower24") TArray<FString> GetTower24() const;
+	/** for the tests: a picture of the world from a point (the city as seen from where a tower's window stands), written as a PNG */
+	/** for the tests: the tower's own pieces hidden (the city's picture seen alone) or shown */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Tower24") void SetTowerHidden24(bool bHide);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Tower24") bool CaptureView24(FVector At, FRotator Rot, float Fov, int32 Width, int32 Height, const FString& Dir, const FString& File);
+	int32 TowerSeedNow24 = 0, TowerFloorsNow24 = 0, TowerBoxes24 = 0, TowerProps24 = 0, TowerViewIndex24 = -1, TowerLightFloor24 = -1, TowerFloorNow24 = 0;
+	FString TowerNameNow24;
+	TArray<TArray<int32>> TowerPlan24;
+	TArray<FRoom24> TowerRooms24;
+	TArray<FTowerLift24> TowerLifts24;
+	UPROPERTY(Transient) TMap<FString, TObjectPtr<class UInstancedStaticMeshComponent>> TowerIsms24;
+	UPROPERTY(Transient) TObjectPtr<UMaterialInstanceDynamic> TowerViewMID24;
+	UPROPERTY(Transient) TObjectPtr<UPostProcessComponent> TowerPost24;
+	UPROPERTY(Transient) TArray<TObjectPtr<class UPointLightComponent>> TowerLights24;
+	TWeakObjectPtr<UStaticMeshComponent> TowerSphereC24;
+	TSet<FName> TowerMissing24;
+	TArray<FString> TowerLines24, TowerStairs24;
+	FVector TowerExit24 = FVector::ZeroVector, TowerStart24 = FVector::ZeroVector;
+	bool bTowerPlaced24 = false;
 	/** for the tests: the marks and found ids the cave links made this session taken off again */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Cave16") int32 ForgetCaveLinkMarks16();
 	TArray<int32> CaveLinkMarked16;

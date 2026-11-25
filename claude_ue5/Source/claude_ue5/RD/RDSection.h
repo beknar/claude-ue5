@@ -240,6 +240,8 @@ public:
 		TArray<int32> Rooms; int32 Door = -1; bool bBoarded = false; uint32 Seed = 0; FString Label;
 	};
 	TArray<FTownBld> TownBlds;
+	/** a point in a building's frame, for the generator (the list of 2026-11-22's phase 24) */
+	FVector TownBldPoint24(const FTownBld& B, float X, float Y, float Z) const { return TownBldPoint(B, X, Y, Z); }
 	/** what stands outside: its kind (RDTownSpots), where, its yaw (and the building it belongs to, -1) */
 	struct FTownSpot { uint8 Kind = 0; FVector At = FVector::ZeroVector; float Yaw = 0.f; int32 Bld = -1; };
 	TArray<FTownSpot> TownSpots;

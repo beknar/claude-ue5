@@ -137,7 +137,7 @@ pieces_of(VEL)
 # and props; a monster drawn in a material of its own (FRDMonsterDef::Material: the iron golem's rusted iron, a static pack's
 # material) needs the skeletal-mesh usage)
 nskel = 0
-for m_ in ("/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewers", "/Game/RandomDungeon/Maps/kethrys_spire", "/Game/RandomDungeon/Maps/heaven_fortress", "/Game/RandomDungeon/Maps/caves"):
+for m_ in ("/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewers", "/Game/RandomDungeon/Maps/kethrys_spire", "/Game/RandomDungeon/Maps/heaven_fortress", "/Game/RandomDungeon/Maps/caves", "/Game/RandomDungeon/Maps/heaven_tower"):
     g_ = pieces_of(m_)
     for d in g_.get_editor_property("monsters"):
         mm = d.get_editor_property("material")
@@ -145,6 +145,16 @@ for m_ in ("/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewe
             nskel += 1; note(mm); want(mm.get_base_material(), "used_with_skeletal_mesh")
     # (the caves of the list of 2026-11-22 (945, RDCave16.cpp): the kit's tunnels and their floor strips are bent spline meshes, its
     # dressing instanced meshes; its rooms, caps, torches and god rays plain components (the Nanite usage where Nanite))
+    # (the skyscrapers' level of the list of 2026-11-22 (948, RDTower24.cpp): its pieces from the office packs and its surfaces (the engine's
+    # cube in each surface's material) all drawn through instanced meshes; the lifts' platforms and the city's sphere plain components)
+    if g_.get_editor_property("tower24"):
+        for p in g_.get_editor_property("tower_pieces24").values():
+            if not p.mesh: continue
+            meshes.add(p.mesh); mat = p.get_editor_property("material"); use(p.mesh, [mat] if mat else None)
+        cube = g_.get_editor_property("tower_cube24")
+        surf = [g_.get_editor_property(k) for k in ("tower_wall_mat24", "tower_tile_wall_mat24", "tower_core_mat24", "tower_floor_mat24", "tower_lobby_floor_mat24", "tower_tile_mat24",
+                "tower_wood_mat24", "tower_concrete_mat24", "tower_ceil_mat24", "tower_glass_mat24", "tower_door_glass_mat24", "tower_inner_glass_mat24", "tower_metal_mat24", "tower_stair_mat24")]
+        if cube: use(cube, [m for m in surf if m])
     if g_.get_editor_property("cave16"):
         for t in g_.get_editor_property("cave_tunnels16"):
             for tm in (t.get_editor_property("mesh"), t.get_editor_property("floor_mesh")):

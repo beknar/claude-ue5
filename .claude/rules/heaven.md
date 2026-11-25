@@ -110,3 +110,14 @@ The city is a wilderness town on `brokenspire` with the modern plan (`FRDWildTow
   - **Showing a parent shows its children**: drivers and empty seats came back with their car; apply the children's own rule at once.
   - **A replan must not re-plan what the static build placed**: keep it.
 
+## The list of 2026-11-22: the skyscrapers' level (phase 24: `948`, `RD/RDTower24.cpp`, `884 tower24_*`)
+
+- **A level with no sets waits for nothing**: the loading cover waits for the start set to be built (`TickCover16`); the tower level has none, and the cover held her input a whole minute (the stairs' test walked nowhere). It waits for the tower now (`bTowerPlaced24`).
+- **A pack's mesh has its own front**: each candidate was pictured alone from +X and from +Y (base colour) and its front written in the table; a long ortho picture of all of them drew half black (Nanite meshes in an orthographic capture).
+- **A walk from a landing cuts across a flight**: from the next floor's landing straight to the half landing she walked down the flight she had come up. A route goes through every landing.
+- **A lift's door is not its shaft's middle**: walked at the shaft's middle she met the wall beside the door; approach along the door's row.
+- **A tower's pieces stand in the town's shared instanced components**: for a capture from inside it, its instances in its footprint are moved down and back (`TowerOutOfCity24`), its other components hidden from the capture.
+- **A picture of a real sky blooms**: the window's HDR sky washed every view; bloom and lens flare are off in the tower level.
+- **Compare a capture with a capture of the same kind from the same point**: Heaven pictured 17 m beyond the tower's wall stood past a building 12 m north of it; the comparison now takes the cube's own point with the tower taken out (`CaptureCity24`).
+- **A C++ file changed while a background build runs may be compiled half old**: build again after it, before trusting a run.
+

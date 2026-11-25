@@ -243,6 +243,7 @@ bool ARDDungeonGenerator::GenerateSectionNow(FIntPoint S)
 
 void ARDDungeonGenerator::Enqueue(FIntPoint S)
 {
+	if (bTower24) return;          // (the skyscrapers' level: no sets of rooms)
 	if ((bOneRoom || bTown) && !IsStartSection(S)) return;          // (martial_arts: the one room, nothing beyond it; Brokenspire: the town alone)
 	if (!IsSectionGenerated(S) && !Queue.Contains(S) && IsSectionAllowed(S)) Queue.Add(S);
 }
@@ -1618,6 +1619,8 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 	if (bWild) { const FString Wp = WildPoiInteract(From); if (!Wp.IsEmpty()) return Wp; }
 	// (Brokenspire: someone of the town, a service, the gate, a boarded door; the castle's way back)
 	// (the list of 2026-11-22's twentieth phase: Heaven's lifts, at their doors and on their platforms)
+	if (bTower24) { const FString Tw = TowerUseHere24(From); if (!Tw.IsEmpty()) return Tw; }          // (phase 24: the tower's lifts and doors)
+	if (bTown && TownPlan == 5) { const FString Tw = TowerUse24(From); if (!Tw.IsEmpty()) return Tw; }          // (a tower's door: into the tower)
 	if (bTown && TownPlan == 5) if (ARDSection* Hs = GetSection(FIntPoint::ZeroValue)) { const FString Lf = Hs->LiftUse20(From, Best ? BestD : 1e9f); if (!Lf.IsEmpty()) return Lf; }
 	if (bTown || bTownLink) { const FString Tw = TownInteract(From); if (!Tw.IsEmpty()) return Tw; }
 	// (the third list: an armory table's weapon, a shrine, a fountain, a vault's door)
@@ -1743,6 +1746,8 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 				: FString::Printf(TEXT("search the body of %s (%d)"), *Lp->Owner14, Lp->GetNumThings());
 			return Lp->GetNumThings() == 1 ? FString::Printf(TEXT("take the %s"), *Lp->Things[0].ToString().ToLower()) : FString::Printf(TEXT("take up what lies here (%d)"), Lp->GetNumThings());
 		}
+	if (bTower24) { const FString Tw = TowerDescribeHere24(From); if (!Tw.IsEmpty()) return Tw; }
+	if (bTown && TownPlan == 5) { const FString Tw = TowerDescribe24(From); if (!Tw.IsEmpty()) return Tw; }
 	if (bTown && TownPlan == 5) if (const ARDSection* Hs = GetSection(FIntPoint::ZeroValue)) { const FString Lf = Hs->LiftDescribe20(From, Best ? BestD : 1e9f); if (!Lf.IsEmpty()) return Lf; }          // (the twentieth phase)
 	if (bTown || bTownLink) { const FString Tw = TownDescribe(From); if (!Tw.IsEmpty()) return Tw; }
 	if (bSpecialRooms || bWeaponPickups) { const FString Sp = DescribeSpecialNear(From); if (!Sp.IsEmpty()) return Sp; }
@@ -1796,6 +1801,7 @@ void ARDDungeonGenerator::BeginPlay()
 	}
 	SessionSeed = FixedSessionSeed != 0 ? FixedSessionSeed : (int32)(FDateTime::Now().GetTicks() & 0x7fffffff);
 	if (bCave15) ApplyCave15();          // (the list of 2026-11-20's ninth phase: the tower's key and tier, before anything reads them)
+	if (bTower24) ApplyTower24();          // (the list of 2026-11-22's phase 24: the skyscraper's seed, floors and name)
 	if (bRevealEffect && RevealPostMaterial)
 	{
 		RevealMID = UMaterialInstanceDynamic::Create(RevealPostMaterial, this);
@@ -1859,7 +1865,8 @@ void ARDDungeonGenerator::BeginPlay()
 	for (auto It = Sections.CreateIterator(); It; ++It) if (!It->Value) It.RemoveCurrent();
 	// (Brokenspire: the game's town (its seed), what was looted and opened in it or in the castle)
 	if (bTown || bTownLink) { BeginTownPlay(); if (bOpeningMenu) return; }
-	if (Sections.Num() == 0) SpawnSection(FIntPoint::ZeroValue, false);
+	if (bTower24) BeginTower24();          // (the skyscrapers' level: the tower alone, built from its seed)
+	else if (Sections.Num() == 0) SpawnSection(FIntPoint::ZeroValue, false);
 	else for (auto& KV : Sections) KV.Value->ActivateForPlay();
 	if (bTown || bTownLink) AfterTownBuilt();
 	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDGEN play: %d start sections, session seed %d, %d monsters"), Sections.Num(), SessionSeed, GetNumMonsters());
@@ -1874,6 +1881,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 	// (the list of 2026-11-22: -RDPerf, the frame rate in every city and biome, and the castle's and a dungeon's first hall)
 	if (bTown || bTownLink) TickPerf16(UGameplayStatics::GetPlayerPawn(this, 0));
 	TickCover16(Dt);
+	if (bTower24) TickTower24(Dt);
 	// (mistward: the frame rate, smoothed over about a second of frames, from the real time between frames)
 	if (bShowFps)
 	{
