@@ -1,0 +1,239 @@
+{
+ "tag": "t24j",
+ "plan": [
+  "tower24_enter",
+  "tower24_lifts",
+  "tower24_window",
+  "tower24_exit"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "tower24_enter",
+   "ok": true,
+   "door": {
+    "bld": 16,
+    "at": "<Struct 'Vector' (0x000001B48464D140) {x: 5706677.000000, y: -5538412.000000, z: 0.000000}>",
+    "out": "<Struct 'Vector' (0x000001B48464D230) {x: 0.000000, y: -1.000000, z: 0.000000}>",
+    "name": "Zenith Tower",
+    "floors": 11,
+    "said": "enter Zenith Tower (11 floors)"
+   },
+   "level": "heaven_tower",
+   "tower": {
+    "name": "Zenith Tower",
+    "seed": 1015000832,
+    "floors": 11,
+    "cells": 14,
+    "cell": 150.0,
+    "storey": 350.0
+   },
+   "count": {
+    "boxes": 9258,
+    "props": 1788,
+    "components": 47,
+    "missing": 0
+   },
+   "views": [
+    {
+     "k": 0,
+     "floor": 1,
+     "z": 510
+    },
+    {
+     "k": 1,
+     "floor": 5,
+     "z": 1910
+    },
+    {
+     "k": 2,
+     "floor": 9,
+     "z": 3310
+    }
+   ],
+   "her": [
+    0,
+    -750,
+    85
+   ],
+   "key": "tower",
+   "return_town": "Heaven",
+   "monsters": 0,
+   "turn_deg": 0.0,
+   "capture_ms": 46.0,
+   "faces_flat": [],
+   "faces": 18
+  },
+  {
+   "step": "tower24_lifts",
+   "ok": true,
+   "local": [
+    {
+     "to": 1,
+     "said": "ride the lift to floor 1",
+     "f": "lift ride",
+     "at": 1,
+     "her_z_over": 84.6
+    },
+    {
+     "to": 2,
+     "said": "ride the lift to floor 2",
+     "f": "lift ride",
+     "at": 2,
+     "her_z_over": 84.6
+    },
+    {
+     "to": 3,
+     "said": "ride the lift to floor 3",
+     "f": "lift ride",
+     "at": 3,
+     "her_z_over": 84.6
+    },
+    {
+     "to": 4,
+     "said": "ride the lift to floor 4",
+     "f": "lift ride",
+     "at": 4,
+     "her_z_over": 84.6
+    },
+    {
+     "to": 5,
+     "said": "ride the lift to floor 5",
+     "f": "lift ride",
+     "at": 5,
+     "her_z_over": 84.6
+    },
+    {
+     "to": 6,
+     "said": "ride the lift to floor 6",
+     "f": "lift ride",
+     "at": 6,
+     "her_z_over": 84.6
+    },
+    {
+     "to": 7,
+     "said": "ride the lift to floor 7",
+     "f": "lift ride",
+     "at": 7,
+     "her_z_over": 84.6
+    },
+    {
+     "to": 8,
+     "said": "ride the lift to floor 8",
+     "f": "lift ride",
+     "at": 8,
+     "her_z_over": 84.6
+    },
+    {
+     "to": 9,
+     "said": "ride the lift to floor 9",
+     "f": "lift ride",
+     "at": 9,
+     "her_z_over": 84.6
+    },
+    {
+     "to": 10,
+     "said": "ride the lift to floor 10",
+     "f": "lift ride",
+     "at": 10,
+     "her_z_over": 84.6
+    },
+    {
+     "to": 0,
+     "said": "ride the lift to the lobby",
+     "f": "lift ride",
+     "at": 0,
+     "her_z_over": 84.6
+    }
+   ],
+   "express": [
+    {
+     "to": 1,
+     "said": "ride the express lift to floor 10",
+     "f": "lift ride",
+     "at": 1,
+     "her_z_over": 84.6
+    },
+    {
+     "to": 0,
+     "said": "ride the express lift to the lobby",
+     "f": "lift ride",
+     "at": 0,
+     "her_z_over": 84.6
+    }
+   ],
+   "gate": {
+    "nearest_x_to_shaft_cm": 212,
+    "lowest_over_floor": 84.6
+   },
+   "call": {
+    "floor": 2,
+    "said": "call the lift",
+    "f": "lift called",
+    "at": 2
+   },
+   "stepped_on": {
+    "off_cm": 55,
+    "her_z_over": 84.6
+   },
+   "express_call": {
+    "said": "call the express lift",
+    "f": "lift called",
+    "at": 0,
+    "local_target": 2
+   }
+  },
+  {
+   "step": "tower24_window",
+   "ok": true,
+   "camera": {
+    "at": [
+     40,
+     620,
+     1888
+    ],
+    "yaw": 90.0,
+    "pitch": 0.0,
+    "fov": 90.0
+   },
+   "here": {
+    "floor": 5,
+    "view": 1,
+    "view_floor": 5,
+    "hour": 11.0
+   },
+   "fps": {
+    "lobby": 60.7,
+    "window_floor": 57.6
+   }
+  },
+  {
+   "step": "tower24_exit",
+   "ok": true,
+   "said": "leave Zenith Tower for the street",
+   "back_in": "brokenspire",
+   "from_door_m": 4.5,
+   "city": {
+    "at": [
+     5706752,
+     -5535690,
+     1910
+    ],
+    "yaw": 90.0,
+    "pushed_cm": 682,
+    "captured": true
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_t24j_t24_lobby.png",
+  "bs_t24j_t24_lift.png",
+  "bs_t24j_t24_window.png",
+  "bs_t24j_t24_eye.png",
+  "bs_t24j_t24_city.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

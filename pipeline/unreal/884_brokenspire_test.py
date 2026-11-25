@@ -7716,6 +7716,302 @@ def step_nanite16():
 STEPS.update({"nanite16": step_nanite16})
 
 
+# ================================================================================================ the list of 2026-11-22's phase 24: the tower level
+def tower24():
+    """the tower level's lines: its plan, rooms, stairs, lifts, way out, the floor she is on, its pictures, counts"""
+    d = {"rooms": [], "stairs": {}, "lifts": [], "views": []}
+    for l in G["gen"].get_tower24():
+        p = str(l).split("|")
+        if p[0] == "tower": d["tower"] = {"name": p[1], "seed": int(p[2]), "floors": int(p[3]), "cells": int(p[4]), "cell": float(p[5]), "storey": float(p[6])}
+        elif p[0] == "room": d["rooms"].append({"i": int(p[1]), "floor": int(p[2]), "kind": p[3], "a": V(float(p[4]), float(p[5]), 0), "b": V(float(p[6]), float(p[7]), 0), "door": V(float(p[8]), float(p[9]), 0), "way": int(p[10]), "props": int(p[11])})
+        elif p[0] == "stair": d["stairs"][int(p[1])] = {"foot": V(float(p[2]), float(p[3]), float(p[4])), "top": V(float(p[5]), float(p[6]), float(p[7]))}
+        elif p[0] == "lift": d["lifts"].append({"i": int(p[1]), "express": p[2] == "1", "shaft": V(float(p[3]), float(p[4]), 0), "n": int(p[5]), "at": int(p[6]), "target": int(p[7]), "z": float(p[8]), "moving": p[9] == "1", "shut": int(p[10]), "door": V(float(p[11]), float(p[12]), 0), "floors": []})
+        elif p[0] == "liftfloor": d["lifts"][int(p[1])]["floors"].append(float(p[3]))
+        elif p[0] == "exit": d["exit"] = V(float(p[1]), float(p[2]), float(p[3]))
+        elif p[0] == "view": d["views"].append({"k": int(p[1]), "floor": int(p[2]), "at": V(float(p[3]), float(p[4]), float(p[5])), "yaw": float(p[6])})
+        elif p[0] == "here": d["here"] = {"floor": int(p[1]), "view": int(p[2]), "view_floor": int(p[3]), "hour": float(p[4])}
+        elif p[0] == "count": d["count"] = {"boxes": int(p[1]), "props": int(p[2]), "components": int(p[3]), "missing": int(p[4])}
+    return d
+
+
+def tower24_in():
+    """into a tower of Heaven by its door (the game's own F), unless she is in the tower level already; the door she went in by"""
+    if "heaven_tower" in G["w"].get_path_name(): return G.get("t24_door")
+    g = G["gen"]
+    S = yield from heaven16_in(); yield from wait(1.0)
+    g.set_town_hour(11.0); yield from wait(1.5)
+    if os.environ.get("T24_LDR"): g.set_editor_property("tower_capture_ldr24", os.environ["T24_LDR"] == "1")
+    doors = [str(l).split("|") for l in g.get_tower_doors24()]
+    if not doors: return None
+    # (the tallest, and of those one whose door does not face -Y: the picture's turn exercised (PR #131's review))
+    doors.sort(key=lambda q: (-int(q[8]), float(q[6]) < -0.5))
+    p = doors[0]
+    door = {"bld": int(p[1]), "at": V(float(p[2]), float(p[3]), float(p[4])), "out": V(float(p[5]), float(p[6]), 0), "name": p[7], "floors": int(p[8])}
+    stand = V(door["at"].x + door["out"].x * 150, door["at"].y + door["out"].y * 150, 0)
+    put(stand, yaw=math.degrees(math.atan2(-door["out"].y, -door["out"].x)), z=door["at"].z); yield from wait(1.0)
+    door["said"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+    G["t24_door"] = door
+    yield from travel("heaven_tower", lambda: G["gen"].interact_nearest(G["pawn"].get_actor_location()))
+    yield from wait(2.0)
+    return door
+
+
+def step_tower24_enter():
+    """the list of 2026-11-22: "the skyscrapers ... can have the front door or entrances transport them to a new level": F at a tower's
+    door in Heaven names it; the level opens with that tower's seed, name and floors, her state carried; she stands in its lobby"""
+    res = {}
+    door = yield from tower24_in()
+    res["door"] = {k: (str(v) if isinstance(v, unreal.Vector) else v) for k, v in (door or {}).items()}
+    g = G["gen"]; d = tower24()
+    res["level"] = G["w"].get_path_name().split(".")[-1]
+    res["tower"] = d.get("tower"); res["count"] = d.get("count"); res["views"] = [{"k": v["k"], "floor": v["floor"], "z": round(v["at"].z)} for v in d["views"]]
+    p = G["pawn"].get_actor_location()
+    res["her"] = [round(p.x), round(p.y), round(p.z)]
+    res["key"] = str(g.get_editor_property("dungeon_key")); res["return_town"] = str(G["gi"].get_editor_property("return_town"))
+    res["monsters"] = g.get_num_monsters()
+    res["turn_deg"] = round(float(G["gi"].get_editor_property("tower_yaw24")) + 90.0, 1)
+    # (each picture's six faces read back: a blank or black picture has no spread)
+    st = [str(l).split("|") for l in g.get_tower_view_stats24()]
+    res["capture_ms"] = next((float(q[1]) for q in st if q[0] == "capture"), None)
+    faces = [{"k": int(q[1]), "f": int(q[2]), "mean": float(q[3]), "spread": float(q[4])} for q in st if q[0] == "face"]
+    res["faces_flat"] = [(x["k"], x["f"]) for x in faces if x["spread"] < 0.002]
+    res["faces"] = len(faces)
+    shot("t24_lobby"); yield from rwait(1.2)
+    t = d.get("tower") or {}
+    ok = door is not None and door["said"].startswith("enter ") and res["level"] == "heaven_tower" and t.get("name") == door["name"] and t.get("floors") == door["floors"] \
+        and d.get("count", {}).get("missing", 1) == 0 and len(d["views"]) == 3 and p.z < 300 and res["monsters"] == 0 and res["faces"] == 18 and not res["faces_flat"]
+    step_result("tower24_enter", bool(ok), **res)
+
+
+def step_tower24_floors():
+    """the floors generated: on every floor but the lobby a bathroom and a closet; a cafeteria floor, a data centre floor, the executive
+    floor and a boardroom at the top; offices, cubicle farms and meeting rooms; each room furnished (its pieces counted) and a door to
+    the corridor; a picture of one room of each kind, from its doorway"""
+    res = {}
+    yield from tower24_in()
+    g = G["gen"]; d = tower24(); t = d["tower"]
+    kinds = {}
+    for r in d["rooms"]: kinds.setdefault(r["kind"], []).append(r)
+    res["kinds"] = {k: len(v) for k, v in kinds.items()}
+    per_floor = {}
+    for r in d["rooms"]: per_floor.setdefault(r["floor"], []).append(r["kind"])
+    res["floors"] = {f: sorted(set(v)) for f, v in sorted(per_floor.items())}
+    res["floors_without_bath"] = [f for f, v in per_floor.items() if "bathroom" not in v]
+    res["floors_without_closet"] = [f for f, v in per_floor.items() if "closet" not in v]
+    res["empty_rooms"] = [(r["i"], r["kind"], r["floor"]) for r in d["rooms"] if r["props"] == 0]
+    quiet(True)
+    shots = []
+    try:
+        for k in ("lobby", "office", "cubicles", "meeting", "bathroom", "closet", "cafeteria", "datacentre", "executive", "boardroom"):
+            r = next((x for x in kinds.get(k, []) if x["floor"] > 0 or k in ("lobby", "bathroom", "closet")), None)
+            if not r: continue
+            z = r["floor"] * t["storey"]
+            mid = V((r["a"].x + r["b"].x) / 2, (r["a"].y + r["b"].y) / 2, 0)
+            if k == "lobby":
+                stand = V(0, -t["cells"] * t["cell"] / 2 + 160, 0); look = V(0, 0, 0)
+            else:
+                stand = r["door"]; look = mid
+            yaw = math.degrees(math.atan2(look.y - stand.y, look.x - stand.x))
+            put(stand, yaw=yaw, z=z); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=yaw))
+            G["pawn"].set_actor_hidden_in_game(True); yield from wait(1.2)
+            shot(f"t24_{k}"); shots.append(k); yield from rwait(1.2)
+            G["pawn"].set_actor_hidden_in_game(False)
+    finally:
+        G["pawn"].set_actor_hidden_in_game(False); quiet(False)
+    res["pictures"] = shots
+    nf = t["floors"]
+    ok = not res["floors_without_bath"] and not res["floors_without_closet"] and not res["empty_rooms"] \
+        and all(k in kinds for k in ("lobby", "office", "meeting", "bathroom", "closet", "executive", "boardroom")) \
+        and (nf <= 3 or "cafeteria" in kinds) and (nf <= 4 or "datacentre" in kinds)
+    step_result("tower24_floors", bool(ok), **res)
+
+
+def step_tower24_stairs():
+    """each floor reached by the stairs: from the lobby's landing up every flight (her own movement: the landing, the half landing, the
+    next floor's landing) to the top floor; her height on each floor's landing"""
+    res = {}
+    yield from tower24_in()
+    d = tower24(); t = d["tower"]; H = t["storey"]; pts = []
+    quiet(True)
+    try:
+        st = d["stairs"]
+        if 0 in st:
+            f0 = st[0]["foot"]; put(V(f0.x, f0.y, 0), yaw=-90.0, z=f0.z); yield from wait(1.0)
+            for k in sorted(st):
+                s = st[k]; half_y = s["foot"].y - t["cell"] * 0.5 - 2 * t["cell"] - t["cell"] * 0.5
+                # (each floor: across its landing to the flight's foot, up to the half landing, across it, up to the next floor's landing)
+                for i, w_ in enumerate((V(s["foot"].x, s["foot"].y, 0), V(s["foot"].x, half_y + 40, 0), V(s["top"].x, half_y + 40, 0), V(s["top"].x, s["top"].y, 0))):
+                    best, z = yield from walk20(w_, 8.0, 45.0)
+                    want = s["foot"].z if i == 0 else s["foot"].z + H * 0.5 if i < 3 else s["top"].z
+                    pts.append({"floor": k, "i": i, "off_cm": best, "her_z_over": round(z - want, 1)})
+                    if best >= 70: break
+                if pts and pts[-1]["off_cm"] >= 70: break
+    finally:
+        quiet(False)
+    res["points"] = pts
+    top = (t["floors"] - 1) * H
+    res["top_reached"] = bool(pts) and pts[-1]["i"] == 3 and pts[-1]["off_cm"] < 70 and abs(pts[-1]["her_z_over"] - 92) < 20 and abs(G["pawn"].get_actor_location().z - top - 92) < 30
+    shot("t24_stairs"); yield from rwait(1.2)
+    ok = res["top_reached"] and all(p_["off_cm"] < 70 and 70 < p_["her_z_over"] < 110 for p_ in pts)
+    step_result("tower24_stairs", bool(ok), **res)
+
+
+def step_tower24_lifts():
+    """each floor reached by the lifts: on the local lift F rides it floor by floor to the top and back to the lobby (her height at each);
+    the express from the lobby to the top and back; from a landing F calls the local lift; while it is away its door keeps her out of
+    the shaft (pushed at it 2 s)"""
+    res = {}
+    yield from tower24_in()
+    g = G["gen"]; d = tower24()
+    def lift(i): return tower24()["lifts"][i]
+    def settle(i, secs=20.0):
+        t1 = now()
+        while now() - t1 < secs:
+            yield from wait(0.25)
+            x = lift(i)
+            if not x["moving"] and x["at"] == x["target"]: return x
+        return lift(i)
+    quiet(True)
+    try:
+        for i in (0, 1):
+            L = d["lifts"][i]; sh = L["shaft"]; rides = []
+            dy = L["door"].y
+            x = lift(i)
+            if x["at"] != 0:
+                put(V(sh.x + 330, dy, 0), z=L["floors"][0]); g.interact_nearest(G["pawn"].get_actor_location()); yield from settle(i, 30.0)
+            put(V(sh.x, sh.y, 0), z=L["floors"][0]); yield from wait(1.0)
+            for k in list(range(1, len(L["floors"]))) + [0]:
+                said = str(g.describe_nearest(G["pawn"].get_actor_location())); f_ = str(g.interact_nearest(G["pawn"].get_actor_location()))
+                x = yield from settle(i, 30.0)
+                rides.append({"to": k, "said": said, "f": f_, "at": x["at"], "her_z_over": round(G["pawn"].get_actor_location().z - L["floors"][k], 1)})
+            res["express" if L["express"] else "local"] = rides
+        # (the local lift at the lobby: on floor 2 its door keeps her out, then F calls it)
+        L = d["lifts"][0]; sh = L["shaft"]; k2 = min(2, len(L["floors"]) - 1)
+        at = V(sh.x + 330, L["door"].y, 0)
+        put(at, yaw=180.0, z=L["floors"][k2]); yield from wait(1.0)
+        t1 = now(); nearest = 1e9; zmin = 1e9
+        while now() - t1 < 2.0:
+            q = G["pawn"].get_actor_location(); nearest = min(nearest, abs(q.x - sh.x)); zmin = min(zmin, q.z)
+            G["pawn"].add_movement_input(V(-1, 0, 0), 1.0, False); yield
+        res["gate"] = {"nearest_x_to_shaft_cm": round(nearest), "lowest_over_floor": round(zmin - L["floors"][k2], 1)}
+        put(at, z=L["floors"][k2]); yield from wait(0.5)
+        said = str(g.describe_nearest(G["pawn"].get_actor_location())); f_ = str(g.interact_nearest(G["pawn"].get_actor_location()))
+        x = yield from settle(0, 30.0)
+        res["call"] = {"floor": k2, "said": said, "f": f_, "at": x["at"]}
+        best, z = yield from walk20(V(sh.x, L["door"].y, 0), 4.0, 60.0)
+        res["stepped_on"] = {"off_cm": best, "her_z_over": round(z - L["floors"][k2], 1)}
+        # (the express, at the top, called from before its own door in the lobby (its door 1.5 m from the local lift's: PR #131's review))
+        E = d["lifts"][1]
+        put(V(E["door"].x + 120, E["door"].y, 0), yaw=180.0, z=E["floors"][0]); yield from wait(0.5)
+        if lift(1)["at"] == 0:
+            put(V(E["shaft"].x, E["shaft"].y, 0), z=E["floors"][0]); yield from wait(0.5); g.interact_nearest(G["pawn"].get_actor_location()); yield from settle(1, 30.0)
+            put(V(E["door"].x + 120, E["door"].y, 0), yaw=180.0, z=E["floors"][0]); yield from wait(0.5)
+        said = str(g.describe_nearest(G["pawn"].get_actor_location())); f_ = str(g.interact_nearest(G["pawn"].get_actor_location()))
+        x = yield from settle(1, 30.0)
+        res["express_call"] = {"said": said, "f": f_, "at": x["at"], "local_target": lift(0)["target"]}
+        shot("t24_lift"); yield from rwait(1.2)
+    finally:
+        quiet(False)
+    def good(rs, n): return len(rs) == n and all(r_["f"] == "lift ride" and r_["at"] == r_["to"] and 75 < r_["her_z_over"] < 110 for r_ in rs)
+    ok = good(res.get("local", []), len(d["lifts"][0]["floors"])) and good(res.get("express", []), 2) and res["gate"]["nearest_x_to_shaft_cm"] > 100 \
+        and res["gate"]["lowest_over_floor"] > 60 and res["call"]["f"] == "lift called" and res["call"]["at"] == res["call"]["floor"] and res["stepped_on"]["off_cm"] < 60 \
+        and res["express_call"]["said"] == "call the express lift" and res["express_call"]["at"] == 0
+    step_result("tower24_lifts", bool(ok), **res)
+
+
+def step_tower24_window():
+    """the city from a window: on the middle picture's floor she stands at the north windows looking out (a picture); the frame rate in
+    the lobby and on that floor; her camera kept for the picture of the city from the same point (tower24_exit)"""
+    res = {}
+    yield from tower24_in()
+    g = G["gen"]; d = tower24(); t = d["tower"]
+    v = d["views"][1] if len(d["views"]) > 1 else None
+    k = v["floor"] if v else max(1, t["floors"] // 2)
+    hw = t["cells"] * t["cell"] / 2
+    fps = {}
+    put(V(0, -hw + 200, 0), yaw=90.0, z=0); yield from wait(2.0)
+    xs = []; t0 = time.time()
+    while time.time() - t0 < 4.0: yield from rwait(0.25); xs.append(g.get_fps())
+    fps["lobby"] = round(sum(xs) / max(1, len(xs)), 1)
+    put(V(t["cell"] * 0.5, hw - 110, 0), yaw=90.0, z=k * t["storey"]); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=0, yaw=90.0))
+    yield from wait(2.0)
+    here = tower24()["here"]
+    cm = G["pc"].player_camera_manager
+    cl = cm.get_camera_location(); cr = cm.get_camera_rotation()
+    res["camera"] = {"at": [round(cl.x), round(cl.y), round(cl.z)], "yaw": round(cr.yaw, 1), "pitch": round(cr.pitch, 1), "fov": round(cm.get_fov_angle(), 1)}
+    G["t24_cam"] = {"at": cl, "yaw": cr.yaw, "pitch": cr.pitch, "fov": cm.get_fov_angle(), "floor": k, "storey": t["storey"], "hw": hw}
+    res["here"] = here
+    shot("t24_window"); yield from rwait(1.5)
+    # (from her eyes 60 cm inside the glass, looking out level: the picture the city's one from the same place is set beside)
+    eye = V(t["cell"] * 0.5, hw - 60, k * t["storey"] + 160)
+    g.capture_view24(eye, unreal.Rotator(roll=0, pitch=0, yaw=90.0), 90.0, 1280, 720, os.path.join(SHOTS, ""), f"bs_{TAG}_t24_eye.png"); R.setdefault("shots", []).append(f"bs_{TAG}_t24_eye.png")
+    G["t24_eye"] = {"at": eye, "yaw": 90.0, "floor": k, "storey": t["storey"], "hw": hw}
+    # (the city's picture alone, the tower hidden: level from the floor's middle each way, up and down)
+    g.set_tower_hidden24(True)
+    for nm, pi, yw in (("n", 0, 90), ("e", 0, 0), ("s", 0, -90), ("w", 0, 180), ("up", 89, 90), ("down", -89, 90)):
+        g.capture_view24(V(0, 0, k * t["storey"] + 160), unreal.Rotator(roll=0, pitch=pi, yaw=yw), 90.0, 512, 512, os.path.join(SHOTS, ""), f"bs_{TAG}_t24_look_{nm}.png")
+    g.set_tower_hidden24(False)
+    xs = []; t0 = time.time()
+    while time.time() - t0 < 4.0: yield from rwait(0.25); xs.append(g.get_fps())
+    fps["window_floor"] = round(sum(xs) / max(1, len(xs)), 1)
+    res["fps"] = fps
+    ok = v is not None and here["floor"] == k and here["view"] == 1 and here["view_floor"] == v["floor"] and fps["lobby"] > 15 and fps["window_floor"] > 15
+    step_result("tower24_window", bool(ok), **res)
+
+
+def step_tower24_exit():
+    """the way back: at the lobby's doors F names the street and takes her back to Heaven before the tower's door; then the city from
+    the window's place in Heaven itself (the point of her camera in the tower carried into the city by the tower's place and turn,
+    moved out past its walls along the view, at the hour of the pictures): tower24_city beside tower24_window"""
+    res = {}
+    yield from tower24_in()
+    g = G["gen"]; d = tower24(); door = G.get("t24_door") or {}
+    ex = d["exit"]
+    put(V(ex.x, ex.y + 140, 0), yaw=-90.0, z=0); yield from wait(1.0)
+    said = str(g.describe_nearest(G["pawn"].get_actor_location()))
+    views = d["views"]
+    yield from travel("brokenspire", lambda: G["gen"].interact_nearest(G["pawn"].get_actor_location()))
+    t0 = time.time()
+    while time.time() - t0 < 90:
+        yield
+        st = str(G["gen"].get_wild_town_state()).split("|")
+        if len(st) > 3 and st[1] == "Heaven" and st[2] == "0" and st[3] == "1": break
+    yield from wait(2.0)
+    g = G["gen"]
+    p = G["pawn"].get_actor_location()
+    res["said"] = said; res["back_in"] = G["w"].get_path_name().split(".")[-1]
+    res["from_door_m"] = round(dist2(p, door["at"]) / 100.0, 1) if door else None
+    # (the city from the window's place)
+    cam = G.get("t24_eye")
+    if cam and len(views) > 1:
+        v = views[1]; T = math.radians(v["yaw"] + 90.0); c, s = math.cos(T), math.sin(T)
+        lx, ly = cam["at"].x, cam["at"].y
+        wx, wy = v["at"].x + c * lx - s * ly, v["at"].y + s * lx + c * ly
+        wz = v["at"].z + (cam["at"].z - (cam["floor"] * cam["storey"] + 160.0))
+        yaw = cam["yaw"] + v["yaw"] + 90.0
+        dx, dy = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
+        along = (wx - v["at"].x) * dx + (wy - v["at"].y) * dy
+        push = max(0.0, cam["hw"] * 1.45 + 150.0 - along)
+        at = V(wx + dx * push, wy + dy * push, wz)
+        # (the pictures' hour read in the tower: leaving it forgets them (PR #131's review))
+        g.set_town_hour(float(d["here"]["hour"])); yield from wait(2.0); res["hour"] = d["here"]["hour"]
+        okc = g.capture_view24(at, unreal.Rotator(roll=0, pitch=0, yaw=yaw), 90.0, 1280, 720, os.path.join(SHOTS, ""), f"bs_{TAG}_t24_city.png")
+        # (and the six ways from the picture's own point with the tower taken out, as its windows' picture was taken: beside the tower's
+        # look_* pictures (the city's picture alone, the tower hidden), the same ways turned by the tower's turn)
+        for nm, pi, yw in (("n", 0, 90), ("e", 0, 0), ("s", 0, -90), ("w", 0, 180), ("up", 89, 90), ("down", -89, 90)):
+            wy_ = yw + v["yaw"] + 90.0
+            g.capture_city24(door["bld"], v["at"], unreal.Rotator(roll=0, pitch=pi, yaw=wy_), 90.0, 512, 512, os.path.join(SHOTS, ""), f"bs_{TAG}_t24_citylook_{nm}.png")
+        res["city"] = {"at": [round(at.x), round(at.y), round(at.z)], "yaw": round(yaw, 1), "pushed_cm": round(push), "captured": bool(okc)}
+        R.setdefault("shots", []).append(f"bs_{TAG}_t24_city.png")
+    ok = said.startswith("leave ") and res["back_in"] == "brokenspire" and res["from_door_m"] is not None and res["from_door_m"] < 8.0 and res.get("city", {}).get("captured")
+    step_result("tower24_exit", bool(ok), **res)
+
+
+
+STEPS.update({"tower24_enter": step_tower24_enter, "tower24_floors": step_tower24_floors, "tower24_stairs": step_tower24_stairs, "tower24_lifts": step_tower24_lifts,
+              "tower24_window": step_tower24_window, "tower24_exit": step_tower24_exit})
+
+
 def run():
     G["saves"] = saves_snapshot()
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None

@@ -164,6 +164,22 @@ public:
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|List15") int32 CaveTier15 = 0;
 	/** the list of 2026-11-22's caves: the biome at the cave's tower (its region: a geode's colour, the cold's or the heat's ores) */
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") FString CaveBiome16;
+	// ---- the list of 2026-11-22's twenty-fourth phase: the tower she went into (RDTower24.cpp): its seed, floors and name, where it
+	// stands in Heaven, and the city round it in three cube pictures (low, middle and high floors) at the hour she went in (not saved:
+	// a game loaded in the tower level builds it from its default seed with no pictures)
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Tower24") int32 TowerSeed24 = 0;
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Tower24") int32 TowerFloors24 = 0;
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Tower24") FString TowerName24;
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Tower24") FVector TowerAt24 = FVector::ZeroVector;
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Tower24") float TowerYaw24 = 0.f;
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Tower24") float TowerViewHour24 = -1.f;
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "RandomDungeon|Tower24") TArray<TObjectPtr<class UTextureRenderTargetCube>> TowerViews24;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Tower24") TArray<int32> TowerViewFloors24;
+	/** where each picture was taken (in Heaven) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Tower24") TArray<FVector> TowerViewAt24;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Tower24") float TowerCaptureMs24 = 0.f;
+	/** the tower she went into forgotten (a new game, a load, leaving it: its pictures' memory let go) */
+	void ForgetTower24() { TowerSeed24 = 0; TowerFloors24 = 0; TowerName24.Reset(); TowerViews24.Reset(); TowerViewFloors24.Reset(); TowerViewAt24.Reset(); TowerViewHour24 = -1.f; }
 	/** the caves whose lost blade she has taken (their keys): laid no more */
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Cave16") TArray<FString> LostBladeCaves16;
 	/** the caves whose drowned knight's piece she has taken (their keys): laid no more */
@@ -292,6 +308,8 @@ public:
 	/** -RDTownGo=town:<name>: the wilderness town she travels to once the wilds are ready (as given), and the one whose
 	 *  building round her is still to be marked (-RDMarkFile; lower case, no spaces) */
 	FString TownGoTown, TownGoMark;
+	/** -RDTownGo=tower: out to Heaven, then in by its first tower's door (the list of 2026-11-22's phase 24) */
+	bool bTownGoTower24 = false;
 	/** the showcase tour: the castle's autoplay seconds when it comes through the Mistgate (0: none) */
 	float TourCastleSeconds = 0.f;
 	bool bTourRead = false;

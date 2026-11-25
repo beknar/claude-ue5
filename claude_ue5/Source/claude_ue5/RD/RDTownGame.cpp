@@ -653,6 +653,8 @@ bool ARDDungeonGenerator::ReturnToTown()
 	LastTravel = TEXT("town");
 	if (bTravelDryRun) return true;
 	SaveCarry();
+	// (out of a tower: its pictures' memory let go (PR #131's review: three cubes kept for the session))
+	if (bTower24) if (URDGameInstance* Gt = URDGameInstance::Of(this)) Gt->ForgetTower24();
 	if (URDGameInstance* GI = URDGameInstance::Of(this))
 	{
 		GI->Arrive = TEXT("castle");
@@ -990,6 +992,9 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 			// (-RDTownGo=town:<name>: out to a wilderness town (Vel Morrath: "town:velmorrath"), the packaged game's test of the
 			// city: once the wilds are ready, by the map's fast travel; her mark written once it is built round her)
 			else if (Go.StartsWith(TEXT("town:")) && bWild) GI->TownGoTown = Go.Mid(5);
+			// (-RDTownGo=tower: the list of 2026-11-22's phase 24, the packaged game's test of the skyscrapers' level: out to Heaven, then
+			// in by its first tower's door, the game's own way in)
+			else if (Go == TEXT("tower") && bWild) { GI->TownGoTown = TEXT("heaven"); GI->bTownGoTower24 = true; }
 			// (the list of 2026-11-20's eighteenth phase: the wilds' runs, played once the wilds are ready (RDList15q.cpp))
 			else if ((Go == TEXT("horse") || Go == TEXT("village") || Go == TEXT("cavetower")) && bWild) { GI->Go15 = Go; GI->Go15Stage = 0; GI->Go15Try = 0; GI->Go15At = 0.f; }
 			else UE_LOG(LogRDTownGame, Warning, TEXT("RDTOWN -RDTownGo=%s: not a way this level has"), *Go);
@@ -1006,6 +1011,16 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 			const ARDSection* Here = GI->TownGoMark.IsEmpty() ? nullptr : GetSection(FIntPoint::ZeroValue);
 			if (Here && !Here->IsBuilding() && !bTownLoading && TownName.Replace(TEXT(" "), TEXT("")).ToLower() == GI->TownGoMark)
 			{
+				if (GI->bTownGoTower24)
+				{
+					GI->bTownGoTower24 = false;
+					int32 Bt = -1;
+					for (int32 I = 0; I < Here->TownBlds.Num() && Bt < 0; ++I) if (Here->TownBlds[I].Kind == TK_SkyTower && Here->TownBlds[I].State == 0) Bt = I;
+					const bool bIn = Bt >= 0 && EnterTower24(Bt);
+					UE_LOG(LogRDTownGame, Log, TEXT("RDTOWN -RDTownGo=tower: %s"), bIn ? TEXT("into a tower") : TEXT("no tower to enter"));
+					GI->TownGoMark.Reset();
+					if (bIn) return;
+				}
 				WriteTestMark(TEXT("town"), TownName);
 				UE_LOG(LogRDTownGame, Log, TEXT("RDTOWN -RDTownGo: %s built round her"), *TownName);
 				GI->TownGoMark.Reset();

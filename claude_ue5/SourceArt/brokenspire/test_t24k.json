@@ -1,0 +1,119 @@
+{
+ "tag": "t24k",
+ "plan": [
+  "tower24_enter",
+  "tower24_window",
+  "tower24_exit"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "tower24_enter",
+   "ok": true,
+   "door": {
+    "bld": 16,
+    "at": "<Struct 'Vector' (0x000001B48464D2D0) {x: 5706677.000000, y: -5538412.000000, z: 0.000000}>",
+    "out": "<Struct 'Vector' (0x000001B48464FE40) {x: 0.000000, y: -1.000000, z: 0.000000}>",
+    "name": "Zenith Tower",
+    "floors": 11,
+    "said": "enter Zenith Tower (11 floors)"
+   },
+   "level": "heaven_tower",
+   "tower": {
+    "name": "Zenith Tower",
+    "seed": 1015000832,
+    "floors": 11,
+    "cells": 14,
+    "cell": 150.0,
+    "storey": 350.0
+   },
+   "count": {
+    "boxes": 9258,
+    "props": 1788,
+    "components": 47,
+    "missing": 0
+   },
+   "views": [
+    {
+     "k": 0,
+     "floor": 1,
+     "z": 510
+    },
+    {
+     "k": 1,
+     "floor": 5,
+     "z": 1910
+    },
+    {
+     "k": 2,
+     "floor": 9,
+     "z": 3310
+    }
+   ],
+   "her": [
+    0,
+    -750,
+    85
+   ],
+   "key": "tower",
+   "return_town": "Heaven",
+   "monsters": 0,
+   "turn_deg": 0.0,
+   "capture_ms": 58.0,
+   "faces_flat": [],
+   "faces": 18
+  },
+  {
+   "step": "tower24_window",
+   "ok": true,
+   "camera": {
+    "at": [
+     40,
+     620,
+     1888
+    ],
+    "yaw": 90.0,
+    "pitch": 0.0,
+    "fov": 90.0
+   },
+   "here": {
+    "floor": 5,
+    "view": 1,
+    "view_floor": 5,
+    "hour": 11.0
+   },
+   "fps": {
+    "lobby": 52.6,
+    "window_floor": 53.9
+   }
+  },
+  {
+   "step": "tower24_exit",
+   "ok": true,
+   "said": "leave Zenith Tower for the street",
+   "back_in": "brokenspire",
+   "from_door_m": 4.5,
+   "hour": 11.0,
+   "city": {
+    "at": [
+     5706752,
+     -5535690,
+     1910
+    ],
+    "yaw": 90.0,
+    "pushed_cm": 682,
+    "captured": true
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log, Content Browser",
+ "shots": [
+  "bs_t24k_t24_lobby.png",
+  "bs_t24k_t24_window.png",
+  "bs_t24k_t24_eye.png",
+  "bs_t24k_t24_city.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

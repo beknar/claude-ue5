@@ -194,7 +194,7 @@ void URDSaveGame::DropOldWorld(URDGameInstance* GI, int32 FromVersion)
 	for (const TPair<FString, int32>& C : GI->Counters) if (C.Key.StartsWith(TEXT("wq12:")) || C.Key.StartsWith(TEXT("wild:"))) Gone.Add(C.Key);
 	for (const FString& K : Gone) GI->Counters.Remove(K);
 	// (a way back from a city's dungeon to the old city's gate: home to Brokenspire instead)
-	GI->ReturnAt = FVector::ZeroVector; GI->ReturnTown.Reset();
+	GI->ReturnAt = FVector::ZeroVector; GI->ReturnTown.Reset(); GI->ForgetTower24();          // (a load in the tower builds it from its default seed (PR #131's review))
 	GI->bOldWorld = true;
 	UE_LOG(LogRDSave, Log, TEXT("RDSAVE a save of the world's version %d (now %d): its wild state dropped (%d counters)"), FromVersion, WorldVersion, Gone.Num());
 }

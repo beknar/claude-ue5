@@ -16,7 +16,7 @@ void URDGameInstance::NewGame(FName Hero)
 	Quests.Reset(); Counters.Reset();
 	CirclesFound = { FName(TEXT("Brokenspire")) };
 	TownLooted.Reset(); CastleTiers.Reset(); CastleStartLooted.Reset(); GuardsDead.Reset(); HerPiles.Reset();
-	Dungeons.Reset(); ReturnAt = FVector::ZeroVector; ReturnYaw = 0.f; ReturnTown.Reset();
+	Dungeons.Reset(); ReturnAt = FVector::ZeroVector; ReturnYaw = 0.f; ReturnTown.Reset(); ForgetTower24();
 	CaveKey15.Reset(); CaveTier15 = 0; CaveBiome16.Reset(); LiftedRelics16.Reset(); LostBladeCaves16.Reset(); DrownedCaves16.Reset(); Paintings16.Reset(); PaintingsApplied16.Reset(); KnownCaves16.Reset(); CaveMaps16.Reset(); ContractsInCave16.Reset(); RescuedTravellers16.Reset(); CaveMouthsAttuned16.Reset(); TowerKeys16.Reset(); TowersClimbed16.Reset(); TowerChests16.Reset(); WildMarked15.Reset();          // (the caves' records go with the game (PR #121's review); PR #123's review: this comment stood mid-line and took every reset after it)
 	WildLookoutsClimbed15.Reset(); RoamersSeen15.Reset(); RoamersSlain15.Reset(); CollectiblesTaken15.Reset(); LastingHealth15 = LastingMana15 = 0; TreasureMapsTaken15.Reset(); TreasureMaps15.Reset(); TreasuresDug15.Reset(); PlaceItemsGiven15.Reset(); ContractsTaken15.Reset(); ContractsDone15.Reset(); ContractsPaid15.Reset(); ContractSigns15.Reset(); CampsCleared15.Reset(); CampsClearedDay15.Reset(); CampsResettledFrom15.Reset(); RuinsResettled15.Reset(); ReclaimKeys15.Reset(); MetPeople15.Reset(); WaystonesLit15.Reset();          // (the list of 2026-11-20's ninth phase (PR #101's review): no cave carried into a new game)
 	bOldWorld = false;          // (the list of 2026-11-16: an older save's give-back is not the new game's (PR #89's review))
