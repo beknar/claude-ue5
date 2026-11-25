@@ -175,6 +175,7 @@ void ARDSection::ModernRoof(int32 BI, float Top)
 			AddPiece(TEXT("Modern.Parapet"), WallT(P, Sides[Si].Out, Top), !Cores20.Contains(BI));
 		}
 	HeavenTallestZ = FMath::Max(HeavenTallestZ, Top);
+	HeavenBillboard22(BI, Top, Hx, Hy, Yaw0);          // (the list of 2026-11-22's phase 22: a billboard by its seed)
 	// ---- a tower: its floors stacked over the lobby, fitted to the lobby's footprint, its rooftop; how many floors by its seed
 	if (B.Kind == TK_SkyTower)
 	{
@@ -355,6 +356,13 @@ void ARDSection::TickHeavenCars(float Dt, const FVector& Her)
 		bool bWait = false;
 		{
 			const FVector D = Her - Here;
+			const float Ahead = FVector::DotProduct(D, Way), Side = FMath::Abs(FVector::DotProduct(D, Right));
+			if (Ahead > -150.f && Ahead < 900.f && Side < 260.f && FMath::Abs(D.Z) < 400.f) bWait = true;
+		}
+		// (the list of 2026-11-22's phase 22: and for a pedestrian on the street, as for her)
+		for (int32 Pi = 0; Pi < CarYield22.Num() && !bWait; ++Pi)
+		{
+			const FVector D = CarYield22[Pi] - Here;
 			const float Ahead = FVector::DotProduct(D, Way), Side = FMath::Abs(FVector::DotProduct(D, Right));
 			if (Ahead > -150.f && Ahead < 900.f && Side < 260.f && FMath::Abs(D.Z) < 400.f) bWait = true;
 		}

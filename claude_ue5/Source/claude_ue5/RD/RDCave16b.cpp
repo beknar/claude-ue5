@@ -41,6 +41,8 @@ void ARDDungeonGenerator::SetCaveBiome16(const FString& Biome)
 
 bool ARDDungeonGenerator::CaveItemAllowed16(const FRDItemDef& It) const
 {
+	// (the list of 2026-11-22's phase 22: Heaven's twins come only from its stores and tables (TownStock swaps them in), never a draw)
+	if (HeavenGoods22.Num() > 0 && IsHeavenTwin22(It.Name)) return false;
 	if (CaveItems16.Num() == 0) return true;
 	const bool bCaveItem = CaveItems16.Contains(It.Name);
 	// (outside a cave: none of the caves' own; their draws and sums as before)

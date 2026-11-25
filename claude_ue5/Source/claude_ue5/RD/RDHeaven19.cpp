@@ -170,6 +170,7 @@ void ARDSection::HeavenRuns19()
 	// (each street of the grid between its crossings: a run of tiles along it; its ends at a crossing (both kinds of road over the
 	// tile), the square, the facility's forecourt (a road 5 tiles and more each way) or another road beyond its rectangle's end)
 	Runs19.Reset(); JGroup19.Init(-1, N * N); Junctions19.Reset();
+	Pave22.Reset(); PaveTiles22.Reset();          // (the phase 22 pavements are made from the runs again)
 	TArray<uint8> Ax; Ax.Init(0, N * N);
 	for (int32 Ri = 0; Ri < TownRoads.Num(); ++Ri)
 	{

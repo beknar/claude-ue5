@@ -27,7 +27,12 @@
                               (Heaven.Forge, .Anvil, .QuenchTub), the modern containers, each a body and its door or lid on its hinge
                               (Heaven.Barrel a fridge, .Barrel2 a filing cabinet, .Crate a tool chest, .Crate2 a bin, .Chest a safe,
                               .Wardrobe a locker, Heaven.Dumpster21 the yards' dumpster) and their words (ContainerWords21)
-    946_heaven16.py all       the six
+    946_heaven16.py goods     phase 22, Heaven's goods on every map of the game: the everyday items' modern twins of
+                              SourceArt/heaven/goods22.json (copied from their likes, no weight in any draw) and their pictures
+                              (SourceArt/heaven/art22/icons), the map's HeavenGoods22; run it after the item stages
+    946_heaven16.py life      phase 22, Heaven's life on brokenspire: the neon tube, the billboard's frame and faces
+                              (SourceArt/heaven/art22/billboards), the tables' modern food, the city's sounds (SourceArt/heaven/city22.json)
+    946_heaven16.py all       the eight but goods (every map: ask for it by name)
 
 Run on the editor with any level open (it opens brokenspire and saves it)."""
 import os, sys, json, importlib
@@ -391,9 +396,136 @@ def shops(g):
     REPORT.append(f"shops: {len(add)} pieces ({', '.join(sorted(add))}); the containers' words")
 
 
-PARTS = {"lamps": lamps, "signs": signs, "symbols": symbols, "streets": streets, "storeys": storeys, "shops": shops}
+# ================================================================================================ phase 22: the goods (every map of the game)
+MAPS22 = "/Game/RandomDungeon/Maps/"
+
+
+def goods_maps():
+    return json.load(open(os.path.join(SA, "caves", "treasure16.json"), encoding="utf-8"))["maps"]
+
+
+def goods(g):
+    """the everyday items' modern twins (SourceArt/heaven/goods22.json) on every map of the game: each copied from its like (kind,
+    numbers, tiers, buff), with its own name, picture and words and no weight in any draw; the map's HeavenGoods22 (like -> twin); their
+    pictures (SourceArt/heaven/art22/icons/icon_<icon>.png) in the UI art. Idempotent: its twins taken out first, by name. Run after the
+    item stages (910, 905, 911, 918, 925, 928, 929, 937, 938, 943, 945 items), which write the items anew"""
+    G = json.load(open(os.path.join(SA, "heaven", "goods22.json"), encoding="utf-8"))
+    src = os.path.join(SA, "heaven", "art22", "icons")
+    icons = sorted({x["icon"] for x in G["goods"]})
+    lost = [n for n in icons if not os.path.exists(os.path.join(src, f"icon_{n}.png"))]
+    assert not lost, f"946 goods: no picture for {lost} (rdm4_ui_cut.py --export SourceArt/heaven/art22/icons first)"
+    tex = {n: ui_tex.ui_texture(os.path.join(src, f"icon_{n}.png"), "/Game/RandomDungeon/UI/Heaven22", f"T_HV22_{n}") for n in icons}
+    mine = {x["name"] for x in G["goods"]} | set(G.get("retired", []))
+    out = []
+    for m in goods_maps():
+        if not EAL.does_asset_exist(MAPS22 + m): out.append(f"goods: no map {m}"); continue
+        les.load_level(MAPS22 + m); unreal.SystemLibrary.execute_console_command(None, "obj gc")
+        gg = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
+        its = [i for i in gg.get_editor_property("items") if str(i.name) not in mine]
+        tw = {}; missing = []
+        for x in G["goods"]:
+            like = next((i for i in its if str(i.name) == x["like"]), None)
+            if not like: missing.append(x["like"]); continue
+            it = unreal.RDItemDef(); it.import_text(like.export_text())
+            it.set_editor_property("name", x["name"]); it.set_editor_property("icon", unreal.Name(x["icon"]))
+            it.set_editor_property("looks", x["looks"]); it.set_editor_property("weight", 0.0)
+            its.append(it); tw[unreal.Name(x["like"])] = unreal.Name(x["name"])
+        gg.set_editor_property("items", its)
+        gg.set_editor_property("heaven_goods22", tw)
+        ua = gg.get_editor_property("ui_art")
+        for n, t in tex.items():
+            art = unreal.RDUIArt(); art.set_editor_property("texture", t)
+            art.set_editor_property("border", unreal.Vector4(0, 0, 0, 0)); art.set_editor_property("inner", unreal.Vector4(0, 0, 1, 1))
+            ua[unreal.Name(n)] = art
+        gg.set_editor_property("ui_art", ua)
+        gg.modify(); les.save_current_level()
+        out.append(f"goods {m}: {len(tw)} twins, {len(tex)} pictures" + (f"; no like for {missing}" if missing else ""))
+        gg = None; import gc as _gc; _gc.collect(); unreal.SystemLibrary.execute_console_command(None, "obj gc")
+    REPORT.extend(out)
+
+
+# ================================================================================================ phase 22: Heaven's life (brokenspire)
+def life(g):
+    """the neon tube (Heaven.Neon22: a 100 cm bar along X in the lens material, its colour and light per instance), the billboard's frame
+    (Heaven.Billboard22) and its faces (Heaven.BillboardFace22_<i>: SourceArt/heaven/art22/billboards/bb_*.png in the sign faces'
+    emissive material, a Glow the game sets by the hour), the tables' modern food (Heaven.Town.Food*), the city's sounds
+    (SourceArt/heaven/city22.json, converted first by `rdc_sound_prep.py SourceArt/heaven/city22.json SourceArt/heaven/audio_city`)"""
+    mats = hk.materials()
+    B = lambda n, parts: hk.boxes(n, parts, mats)
+    add = {}
+    tube = raw(B("SM_HV_Neon22", [(-50, 50, -2, 2, -2, 2, "steel")])); tube.material = lens_material()
+    add["Heaven.Neon22"] = tube
+    # (the billboard in its own frame: its face +X, three legs on the roof at y -280, 0, 280, a catwalk before the face, the panel's back
+    # 6.6 by 3.3 m from 2.6 m up)
+    add["Heaven.Billboard22"] = raw(B("SM_HV_Billboard22", [(-14, -6, y - 6, y + 6, 0, 262, "steel") for y in (-280, 0, 280)]
+                                      + [(-12, -2, -335, 335, 258, 592, "dark"), (-14, 4, -338, 338, 590, 596, "steel"), (-14, 4, -338, 338, 254, 260, "steel"),
+                                         (-14, 4, -338, -332, 254, 596, "steel"), (-14, 4, 332, 338, 254, 596, "steel"), (0, 60, -330, 330, 236, 240, "plate")]), collision=True)
+    bsrc = os.path.join(SA, "heaven", "art22", "billboards")
+    files = sorted(f for f in os.listdir(bsrc) if f.startswith("bb_") and f.endswith(".png")) if os.path.isdir(bsrc) else []
+    assert files, "946 life: no billboard pictures in SourceArt/heaven/art22/billboards"
+    base = face_material(); plane = unreal.load_asset("/Engine/BasicShapes/Plane")
+    # (the face: the plane's +Z to the frame's +X, its X along -Y (the picture's left to right seen from the street), 6.4 x 3.2 m on the
+    # panel at 4.25 m (the sign faces' frame turned a quarter)
+    rot = unreal.MathLibrary.make_rot_from_zx(V(1, 0, 0), V(0, -1, 0))
+    for i, f in enumerate(files):
+        key = f[3:-4]
+        t = unreal.AssetImportTask()
+        t.set_editor_property("filename", os.path.join(bsrc, f)); t.set_editor_property("destination_path", HV16)
+        t.set_editor_property("destination_name", "T_HV_Board22_" + key); t.set_editor_property("replace_existing", True)
+        t.set_editor_property("automated", True); t.set_editor_property("save", True)
+        AT.import_asset_tasks([t])
+        tex = unreal.load_asset(f"{HV16}/T_HV_Board22_{key}"); assert tex, f"946 life: {f} was not imported"
+        mp = f"{HV16}/MI_HV_Board22_{key}"
+        mi = unreal.load_asset(mp) if EAL.does_asset_exist(mp) else AT.create_asset(f"MI_HV_Board22_{key}", HV16, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+        MEL.set_material_instance_parent(mi, base)
+        MEL.set_material_instance_texture_parameter_value(mi, "Face", tex)
+        MEL.set_material_instance_scalar_parameter_value(mi, "Glow", 0.9)
+        MEL.update_material_instance(mi); EAL.save_loaded_asset(mi, False)
+        p = unreal.RDPiece(); p.mesh = plane; p.collision = False; p.material = mi
+        p.adjust = unreal.Transform(V(2, 0, 425), rot, V(6.4, 3.2, 1.0)); p.size = V(2, 640, 320)
+        add[f"Heaven.BillboardFace22_{i}"] = p
+    g.set_editor_property("billboard_faces22", len(files))
+    # (the tables' modern food: a sandwich in its wedge pack, a takeaway box, a packet of crackers, a fruit cup; on the table's top at z 0)
+    add["Heaven.Town.FoodBread"] = raw(B("SM_HV_FoodSandwich22", [(-9, 9, -6, 6, 0, 6, "prod_brown"), (-9.5, 9.5, -6.5, 6.5, 0, 7, "glass"), (-3, 3, -6.7, -6.5, 2, 5, "white")]))
+    add["Heaven.Town.FoodBreadRound"] = raw(B("SM_HV_FoodBox22", [(-8, 8, -8, 8, 0, 7, "white"), (-8.2, 8.2, -2, 2, 0, 7.2, "prod_green")]))
+    add["Heaven.Town.FoodCheese"] = raw(B("SM_HV_FoodCrackers22", [(-7, 7, -4, 4, 0, 2.5, "prod_orange"), (-7.5, -7, -4, 4, 0, 2.5, "steel"), (7, 7.5, -4, 4, 0, 2.5, "steel")]))
+    # (the tavern's still outside the hotel: an air conditioner's condenser for the still's pot, recycling bins for its kegs)
+    add["Heaven.Town.StillPot"] = raw(B("SM_HV_Condenser22", [(-45, 45, -35, 35, 0, 85, "white"), (45, 46, -28, 28, 12, 76, "dark"), (-45, 45, -35, 35, 85, 88, "steel"),
+                                                                   (-40, -30, -30, -20, -6, 0, "dark"), (30, 40, 20, 30, -6, 0, "dark")]), collision=True)
+    add["Heaven.Town.Keg"] = raw(B("SM_HV_Recycle22", [(-30, 30, -30, 30, 0, 100, "prod_blue"), (-32, 32, -33, 32, 100, 105, "dark"), (-33, -29, -25, 25, 85, 90, "dark")]), collision=True)
+    add["Heaven.Town.FoodApples"] = raw(B("SM_HV_FoodCup22", [(-3.5, 3.5, -3.5, 3.5, 0.3, 6.5, "prod_red"), (-4, 4, -4, 4, 0, 9, "glass"), (-4.5, 4.5, -4.5, 4.5, 9, 10, "white")]))
+    set_pieces(g, add)
+    # ---- the city's sounds (as 921 imports the water's: every field of the set; the loops kept looping)
+    aud = os.path.join(SA, "heaven", "audio_city"); idx = os.path.join(aud, "index.json")
+    assert os.path.exists(idx), "946 life: run rdc_sound_prep.py SourceArt/heaven/city22.json SourceArt/heaven/audio_city first"
+    I = json.load(open(idx, encoding="utf-8")); J = json.load(open(os.path.join(SA, "heaven", "city22.json"), encoding="utf-8"))
+    dest = "/Game/RandomDungeon/Audio/Heaven22"
+    if not EAL.does_directory_exist(dest): EAL.make_directory(dest)
+    snd = g.get_editor_property("sounds"); n = 0
+    for key, spec in J["sets"].items():
+        waves = []
+        for f in I.get(key, {}).get("files", []):
+            t = unreal.AssetImportTask(); t.set_editor_property("filename", os.path.join(aud, f)); t.set_editor_property("destination_path", dest)
+            t.set_editor_property("destination_name", "SW_" + f[:-4]); t.set_editor_property("replace_existing", True); t.set_editor_property("automated", True)
+            AT.import_asset_tasks([t])
+            w = unreal.load_asset(f"{dest}/SW_{f[:-4]}")
+            if w: w.set_editor_property("looping", bool(spec.get("loop", False))); EAL.save_loaded_asset(w, False); waves.append(w)
+        assert waves, f"946 life: no files for {key}"
+        s = unreal.RDSoundSet(); s.set_editor_property("sounds", waves)
+        s.set_editor_property("volume", float(spec.get("volume", 1.0))); s.set_editor_property("pitch", float(spec.get("pitch", 1.0)))
+        s.set_editor_property("pitch_variation", float(spec.get("pitch_var", 0.05))); s.set_editor_property("inner_radius", float(spec.get("inner", 200.0)))
+        s.set_editor_property("falloff_distance", float(spec.get("falloff", 2500.0))); s.set_editor_property("b2d", bool(spec.get("loop", False)))
+        snd[unreal.Name(key)] = s; n += len(waves)
+    g.set_editor_property("sounds", snd)
+    REPORT.append(f"life: {len(add)} pieces ({len(files)} billboard faces: {', '.join(f[3:-4] for f in files)}); {len(J['sets'])} sound sets, {n} files")
+
+
+PARTS = {"lamps": lamps, "signs": signs, "symbols": symbols, "streets": streets, "storeys": storeys, "shops": shops, "life": life}
 args = sys.argv[1:] or ["all"]
 todo = list(PARTS) if args[0] == "all" else args[0].split(",")
+if "goods" in todo:
+    todo.remove("goods")
+    goods(None)          # (every map; it ends with the last one open)
 g = gen()
 for t in todo: PARTS[t](g)
 g.modify(); les.save_current_level()

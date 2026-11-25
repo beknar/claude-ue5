@@ -1,0 +1,245 @@
+{
+ "_note": "Heaven's goods (the list of 2026-11-22's phase 22, 946 goods): each the twin of an everyday item (its kind, numbers, tiers, buff copied; no weight in any draw), with a modern name, word and picture (art22/icon_<icon>.png); Heaven's stores sell the twins in their likes' place, no other store sells them",
+ "goods": [
+  {
+   "like": "Bread",
+   "name": "Sandwich",
+   "icon": "hv_sandwich",
+   "looks": "A sandwich in a paper wrap from the corner shop."
+  },
+  {
+   "like": "Cheese",
+   "name": "Cheese Crackers",
+   "icon": "hv_crackers",
+   "looks": "A packet of cheese crackers, salty and filling."
+  },
+  {
+   "like": "Fish",
+   "name": "Sushi Box",
+   "icon": "hv_sushi",
+   "looks": "A plastic tray of sushi rolls."
+  },
+  {
+   "like": "Fruit",
+   "name": "Fruit Cup",
+   "icon": "hv_fruitcup",
+   "looks": "A sealed cup of cut fruit."
+  },
+  {
+   "like": "Nuts and Seeds",
+   "name": "Trail Mix",
+   "icon": "hv_trailmix",
+   "looks": "A resealable bag of nuts, raisins and chocolate."
+  },
+  {
+   "like": "Hardtack",
+   "name": "Energy Bar",
+   "icon": "hv_energybar",
+   "looks": "A dense cereal bar in a foil wrapper."
+  },
+  {
+   "like": "Jerky",
+   "name": "Beef Jerky Pack",
+   "icon": "hv_jerky",
+   "looks": "Dried beef strips in a pouch."
+  },
+  {
+   "like": "Travel Cake",
+   "name": "Protein Shake",
+   "icon": "hv_shake",
+   "looks": "A bottle of chocolate protein shake."
+  },
+  {
+   "like": "Sweet Roll",
+   "name": "Doughnut",
+   "icon": "hv_doughnut",
+   "looks": "A glazed doughnut with sprinkles."
+  },
+  {
+   "like": "Well Done Steak",
+   "name": "Burger",
+   "icon": "hv_burger",
+   "looks": "A cheeseburger in a paper wrap."
+  },
+  {
+   "like": "Small Healing Potion",
+   "name": "Bandage Roll",
+   "icon": "hv_bandage",
+   "looks": "A roll of sterile bandage."
+  },
+  {
+   "like": "Medium Healing Potion",
+   "name": "First-Aid Kit",
+   "icon": "hv_firstaid",
+   "looks": "A small first-aid kit."
+  },
+  {
+   "like": "Uncommon Healing Potion",
+   "name": "Med Kit",
+   "icon": "hv_firstaid",
+   "looks": "A first-aid kit with splints and dressings."
+  },
+  {
+   "like": "Large Healing Potion",
+   "name": "Trauma Kit",
+   "icon": "hv_trauma",
+   "looks": "A soft olive bag of trauma dressings."
+  },
+  {
+   "like": "Wondrous Healing Potion",
+   "name": "Surgical Kit",
+   "icon": "hv_trauma",
+   "looks": "A field surgeon's kit."
+  },
+  {
+   "like": "Rare Healing Potion",
+   "name": "Nano-Med Injector",
+   "icon": "hv_injector_red",
+   "looks": "An auto-injector of healing nanites."
+  },
+  {
+   "like": "Very Rare Healing Potion",
+   "name": "Regen Serum",
+   "icon": "hv_injector_red",
+   "looks": "A regenerative serum in an auto-injector."
+  },
+  {
+   "like": "Legendary Healing Potion",
+   "name": "Phoenix Serum",
+   "icon": "hv_serum_gold",
+   "looks": "A glowing golden serum vial."
+  },
+  {
+   "like": "Small Mana Potion",
+   "name": "Focus Pills",
+   "icon": "hv_pills_blue",
+   "looks": "A bottle of focus pills."
+  },
+  {
+   "like": "Medium Mana Potion",
+   "name": "Neuro Tonic",
+   "icon": "hv_tonic_blue",
+   "looks": "A little bottle of blue neuro tonic."
+  },
+  {
+   "like": "Uncommon Mana Potion",
+   "name": "Mind Booster",
+   "icon": "hv_tonic_blue",
+   "looks": "A tonic that clears the mind."
+  },
+  {
+   "like": "Large Mana Potion",
+   "name": "Cortex Serum",
+   "icon": "hv_injector_blue",
+   "looks": "An auto-injector of blue cortex serum."
+  },
+  {
+   "like": "Wondrous Mana Potion",
+   "name": "Synapse Serum",
+   "icon": "hv_injector_blue",
+   "looks": "A serum that quickens thought."
+  },
+  {
+   "like": "Rare Mana Potion",
+   "name": "Psi Injector",
+   "icon": "hv_injector_blue",
+   "looks": "A psionic booster in an injector."
+  },
+  {
+   "like": "Very Rare Mana Potion",
+   "name": "Aether Serum",
+   "icon": "hv_serum_violet",
+   "looks": "A violet serum that hums faintly."
+  },
+  {
+   "like": "Legendary Mana Potion",
+   "name": "Quantum Tonic",
+   "icon": "hv_serum_violet",
+   "looks": "A tonic said to bend thought itself."
+  },
+  {
+   "like": "Small Speed Potion",
+   "name": "Energy Drink",
+   "icon": "hv_energydrink",
+   "looks": "A can of fizzy energy drink."
+  },
+  {
+   "like": "Medium Speed Potion",
+   "name": "Caffeine Shot",
+   "icon": "hv_caffeine",
+   "looks": "A tiny bottle of strong caffeine."
+  },
+  {
+   "like": "Uncommon Speed Potion",
+   "name": "Adrenaline Gum",
+   "icon": "hv_gum",
+   "looks": "A pack of adrenaline chewing gum."
+  },
+  {
+   "like": "Large Speed Potion",
+   "name": "Stim Pack",
+   "icon": "hv_stim",
+   "looks": "A combat stimulant pack."
+  },
+  {
+   "like": "Wondrous Speed Potion",
+   "name": "Sprint Serum",
+   "icon": "hv_stim",
+   "looks": "A serum that lightens the step."
+  },
+  {
+   "like": "Rare Speed Potion",
+   "name": "Overdrive Injector",
+   "icon": "hv_injector_yellow",
+   "looks": "An injector of overdrive stimulant."
+  },
+  {
+   "like": "Very Rare Speed Potion",
+   "name": "Hyperdrive Serum",
+   "icon": "hv_injector_yellow",
+   "looks": "A dangerously fast stimulant."
+  },
+  {
+   "like": "Legendary Speed Potion",
+   "name": "Quicksilver Serum",
+   "icon": "hv_serum_silver",
+   "looks": "A vial of shimmering silver serum."
+  },
+  {
+   "like": "Leather Strips",
+   "name": "Duct Tape",
+   "icon": "hv_ducttape",
+   "looks": "A roll of silver duct tape: it mends leather and cloth."
+  },
+  {
+   "like": "Whetstone",
+   "name": "Sharpening Rod",
+   "icon": "hv_sharpener",
+   "looks": "A diamond sharpening rod for blades."
+  },
+  {
+   "like": "Slickstone",
+   "name": "Lubricant Spray",
+   "icon": "hv_spray",
+   "looks": "A can of lubricant spray for joints and hinges."
+  },
+  {
+   "like": "Patch Kit",
+   "name": "Kevlar Patches",
+   "icon": "hv_kevlar",
+   "looks": "Kevlar patches and adhesive for armour."
+  },
+  {
+   "like": "Repair Kit",
+   "name": "Toolkit",
+   "icon": "hv_toolkit",
+   "looks": "A compact toolkit for any gear."
+  },
+  {
+   "like": "Torch",
+   "name": "Road Flare",
+   "icon": "hv_flare",
+   "looks": "A road flare: it burns bright red for a long while."
+  }
+ ]
+}

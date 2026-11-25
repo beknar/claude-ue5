@@ -1,0 +1,342 @@
+{
+ "_note": "Heaven's goods' pictures (the list of 2026-11-22's phase 22): rdm4_ui_gen.py / rdm4_ui_cut.py on the caves' model, styles and ground; modern products, painted as the game's other item pictures are",
+ "invoke": {
+  "host": "http://192.168.1.35:9090",
+  "model": "FLUX.1 Krea dev (quantized)",
+  "t5_encoder": "t5_bnb_int8_quantized_encoder",
+  "clip_embed": "clip-vit-large-patch14",
+  "vae": "FLUX.1-schnell_ae",
+  "steps": 30,
+  "guidance": 3.5,
+  "board": "claude-ue5 level4 UI",
+  "seeds": 2
+ },
+ "style": "hand-painted video game item art, painterly brush texture, rich but muted colours, crisp clean silhouette with a thin dark outline",
+ "styles": {
+  "panel": "made of blackened iron, worn dark leather and aged gold trim, the whole frame inside the picture with a wide empty white margin all around it",
+  "slot": "made of blackened iron, dark stone and aged gold trim, the whole frame inside the picture with a wide empty white margin all around it",
+  "bar": "made of blackened iron and aged gold trim, the whole frame inside the picture with an empty white margin all around it",
+  "icon": "a single object floating in the air in the middle of the picture, seen whole, with a wide empty white margin all around it",
+  "ring": "made of blackened iron and aged gold trim, the whole ring inside the picture with a wide empty white margin all around it",
+  "ornament": "made of blackened iron and aged gold, the whole ornament inside the picture with a wide empty white margin all around it",
+  "texture": "a flat even painted texture, the same all along its length"
+ },
+ "backdrop": "alone on a plain pure white background, soft even light from the front",
+ "elements": [
+  {
+   "name": "icon_hv_sandwich",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one triangular sandwich in a clear plastic wedge pack with a printed label, bread, lettuce and ham showing, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_crackers",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one small rectangular packet of cheese crackers, orange and white printed foil packet, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_sushi",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one clear plastic takeaway tray with six sushi rolls and a little fish-shaped soy sauce bottle, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_fruitcup",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one clear plastic cup with a sealed lid full of cut melon, grapes and strawberries, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_trailmix",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one small dark green resealable pouch of trail mix with a clear window showing nuts, raisins and chocolate pieces, slight three-quarter view",
+   "backdrop": "alone on a plain flat teal background, soft even light from the front"
+  },
+  {
+   "name": "icon_hv_energybar",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one cereal energy bar in a shiny green and silver foil wrapper, torn open at one end showing oats, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_jerky",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one brown resealable pouch of beef jerky with strips of dried meat showing through a window, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_shake",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one plastic bottle of chocolate protein shake with a black cap and a brown label, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_doughnut",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one round glazed doughnut with pink icing and coloured sprinkles, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_burger",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one cheeseburger with a sesame bun, lettuce and melted cheese, half in a paper wrap, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_bandage",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one roll of white cotton bandage gauze with a loose end unrolled, soft woven texture, slight three-quarter view",
+   "backdrop": "alone on a plain flat teal background, soft even light from the front"
+  },
+  {
+   "name": "icon_hv_firstaid",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one small white plastic first-aid case with a green plus sign on the lid, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_trauma",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one olive green soft trauma kit pouch with buckles and a white plus patch, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_injector_red",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one sleek medical auto-injector pen with a glowing red liquid window and a grey cap, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_serum_gold",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one small glass serum vial with a metal cap full of glowing golden liquid, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_pills_blue",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one small white pill bottle with a blue label and a few blue capsules beside it, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_tonic_blue",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one small glass tonic bottle with a dropper cap full of blue liquid, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_injector_blue",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one sleek medical auto-injector pen with a glowing blue liquid window and a grey cap, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_serum_violet",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one small glass serum vial with a metal cap full of glowing violet liquid, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_energydrink",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one slim aluminium energy drink can, bright yellow and black with a lightning bolt, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_caffeine",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one tiny plastic shot bottle of caffeine with an orange cap and label, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_gum",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one flat pack of chewing gum, red with white stripes, two pieces poking out, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_stim",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one compact combat stim pack, a black case with a short yellow injector clipped to it, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_injector_yellow",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one sleek medical auto-injector pen with a glowing yellow liquid window and a grey cap, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_serum_silver",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one small glass serum vial with a metal cap full of shimmering liquid silver, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_ducttape",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one roll of silver grey duct tape, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_sharpener",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one diamond sharpening rod with a black rubber handle, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_spray",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one small blue and yellow spray can of lubricant oil with a red straw nozzle, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_kevlar",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one small black zip pouch of kevlar repair patches with a yellow tag, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_toolkit",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one compact red metal toolbox with a black handle, closed, slight three-quarter view"
+  },
+  {
+   "name": "icon_hv_flare",
+   "kind": "icon",
+   "size": [
+    1024,
+    1024
+   ],
+   "prompt": "a game item illustration of one red road flare stick with a black cap, unlit, slight three-quarter view"
+  }
+ ],
+ "picks": {
+  "_note": "chosen on the contact sheets (2026-11-24): no backdrop, no lettering where a twin had none; the trail mix and the bandage painted again on teal (flux1kreadev's: a torn-paper backdrop, the white gauze cut with the white ground)",
+  "icon_hv_sandwich": 1793004766,
+  "icon_hv_crackers": 1229805003,
+  "icon_hv_sushi": 607596672,
+  "icon_hv_fruitcup": 166050689,
+  "icon_hv_energybar": 1015247105,
+  "icon_hv_jerky": 780589675,
+  "icon_hv_shake": 998110755,
+  "icon_hv_doughnut": 1736672988,
+  "icon_hv_burger": 1447761110,
+  "icon_hv_firstaid": 608220787,
+  "icon_hv_trauma": 546089911,
+  "icon_hv_injector_red": 155458048,
+  "icon_hv_serum_gold": 1988094252,
+  "icon_hv_pills_blue": 4778767,
+  "icon_hv_tonic_blue": 1769102976,
+  "icon_hv_injector_blue": 1673695279,
+  "icon_hv_serum_violet": 1141839502,
+  "icon_hv_energydrink": 1086968270,
+  "icon_hv_caffeine": 838363420,
+  "icon_hv_gum": 1147144671,
+  "icon_hv_stim": 1299985119,
+  "icon_hv_injector_yellow": 2087182294,
+  "icon_hv_serum_silver": 2124704064,
+  "icon_hv_ducttape": 1354158868,
+  "icon_hv_sharpener": 1946221207,
+  "icon_hv_spray": 1583219112,
+  "icon_hv_kevlar": 1996394015,
+  "icon_hv_toolkit": 1908997148,
+  "icon_hv_flare": 119541880,
+  "icon_hv_trailmix": 1487105372,
+  "icon_hv_bandage": 1320983644
+ }
+}

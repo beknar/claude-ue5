@@ -817,6 +817,27 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Heaven21") FString GetContainerWord(int32 I) const;
 	/** for the tests: every container's kind, word, place, state and its moving part's turn from shut */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven21") TArray<FString> GetContainerLines21() const;
+	// ---- the list of 2026-11-22's twenty-second phase: Heaven's life (RDHeaven22.cpp)
+	/** the pavements, made from the streets' runs once: 1 a pavement's tile beside a street (a walk's goal), 2 a zebra's tile across a
+	 *  street, 3 other open ground walked between them (the square, a second row), 0 not walked (the asphalt, the lay-bys) */
+	mutable TArray<uint8> Pave22;
+	mutable TArray<FIntPoint> PaveTiles22;
+	void MakePave22() const;
+	uint8 PaveAt22(const FVector& W) const;
+	/** a pedestrian's way between two points over the pavements and the zebras only (false: none within 200 tiles) */
+	bool FindPavePath22(const FVector& From, const FVector& To, TArray<FVector>& Out) const;
+	FVector PaveTileWorld22(int32 K) const { return PaveTiles22.IsValidIndex(K) ? TileWorld(PaveTiles22[K]) : FVector::ZeroVector; }
+	/** the pedestrians on the street (a zebra, the asphalt): the cars wait for them as for her */
+	TArray<FVector> CarYield22;
+	/** a shop's, the market's, the hotel's, the clinic's or the gear shop's front: its neon over the door */
+	void HeavenFront22(int32 BI, float Hx, float Hy, int32 DoorK, float Yaw0);
+	/** a billboard on a roof by the street (by the building's seed) */
+	void HeavenBillboard22(int32 BI, float Top, float Hx, float Hy, float Yaw0);
+	TWeakObjectPtr<class UInstancedStaticMeshComponent> Neon22;
+	/** for the tests: "front|<building>|<kind>|<tubes>|<r>|<g>|<b>|<x>|<y>|<z>", "board|<building>|<x>|<y>|<z>|<yaw>|<face>" */
+	TArray<FString> Fronts22;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven22") TArray<FString> GetFronts22() const { return Fronts22; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven22") TArray<FString> GetPave22Lines() const;
 	// ---- the list of 2026-11-22's twentieth phase: Heaven's storeys (RDHeaven20.cpp)
 	/** a building's stair and lift core: three strips of four tiles from its back wall (X0, its local X), from a back corner (Y0) along Sgn */
 	struct FCore20 { int32 Bld = -1; int32 N = 0; float Sgn = 1.f; float X0 = 0.f, Y0 = 0.f; };

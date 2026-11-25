@@ -279,3 +279,74 @@ A modern city surrounded by a shimmering shield, with skyscrapers, office buildi
     - the night woke her at 7:00 the next day, whole, for 31 gold against the clinic's 21 for the same body.
   - **Containers**: each part's middle moved where it should: the doors 20 to 28 cm out in front of their bodies, the lids 16 to 28 cm up (a door turning into its body would have read inward).
 
+## The list of 2026-11-22: goods and life (phase 22: `946 goods`, `946 life`, `RD/RDHeaven22.cpp`, `884 heaven22_*`)
+
+The user's words: "food, items and other things bought in the city of heaven should be modern in looks", and "the city of heaven should have typical ..." (the plan: typical city ambience: people on the pavements, the city's sound, billboards, neon at night).
+
+### Modern goods
+
+- **Twins**:
+  - Every everyday item (the foods, the healing, mana and speed potions, the five repair items, the torch) has a modern twin, 40 in all (`SourceArt/heaven/goods22.json`).
+  - Each twin is copied from its item, so it has the same kind, numbers, tiers and buff. Only its name, words and picture are its own: a Sandwich for Bread, a First-Aid Kit for the Medium Healing Potion, Focus Pills, an Energy Drink, Duct Tape, a Road Flare...
+  - `946 goods` writes them on every map of the game, so what she buys in Heaven goes with her. The map's `HeavenGoods22` pairs each item with its twin.
+- **Where they come from**:
+  - Heaven's stores sell the twin in its item's place (`TownStock` through `HeavenGood22`), each shop still by its trade.
+  - Heaven's tables lay modern food: a sandwich in its wedge pack, a takeaway box, crackers, a fruit cup. Each gives the twin.
+  - No container, shelf, prize or other store draws a twin: `CaveItemAllowed16` refuses them, and they have no weight in any draw.
+- **Their pictures**:
+  - 31 pictures were painted on the InvokeAI server (`art22/goods22_art.json`, two seeds each) and chosen on the contact sheets; the trail mix and the bandage were painted again on teal.
+  - The trail mix and the bandage still carry a faint teal shadow at their feet.
+  - `martial_arts` has no Cheese, so it has 39 twins.
+
+### People on the pavements
+
+- **Where they walk**:
+  - The pavements are made from the streets' runs: the open ground beside the asphalt is a walk's goal, a zebra's tiles cross the street, and the square and second rows are walked between them.
+  - A pedestrian (`ARDTownsfolk::bPave22`, one of the town's own townsfolk) walks a tile path over those tiles only, to a pavement 15 to 60 m off, more often ahead of it.
+  - They come and go round her: 30 by day and 8 at night, within 90 m, made 25 m and more from her.
+- **The cars**: a car waits for a pedestrian on the street as it waits for her (`CarYield22`).
+
+### The city's sound
+
+- **The bed**: The Sound Guild's city loops by day (`Heaven.City`) and its night loops by night (`Heaven.CityNight`), heard everywhere inside Heaven's walls.
+- **The crowd**: `Heaven.Crowd` near the square by day: full within 25 m, none past 90 m.
+- **Now and then**:
+  - a horn from a car 15 to 80 m off, every 10 to 35 s (`Heaven.Horn`, SoundBits' horns);
+  - a car passing within 10 m (`Heaven.PassBy`);
+  - at night, the hum of the neon within 12 m (`Heaven.Neon`).
+- **Source**: `SourceArt/heaven/city22.json`, converted by `rdc_sound_prep.py` into `audio_city` (ignored).
+
+### Billboards and neon
+
+- **Billboards**:
+  - One low building in three that is wide enough has a billboard on its roof, its face 6.4 by 3.2 m toward the street.
+  - Its picture is one of seven ads painted on the InvokeAI server: a burger, a car, a cola, an energy drink, a phone, a beach, a watch. All are without lettering. The running shoes were left out: a real maker's mark was painted on all three.
+  - The face is in the sign faces' emissive material. Its glow is 0.9 by day and 3 at night.
+- **Neon**:
+  - Over the door of every shop, the market, the hotel, the clinic and the gear shop: a frame of four tubes in the trade's colour.
+  - It stands 6 cm out from the wall piece's measured outer face.
+  - Its light is 0.1 by day and 1 at night, through the signal lens's material.
+- **The hotel's still**: the tavern's still and kegs outside the hotel are a condenser unit and recycling bins in Heaven.
+- **Switches**: `rd.Neon22`, `rd.Peds22` and `rd.CitySound22` turn each of these off for the tests.
+
+### Measured
+
+- **Goods** (`884 heaven22_goods -Light`, `test_h22a.json`):
+  - 40 twins, none missing, weighted, without a picture or of another kind, and none drawn.
+  - Heaven's store had 27 lines, 15 of them twins and none of the items that have one; the market sold a Bandage Roll for 12 gold.
+  - The tables held 57 modern food pieces and no bread or cheese meshes; one table's food gave a Sandwich.
+- **Pedestrians** (`heaven22_peds`, `test_h22c.json`):
+  - 30 walking round her for 40 s, 2190 readings, none on the asphalt.
+  - One crossed at a zebra; 9 walked new ways; no car came within 3.8 m of one.
+  - 8 at night.
+  - The frame rate with them, without, then with again in one place: 13.2, 14.0, 14.9.
+- **Sound** (`heaven22_sound`, `test_h22b.json`):
+  - The day's bed at 0.85, the crowd 0.70 at the square and 0.27 at 65 m.
+  - 9 horns in 30 s (with them made frequent); the night's set at night with no crowd.
+  - Recorded in the square with every other set silent: -27.6 dB with the city's sound, -41.6 without (14.0 dB).
+- **Neon and billboards** (`heaven22_neon`, `test_h22d.json`):
+  - 16 fronts with 64 tubes and 30 billboards; dim by day (0.1, 0.9), lit at night (1, 3).
+  - At midnight, read where each is on the screen with it on and off: the hotel's front 1.13 times as bright, a billboard 2.40 times.
+  - The first neon stood inside Heaven's walls (13 cm out against walls 23 cm thick) and made no difference until it was measured on the wall piece.
+- **The medieval things** (`heaven19_medieval`, `test_h22b.json`): none left in Heaven, the still's stand-ins included.
+

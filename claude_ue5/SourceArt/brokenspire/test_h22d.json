@@ -1,0 +1,89 @@
+{
+ "tag": "h22d",
+ "plan": [
+  "heaven22_neon"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "heaven22_neon",
+   "ok": true,
+   "fronts": 16,
+   "boards": 30,
+   "tubes_component": {
+    "n": 1,
+    "instances": 64,
+    "visible": true,
+    "hidden_in_game": false,
+    "material": "M_HV_SignalLens",
+    "mesh": "SM_HV_Neon22",
+    "first_z": [
+     268,
+     318,
+     293,
+     293
+    ],
+    "front_z": [
+     293,
+     293,
+     293,
+     293
+    ],
+    "from_nearest_front_cm": [
+     0,
+     0,
+     130,
+     130,
+     0,
+     0,
+     130,
+     130
+    ],
+    "custom_floats": 4
+   },
+   "front_kinds": [
+    1,
+    2,
+    3,
+    6,
+    25
+   ],
+   "neon_out_from_wall_line_cm": [
+    29.0
+   ],
+   "day": {
+    "tubes": 64,
+    "lit": 0.1,
+    "boards": 30,
+    "glow": 0.9
+   },
+   "day_front": 94.89,
+   "night": {
+    "tubes": 64,
+    "lit": 1.0,
+    "boards": 30,
+    "glow": 3.0,
+    "hum": 1
+   },
+   "luma": {
+    "front_on": 166.53,
+    "board_on": 78.52,
+    "front_off": 147.32,
+    "board_off": 32.77
+   },
+   "front_on_over_off": 1.13,
+   "board_on_over_off": 2.396
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_h22d_heaven22_front_day.png",
+  "bs_h22d_heaven22_front_on.png",
+  "bs_h22d_heaven22_board_on.png",
+  "bs_h22d_heaven22_front_off.png",
+  "bs_h22d_heaven22_board_off.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 3
+}

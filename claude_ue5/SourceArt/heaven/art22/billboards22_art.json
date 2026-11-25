@@ -1,0 +1,125 @@
+{
+ "_note": "Heaven's billboards (the list of 2026-11-22's phase 22, 'billboards'): wide advertising pictures painted whole (no cut: 946 life imports each pick as a billboard's face). No words are asked for: FLUX writes nonsense letters, and names a real brand when one is named",
+ "invoke": {
+  "host": "http://192.168.1.35:9090",
+  "model": "FLUX.1 Krea dev (quantized)",
+  "t5_encoder": "t5_bnb_int8_quantized_encoder",
+  "clip_embed": "clip-vit-large-patch14",
+  "vae": "FLUX.1-schnell_ae",
+  "steps": 30,
+  "guidance": 3.5,
+  "board": "claude-ue5 level4 UI",
+  "seeds": 3
+ },
+ "style": "hand-painted video game item art, painterly brush texture, rich but muted colours, crisp clean silhouette with a thin dark outline",
+ "styles": {
+  "panel": "made of blackened iron, worn dark leather and aged gold trim, the whole frame inside the picture with a wide empty white margin all around it",
+  "slot": "made of blackened iron, dark stone and aged gold trim, the whole frame inside the picture with a wide empty white margin all around it",
+  "bar": "made of blackened iron and aged gold trim, the whole frame inside the picture with an empty white margin all around it",
+  "icon": "a single object floating in the air in the middle of the picture, seen whole, with a wide empty white margin all around it",
+  "ring": "made of blackened iron and aged gold trim, the whole ring inside the picture with a wide empty white margin all around it",
+  "ornament": "made of blackened iron and aged gold, the whole ornament inside the picture with a wide empty white margin all around it",
+  "texture": "a flat even painted texture, the same all along its length"
+ },
+ "backdrop": "alone on a plain pure white background, soft even light from the front",
+ "elements": [
+  {
+   "name": "bb_cola",
+   "kind": "texture",
+   "size": [
+    1280,
+    640
+   ],
+   "prompt": "a single tall ice-cold bottle of bright orange soda with water droplets, splashing orange liquid and ice cubes, on a deep blue gradient",
+   "style": "a glossy modern advertising billboard image, bold clean graphic composition, vivid saturated colours, studio lighting, photographic",
+   "backdrop": "filling the whole picture edge to edge"
+  },
+  {
+   "name": "bb_phone",
+   "kind": "texture",
+   "size": [
+    1280,
+    640
+   ],
+   "prompt": "a sleek black smartphone floating at an angle with a glowing violet and cyan abstract screen, light trails sweeping behind it on a dark background",
+   "style": "a glossy modern advertising billboard image, bold clean graphic composition, vivid saturated colours, studio lighting, photographic",
+   "backdrop": "filling the whole picture edge to edge"
+  },
+  {
+   "name": "bb_car",
+   "kind": "texture",
+   "size": [
+    1280,
+    640
+   ],
+   "prompt": "a sleek silver electric sports car driving along a coastal road at sunset, motion blur, warm orange sky over the sea",
+   "style": "a glossy modern advertising billboard image, bold clean graphic composition, vivid saturated colours, studio lighting, photographic",
+   "backdrop": "filling the whole picture edge to edge"
+  },
+  {
+   "name": "bb_burger",
+   "kind": "texture",
+   "size": [
+    1280,
+    640
+   ],
+   "prompt": "a huge juicy cheeseburger with lettuce, tomato and melted cheese next to golden fries, on a bright red background",
+   "style": "a glossy modern advertising billboard image, bold clean graphic composition, vivid saturated colours, studio lighting, photographic",
+   "backdrop": "filling the whole picture edge to edge"
+  },
+  {
+   "name": "bb_travel",
+   "kind": "texture",
+   "size": [
+    1280,
+    640
+   ],
+   "prompt": "a tropical beach with turquoise water, white sand and palm trees under a clear sky, a small white airplane high in the sky",
+   "style": "a glossy modern advertising billboard image, bold clean graphic composition, vivid saturated colours, studio lighting, photographic",
+   "backdrop": "filling the whole picture edge to edge"
+  },
+  {
+   "name": "bb_watch",
+   "kind": "texture",
+   "size": [
+    1280,
+    640
+   ],
+   "prompt": "a luxurious gold wristwatch lying on black silk, dramatic rim light, deep shadows",
+   "style": "a glossy modern advertising billboard image, bold clean graphic composition, vivid saturated colours, studio lighting, photographic",
+   "backdrop": "filling the whole picture edge to edge"
+  },
+  {
+   "name": "bb_drink",
+   "kind": "texture",
+   "size": [
+    1280,
+    640
+   ],
+   "prompt": "a can of energy drink bursting through electric green lightning on a black background",
+   "style": "a glossy modern advertising billboard image, bold clean graphic composition, vivid saturated colours, studio lighting, photographic",
+   "backdrop": "filling the whole picture edge to edge"
+  },
+  {
+   "name": "bb_shoes",
+   "kind": "texture",
+   "size": [
+    1280,
+    640
+   ],
+   "prompt": "a pair of bright white and neon pink running shoes mid-air over a city running track at dawn",
+   "style": "a glossy modern advertising billboard image, bold clean graphic composition, vivid saturated colours, studio lighting, photographic",
+   "backdrop": "filling the whole picture edge to edge"
+  }
+ ],
+ "picks": {
+  "_note": "chosen on the contact sheet (2026-11-24), resized to 1024 x 512 into billboards/: the running shoes left out (a real maker's mark painted on all three), the cola without a lettered label",
+  "bb_burger": 233732282,
+  "bb_car": 203295652,
+  "bb_cola": 1742722412,
+  "bb_drink": 1568761451,
+  "bb_phone": 342965599,
+  "bb_travel": 1325820008,
+  "bb_watch": 3432536
+ }
+}

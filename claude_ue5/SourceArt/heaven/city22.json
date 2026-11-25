@@ -1,0 +1,19 @@
+{
+  "comment": "the list of 2026-11-22's phase 22 (Heaven's life: 'the city of heaven should have typical ... city ambience'): Heaven's sounds on brokenspire. Heaven.City the bed of a modern city by day (traffic, voices, the city's hum: The Sound Guild's city loops), Heaven.CityNight by night (their night loops), Heaven.Crowd the voices near the square and the market (their crowd loops), Heaven.Horn a car's or a bike's horn somewhere in the streets (SoundBits' horns), Heaven.PassBy cars passing (SoundBits' traffic), Heaven.Neon the hum of a neon sign at night (Stormwave's static electricity loop). Converted by pipeline/blender_numpy/rdc_sound_prep.py into SourceArt/heaven/audio_city/ (ignored), imported by pipeline/unreal/946_heaven16.py life",
+  "root": "I:/game assets",
+  "packs": {
+    "guild": "complete rpg creator bundle/ambience sounds pack/The_Sound_Guild_Ambience_Sounds/WAV - 44100 Hz - 16 Bit",
+    "honda": "gdc 2026 soniss audio/SoundBits - Motorcycles - Honda",
+    "kawa": "gdc 2026 soniss audio/SoundBits - Motorcycles - Kawasaki",
+    "pass": "gdc 2026 soniss audio/SoundBits - Pass-By - Trains, Trucks & Cars 2",
+    "storm": "gamedevmarket assets/Sci Fi Sound Effects Bundle/Stormwave Audio Sci-Fi Sound Effects Bundle"
+  },
+  "sets": {
+    "Heaven.City": {"from": [["guild", "Ambience_City_0[1-4]_Loop\\.wav$"], ["guild", "Ambience_City_Cars_0[12]_Loop\\.wav$"]], "loop": true, "stereo": true, "level": -24, "volume": 0.85},
+    "Heaven.CityNight": {"from": [["guild", "Ambience_City_Night_0[12]_Loop\\.wav$"]], "loop": true, "stereo": true, "level": -26, "volume": 0.8},
+    "Heaven.Crowd": {"from": [["guild", "Ambience_City_Small_Crowd_Loop\\.wav$"], ["guild", "Ambience_Crowd_0[1-3]_Loop\\.wav$"]], "loop": true, "stereo": true, "level": -27, "volume": 0.7},
+    "Heaven.Horn": {"from": [["honda", "VEHHorn_.*\\.wav$"], ["kawa", "VEHHorn_.*\\.wav$"]], "max_len": 2.5, "level": -16, "volume": 0.9, "pitch_var": 0.12, "inner": 600, "falloff": 6000},
+    "Heaven.PassBy": {"from": [["pass", "AMBTraf_.*\\.wav$"], ["pass", "VEHFrght_.*\\.wav$"]], "max_len": 9, "level": -20, "volume": 0.8, "pitch_var": 0.05, "inner": 800, "falloff": 5000},
+    "Heaven.Neon": {"from": [["storm", "Energy/Sci-Fi Static Electricity Loop 1\\.wav$"]], "loop": true, "level": -30, "volume": 0.35, "inner": 150, "falloff": 900}
+  }
+}
