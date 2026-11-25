@@ -862,7 +862,7 @@ public:
 		uint8 State = 0; bool bBus = false, bStoppedHere = false, bShown = true, bDriverShown = true, bCol = true; uint32 Seed = 0; float Rethink = 0.f;
 		/** what held it last (0 nothing, 1 the car ahead, 2 her, 3 a pedestrian, 4 a red or amber light, 5 a stop sign, 6 a left turn's
 		 *  yield, 7 its curve not clear, 8 a car coming into its lane, 9 its bay or stop) and since when it has stood */
-		uint8 Why = 0; float StillSince = -1.f, Entered = 0.f; bool bCommitted = false;
+		uint8 Why = 0; float StillSince = -1.f, Entered = 0.f; bool bLost = false, bGoing = false;
 		FVector P0 = FVector::ZeroVector, P1 = FVector::ZeroVector, P2 = FVector::ZeroVector, Pos = FVector::ZeroVector;
 		TArray<int32> Route;
 	};
@@ -875,6 +875,9 @@ public:
 	void BuildRoads23();
 	TArray<int32> NextLanes23(int32 L) const;
 	bool Route23(int32 From, int32 To, TArray<int32>& Out) const;
+	int32 RouteOn23(int32 I);
+	/** the streets' runs and parking as the static build planned them (a replan with static building off plans none: kept for the traffic) */
+	TArray<FRun19> KeptRuns19; TArray<FJunction19> KeptJunctions19; TArray<int32> KeptJGroup19; TArray<FPark19> KeptParks19; TSet<int32> KeptParkTiles19; int32 KeptSeed19 = 0;
 	int32 AddressLane23(int32 Bld, float& OutS) const;
 	int32 GoalOf23(const FCar23& Cr, float Hour) const;
 	int32 GoalBuilding23(const FCar23& Cr, int32 Goal) const;

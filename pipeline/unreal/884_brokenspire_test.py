@@ -6018,7 +6018,7 @@ def step_heaven23_roads():
     free bays, the bus stops and two bus loops), a driver seated in every car (his skeletal body inside the car's footprint, at the
     driver's side), the buses' seats; pictures of a driver at the wheel and of the street"""
     g = G["gen"]; res = {}; quiet(True)
-    S = yield from heaven16_in(); yield from wait(2.0)
+    S = yield from heaven16_in(); yield from wait(2.0); h_was = g.get_town_hour()
     try:
         g.set_town_hour(10.0); yield from wait(2.0)
         d = traffic23(); h = d["head"] or {}
@@ -6046,7 +6046,7 @@ def step_heaven23_roads():
             look_at19(V(stand.x - f.x * 1500, stand.y - f.y * 1500, 0), c["at"], -4.0); yield from wait(4.0)
             pth = yield from shot_file19("heaven23_street"); res["shot_street"] = bool(pth)
     finally:
-        unreal.SystemLibrary.execute_console_command(G["w"], "rd.Traffic23 1"); G["pawn"].set_actor_hidden_in_game(False); quiet(False)
+        unreal.SystemLibrary.execute_console_command(G["w"], "rd.Traffic23 1"); G["pawn"].set_actor_hidden_in_game(False); g.set_town_hour(h_was); quiet(False)
     ok = (h.get("lanes", 0) >= 40 and h.get("bays", 0) >= 5 and h.get("stops", 0) >= 2 and h.get("loops", 0) == 2 and h.get("cars", 0) >= 30
           and h.get("drivers") == h.get("cars") and h.get("buses", 0) == 2 and not off and res.get("shot_driver"))
     step_result("heaven23_roads", bool(ok), **res)
@@ -6058,15 +6058,19 @@ def step_heaven23_laws():
     car read stopped at its red line); stop signs stopped at; no two cars' footprints within 1.5 m (the game's least gap, and the
     test's every 0.25 s); the cars go places (lanes visited each); their speed eases (no step over 4 m/s between readings)"""
     g = G["gen"]; res = {}; quiet(True)
-    S = yield from heaven16_in(); yield from wait(1.0)
+    S = yield from heaven16_in(); yield from wait(1.0); h_was = g.get_town_hour()
     try:
         g.set_town_hour(9.0); S.reset_traffic_counts23(); yield from wait(1.0)
-        seen = {}; waited_red = set(); jumps = 0; least = 1e9; follow = 1e9; t0 = time.time(); last = {}
+        seen = {}; waited_red = set(); over_red = set(); over_held = set(); jumps = 0; least = 1e9; follow = 1e9; t0 = time.time(); last = {}
         while time.time() - t0 < 120.0:
             d = traffic23(); cars = d["cars"]
             for c in cars:
                 seen.setdefault(c["i"], set()).add(c["lane"])
                 if c["phase"] == 0 and c["state"] == 0 and c["v"] < 15 and c["lane_len"] - c["s"] < c["len"] * 0.5 + 200: waited_red.add(c["i"])
+                # (standing over its line held by the light itself (why 4): it went on and was stopped across it; one held there by the
+                # queue ahead after going in on green is another thing, and recorded apart)
+                if c["phase"] == 0 and c["state"] == 0 and c["v"] < 15 and c["lane_len"] - c["s"] - c["len"] * 0.5 < -20:
+                    (over_red if c["why"] == 4 else over_held).add(c["i"])
                 # (a change over 16 m/s2 in a quarter second, not for her, a pedestrian or a car coming into its way (an emergency stop))
                 if c["i"] in last and abs(c["v"] - last[c["i"]][0]) > 400 and c["why"] not in (2, 3, 7):
                     jumps += 1; res.setdefault("jumps_seen", []).append({"i": c["i"], "from": round(last[c["i"]][0]), "to": round(c["v"]), "states": [last[c["i"]][1], c["state"]], "why": c["why"], "bus": c["bus"]})
@@ -6090,13 +6094,15 @@ def step_heaven23_laws():
         res["head"] = h; res["cars_waited_at_red"] = len(waited_red); res["speed_jumps"] = jumps; res["least_gap_cm_test"] = round(least); res["least_following_gap_cm"] = round(follow)
         lanes = [len(v) for v in seen.values()]
         res["lanes_visited"] = {"median": sorted(lanes)[len(lanes) // 2] if lanes else 0, "cars_on_3_or_more": sum(1 for n in lanes if n >= 3), "cars": len(lanes)}
+        res["stood_over_the_line_at_red"] = over_red; res["held_over_the_line_by_the_queue"] = len(over_held)
     finally:
-        quiet(False)
+        g.set_town_hour(h_was); quiet(False)
     # (stop signs: Heaven's plan lights all its 36 crossings (phase 19); the rule is checked where a lane ends at one)
     stop_lanes = sum(1 for l in d_["lanes"] if l["stop_sign"]); res["lanes_to_a_stop_sign"] = stop_lanes
     # (no two footprints touch anywhere (two lanes' middles are 4.4 m apart: a bus 2.9 m wide passes a car 1.5 m off), and in one lane
     # no car within 2 m of the one ahead)
-    ok = (h["red_runs"] == 0 and h["stop_rolls"] == 0 and (stop_lanes == 0 or h["stop_sign_stops"] >= 1) and res["cars_waited_at_red"] >= 3 and h["min_gap"] >= 0
+    res["stood_over_the_line_at_red"] = len(res.get("stood_over_the_line_at_red") or [])
+    ok = (h["red_runs"] == 0 and res["stood_over_the_line_at_red"] == 0 and h["stop_rolls"] == 0 and (stop_lanes == 0 or h["stop_sign_stops"] >= 1) and res["cars_waited_at_red"] >= 3 and h["min_gap"] >= 0
           and res["least_gap_cm_test"] >= 0 and res["least_following_gap_cm"] >= 200 and res["lanes_visited"]["cars_on_3_or_more"] >= 0.5 * res["lanes_visited"]["cars"] and res["speed_jumps"] <= 3)
     step_result("heaven23_laws", bool(ok), **res)
 
@@ -6107,7 +6113,7 @@ def step_heaven23_buses():
     passengers up, seated in it) and get off (walking away from the stop); a picture of a bus at a stop"""
     g = G["gen"]; res = {}; quiet(True)
     S = yield from heaven16_in(); yield from wait(1.0)
-    shots = []
+    shots = []; h_was = g.get_town_hour(); empty_seen = 0
     try:
         g.set_town_hour(10.0); S.reset_traffic_counts23()
         # (by the first bus's first stop, so the stops round her have waiting people)
@@ -6132,13 +6138,16 @@ def step_heaven23_buses():
             if int(time.time() - t0) % 30 == 0: res.setdefault("bus_states", []).append([{"i": c["i"], "state": c["state"], "lane": c["lane"], "v": round(c["v"]), "why": c["why"], "still": round(c["still_s"]), "goal_lane": c["goal_lane"], "route": c["route"]} for c in d["cars"] if c["bus"]])
             rd = [c_ for c_ in S.get_components_by_tag(unreal.SkeletalMeshComponent, "HeavenRider23") if c_.is_visible()]
             riders_shown = max(riders_shown, len(rd))
+            # (a rider seen in a bus that carries nobody: its empty seats drawn)
+            for c in d["cars"]:
+                if c["bus"] and c["passengers"] == 0 and any(dist2(r_.get_world_location(), c["at"]) < 700 for r_ in rd): empty_seen += 1
             yield from rwait(0.5)
         h = traffic23()["head"]
         res["head"] = h; res["stops_visited"] = {str(k): v for k, v in visits.items()}; res["max_waiting_at_a_stop"] = max_waiting; res["riders_seen_seated"] = riders_shown
-        res["shots"] = shots
+        res["shots"] = shots; res["riders_seen_in_empty_buses"] = empty_seen
     finally:
-        G["pawn"].set_actor_hidden_in_game(False); quiet(False)
-    ok = (h["boarded"] >= 2 and h["alighted"] >= 1 and len(visits) == 2 and all(len(v) >= 2 for v in visits.values()) and max_waiting >= 1 and riders_shown >= 1)
+        G["pawn"].set_actor_hidden_in_game(False); g.set_town_hour(h_was); quiet(False)
+    ok = (h["boarded"] >= 2 and h["alighted"] >= 1 and len(visits) == 2 and all(len(v) >= 2 for v in visits.values()) and max_waiting >= 1 and riders_shown >= 1 and empty_seen == 0)
     step_result("heaven23_buses", bool(ok), **res)
 
 
@@ -6186,12 +6195,17 @@ def step_heaven23_distance():
             dd = dist2(c["at"], her); vis = b.is_visible(); col = b.get_collision_enabled() != unreal.CollisionEnabled.NO_COLLISION
             if (dd < 19000 and not vis) or (dd > 21000 and vis) or (dd < 2800 and not col) or (dd > 3200 and col): bad.append({"d_m": round(dd / 100), "vis": vis, "col": col})
         res["by_distance_wrong"] = bad[:6]
+        dbad = []
+        for d_ in S.get_components_by_tag(unreal.SkeletalMeshComponent, "HeavenDriver23"):
+            dd = dist2(d_.get_world_location(), her)
+            if (dd > 6300 and d_.is_visible()) or (dd < 5700 and not d_.is_visible()): dbad.append(round(dd / 100))
+        res["drivers_by_distance_wrong_m"] = dbad[:6]
         f1 = yield from fps(); unreal.SystemLibrary.execute_console_command(G["w"], "rd.Traffic23 0"); yield from wait(1.0)
         f0 = yield from fps(); unreal.SystemLibrary.execute_console_command(G["w"], "rd.Traffic23 1"); yield from wait(1.0); f2 = yield from fps()
         res["fps_driving_held_driving"] = [f1, f0, f2]
     finally:
         unreal.SystemLibrary.execute_console_command(G["w"], "rd.Traffic23 1"); quiet(False)
-    ok = not bad and (f1 + f2) / 2 >= 0.8 * f0
+    ok = not bad and not res["drivers_by_distance_wrong_m"] and (f1 + f2) / 2 >= 0.8 * f0
     step_result("heaven23_distance", bool(ok), **res)
 
 

@@ -472,3 +472,23 @@ All five steps pass in one run: `884 heaven23_roads,heaven23_laws,heaven23_buses
   - A gap measured along the line between two middles read a bus beside a parked car as 2.4 m "into" it: footprints by separating axes now.
   - Cars held each other in knots: a car going straight behind the car waiting across the crossing; two left turns waiting for each other; a bus's turn sweeping over cars at their lines; a car rolling into a turning bus; two cars turning across each other entering together.
 
+### After PR #130's review
+
+- **Lights**: a car on a green or amber that reaches its line before the red, at no more than the crossing's speed, is committed and goes. A car not committed stops 40 cm before its line. A car whose front is already past its line is never stopped there. A red run is counted at the line itself.
+- **Crossings**: a car goes into a crossing only when all of it fits in the next lane beyond.
+- **Goals**: a car whose way to its goal was lost, or that has no bay, looks again at its next look. At a lane's end it takes the next lane that leads to its goal.
+- **Drivers and riders**: they are drawn by their own rule again when their car comes back into view (empty seats are never shown). They go with their car when it is made again.
+- **Bays**: a car turning into or out of a bay waits for her and for pedestrians.
+- **After a restart**: the streets' runs and parking are the static build's, kept.
+- **Bus stops**: only the stops a bus calls at get people waiting. Those off the bus walk away only within her reach.
+- **Far away**: the traffic stands still while she is far beyond the shield.
+- **Measured again** (all five steps pass: `884 heaven23_roads,heaven23_laws,heaven23_buses,heaven23_goals,heaven23_distance -Light`, `test_h23x.json`):
+  - **Laws**:
+    - no red run, and no car stopped over its line by the light (one stood over it held by the queue ahead after going in on green);
+    - the least gap between footprints anywhere was 66 cm, in a lane 2.12 m;
+    - no change of speed over 16 m/s² in a quarter second;
+    - every car drove three lanes or more.
+  - **Buses**: their loops, 12 got on and 11 got off, and no rider was seen in a bus carrying nobody.
+  - **Distance**: drivers drawn only within 60 m.
+  - **Pictures**: a bus at its stop, from behind it along its lane.
+

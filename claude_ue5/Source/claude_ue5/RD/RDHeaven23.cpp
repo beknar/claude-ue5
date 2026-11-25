@@ -213,6 +213,24 @@ TArray<int32> ARDSection::NextLanes23(int32 L) const
 	return Out;
 }
 
+int32 ARDSection::RouteOn23(int32 I)
+{
+	// (the way to its goal from the next lane that has one: its bay behind it on its own lane, or a way lost; else on at random, and it
+	// looks again at its next look)
+	FCar23& Cr = Cars23[I];
+	const TArray<int32> Opts = NextLanes23(Cr.Lane);
+	int32 Best = -1, BestN = 1 << 30; TArray<int32> BestR;
+	if (!Cr.bBus || Cr.GoalLane >= 0)
+		for (const int32 O : Opts)
+		{
+			TArray<int32> R;
+			if (Route23(O, Cr.GoalLane, R) && R.Num() < BestN) { BestN = R.Num(); Best = O; BestR = R; }
+		}
+	if (Best >= 0) { Cr.Route = BestR; Cr.Route.Insert(Best, 0); Cr.bLost = false; return Best; }
+	Cr.bLost = true; Cr.Route.Reset();
+	return Opts.Num() ? Opts[(Cr.Seed + (uint32)Cr.Lane) % (uint32)Opts.Num()] : -1;
+}
+
 bool ARDSection::Route23(int32 From, int32 To, TArray<int32>& Out) const
 {
 	// (the shortest way by length over the lanes (a few hundred: a plain Dijkstra over an array))
@@ -304,9 +322,9 @@ void ARDSection::SetGoal23(int32 Ci, float Hour)
 	if (Cr.Bay >= 0 && Bays23.IsValidIndex(Cr.Bay) && Bays23[Cr.Bay].Car == Ci) Bays23[Cr.Bay].Car = -1;
 	Cr.Bay = Bi;
 	if (Bi >= 0) Bays23[Bi].Car = Ci;
-	Cr.GoalLane = Bi >= 0 ? Bays23[Bi].Lane : (Lanes23.IsValidIndex(Al) ? Al : FMath::Abs((int32)(Cr.Seed + Ci * 7)) % FMath::Max(1, Lanes23.Num()));
+	Cr.GoalLane = Bi >= 0 ? Bays23[Bi].Lane : (Lanes23.IsValidIndex(Al) ? Al : (int32)((Cr.Seed + (uint32)Ci * 7u) % (uint32)FMath::Max(1, Lanes23.Num())));
 	Cr.GoalS = Bi >= 0 ? Bays23[Bi].S : S;
-	Route23(Cr.Lane, Cr.GoalLane, Cr.Route);
+	Cr.bLost = !Route23(Cr.Lane, Cr.GoalLane, Cr.Route);
 }
 
 // ------------------------------------------------------------------------------------------------ the cars made
@@ -324,6 +342,7 @@ USkeletalMeshComponent* ARDSection::SeatPerson23(USceneComponent* Pv, int32 Def,
 	Sk->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 	Sk->SetRelativeTransform(FTransform(FRotator(0.f, Df.MeshYaw, 0.f), At + FVector(0, 0, Df.MeshZ * 0.f), FVector(Df.Scale)));
 	Sk->ComponentTags.Add(bDriver ? FName(TEXT("HeavenDriver23")) : FName(TEXT("HeavenRider23")));
+	Sk->ComponentTags.Add(TEXT("RDInteractive"));          // (RestartPlay's ClearInteractive takes them with their cars' pivots)
 	Sk->RegisterComponent();
 	AddInstanceComponent(Sk);
 	Sk->PlayAnimation(*A, true);
@@ -336,8 +355,11 @@ void ARDSection::HeavenTraffic23()
 	// (a replan (RestartPlay) makes the cars again: the old drivers and riders go with their cars, not left in the street)
 	for (UActorComponent* C : GetComponentsByTag(USkeletalMeshComponent::StaticClass(), TEXT("HeavenDriver23"))) C->DestroyComponent();
 	for (UActorComponent* C : GetComponentsByTag(USkeletalMeshComponent::StaticClass(), TEXT("HeavenRider23"))) C->DestroyComponent();
-	for (FCar23& Cr : Cars23) if (USceneComponent* C = Cr.C.Get()) C->DestroyComponent(true);
+	for (FCar23& Cr : Cars23) { if (UStaticMeshComponent* B = Cr.Body.Get()) B->DestroyComponent(); if (USceneComponent* C = Cr.C.Get()) C->DestroyComponent(false); }
 	Cars23.Reset(); ResetTrafficCounts23();
+	// (the people waiting at the stops belong to the old stops' numbers)
+	for (const ARDDungeonGenerator::FBusWait23& W : Generator->BusWait23) if (ARDTownsfolk* F = W.F.Get()) { Generator->TownPeople.Remove(F); F->Destroy(); }
+	Generator->BusWait23.Reset();
 	BuildRoads23();
 	if (Lanes23.Num() == 0) return;
 	TArray<const FRDPiece*> Kinds; TArray<FName> KindNames;
@@ -475,6 +497,18 @@ void ARDSection::CurveOf23(int32 L, int32 Nx, FVector& P0, FVector& P1, FVector&
 	else P1 = (Ln.B + Nl.A) * 0.5f + Ln.Way * 700.f;
 }
 
+float ARDDungeonGenerator::SignalGoLeft23(float T, float Offset, bool bAlongX) const
+{
+	// (the seconds before this road's red: its green and amber left (0 at red))
+	const float G = FMath::Max(SignalGreen19, 1.f), A = FMath::Max(SignalAmber19, 0.5f), Rr = FMath::Max(SignalAllRed19, 0.f);
+	const float C = 2.f * (G + A + Rr), Half = G + A + Rr;
+	float Tt = FMath::Fmod(T + Offset, C); if (Tt < 0.f) Tt += C;
+	const bool bXTurn = Tt < Half;
+	if (bXTurn != bAlongX) return 0.f;
+	const float U = bXTurn ? Tt : Tt - Half;
+	return U < G + A ? G + A - U : 0.f;
+}
+
 float ARDDungeonGenerator::SignalAmberLeft23(float T, float Offset, bool bAlongX) const
 {
 	// (as SignalPhase19: the seconds left of this road's amber now (0 when it is not amber))
@@ -491,6 +525,12 @@ float ARDDungeonGenerator::SignalAmberLeft23(float T, float Offset, bool bAlongX
 void ARDSection::TickTraffic23(float Dt, const FVector& Her)
 {
 	if (Cars23.Num() == 0 || Dt <= 0.f) return;
+	// (still while she is far beyond the shield, as the old cars were (PR #130's review: driven four times a second with her in the wilds))
+	if (HeavenDomeRadius > 0.f)
+	{
+		FVector2D Mid(0, 0); for (const FVector2D& P : TownBorder) Mid += P; Mid /= FMath::Max(1, TownBorder.Num());
+		if (FVector2D::Distance(Mid, FVector2D(Her.X, Her.Y)) > HeavenDomeRadius + 30000.f) return;
+	}
 	const UWorld* Wd = GetWorld();
 	const float Now = Wd ? Wd->GetTimeSeconds() : 0.f;
 	const bool bRun = CVarRDTraffic23.GetValueOnGameThread() != 0;
@@ -519,7 +559,9 @@ void ARDSection::TickTraffic23(float Dt, const FVector& Her)
 		const float Ddt = bFar ? FarDt : Dt;
 		// (by distance: drawn within 200 m, its driver within 60 m, its collision within 30 m)
 		const bool bShow = DistHer < 20000.f, bDriver = DistHer < 6000.f, bCol = DistHer < 3000.f;
-		if (bShow != Cr.bShown) { Cr.bShown = bShow; Cc->SetVisibility(bShow, true); }
+		// (shown again with all its children: the driver's and riders' rule is applied again at once (PR #130's review: empty seats and far
+		// drivers were drawn))
+		if (bShow != Cr.bShown) { Cr.bShown = bShow; Cc->SetVisibility(bShow, true); Cr.bDriverShown = !bDriver; }
 		if (bShow && bDriver != Cr.bDriverShown)
 		{
 			Cr.bDriverShown = bDriver;
@@ -530,8 +572,13 @@ void ARDSection::TickTraffic23(float Dt, const FVector& Her)
 		if (!bRun) continue;
 		const FLane23& Ln = Lanes23[Cr.Lane];
 		// ---- parked: in, waiting, out
+		// (into or out of its bay it waits while she or a pedestrian is near its way (a lot's bay crosses the pavement))
+		bool bNearBay = (Cr.State == 2 || Cr.State == 4) && FVector::Dist2D(Her, Cr.Pos) < Cr.Len * 0.5f + 250.f && FMath::Abs(Her.Z - Cr.Pos.Z) < 400.f;
+		if (Cr.State == 2 || Cr.State == 4) for (const FVector& Y : CarYield22) if (FVector::Dist2D(Y, Cr.Pos) < Cr.Len * 0.5f + 200.f) bNearBay = true;
+		for (const TWeakObjectPtr<ARDTownsfolk>& Pf : Generator->Peds22) if ((Cr.State == 2 || Cr.State == 4) && Pf.IsValid() && FVector::Dist2D(Pf->GetActorLocation(), Cr.Pos) < Cr.Len * 0.5f + 200.f) bNearBay = true;
 		if (Cr.State == 2)
 		{
+			if (bNearBay) continue;
 			Cr.T = FMath::Min(1.f, Cr.T + Ddt / 2.5f); PlaceCar23(Cr); if (Bays23.IsValidIndex(Cr.Bay)) Cr.S = Bays23[Cr.Bay].S;
 			if (Cr.T >= 1.f) { Cr.State = 3; ++Parks23; Cr.Until = Now + (Cr.Goal == 0 && GoalOf23(Cr, Hour) == 0 ? 90.f : 20.f + (float)((Cr.Seed >> 7) % 40u)); Cr.V = 0.f; }
 			continue;
@@ -554,6 +601,7 @@ void ARDSection::TickTraffic23(float Dt, const FVector& Her)
 		}
 		if (Cr.State == 4)
 		{
+			if (bNearBay) continue;
 			Cr.T = FMath::Max(0.f, Cr.T - Ddt / 2.5f); PlaceCar23(Cr);
 			if (Cr.T <= 0.f) { Cr.State = 0; Cr.V = 0.f; SetGoal23(I, Hour); }
 			continue;
@@ -586,7 +634,7 @@ void ARDSection::TickTraffic23(float Dt, const FVector& Her)
 			Cr.T += Cr.V * Ddt / FMath::Max(Cr.CrossLen, 100.f);
 			if (Cr.T >= 1.f)
 			{
-				Cr.State = 0; Cr.Lane = Cr.Next; Cr.S = 0.f; Cr.bStoppedHere = false; Cr.StopAt = -1.f;
+				Cr.State = 0; Cr.Lane = Cr.Next; Cr.S = 0.f; Cr.bStoppedHere = false; Cr.StopAt = -1.f; Cr.bGoing = false;
 				if (Cr.Route.Num() > 0 && Cr.Route[0] == Cr.Lane) Cr.Route.RemoveAt(0);
 			}
 			PlaceCar23(Cr);
@@ -596,7 +644,8 @@ void ARDSection::TickTraffic23(float Dt, const FVector& Her)
 		if (!Cr.bBus && Now >= Cr.Rethink)
 		{
 			Cr.Rethink = Now + 10.f;
-			if (GoalOf23(Cr, Hour) != Cr.Goal) SetGoal23(I, Hour);
+			// (and one with no bay, or whose way was lost, looks again: it went on at random for good, its bay kept from the others)
+			if (GoalOf23(Cr, Hour) != Cr.Goal || Cr.Bay < 0 || Cr.bLost) SetGoal23(I, Hour);
 		}
 		// ---- along its lane: the room ahead (the car ahead, her, a pedestrian, its stop line or its bay or stop)
 		float Room = 1e9f; uint8 Why = 0;
@@ -648,7 +697,9 @@ void ARDSection::TickTraffic23(float Dt, const FVector& Her)
 		if (StopS < 0.f && Ln.ToJ >= 0)
 		{
 			const float ToLine = Ln.Len - Cr.S - Cr.Len * 0.5f;
-			if (Ln.Signal >= 0 && Signals19.IsValidIndex(Ln.Signal))
+			// (committed: it reaches its line before the red at its speed, and is not held (V over 1 m/s): the light is not asked again)
+			if (Cr.bGoing && Cr.V < 100.f) Cr.bGoing = false;
+			if (Ln.Signal >= 0 && Signals19.IsValidIndex(Ln.Signal) && !Cr.bGoing)
 			{
 				const int32 Ph = Generator->SignalPhase19(Now, Signals19[Ln.Signal].Offset, Ln.bAlongX);
 				// (red stops it. Amber: it goes on when it reaches the line before the amber ends; else it stops when it can stop at its
@@ -662,12 +713,19 @@ void ARDSection::TickTraffic23(float Dt, const FVector& Her)
 					const bool bMakesIt = Cr.V > 100.f && ToLine / Cr.V < Left - 0.3f;
 					bStop = !bMakesIt && ToLine > Brake * 0.6f;
 				}
-				if (bStop) { bMayGo = false; WhyStop = 4; }
+					// (its front already over the line (it went on amber), it goes on: stopped there it stood on the zebra a whole red)
+					// (its front already past its line, it crossed on green or amber: never stopped there (it stood on the zebra))
+					if (ToLine < 0.f) bStop = false;
+					if (bStop) { bMayGo = false; WhyStop = 4; }
+					// (green or amber, it goes, and reaches its line before the red at no more than the crossing's speed (it eases down to it
+					// before the line: timed at its own speed, one came late and ran the red): committed)
+					const float GoLeft = Generator->SignalGoLeft23(Now, Signals19[Ln.Signal].Offset, Ln.bAlongX);
+					if (!bStop && Cr.V > 100.f && ToLine >= 0.f && ToLine / FMath::Min(Cr.V, 650.f) < GoLeft - 0.3f && ToLine < Brake + 300.f) Cr.bGoing = true;
 			}
 			else if (Ln.bStopSign && !Cr.bStoppedHere) { bMayGo = false; WhyStop = 5; }
 			// (a left turn yields to what comes the other way)
 			int32 Nx = Cr.Route.Num() > 0 ? Cr.Route[0] : -1;
-			if (!NextLanes23(Cr.Lane).Contains(Nx)) { const TArray<int32> Op = NextLanes23(Cr.Lane); Nx = Op.Num() ? Op[(Cr.Seed + (uint32)Cr.Lane) % (uint32)Op.Num()] : -1; if (Nx >= 0) { Cr.Route.Reset(); Cr.Route.Add(Nx); } }
+			if (!NextLanes23(Cr.Lane).Contains(Nx)) Nx = RouteOn23(I);
 			if (bMayGo && Lanes23.IsValidIndex(Nx) && FVector::CrossProduct(Ln.Way, Lanes23[Nx].Way).Z < -0.5f)
 				for (int32 O = 0; O < Cars23.Num(); ++O)
 				{
@@ -686,8 +744,17 @@ void ARDSection::TickTraffic23(float Dt, const FVector& Her)
 			// line), at the line only: further back nothing is decided)
 			// (looked at from its braking distance on, so a blocked curve slows it, not stops it dead at the line (from 6 to 8 m/s to 0
 			// in a quarter second))
-			if (bMayGo && Ln.Len - Cr.S < Cr.V * Cr.V / (2.f * RDH23Dec * 0.8f) + Cr.Len * 0.5f + 300.f && Lanes23.IsValidIndex(Nx))
-			{
+				// (room for all of it in the next lane beyond the crossing, or it does not go in (PR #130's review: one waited inside it))
+				if (bMayGo && Lanes23.IsValidIndex(Nx))
+					if (const TArray<int32>* Qs = OnLane.Find(Nx); Qs && Qs->Num() > 0)
+					{
+						const FCar23& Q = Cars23[(*Qs)[0]];
+						if (Q.S - Q.Len * 0.5f < Cr.Len + RDH23Gap * 0.5f) { bMayGo = false; WhyStop = 8; }
+					}
+				for (int32 O = 0; O < Cars23.Num() && bMayGo; ++O)
+					if (O != I && Cars23[O].State == 1 && Cars23[O].Next == Nx && Lanes23.IsValidIndex(Nx)) { bMayGo = Lanes23[Nx].Len > Cars23[O].Len + Cr.Len + 2.f * RDH23Gap; if (!bMayGo) WhyStop = 8; }
+				if (bMayGo && Ln.Len - Cr.S < Cr.V * Cr.V / (2.f * RDH23Dec * 0.8f) + Cr.Len * 0.5f + 300.f && Lanes23.IsValidIndex(Nx))
+				{
 				FVector Q0, Q1, Q2; CurveOf23(Cr.Lane, Nx, Q0, Q1, Q2);
 				// (held 20 s by that alone, it goes: its curve is still guarded step by step)
 				if (!CurveClear23(I, Q0, Q1, Q2, 0.05f, 1.f, 60.f) && !(Cr.Why == 7 && Cr.StillSince >= 0.f && Now - Cr.StillSince > 20.f)) { bMayGo = false; WhyStop = 7; }
@@ -712,7 +779,8 @@ void ARDSection::TickTraffic23(float Dt, const FVector& Her)
 			}
 			if (!bMayGo) StopS = Ln.Len;
 		}
-		if (StopS >= 0.f) Hold(StopS - Cr.S - (Cr.bBus || Cr.Bay >= 0 && bAtGoalLane ? 0.f : Cr.Len * 0.5f), (Cr.bBus || Cr.Bay >= 0) && bAtGoalLane ? 9 : WhyStop);
+		// (at a line it stops 40 cm before it: aimed at the line itself, it slid over it by a few centimetres, read as over it)
+		if (StopS >= 0.f) Hold(StopS - Cr.S - ((Cr.bBus || Cr.Bay >= 0) && bAtGoalLane ? 0.f : Cr.Len * 0.5f + 40.f), (Cr.bBus || Cr.Bay >= 0) && bAtGoalLane ? 9 : WhyStop);
 		// (its speed from the room: easing to a stop that ends at the room, and up to its limit)
 		float Vt = FMath::Min(Cr.VMax, FMath::Sqrt(2.f * RDH23Dec * 0.8f * FMath::Max(Room, 0.f)));
 		// (down to the crossing's speed by the line: no step from its street speed onto the curve)
@@ -721,9 +789,13 @@ void ARDSection::TickTraffic23(float Dt, const FVector& Her)
 		if (Room < -30.f) Cr.V = 0.f;
 		Cr.Why = Room < 3000.f ? Why : 0;
 		if (Cr.V < 15.f) { if (Cr.StillSince < 0.f) Cr.StillSince = Now; } else Cr.StillSince = -1.f;
+		const float LineWas = Ln.Len - Cr.S - Cr.Len * 0.5f;
 		Cr.S = FMath::Min(Cr.S + Cr.V * Ddt, Ln.Len);
+		// (a red run: its front over the line while the light is red (counted where it happens, not at the curve's start))
+		if (Ln.Signal >= 0 && Signals19.IsValidIndex(Ln.Signal) && LineWas >= 0.f && Ln.Len - Cr.S - Cr.Len * 0.5f < 0.f
+			&& Generator->SignalPhase19(Now, Signals19[Ln.Signal].Offset, Ln.bAlongX) == 0) ++RedRuns23;
 		// ---- what happens at the stop
-		if (StopS >= 0.f && Cr.V < 15.f && StopS - Cr.S < 120.f + (Cr.bBus || Cr.Bay >= 0 ? 0.f : Cr.Len * 0.5f))
+		if (StopS >= 0.f && Cr.V < 15.f && StopS - Cr.S < 160.f + (Cr.bBus || Cr.Bay >= 0 ? 0.f : Cr.Len * 0.5f))
 		{
 			if (Cr.bBus && bAtGoalLane)
 			{
@@ -756,10 +828,8 @@ void ARDSection::TickTraffic23(float Dt, const FVector& Her)
 		if (Cr.S >= Ln.Len - 1.f && bMayGo && (StopS < 0.f || !bAtGoalLane))
 		{
 			if (Ln.bStopSign && !Cr.bStoppedHere) ++StopSignRolls23;          // (never: a stop not made)
-			if (Ln.Signal >= 0 && Signals19.IsValidIndex(Ln.Signal) && Generator->SignalPhase19(Now, Signals19[Ln.Signal].Offset, Ln.bAlongX) == 0) ++RedRuns23;
-			int32 Nx = Cr.Route.Num() > 0 ? Cr.Route[0] : -1;
-			const TArray<int32> Opts = NextLanes23(Cr.Lane);
-			if (!Opts.Contains(Nx)) { Nx = Opts.Num() ? Opts[(Cr.Seed + (uint32)Cr.S) % (uint32)Opts.Num()] : -1; if (Nx >= 0 && Cr.Goal >= 0 && !Cr.bBus) Route23(Nx, Cr.GoalLane, Cr.Route); }
+int32 Nx = Cr.Route.Num() > 0 ? Cr.Route[0] : -1;
+			if (!NextLanes23(Cr.Lane).Contains(Nx)) Nx = RouteOn23(I);
 			if (Nx >= 0)
 			{
 				Cr.Next = Nx; Cr.State = 1; Cr.T = 0.f; Cr.Entered = Now;
@@ -778,6 +848,7 @@ void ARDSection::TickTraffic23(float Dt, const FVector& Her)
 			{
 				const FCar23& A = Cars23[I]; const FCar23& B = Cars23[J];
 				if (A.State >= 2 && A.State <= 3 && B.State >= 2 && B.State <= 3) continue;
+				if (FVector::Dist2D(A.Pos, Her) > 15000.f) continue;          // (measured near her only: all pairs every quarter second cost)
 				const float D = FVector::Dist2D(A.Pos, B.Pos);
 				if (D > 1500.f) continue;
 				// (the largest margin at which their footprints keep apart, to 5 cm (the projection on the line between their middles read
@@ -855,7 +926,10 @@ int32 ARDDungeonGenerator::BoardBus23(int32 Stop, const FVector& At, float Yaw, 
 	// (those getting off walk away as pedestrians; those waiting get on, as many as there are seats)
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	const FVector Rw = FRotator(0, Yaw, 0).Vector();
-	for (int32 K = 0; K < Off && S && GetWorld(); ++K)
+	// (walking away only where she can see them: inside the walls, within 90 m (PR #129's rule))
+	const APawn* Pw = UGameplayStatics::GetPlayerPawn(this, 0);
+	const bool bNear = Pw && IsInTownWalls(Pw->GetActorLocation()) && FVector::Dist2D(Pw->GetActorLocation(), At) < Peds22Reach;
+	for (int32 K = 0; K < Off && S && GetWorld() && bNear; ++K)
 	{
 		FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		const FVector P = At - Rw * 120.f + FVector(Rw.Y, -Rw.X, 0.f) * (K * 70.f - 70.f) + FVector(0, 0, 92.f);
@@ -887,10 +961,12 @@ void ARDDungeonGenerator::TickBusStops23(const FVector& Her, ARDSection* S, bool
 		if (!F || FVector::Dist2D(F->GetActorLocation(), Her) > 20000.f) { if (F) { TownPeople.Remove(F); F->Destroy(); } BusWait23.RemoveAt(K); }
 	}
 	if (bNight || !S || !GetWorld()) return;
+	TSet<int32> Served; for (const TArray<int32>& L : S->BusRoutes23) for (const int32 K : L) Served.Add(K);
 	for (int32 Si = 0; Si < S->BusStops23.Num(); ++Si)
 	{
 		const ARDSection::FStop23& St = S->BusStops23[Si];
-		if (FVector::Dist2D(St.At, Her) > 15000.f || BusWaiting23(Si) >= 3) continue;
+		// (only at the stops a bus calls at (a loop takes six at most))
+		if (!Served.Contains(Si) || FVector::Dist2D(St.At, Her) > 15000.f || BusWaiting23(Si) >= 3) continue;
 		const uint32 H = HashCombine((uint32)Si, (uint32)(BusWaitMade23 * 2654435761u));
 		if (H % 100u >= 18u) { ++BusWaitMade23; continue; }          // (about one in five looks a second)
 		int32 D = -1;

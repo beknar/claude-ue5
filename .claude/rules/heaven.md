@@ -103,4 +103,10 @@ The city is a wilderness town on `brokenspire` with the modern plan (`FRDWildTow
 - **Sample a long thing's way densely**: at six places along a bus's turn the overlap with a car at its line fell between two of them; at twelve it is found.
 - **A crossing is reserved, not only checked at its entry**: two cars turning across each other from opposite sides went in together, each seeing the other at its line. Check the whole way against every crossing car's remaining way.
 - **A test's picture stand point must be outside**: "across the street" from a bus at its stop stood in buildings twice. Stand behind it along its lane.
+- **PR #130's review**:
+  - **A decision kept from one frame must be kept**: a car that went on amber was stopped dead across its line at the red, because the light was asked again every frame. Commit when it reaches its line before the red, timed at no more than the speed it slows to. Never stop one already past its line.
+  - **Count an offence where it happens**: a red run at the line, not where the curve starts. A car stopping aimed at its line slid over it and read as "already over"; stop 40 cm short.
+  - **A fallback that fakes a route ends the re-routing**: a lost car's random next lane was written as its route, so it was never routed again, and its bay stayed reserved.
+  - **Showing a parent shows its children**: drivers and empty seats came back with their car; apply the children's own rule at once.
+  - **A replan must not re-plan what the static build placed**: keep it.
 

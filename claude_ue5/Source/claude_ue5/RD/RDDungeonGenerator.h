@@ -2359,6 +2359,7 @@ public:
 	int32 BoardBus23(int32 Stop, const FVector& At, float Yaw, int32 Off, int32 Room);
 	void TickBusStops23(const FVector& Her, class ARDSection* S, bool bNight);
 	float SignalAmberLeft23(float T, float Offset, bool bAlongX) const;
+	float SignalGoLeft23(float T, float Offset, bool bAlongX) const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven23") TArray<FString> GetTraffic23() const;
 	/** a lift platform's speed (cm a second) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven20") float LiftSpeed20 = 220.f;
