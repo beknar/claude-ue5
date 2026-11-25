@@ -170,6 +170,9 @@ else:
         assert a, (pack, n)
         return a
     mons = [m for m in gen.get_editor_property("monsters") if not str(m.get_editor_property("name")) in {e["name"] for e in MJ["monsters"]}]
+    # (947's defenders (the list of 2026-11-22's phase 25) are not the castle's kinds: never reweighted here; run 947 monsters after this)
+    d25 = os.path.join(SA, "defenders25.json")
+    own25 = {e["name"] for e in json.load(open(d25, encoding="utf-8"))["monsters"]} if os.path.exists(d25) else set()
     added = []; rows = []
     for e in MJ["monsters"]:
         sk = unreal.load_asset(e["mesh"]); assert sk, e["mesh"]
@@ -208,7 +211,8 @@ else:
         rows.append([e["name"], e["tier"], round(ext.z * 2 * sc), round(rad), round(hh), round(spd), [round(h, 2) for h in d.hit_times], round(d.ranged_release, 2),
                      bool(d.ranged_fx), bool(d.ranged_muzzle_fx), bool(d.ranged_hit_fx)])
     by_t = {}
-    for m in mons: by_t.setdefault(int(m.get_editor_property("tier")), []).append(m)
+    for m in mons:
+        if str(m.get_editor_property("name")) not in own25: by_t.setdefault(int(m.get_editor_property("tier")), []).append(m)
     mw = {}
     for d in added: mw[int(d.tier)] = mw.get(int(d.tier), 0.0) + float(d.weight)
     for t, ms in by_t.items():

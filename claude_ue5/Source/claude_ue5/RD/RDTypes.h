@@ -220,6 +220,9 @@ struct FRDMonsterDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HoverHeight = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HoverBob = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HoverPeriod = 1.6f;
+	/** a flyer whose own clips carry it up (the list of 2026-11-22's phase 25: Military_Drone's quadcopters): its mesh lowered this far
+	 *  when it dies, onto the floor, where a levitating kind only loses its hover */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float DeathDrop = 0.f;
 	/** its shot is a thing that flies (a thrown lance): this mesh along the shot's way, turned by RangedMeshRot from the way's
 	 *  rotation (the lance's point is its +Z: pitch -90 lays it along the way) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> RangedMesh = nullptr;
@@ -254,6 +257,20 @@ struct FRDMonsterDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<float> FistFxScale;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<bool> FistFxUserScale;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FName> FistBones;
+	// ---- the list of 2026-11-22's phase 25 (the fortress's defenders, RDFortress25.cpp, 947): a medic heals its side
+	/** it heals: in a fight, the most hurt of its side within HealRange (with a sight line, missing HealBelow of its hit points or
+	 *  more) gets HealShare of its hit points back at HealRelease of HealClip (else its first attack); then it waits HealCooldown */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bHeals = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HealRange = 1000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HealShare = 0.3f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HealBelow = 0.15f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HealCooldown = 6.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> HealClip = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HealRelease = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> HealFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HealFxScale = 1.f;
+	/** its look's variant: these materials slot by slot over its mesh's own (none: the mesh's); a kind's colour or design */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<TObjectPtr<class UMaterialInterface>> Materials;
 };
 
 /** Sounds for one occasion ("Player.Hurt", "Env.DoorOpen", "Monster.Troll.Roar"...): one of them is played each time,

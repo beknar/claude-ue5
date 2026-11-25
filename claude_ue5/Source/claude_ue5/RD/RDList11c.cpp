@@ -56,9 +56,9 @@ void ARDMonster::Curse11(ERDCurseEffect E, float Seconds, float Amount, FName El
 	case ERDCurseEffect::Lethargy: SlowFor(0.3f, Seconds); break;
 	case ERDCurseEffect::Silence:
 		// (a shot or beam already in its wind-up is broken off: it would have gone off at its hit time (PR #48's review))
-		if (AttackTime >= 0.f && (bRangedSwing || bBeamSwing))
+		if (AttackTime >= 0.f && (bRangedSwing || bBeamSwing || bHealSwing))          // (a medic's heal too (PR #132's review))
 		{
-			AttackTime = -1.f; bRangedSwing = bBeamSwing = false; bHitDone = true; ++SilencedRefusals;
+			AttackTime = -1.f; bRangedSwing = bBeamSwing = bHealSwing = false; HealTarget = nullptr; bHitDone = true; ++SilencedRefusals;
 			bWalkingAnim = true; SetWalkingAnim(false);
 		}
 		break;
@@ -111,7 +111,7 @@ TArray<FString> ARDMonster::GetCurseLines() const
 void ARDMonster::HealBy(float Amount)
 {
 	if (bDead || Amount <= 0.f) return;
-	// (Withering Brand: the heal it gets is its share less; no monster here heals itself, so there is no regeneration to stop)
+	// (Withering Brand: the heal it gets is its share less (the fortress's medics' heals and her allies'))
 	if (HasCurse11(ERDCurseEffect::Withering)) Amount *= FMath::Clamp(1.f - C11Amount[(int32)ERDCurseEffect::Withering], 0.f, 1.f);
 	Health = FMath::Min(MaxHealth, Health + Amount);
 }

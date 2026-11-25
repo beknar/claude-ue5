@@ -58,6 +58,9 @@ def tier_power(t):
 HOME = D["monsters"]["home"]; own = {}
 for m, j in HOME.items():
     names = {e["name"] for e in json.load(open(os.path.join(SA, j, "monsters.json"), encoding="utf-8"))["monsters"]}
+    # (the fortress's defenders of the list of 2026-11-22's phase 25 (947): its own kinds too)
+    if os.path.exists(os.path.join(SA, j, "defenders25.json")):
+        names |= {e["name"] for e in json.load(open(os.path.join(SA, j, "defenders25.json"), encoding="utf-8"))["monsters"]}
     g = open_map(m)
     for d in g.get_editor_property("monsters"):
         if str(d.get_editor_property("name")) in names: own[str(d.get_editor_property("name"))] = (m, d.export_text())
@@ -175,7 +178,10 @@ for m in MAPS:
     mons = list(g.get_editor_property("monsters"))
     have = {str(d.get_editor_property("name")) for d in mons}
     for nm, (home, txt) in own.items():
-        if nm in have: continue
+        # (on its own map it stays as its stage made it; elsewhere it is made again from its own map's (PR #132's review: a kind copied
+        # once never took a later change: its numbers, colours, heal or feet))
+        if home == m: continue
+        if nm in have: mons = [d_ for d_ in mons if str(d_.get_editor_property("name")) != nm]
         d = unreal.RDMonsterDef(); d.import_text(txt); d.set_editor_property("weight", 0.0); mons.append(d)
     bands = D["monsters"]["wild_bands"]
     for d in mons:

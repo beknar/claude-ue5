@@ -128,3 +128,17 @@ The city is a wilderness town on `brokenspire` with the modern plan (`FRDWildTow
   - **Session state carried for one visit is let go after it, and forgotten by a load**: three cubes of 28 MB each.
   - **A test that reads a value after leaving the place that held it reads the reset**: the hour came back -1 and the comparison was taken at night.
 
+## The list of 2026-11-22: the fortress's defenders (phase 25: `947 monsters`, `RD/RDFortress25.cpp`, `868 fortress25`)
+
+- **A flyer's clip can carry it up**: Military_Drone's quadcopters fly in their own idle 1.3 m over their origin (at 2.5 times, 3.2 m); a hover on top put them at 3.3 m. Their mesh is lowered instead, and dropped onto the floor at death (`DeathDrop`); the gun drone's death clip falls 2.6 m by itself.
+- **A capped chase speed holds a fighter of blows where it stands**: the test held every kind still (`max_chase_speed` 1) and the melee kinds never struck; only shooters are held.
+- **Feet measured once are measured in an idle's sway**: a correction from one run left 5 to 6 cm in the next. Correct by the measure, test within 8 cm.
+- **A pack's colours are whole materials, not instances**: a variant is found by name (the set's number), slot by slot, and each slot's swap is asserted.
+- **A stage that adds kinds to the fortress is followed by `910`** (the kinds on every map, their wild bands) **and `935` and `945 level`** (the caves copy brokenspire's monsters as text); `947 monsters` follows `909`.
+- **PR #132's review**:
+  - **A swing's flag left set by a cut-short swing is taken by the next**: a medic's heal interrupted by a flinch turned its next shot into a heal. Every swing clears the others' flags.
+  - **A monster's choice that comes after another branch that returns early never runs**: a medic in reach of her struck and never healed.
+  - **"Elite" is against the set's mean**: a test that spawns a tier-3 kind (or a kind 1.2 times as strong) in the tier-1 first hall made it an elite, and the medics, rightly, would not heal it. Spawn at the hall's tier, of the kinds' own strength.
+  - **Ask the thing why**: the heal's refusals recorded (`GetHealWhy25`) found the elite rule in one run, where guesses had taken four.
+  - **A copy made once is a copy kept stale**: `910` skipped kinds a map already had.
+

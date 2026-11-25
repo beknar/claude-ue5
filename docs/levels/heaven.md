@@ -586,3 +586,55 @@ On the tallest tower, Zenith Tower (11 floors): `884 tower24_enter,tower24_floor
   - They call the express from its own door.
   - They compare the windows at the pictures' hour.
 
+## The list of 2026-11-22: the fortress's defenders (phase 25: `947 monsters`, `RD/RDFortress25.cpp`, `868 fortress25 -lv heaven_fortress`)
+
+The user's words: "vary the Heaven dungeon with soldier variants, medics, differently colored/designed drones and differently colored/designed mechs from the Dystopia and Sci-fi packs. also use aliens and monsters from the Aliens Warrior Pack."
+
+### The kinds
+
+Twenty-four kinds beside 909's five, from `SourceArt/heaven_fortress/defenders25.json` (29 in all, by the fortress's tiers):
+
+| Tier | Kinds |
+|---|---|
+| 1 | Kratos Defender, Kratos Defender (grey), Kratos Sentry Drone, Kratos Medic |
+| 2 | Facility Guard (red), Facility Guard (blue), Grenadier Drone, Grenadier Drone (olive), Kratos Field Medic |
+| 3 | Kratos Operative (black), Kratos Flame Trooper, Kratos Medic (masked), Alien Warrior |
+| 4 | Kratos Heavy Gunner, Kratos Combat Mech, Alien Brute, Alien Stalker, Bomber Drone, Kratos Chief Medic |
+| 5 | Kratos Siege Mech (the mech's second colourway, 1.6 times), Alien Sniper, Alien Warlord, Alien Hunter, Alien Exterminator |
+
+- **Where they come from**: the Sci-Fi Characters Pack Vol 2's defender, guard and operative on its 43 clips; the Dystopia pack's flame trooper, gunner and mech on the mech pack's clips; its four medics on Vol 2's; Military_Pack's gun drone and Military_Drone's quadcopters on their own clips; Aliens_Warrior_Pack's fifth warrior on its own clips and the brute, stalker and sniper on its clips (the skeletons made compatible); the Creatures_Pack's Alien and Exterminator.
+- **Colours and designs**: a kind's variant is its pack's numbered colour set, slot by slot (`M_X_1` to `M_X_n`, `M_X` to `M_X_Set_0n`; `FRDMonsterDef::Materials`). None of the packs has material instances: their sets are whole materials. The mech's crimson set is its Set_02.
+- **Medics heal their side** (`FRDMonsterDef::bHeals`): in a fight a medic stops for the most hurt of its side within 10 to 13 m (with a sight line, missing 15 % of its hit points or more), heals it 30 to 40 % of its hit points with a green glow, then waits 5 to 6 s. No pack has a healing clip: the medics' heal is the defenders' reload. The first medic fights with blows only, the others shoot too.
+- **Drones fly**: the gun drone and the quadcopters (2.5 times the pack's size, 13 cm tall otherwise) fly 1.5 to 2 m up; the quadcopters' own clips carry them up, so they are lowered by their mesh and dropped onto the floor when they die (`FRDMonsterDef::DeathDrop`). The quadcopters have no hit or death clip: they shudder in their idle and fall.
+- **On every map**: `910` copies them with the fortress's own kinds to every map (weight 0 there; made again from the fortress's at every run) and gives them their wild band, tiers 26 to 30; the castle's kinds' weights in the fortress are cut so the defenders are two in three of each tier. `947 monsters` runs after `909` (909 leaves them out of its weights).
+- **909's kinds' feet** are corrected by their measured bottoms (the Operative stood 9 cm into the floor, the Commander 9 cm and the tank 19 cm over it).
+
+### Measured
+
+`868 fortress25 -lv heaven_fortress` (`test_f25l.json` in `SourceArt/mistward`):
+
+- **All 29 kinds**: spawned in rows of six (pictured), each one's bones moving in its clip.
+  - Each variant's colour set drawn on its mesh, slot by slot.
+  - The walkers' drawn bottoms are within 8 cm of the floor (an idle's sway moves them some 6 cm from run to run).
+  - The flyers fly 1.5 to 2 m up.
+- **Each alone**: a shooter shot her at least once from 7 m, and a fighter struck her at least once from 1.2 m. Each one:
+  - lost hit points to a blow of a fifth of them;
+  - when killed, was dead, its death clip moving its body (all but the quadcopters, which have none);
+  - if a drone, lay on the floor when dead.
+- **Medics**: each of the four, in a fight with her, healed a trooper at half its hit points by exactly its share (the trooper's 30 to 40 %), 1.5 to 5.7 s into the fight.
+- **What could not be measured**: how the kinds read to a player in a fight, and their voices.
+  - The packs have no sound sets of the drones', aliens' or creatures' own on this map: they speak with the Horned set as 909's do.
+  - Several soldiers' rifles are separate meshes on other skeletons and are not in their hands.
+
+### After PR #132's review
+
+- **A heal cut short** (a flinch, a stun, a curse) no longer turns the medic's next shot into a heal.
+- **Curse of Silence** breaks off a heal under way.
+- **Who is healed**:
+  - A medic heals its side before anything else it would do in a fight (in reach of her it struck and never healed).
+  - It heals no boss or elite, never another medic's patient, and faces its patient.
+  - A heal is at most twice the medic's own share's worth.
+- **A dead drone** reaches the floor before its body is frozen.
+- **A kind's colour set** is looked for in its material's own folder first; each swap is printed.
+- **On the other maps**: `910` makes the fortress's kinds again there at every run; `869` gives the colour sets' materials the skeletal-mesh usage (brokenspire's and the caves' too).
+

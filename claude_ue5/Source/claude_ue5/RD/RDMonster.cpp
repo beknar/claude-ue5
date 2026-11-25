@@ -61,6 +61,8 @@ void ARDMonster::Setup(ARDSection* InSection, const FRDMonsterDef& Def, int32 In
 	M->SetRelativeScale3D(FVector(Def.Scale));
 	// (a kind's own look over its mesh's (2026-11-07: The War Engine's iron golem, the Stone Golem in iron))
 	if (Def.Material) for (int32 Sl = 0; Sl < M->GetNumMaterials(); ++Sl) M->SetMaterial(Sl, Def.Material);
+	// (the list of 2026-11-22's phase 25: a kind's colour or design, slot by slot)
+	for (int32 Sl = 0; Sl < Def.Materials.Num() && Sl < M->GetNumMaterials(); ++Sl) if (Def.Materials[Sl]) M->SetMaterial(Sl, Def.Materials[Sl]);
 	IdleAnim = Def.Idle; WalkAnim = Def.Walk;
 	WalkSpeed = Def.WalkSpeed; ClipSpeed = FMath::Max(Def.WalkClipSpeed, 10.f);
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
@@ -101,6 +103,7 @@ void ARDMonster::Setup(ARDSection* InSection, const FRDMonsterDef& Def, int32 In
 			MaxChaseScale = SpeedScale;
 		}
 		SetupRanged(Def);          // (mistward5: its shot, its wait scaled as its blows' interval)
+		SetupHeal(Def);            // (the list of 2026-11-22's phase 25: a medic)
 		SetupBoss(Def);            // (the final boss: levitating, the beam from above, the lance, wind round its fists)
 	}
 	// (level 5: parts made on its skeleton follow its body; a weapon in its hand)
@@ -412,7 +415,7 @@ void ARDMonster::Empower(int32 InTier, float HealthMul, float DamageMul, float S
 		const FVector Rel = M->GetRelativeLocation();
 		M->SetRelativeLocation(FVector(Rel.X, Rel.Y, Rel.Z * ScaleMul));
 		M->SetRelativeScale3D(M->GetRelativeScale3D() * ScaleMul);
-		BaseMeshZ *= ScaleMul; HoverHeight *= ScaleMul; HoverBob *= ScaleMul;     // (the final boss: it floats as high for its size)
+		BaseMeshZ *= ScaleMul; HoverHeight *= ScaleMul; HoverBob *= ScaleMul; DeathDrop *= ScaleMul;     // (the final boss: it floats as high for its size)
 		AddActorWorldOffset(FVector(0, 0, H0 * (ScaleMul - 1.f) + 2.f));
 		Reach *= ScaleMul;
 	}
@@ -477,6 +480,8 @@ void ARDMonster::Freeze()
 {
 	// (a corpse costs nothing: its pose held, no ticking)
 	bFrozen = true;
+	// (a drone's drop finished first: frozen half way it hung in the air (PR #132's review))
+	if (DeathDrop > 0.f) { HoverNow = -DeathDrop; USkeletalMeshComponent* Mz = GetMesh(); const FVector Rl = Mz->GetRelativeLocation(); Mz->SetRelativeLocation(FVector(Rl.X, Rl.Y, BaseMeshZ + HoverNow)); }
 	GetMesh()->bPauseAnims = true;
 	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 	SetActorTickEnabled(false);
@@ -826,6 +831,7 @@ bool ARDMonster::TickCombat(float Dt)
 	if (bAlly && AllySeconds > 0.f && (AllyLeft -= Dt) <= 0.f) { Health = 0.f; Die(); return true; }
 	AttackCooldown = FMath::Max(0.f, AttackCooldown - Dt);
 	RangedWaitLeft = FMath::Max(0.f, RangedWaitLeft - Dt);
+	HealWaitLeft = FMath::Max(0.f, HealWaitLeft - Dt);
 	BeamWaitLeft = FMath::Max(0.f, BeamWaitLeft - Dt);
 	CombatBranch = TEXT("none");
 	if (Stun > 0.f)
@@ -867,7 +873,14 @@ bool ARDMonster::TickCombat(float Dt)
 		CombatBranch = TEXT("swing");
 		AttackTime += Dt;
 		Face(D, Dt);
-		if (!bHitDone && AttackTime >= AttackHit && bRangedSwing)
+		if (bHealSwing) if (ARDMonster* Ht = HealTarget.Get(); Ht && Ht != this) { FVector Dh = Ht->GetActorLocation() - L; Dh.Z = 0.f; Face(Dh, Dt); }          // (facing its patient)
+		if (!bHitDone && AttackTime >= AttackHit && bHealSwing)
+		{
+			// (the list of 2026-11-22's phase 25: the medic's heal reaches its patient)
+			bHitDone = true;
+			ReleaseHeal();
+		}
+		else if (!bHitDone && AttackTime >= AttackHit && bRangedSwing)
 		{
 			// (mistward5: its shot leaves its hand; the generator flies it)
 			bHitDone = true;
@@ -908,7 +921,8 @@ bool ARDMonster::TickCombat(float Dt)
 		if (AttackTime >= AttackLen)
 		{
 			// (a shot: its own longer wait; its blows may follow at once when its foe closes in)
-			if (bRangedSwing) { RangedWaitLeft = RangedWait; bRangedSwing = false; }
+			if (bHealSwing) { HealWaitLeft = HealWait; bHealSwing = false; HealTarget = nullptr; }
+			else if (bRangedSwing) { RangedWaitLeft = RangedWait; bRangedSwing = false; }
 			else if (bBeamSwing) { BeamWaitLeft = BeamWait; bBeamSwing = false; }
 			else AttackCooldown = AttackInterval / (bAlly ? FMath::Max(AllyPace, 0.1f) : 1.f) * (1.f + CurseAmount11(ERDCurseEffect::Lethargy));          // (an ally: the Summoner's frenzy; Hex of Lethargy's slower blows)
 			EndFistFx();
@@ -916,6 +930,9 @@ bool ARDMonster::TickCombat(float Dt)
 		}
 		return true;
 	}
+	// (the list of 2026-11-22's phase 25: a medic heals its side before anything else it would do, its blows too (in reach of her it struck
+	// and never healed))
+	if (bHeals && !bAlly && CellExit.IsZero() && TryHeal(Dt)) { CombatBranch = TEXT("heal"); return true; }
 	ChaseTimer -= Dt;
 	const bool bSameSection = !FoeMo || FoeMo->Section == Section;
 	// (Brokenspire: a room's guard takes no foe outside its room; one it was after walks out, and it goes back about the room)
@@ -983,6 +1000,7 @@ bool ARDMonster::TickCombat(float Dt)
 			GetMesh()->PlayAnimation(AttackAnims[K], false);
 			AttackLen = RDClipLength(AttackAnims[K]); AttackHit = FMath::Clamp(HitTimes[K], 0.05f, AttackLen); AttackTime = 0.f; bHitDone = false;
 			bRangedSwing = false;         // (a shot cut short by a flinch or a stun must not make this blow a shot)
+			bHealSwing = false;
 			bBeamSwing = false;
 			if (FistFx.Num() > 0 && FistBones.Num() > 0) StartFistFx();      // (the final boss: wind round its fists)
 			++AttacksMade;
