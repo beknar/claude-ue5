@@ -480,6 +480,8 @@ void ARDMonster::Freeze()
 {
 	// (a corpse costs nothing: its pose held, no ticking)
 	bFrozen = true;
+	// (a drone's drop finished first: frozen half way it hung in the air (PR #132's review))
+	if (DeathDrop > 0.f) { HoverNow = -DeathDrop; USkeletalMeshComponent* Mz = GetMesh(); const FVector Rl = Mz->GetRelativeLocation(); Mz->SetRelativeLocation(FVector(Rl.X, Rl.Y, BaseMeshZ + HoverNow)); }
 	GetMesh()->bPauseAnims = true;
 	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 	SetActorTickEnabled(false);
@@ -871,6 +873,7 @@ bool ARDMonster::TickCombat(float Dt)
 		CombatBranch = TEXT("swing");
 		AttackTime += Dt;
 		Face(D, Dt);
+		if (bHealSwing) if (ARDMonster* Ht = HealTarget.Get(); Ht && Ht != this) { FVector Dh = Ht->GetActorLocation() - L; Dh.Z = 0.f; Face(Dh, Dt); }          // (facing its patient)
 		if (!bHitDone && AttackTime >= AttackHit && bHealSwing)
 		{
 			// (the list of 2026-11-22's phase 25: the medic's heal reaches its patient)
@@ -927,6 +930,9 @@ bool ARDMonster::TickCombat(float Dt)
 		}
 		return true;
 	}
+	// (the list of 2026-11-22's phase 25: a medic heals its side before anything else it would do, its blows too (in reach of her it struck
+	// and never healed))
+	if (bHeals && !bAlly && CellExit.IsZero() && TryHeal(Dt)) { CombatBranch = TEXT("heal"); return true; }
 	ChaseTimer -= Dt;
 	const bool bSameSection = !FoeMo || FoeMo->Section == Section;
 	// (Brokenspire: a room's guard takes no foe outside its room; one it was after walks out, and it goes back about the room)
@@ -1018,7 +1024,6 @@ bool ARDMonster::TickCombat(float Dt)
 	// 9 m, threw and called and never came))
 	const bool bProvoked = bFinalBoss && !bAlly && G->FinalBandNear > G->FinalBossCloseBand && GetWorld()->GetTimeSeconds() - LastHurtTime < G->FinalBossStruckHold;
 	if (!bProvoked && bSkyBeam && CellExit.IsZero() && TrySkyBeam(P, D, Dist, Dz, Gap, Dt)) { CombatBranch = TEXT("beam"); return true; }
-	if (bHeals && !bAlly && CellExit.IsZero() && TryHeal(Dt)) { CombatBranch = TEXT("heal"); return true; }          // (phase 25: a medic heals its side first)
 	if (!bProvoked && bShoots && G->bMonsterRanged && CellExit.IsZero() && TryShoot(P, D, Dist, Dz, Gap, Dt)) { CombatBranch = TEXT("shoot"); return true; }
 	// (the final boss: back from her, circling, while his band fights her)
 	if (bFinalBoss && !bAlly && bFoePlayer && CellExit.IsZero() && TickFinalHold(P, D, Dist, Dz, Dt)) { CombatBranch = TEXT("hold"); return true; }

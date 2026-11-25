@@ -33,25 +33,35 @@ void ARDMonster::SetupHeal(const FRDMonsterDef& Def)
 bool ARDMonster::TryHeal(float Dt)
 {
 	ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr;
-	if (!G || !HealClip || HealWaitLeft > 0.f || AttackCooldown > 0.f || IsSilenced()) return false;
+	if (!G || !HealClip) return false;
+	if (HealWaitLeft > 0.f) { HealWhy25 = TEXT("wait"); return false; }
+	if (AttackCooldown > 0.f) { HealWhy25 = TEXT("cooldown"); return false; }
+	if (IsSilenced()) { HealWhy25 = TEXT("silenced"); return false; }
+	FString Why = TEXT("none");
 	// (the most hurt of its side within reach, with a sight line from its chest to theirs; itself too)
-	ARDMonster* Best = nullptr; float BestShare = HealBelow;
+	ARDMonster* Best = nullptr; float BestShare = 0.f;
 	const FVector L = GetActorLocation();
 	FCollisionObjectQueryParams O; O.AddObjectTypesToQuery(ECC_WorldStatic); O.AddObjectTypesToQuery(ECC_WorldDynamic);
 	for (ARDMonster* M : G->GetMonsters())
 	{
 		if (!IsValid(M) || M->IsDead() || M->IsAlly() || M->GetMaxHealth() <= 0.f) continue;
+		if (M->IsEliteOrBoss()) { if (1.f - M->GetHealth() / M->GetMaxHealth() >= HealBelow) Why = TEXT("elite"); continue; }          // (no boss or elite is healed (PR #132's review))
 		const float Missing = 1.f - M->GetHealth() / M->GetMaxHealth();
-		if (Missing <= BestShare) continue;
+		if (Missing < HealBelow || Missing <= BestShare) continue;
+		// (one medic a patient: another's patient is left to it)
+		bool bTaken = false;
+		for (ARDMonster* Om : G->GetMonsters()) if (Om != this && IsValid(Om) && Om->bHealSwing && Om->HealTarget.Get() == M) bTaken = true;
+		if (bTaken) { Why = TEXT("taken"); continue; }
 		if (FVector::Dist(M->GetActorLocation(), L) > HealRange) continue;
 		if (M != this)
 		{
 			FCollisionQueryParams Q(SCENE_QUERY_STAT(RDHealSight), false, this); Q.AddIgnoredActor(M);
-			if (GetWorld()->LineTraceTestByObjectType(L + FVector(0, 0, 40.f), M->GetActorLocation() + FVector(0, 0, 40.f), O, Q)) continue;
+			if (GetWorld()->LineTraceTestByObjectType(L + FVector(0, 0, 40.f), M->GetActorLocation() + FVector(0, 0, 40.f), O, Q)) { Why = TEXT("sight"); continue; }
 		}
 		Best = M; BestShare = Missing;
 	}
-	if (!Best) return false;
+	if (!Best) { HealWhy25 = Why; return false; }
+	HealWhy25 = TEXT("heal");
 	FVector D = Best->GetActorLocation() - L; D.Z = 0.f;
 	if (Best != this)
 	{
@@ -71,19 +81,18 @@ void ARDMonster::ReleaseHeal()
 	ARDMonster* T = HealTarget.Get();
 	if (!T || T->IsDead()) return;
 	const float Before = T->GetHealth();
-	T->HealBy(T->GetMaxHealth() * HealShare);
+	// (a share of the patient's hit points, at most twice the medic's own share's worth (a stronger kind is not healed by its size))
+	T->HealBy(HealShare * FMath::Min(T->GetMaxHealth(), 2.f * MaxHealth));
 	const float Got = T->GetHealth() - Before;
 	++HealsGiven; HealedTotal += Got;
 	if (HealFx)
 	{
-		const FVector At = T->GetActorLocation();
 		if (UNiagaraSystem* N = Cast<UNiagaraSystem>(HealFx.Get()))
 		{
-			if (UNiagaraComponent* C = UNiagaraFunctionLibrary::SpawnSystemAttached(N, T->GetRootComponent(), NAME_None, FVector::ZeroVector, FRotator::ZeroRotator, FVector(HealFxScale), EAttachLocation::KeepRelativeOffset, true, ENCPoolMethod::None, false))
+			if (UNiagaraComponent* C = UNiagaraFunctionLibrary::SpawnSystemAttached(N, T->GetRootComponent(), NAME_None, FVector::ZeroVector, FRotator::ZeroRotator, FVector(1.f), EAttachLocation::KeepRelativeOffset, true, ENCPoolMethod::None, false))
 				C->SetVariableFloat(TEXT("User.Scale"), HealFxScale);
 		}
 		else if (UParticleSystem* Ps = Cast<UParticleSystem>(HealFx.Get())) UGameplayStatics::SpawnEmitterAttached(Ps, T->GetRootComponent(), NAME_None, FVector::ZeroVector, FRotator::ZeroRotator, FVector(HealFxScale));
-		(void)At;
 	}
 	UE_LOG(LogRDFortress25, Log, TEXT("RDFORTRESS25 %s healed %s: %.0f hit points (%d heals)"), *MonsterName.ToString(), *T->MonsterName.ToString(), Got, HealsGiven);
 }

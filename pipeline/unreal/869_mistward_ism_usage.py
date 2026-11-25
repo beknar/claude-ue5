@@ -119,6 +119,10 @@ def pieces_of(m_):
 # own table; and the wilderness on it: its plants and rocks are instanced too, the list of 2026-11-04's swaying grass and bushes
 # in materials of their own (FRDWildFoliage::Materials), and the weather's rain and snow drops (instanced planes)
 g_ = pieces_of("/Game/RandomDungeon/Maps/brokenspire")
+# (the fortress's kinds with colour sets of their own are on brokenspire too (910: the wilds' tiers 26-30))
+for d in g_.get_editor_property("monsters"):
+    for mm in list(d.get_editor_property("materials")) + [d.get_editor_property("material")]:
+        if mm and mm.get_base_material(): note(mm); want(mm.get_base_material(), "used_with_skeletal_mesh")
 for bm in g_.get_editor_property("wild_biomes"):
     for f in bm.get_editor_property("foliage"):
         fm = f.get_editor_property("mesh")
@@ -143,6 +147,9 @@ for m_ in ("/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewe
         mm = d.get_editor_property("material")
         if mm and mm.get_base_material():
             nskel += 1; note(mm); want(mm.get_base_material(), "used_with_skeletal_mesh")
+        # (a kind's colour set, slot by slot (the list of 2026-11-22's phase 25: FRDMonsterDef::Materials))
+        for mm in d.get_editor_property("materials"):
+            if mm and mm.get_base_material(): nskel += 1; note(mm); want(mm.get_base_material(), "used_with_skeletal_mesh")
     # (the caves of the list of 2026-11-22 (945, RDCave16.cpp): the kit's tunnels and their floor strips are bent spline meshes, its
     # dressing instanced meshes; its rooms, caps, torches and god rays plain components (the Nanite usage where Nanite))
     # (the skyscrapers' level of the list of 2026-11-22 (948, RDTower24.cpp): its pieces from the office packs and its surfaces (the engine's

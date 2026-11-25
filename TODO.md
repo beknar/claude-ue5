@@ -17,6 +17,7 @@ Built and compiled, but no test has run it yet:
 ## The list of 2026-11-22's twenty-fifth phase: the fortress's defenders
 
 - [ ] **The defenders' voices and guns**: the drones, aliens and creatures speak with the Horned set (no set of their own on the map); the Sci-Fi defender's, the Dystopia gunner's and the mech's guns are separate meshes on other skeletons and not in their hands; the medics heal with the reload clip (no pack has a healing clip).
+- [ ] **A package needs a full cook**: `FRDMonsterDef` and `ARDMonster` gained properties (the heal, the colour sets, the drop): a `-SkipCook` package staged on an earlier cook would read past them.
 - [ ] **Not measured in a dungeon's play**: the defenders met in the fortress's rooms (the test spawns them by the start hall) and in the wilds at tiers 26 to 30, and the caves after `935` / `945 level` (rerun, not tested).
 
 ## The list of 2026-11-22 ([docs/improvements16.txt](docs/improvements16.txt)), its twenty-fourth phase: the skyscrapers' level

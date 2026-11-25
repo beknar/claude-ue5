@@ -85,6 +85,7 @@ bool ARDMonster::TryShoot(AActor* P, const FVector& D, float Dist, float Dz, flo
 	if (FVector::DotProduct(D.GetSafeNormal(), GetActorForwardVector()) < 0.9f) { SetWalkingAnim(false); return true; }      // (turning to aim)
 	GetMesh()->PlayAnimation(RangedClip, false);
 	AttackLen = RDClipLength(RangedClip); AttackHit = AttackLen * RangedRelease; AttackTime = 0.f; bHitDone = false; bRangedSwing = true; bBeamSwing = false;
+	bHealSwing = false; HealTarget = nullptr;          // (a heal cut short by a flinch must not make this shot a heal (PR #132's review))
 	ShotAim = To;
 	if (ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr) G->PlaySoundAt(SndAttack, GetActorLocation());
 	VoiceTimer = FMath::Max(VoiceTimer, 2.f);

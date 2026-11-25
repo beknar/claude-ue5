@@ -8746,10 +8746,10 @@ STEPS.update({"cave16trade": step_cave16trade})
 # ------------------------------------------------------------------------------------------------ the list of 2026-11-22's phase 25
 def fort25_kinds():
     """the fortress's defenders: 909's five and 947's (SourceArt/heaven_fortress/*.json), by tier"""
-    SAF = os.path.join(os.path.dirname(OUT), "heaven_fortress") if "OUT" in globals() else r"E:\code\claude-ue5\claude_ue5\SourceArt\heaven_fortress"
+    SAF = os.path.join(os.path.dirname(OUT), "heaven_fortress")
     out = []
     for fn in ("monsters.json", "defenders25.json"):
-        p = os.path.join(r"E:\code\claude-ue5\claude_ue5\SourceArt\heaven_fortress", fn)
+        p = os.path.join(SAF, fn)
         out += [(e["name"], e["tier"]) for e in json.load(open(p, encoding="utf-8"))["monsters"]]
     return out
 
@@ -8794,8 +8794,13 @@ def step_fortress25():
             mv = max(math.dist(x_, y_) for x_, y_ in zip(p0[k], p1)) if p0[k] and p1 else 0.0
             d = defs[k]; bt = sorted(bottoms[k])[len(bottoms[k]) // 2] if bottoms[k] else None
             hov = float(d.hover_height)
+            # (its colours as drawn: the spawned mesh's slots against its kind's set)
+            want_m = [x.get_name() if x else None for x in d.get_editor_property("materials")]
+            mc = m.get_component_by_class(unreal.SkeletalMeshComponent)
+            got_m = [mc.get_material(i).get_name() if mc.get_material(i) else None for i in range(len(want_m))]
             per[k] = {"spawned": True, "bones_moved_cm": round(mv, 1), "bottom_cm": round(bt, 1) if bt is not None else None, "hover": hov,
-                      "height_cm": round(float(d.capsule_half_height) * 2), "variant_slots": len(d.get_editor_property("materials"))}
+                      "height_cm": round(float(d.capsule_half_height) * 2), "variant_slots": len(want_m),
+                      "variant_drawn": sum(1 for a_, b_ in zip(want_m, got_m) if a_ and a_ == b_), "death_is_idle": d.death == d.idle}
         put(V(ctr.x + 150, ctr.y, ctr.z), yaw=0.0)
         G["pawn"].set_actor_hidden_in_game(True)
         G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4, yaw=0.0)); yield from wait(1.0)
@@ -8838,17 +8843,28 @@ def step_fortress25():
         # ---- a medic's heal: a trooper hurt beside it, both in a fight with her 8 m off
         medics = [(k, t) for k, t in kinds if defs[k].heals]
         heal = {}
-        for k, t in medics[:2]:
+        for k, t in medics:
             put(V(ctr.x, ctr.y, ctr.z), yaw=0.0); yield from wait(0.2)
-            md_ = g.spawn_monster_named(k, V(ctr.x + 800, ctr.y + 120, ctr.z), t, 50.0, 0.0, 1.0)
-            tr = g.spawn_monster_named("Kratos_Trooper", V(ctr.x + 800, ctr.y - 120, ctr.z), t, 50.0, 0.0, 1.0)
+            # (both of their kinds' own strength: one 50 times stronger is an elite, and no medic heals an elite (PR #132's review))
+            # (both at the first hall's own tier 1: one of tier 3 there has three tiers' hit points against the hall's mean and is an elite)
+            md_ = g.spawn_monster_named(k, V(ctr.x + 800, ctr.y + 120, ctr.z), 1, 1.0, 0.0, 1.0)
+            # (a patient of its own tier: a kind of another tier spawned at this one can read as an elite there, and no medic heals one)
+            # (a trooper of the kinds' own strength (the tier-4 and -5 kinds' 1.2 reads as an elite in the tier-1 hall))
+            pk = "Kratos_Trooper"
+            tr = g.spawn_monster_named(pk, V(ctr.x + 800, ctr.y - 120, ctr.z), 1, 1.0, 0.0, 1.0)
             if not (md_ and tr): continue
             yield from wait(0.5)
             tr.apply_damage(tr.get_max_health() * 0.5, G["pawn"]); md_.apply_damage(0.01, G["pawn"])
-            hp0 = tr.get_health(); t0 = now()
-            while now() - t0 < 14.0 and md_.get_heals_given() < 1:
+            hp0 = tr.get_health(); t0 = now(); branches = {}
+            while now() - t0 < 20.0 and md_.get_heals_given() < 1:
                 yield from wait(0.1); c.set_health(c.get_max_health())
-            heal[k] = {"heals": md_.get_heals_given(), "healed": round(md_.get_healed_total(), 1), "trooper_hp_before": round(hp0, 1), "trooper_hp_after": round(tr.get_health(), 1),
+                try: b_ = str(md_.get_editor_property("combat_branch")); branches[b_] = branches.get(b_, 0) + 1
+                except Exception: pass
+                try: w_ = "why:" + str(md_.get_heal_why25()); branches[w_] = branches.get(w_, 0) + 1
+                except Exception: pass
+            want_h = float(defs[k].heal_share) * min(tr.get_max_health(), 2.0 * md_.get_max_health())
+            heal[k] = {"patient": pk, "heals": md_.get_heals_given(), "healed": round(md_.get_healed_total(), 1), "want": round(want_h, 1), "branches": branches,
+                       "medic_dead": bool(md_.is_dead()), "trooper_dead": bool(tr.is_dead()), "dist_cm": round(dist2(md_.get_actor_location(), tr.get_actor_location())), "trooper_hp_before": round(hp0, 1), "trooper_hp_after": round(tr.get_health(), 1),
                        "trooper_max": round(tr.get_max_health(), 1), "seconds": round(now() - t0, 1)}
             for x in (md_, tr):
                 try: x.destroy_actor()
@@ -8863,11 +8879,13 @@ def step_fortress25():
         hov = r.get("hover", 0) or 0
         # (a flyer off the floor and below the ceiling; a walker's feet on the floor)
         okb = r.get("bottom_cm") is not None and ((hov > 0 and 60 <= r["bottom_cm"] <= 330) or (hov == 0 and -8 <= r["bottom_cm"] <= 8))          # (an idle's sway moves the feet some 6 cm from run to run)
-        if not (r.get("spawned") and r.get("bones_moved_cm", 0) > 0.3 and okb and (r.get("shots", 0) >= 1 if r.get("shoots") else r.get("attacks", 0) >= 1)
+        okd = r.get("death_is_idle") or r.get("death_moved_cm", 0) > 5          # (its death clip moves it, but for the quadcopters (none))
+        okv = r.get("variant_drawn", 0) == r.get("variant_slots", 0) - sum(1 for x in defs[k].get_editor_property("materials") if not x)
+        if not (r.get("spawned") and r.get("bones_moved_cm", 0) > 0.3 and okb and okd and okv and (r.get("shots", 0) >= 1 if r.get("shoots") else r.get("attacks", 0) >= 1)
                 and r.get("hit_lost", 0) > 0 and r.get("dead") and r.get("dead_bottom_cm") is not None and -15 <= r["dead_bottom_cm"] <= 60):          # (a dead drone on the floor)
             bad.append(k)
     res["failed_kinds"] = bad
-    ok = not res["missing"] and not bad and heal and all(h["heals"] >= 1 and h["trooper_hp_after"] > h["trooper_hp_before"] for h in heal.values())
+    ok = not res["missing"] and not bad and len(heal) == len(medics) and all(h["heals"] >= 1 and abs(h["healed"] - h["want"]) < 0.02 * h["want"] + 1 for h in heal.values())
     step_result("fortress25", bool(ok), **res)
 
 

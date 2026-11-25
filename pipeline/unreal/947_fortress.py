@@ -81,24 +81,28 @@ def mat_named(root, name):
 
 def variant(sk, n):
     """the mesh's materials slot by slot, each swapped for the pack's colour set n where it has one (M_X_1 -> M_X_n, M_X_01 -> M_X_0n,
-    M_X -> M_X_Set_0n); the slots changed"""
-    root = "/" + "/".join(sk.get_path_name().split("/")[1:3])
+    M_X -> M_X_Set_0n): looked for in the material's own folder, then its parents' up to the pack's (PR #132's review: the whole pack
+    held other models' materials of the same name); only a number after an underscore, of one or two digits"""
     out, changed = [], []
     for sm in sk.get_editor_property("materials"):
         mi = sm.get_editor_property("material_interface")
         new = None
         if mi:
             nm = mi.get_name()
-            m = re.match(r"^(.*?)(\d+)$", nm)
+            m = re.match(r"^(.*_)(\d{1,2})$", nm)
             cands = []
             if m: cands.append(m.group(1) + str(n).zfill(len(m.group(2))))
             cands.append(nm + "_Set_%02d" % n)
-            for c in cands:
-                if c != nm:
-                    new = mat_named(root, c)
-                    if new: break
+            parts = mi.get_path_name().split(".")[0].split("/")[:-1]
+            for depth in range(len(parts), 2, -1):
+                folder = "/".join(parts[:depth])
+                for c in cands:
+                    if c != nm:
+                        new = mat_named(folder, c)
+                        if new: break
+                if new: break
         out.append(new or mi)
-        if new: changed.append(f"{mi.get_name()}->{new.get_name()}")
+        if new: changed.append(f"{mi.get_path_name().split('.')[0]} -> {new.get_path_name().split('.')[0]}")
     return out, changed
 
 
@@ -169,6 +173,7 @@ def monsters():
             hc = clip(pk, hl["clip"]); d.heal_clip = hc; d.heal_release = round(min(0.8, max(0.3, blow_time(hc) / max(length(hc), 0.1))), 2)
             d.heal_fx = heal_fx; d.heal_fx_scale = 1.0
         added.append(d)
+        for c_ in ch: print("947   variant", e["name"], c_)
         rows.append([e["name"], e["tier"], round(ext.z * 2 * sc), round(rad), round(hh), round(spd), snd, len(ch), bool(r), bool(hl), bool(hv)])
     # (the castle's kinds' weights cut so the defenders (909's and these) are two in three of each tier)
     defs = [m for m in keep if str(m.get_editor_property("name")) in old] + added

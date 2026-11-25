@@ -83,7 +83,7 @@ void ARDMonster::TickHover(float Dt)
 {
 	// (a blow cut short by a flinch, a stun or its death: the wind off its fists)
 	if (FistFxLive.Num() > 0 && (AttackTime < 0.f || bDead)) EndFistFx();
-	if (HoverHeight <= 0.f) return;
+	if (HoverHeight <= 0.f && DeathDrop <= 0.f) return;          // (a drop with no hover too (PR #132's review))
 	HoverTime += Dt;
 	const float Want = bDead ? -DeathDrop : HoverHeight + HoverBob * FMath::Sin(2.f * PI * HoverTime / HoverPeriod);          // (phase 25: a drone whose clip flies it falls to the floor)
 	HoverNow = FMath::FInterpTo(HoverNow, Want, Dt, bDead ? 2.5f : 6.f);
@@ -102,7 +102,7 @@ bool ARDMonster::TrySkyBeam(AActor* P, const FVector& D, float Dist, float Dz, f
 	if (FVector::DotProduct(D.GetSafeNormal(), GetActorForwardVector()) < 0.8f) { SetWalkingAnim(false); return true; }
 	GetMesh()->PlayAnimation(BeamClip, false);
 	AttackLen = RDClipLength(BeamClip); AttackHit = AttackLen * BeamRelease; AttackTime = 0.f; bHitDone = false;
-	bBeamSwing = true; bRangedSwing = false;
+	bBeamSwing = true; bRangedSwing = false; bHealSwing = false; HealTarget = nullptr;
 	++AttacksMade;
 	if (ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr) G->PlaySoundAt(SndAttack, GetActorLocation());
 	VoiceTimer = FMath::Max(VoiceTimer, 2.f);

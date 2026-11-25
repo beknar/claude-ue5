@@ -60,6 +60,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Fortress25") int32 GetHealsGiven() const { return HealsGiven; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Fortress25") float GetHealedTotal() const { return HealedTotal; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Fortress25") bool IsHealer() const { return bHeals; }
+	/** for the tests: why its last look for a patient found none ("wait", "cooldown", "none", "sight", "elite", "taken") or "heal" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Fortress25") FString GetHealWhy25() const { return HealWhy25; }
+	FString HealWhy25;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetDamage() const { return Damage; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsDead() const { return bDead; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsAggro() const { return bAggro; }
