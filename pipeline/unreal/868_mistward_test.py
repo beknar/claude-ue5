@@ -8891,6 +8891,53 @@ def step_fortress25():
 
 STEPS.update({"fortress25": step_fortress25})
 
+
+def step_fortress26():
+    """the list of 2026-11-22 ("the heaven dungeon's assets should be taken from any modern city building pack, looking like the inside of a
+    modern building for the first two levels"): tier 1's first hall and a set of tier 2 built in the Office theme: their walls, floors and
+    ceilings the office's (SM_HVO_*), none of the steel facility's (SM_HVF_*), its furniture Heaven's modern pieces, its things by the walls
+    the office's; pictures of both"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    res = {"themes": [str(t) for t in g.get_editor_property("tier_themes")]}
+    g.debug_clear_section(I2(0, 0), 0, V(0, 0, 0)); yield from wait(0.5)
+    s2 = I2(1, 0)
+    if g.is_tier_open(2) and not g.is_section_generated(s2): g.generate_section_now(s2); yield from built(s2)
+    def census(si):
+        S = g.get_section(si)
+        if not S: return None
+        n = {}
+        for comp in S.get_components_by_class(unreal.InstancedStaticMeshComponent):
+            m = comp.get_editor_property("static_mesh")
+            if not m: continue
+            k = m.get_name(); n[k] = n.get(k, 0) + comp.get_instance_count()
+        return n
+    for nm, si in (("tier1", I2(0, 0)), ("tier2", s2)):
+        n = census(si) or {}
+        res[nm] = {"office": sum(v for k, v in n.items() if "HVO" in k), "facility": sum(v for k, v in n.items() if "HVF" in k),
+                   "heaven_furniture": sum(v for k, v in n.items() if k.startswith("SM_HV_") or k.startswith("SM_HV2") or k.startswith("SM_HV3")),
+                   "office_things": sum(v for k, v in n.items() if any(x in k for x in ("Printer", "Water_Dispenser", "Shelving", "Planters", "Drawer"))),
+                   "tier": g.get_section_tier(si) if hasattr(g, "get_section_tier") else None}
+    # (pictures: the first hall from its middle, and a room of the tier-2 set from its middle)
+    hc = g.get_start_room_center()
+    put(V(hc.x - 600, hc.y, hc.z), yaw=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=0.0))
+    G["pawn"].set_actor_hidden_in_game(True); yield from wait(1.5); shot("f26_tier1"); yield from rwait(1.4)
+    S2 = g.get_section(s2); shots = ["f26_tier1"]
+    if S2:
+        done = 0
+        for k in range(0, 40):
+            try: rc = S2.get_room_center(k)
+            except Exception: break
+            if rc is None or (rc.x == 0 and rc.y == 0): continue
+            put(V(rc.x - 350, rc.y, rc.z), yaw=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=0.0)); yield from wait(1.2)
+            shot(f"f26_tier2_{done}"); shots.append(f"f26_tier2_{done}"); yield from rwait(1.3); done += 1
+            if done >= 3: break
+    G["pawn"].set_actor_hidden_in_game(False); quiet(False)
+    res["pictures"] = shots
+    ok = res["themes"][:2] == ["Office", "Office"] and all(res[t]["office"] > 50 and res[t]["facility"] == 0 and res[t]["heaven_furniture"] > 0 for t in ("tier1", "tier2"))
+    step_result("fortress26", bool(ok), **res)
+
+
+STEPS.update({"fortress26": step_fortress26})
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""
     if G.get("gen"): return G["gen"]

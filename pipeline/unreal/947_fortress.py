@@ -8,6 +8,11 @@ Pack"; the plan docs/improvements16_plan.md), the fortress under Kratos Aurorim 
                                RD/RDFortress25.cpp); a drone's hover); the castle's kinds' weights cut so the defenders are two in three
                                of each tier. Run 910 and 905 after it (they copy every dungeon's kinds to every map and give them their
                                wild bands), and again after any stage that writes the castle's monsters.
+    947_fortress.py building   phase 26: tiers 1 and 2 an office building (TierThemes "Office"): its walls (plaster over a wood or plaster
+                               dado, a steel skirting), terrazzo, wood and grey floors, white ceilings with light panels (boxes merged in
+                               Heaven's and Office_Environment's materials); the castle's furniture as Heaven's modern pieces of the same
+                               names (brokenspire's, as text) with their containers' words; the machines by the walls as the tower's
+                               office things (printers, water dispensers, shelving, planters, drawers); the start section built again
 
 Run on the editor with any level open (it opens heaven_fortress and saves it)."""
 import os, sys, re, json, math, gc
@@ -199,8 +204,150 @@ def monsters():
     for r_ in rows: print("947  ", r_)
 
 
+# ================================================================================================ phase 26: tiers 1 and 2 an office building
+WILD = "/Game/RandomDungeon/Maps/brokenspire"
+YAW = {"+x": 0.0, "-x": 180.0, "+y": -90.0, "-y": 90.0}
+FACE = 25.0
+V = unreal.Vector
+
+
+def corners(b): return [V(x, y, z) for x in (b.min.x, b.max.x) for y in (b.min.y, b.max.y) for z in (b.min.z, b.max.z)]
+
+
+def piece(m, front="+x", mode="center", collision=True, lift=0.0, height=None):
+    """909's normalisation (front to +X; a wall's face at FACE, a floor's top at 0, a ceiling turned over), with 948's lift and height"""
+    rot = unreal.Rotator(roll=180.0 if mode == "ceil" else 0.0, pitch=0.0, yaw=YAW[front])
+    b = m.get_bounding_box()
+    sc = 1.0 if height is None else height / max(b.max.z - b.min.z, 1.0)
+    t0 = unreal.Transform(V(0, 0, 0), rot, V(sc, sc, sc))
+    pts = [unreal.MathLibrary.transform_location(t0, c) for c in corners(b)]
+    mn = V(min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)); mx = V(max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts))
+    tx, ty, tz = -(mn.x + mx.x) / 2, -(mn.y + mx.y) / 2, -mn.z + lift
+    if mode == "floor": tz = -mx.z
+    elif mode == "wallface": tx = FACE - mx.x
+    p = unreal.RDPiece(); p.mesh = m; p.adjust = unreal.Transform(V(tx, ty, tz), rot, V(sc, sc, sc))
+    p.size = V(mx.x - mn.x, mx.y - mn.y, mx.z - mn.z); p.collision = collision
+    return p
+
+
+def find_mesh(name, pack):
+    flt = unreal.ARFilter(package_paths=["/Game/" + pack], recursive_paths=True, class_paths=[unreal.TopLevelAssetPath("/Script/Engine", "StaticMesh")])
+    hits = [a for a in AR.get_assets(flt) if str(a.asset_name) == name]
+    assert hits, (name, pack)
+    return unreal.load_asset(str(hits[0].package_name) + "." + name)
+
+
+def building():
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import importlib, heaven_kit as hk
+    importlib.reload(hk)
+    # ---- the castle's furniture names the fortress has, and Heaven's modern pieces of the same names (brokenspire's, as text)
+    les.load_level(DST)
+    g = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
+    plain = [str(k) for k in g.get_editor_property("pieces").keys() if "." not in str(k)]
+    del g; gc.collect(); unreal.SystemLibrary.execute_console_command(None, "obj gc")
+    les.load_level(WILD)
+    g = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
+    hp = g.get_editor_property("pieces")
+    texts = {n: hp[unreal.Name("Heaven." + n)].export_text() for n in plain if unreal.Name("Heaven." + n) in hp}
+    words = {str(k)[7:]: str(v) for k, v in g.get_editor_property("container_words21").items() if str(k).startswith("Heaven.")}
+    del g, hp; gc.collect(); unreal.SystemLibrary.execute_console_command(None, "obj gc")
+    les.load_level(DST)
+    g = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
+    MAT = dict(hk.materials())
+    OE = "Office_Environment"
+    def mi(n):
+        flt = unreal.ARFilter(package_paths=["/Game/" + OE], recursive_paths=True, class_paths=[unreal.TopLevelAssetPath("/Script/Engine", "MaterialInstanceConstant")])
+        hits = [a for a in AR.get_assets(flt) if str(a.asset_name) == n]
+        assert hits, n
+        return unreal.load_asset(str(hits[0].package_name) + "." + n)
+    MAT.update({"plaster": mi("MI_White_Painted_Plaster"), "terrazzo": mi("MI_Terrazzo_Floor"), "wood": mi("MI_MT00026-Clean_Gray_Wood"), "carpetgrey": mi("MI_Soft_Granite_Floor")})
+    H = 151.0
+    def wall(name, dado):
+        # (the room's face +X: a steel skirting, a dado of wood or plaster to 1 m, white plaster above, a white cornice; pilasters at the ends)
+        return hk.boxes(name, [(-40, 0, -H, H, 0, 600, "plaster"), (-40, 2, -H, H, 0, 14, "steel"), (-40, 1.5, -H, H, 14, 100, dado),
+                               (-40, 1.5, -H, H, 100, 104, "steel"), (-40, 3, -H, -145, 0, 560, "white"), (-40, 3, 145, H, 0, 560, "white"),
+                               (-40, 4, -H, H, 560, 600, "white")], MAT, True)
+    w1 = wall("SM_HVO_Wall", "wood"); w2 = wall("SM_HVO_WallPlain", "plaster")
+    P = {}
+    for n, w in (("Wall_Block", w1), ("Wall_Stone", w2), ("Wall_Corr", w2), ("Wall_Rough", w1), ("Wall_Rough_2", w2), ("Wall_Rough_3", w1), ("Wall_Rough_4", w2), ("Wall_Rough_5", w1)):
+        P["Office." + n] = piece(w, mode="wallface")
+    f1 = piece(hk.boxes("SM_HVO_Floor", [(-H, H, -H, H, -20, 0, "terrazzo")], MAT, True), mode="floor")
+    f2 = piece(hk.boxes("SM_HVO_FloorWood", [(-H, H, -H, H, -20, 0, "wood")], MAT, True), mode="floor")
+    f3 = piece(hk.boxes("SM_HVO_FloorCarpet", [(-H, H, -H, H, -20, 0, "carpetgrey")], MAT, True), mode="floor")
+    for n in ("Floor_Stone", "Floor_Brick", "Floor_Brick2", "Floor_Random", "Floor_Tiles", "Floor_Corr"):
+        P["Office." + n] = f1; P["Office." + n + "_Alt"] = f3
+    P["Office.Floor_Wood"] = f2; P["Office.Floor_Wood_Alt"] = f2
+    P["Office.Ceil_Room"] = piece(hk.boxes("SM_HVO_Ceil", [(-H, H, -H, H, 0, 15, "white"), (-70, 70, -70, 70, 15, 16.5, "panel"), (-H, H, -1, 1, 15, 15.6, "steel"), (-1, 1, -H, H, 15, 15.6, "steel")], MAT, True), mode="ceil")
+    P["Office.Ceil_Corr"] = P["Office.Ceil_Room"]
+    # ---- the furniture: Heaven's modern pieces under the castle's names
+    for n, txt in texts.items():
+        p = unreal.RDPiece(); p.import_text(txt); P["Office." + n] = p
+    # ---- the castle's pieces an office has no use for: each given an office's own in the box the castle's takes (its mesh's box through
+    # its Adjust), or left out (the gibbets, cages, bones, hay, tombs, weapons on the walls)
+    cp = g.get_editor_property("pieces")
+    def box_of(n):
+        q = cp[unreal.Name(n)]
+        pts = [unreal.MathLibrary.transform_location(q.adjust, c) for c in corners(q.mesh.get_bounding_box())]
+        return (min(p.x for p in pts), max(p.x for p in pts), min(p.y for p in pts), max(p.y for p in pts), min(p.z for p in pts), max(p.z for p in pts)), q
+    def raw(m, like, collision=True):
+        p = unreal.RDPiece(); p.mesh = m; p.adjust = unreal.Transform(); p.size = like.size; p.collision = collision
+        p.hinge = like.hinge
+        return p
+    (x0, x1, y0, y1, z0, z1), dw = box_of("Doorway")
+    ow = 75.0          # (half the opening: the two leaves of 70 cm and their frame)
+    P["Office.Doorway"] = raw(hk.boxes("SM_HVO_Doorway", [(x0, x1, y0, -ow, z0, z1, "plaster"), (x0, x1, ow, y1, z0, z1, "plaster"), (x0, x1, -ow, ow, 230, z1, "plaster"),
+                                                           (x0 - 1, x1 + 1, -ow - 6, -ow, z0, 236, "steel"), (x0 - 1, x1 + 1, ow, ow + 6, z0, 236, "steel"), (x0 - 1, x1 + 1, -ow, ow, 230, 236, "steel")], MAT, True), dw)
+    (x0, x1, y0, y1, z0, z1), dl = box_of("DoorLeaf")
+    P["Office.DoorLeaf"] = raw(hk.boxes("SM_HVO_DoorLeaf", [(x0, x1, y0, y1, z0, z1, "glass"), (x0 - 0.5, x1 + 0.5, y0, y0 + 5, z0, z1, "steel"), (x0 - 0.5, x1 + 0.5, y1 - 5, y1, z0, z1, "steel"),
+                                                            (x0 - 0.5, x1 + 0.5, y0, y1, z0, z0 + 8, "steel"), (x0 - 0.5, x1 + 0.5, y0, y1, z1 - 5, z1, "steel")], MAT, True), dl)
+    for n, parts in (("Column", lambda b: [(b[0], b[1], b[2], b[3], b[4], b[5], "white"), (b[0] - 2, b[1] + 2, b[2] - 2, b[3] + 2, b[4], b[4] + 14, "steel")]),
+                     ("CornerColumn", lambda b: [(b[0], b[1], b[2], b[3], b[4], b[5], "white")]),
+                     ("Dais", lambda b: [(b[0], b[1], b[2], b[3], b[4], b[5] - 3, "white"), (b[0], b[1], b[2], b[3], b[5] - 3, b[5], "steel")]),
+                     ("Carpet", lambda b: [(b[0], b[1], b[2], b[3], 0, 2, "carpetgrey")]), ("CarpetLong", lambda b: [(b[0], b[1], b[2], b[3], 0, 2, "carpetgrey")])):
+        bb, like = box_of(n)
+        P["Office." + n] = raw(hk.boxes("SM_HVO_" + n, parts(bb), MAT, True), like, n not in ("Carpet", "CarpetLong"))
+    cube = unreal.load_asset("/Engine/BasicShapes/Cube")
+    for n in ("Gibbet", "CageHanging", "CageLarge", "Chain", "Shackles", "Bones", "BonePile", "BonePile2", "HayPile", "Firewood", "Debris", "Tomb1", "Tomb2", "Tomb3", "Tomb4",
+              "ShrineStatue", "Crystal", "Spear", "SpearFlat", "Axe", "AxeFlat", "Sword", "SwordFlat"):
+        if unreal.Name(n) not in cp: continue
+        h = unreal.RDPiece(); h.mesh = cube; h.adjust = unreal.Transform(V(0, 0, -100000), unreal.Rotator(), V(0.001, 0.001, 0.001)); h.size = V(1, 1, 1); h.collision = False; h.hidden = True
+        P["Office." + n] = h
+    if "Chest" in texts:
+        p = unreal.RDPiece(); p.import_text(texts["Chest"]); P["Office.Trunk"] = p; words["Trunk"] = words.get("Chest", "safe"); texts["Trunk"] = texts["Chest"]
+    # ---- the props by the walls (the fortress's machines' names: an office's things in their place) from the tower's table
+    TJ = json.load(open(os.path.join(SA, "..", "heaven_tower", "tower24.json"), encoding="utf-8"))["pieces"]
+    def tp(nm):
+        e = TJ[nm]; return piece(find_mesh(e["mesh"], e["pack"]), e["front"], "center", bool(e.get("collision", True)), float(e.get("lift", 0.0)), e.get("height"))
+    for fort, tw in (("Server", "Tower.Printer"), ("Chiller", "Tower.WaterDispenser"), ("Rack", "Tower.Shelving"), ("Generator", "Tower.Planter"),
+                     ("PowerBox", "Tower.Drawers"), ("Cabinet", "Tower.StorageShelving")):
+        P["Office.Fortress." + fort] = tp(tw)
+    # (and the castle's furniture an office reads as other things: the brazier and the plinth planters, the altar a desk, the thrones a
+    # chair, the stool a chair, the tool board a cork board, the banner and painting a picture)
+    for n, tw in (("Brazier", "Tower.Planter"), ("Pedestal", "Tower.PlanterBox"), ("Altar", "Tower.Desk"), ("Throne", "Tower.OfficeChair"), ("ThroneRoyal", "Tower.OfficeChair"),
+                  ("Stool", "Tower.Chair"), ("ToolBoard", "Tower.CorkBoard"), ("Banner", "Tower.Painting"), ("Painting", "Tower.Painting")):
+        if n not in texts: P["Office." + n] = tp(tw)
+    pieces = dict(g.get_editor_property("pieces"))
+    for k in [k for k in pieces if str(k).startswith("Office.")]: del pieces[k]
+    for k, p in P.items(): pieces[unreal.Name(k)] = p
+    g.set_editor_property("pieces", pieces)
+    cw = dict(g.get_editor_property("container_words21"))
+    for k in [k for k in cw if str(k).startswith("Office.")]: del cw[k]
+    for n, wd in words.items():
+        if n in texts: cw[unreal.Name("Office." + n)] = wd
+    g.set_editor_property("container_words21", cw)
+    tt = [str(t) for t in g.get_editor_property("tier_themes")]
+    tt[0] = "Office"; tt[1] = "Office"
+    g.set_editor_property("tier_themes", [unreal.Name(t) for t in tt])
+    g.modify(); g.build_start_section()
+    les.save_current_level()
+    print("947 building", DST, "| office pieces", len(P), "| Heaven's furniture under the castle's names", sorted(texts), "| words", {n: words[n] for n in words if n in texts},
+          "| themes", tt)
+
+
 arg = sys.argv[1] if len(sys.argv) > 1 else "monsters"
 if arg == "monsters": monsters()
-else: raise SystemExit("947: monsters")
+elif arg == "building": building()
+else: raise SystemExit("947: monsters | building")
 for _n in [n for n in list(globals()) if not n.startswith("__") and n not in ("unreal", "gc")]: del globals()[_n]
 gc.collect()

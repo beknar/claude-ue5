@@ -1,0 +1,50 @@
+{
+ "tag": "f26b",
+ "plan": [
+  "fortress26"
+ ],
+ "level": "heaven_fortress",
+ "steps": [
+  {
+   "step": "fortress26",
+   "ok": true,
+   "themes": [
+    "Office",
+    "Office",
+    "Facility",
+    "Facility",
+    "Mixed"
+   ],
+   "tier1": {
+    "office": 7198,
+    "facility": 0,
+    "heaven_furniture": 560,
+    "office_things": 228,
+    "tier": null
+   },
+   "tier2": {
+    "office": 6891,
+    "facility": 0,
+    "heaven_furniture": 549,
+    "office_things": 174,
+    "tier": null
+   },
+   "pictures": [
+    "f26_tier1",
+    "f26_tier2_0",
+    "f26_tier2_1",
+    "f26_tier2_2"
+   ]
+  }
+ ],
+ "windows_hidden": "Content Browser, Message Log",
+ "shots": [
+  "mw_f26b_f26_tier1.png",
+  "mw_f26b_f26_tier2_0.png",
+  "mw_f26b_f26_tier2_1.png",
+  "mw_f26b_f26_tier2_2.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 2
+}

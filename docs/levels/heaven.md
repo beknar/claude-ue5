@@ -638,3 +638,29 @@ Twenty-four kinds beside 909's five, from `SourceArt/heaven_fortress/defenders25
 - **A kind's colour set** is looked for in its material's own folder first; each swap is printed.
 - **On the other maps**: `910` makes the fortress's kinds again there at every run; `869` gives the colour sets' materials the skeletal-mesh usage (brokenspire's and the caves' too).
 
+## The list of 2026-11-22: the fortress's tiers 1 and 2 an office building (phase 26: `947 building`, `868 fortress26 -lv heaven_fortress`)
+
+The user's words: "the heaven dungeon's assets should be taken from any modern city building pack, looking like the inside of a modern building for the first two levels ... also use props and buildings from the sci-fi city packs for Tiers 1-2."
+
+- **The theme**: tiers 1 and 2 are drawn in the `Office` theme (`TierThemes`); tiers 3 and 4 stay the steel facility and 5 the mixed until phase 27. A theme takes `<Theme>.<piece>` for any piece the castle names, so every wall, floor, ceiling, piece of furniture and prop of those tiers is the office's.
+- **The shell** (boxes merged in Heaven's and Office_Environment's materials):
+  - walls of white plaster over a wood or plaster dado, with a steel skirting and white pilasters and cornice;
+  - terrazzo, wood and grey stone floors;
+  - white ceilings with a light panel in each tile;
+  - doorways of plaster with a steel frame, and glass doors in steel frames on the castle's hinges;
+  - white columns, daises and grey carpets, each in the box the castle's piece took.
+- **The furniture**: Heaven's modern pieces under the castle's names (brokenspire's, copied as text): desks, chairs, tables, beds, bookshelves, shelf racks, desk lamps for candles, ceiling lights for chandeliers, the media wall for the hearth, the cooker for the cauldron and tripod, the gear shop's bench, vice and bin for the forge, anvil and quench tub, the fridge, filing cabinet, tool chest, bin, safe and locker for the containers, with their words.
+  - The castle's other pieces as an office's: the brazier and plinth as planters, the altar a desk, the thrones executive chairs, the stool a chair, the tool board a cork board, the banner and painting a picture, the trunk a safe.
+  - Left out: the gibbets, cages, chains, shackles, bones, hay, firewood, debris, tombs, shrine statues, crystals and wall weapons.
+- **The things by the walls**: the fortress's machines' places hold office things from the tower's table: printers, water dispensers, shelving, planters, drawers and storage shelving.
+- **Modern in the game's rules too**: the Office theme is modern as Heaven's is (`IsModernTheme26`): no fires in torches, candles, braziers or hearths, white lamps, upright locker doors, the containers' words.
+
+### Measured
+
+`868 fortress26 -lv heaven_fortress` (`test_f26b.json` in `SourceArt/mistward`):
+
+- **Tier 1** (the first hall's set): 7198 instances of the office's own meshes, none of the facility's, 560 of Heaven's furniture, 228 office things by the walls.
+- **Tier 2** (a set generated once the first was cleared): 6891 office pieces, none of the facility's, 549 of Heaven's furniture, 174 office things.
+- **Pictures**: the first hall, and three rooms of the tier-2 set.
+- **What could not be measured**: whether it reads as a modern building to a player. The pictures show the white walls and ceilings with their panels, glass doors, desks and shelves, and the barracks' beds.
+

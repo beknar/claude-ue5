@@ -548,6 +548,8 @@ private:
 	/** mistward: a piece of the set's theme ("<Theme>.<Name>") or else the plain one, and the name that resolves to */
 	const FRDPiece* Pc(FName Name) const;
 	FName PcName(FName Name) const;
+	/** Heaven's theme, or the fortress's Office (the list of 2026-11-22's phase 26): modern lamps, no fires, upright locker doors, the containers' words */
+	bool IsModernTheme26() const { return Theme == FName(TEXT("Heaven")) || Theme == FName(TEXT("Office")); }
 	/** PcName's answers for the theme they were found for (a name formatted and looked up once per piece name, not per piece) */
 	mutable TMap<FName, FName> ThemeNames;
 	mutable FName ThemeNamesOf;
