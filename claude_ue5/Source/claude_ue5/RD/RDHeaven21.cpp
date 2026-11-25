@@ -61,6 +61,7 @@ FTransform ARDSection::ShopFurnish21(int32 BI)
 	const FVector Ck = Inside + Across * (Side * 130.f);
 	const float CkYaw = In_.Rotation().Yaw + (Side > 0.f ? 180.f : 0.f);
 	AddPiece(TEXT("Heaven.Checkout21"), FTransform(FRotator(0, CkYaw, 0), Ck));
+	MarkBlocked(Ck, CkYaw, FVector2D(180.f, 70.f));
 	// ---- the rows: gondolas along the building's width, 6.45 m in from the door's wall and every 2.7 m, aisles of 1.5 m at the walls
 	FVector2D Lo(1e9, 1e9), Hi(-1e9, -1e9);
 	const FVector C0 = TileWorld(B.Min) - FVector(M * 0.5f, M * 0.5f, 0.f), C1 = TileWorld(B.Max - FIntPoint(1, 1)) + FVector(M * 0.5f, M * 0.5f, 0.f);
@@ -82,15 +83,26 @@ FTransform ARDSection::ShopFurnish21(int32 BI)
 			if (Slots >= 5 && K == Slots / 2) continue;          // (a cross aisle half way along a long row)
 			const float A = A0 + K * 125.f + ((A1 - A0) - (Slots - 1) * 125.f) * 0.5f;
 			const int32 Gk = Kind >= 0 ? Kind : (Row + K) % 3;
-			if (AddPiece(FName(*FString::Printf(TEXT("Heaven.Gondola21_%d"), Gk)), FTransform(FRotator(0, GyYaw, 0), Base + Across * A + FVector(0, 0, GetActorLocation().Z)))) ++Gondolas;
+			const FVector Gp = Base + Across * A;
+			if (AddPiece(FName(*FString::Printf(TEXT("Heaven.Gondola21_%d"), Gk)), FTransform(FRotator(0, GyYaw, 0), Gp)))
+			{
+				++Gondolas;
+				MarkBlocked(Gp, GyYaw, FVector2D(90.f, 120.f));          // (tile paths keep off the shelves (PR #128's review))
+			}
 		}
 	}
-	// ---- its ceiling's light panels, every other tile under the roof
+	// ---- its ceiling's light panels, every other tile under its roof (the market's hall is two storeys high: under its roof, not half way
+	// up (PR #128's review)), and its lights: the room's own were laid by the furnishing not laid here; one a 5 m square, steady, no shadow
+	const float Ceil = 2.f + 300.f * FMath::Max(1, B.Storeys) - 6.f;
 	for (int32 X = B.Min.X; X < B.Max.X; ++X)
 		for (int32 Y = B.Min.Y; Y < B.Max.Y; ++Y)
-			if ((X + Y) % 2 == 0) AddPiece(TEXT("Heaven.CeilingPanel20"), FTransform(FRotator(0, GyYaw, 0), TileWorld(FIntPoint(X, Y), 296.f)), true);
+		{
+			if ((X + Y) % 2 == 0) AddPiece(TEXT("Heaven.CeilingPanel20"), FTransform(FRotator(0, GyYaw, 0), TileWorld(FIntPoint(X, Y), Ceil)), true);
+			if ((X - B.Min.X) % 2 == 1 && (Y - B.Min.Y) % 2 == 1) AddLight(TileWorld(FIntPoint(X, Y), FMath::Min(Ceil - 40.f, 260.f)), FLinearColor(0.96f, 0.97f, 1.f), 70.f, 700.f, false, 0.f);
+		}
 	Shops21.Add(FString::Printf(TEXT("shop|%d|%d|%d|%.0f|%.0f|%.0f|%.0f|%.0f|%.0f|%.0f|%.0f|%.0f|%.0f"), BI, Kind, Gondolas, Ck.X, Ck.Y, C0.X, C0.Y, C1.X, C1.Y,
 		(Inside + Across * (Side * 230.f)).X, (Inside + Across * (Side * 230.f)).Y, (Ck - Across * (Side * 140.f)).X, (Ck - Across * (Side * 140.f)).Y));
+	Shops21.Last() += FString::Printf(TEXT("|%.0f|%.0f|%.3f|%.3f|%.1f"), DoorWall.X, DoorWall.Y, In_.X, In_.Y, GyYaw);
 	return FTransform(FRotator(0, CkYaw, 0), Ck);
 }
 
@@ -116,7 +128,8 @@ TArray<FString> ARDSection::GetContainerLines21() const
 		FString Body = TEXT("-");
 		for (USceneComponent* Ch : Base->GetAttachChildren()) if (const UStaticMeshComponent* Sm = Cast<UStaticMeshComponent>(Ch); Sm && Sm->GetStaticMesh()) { Body = Sm->GetStaticMesh()->GetName(); break; }
 		const FVector L = Base->GetComponentLocation();
-		Out.Add(FString::Printf(TEXT("c|%d|%s|%s|%.0f|%.0f|%.0f|%.0f|%.2f|%.2f|%.1f|%s"), I, *Mv.Kind, *GetContainerWord(I), L.X, L.Y, L.Z, Base->GetComponentRotation().Yaw, Mv.Target, Mv.Alpha, Ang, *Body));
+		const FVector Pm = Mv.Parts.Num() > 0 && Mv.Parts[0] ? Mv.Parts[0]->Bounds.Origin : FVector::ZeroVector;
+		Out.Add(FString::Printf(TEXT("c|%d|%s|%s|%.0f|%.0f|%.0f|%.0f|%.2f|%.2f|%.1f|%s|%.1f|%.1f|%.1f"), I, *Mv.Kind, *GetContainerWord(I), L.X, L.Y, L.Z, Base->GetComponentRotation().Yaw, Mv.Target, Mv.Alpha, Ang, *Body, Pm.X, Pm.Y, Pm.Z));
 	}
 	return Out;
 }
@@ -127,9 +140,17 @@ int32 ARDDungeonGenerator::ShopKindOfWho21() const
 	// (the kind of the shop whose clerk opened the store: -1 the market or any other town's trader, everything)
 	// (the building the store was opened at: its checkout's spot or its clerk (the first test: F reached the checkout, not the clerk
 	// behind it))
-	if (TownPlan != 5) return -1;
+	if (!InHeaven21()) return -1;
 	const ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	return S ? S->ShopKind21(StoreBld21) : -1;
+}
+
+bool ARDDungeonGenerator::InHeaven21() const
+{
+	// (Heaven's town stands round her now: its section there under its theme (TownPlan stays 5 after it is unloaded: PR #128's review,
+	// the wilds' trader was "The market" after Heaven))
+	const ARDSection* S = TownPlan == 5 ? GetSection(FIntPoint::ZeroValue) : nullptr;
+	return S && S->Theme == FName(TEXT("Heaven"));
 }
 
 bool ARDDungeonGenerator::ShopSells21(int32 Kind, FName Item) const
@@ -147,8 +168,6 @@ bool ARDDungeonGenerator::ShopSells21(int32 Kind, FName Item) const
 	}
 }
 
-int32 ARDDungeonGenerator::HotelPrice21() const { return FMath::Max(10, FMath::RoundToInt(8.f * GetGameTier())); }
-
 bool ARDDungeonGenerator::HotelRent21()
 {
 	// (a room for the night: she sleeps until seven and wakes whole, her afflictions gone)
@@ -158,9 +177,13 @@ bool ARDDungeonGenerator::HotelRent21()
 	AddGold(-Cost, TEXT("the hotel"));
 	PlayerCombat->SetHealth(PlayerCombat->GetMaxHealth()); PlayerCombat->SetMana(PlayerCombat->GetMaxMana());
 	PlayerCombat->ClearAfflictions();
-	if (bDayNight) SetTownHour(7.f);
+	// (to the next morning: a day on when it is seven or later (PR #128's review: the clock went back 15 hours to the same day's
+	// seven), and saved as the camp's rest is)
+	const int32 Day0 = TownDay;
+	if (bDayNight) { if (TownHour >= 7.f) ++TownDay; SetTownHour(7.f); }
 	TownCount(TEXT("hotel"));
-	SetTownNote(FString::Printf(TEXT("You sleep in a quiet room until seven (%d gold)"), Cost));
-	UE_LOG(LogRDHeaven21, Log, TEXT("RDHEAVEN21 a night at the hotel: %d gold, hour %.1f"), Cost, TownHour);
+	SetTownNote(bDayNight ? FString::Printf(TEXT("You sleep in a quiet room until seven: day %d (%d gold)"), TownDay, Cost) : FString::Printf(TEXT("You rest in a quiet room (%d gold)"), Cost));
+	if (bWild) WildAutosave(TEXT("found"));
+	UE_LOG(LogRDHeaven21, Log, TEXT("RDHEAVEN21 a night at the hotel: %d gold, day %d -> %d, hour %.1f"), Cost, Day0, TownDay, TownHour);
 	return true;
 }

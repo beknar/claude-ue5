@@ -62,8 +62,21 @@ static FName RDTIconOf(uint8 Kind, uint8 State)
 }
 
 /** what the map writes under a building's picture (empty: nothing, the homes) */
-static FString RDTLabelOf(uint8 Kind)
+static FString RDTLabelOf(uint8 Kind, bool bHeaven = false)
 {
+	// (Heaven's services by their modern names (the list of 2026-11-22's phase 21))
+	if (bHeaven)
+		switch (Kind)
+		{
+		case TK_Store: return TEXT("MARKET · buy and sell");
+		case TK_Smithy: return TEXT("GEAR SHOP · repairs, the anvil");
+		case TK_Healer: return TEXT("CLINIC · healing");
+		case TK_Temple: return TEXT("CHAPEL · blessings");
+		case TK_Storehouse: return TEXT("BANK · your safe-deposit box");
+		case TK_Tavern: return TEXT("HOTEL · a room for the night");
+		case TK_Barracks: return TEXT("SECURITY");
+		default: break;
+		}
 	switch (Kind)
 	{
 	case TK_Castle: return TEXT("MISTWARD CASTLE · into the dungeon");
@@ -359,7 +372,7 @@ void ARDHUD::DrawTownMap(float Sc, const FVector& L, float Yaw)
 		const bool bHome = Bd.Kind == TK_Home;
 		const bool bBadge = Gen->bTownSymbols15 && !RDTLabelOf(Bd.Kind).IsEmpty();
 		const FName Hv = Gen->TownPlan == 5 ? ARDDungeonGenerator::HeavenMapSymbol16(Bd.Kind) : NAME_None;          // (the list of 2026-11-22: Heaven's modern pictograms)
-		Icon(!Hv.IsNone() && UI.Has(Hv) ? Hv : RDTIconOf(Bd.Kind, Bd.State), W, (bHome ? 12.f : Bd.Kind == TK_Castle ? 40.f : 26.f) * Sc, bBadge ? FString() : RDTLabelOf(Bd.Kind));
+		Icon(!Hv.IsNone() && UI.Has(Hv) ? Hv : RDTIconOf(Bd.Kind, Bd.State), W, (bHome ? 12.f : Bd.Kind == TK_Castle ? 40.f : 26.f) * Sc, bBadge ? FString() : RDTLabelOf(Bd.Kind, Gen->TownPlan == 5));
 		if (bBadge) TownBadge15(Bd.Kind, ToM(FVector2D(W.X, W.Y)) + FVector2D(0.f, -20.f * Sc), 15.f * Sc, W);
 	}
 	// what stands outdoors: the square, the well, the market, the circle, the board, the graveyard, the mill, the still, the gate
@@ -709,7 +722,7 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 		if (!bHvPic) Pic(Nm, Ctr, FMath::Max(Hw, Hh * 0.8f) * Grow, FMath::Max(Hh, Hw * 0.8f) * Grow, (Bd.Seed & 1u) != 0u && Bd.Kind != TK_Castle, true);
 		if (Bd.Kind != TK_Home) Taken.Add(FBox2D(Ctr - FVector2D(Hw, Hh) * 0.9f, Ctr + FVector2D(Hw, Hh) * 0.9f));
 		if (Gen->bTownSymbols15 && !RDTLabelOf(Bd.Kind).IsEmpty()) Badges15.Add({ Bd.Kind, Ctr, FVector((W0 + W1) * 0.5f, 0.f) });
-		else Label(RDTLabelOf(Bd.Kind), Ctr, FMath::Max(Hw, Hh), Nm.ToString());
+		else Label(RDTLabelOf(Bd.Kind, Gen->TownPlan == 5), Ctr, FMath::Max(Hw, Hh), Nm.ToString());
 	}
 	// (the castle's round towers)
 	for (const FVector& Tw : S->CastleTowers) Pic(TEXT("mapc_tower"), ToM(W2(Tw)), 380.f * K, 380.f * K, false, true);

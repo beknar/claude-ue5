@@ -343,8 +343,11 @@ def shops(g):
     add["Heaven.Fountain"] = raw(B("SM_HV_ClinicDesk21", [(-40, 40, -100, 100, 0, 105, "white"), (-42, 42, -102, 102, 105, 108, "steel"), (40, 41, -100, 100, 60, 72, "cyan"),
                                                           (-20, -16, -30, 10, 108, 150, "glass"), (-19, -17, -12, -8, 108, 115, "steel")]), collision=True)
     # (the bank's vault: its door in a steel plate against the back wall, its front +X, a wheel and bolts)
-    add["Heaven.Town.StashChest"] = raw(B("SM_HV_Vault21", [(-15, -5, -110, 110, 0, 230, "steel"), (-5, 8, -80, 80, 20, 210, "plate"), (8, 14, -25, 25, 100, 106, "steel"),
+    vault = raw(B("SM_HV_Vault21", [(-15, -5, -110, 110, 0, 230, "steel"), (-5, 8, -80, 80, 20, 210, "plate"), (8, 14, -25, 25, 100, 106, "steel"),
                                                             (8, 14, -3, 3, 78, 128, "steel"), (8, 12, -60, -50, 60, 170, "dark"), (8, 12, 50, 60, 60, 170, "dark")]), collision=True)
+    # (the service's point is 90 cm in from the back wall's line: the plate's back set onto the wall's face (PR #128's review: it stood
+    # 75 cm out))
+    vault.adjust = unreal.Transform(V(-55, 0, 0), unreal.Rotator(0, 0, 0), V(1, 1, 1)); add["Heaven.Town.StashChest"] = vault
     # (the gear shop: a workbench with a pegboard of tools for the forge, a vice on a stand for the anvil, a parts bin for the quench tub)
     add["Heaven.Forge"] = raw(B("SM_HV_Workbench21", [(-40, 40, -95, 95, 0, 86, "steel"), (-42, 42, -97, 97, 86, 92, "pallet"), (-45, -42, -95, 95, 92, 200, "plate"),
                                                       (-42, -38, -70, -60, 120, 170, "hazard"), (-42, -38, -30, -25, 110, 180, "dark"), (-42, -38, 20, 40, 130, 150, "prod_red"), (-42, -38, 60, 66, 115, 175, "steel")]), collision=True)

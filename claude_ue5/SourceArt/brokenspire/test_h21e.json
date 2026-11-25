@@ -1,21 +1,22 @@
 {
- "tag": "h21b",
+ "tag": "h21e",
  "plan": [
   "heaven21_containers",
-  "heaven21_shops"
+  "heaven21_shops",
+  "heaven21_services"
  ],
  "level": "brokenspire",
  "steps": [
   {
    "step": "heaven21_containers",
-   "ok": false,
+   "ok": true,
    "elsewhere": {
-    "SM_barrel_01": 312,
-    "SM_barrel_02": 170,
-    "SM_crate_01": 186,
-    "SM_crate_02": 132,
-    "SM_Kit_Chest": 115,
-    "SM_Kit_Wardrobe": 84
+    "SM_barrel_01": 292,
+    "SM_barrel_02": 150,
+    "SM_crate_01": 166,
+    "SM_crate_02": 154,
+    "SM_Kit_Chest": 163,
+    "SM_Kit_Wardrobe": 105
    },
    "medieval": {},
    "containers": 134,
@@ -35,14 +36,40 @@
      "alpha": 1.0,
      "turn_deg": 100.0,
      "body": "SM_HV_Fridge21",
+     "part_moved": {
+      "out_front_cm": 27.8,
+      "up_cm": 0.0
+     },
+     "changed": [
+      [
+       2,
+       "fridge",
+       0
+      ]
+     ],
+     "target": 1.0,
+     "her_off_cm": 90,
      "nearest_other_m": 3.4
     },
     "filing cabinet": {
      "said": "open filing cabinet",
-     "f": "barrel",
-     "alpha": 0.0,
-     "turn_deg": 0.0,
+     "f": "barrel2",
+     "alpha": 1.0,
+     "turn_deg": 100.0,
      "body": "SM_HV_Filing21",
+     "part_moved": {
+      "out_front_cm": 19.7,
+      "up_cm": 0.0
+     },
+     "changed": [
+      [
+       10,
+       "filing cabinet",
+       0
+      ]
+     ],
+     "target": 1.0,
+     "her_off_cm": 90,
      "nearest_other_m": 2.5
     },
     "tool chest": {
@@ -51,6 +78,19 @@
      "alpha": 1.0,
      "turn_deg": 100.0,
      "body": "SM_HV_ToolChest21",
+     "part_moved": {
+      "out_front_cm": -30.3,
+      "up_cm": 16.4
+     },
+     "changed": [
+      [
+       1,
+       "tool chest",
+       0
+      ]
+     ],
+     "target": 1.0,
+     "her_off_cm": 90,
      "nearest_other_m": 3.4
     },
     "bin": {
@@ -59,6 +99,19 @@
      "alpha": 1.0,
      "turn_deg": 100.0,
      "body": "SM_HV_Bin21",
+     "part_moved": {
+      "out_front_cm": -38.4,
+      "up_cm": 28.2
+     },
+     "changed": [
+      [
+       12,
+       "bin",
+       0
+      ]
+     ],
+     "target": 1.0,
+     "her_off_cm": 90,
      "nearest_other_m": 2.9
     },
     "safe": {
@@ -67,6 +120,19 @@
      "alpha": 1.0,
      "turn_deg": 100.0,
      "body": "SM_HV_Safe21",
+     "part_moved": {
+      "out_front_cm": 23.1,
+      "up_cm": 0.0
+     },
+     "changed": [
+      [
+       5,
+       "safe",
+       0
+      ]
+     ],
+     "target": 1.0,
+     "her_off_cm": 90,
      "nearest_other_m": 2.1
     },
     "locker": {
@@ -75,6 +141,24 @@
      "alpha": 1.0,
      "turn_deg": 100.0,
      "body": "SM_HV_Locker21",
+     "part_moved": {
+      "out_front_cm": 26.7,
+      "up_cm": 0.0
+     },
+     "changed": [
+      [
+       32,
+       "locker",
+       0
+      ],
+      [
+       33,
+       "locker",
+       0
+      ]
+     ],
+     "target": 1.0,
+     "her_off_cm": 90,
      "nearest_other_m": 5.9
     },
     "dumpster": {
@@ -83,6 +167,19 @@
      "alpha": 1.0,
      "turn_deg": 100.0,
      "body": "SM_HV_Dumpster21",
+     "part_moved": {
+      "out_front_cm": -109.3,
+      "up_cm": 86.7
+     },
+     "changed": [
+      [
+       0,
+       "dumpster",
+       0
+      ]
+     ],
+     "target": 1.0,
+     "her_off_cm": 129,
      "nearest_other_m": 5.4
     }
    },
@@ -93,7 +190,7 @@
   },
   {
    "step": "heaven21_shops",
-   "ok": true,
+   "ok": false,
    "shops": 13,
    "checkouts": 13,
    "gondolas": [
@@ -176,11 +273,38 @@
      "in_rect": 16
     }
    ],
+   "rows_per_shop": [
+    4,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    3,
+    2,
+    2,
+    3,
+    2
+   ],
+   "gondolas_off_their_rows": [],
+   "gondola_vertices": {
+    "0": 0,
+    "1": 0,
+    "2": 0
+   },
+   "clerk_spoken_to": {
+    "kind": 1,
+    "f": "store",
+    "panel": "store",
+    "title": "The pharmacy"
+   },
    "sales": [
     {
      "kind": -1,
      "clerk_role": "Trader",
-     "clerk_off_cm": 0,
+     "clerk_off_cm": 372,
      "f": "store",
      "panel": "store",
      "title": "The market",
@@ -196,7 +320,7 @@
     {
      "kind": 0,
      "clerk_role": "Worker",
-     "clerk_off_cm": 0,
+     "clerk_off_cm": 410,
      "f": "store",
      "panel": "store",
      "title": "The grocery",
@@ -212,7 +336,7 @@
     {
      "kind": 1,
      "clerk_role": "Worker",
-     "clerk_off_cm": 0,
+     "clerk_off_cm": 502,
      "f": "store",
      "panel": "store",
      "title": "The pharmacy",
@@ -245,15 +369,96 @@
    "shots": [
     "shop"
    ]
+  },
+  {
+   "step": "heaven21_services",
+   "ok": true,
+   "faces": {
+    "CHAPEL": 4,
+    "HOTEL": 2,
+    "GEARSHOP": 2,
+    "MARKET": 2,
+    "CLINIC": 2,
+    "BANK": 2,
+    "SECURITY": 2,
+    "TOWER": 18,
+    "OFFICES": 24,
+    "PHARMACY": 2,
+    "HARDWARE": 10,
+    "GROCERY": 12
+   },
+   "pieces": {
+    "clinic_desk": 1,
+    "vault": 1,
+    "workbench": 1,
+    "vice": 1,
+    "parts_bin": 1
+   },
+   "medieval_service_pieces": {},
+   "in_their_buildings": {
+    "clinic_desk": true,
+    "vault": true,
+    "workbench": true,
+    "vice": true
+   },
+   "clinic_price": 21,
+   "keepers": {
+    "Trader": {
+     "f": "bark",
+     "panel": "store",
+     "title": "The market"
+    },
+    "Healer": {
+     "f": "bark",
+     "panel": "healer",
+     "title": "The clinic"
+    },
+    "Smith": {
+     "f": "bark",
+     "panel": "smith",
+     "title": "The gear shop"
+    },
+    "Keeper": {
+     "f": "bark",
+     "panel": "stash",
+     "title": "Your safe-deposit box"
+    },
+    "Innkeeper": {
+     "f": "bark",
+     "panel": "hotel",
+     "title": "The hotel",
+     "was_asleep": true,
+     "night": {
+      "ok": true,
+      "hour": 7.0,
+      "day_on": 1,
+      "health_full": true,
+      "gold": -31
+     }
+    },
+    "Priest": {
+     "f": "bark",
+     "panel": "temple",
+     "title": "The chapel"
+    }
+   },
+   "shots": [
+    "clinic",
+    "bank",
+    "gearshop"
+   ]
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
  "shots": [
-  "bs_h21b_heaven21_open_fridge.png",
-  "bs_h21b_heaven21_open_locker.png",
-  "bs_h21b_heaven21_shop.png"
+  "bs_h21e_heaven21_open_fridge.png",
+  "bs_h21e_heaven21_open_locker.png",
+  "bs_h21e_heaven21_shop.png",
+  "bs_h21e_heaven21_clinic.png",
+  "bs_h21e_heaven21_bank.png",
+  "bs_h21e_heaven21_gearshop.png"
  ],
  "error": null,
- "saves_put_back": 0,
+ "saves_put_back": 1,
  "windows_shown_again": 3
 }

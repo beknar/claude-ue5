@@ -254,3 +254,28 @@ A modern city surrounded by a shimmering shield, with skyscrapers, office buildi
   - On the first runs F from 1.4 m took another container across a storeroom's aisle: nearer, as F should.
 - **Pictures**: a shop's shelves and checkout, the clinic, the bank, the gear shop, an open fridge and locker.
 
+### After PR #128's review
+
+- **The hotel**:
+  - It is open at night: the innkeeper wakes to serve, as the keepers do.
+  - A night moves the day on: to seven next morning, and from before seven to that same day's seven. It is autosaved as the camp's rest is.
+  - Its price is what the clinic would ask now for the same (hit points, mana, cures) plus a room priced by the tier as the town's prices are.
+- **The shops**:
+  - They have their lights: one steady light every two tiles under the ceiling.
+  - Their shelves and checkout block their tiles for the tile paths.
+  - The market's light panels hang under its roof (its hall is two storeys high).
+- **Leaving Heaven**: its words and the shops' stock hold only while Heaven stands round her (`InHeaven21`), and a store forgets its shop when its panel shuts.
+- **The map**: it names the market, the bank and the hotel, and a shop as a grocery, a pharmacy or a hardware store.
+- **The bank's vault** stands against its back wall.
+- **Old saves**: a save made in Heaven before this phase keeps its looted containers by their order. The shops' storeroom containers are gone and the yards' dumpsters come first, so it marks others as looted. No save version was raised for it.
+- **Measured again** (`884 heaven21_containers,heaven21_services -Light`, `test_h21e.json`; `heaven21_shops -Light`, `test_h21f.json`):
+  - **Shops**:
+    - 2 to 4 rows of shelves a shop, every shelf 6 m and more in from its door's wall and turned across the room;
+    - the three shelves' meshes 4104, 4266 and 4212 vertices (their frames and boards alone about 290: the goods are there);
+    - the four kinds' stores as before, and F from beside a pharmacy's clerk opened "The pharmacy".
+  - **Services**:
+    - the clinic's desk, the vault, the bench and the vice each in its own building;
+    - at 23:00 the innkeeper was asleep and served;
+    - the night woke her at 7:00 the next day, whole, for 31 gold against the clinic's 21 for the same body.
+  - **Containers**: each part's middle moved where it should: the doors 20 to 28 cm out in front of their bodies, the lids 16 to 28 cm up (a door turning into its body would have read inward).
+

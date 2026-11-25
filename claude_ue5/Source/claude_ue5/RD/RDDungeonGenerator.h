@@ -2285,6 +2285,7 @@ public:
 	/** a themed container piece's word for her ("Heaven.Barrel" -> "fridge") */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven21") TMap<FName, FString> ContainerWords21;
 	int32 ShopKindOfWho21() const;
+	bool InHeaven21() const;
 	/** the building whose counter or keeper opened the store (a shop's stock by its kind) */
 	int32 StoreBld21 = -1;
 	bool ShopSells21(int32 Kind, FName Item) const;

@@ -1,0 +1,198 @@
+{
+ "tag": "h21f",
+ "plan": [
+  "heaven21_shops"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "heaven21_shops",
+   "ok": true,
+   "shops": 13,
+   "checkouts": 13,
+   "gondolas": [
+    {
+     "bld": 3,
+     "kind": -1,
+     "reported": 44,
+     "in_rect": 44
+    },
+    {
+     "bld": 29,
+     "kind": 1,
+     "reported": 16,
+     "in_rect": 16
+    },
+    {
+     "bld": 30,
+     "kind": 2,
+     "reported": 12,
+     "in_rect": 12
+    },
+    {
+     "bld": 31,
+     "kind": 2,
+     "reported": 12,
+     "in_rect": 12
+    },
+    {
+     "bld": 32,
+     "kind": 2,
+     "reported": 12,
+     "in_rect": 12
+    },
+    {
+     "bld": 33,
+     "kind": 0,
+     "reported": 12,
+     "in_rect": 12
+    },
+    {
+     "bld": 34,
+     "kind": 0,
+     "reported": 12,
+     "in_rect": 12
+    },
+    {
+     "bld": 35,
+     "kind": 2,
+     "reported": 12,
+     "in_rect": 12
+    },
+    {
+     "bld": 36,
+     "kind": 0,
+     "reported": 18,
+     "in_rect": 18
+    },
+    {
+     "bld": 37,
+     "kind": 0,
+     "reported": 22,
+     "in_rect": 22
+    },
+    {
+     "bld": 38,
+     "kind": 2,
+     "reported": 12,
+     "in_rect": 12
+    },
+    {
+     "bld": 39,
+     "kind": 0,
+     "reported": 18,
+     "in_rect": 18
+    },
+    {
+     "bld": 40,
+     "kind": 0,
+     "reported": 16,
+     "in_rect": 16
+    }
+   ],
+   "rows_per_shop": [
+    4,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    3,
+    2,
+    2,
+    3,
+    2
+   ],
+   "gondolas_off_their_rows": [],
+   "gondola_vertices": {
+    "0": 4104,
+    "1": 4266,
+    "2": 4212
+   },
+   "clerk_spoken_to": {
+    "kind": 1,
+    "f": "store",
+    "panel": "store",
+    "title": "The pharmacy"
+   },
+   "sales": [
+    {
+     "kind": -1,
+     "clerk_role": "Trader",
+     "clerk_off_cm": 372,
+     "f": "store",
+     "panel": "store",
+     "title": "The market",
+     "buy_lines": 27,
+     "not_its_trade": [],
+     "sale": {
+      "item": "Small Healing Potion",
+      "ok": true,
+      "gold": -12,
+      "count": 1
+     }
+    },
+    {
+     "kind": 0,
+     "clerk_role": "Worker",
+     "clerk_off_cm": 410,
+     "f": "store",
+     "panel": "store",
+     "title": "The grocery",
+     "buy_lines": 15,
+     "not_its_trade": [],
+     "sale": {
+      "item": "Bread",
+      "ok": true,
+      "gold": -4,
+      "count": 1
+     }
+    },
+    {
+     "kind": 1,
+     "clerk_role": "Worker",
+     "clerk_off_cm": 502,
+     "f": "store",
+     "panel": "store",
+     "title": "The pharmacy",
+     "buy_lines": 6,
+     "not_its_trade": [],
+     "sale": {
+      "item": "Small Healing Potion",
+      "ok": true,
+      "gold": -12,
+      "count": 1
+     }
+    },
+    {
+     "kind": 2,
+     "clerk_role": "Worker",
+     "clerk_off_cm": 0,
+     "f": "store",
+     "panel": "store",
+     "title": "The hardware store",
+     "buy_lines": 6,
+     "not_its_trade": [],
+     "sale": {
+      "item": "Repair Kit",
+      "ok": true,
+      "gold": -16,
+      "count": 1
+     }
+    }
+   ],
+   "shots": [
+    "shop"
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log, Content Browser",
+ "shots": [
+  "bs_h21f_heaven21_shop.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}
