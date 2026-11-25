@@ -599,6 +599,8 @@ private:
 		FVector ClosedLoc = FVector::ZeroVector;
 		/** improvements7: a lever's mover: pulling it moves this other door (the portcullis) the same way */
 		int32 Link = -1;
+		/** the list of 2026-11-22's phase 21: what she is told it is ("fridge"), where it is not its kind's word */
+		FString Word;
 	};
 	struct FFlicker { UPointLightComponent* Light; float Base; float Phase; float Amount; };
 	// ---- Brokenspire (RDTownPlan.cpp)
@@ -803,6 +805,18 @@ public:
 	TArray<FString> Streets19;
 	/** Heaven's yard things by the homes (a trailer, a parked car, a dumpster, pallets, a bin): "yard|<x>|<y>|<yaw>|<length>|<width>" */
 	TArray<FString> YardLines19;
+	// ---- the list of 2026-11-22's twenty-first phase: Heaven's shops, services and containers (RDHeaven21.cpp)
+	int32 ShopKind21(int32 BI) const;
+	FString ShopWord21(int32 BI) const;
+	float ShopSide21(int32 BI) const;
+	FTransform ShopFurnish21(int32 BI);
+	TArray<FString> Shops21;
+	/** for the tests: "shop|<building>|<kind>|<gondolas>|<checkout x>|<y>|<rect x0>|<y0>|<x1>|<y1>|<clerk x>|<y>|<customer x>|<y>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven21") TArray<FString> GetShops21() const;
+	/** a container's word for her: its Word, else its kind */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Heaven21") FString GetContainerWord(int32 I) const;
+	/** for the tests: every container's kind, word, place, state and its moving part's turn from shut */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven21") TArray<FString> GetContainerLines21() const;
 	// ---- the list of 2026-11-22's twentieth phase: Heaven's storeys (RDHeaven20.cpp)
 	/** a building's stair and lift core: three strips of four tiles from its back wall (X0, its local X), from a back corner (Y0) along Sgn */
 	struct FCore20 { int32 Bld = -1; int32 N = 0; float Sgn = 1.f; float X0 = 0.f, Y0 = 0.f; };

@@ -893,11 +893,17 @@ bool ARDSection::AddContainer(FName Name, const FVector& Loc, float Yaw, const F
 		return Containers.Add(Mv);
 	};
 	const bool bWardrobe = Kind == TEXT("wardrobe");
-	const int32 I0 = AddMoving(P->Moving, P->Hinge, bWardrobe, -1);
+	// (the list of 2026-11-22's phase 21: Heaven's containers: a part taller than it is deep is a door on an upright hinge (a fridge's,
+	// a safe's), a flat one a lid; and her word for it)
+	auto Upright = [&](UStaticMesh* Mm) { if (bWardrobe) return true; if (Theme != FName(TEXT("Heaven")) || !Mm) return false; const FBox Bb = Mm->GetBoundingBox(); return Bb.GetSize().Z > 2.f * Bb.GetSize().X; };
+	const FString* Wd = Theme == FName(TEXT("Heaven")) || Name.ToString().StartsWith(TEXT("Heaven.")) ? Generator->ContainerWords21.Find(PcName(Name)) : nullptr;
+	const int32 I0 = AddMoving(P->Moving, P->Hinge, Upright(P->Moving), -1);
+	if (Wd) Containers[I0].Word = *Wd;
 	if (P->Moving2)
 	{
-		const int32 I1 = AddMoving(P->Moving2, P->Hinge2, bWardrobe, I0);
+		const int32 I1 = AddMoving(P->Moving2, P->Hinge2, Upright(P->Moving2), I0);
 		Containers[I0].Partner = I1;
+		if (Wd) Containers[I1].Word = *Wd;
 	}
 	// (mistward: one she has opened stays open, also when its set of rooms is generated again)
 	if (Generator->bContainersStayOpen && Generator->IsContainerLooted(Coord, I0))

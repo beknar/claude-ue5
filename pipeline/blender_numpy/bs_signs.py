@@ -134,7 +134,9 @@ def paint(key, options):
 # DIN-like signage face shipped with Windows) on a dark blue-grey glass ground with a thin pale rim; the words as Heaven's
 # RDTSignText(Kind, bModern) keys them
 MODERN = {"GEARSHOP": [["GEAR", "SHOP"]], "GROCERY": [["GROCERY"]], "CLINIC": [["CLINIC"]], "CHAPEL": [["CHAPEL"]], "STORAGE": [["STORAGE"]],
-          "BAR": [["BAR"]], "SECURITY": [["SECURITY"]], "TOWER": [["TOWER"]], "OFFICES": [["OFFICES"]], "SHOP": [["SHOP"]]}
+          "BAR": [["BAR"]], "SECURITY": [["SECURITY"]], "TOWER": [["TOWER"]], "OFFICES": [["OFFICES"]], "SHOP": [["SHOP"]],
+          # (the list of 2026-11-22's phase 21: the market, the bank, the hotel, the shops' own trades)
+          "MARKET": [["MARKET"]], "BANK": [["BANK"]], "HOTEL": [["HOTEL"]], "PHARMACY": [["PHARMACY"]], "HARDWARE": [["HARD", "WARE"], ["HARDWARE"]]}
 
 
 def paint_modern(key, options, font_path):

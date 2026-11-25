@@ -1758,7 +1758,7 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 	if (bBestDoor && Best->IsDoorCell(BestI)) { const FString Cl = Best->DescribeCell(BestI); if (!Cl.IsEmpty()) return Cl; }
 	// (a lever reached by the doors' longer reach: named as a lever, not "open door" (the PR review's find))
 	if (bBestDoor && Best->GetDoorKind(BestI) == TEXT("lever")) return Best->IsPortcullisUp() ? TEXT("pull the lever (lower the portcullis)") : TEXT("pull the lever (raise the portcullis)");
-	FString What = bBestDoor ? (Best->IsDoorCell(BestI) ? TEXT("cell door") : Best->GetDoorKind(BestI) == TEXT("gate") ? TEXT("gate") : TEXT("door")) : Best->GetContainerKind(BestI);
+	FString What = bBestDoor ? (Best->IsDoorCell(BestI) ? TEXT("cell door") : Best->GetDoorKind(BestI) == TEXT("gate") ? TEXT("gate") : TEXT("door")) : Best->GetContainerWord(BestI);          // (phase 21: Heaven's words)
 	What.ReplaceInline(TEXT("2"), TEXT(""));
 	return FString::Printf(TEXT("%s %s"), Best->IsTargetOpen(bBestDoor, BestI) ? TEXT("close") : TEXT("open"), *What);
 }

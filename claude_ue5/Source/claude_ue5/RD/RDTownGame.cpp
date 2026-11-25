@@ -1501,9 +1501,13 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 		const FString Line = T->NextLine();
 		LastBark = FString::Printf(TEXT("%s|%s"), *T->Title, *Line);
 		if (PlayerCombat && !Line.IsEmpty()) PlayerCombat->ShowMessage(FString::Printf(TEXT("%s:  \"%s\""), *T->Title, *Line));
-		const FName Service = T->TownRole == ERDTownRole::Smith ? FName(TEXT("smith")) : T->TownRole == ERDTownRole::Trader ? FName(TEXT("store")) : T->TownRole == ERDTownRole::Healer ? FName(TEXT("healer"))
+		// (the list of 2026-11-22's phase 21: Heaven's shop clerks sell their shop's stock; its innkeeper keeps a hotel)
+		const ARDSection* HvS = TownPlan == 5 ? GetSection(FIntPoint::ZeroValue) : nullptr;
+		const bool bClerk21 = HvS && T->TownRole == ERDTownRole::Worker && HvS->TownBlds.IsValidIndex(HvS->TownBuildingAt(T->Post)) && HvS->TownBlds[HvS->TownBuildingAt(T->Post)].Kind == TK_Shop;
+		const FName Service = bClerk21 ? FName(TEXT("store")) : (HvS && T->TownRole == ERDTownRole::Innkeeper) ? FName(TEXT("hotel"))
+		                    : T->TownRole == ERDTownRole::Smith ? FName(TEXT("smith")) : T->TownRole == ERDTownRole::Trader ? FName(TEXT("store")) : T->TownRole == ERDTownRole::Healer ? FName(TEXT("healer"))
 		                    : T->TownRole == ERDTownRole::Priest ? FName(TEXT("temple")) : T->TownRole == ERDTownRole::Keeper ? FName(TEXT("stash")) : NAME_None;
-		if (!Service.IsNone()) { OpenTownPanel(Service, Who); TownBody = Line; }
+		if (!Service.IsNone()) { StoreBld21 = HvS ? HvS->TownBuildingAt(T->Post) : -1; OpenTownPanel(Service, Who); TownBody = Line; }
 		return TEXT("bark");
 	}
 	if (const FString Th = TownThingInteract(From); !Th.IsEmpty()) return Th;
@@ -1515,7 +1519,7 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 		FName Panel = NAME_None;
 		switch (Sp.Kind)
 		{
-		case TS_Counter: if (D < 260.f) Panel = TEXT("store"); break;
+		case TS_Counter: if (D < 260.f) { Panel = TEXT("store"); StoreBld21 = Sp.Bld; } break;
 		case TS_Basin: if (D < 260.f) Panel = TEXT("healer"); break;
 		case TS_Altar: if (D < 330.f) Panel = TEXT("temple"); break;
 		case TS_Stable: if (D < 420.f && !bMounted) Panel = TEXT("stable"); break;
@@ -1901,9 +1905,22 @@ void ARDDungeonGenerator::BuildTownLines()
 	else if (TownPanel == TEXT("store"))
 	{
 		TownTitle = TEXT("The trader's store"); TownSub = FString::Printf(TEXT("buy and sell  ·  you have %d gold"), Gold);
+		// (the list of 2026-11-22's phase 21: Heaven's market, or a shop's own trade by its clerk)
+		const int32 Sk = ShopKindOfWho21();
+		if (TownPlan == 5)
+		{
+			static const TCHAR* Titles[4] = { TEXT("The market"), TEXT("The grocery"), TEXT("The pharmacy"), TEXT("The hardware store") };
+			static const TCHAR* Bodies[4] = { TEXT("Aisle after aisle under white light, a hum of fridges, a till that beeps. \"Anything you need, it's here somewhere.\""),
+				TEXT("Shelves of tins, bread in bags, fruit under misted glass. The clerk scans without looking up."),
+				TEXT("Rows of little boxes, white and green, and a counter that smells of mint. \"Ask if you can't find it.\""),
+				TEXT("Kits, tape, lamps and tools on hooks to the ceiling. \"If it's broken, we've got the thing that fixes it.\"") };
+			TownTitle = Titles[FMath::Clamp(Sk + 1, 0, 3)];
+			if (TownBody.IsEmpty()) TownBody = Bodies[FMath::Clamp(Sk + 1, 0, 3)];
+		}
 		if (TownTab == 0)
 			for (const FName& It : TownStock())
 			{
+				if (!ShopSells21(Sk, It)) continue;
 				const int32 Ix = FindItem(It); const int32 P = PriceOf(It);
 				Add(TEXT("buy"), It.ToString(), FString::Printf(TEXT("%d g"), P), Ix >= 0 && !Items[Ix].Looks.IsEmpty() ? Items[Ix].Looks : FString::Printf(TEXT("You carry %d"), PlayerCombat ? PlayerCombat->GetItemCount(It) : 0), Gold >= P, It.ToString());
 			}
@@ -1912,10 +1929,25 @@ void ARDDungeonGenerator::BuildTownLines()
 		if (IsCollectorTown16()) Add(TEXT("none"), TEXT("A collector keeps a stall here"), TEXT("x2"), TEXT("Raw gems and the old coins of a dead kingdom sell here for twice what any other trader pays."), false);
 		Add(TEXT("bye"), TEXT("Leave"), FString(), FString());
 	}
+	else if (TownPanel == TEXT("hotel"))
+	{
+		// (the list of 2026-11-22's phase 21: Heaven's inn a hotel: a room for the night, and its bar's food and drink)
+		TownTitle = TEXT("The hotel"); TownSub = FString::Printf(TEXT("you have %d gold"), Gold);
+		if (TownBody.IsEmpty()) TownBody = TEXT("A lobby of soft chairs and a desk with a bell. \"A room? Clean sheets, a lock that works, and quiet until morning.\"");
+		const int32 Room = HotelPrice21();
+		Add(TEXT("room"), TEXT("A room for the night"), FString::Printf(TEXT("%d g"), Room), TEXT("Sleep until seven in the morning; you wake with all your hit points and mana, your afflictions gone."), Gold >= Room);
+		for (const FName& It : TownStock())
+		{
+			if (!ShopSells21(0, It)) continue;
+			Add(TEXT("buy"), It.ToString(), FString::Printf(TEXT("%d g"), PriceOf(It)), FString::Printf(TEXT("You carry %d"), PlayerCombat ? PlayerCombat->GetItemCount(It) : 0), Gold >= PriceOf(It), It.ToString());
+		}
+		Add(TEXT("bye"), TEXT("Leave"), FString(), FString());
+	}
 	else if (TownPanel == TEXT("healer"))
 	{
-		TownTitle = TEXT("The healer's house"); TownSub = FString::Printf(TEXT("you have %d gold"), Gold);
-		if (TownBody.IsEmpty()) TownBody = TEXT("Clean linen, bitter herbs, a basin of clear water. The healer looks as if she has not slept in days.");
+		TownTitle = TownPlan == 5 ? TEXT("The clinic") : TEXT("The healer's house"); TownSub = FString::Printf(TEXT("you have %d gold"), Gold);
+		if (TownBody.IsEmpty()) TownBody = TownPlan == 5 ? TEXT("White light, a smell of disinfectant, a screen that never stops scrolling. The doctor waves you to the chair.")
+		                                                 : TEXT("Clean linen, bitter herbs, a basin of clear water. The healer looks as if she has not slept in days.");
 		const int32 Cost = TownHealCost();
 		Add(TEXT("heal"), TEXT("Be healed and cured"), Cost > 0 ? FString::Printf(TEXT("%d g"), Cost) : TEXT("FREE"),
 			TEXT("All your hit points and mana back; poison, weakness and slowness taken away."), Gold >= Cost);
@@ -1929,8 +1961,9 @@ void ARDDungeonGenerator::BuildTownLines()
 	}
 	else if (TownPanel == TEXT("smith"))
 	{
-		TownTitle = TEXT("The smithy"); TownSub = FString::Printf(TEXT("repairs and the anvil  ·  you have %d gold"), Gold);
-		if (TownBody.IsEmpty()) TownBody = TEXT("The forge breathes. \"Bring it here. Whatever the castle did to it, I've seen worse.\"");
+		TownTitle = TownPlan == 5 ? TEXT("The gear shop") : TEXT("The smithy"); TownSub = FString::Printf(TEXT("repairs and the anvil  ·  you have %d gold"), Gold);
+		if (TownBody.IsEmpty()) TownBody = TownPlan == 5 ? TEXT("Racks of kit, a workbench and its vice, a radio playing low. \"Bring it here. I'll have it fixed before your coffee's cold.\"")
+		                                                 : TEXT("The forge breathes. \"Bring it here. Whatever the castle did to it, I've seen worse.\"");
 		int32 All = 0;
 		TArray<FTownLine> Each;
 		if (PlayerCombat)
@@ -1966,7 +1999,7 @@ void ARDDungeonGenerator::BuildTownLines()
 	}
 	else if (TownPanel == TEXT("temple"))
 	{
-		TownTitle = TEXT("The temple"); TownSub = FString::Printf(TEXT("you have %d gold"), Gold);
+		TownTitle = TownPlan == 5 ? TEXT("The chapel") : TEXT("The temple"); TownSub = FString::Printf(TEXT("you have %d gold"), Gold);
 		if (TownBody.IsEmpty()) TownBody = TEXT("Candles gutter before an altar of grey stone. The priest's voice is low: \"The light still listens, here.\"");
 		const int32 Cost = FMath::RoundToInt(20.f * RDTierPrice(T));
 		Add(TEXT("bless"), TEXT("Ask for a blessing"), FString::Printf(TEXT("%d g"), Cost), TEXT("For ten minutes: your blows 10% stronger, 10% less of each blow reaches you. It goes with you into the castle."), Gold >= Cost);
@@ -1992,7 +2025,8 @@ void ARDDungeonGenerator::BuildTownLines()
 	}
 	else if (TownPanel == TEXT("stash"))
 	{
-		TownTitle = TEXT("Your storage"); TownSub = TEXT("the storehouse keeps what you leave here, as long as the game lasts");
+		TownTitle = TownPlan == 5 ? TEXT("Your safe-deposit box") : TEXT("Your storage");
+		TownSub = TownPlan == 5 ? TEXT("the bank keeps what you leave here, as long as the game lasts") : TEXT("the storehouse keeps what you leave here, as long as the game lasts");
 		if (TownTab == 0) { if (PlayerCombat) RDTownThingLines(this, PlayerCombat, TownLines, TEXT("deposit"), false); }
 		else if (GI)
 		{
@@ -2056,6 +2090,7 @@ bool ARDDungeonGenerator::ActivateTownEntry(int32 Line)
 	else if (E.Act == TEXT("buy")) bOk = TownBuy(FName(*E.Arg));
 	else if (E.Act == TEXT("sell")) bOk = TownSell(E.Arg);
 	else if (E.Act == TEXT("heal")) bOk = TownHeal();
+	else if (E.Act == TEXT("room")) bOk = HotelRent21();          // (phase 21: Heaven's hotel)
 	else if (E.Act == TEXT("repair")) bOk = TownRepair(E.Arg);
 	else if (E.Act == TEXT("anvil")) { CloseTownPanel(); if (PlayerCombat) { PlayerCombat->SetCraftStation(NAME_None); PlayerCombat->SetCraftingOpen(true); } return true; }
 	else if (E.Act == TEXT("castle")) { CloseTownPanel(); TownCount(TEXT("circle_castle")); return EnterCastle(); }

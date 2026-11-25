@@ -1,0 +1,333 @@
+{
+ "tag": "h21a",
+ "plan": [
+  "heaven21_containers",
+  "heaven21_shops",
+  "heaven21_services",
+  "heaven16_signs"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "heaven21_containers",
+   "ok": false,
+   "elsewhere": {
+    "SM_barrel_01": 282,
+    "SM_barrel_02": 204,
+    "SM_crate_01": 192,
+    "SM_crate_02": 172,
+    "SM_Kit_Chest": 111,
+    "SM_Kit_Wardrobe": 117
+   },
+   "medieval": {},
+   "containers": 134,
+   "by_word": {
+    "dumpster": 1,
+    "tool chest": 16,
+    "fridge": 36,
+    "safe": 31,
+    "filing cabinet": 3,
+    "bin": 3,
+    "locker": 44
+   },
+   "opened": {
+    "fridge": {
+     "said": "open fridge",
+     "f": "barrel",
+     "alpha": 1.0,
+     "turn_deg": 100.0,
+     "body": "SM_HV_Fridge21"
+    },
+    "filing cabinet": {
+     "said": "open filing cabinet",
+     "f": "barrel",
+     "alpha": 0.0,
+     "turn_deg": 0.0,
+     "body": "SM_HV_Filing21"
+    },
+    "tool chest": {
+     "said": "open tool chest",
+     "f": "crate",
+     "alpha": 1.0,
+     "turn_deg": 100.0,
+     "body": "SM_HV_ToolChest21"
+    },
+    "bin": {
+     "said": "open bin",
+     "f": "crate2",
+     "alpha": 1.0,
+     "turn_deg": 100.0,
+     "body": "SM_HV_Bin21"
+    },
+    "safe": {
+     "said": "open safe",
+     "f": "chest",
+     "alpha": 1.0,
+     "turn_deg": 100.0,
+     "body": "SM_HV_Safe21"
+    },
+    "locker": {
+     "said": "open locker",
+     "f": "wardrobe",
+     "alpha": 1.0,
+     "turn_deg": 100.0,
+     "body": "SM_HV_Locker21"
+    },
+    "dumpster": {
+     "said": "open dumpster",
+     "f": "crate",
+     "alpha": 1.0,
+     "turn_deg": 100.0,
+     "body": "SM_HV_Dumpster21"
+    }
+   },
+   "shots": [
+    "fridge",
+    "locker"
+   ]
+  },
+  {
+   "step": "heaven21_shops",
+   "ok": false,
+   "shops": 13,
+   "checkouts": 13,
+   "gondolas": [
+    {
+     "bld": 3,
+     "kind": -1,
+     "reported": 44,
+     "in_rect": 44
+    },
+    {
+     "bld": 29,
+     "kind": 1,
+     "reported": 16,
+     "in_rect": 16
+    },
+    {
+     "bld": 30,
+     "kind": 2,
+     "reported": 12,
+     "in_rect": 12
+    },
+    {
+     "bld": 31,
+     "kind": 2,
+     "reported": 12,
+     "in_rect": 12
+    },
+    {
+     "bld": 32,
+     "kind": 2,
+     "reported": 12,
+     "in_rect": 12
+    },
+    {
+     "bld": 33,
+     "kind": 0,
+     "reported": 12,
+     "in_rect": 12
+    },
+    {
+     "bld": 34,
+     "kind": 0,
+     "reported": 12,
+     "in_rect": 12
+    },
+    {
+     "bld": 35,
+     "kind": 2,
+     "reported": 12,
+     "in_rect": 12
+    },
+    {
+     "bld": 36,
+     "kind": 0,
+     "reported": 18,
+     "in_rect": 18
+    },
+    {
+     "bld": 37,
+     "kind": 0,
+     "reported": 22,
+     "in_rect": 22
+    },
+    {
+     "bld": 38,
+     "kind": 2,
+     "reported": 12,
+     "in_rect": 12
+    },
+    {
+     "bld": 39,
+     "kind": 0,
+     "reported": 18,
+     "in_rect": 18
+    },
+    {
+     "bld": 40,
+     "kind": 0,
+     "reported": 16,
+     "in_rect": 16
+    }
+   ],
+   "sales": [
+    {
+     "kind": -1,
+     "clerk_role": "Trader",
+     "clerk_off_cm": 0,
+     "f": "store",
+     "panel": "store",
+     "title": "The market",
+     "buy_lines": 27,
+     "not_its_trade": [],
+     "sale": {
+      "item": "Small Healing Potion",
+      "ok": true,
+      "gold": -12,
+      "count": 1
+     }
+    },
+    {
+     "kind": 0,
+     "clerk_role": "Worker",
+     "clerk_off_cm": 0,
+     "f": "",
+     "panel": "None",
+     "title": "The market",
+     "buy_lines": 0,
+     "not_its_trade": [],
+     "sale": null
+    },
+    {
+     "kind": 1,
+     "clerk_role": "Worker",
+     "clerk_off_cm": 0,
+     "f": "",
+     "panel": "None",
+     "title": "The market",
+     "buy_lines": 0,
+     "not_its_trade": [],
+     "sale": null
+    },
+    {
+     "kind": 2,
+     "clerk_role": "Worker",
+     "clerk_off_cm": 0,
+     "f": "",
+     "panel": "None",
+     "title": "The market",
+     "buy_lines": 0,
+     "not_its_trade": [],
+     "sale": null
+    }
+   ],
+   "shots": [
+    "shop"
+   ]
+  },
+  {
+   "step": "heaven21_services",
+   "ok": true,
+   "faces": {
+    "CHAPEL": 4,
+    "HOTEL": 2,
+    "GEARSHOP": 2,
+    "MARKET": 2,
+    "CLINIC": 2,
+    "BANK": 2,
+    "SECURITY": 2,
+    "TOWER": 18,
+    "OFFICES": 24,
+    "PHARMACY": 2,
+    "HARDWARE": 10,
+    "GROCERY": 12
+   },
+   "pieces": {
+    "clinic_desk": 1,
+    "vault": 1,
+    "workbench": 1,
+    "vice": 1,
+    "parts_bin": 1
+   },
+   "medieval_service_pieces": {},
+   "keepers": {
+    "Trader": {
+     "f": "store",
+     "panel": "store",
+     "title": "The market"
+    },
+    "Healer": {
+     "f": "bark",
+     "panel": "healer",
+     "title": "The clinic"
+    },
+    "Smith": {
+     "f": "bark",
+     "panel": "smith",
+     "title": "The gear shop"
+    },
+    "Keeper": {
+     "f": "bark",
+     "panel": "stash",
+     "title": "Your safe-deposit box"
+    },
+    "Innkeeper": {
+     "f": "bark",
+     "panel": "hotel",
+     "title": "The hotel",
+     "night": {
+      "ok": true,
+      "hour": 7.0,
+      "health_full": true,
+      "gold": -10
+     }
+    },
+    "Priest": {
+     "f": "bark",
+     "panel": "temple",
+     "title": "The chapel"
+    }
+   },
+   "shots": [
+    "clinic",
+    "bank",
+    "gearshop"
+   ]
+  },
+  {
+   "step": "heaven16_signs",
+   "ok": true,
+   "boards": 41,
+   "shield_boards": 0,
+   "faces": {
+    "MI_HV_Sign_CHAPEL": 4,
+    "MI_HV_Sign_HOTEL": 2,
+    "MI_HV_Sign_GEARSHOP": 2,
+    "MI_HV_Sign_MARKET": 2,
+    "MI_HV_Sign_CLINIC": 2,
+    "MI_HV_Sign_BANK": 2,
+    "MI_HV_Sign_SECURITY": 2,
+    "MI_HV_Sign_TOWER": 18,
+    "MI_HV_Sign_OFFICES": 24,
+    "MI_HV_Sign_PHARMACY": 2,
+    "MI_HV_Sign_HARDWARE": 10,
+    "MI_HV_Sign_GROCERY": 12
+   },
+   "gold_faces": 0
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_h21a_heaven21_open_fridge.png",
+  "bs_h21a_heaven21_open_locker.png",
+  "bs_h21a_heaven21_shop.png",
+  "bs_h21a_heaven21_clinic.png",
+  "bs_h21a_heaven21_bank.png",
+  "bs_h21a_heaven21_gearshop.png",
+  "bs_h21a_heaven16_sign.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}
