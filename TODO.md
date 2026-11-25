@@ -17,6 +17,7 @@ Built and compiled, but no test has run it yet:
 ## The list of 2026-11-22's twenty-fifth phase: the fortress's defenders
 
 - [ ] **The defenders' voices and guns**: the drones, aliens and creatures speak with the Horned set (no set of their own on the map); the Sci-Fi defender's, the Dystopia gunner's and the mech's guns are separate meshes on other skeletons and not in their hands; the medics heal with the reload clip (no pack has a healing clip).
+- [ ] **The open alien tiers (phase 27)**: not played through: a fight in the open (the monsters see farther with no walls; the ridges' blockers stop their sight), a vault without its door (the open sets have none: its key is not needed), the arena's barred doors (none in the open). The generator gained properties: a full cook for a package.
 - [ ] **A package needs a full cook**: `FRDMonsterDef` and `ARDMonster` gained properties (the heal, the colour sets, the drop): a `-SkipCook` package staged on an earlier cook would read past them.
 - [ ] **Not measured in a dungeon's play**: the defenders met in the fortress's rooms (the test spawns them by the start hall) and in the wilds at tiers 26 to 30, and the caves after `935` / `945 level` (rerun, not tested).
 

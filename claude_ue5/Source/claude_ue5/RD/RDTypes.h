@@ -51,6 +51,27 @@ struct FRDPiece
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float CullDistance = 0.f;
 };
 
+/** the list of 2026-11-22's phase 27: a part of one of the Alien Planet pack's baked clusters (947 world): a piece, placed in the cluster's frame */
+USTRUCT(BlueprintType)
+struct FRDAlienPart27
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") FName Piece;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") FTransform Xf;
+};
+
+/** one of the pack's level instances its PCG graphs copy (LI_*: flowers, pebbles, spike rocks, trees...), centred on its middle;
+ *  bBlocks: its tiles are blocked (spike rocks, trees), else walked through (plants, pebbles) */
+USTRUCT(BlueprintType)
+struct FRDAlienCluster27
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") FName Kind;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") FVector2D Half = FVector2D(100.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") bool bBlocks = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") TArray<FRDAlienPart27> Parts;
+};
+
 /** random_dungeonmagic_level5: what a monster's blow does to her besides its damage */
 UENUM(BlueprintType)
 enum class ERDMonsterAbility : uint8

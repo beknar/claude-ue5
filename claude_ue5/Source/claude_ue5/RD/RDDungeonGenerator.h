@@ -2364,6 +2364,40 @@ public:
 	/** a lift platform's speed (cm a second) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven20") float LiftSpeed20 = 220.f;
 	void TickLifts20(float Dt);
+	// ---- the list of 2026-11-22's twenty-seventh phase: the fortress's open alien tiers (RDAlien27.cpp; 947 world)
+	/** the themes whose sets are open ground under the sky (heaven_fortress: "Alien"); empty on every other map */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Alien27") TArray<FName> OpenThemes27;
+	/** the Alien Planet pack's baked clusters, read from its level instances */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Alien27") TArray<FRDAlienCluster27> AlienClusters27;
+	/** the ridges' rocks (pieces, about 1 m across, on z 0) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Alien27") TArray<FName> AlienRocks27;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Alien27") FName AlienGround27 = TEXT("Alien27.Ground");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Alien27") FName AlienBlock27 = TEXT("Alien27.Block");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Alien27") FName AlienForce27 = TEXT("Alien27.Force");
+	/** the share of a clearing's tiles with a cluster of plants or pebbles; the spike rocks and trees a clearing at most */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Alien27") float AlienDressShare27 = 0.3f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Alien27") int32 AlienBlockersPerRoom27 = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Alien27") FLinearColor AlienSunColor27 = FLinearColor(1.f, 0.86f, 0.78f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Alien27") float AlienSunLux27 = 6.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Alien27") FRotator AlienSunRot27 = FRotator(-38.f, 120.f, 0.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Alien27") FLinearColor AlienRayleigh27 = FLinearColor(0.12f, 0.03f, 0.10f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Alien27") float AlienMie27 = 0.006f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Alien27") float AlienSkyLight27Scale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Alien27") FLinearColor AlienFogColor27 = FLinearColor(0.35f, 0.22f, 0.42f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Alien27") float AlienFogDensity27 = 0.02f;
+	UPROPERTY(Transient) TObjectPtr<class UDirectionalLightComponent> AlienSun27;
+	UPROPERTY(Transient) TObjectPtr<class USkyAtmosphereComponent> AlienAtmos27;
+	UPROPERTY(Transient) TObjectPtr<class USkyLightComponent> AlienSkyLight27;
+	UPROPERTY(Transient) TObjectPtr<class UExponentialHeightFogComponent> AlienFog27;
+	float AlienSky27 = 0.f;
+	/** -RDOpen27 (the packaged game's run): tier 3 opened, a set of it generated, she put in it; its mark written once the sky is up */
+	int32 Open27Go = 0;
+	void TickOpen27Go();
+	/** is this point in a set of an open theme */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Alien27") bool IsOpenAt27(FVector At) const;
+	/** for the tests: how far the sky has come up (0 indoors, 1 out) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Alien27") float GetAlienSky27() const;
+	void TickAlienSky27(float Dt);
 	// ---- the list of 2026-11-22's twenty-fourth phase: the skyscrapers' level (RDTower24.cpp; 948)
 	/** brokenspire: the level a Heaven tower's door opens (heaven_tower); empty: the towers' doors are plain doors */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tower24") FString TowerLevel24;

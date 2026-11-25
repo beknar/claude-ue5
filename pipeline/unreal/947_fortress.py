@@ -13,6 +13,10 @@ Pack"; the plan docs/improvements16_plan.md), the fortress under Kratos Aurorim 
                                Heaven's and Office_Environment's materials); the castle's furniture as Heaven's modern pieces of the same
                                names (brokenspire's, as text) with their containers' words; the machines by the walls as the tower's
                                office things (printers, water dispensers, shelving, planters, drawers); the start section built again
+    947_fortress.py study27    phase 27: the Alien Planet's baked clusters (its PCG graphs' LI_* level instances) read into
+                               SourceArt/heaven_fortress/alien27.json (opens each of the pack's maps, then heaven_fortress)
+    947_fortress.py world      phase 27: tiers 3 to 5 open alien ground (TierThemes "Alien", OpenThemes27; C++ RD/RDAlien27.cpp): the
+                               pack's ground, rocks and clusters as pieces, the blocker, the force wall; run 869 after it
 
 Run on the editor with any level open (it opens heaven_fortress and saves it)."""
 import os, sys, re, json, math, gc
@@ -364,9 +368,189 @@ def building():
           "| themes", tt)
 
 
+# ================================================================================================ phase 27: tiers 3 to 5 an open alien world
+LI = "/Game/AlienPlanet/Levels/LevelInstances"
+KINDS27 = {"Foliage": False, "Pebbles": False, "SpikeRocks": True, "Trees": True}          # (bBlocks; MountainSlope's are mountains' sides, 20 m and more)
+
+
+def study27():
+    """the Alien Planet's baked clusters (the level instances its PCG graphs copy): every mesh instance of each LI_* map, centred on the
+    cluster's middle, written to SourceArt/heaven_fortress/alien27.json. The pack's graphs read a landscape and splines the game's sets
+    have not; the game lays these clusters itself (RD/RDAlien27.cpp)"""
+    flt = unreal.ARFilter(package_paths=[LI], recursive_paths=True, class_paths=[unreal.TopLevelAssetPath("/Script/Engine", "World")])
+    maps = sorted(str(a.package_name) for a in AR.get_assets(flt))
+    out = []
+    for mp in maps:
+        kind = mp.split("/")[-2]
+        if kind not in KINDS27: continue
+        les.load_level(mp)
+        parts = []
+        # (the plants' holders are instanced placement partition actors, which the editor's actor list leaves out: every actor of the world)
+        for act in unreal.GameplayStatics.get_all_actors_of_class(unreal.EditorLevelLibrary.get_editor_world(), unreal.Actor):
+            for c in act.get_components_by_class(unreal.StaticMeshComponent):
+                m = c.get_editor_property("static_mesh")
+                if not m or "TreesDecoration" in m.get_path_name() or "/Engine/" in m.get_path_name(): continue
+                if isinstance(c, unreal.InstancedStaticMeshComponent):
+                    xs = [c.get_instance_transform(i, True) for i in range(c.get_instance_count())]
+                else:
+                    if not c.is_visible(): continue
+                    xs = [c.get_world_transform()]
+                for x in xs:
+                    t = x.translation; r = x.rotation.rotator(); sc = x.scale3d
+                    bb = m.get_bounding_box(); ext = max(bb.max.x - bb.min.x, bb.max.y - bb.min.y) * 0.5 * max(abs(sc.x), abs(sc.y))
+                    parts.append({"mesh": m.get_path_name(), "t": [t.x, t.y, t.z], "r": [r.roll, r.pitch, r.yaw], "s": [sc.x, sc.y, sc.z], "ext": ext})
+        if not parts: print("947 study27", mp, "no parts"); continue
+        cx = sum(p["t"][0] for p in parts) / len(parts); cy = sum(p["t"][1] for p in parts) / len(parts); z0 = min(p["t"][2] for p in parts)
+        for p in parts: p["t"] = [round(p["t"][0] - cx, 1), round(p["t"][1] - cy, 1), round(p["t"][2] - z0, 1)]
+        # (its half size: each part's own reach round its place (a tree's crown is the mesh's, not a point))
+        hx = max(abs(p["t"][0]) + p["ext"] * 0.6 for p in parts); hy = max(abs(p["t"][1]) + p["ext"] * 0.6 for p in parts)
+        for p in parts: del p["ext"]
+        out.append({"name": mp.split("/")[-1], "kind": kind, "blocks": KINDS27[kind], "half": [round(hx), round(hy)], "parts": parts})
+        print("947 study27", mp.split("/")[-1], kind, len(parts), "parts, half", round(hx), round(hy))
+        gc.collect(); unreal.SystemLibrary.execute_console_command(None, "obj gc")
+    json.dump({"clusters": out}, open(os.path.join(SA, "alien27.json"), "w", encoding="utf-8"), indent=1)
+    les.load_level(DST)
+    print("947 study27:", len(out), "clusters,", sum(len(c["parts"]) for c in out), "parts")
+
+
+ROCKS27 = ["SM_RockRegular0%d" % i for i in range(1, 6)] + ["SM_RockSharp0%d" % i for i in range(1, 6)] + ["SM_RockSmooth0%d" % i for i in range(1, 6)] + \
+          ["SM_SpikeRockSharp0%d" % i for i in range(1, 5)] + ["SM_SpikeRockSmooth0%d" % i for i in range(1, 5)]
+
+
+def world():
+    """tiers 3 to 5 open ground (TierThemes "Alien", OpenThemes27): the pack's ground material on the sets' floors and the ridges' ground,
+    its rocks for the ridges (about 1 m across, scaled by the game), its clusters (alien27.json) as pieces, an invisible blocker a tile
+    across and a room high, a force wall for the shut tiers; the castle's furniture as the facility's (909's Facility.*), what hangs on a
+    wall or stands only indoors left out"""
+    les.load_level(DST)
+    g = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
+    cp = g.get_editor_property("pieces")
+    TS = g.get_editor_property("tile_size"); RH = g.get_editor_property("room_height")
+    P = {}
+    # ---- the ground: the pack's triplanar ground on the office's floor box (a tile, its top at 0)
+    box = cp[unreal.Name("Office.Floor_Stone")].mesh
+    def ground(mi_path):
+        p = piece(box, mode="floor", collision=True); p.material = unreal.load_asset(mi_path); return p
+    g1 = ground("/Game/AlienPlanet/Materials/Ground/MI_Ground01"); g2 = ground("/Game/AlienPlanet/Materials/Ground/MI_Ground02")
+    g3 = ground("/Game/AlienPlanet/Materials/Ground/MI_Ground03")
+    for n in ("Floor_Stone", "Floor_Brick", "Floor_Brick2", "Floor_Random", "Floor_Tiles", "Floor_Corr", "Floor_Wood"):
+        P["Alien." + n] = g1; P["Alien." + n + "_Alt"] = g1          # (one ground for the walked tiles: MI_Ground02 (snow) and 03 drew squares)
+    P["Alien27.Ground"] = g3
+    # ---- the ridges' rocks: each about 1 m across its larger side, its bottom on 0, no collision (the blocker is the tile's)
+    rocks = []
+    for n in ROCKS27:
+        m = find_mesh(n, "AlienPlanet")
+        b = m.get_bounding_box(); w = max(b.max.x - b.min.x, b.max.y - b.min.y, 1.0); sc = 100.0 / w
+        p = piece(m, mode="center", collision=False); p.adjust = unreal.Transform(V(-(b.min.x + b.max.x) / 2 * sc, -(b.min.y + b.max.y) / 2 * sc, -b.min.z * sc), unreal.Rotator(), V(sc, sc, sc))
+        p.size = V(100, 100, (b.max.z - b.min.z) * sc); p.cull_distance = 15000.0          # (faded out at 150 m, no shadow: 5,500 a set)
+        P["Alien27.Rock#" + n] = p; rocks.append("Alien27.Rock#" + n)
+    # ---- the blocker: a tile across, two rooms high, hidden; the force wall: a thin box in a material of its own
+    cube = unreal.load_asset("/Engine/BasicShapes/Cube")
+    h = unreal.RDPiece(); h.mesh = cube; h.adjust = unreal.Transform(V(0, 0, RH), unreal.Rotator(), V(TS / 100.0, TS / 100.0, 2.0 * RH / 100.0)); h.size = V(TS, TS, 2 * RH)
+    h.collision = True; h.hidden = True; P["Alien27.Block"] = h
+    f = unreal.RDPiece(); f.mesh = cube; f.adjust = unreal.Transform(V(0, 0, 50), unreal.Rotator(), V(0.06, 1.0, 1.0)); f.size = V(6, 100, 100); f.collision = False
+    f.material = force_material27(); P["Alien27.Force"] = f
+    # ---- the clusters: each mesh a piece (as the pack placed it: the part's transform is the whole of it)
+    J = json.load(open(os.path.join(SA, "alien27.json"), encoding="utf-8"))["clusters"]
+    clusters = []
+    for c in J:
+        # (a tree blocks its trunk's tiles, not its crown's: a third of its reach)
+        hf = 0.33 if c["kind"] == "Trees" else 1.0
+        cl = unreal.RDAlienCluster27(); cl.kind = c["kind"]; cl.half = unreal.Vector2D(c["half"][0] * hf, c["half"][1] * hf); cl.blocks = bool(c["blocks"])
+        parts = []
+        for pt in c["parts"]:
+            m = unreal.load_asset(pt["mesh"])
+            if not m: continue
+            pn = "Alien27.M#" + m.get_name() + ("" if c["blocks"] else "#nc")
+            if pn not in P:
+                q = unreal.RDPiece(); q.mesh = m; q.adjust = unreal.Transform(); bb = m.get_bounding_box()
+                q.size = V(bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z); q.collision = bool(c["blocks"])
+                if not c["blocks"]: q.cull_distance = 6000.0
+                P[pn] = q
+            ap = unreal.RDAlienPart27(); ap.piece = pn
+            ap.xf = unreal.Transform(V(*pt["t"]), unreal.Rotator(roll=pt["r"][0], pitch=pt["r"][1], yaw=pt["r"][2]), V(*pt["s"]))
+            parts.append(ap)
+        cl.parts = parts; clusters.append(cl)
+    # ---- the castle's furniture under the sky: the facility's own (909's Facility.*: crates, lockers, consoles), what hangs on a wall or
+    # stands only indoors left out
+    for k in cp.keys():
+        ks = str(k)
+        if ks.startswith("Facility.") and not any(x in ks for x in ("Wall", "Floor", "Ceil", "Door", "Column", "Grating", "Cell", "Torch", "Chandelier", "Banner", "Painting")):
+            q = unreal.RDPiece(); q.import_text(cp[k].export_text()); P["Alien." + ks[9:]] = q
+    # (what the facility has not: the office's own (Heaven's modern furniture: a research outpost's camp), the crystal the pack's ice crystal)
+    for k in cp.keys():
+        ks = str(k)
+        if ks.startswith("Office.") and ("Alien." + ks[7:]) not in P and not cp[k].hidden and not any(x in ks for x in ("Wall", "Floor", "Ceil", "Door", "Column", "Dais", "Carpet")):
+            q = unreal.RDPiece(); q.import_text(cp[k].export_text()); P["Alien." + ks[7:]] = q
+    # (the hall's pillars spike rocks of their height; the cells' doors the office's glass leaf on the castle's hinge)
+    for n, rk in (("Column", "SM_SpikeRockSharp01"), ("CornerColumn", "SM_SpikeRockSmooth02")):
+        if unreal.Name(n) in cp: P["Alien." + n] = piece(find_mesh(rk, "AlienPlanet"), mode="center", collision=True, height=float(cp[unreal.Name(n)].size.z))
+    if unreal.Name("Office.Dais") in cp:          # (the throne's dais a white platform, the outpost's)
+        q = unreal.RDPiece(); q.import_text(cp[unreal.Name("Office.Dais")].export_text()); P["Alien.Dais"] = q
+    if unreal.Name("Office.CellDoor") in cp:
+        q = unreal.RDPiece(); q.import_text(cp[unreal.Name("Office.CellDoor")].export_text()); P["Alien.CellDoor"] = q
+    for n in ("Plinth", "StatuePlinth", "Pedestal"):
+        if unreal.Name(n) in cp and ("Alien." + n) not in P and unreal.Name("Office.Pedestal") in cp:
+            q = unreal.RDPiece(); q.import_text(cp[unreal.Name("Office.Pedestal")].export_text()); P["Alien." + n] = q
+    if unreal.Name("Crystal") in cp:
+        ic = find_mesh("SM_IceCrystal02", "AlienPlanet"); P["Alien.Crystal"] = piece(ic, mode="center", collision=True, height=float(cp[unreal.Name("Crystal")].size.z))
+    for n in ("Torch", "Banner", "Painting", "Chain", "Chandelier", "Books", "Debris", "Spear", "SpearFlat", "Axe", "AxeFlat", "Sword", "SwordFlat", "Shield",
+              "Gibbet", "CageHanging", "CageLarge", "Shackles", "Carpet", "CarpetLong", "Bookshelf", "Bookshelf2", "ToolBoard", "Wall_Rough_Back",
+              "Candles", "CandleStand", "Tomb1", "Tomb2", "Tomb3", "Tomb4", "Bones", "BonePile", "BonePile2", "HayPile", "Firewood", "Pew"):
+        if unreal.Name(n) not in cp or ("Alien." + n) in P: continue
+        hd = unreal.RDPiece(); hd.mesh = cube; hd.adjust = unreal.Transform(V(0, 0, -100000), unreal.Rotator(), V(0.001, 0.001, 0.001)); hd.size = V(1, 1, 1); hd.collision = False; hd.hidden = True
+        P["Alien." + n] = hd
+    pieces = dict(g.get_editor_property("pieces"))
+    for k in [k for k in pieces if str(k).startswith("Alien.") or str(k).startswith("Alien27.")]: del pieces[k]
+    for k, p in P.items(): pieces[unreal.Name(k)] = p
+    g.set_editor_property("pieces", pieces)
+    cw = dict(g.get_editor_property("container_words21"))
+    for k in [k for k in cw if str(k).startswith("Alien.")]: del cw[k]
+    for k, v in list(cw.items()):
+        if str(k).startswith("Facility.") and ("Alien." + str(k)[9:]) in P: cw[unreal.Name("Alien." + str(k)[9:])] = v
+    g.set_editor_property("container_words21", cw)
+    g.set_editor_property("alien_clusters27", clusters)
+    g.set_editor_property("alien_rocks27", [unreal.Name(r) for r in rocks])
+    g.set_editor_property("open_themes27", [unreal.Name("Alien")])
+    tt = [str(t) for t in g.get_editor_property("tier_themes")]
+    while len(tt) < 5: tt.append("None")
+    tt[2] = tt[3] = tt[4] = "Alien"
+    g.set_editor_property("tier_themes", [unreal.Name(t) for t in tt])
+    g.modify()
+    les.save_current_level()
+    print("947 world", DST, "| pieces", len(P), "| clusters", len(clusters), "(blocking", sum(1 for c in clusters if c.blocks), ") parts", sum(len(c.parts) for c in clusters),
+          "| rocks", len(rocks), "| themes", tt)
+
+
+def force_material27():
+    """the force wall: an unlit, see-through, two-sided cyan sheet brighter at its edges (a fresnel), made once"""
+    path = "/Game/RandomDungeon/Fortress27/M_Alien27_Force"
+    if eal.does_asset_exist(path): return unreal.load_asset(path)
+    MEL = unreal.MaterialEditingLibrary
+    m = unreal.AssetToolsHelpers.get_asset_tools().create_asset("M_Alien27_Force", "/Game/RandomDungeon/Fortress27", unreal.Material, unreal.MaterialFactoryNew())
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
+    m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    m.set_editor_property("two_sided", True)
+    col = MEL.create_material_expression(m, unreal.MaterialExpressionConstant3Vector, -500, 0); col.set_editor_property("constant", unreal.LinearColor(0.25, 1.6, 2.4, 1))
+    fr = MEL.create_material_expression(m, unreal.MaterialExpressionFresnel, -500, 200)
+    mul = MEL.create_material_expression(m, unreal.MaterialExpressionMultiply, -250, 0)
+    MEL.connect_material_expressions(col, "", mul, "A"); MEL.connect_material_expressions(fr, "", mul, "B")
+    add = MEL.create_material_expression(m, unreal.MaterialExpressionAdd, -100, 0)
+    base = MEL.create_material_expression(m, unreal.MaterialExpressionConstant3Vector, -500, -150); base.set_editor_property("constant", unreal.LinearColor(0.05, 0.35, 0.55, 1))
+    MEL.connect_material_expressions(mul, "", add, "A"); MEL.connect_material_expressions(base, "", add, "B")
+    MEL.connect_material_property(add, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    op = MEL.create_material_expression(m, unreal.MaterialExpressionConstant, -250, 300); op.set_editor_property("r", 0.35)
+    MEL.connect_material_property(op, "", unreal.MaterialProperty.MP_OPACITY)
+    m.set_editor_property("used_with_instanced_static_meshes", True)
+    MEL.recompile_material(m); eal.save_loaded_asset(m, only_if_is_dirty=False)
+    return m
+
+
 arg = sys.argv[1] if len(sys.argv) > 1 else "monsters"
 if arg == "monsters": monsters()
 elif arg == "building": building()
-else: raise SystemExit("947: monsters | building")
+elif arg == "study27": study27()
+elif arg == "world": world()
+else: raise SystemExit("947: monsters | building | study27 | world")
 for _n in [n for n in list(globals()) if not n.startswith("__") and n not in ("unreal", "gc")]: del globals()[_n]
 gc.collect()

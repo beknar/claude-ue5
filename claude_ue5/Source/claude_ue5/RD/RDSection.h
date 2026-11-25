@@ -550,6 +550,23 @@ private:
 	FName PcName(FName Name) const;
 	/** Heaven's theme, or the fortress's Office (the list of 2026-11-22's phase 26): modern lamps, no fires, upright locker doors, the containers' words */
 	bool IsModernTheme26() const { return Theme == FName(TEXT("Heaven")) || Theme == FName(TEXT("Office")); }
+public:
+	// ---- the list of 2026-11-22's phase 27: an open theme (the fortress's alien tiers; RDAlien27.cpp)
+	bool IsOpenTheme27() const;
+	void AlienSolid27(FIntPoint T);
+	int32 AlienCluster27(FRandomStream& Ra, const FVector& At, bool bBlocking, int32 RI);
+	void AlienDress27(int32 RI);
+	void AlienCorridor27(int32 CI);
+	void AlienSeal27(const FVector& Border, const FVector& Out);
+	/** for the tests: "open=|ground=|blockers=|rocks=|clusters=|parts=|blocking=" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Alien27") FString GetAlienStats27() const;
+	/** for the tests: the blocking clusters' places */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Alien27") TArray<FVector> GetAlienBlocking27() const { return AlienBlocking27; }
+	/** for the tests: is the tile under this point blocked for the monsters' paths */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Alien27") bool IsTileBlocked27(FVector At) const;
+	int32 AlienGround27N = 0, AlienBlockers27N = 0, AlienRocks27N = 0, AlienClusters27N = 0, AlienParts27N = 0;
+	TArray<FVector> AlienBlocking27;
+private:
 	/** PcName's answers for the theme they were found for (a name formatted and looked up once per piece name, not per piece) */
 	mutable TMap<FName, FName> ThemeNames;
 	mutable FName ThemeNamesOf;

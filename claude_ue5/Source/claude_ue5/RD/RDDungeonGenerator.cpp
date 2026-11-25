@@ -1882,6 +1882,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 	if (bTown || bTownLink) TickPerf16(UGameplayStatics::GetPlayerPawn(this, 0));
 	TickCover16(Dt);
 	if (bTower24) TickTower24(Dt);
+	TickAlienSky27(Dt);          // (the list of 2026-11-22's phase 27: the sky over the fortress's open tiers)
 	// (mistward: the frame rate, smoothed over about a second of frames, from the real time between frames)
 	if (bShowFps)
 	{

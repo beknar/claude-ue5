@@ -153,3 +153,12 @@ The city is a wilderness town on `brokenspire` with the modern plan (`FRDWildTow
   - **A rule kept to Heaven by name misses the Office**: the desk lamp's "never on the floor" asked for Heaven; it asks `IsModernTheme26` now.
   - **Count what is left, not only what is there**: the test counted office pieces and passed with cells, seals, books and chains of the castle standing. It lists every visible mesh of the sets against the castle's pieces' (traps' and weapons' aside) and wants none.
 
+## The list of 2026-11-22: the open alien tiers (phase 27: `947 study27,world`, `RD/RDAlien27.cpp`, `868 fortress27`)
+
+- **A pack's PCG graphs need what they sample**: the Alien Planet's read a landscape and splines; the game's sets have neither. Its baked clusters (the `LI_*` level instances the graphs copy) are read once and laid by the game.
+- **The editor's actor list leaves out instanced placement partition actors**: the plant clusters' holders. `get_all_level_actors` found no parts in 29 of the maps; `GameplayStatics.get_all_actors_of_class(world, Actor)` found them all.
+- **A tree's footprint is its trunk, not its crown**: measured by its mesh it covered 7 to 10 m and fitted in no clearing.
+- **A pack's numbered materials are not variants of one look**: `MI_Ground02` is snow, and its tiles drew white squares on the brown ground.
+- **An open theme leaves the theme's furniture standing in the sun**: every castle piece needs an open-air piece, or one left out. Count what is left after each change.
+- **A walk test pushes her every frame**: an input given once per 0.2 s moved her 0.3 m in 4 s.
+
