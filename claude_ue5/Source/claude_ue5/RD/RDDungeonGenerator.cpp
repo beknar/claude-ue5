@@ -1913,7 +1913,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 	if (bVillageFolk15) TickVillageFolk15();          // (the list of 2026-11-20: the villagers far off left still)
 	TickDungeonKeys();
 	if (bCave16) TickCaveContract16();          // (the list of 2026-11-22's caves: a contract's beast fled into this cave)
-	if (bTown) { TickStreetLamps16(Dt); TickSignals19(Dt); TickLifts20(Dt); }          // (the list of 2026-11-22: Heaven's street lamps at night)
+	if (bTown) { TickStreetLamps16(Dt); TickSignals19(Dt); TickLifts20(Dt); TickHeaven22(Dt); }          // (the list of 2026-11-22: Heaven's street lamps at night)
 	// input: F interacts, M toggles the map
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
 	{

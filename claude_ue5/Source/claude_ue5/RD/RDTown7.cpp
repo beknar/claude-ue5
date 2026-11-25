@@ -210,10 +210,12 @@ void ARDSection::TownFoodOn(FRandomStream& Rf, const FVector& Top, float Yaw)
 		const int32 Kd = Rf.RandRange(0, 3);
 		const FVector Off = Rt.RotateVector(FVector(Rf.FRandRange(-14.f, 14.f), (K - (Count - 1) * 0.5f) * 30.f + Rf.FRandRange(-4.f, 4.f), 0.f));
 		const float Ty = Rf.FRandRange(0.f, 360.f);
-		const FRDPiece* P = Generator->Piece(Kinds[Kd]);
+		// (the list of 2026-11-22's phase 22: in Heaven its modern goods: the themed piece, the twin item)
+		const FRDPiece* P = Generator->Piece(PcName(Kinds[Kd]));
 		if (!P || !P->Mesh) continue;
-		F.Items.Add(Gives[Kd]);
-		if (Kd == 3) F.Items.Add(Gives[Kd]);
+		const FName Gv = Theme == TEXT("Heaven") ? Generator->HeavenGood22(Gives[Kd], true) : FName(Gives[Kd]);
+		F.Items.Add(Gv);
+		if (Kd == 3) F.Items.Add(Gv);
 		if (!F.bTaken) F.Comps.Add(AddMesh(RootComponent, P->Mesh, P->Adjust * FTransform(FRotator(0, Ty, 0), Top + Off - GetActorLocation()), false));
 	}
 	if (F.Items.Num() > 0) TownFoods.Add(F);

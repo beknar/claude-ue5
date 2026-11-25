@@ -5634,6 +5634,343 @@ def step_heaven16_tower():
 
 STEPS.update({"heaven21_shops": step_heaven21_shops, "heaven21_services": step_heaven21_services, "heaven21_containers": step_heaven21_containers, "heaven20_floors": step_heaven20_floors, "heaven20_stairs": step_heaven20_stairs, "heaven20_lift": step_heaven20_lift, "heaven20_restart": step_heaven20_restart, "heaven20_fps": step_heaven20_fps, "heaven19_survey": step_heaven19_survey, "heaven19_medieval": step_heaven19_medieval, "heaven19_markings": step_heaven19_markings, "heaven19_signals": step_heaven19_signals, "heaven19_signs": step_heaven19_signs, "heaven19_parking": step_heaven19_parking, "heaven19_fps": step_heaven19_fps, "heaven19_restart": step_heaven19_restart, "heaven16_lamps": step_heaven16_lamps, "heaven16_signs": step_heaven16_signs, "heaven16_map": step_heaven16_map, "heaven16_sleep": step_heaven16_sleep, "heaven16_tower": step_heaven16_tower})
 
+# ------------------------------------------------------------------------------------------------ the list of 2026-11-22's phase 22
+def life22():
+    L = [str(l).split("|") for l in G["gen"].get_heaven22_lines()]
+    d = {"peds": []}
+    for q in L:
+        if q[0] == "life22":
+            k = ["peds", "zebra", "road", "tubes", "neon_lit", "boards", "board_glow", "city", "city_vol", "crowd_vol", "horns", "passbys", "night", "in_heaven", "hum"]
+            for i, n in enumerate(k):
+                v = q[i + 1]
+                d[n] = v if n == "city" else (float(v) if "." in v else int(v))
+        elif q[0] == "ped": d["peds_at"] = d.get("peds_at", []) + [{"at": V(float(q[1]), float(q[2]), float(q[3])), "pave": int(q[4]), "walking": q[5] == "1", "walks": int(q[6]), "name": q[7]}]
+    return d
+
+
+def fronts22():
+    out = {"front": [], "board": []}
+    for l in section().get_fronts22():
+        q = str(l).split("|")
+        if q[0] == "front": out["front"].append({"bld": int(q[1]), "kind": int(q[2]), "tubes": int(q[3]), "col": (float(q[4]), float(q[5]), float(q[6])), "at": V(float(q[7]), float(q[8]), float(q[9])), "yaw": float(q[10]) if len(q) > 10 else 0.0, "face_cm": float(q[11]) if len(q) > 11 else None})
+        elif q[0] == "board": out["board"].append({"bld": int(q[1]), "at": V(float(q[2]), float(q[3]), float(q[4])), "yaw": float(q[5]), "face": int(q[6])})
+    return out
+
+
+def moving_cars22(S):
+    out = []
+    for c in S.get_components_by_tag(unreal.SceneComponent, "HeavenCar"):
+        if isinstance(c, unreal.StaticMeshComponent): continue
+        out.append(c.get_world_location())
+    return out
+
+
+def step_heaven22_goods():
+    """the list of 2026-11-22: "food, items and other things bought in the city of heaven should be modern in looks": every everyday
+    item's modern twin on the map (its picture, no weight in any draw, the draws refuse it); Heaven's stores sell the twins in their
+    likes' place (the market's list, a twin bought); the tables' food in Heaven is modern and gives the twins"""
+    g = G["gen"]; res = {}
+    tw = {str(k): str(v) for k, v in g.get_editor_property("heaven_goods22").items()}
+    items = {str(i.name): i for i in g.get_editor_property("items")}
+    ua = {str(k) for k in g.get_editor_property("ui_art").keys()}
+    res["twins"] = len(tw)
+    res["twins_missing"] = [v for v in tw.values() if v not in items]
+    res["twins_weighted"] = [v for v in tw.values() if v in items and items[v].weight > 0]
+    res["twins_no_picture"] = [v for v in tw.values() if v in items and str(items[v].icon) not in ua]
+    res["twins_kind_differs"] = [v for k, v in tw.items() if v in items and k in items and str(items[v].kind) != str(items[k].kind)]
+    res["twins_drawn"] = [v for v in tw.values() if g.cave_may_draw16(v)]
+    # (every recipe part that asks for an item with a twin takes the twin too)
+    lone = []
+    for r in g.get_editor_property("recipes"):
+        for p_ in r.parts:
+            names = [str(a_) for a_ in p_.any_of]
+            lone += [f"{r.item}:{n}" for n in names if n in tw and tw[n] not in names]
+    res["recipe_parts_without_twin"] = lone[:6]
+    S = yield from heaven16_in(); yield from wait(1.5)
+    quiet(True); g0_ = gold(); have0 = {v: cb().get_item_count(v) for v in tw.values()}
+    stock = [str(x) for x in g.get_town_stock22()]
+    res["stock"] = len(stock)
+    res["stock_twins"] = sum(1 for x in stock if x in tw.values())
+    res["stock_likes_with_twins"] = [x for x in stock if x in tw]
+    # (the market: its list and a twin bought)
+    sh = shops21(); g.add_gold(5000, "the test")
+    sale = None
+    x = next((y for y in sh if y["kind"] == -1), None)
+    try:
+        if x:
+            put(x["customer"], z=0.0); stop21(); yield from wait(0.4)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=math.degrees(math.atan2(x["clerk"].y - x["customer"].y, x["clerk"].x - x["customer"].x))))
+            g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(0.3)
+            buys = [pp for pp in panel() if pp[0] == "buy"]
+            res["market_buy_lines"] = len(buys); res["market_twins"] = sum(1 for pp in buys if pp[1] in tw.values())
+            res["market_shows"] = [pp[1] for pp in buys][:12]
+            i = next((j for j, pp in enumerate(panel()) if pp[0] == "buy" and pp[3] == "1" and pp[1] in tw.values()), -1)
+            if i >= 0:
+                nm = panel()[i][1]; g0 = gold(); n0 = cb().get_item_count(nm)
+                ok_ = g.activate_town_entry(i)
+                sale = {"item": nm, "ok": ok_, "gold": gold() - g0, "count": cb().get_item_count(nm) - n0}
+            g.close_town_panel(); yield from rwait(0.3)
+        # (the tables' food: the modern pieces in Heaven, and one taken gives its twins)
+        food = {}
+        for c in S.get_components_by_class(unreal.StaticMeshComponent):
+            m = c.get_editor_property("static_mesh")
+            if not m: continue
+            n = m.get_name()
+            if n.startswith("SM_HV_Food") or n in ("SM_Bread", "SM_BreadRound", "SM_Cheese", "SM_Apples") or "Bread" in n or "Cheese" in n:
+                food.setdefault(n, []).append(c.get_world_location())
+        res["food_meshes"] = {k: len(v) for k, v in food.items()}
+        took = None
+        spots = [p for k, v in food.items() if k.startswith("SM_HV_Food") for p in v]
+        for p in spots[:8]:
+            put(V(p.x + 70, p.y, 0), z=0.0); stop21(); yield from wait(0.4)
+            d_ = str(g.describe_nearest(G["pawn"].get_actor_location()))
+            if "food" not in d_.lower():
+                put(V(p.x - 70, p.y, 0), z=0.0); stop21(); yield from wait(0.4); d_ = str(g.describe_nearest(G["pawn"].get_actor_location()))
+            if "food" not in d_.lower(): continue
+            before = {v: cb().get_item_count(v) for v in tw.values()}
+            r_ = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.3)
+            got = {v: cb().get_item_count(v) - before[v] for v in tw.values() if cb().get_item_count(v) != before[v]}
+            took = {"said": d_, "f": r_, "got": got}
+            break
+        res["table_food"] = took
+        # (out of Heaven's walls, 60 m from its gate within its 2 km, the store's list has no twin: the cleared camp's trader there)
+        gate = place("gate")
+        if gate:
+            sq = place("square") or gate
+            dx, dy = gate.x - sq.x, gate.y - sq.y; n_ = math.hypot(dx, dy) or 1.0
+            put(V(gate.x + dx / n_ * 6000, gate.y + dy / n_ * 6000, 0)); stop21(); yield from wait(1.0)
+            res["outside_walls"] = {"in_walls": g.is_in_town_walls(G["pawn"].get_actor_location()), "stock_twins": sum(1 for x in g.get_town_stock22() if str(x) in tw.values())}
+    finally:
+        if g.is_town_panel_open(): g.close_town_panel()
+        for v, n0 in have0.items():
+            d_ = cb().get_item_count(v) - n0
+            if d_ > 0: cb().remove_item(v, d_)
+        g.add_gold(g0_ - gold(), "the test")
+        quiet(False)
+    res["sale"] = sale
+    ok = (res["twins"] >= 38 and not res["twins_missing"] and not res["twins_weighted"] and not res["twins_no_picture"] and not res["twins_kind_differs"]
+          and not res["twins_drawn"] and not res["recipe_parts_without_twin"] and res.get("outside_walls", {}).get("in_walls") is False
+          and res["outside_walls"]["stock_twins"] == 0 and res["stock_twins"] >= 10 and not res["stock_likes_with_twins"] and res.get("market_twins", 0) >= 10
+          and sale and sale["ok"] and sale["count"] == 1 and sale["gold"] < 0
+          and not any(k in res["food_meshes"] for k in ("SM_Bread", "SM_BreadRound", "SM_Cheese")) and took and took["f"] == "food" and took["got"])
+    step_result("heaven22_goods", bool(ok), **res)
+
+
+def step_heaven22_peds():
+    """the list of 2026-11-22: "typical city ambience: people on the pavements": by day 15 or more pedestrians walk round her; over 40 s
+    every reading puts each on a pavement, a zebra or the open ground beside them, never along the asphalt (2 % at most, between two
+    readings); they walk (their walks rise), some cross at a zebra; no car comes within 1.5 m of one; at night few; the frame rate
+    with them and without (rd.Peds22 0) in the same place; a picture of a street with its people"""
+    g = G["gen"]; res = {}; quiet(True)
+    S = yield from heaven16_in(); h_was = g.get_town_hour()
+    def cvar(v): unreal.SystemLibrary.execute_console_command(G["w"], f"rd.Peds22 {v}")
+    try:
+        g.set_town_hour(12.0); cvar(1)
+        yield from wait(8.0)
+        reads = 0; on_road = 0; zebra_seen = set(); walks0 = {}; near_car = 1e9; counts = []; crossed = set(); zebra_since = {}; held = 0
+        t0 = time.time()
+        while time.time() - t0 < 40.0:
+            d = life22(); P = d.get("peds_at", []); counts.append(d.get("peds", 0))
+            cars = moving_cars22(S)
+            for p in P:
+                reads += 1
+                if p["pave"] == 0: on_road += 1
+                if p["pave"] == 2:
+                    zebra_seen.add(p["name"])
+                    z0 = zebra_since.setdefault(p["name"], (time.time(), p["at"]))
+                    if time.time() - z0[0] > 15 and dist2(z0[1], p["at"]) < 50: held += 1          # (stood on a zebra 15 s)
+                elif p["name"] in zebra_since:
+                    crossed.add(p["name"]); zebra_since.pop(p["name"], None)
+                walks0.setdefault(p["name"], p["walks"])
+                for c in cars: near_car = min(near_car, dist2(p["at"], c))
+            yield from rwait(0.5)
+        d = life22(); P = d.get("peds_at", [])
+        res["peds_min_max"] = [min(counts) if counts else 0, max(counts) if counts else 0]
+        res["readings"] = reads; res["on_asphalt"] = on_road; res["share_on_asphalt"] = round(on_road / max(reads, 1), 4)
+        res["on_a_zebra"] = len(zebra_seen); res["crossed_at_zebra"] = len(crossed); res["stood_on_a_zebra_15s"] = held
+        res["walked"] = sum(1 for p in P if p["name"] in walks0 and p["walks"] > walks0[p["name"]])
+        res["nearest_car_cm"] = round(near_car) if near_car < 1e8 else None
+        res["pave"] = [str(l) for l in S.get_pave22_lines()]
+        # (a picture: down a street from a pavement, people on it)
+        if P:
+            # (from where another of them walks (a pavement), 5 to 25 m off, she hidden, turned to it)
+            p = P[0]["at"]; st_ = next((q["at"] for q in P[1:] if 500 < dist2(q["at"], p) < 2500), None)
+            look_at19(st_ or V(p.x + 700, p.y, 0), p, -4.0); stop21(); yield from wait(1.5)
+            pth = yield from shot_file19("heaven22_peds"); res["shot"] = bool(pth)
+            G["pawn"].set_actor_hidden_in_game(False)
+        # (the frame rate with them and without, in one place)
+        def fps(sec=6.0):
+            xs = []; t1 = time.time()
+            while time.time() - t1 < sec: yield from rwait(0.25); xs.append(g.get_fps())
+            return round(sum(xs) / max(len(xs), 1), 1)
+        # (with, without, with again: the machine's own drift read between them)
+        put(V(p.x, p.y, 0), z=0.0); stop21(); G["pawn"].set_actor_hidden_in_game(False); yield from wait(2.0)
+        f1 = yield from fps()
+        cvar(0); yield from wait(2.5); res["peds_off"] = life22().get("peds"); res["fps_without"] = yield from fps()
+        cvar(1); yield from wait(6.0); f2 = yield from fps()
+        res["fps_with_before_after"] = [f1, f2]; res["fps_with"] = round((f1 + f2) / 2, 1)
+        # (at night: few)
+        g.set_town_hour(23.5); yield from wait(12.0)
+        res["peds_night"] = life22().get("peds"); res["night_max"] = g.get_editor_property("peds22_night")
+    finally:
+        cvar(1); g.set_town_hour(h_was); quiet(False)
+    ok = (res["peds_min_max"][1] >= 15 and res["share_on_asphalt"] <= 0.02 and res["crossed_at_zebra"] >= 1 and res["stood_on_a_zebra_15s"] == 0 and res["walked"] >= 5
+          and (res["nearest_car_cm"] is None or res["nearest_car_cm"] >= 150) and res["peds_off"] == 0
+          and res["peds_night"] <= res["night_max"] and res["fps_with"] >= 0.8 * res["fps_without"])
+    step_result("heaven22_peds", bool(ok), **res)
+
+
+def step_heaven22_neon():
+    """the list of 2026-11-22: "billboards, neon at night": a neon frame over every shop's, the market's, the hotel's, the clinic's and
+    the gear shop's door; billboards on the roofs; dim by day and lit at night (the game's numbers, then the light they make: a shop's
+    front and a billboard read from the street at midnight with them on and off (rd.Neon22 0): each one's own box on the screen, on
+    against off); pictures by day and at night"""
+    g = G["gen"]; res = {}; quiet(True)
+    S = yield from heaven16_in(); h_was = g.get_town_hour()
+    fr = fronts22(); res["fronts"] = len(fr["front"]); res["boards"] = len(fr["board"])
+    # (the tubes' component itself: drawn, hidden, its material, and its first instances against the nearest front's middle)
+    isms_ = list(S.get_components_by_tag(unreal.InstancedStaticMeshComponent, "HeavenNeon22"))
+    if isms_:
+        c = isms_[0]; pts = []
+        for i_ in range(min(c.get_instance_count(), 8)):
+            t_ = c.get_instance_transform(i_, True); t_ = t_[-1] if isinstance(t_, tuple) else t_; pts.append(t_.translation)
+        near = [round(min(dist2(p_, f["at"]) for f in fr["front"])) for p_ in pts] if fr["front"] else []
+        res["tubes_component"] = {"n": len(isms_), "instances": c.get_instance_count(), "visible": c.is_visible(), "hidden_in_game": c.get_editor_property("hidden_in_game"),
+                                  "material": c.get_material(0).get_name() if c.get_material(0) else None, "mesh": c.get_editor_property("static_mesh").get_name() if c.get_editor_property("static_mesh") else None,
+                                  "first_z": [round(p_.z) for p_ in pts[:4]], "front_z": [round(f["at"].z) for f in fr["front"][:4]], "from_nearest_front_cm": near[:8],
+                                  "custom_floats": c.get_editor_property("num_custom_data_floats") if hasattr(c, "get_editor_property") else None}
+    else: res["tubes_component"] = None
+    res["front_kinds"] = sorted({f["kind"] for f in fr["front"]}); res["neon_out_from_wall_line_cm"] = sorted({f["face_cm"] for f in fr["front"]})
+    def cvar(v): unreal.SystemLibrary.execute_console_command(G["w"], f"rd.Neon22 {v}")
+    def view(stand, target, name, corners):
+        """her hidden at stand, the camera turned to the target; the brightness of the picture inside the box its corners make on the
+        screen (the thing itself, a little margin)"""
+        cam_h = 170.0
+        pitch = math.degrees(math.atan2(target.z - cam_h, max(dist2(stand, target), 1.0)))
+        look_at19(stand, target, pitch); stop21(); yield from wait(2.0)
+        vs = unreal.WidgetLayoutLibrary.get_viewport_size(G["w"]); xs = []; ys = []
+        for c_ in corners:
+            ok_ = unreal.GameplayStatics.project_world_to_screen(G["pc"], c_, False)
+            ok2, sp_ = (ok_[0], ok_[1]) if isinstance(ok_, tuple) else (ok_ is not None, ok_)
+            if ok2 and sp_ is not None: xs.append(sp_.x / max(vs.x, 1.0)); ys.append(sp_.y / max(vs.y, 1.0))
+        if len(xs) < 2: return None
+        box = (max(min(xs) - 0.005, 0.0), max(min(ys) - 0.008, 0.0), min(max(xs) + 0.005, 1.0), min(max(ys) + 0.008, 1.0))
+        return (yield from shot_luma(name, box))
+    def frame_corners(f):
+        a = math.radians(f["yaw"] + 90.0); ux, uy = math.cos(a), math.sin(a)
+        return [V(f["at"].x + ux * s_ * 132, f["at"].y + uy * s_ * 132, f["at"].z + h_) for s_ in (-1, 1) for h_ in (-27, 27)]
+    def board_corners(b, face):
+        a = math.radians(b["yaw"] + 90.0); ux, uy = math.cos(a), math.sin(a)
+        return [V(face.x + ux * s_ * 320, face.y + uy * s_ * 320, face.z + h_) for s_ in (-1, 1) for h_ in (-160, 160)]
+    try:
+        g.set_town_hour(12.0); yield from wait(2.0)
+        d = life22(); res["day"] = {"tubes": d.get("tubes"), "lit": d.get("neon_lit"), "boards": d.get("boards"), "glow": d.get("board_glow")}
+        f0 = fr["front"][0] if fr["front"] else None
+        b0 = fr["board"][0] if fr["board"] else None
+        sp = None
+        def front_spot(f):
+            # (out from the neon along its front's way (the building's +X), on open ground, 9 m and nearer)
+            ox, oy = math.cos(math.radians(f["yaw"])), math.sin(math.radians(f["yaw"]))
+            for dd in (900, 700, 1100, 500):
+                p = V(f["at"].x + ox * dd, f["at"].y + oy * dd, 0)
+                if S.town_building_at(p) < 0: return p
+            return None
+        if f0:
+            sp = front_spot(f0)
+            if sp: res["day_front"] = yield from view(sp, f0["at"], "heaven22_front_day", frame_corners(f0))
+        g.set_town_hour(23.5); yield from wait(2.0)
+        d = life22(); res["night"] = {"tubes": d.get("tubes"), "lit": d.get("neon_lit"), "boards": d.get("boards"), "glow": d.get("board_glow"), "hum": d.get("hum")}
+        lum = {}
+        for st, v in (("on", 1), ("off", 0)):
+            cvar(v); yield from wait(1.0)
+            if f0 and sp:
+                lum[f"front_{st}"] = yield from view(sp, f0["at"], f"heaven22_front_{st}", frame_corners(f0))
+            if b0:
+                yw = b0["yaw"]; p = V(b0["at"].x + math.cos(math.radians(yw)) * 2600, b0["at"].y + math.sin(math.radians(yw)) * 2600, 0)
+                face = V(b0["at"].x + math.cos(math.radians(yw)) * 2, b0["at"].y + math.sin(math.radians(yw)) * 2, b0["at"].z + 425)
+                lum[f"board_{st}"] = yield from view(p, face, f"heaven22_board_{st}", board_corners(b0, face))
+        res["luma"] = lum
+    finally:
+        cvar(1); G["pawn"].set_actor_hidden_in_game(False); g.set_town_hour(h_was); quiet(False)
+    lu = res.get("luma", {})
+    ratio = lambda a, b: round(lu[a] / max(lu[b], 1e-3), 3) if lu.get(a) and lu.get(b) else None
+    res["front_on_over_off"] = ratio("front_on", "front_off"); res["board_on_over_off"] = ratio("board_on", "board_off")
+    dy, nt = res.get("day", {}), res.get("night", {})
+    ok = (res["fronts"] >= 10 and res["boards"] >= 3 and dy.get("tubes") == 4 * res["fronts"] and dy.get("boards") == res["boards"]
+          and dy.get("lit", 1) < 0.5 and nt.get("lit") == 1.0 and nt.get("glow", 0) > dy.get("glow", 9)
+          and res["front_on_over_off"] and res["front_on_over_off"] >= 1.1 and res["board_on_over_off"] and res["board_on_over_off"] >= 1.1)
+    step_result("heaven22_neon", bool(ok), **res)
+
+
+def step_heaven22_sound():
+    """the list of 2026-11-22: "typical city ambience: the city's sound": in Heaven its bed by day (Heaven.City) and by night
+    (Heaven.CityNight), the crowd near the square louder than 60 m off, horns from the streets (counted over 30 s with them made
+    frequent); none of it outside the town; measured in the output: 4 s recorded in a street with rd.CitySound22 on and off, every
+    other sound set silent"""
+    g = G["gen"]; res = {}; quiet(True)
+    S = yield from heaven16_in(); h_was = g.get_town_hour()
+    lms = unreal.find_object(None, "/Script/UnrealEd.Default__LevelEditorMiscSettings"); bg0 = lms.get_editor_property("bAllowBackgroundAudio")
+    lms.set_editor_property("bAllowBackgroundAudio", True); unreal.RDDungeonGenerator.set_unfocused_volume(1.0)
+    mv0 = g.get_editor_property("music_volume"); he0 = g.get_editor_property("horn_every22")
+    out = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "BSCity", TAG); os.makedirs(out, exist_ok=True)
+    def cvar(v): unreal.SystemLibrary.execute_console_command(G["w"], f"rd.CitySound22 {v}")
+    vols = {str(k_): v_.volume for k_, v_ in g.get_editor_property("sounds").items()}
+    def only_city(on):
+        snd = g.get_editor_property("sounds")
+        for k_ in list(snd.keys()):
+            st_ = snd[k_]; st_.volume = vols[str(k_)] if (not on or str(k_).startswith("Heaven.")) else 0.0; snd[k_] = st_
+        g.set_editor_property("sounds", snd)
+    def rec(name):
+        g.start_recording_output(4.5); yield from rwait(4.0); g.stop_recording_output(out, name); yield from rwait(0.8)
+        p = os.path.join(out, name + ".wav"); t0 = time.time()
+        while time.time() - t0 < 5:
+            try:
+                with open(p, "rb"): break
+            except OSError: yield
+        import wave, array
+        w_ = wave.open(p, "rb"); data = array.array("h", w_.readframes(w_.getnframes())); w_.close()
+        rms = math.sqrt(sum(float(v) * v for v in data) / max(len(data), 1)) / 32768.0
+        return round(20 * math.log10(max(rms, 1e-6)), 1)
+    try:
+        g.set_editor_property("music_volume", 0.0)
+        g.set_town_hour(12.0)
+        sqp = place("square")
+        if sqp: put(V(sqp.x, sqp.y, 0), z=0.0); stop21()
+        yield from wait(6.0)
+        d = life22(); res["day_square"] = {"city": d.get("city"), "vol": d.get("city_vol"), "crowd": d.get("crowd_vol"), "in": d.get("in_heaven")}
+        if sqp:
+            put(V(sqp.x + 6500, sqp.y, 0), z=0.0); stop21(); yield from wait(4.0)
+            d = life22(); res["day_far"] = {"vol": d.get("city_vol"), "crowd": d.get("crowd_vol")}
+            put(V(sqp.x, sqp.y, 0), z=0.0); stop21(); yield from wait(1.0)
+        g.set_editor_property("horn_every22", unreal.Vector2D(2.0, 4.0))
+        h0 = life22().get("horns", 0); yield from wait(30.0); res["horns_30s"] = life22().get("horns", 0) - h0
+        g.set_editor_property("horn_every22", he0)
+        only_city(True); yield from wait(1.0)
+        res["db_on"] = yield from rec("city_on")
+        cvar(0); yield from wait(3.0); res["db_off"] = yield from rec("city_off"); cvar(1); only_city(False); yield from wait(3.0)
+        # (out of the walls, 60 m past the gate: the city's sound fades)
+        gate = place("gate")
+        if gate and sqp:
+            dx, dy = gate.x - sqp.x, gate.y - sqp.y; n_ = math.hypot(dx, dy) or 1.0
+            put(V(gate.x + dx / n_ * 6000, gate.y + dy / n_ * 6000, 0)); stop21(); yield from wait(5.0)
+            d = life22(); res["outside"] = {"vol": d.get("city_vol"), "crowd": d.get("crowd_vol"), "in": g.is_in_town_walls(G["pawn"].get_actor_location()), "peds": d.get("peds")}
+            put(V(sqp.x, sqp.y, 0), z=0.0); stop21(); yield from wait(3.0)
+        g.set_town_hour(23.5); yield from wait(5.0)
+        d = life22(); res["night"] = {"city": d.get("city"), "vol": d.get("city_vol"), "crowd": d.get("crowd_vol")}
+    finally:
+        only_city(False); cvar(1); g.set_editor_property("horn_every22", he0); g.set_editor_property("music_volume", mv0); lms.set_editor_property("bAllowBackgroundAudio", bg0)
+        g.set_town_hour(h_was); quiet(False)
+    ds, df, nt = res.get("day_square", {}), res.get("day_far", {}), res.get("night", {})
+    res["db_rise"] = round(res["db_on"] - res["db_off"], 1) if res.get("db_on") is not None and res.get("db_off") is not None else None
+    ok = (ds.get("city") == "Heaven.City" and ds.get("vol", 0) > 0 and ds.get("crowd", 0) > 0 and df and df.get("crowd", 1) < ds.get("crowd", 0)
+          and res["horns_30s"] >= 3 and nt.get("city") == "Heaven.CityNight" and nt.get("crowd", 1) == 0
+          and res.get("outside", {}).get("in") is False and res["outside"]["vol"] == 0 and res["outside"]["crowd"] == 0
+          and res["db_rise"] is not None and res["db_rise"] >= 3.0)
+    step_result("heaven22_sound", bool(ok), **res)
+
+
+STEPS.update({"heaven22_goods": step_heaven22_goods, "heaven22_peds": step_heaven22_peds, "heaven22_neon": step_heaven22_neon, "heaven22_sound": step_heaven22_sound})
+
 
 def step_sleep10():
     """"if an NPC is supposed to be sleeping at night, have them sleep in their beds with a new animation or clip in blender" and "there

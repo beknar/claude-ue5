@@ -2293,6 +2293,55 @@ public:
 	bool HotelRent21();
 	/** the open panel's title (tests) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Heaven21") FString GetTownTitle21() const { return TownTitle; }
+	// ---- the list of 2026-11-22's twenty-second phase: Heaven's goods and life (RDHeaven22.cpp; 946 goods, 946 life)
+	/** an everyday item's modern twin (946 goods, every map: "Bread" -> "Sandwich"): Heaven's stores and tables give the twin; a twin is
+	 *  in no draw and no other store */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven22") TMap<FName, FName> HeavenGoods22;
+	/** the pedestrians on Heaven's pavements round her: by day, at night, how far from her they walk */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven22") int32 Peds22Day = 30;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven22") int32 Peds22Night = 8;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven22") float Peds22Reach = 9000.f;
+	/** the billboards' faces 946 life made (Heaven.BillboardFace22_<0..n-1>) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven22") int32 BillboardFaces22 = 0;
+	/** the billboards' glow by day and at night; the neon's light by day (at night 1) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven22") FVector2D BoardGlow22 = FVector2D(0.9f, 3.0f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven22") float NeonDay22 = 0.1f;
+	/** the city's sound: the bed's volume, the crowd's near the square (full within the first, none past the second, cm) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven22") FVector2D CrowdReach22 = FVector2D(2500.f, 9000.f);
+	/** seconds between horns (a random time in this range) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven22") FVector2D HornEvery22 = FVector2D(10.f, 35.f);
+	/** the twin while Heaven stands round her (bHeaven: the caller knows it is Heaven's, its section being built) */
+	FName HeavenGood22(FName Like, bool bHeaven = false) const;
+	bool IsHeavenTwin22(FName Item) const;
+	mutable TSet<FName> HeavenTwins22;
+	mutable int32 HeavenTwinsN22 = -1;
+	void TickHeaven22(float Dt);
+	void TickPeds22(const FVector& Her, class ARDSection* S, bool bNight, bool bSpawn);
+	/** the walkers taken away and the city's sounds faded (another town loaded, Heaven left) */
+	void StopHeaven22();
+	void TickCitySound22(float Dt, const FVector& Her, class ARDSection* S, bool bIn, bool bNight);
+	bool NextPavePath22(class ARDTownsfolk* F, TArray<FVector>& Out) const;
+	/** for the tests: "life22|<peds>|<on a zebra>|<on the asphalt>|<neon tubes>|<neon lit 0..1>|<boards>|<boards' glow>|<city set>|<city
+	 *  volume>|<crowd volume>|<horns>|<pass-bys>|<night>|<in Heaven>|<neon hum>", "ped|<x>|<y>|<z>|<pave kind>|<walking>|<walks>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven22") TArray<FString> GetHeaven22Lines() const;
+	/** what the store here sells (tests: Heaven's twins) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven22") TArray<FString> GetTownStock22() const;
+	/** tests: every pedestrian taken away (they come again on the next look) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heaven22") int32 ClearPeds22();
+	float Heaven22Clock = 0.f, PedsClock22 = 0.f, HornAt22 = -1.f, PassByAt22 = 0.f, NeonHumLook22 = 0.f;
+	int32 Neon22Lit = -1, Horns22 = 0, PassBys22 = 0, PedsMade22 = 0;
+	float BoardGlowNow22 = -1.f, NeonLitNow22 = -1.f;
+	TWeakObjectPtr<class ARDSection> Heaven22Of;
+	TArray<TWeakObjectPtr<class ARDTownsfolk>> Peds22;
+	TArray<TWeakObjectPtr<class UStaticMeshComponent>> Boards22;
+	UPROPERTY(Transient) TObjectPtr<class UAudioComponent> CityAudio22;
+	UPROPERTY(Transient) TObjectPtr<class UAudioComponent> CrowdAudio22;
+	UPROPERTY(Transient) TObjectPtr<class UAudioComponent> NeonAudio22;
+	FName CityKey22, CrowdKey22;
+	int32 BoardsN22 = -1;
+	float CityVol22 = 0.f, CrowdVol22 = 0.f;
+	bool bNeonHum22 = false;
+	TMap<int32, float> CarPassed22;
 	/** a lift platform's speed (cm a second) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven20") float LiftSpeed20 = 220.f;
 	void TickLifts20(float Dt);

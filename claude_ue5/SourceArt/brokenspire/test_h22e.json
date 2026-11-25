@@ -1,0 +1,204 @@
+{
+ "tag": "h22e",
+ "plan": [
+  "heaven22_goods",
+  "heaven22_neon",
+  "heaven22_sound",
+  "heaven22_peds"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "heaven22_goods",
+   "ok": true,
+   "twins": 40,
+   "twins_missing": [],
+   "twins_weighted": [],
+   "twins_no_picture": [],
+   "twins_kind_differs": [],
+   "twins_drawn": [],
+   "recipe_parts_without_twin": [],
+   "stock": 27,
+   "stock_twins": 15,
+   "stock_likes_with_twins": [],
+   "market_buy_lines": 27,
+   "market_twins": 15,
+   "market_shows": [
+    "Bandage Roll",
+    "First-Aid Kit",
+    "Focus Pills",
+    "Neuro Tonic",
+    "Energy Drink",
+    "Caffeine Shot",
+    "Sandwich",
+    "Sushi Box",
+    "Toolkit",
+    "Kevlar Patches",
+    "Sharpening Rod",
+    "Lubricant Spray"
+   ],
+   "food_meshes": {
+    "SM_HV_FoodSandwich22": 13,
+    "SM_HV_FoodCrackers22": 17,
+    "SM_HV_FoodCup22": 15,
+    "SM_HV_FoodBox22": 12
+   },
+   "table_food": {
+    "said": "take the food (sandwich)",
+    "f": "food",
+    "got": {
+     "Sandwich": 1
+    }
+   },
+   "outside_walls": {
+    "in_walls": false,
+    "stock_twins": 0
+   },
+   "sale": {
+    "item": "Bandage Roll",
+    "ok": true,
+    "gold": -12,
+    "count": 1
+   }
+  },
+  {
+   "step": "heaven22_neon",
+   "ok": true,
+   "fronts": 16,
+   "boards": 30,
+   "tubes_component": {
+    "n": 1,
+    "instances": 64,
+    "visible": true,
+    "hidden_in_game": false,
+    "material": "M_HV_SignalLens",
+    "mesh": "SM_HV_Neon22",
+    "first_z": [
+     268,
+     318,
+     293,
+     293
+    ],
+    "front_z": [
+     293,
+     293,
+     293,
+     293
+    ],
+    "from_nearest_front_cm": [
+     0,
+     0,
+     130,
+     130,
+     0,
+     0,
+     130,
+     130
+    ],
+    "custom_floats": 4
+   },
+   "front_kinds": [
+    1,
+    2,
+    3,
+    6,
+    25
+   ],
+   "neon_out_from_wall_line_cm": [
+    29.0
+   ],
+   "day": {
+    "tubes": 64,
+    "lit": 0.1,
+    "boards": 30,
+    "glow": 0.9
+   },
+   "day_front": 81.64,
+   "night": {
+    "tubes": 64,
+    "lit": 1.0,
+    "boards": 30,
+    "glow": 3.0,
+    "hum": 1
+   },
+   "luma": {
+    "front_on": 212.58,
+    "board_on": 84.43,
+    "front_off": 152.49,
+    "board_off": 33.64
+   },
+   "front_on_over_off": 1.394,
+   "board_on_over_off": 2.51
+  },
+  {
+   "step": "heaven22_sound",
+   "ok": true,
+   "day_square": {
+    "city": "Heaven.City",
+    "vol": 1.275,
+    "crowd": 1.05,
+    "in": 1
+   },
+   "day_far": {
+    "vol": 1.275,
+    "crowd": 0.404
+   },
+   "horns_30s": 9,
+   "db_on": -22.9,
+   "db_off": -43.6,
+   "outside": {
+    "vol": 0.0,
+    "crowd": 0.0,
+    "in": false,
+    "peds": 0
+   },
+   "night": {
+    "city": "Heaven.CityNight",
+    "vol": 1.2,
+    "crowd": 0.0
+   },
+   "db_rise": 20.7
+  },
+  {
+   "step": "heaven22_peds",
+   "ok": true,
+   "peds_min_max": [
+    30,
+    30
+   ],
+   "readings": 1950,
+   "on_asphalt": 0,
+   "share_on_asphalt": 0.0,
+   "on_a_zebra": 1,
+   "crossed_at_zebra": 1,
+   "stood_on_a_zebra_15s": 0,
+   "walked": 20,
+   "nearest_car_cm": 380,
+   "pave": [
+    "pave|2405|385|1515|2019"
+   ],
+   "shot": true,
+   "peds_off": 0,
+   "fps_without": 13.7,
+   "fps_with_before_after": [
+    12.4,
+    13.6
+   ],
+   "fps_with": 13.0,
+   "peds_night": 8,
+   "night_max": 8
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_h22e_heaven22_front_day.png",
+  "bs_h22e_heaven22_front_on.png",
+  "bs_h22e_heaven22_board_on.png",
+  "bs_h22e_heaven22_front_off.png",
+  "bs_h22e_heaven22_board_off.png",
+  "bs_h22e_heaven22_peds.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}

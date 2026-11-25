@@ -70,3 +70,19 @@ The city is a wilderness town on `brokenspire` with the modern plan (`FRDWildTow
   - **An editor call can read nothing in play**: `EditorStaticMeshLibrary.get_number_verts` gave 0. Read a mesh's vertices through its sections (`ProceduralMeshLibrary.get_section_from_static_mesh`).
   - **A container's open value is no measure of where its part went**: the test reads the part's middle before and after.
 
+## The list of 2026-11-22: goods and life (phase 22: `946 goods,life`, `RD/RDHeaven22.cpp`, `884 heaven22_*`)
+
+- **A twin is a copy with a new face**: Heaven's goods are copies of the everyday items (`import_text(export_text())`) with their own names, pictures and words and no weight. Every reader of the kind (stores by trade, the quick bar, buffs) takes them unchanged. Kept out of every draw in one place (`CaveItemAllowed16`), and swapped in by the store's list (`TownStock`), never by a store of its own.
+- **A piece placed against a wall stands off the wall's measured face**: the neon 13 cm off the wall's line was inside Heaven's walls (their outer face at 23 cm), visible and lit in every number and nowhere in the pictures. Measure the wall piece's box through its `Adjust` (`TownPiece(B, "Wall")`) and look at the front in a picture.
+- **A brightness is read where the thing is on the screen**: a box over the middle of the picture saw a billboard 26 m off change the picture by 7 %; boxed where it projects (`project_world_to_screen`), 2.4 times.
+- **A stand point on another's spot puts the camera in her back**: the pedestrians' picture stood her where one of them walked. Stand where another stands, 5 to 25 m off, she hidden.
+- **A frame rate on a loaded machine wanders**: one reading said 4.2 with the pedestrians against 7.5 without; read with, without and with again in one place (13.2, 14.0, 14.9).
+- **A timer drawn from a range keeps its old draw when the range shrinks**: the test's shortened horn range waited out the long draw already made (1 horn in 30 s). A wait longer than the range allows is drawn again.
+- **Pictures for a game are painted without words or makers**: FLUX painted a real sportswear maker's mark on every pair of running shoes; they were left out. Look at every ad's picture before using it.
+- **PR #129's review**:
+  - **A town loaded straight from another changes `TownPlan` in the same call that unloads it**: a rule gated on `TownPlan == 5` never ran its "Heaven is gone" branch, and the city's loop played on in Graymourne. Stop what Heaven started whenever the plan is not Heaven's.
+  - **A retry that draws from the same seed fails the same way for ever**: mix the failures into the stream, and give up after a few.
+  - **"Heaven's section loaded" reaches 2 km out**: a rule for what she meets in Heaven asks whether she is inside its walls.
+  - **A twin is a new name to every rule that asks by name** (recipes): add it where the like is asked for.
+  - **A refresh that resets the state it guards repeats the work**: compare what changed before writing again.
+

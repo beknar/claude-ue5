@@ -215,6 +215,8 @@ void ARDTownsfolk::Tick(float Dt)
 	}
 	// (the list of 2026-11-10's sixth phase: a traveller on the wilds' roads: RDWild10.cpp)
 	if (bRoadWalker) { TickRoad(Dt); return; }
+	// (the list of 2026-11-22's twenty-second phase: a pedestrian on Heaven's pavements: RDHeaven22.cpp)
+	if (bPave22) { TickPave22(Dt, Now); return; }
 	// (its day: home at evening, asleep at night; asleep, it stands where it is, or keeps its seat)
 	TickDay(Now);
 	// (the list of 2026-11-10: asleep, in its bed, lying, on its Sleep clip; awake, out of it where it stood before)
@@ -512,7 +514,8 @@ TArray<FName> ARDDungeonGenerator::TownStock() const
 		{
 			// (the list of 2026-11-16's sixth phase: what only a found recipe makes is not sold; its recipe is)
 			if (bRecipes14 && IsLockedRecipe14(It.Name)) continue;
-			Out.Add(It.Name);
+			// (the list of 2026-11-22's phase 22: in Heaven its modern twin, where it has one)
+			Out.Add(HeavenGood22(It.Name));
 		}
 		// (a recipe of the tiers she has opened that she does not know yet)
 		// (a scroll's recipe only for a hero who reads that scroll (PR #83's review))

@@ -1,0 +1,115 @@
+{
+ "tag": "h22c",
+ "plan": [
+  "heaven22_neon",
+  "heaven22_peds"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "heaven22_neon",
+   "ok": false,
+   "fronts": 16,
+   "boards": 30,
+   "tubes_component": {
+    "n": 1,
+    "instances": 64,
+    "visible": true,
+    "hidden_in_game": false,
+    "material": "M_HV_SignalLens",
+    "mesh": "SM_HV_Neon22",
+    "first_z": [
+     268,
+     318,
+     293,
+     293
+    ],
+    "front_z": [
+     293,
+     293,
+     293,
+     293
+    ],
+    "from_nearest_front_cm": [
+     0,
+     0,
+     130,
+     130,
+     0,
+     0,
+     130,
+     130
+    ],
+    "custom_floats": 4
+   },
+   "front_kinds": [
+    1,
+    2,
+    3,
+    6,
+    25
+   ],
+   "day": {
+    "tubes": 64,
+    "lit": 0.1,
+    "boards": 30,
+    "glow": 0.9
+   },
+   "day_front": 82.37,
+   "night": {
+    "tubes": 64,
+    "lit": 1.0,
+    "boards": 30,
+    "glow": 3.0,
+    "hum": 1
+   },
+   "luma": {
+    "front_on": 155.13,
+    "board_on": 78.52,
+    "front_off": 155.0,
+    "board_off": 32.97
+   },
+   "front_on_over_off": 1.001,
+   "board_on_over_off": 2.382
+  },
+  {
+   "step": "heaven22_peds",
+   "ok": true,
+   "peds_min_max": [
+    30,
+    30
+   ],
+   "readings": 2190,
+   "on_asphalt": 0,
+   "share_on_asphalt": 0.0,
+   "crossed_at_zebra": 1,
+   "walked": 9,
+   "nearest_car_cm": 380,
+   "pave": [
+    "pave|2405|385|1515|2019"
+   ],
+   "shot": true,
+   "peds_off": 0,
+   "fps_without": 14.0,
+   "fps_with_before_after": [
+    13.2,
+    14.9
+   ],
+   "fps_with": 14.1,
+   "peds_night": 8,
+   "night_max": 8
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_h22c_heaven22_front_day.png",
+  "bs_h22c_heaven22_front_on.png",
+  "bs_h22c_heaven22_board_on.png",
+  "bs_h22c_heaven22_front_off.png",
+  "bs_h22c_heaven22_board_off.png",
+  "bs_h22c_heaven22_peds.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 3
+}

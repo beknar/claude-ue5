@@ -127,6 +127,11 @@ public:
 	 *  the wild ground) and stands, or sits at its camp's fire (its StandWork) */
 	bool bRoadWalker = false;
 	TArray<FVector> RoadPath;
+	/** the list of 2026-11-22's twenty-second phase: a pedestrian on Heaven's pavements (RDHeaven22.cpp): it walks from one pavement's
+	 *  tile to another over the pavements and the zebras only, the generator's NextPavePath22 its next way */
+	bool bPave22 = false;
+	void TickPave22(float Dt, float Now);
+	int32 PaveBlocked22 = 0, PaveFails22 = 0;
 	/** a lantern in its hand at night (the town's watch): its light with it */
 	void SetLantern(bool bOn);
 	void TickRoad(float Dt);

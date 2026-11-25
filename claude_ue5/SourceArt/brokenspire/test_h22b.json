@@ -1,0 +1,137 @@
+{
+ "tag": "h22b",
+ "plan": [
+  "heaven22_neon",
+  "heaven22_sound",
+  "heaven22_peds",
+  "heaven19_medieval"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "heaven22_neon",
+   "ok": false,
+   "fronts": 16,
+   "boards": 30,
+   "front_kinds": [
+    1,
+    2,
+    3,
+    6,
+    25
+   ],
+   "day": {
+    "tubes": 64,
+    "lit": 0.1,
+    "boards": 30,
+    "glow": 0.9
+   },
+   "day_front": 84.63,
+   "night": {
+    "tubes": 64,
+    "lit": 1.0,
+    "boards": 30,
+    "glow": 3.0,
+    "hum": 1
+   },
+   "luma": {
+    "front_on": 143.49,
+    "board_on": 79.01,
+    "front_off": 155.64,
+    "board_off": 33.11
+   },
+   "front_on_over_off": 0.922,
+   "board_on_over_off": 2.386
+  },
+  {
+   "step": "heaven22_sound",
+   "ok": true,
+   "day_square": {
+    "city": "Heaven.City",
+    "vol": 0.85,
+    "crowd": 0.7,
+    "in": 1
+   },
+   "day_far": {
+    "vol": 0.85,
+    "crowd": 0.269
+   },
+   "horns_30s": 9,
+   "db_on": -27.6,
+   "db_off": -41.6,
+   "night": {
+    "city": "Heaven.CityNight",
+    "vol": 0.8,
+    "crowd": 0.0
+   },
+   "db_rise": 14.0
+  },
+  {
+   "step": "heaven22_peds",
+   "ok": false,
+   "peds_min_max": [
+    30,
+    30
+   ],
+   "readings": 2160,
+   "on_asphalt": 0,
+   "share_on_asphalt": 0.0,
+   "crossed_at_zebra": 1,
+   "walked": 12,
+   "nearest_car_cm": 380,
+   "pave": [
+    "pave|2405|385|1515|2019"
+   ],
+   "shot": true,
+   "fps_with": 4.2,
+   "peds_off": 0,
+   "fps_without": 7.5,
+   "peds_night": 8,
+   "night_max": 8
+  },
+  {
+   "step": "heaven19_medieval",
+   "ok": true,
+   "medieval": {},
+   "fires": {},
+   "modern": {
+    "SM_HV_WallLamp19": 48,
+    "SM_HV_DeskLamp19": 100,
+    "SM_HV_CeilingLight19": 7,
+    "SM_HV_Media19": 75,
+    "SM_HV_Cooker19": 3,
+    "SM_HV_Pot19": 15,
+    "SM_HV_WallShelf19": 15,
+    "SM_HV_Picture19": 68,
+    "SM_HV_Trailer19": 1,
+    "SM_HV_Dumpster19": 0,
+    "SM_HV_Pallets19": 1,
+    "SM_HV_Bollard19": 4
+   },
+   "lights": 634,
+   "flickering_lights": 0,
+   "warm_lights": 0,
+   "desk_lamps_on_floor": 0,
+   "shots": [
+    "media",
+    "trailer",
+    "walllamp"
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_h22b_heaven22_front_day.png",
+  "bs_h22b_heaven22_front_on.png",
+  "bs_h22b_heaven22_board_on.png",
+  "bs_h22b_heaven22_front_off.png",
+  "bs_h22b_heaven22_board_off.png",
+  "bs_h22b_heaven22_peds.png",
+  "bs_h22b_heaven19_media.png",
+  "bs_h22b_heaven19_trailer.png",
+  "bs_h22b_heaven19_walllamp.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 3
+}
