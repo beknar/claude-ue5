@@ -2306,6 +2306,17 @@ public:
 	 *  (rd.Structures17, else the game instance's choice), whether a building is entered so, F at its door, in and out, the level's furnishing and
 	 *  its windows' view of the street */
 	bool Closed17() const;
+	/** the sixth phase (RDList17d.cpp): the Options page's Structures, its words, the choice now, read from the ini and the command line, set
+	 *  (applied at once in a town: saved and loaded), and where a save made inside a building puts her (its door's outside) */
+	static FString StructuresName17(int32 Mode);
+	static FString StructuresWords17(int32 Mode);
+	int32 StructuresChoice17() const;
+	void LoadStructures17();
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List17") bool SetStructures17(int32 Mode, bool bApply);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List17") int32 GetStructures17() const { return StructuresChoice17(); }
+	FVector SavePoint17(const FVector& Her) const;
+	float SaveYaw17(float Yaw) const;
+	void EnsureStructures17() const;
 	bool IsEnterable17(const ARDSection* S, int32 BI) const;
 	int32 BuildingDoorNear17(const FVector& From, bool bOut) const;
 	bool BuildingDoorFirst17(const FVector& From, int32 I, float NearerThan, const ARDSection* BestS, bool bBestDoor, int32 BestI) const;
