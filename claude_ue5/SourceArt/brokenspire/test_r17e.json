@@ -1,0 +1,404 @@
+{
+ "tag": "r17e",
+ "plan": [
+  "rooms17"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "rooms17",
+   "ok": true,
+   "keys": {
+    "temple": {
+     "city": "Brokenspire",
+     "bld": 0,
+     "ok": true,
+     "file": true,
+     "luma": 30.5
+    },
+    "tavern": {
+     "city": "Brokenspire",
+     "bld": 1,
+     "ok": true,
+     "file": true,
+     "luma": 27.5
+    },
+    "smithy": {
+     "city": "Brokenspire",
+     "bld": 2,
+     "ok": true,
+     "file": true,
+     "luma": 28.9
+    },
+    "store": {
+     "city": "Brokenspire",
+     "bld": 3,
+     "ok": true,
+     "file": true,
+     "luma": 26.0
+    },
+    "healer": {
+     "city": "Brokenspire",
+     "bld": 4,
+     "ok": true,
+     "file": true,
+     "luma": 16.5
+    },
+    "storehouse": {
+     "city": "Brokenspire",
+     "bld": 5,
+     "ok": true,
+     "file": true,
+     "luma": 23.3
+    },
+    "barracks": {
+     "city": "Brokenspire",
+     "bld": 8,
+     "ok": true,
+     "file": true,
+     "luma": 45.0
+    },
+    "chapel": {
+     "city": "Brokenspire",
+     "bld": 9,
+     "ok": true,
+     "file": true,
+     "luma": 87.7
+    },
+    "witchshut": {
+     "city": "Brokenspire",
+     "bld": 10,
+     "ok": true,
+     "file": true,
+     "luma": 32.5
+    },
+    "home": {
+     "city": "Brokenspire",
+     "bld": 11,
+     "ok": true,
+     "file": true,
+     "luma": 31.0
+    },
+    "temple_holy": {
+     "city": "Vel Morrath",
+     "bld": 0,
+     "ok": true,
+     "file": true,
+     "luma": 81.7
+    },
+    "tavern_holy": {
+     "city": "Vel Morrath",
+     "bld": 1,
+     "ok": true,
+     "file": true,
+     "luma": 69.5
+    },
+    "smithy_holy": {
+     "city": "Vel Morrath",
+     "bld": 2,
+     "ok": true,
+     "file": true,
+     "luma": 76.4
+    },
+    "store_holy": {
+     "city": "Vel Morrath",
+     "bld": 3,
+     "ok": true,
+     "file": true,
+     "luma": 99.7
+    },
+    "healer_holy": {
+     "city": "Vel Morrath",
+     "bld": 4,
+     "ok": true,
+     "file": true,
+     "luma": 63.9
+    },
+    "storehouse_holy": {
+     "city": "Vel Morrath",
+     "bld": 5,
+     "ok": true,
+     "file": true,
+     "luma": 92.4
+    },
+    "barracks_holy": {
+     "city": "Vel Morrath",
+     "bld": 8,
+     "ok": true,
+     "file": true,
+     "luma": 59.5
+    },
+    "chapel_holy": {
+     "city": "Vel Morrath",
+     "bld": 9,
+     "ok": true,
+     "file": true,
+     "luma": 153.3
+    },
+    "monastery_holy": {
+     "city": "Vel Morrath",
+     "bld": 10,
+     "ok": true,
+     "file": true,
+     "luma": 125.0
+    },
+    "home_holy": {
+     "city": "Vel Morrath",
+     "bld": 13,
+     "ok": true,
+     "file": true,
+     "luma": 145.3
+    },
+    "temple_forge": {
+     "city": "Ashenreach",
+     "bld": 0,
+     "ok": true,
+     "file": true,
+     "luma": 34.7
+    },
+    "tavern_forge": {
+     "city": "Ashenreach",
+     "bld": 1,
+     "ok": true,
+     "file": true,
+     "luma": 28.3
+    },
+    "smithy_forge": {
+     "city": "Ashenreach",
+     "bld": 2,
+     "ok": true,
+     "file": true,
+     "luma": 33.9
+    },
+    "store_forge": {
+     "city": "Ashenreach",
+     "bld": 3,
+     "ok": true,
+     "file": true,
+     "luma": 13.0
+    },
+    "healer_forge": {
+     "city": "Ashenreach",
+     "bld": 4,
+     "ok": true,
+     "file": true,
+     "luma": 26.9
+    },
+    "storehouse_forge": {
+     "city": "Ashenreach",
+     "bld": 5,
+     "ok": true,
+     "file": true,
+     "luma": 6.7
+    },
+    "barracks_forge": {
+     "city": "Ashenreach",
+     "bld": 8,
+     "ok": true,
+     "file": true,
+     "luma": 18.8
+    },
+    "chapel_forge": {
+     "city": "Ashenreach",
+     "bld": 9,
+     "ok": true,
+     "file": true,
+     "luma": 63.9
+    },
+    "workshop_forge": {
+     "city": "Ashenreach",
+     "bld": 10,
+     "ok": true,
+     "file": true,
+     "luma": 6.3
+    },
+    "home_forge": {
+     "city": "Ashenreach",
+     "bld": 14,
+     "ok": true,
+     "file": true,
+     "luma": 71.8
+    },
+    "warehouse": {
+     "city": "Graymourne",
+     "bld": 10,
+     "ok": true,
+     "file": true,
+     "luma": 11.5
+    },
+    "temple_mage": {
+     "city": "Kethrys Spire",
+     "bld": 0,
+     "ok": true,
+     "file": true,
+     "luma": 37.1
+    },
+    "tavern_mage": {
+     "city": "Kethrys Spire",
+     "bld": 1,
+     "ok": true,
+     "file": true,
+     "luma": 44.4
+    },
+    "smithy_mage": {
+     "city": "Kethrys Spire",
+     "bld": 2,
+     "ok": true,
+     "file": true,
+     "luma": 18.0
+    },
+    "store_mage": {
+     "city": "Kethrys Spire",
+     "bld": 3,
+     "ok": true,
+     "file": true,
+     "luma": 16.1
+    },
+    "healer_mage": {
+     "city": "Kethrys Spire",
+     "bld": 4,
+     "ok": true,
+     "file": true,
+     "luma": 42.3
+    },
+    "storehouse_mage": {
+     "city": "Kethrys Spire",
+     "bld": 5,
+     "ok": true,
+     "file": true,
+     "luma": 38.5
+    },
+    "barracks_mage": {
+     "city": "Kethrys Spire",
+     "bld": 8,
+     "ok": true,
+     "file": true,
+     "luma": 46.1
+    },
+    "chapel_mage": {
+     "city": "Kethrys Spire",
+     "bld": 9,
+     "ok": true,
+     "file": true,
+     "luma": 98.0
+    },
+    "library_mage": {
+     "city": "Kethrys Spire",
+     "bld": 10,
+     "ok": true,
+     "file": true,
+     "luma": 35.5
+    },
+    "laboratory_mage": {
+     "city": "Kethrys Spire",
+     "bld": 11,
+     "ok": true,
+     "file": true,
+     "luma": 13.9
+    },
+    "study_mage": {
+     "city": "Kethrys Spire",
+     "bld": 12,
+     "ok": true,
+     "file": true,
+     "luma": 32.7
+    },
+    "meditationchamber_mage": {
+     "city": "Kethrys Spire",
+     "bld": 13,
+     "ok": true,
+     "file": true,
+     "luma": 40.6
+    },
+    "home_mage": {
+     "city": "Kethrys Spire",
+     "bld": 18,
+     "ok": true,
+     "file": true,
+     "luma": 77.4
+    },
+    "temple_modern": {
+     "city": "Heaven",
+     "bld": 0,
+     "ok": true,
+     "file": true,
+     "luma": 85.1
+    },
+    "tavern_modern": {
+     "city": "Heaven",
+     "bld": 1,
+     "ok": true,
+     "file": true,
+     "luma": 78.1
+    },
+    "smithy_modern": {
+     "city": "Heaven",
+     "bld": 2,
+     "ok": true,
+     "file": true,
+     "luma": 134.4
+    },
+    "store_modern": {
+     "city": "Heaven",
+     "bld": 3,
+     "ok": true,
+     "file": true,
+     "luma": 192.0
+    },
+    "healer_modern": {
+     "city": "Heaven",
+     "bld": 4,
+     "ok": true,
+     "file": true,
+     "luma": 167.0
+    },
+    "storehouse_modern": {
+     "city": "Heaven",
+     "bld": 5,
+     "ok": true,
+     "file": true,
+     "luma": 60.9
+    },
+    "barracks_modern": {
+     "city": "Heaven",
+     "bld": 6,
+     "ok": true,
+     "file": true,
+     "luma": 121.1
+    },
+    "chapel_modern": {
+     "city": "Heaven",
+     "bld": 7,
+     "ok": true,
+     "file": true,
+     "luma": 202.3
+    },
+    "officeblock_modern": {
+     "city": "Heaven",
+     "bld": 17,
+     "ok": true,
+     "file": true,
+     "luma": 115.8
+    },
+    "shop_modern": {
+     "city": "Heaven",
+     "bld": 29,
+     "ok": true,
+     "file": true,
+     "luma": 141.4
+    },
+    "home_modern": {
+     "city": "Heaven",
+     "bld": 41,
+     "ok": true,
+     "file": true,
+     "luma": 102.0
+    }
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}
