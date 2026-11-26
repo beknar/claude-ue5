@@ -597,6 +597,17 @@ void ARDSection::PlanTown(FRandomStream& R)
 		if (Place(T.Kind, T.W0, T.W1, T.D0, T.D1, [&](const FVector2D& Q) { return (float)FVector2D::Distance(Q, SqMid) + Jit; }, 900, P))
 			Commit(T.Kind, P, 0, 2);
 	}
+	// (the list of 2026-11-26's fourth phase: two more stores round a medieval city's square, an outfitter and an apothecary, placed as the
+	// trades are: after the homes no plot near the square was left (placed with a stream of their own there, four cities of five got
+	// none); here they take the plan's draws, so the homes and their containers lay out anew once, under rd.Shops17 1)
+	extern bool RDShops17On();
+	if (!bModern && RDShops17On())
+		for (int32 K = 0; K < 2; ++K)
+		{
+			const float Jit = R.FRandRange(0.f, 6.f);
+			if (Place(TK_Store, 6, 7, 5, 6, [&](const FVector2D& Q) { return (float)FVector2D::Distance(Q, SqMid) + Jit; }, 900, P))
+				Commit(TK_Store, P, 0, 2);
+		}
 	// the barracks by the gate, the chapel by the graveyard, the witch's hut far from everyone
 	if (Place(TK_Barracks, 9, 11, 6, 7, Near(GateMid + FVector2D(14.f, 0.f)), 900, P)) Commit(TK_Barracks, P, 0, 2);
 	if (Place(TK_Chapel, 6, 7, 5, 6, Near(FVector2D(GyU0 + 6.f, GyV0 + 5.5f)), 900, P)) Commit(TK_Chapel, P, 0, 2);
@@ -672,6 +683,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 		B.DoorSide = F.Side(-1, 0); B.DoorTile = F.Tile(Cu0, Vc);
 		CastleBld = TownBlds.Add(B);
 	}
+
 	// ---- rooms: one for each building (the castle: four), its kind the dungeon's furnishing for what it is
 	auto AddRoomRect = [&](int32 BI, const FIntRect& Rc, ERDRoomKind K, FIntPoint Lane) -> int32
 	{
@@ -1533,7 +1545,8 @@ void ARDSection::TownShellBuilding(int32 BI)
 		// outside buildings look like they're floating"))
 		const FTransform Sg = WallT(FVector2D(Hx + 9.f, (DoorK + 0.5f) * M - Hy + 140.f), FVector2D(1, 0), 262.f);
 		AddPiece(TEXT("Town.Sign"), Sg, true);
-		AddSignText(Sg, Generator->TownPlan == 5 && B.Kind == TK_Shop ? ShopWord21(BI) : RDTSignText(B.Kind, Generator->TownPlan == 5));          // (phase 21: a shop's own trade)
+		// (the list of 2026-11-26: a medieval city's three stores each their own)
+		AddSignText(Sg, Generator->TownPlan == 5 && B.Kind == TK_Shop ? ShopWord21(BI) : B.Kind == TK_Store && StoreKind17(BI) > 0 ? StoreWord17(BI) : RDTSignText(B.Kind, Generator->TownPlan == 5));          // (phase 21: a shop's own trade)
 	}
 	// (the list of 2026-11-22's phase 22: Heaven's neon over a shop's door)
 	if (Generator->TownPlan == 5 && bFlatRoof && !bBurnt && !bBoarded) HeavenFront22(BI, Hx, Hy, DoorK, Yaw0);

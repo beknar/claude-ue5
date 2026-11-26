@@ -1541,7 +1541,8 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 		                    : T->TownRole == ERDTownRole::Smith ? FName(TEXT("smith")) : T->TownRole == ERDTownRole::Trader ? FName(TEXT("store")) : T->TownRole == ERDTownRole::Healer ? FName(TEXT("healer"))
 		                    : T->TownRole == ERDTownRole::Priest ? FName(TEXT("temple")) : T->TownRole == ERDTownRole::Keeper ? FName(TEXT("stash")) : NAME_None;
 		// (the list of 2026-11-26: a stand's keeper sells the stand's trade)
-		if (!Service.IsNone()) { StoreBld21 = HvS ? HvS->TownBuildingAt(T->Post) : -1; StoreStall17 = T->Stall17; OpenTownPanel(Service, Who); TownBody = Line; }
+		const ARDSection* S0_ = GetSection(FIntPoint::ZeroValue);
+		if (!Service.IsNone()) { StoreBld21 = S0_ ? S0_->TownBuildingAt(T->Post) : -1; StoreStall17 = T->Stall17; OpenTownPanel(Service, Who); TownBody = Line; }
 		return TEXT("bark");
 	}
 	if (const FString Th = TownThingInteract(From); !Th.IsEmpty()) return Th;
@@ -1960,23 +1961,22 @@ void ARDDungeonGenerator::BuildTownLines()
 			TownSub = FString::Printf(TEXT("tier %d wares  ·  buy and sell  ·  you have %d gold"), TownTier17(), Gold);
 			if (TownBody.IsEmpty()) TownBody = StallBody17(StoreStall17);
 		}
-		else if (InHeaven21())
+		// (the list of 2026-11-26: a store of the town's three (or Heaven's nine kinds) sells its trades at the town's tier)
+		int32 Hk17 = -1; const int32 Mk17 = bStall ? -1 : StoreKindOpen17(Hk17);
+		if (!bStall)
 		{
-			static const TCHAR* Titles[4] = { TEXT("The market"), TEXT("The grocery"), TEXT("The pharmacy"), TEXT("The hardware store") };
-			static const TCHAR* Bodies[4] = { TEXT("Aisle after aisle under white light, a hum of fridges, a till that beeps. \"Anything you need, it's here somewhere.\""),
-				TEXT("Shelves of tins, bread in bags, fruit under misted glass. The clerk scans without looking up."),
-				TEXT("Rows of little boxes, white and green, and a counter that smells of mint. \"Ask if you can't find it.\""),
-				TEXT("Kits, tape, lamps and tools on hooks to the ceiling. \"If it's broken, we've got the thing that fixes it.\"") };
-			TownTitle = Titles[FMath::Clamp(Sk + 1, 0, 3)];
-			if (TownBody.IsEmpty()) TownBody = Bodies[FMath::Clamp(Sk + 1, 0, 3)];
+			FString Bd; TownTitle = StoreTitle17(Mk17, Hk17, InHeaven21(), &Bd);
+			TownSub = FString::Printf(TEXT("tier %d wares  ·  buy and sell  ·  you have %d gold"), TownTier17(), Gold);
+			if (TownBody.IsEmpty()) TownBody = Bd;
 		}
 		bool bFits = true;
-		const TArray<FName> Stock = bStall ? StallStock17(StoreStall17, &bFits) : TownStock();
+		extern bool RDShops17On();
+		const TArray<FName> Stock = bStall ? StallStock17(StoreStall17, &bFits) : RDShops17On() ? StoreStock17(StoreTrades17(Mk17, Hk17)) : TownStock();
 		if (TownTab == 0 && bStall && !bFits && Stock.Num()) Add(TEXT("none"), TEXT("None of these is for you"), FString(), FString::Printf(TEXT("Nothing of this trade fits the %s: it can still be bought, and sold again."), *CurrentHero.ToString().ToLower()), false);
 		if (TownTab == 0)
 			for (const FName& It : Stock)
 			{
-				if (!bStall && !ShopSells21(Sk, It)) continue;
+				if (!bStall && !RDShops17On() && !ShopSells21(Sk, It)) continue;
 				const int32 Ix = FindItem(It); const int32 P = PriceOf(It);
 				Add(TEXT("buy"), It.ToString(), FString::Printf(TEXT("%d g"), P), Ix >= 0 && !Items[Ix].Looks.IsEmpty() ? Items[Ix].Looks : FString::Printf(TEXT("You carry %d"), PlayerCombat ? PlayerCombat->GetItemCount(It) : 0), Gold >= P, It.ToString());
 			}

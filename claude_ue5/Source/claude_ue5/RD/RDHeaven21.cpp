@@ -23,12 +23,15 @@ int32 ARDSection::ShopKind21(int32 BI) const
 	// (0 a grocery, 1 a pharmacy, 2 a hardware store; the market (the trader's store) -1: everything)
 	if (!TownBlds.IsValidIndex(BI)) return -1;
 	const FTownBld& B = TownBlds[BI];
+	// (the list of 2026-11-26: nine kinds, in the order the shops stand, so each is there among the twelve)
+	extern bool RDShops17On();
+	if (B.Kind == TK_Shop && RDShops17On()) return ShopOrder17(BI) % 9;
 	return B.Kind == TK_Shop ? (int32)((B.Seed >> 3) % 3u) : -1;
 }
 
 FString ARDSection::ShopWord21(int32 BI) const
 {
-	switch (ShopKind21(BI)) { case 0: return TEXT("GROCERY"); case 1: return TEXT("PHARMACY"); case 2: return TEXT("HARDWARE"); default: return TEXT("MARKET"); }
+	return ARDDungeonGenerator::ShopWord17(ShopKind21(BI));          // (the list of 2026-11-26: nine kinds' words)
 }
 
 float ARDSection::ShopSide21(int32 BI) const
@@ -82,7 +85,7 @@ FTransform ARDSection::ShopFurnish21(int32 BI)
 		{
 			if (Slots >= 5 && K == Slots / 2) continue;          // (a cross aisle half way along a long row)
 			const float A = A0 + K * 125.f + ((A1 - A0) - (Slots - 1) * 125.f) * 0.5f;
-			const int32 Gk = Kind >= 0 ? Kind : (Row + K) % 3;
+			const int32 Gk = Kind >= 0 ? GondolaOf17(Kind) : (Row + K) % 3;
 			const FVector Gp = Base + Across * A;
 			if (AddPiece(FName(*FString::Printf(TEXT("Heaven.Gondola21_%d"), Gk)), FTransform(FRotator(0, GyYaw, 0), Gp)))
 			{
@@ -158,14 +161,9 @@ bool ARDDungeonGenerator::ShopSells21(int32 Kind, FName Item) const
 	if (Kind < 0) return true;
 	const int32 Ix = FindItem(Item);
 	if (Ix < 0) return false;
-	const ERDItemKind K = Items[Ix].Kind;
-	switch (Kind)
-	{
-	case 0: return K == ERDItemKind::Food;
-	case 1: return K == ERDItemKind::Healing || K == ERDItemKind::Mana || K == ERDItemKind::Speed;
-	case 2: return K == ERDItemKind::Repair || K == ERDItemKind::Torch;
-	default: return true;
-	}
+	// (the list of 2026-11-26: a kind sells its trades' things (the grocery's food, the pharmacy's potions...))
+	for (const int32 T : StoreTrades17(-1, Kind)) if (StallSells17(T, Items[Ix])) return true;
+	return false;
 }
 
 bool ARDDungeonGenerator::HotelRent21()

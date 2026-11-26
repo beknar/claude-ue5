@@ -137,6 +137,20 @@
     "Shop"
    ],
    "size": 139
+  },
+  "OUTFITTER": {
+   "lines": [
+    "Out-",
+    "fitter"
+   ],
+   "size": 102
+  },
+  "APOTHECARY": {
+   "lines": [
+    "Apothe-",
+    "cary"
+   ],
+   "size": 96
   }
  }
 }
