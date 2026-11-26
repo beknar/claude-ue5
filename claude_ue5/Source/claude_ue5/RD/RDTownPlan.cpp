@@ -595,7 +595,10 @@ void ARDSection::PlanTown(FRandomStream& R)
 	{
 		const float Jit = R.FRandRange(0.f, 6.f);
 		if (Place(T.Kind, T.W0, T.W1, T.D0, T.D1, [&](const FVector2D& Q) { return (float)FVector2D::Distance(Q, SqMid) + Jit; }, 900, P))
-			Commit(T.Kind, P, 0, 2);
+		{
+			const int32 Bi_ = Commit(T.Kind, P, 0, 2);
+			if (T.Kind == TK_Store && !bModern) TownBlds[Bi_].Store17 = 0;
+		}
 	}
 	// (the list of 2026-11-26's fourth phase: two more stores round a medieval city's square, an outfitter and an apothecary, placed as the
 	// trades are: after the homes no plot near the square was left (placed with a stream of their own there, four cities of five got
@@ -606,7 +609,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 		{
 			const float Jit = R.FRandRange(0.f, 6.f);
 			if (Place(TK_Store, 6, 7, 5, 6, [&](const FVector2D& Q) { return (float)FVector2D::Distance(Q, SqMid) + Jit; }, 900, P))
-				Commit(TK_Store, P, 0, 2);
+				TownBlds[Commit(TK_Store, P, 0, 2)].Store17 = (int8)(K + 1);
 		}
 	// the barracks by the gate, the chapel by the graveyard, the witch's hut far from everyone
 	if (Place(TK_Barracks, 9, 11, 6, 7, Near(GateMid + FVector2D(14.f, 0.f)), 900, P)) Commit(TK_Barracks, P, 0, 2);

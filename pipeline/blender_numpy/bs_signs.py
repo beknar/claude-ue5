@@ -140,7 +140,7 @@ MODERN = {"GEARSHOP": [["GEAR", "SHOP"]], "GROCERY": [["GROCERY"]], "CLINIC": [[
           # (the list of 2026-11-22's phase 21: the market, the bank, the hotel, the shops' own trades)
           "MARKET": [["MARKET"]], "BANK": [["BANK"]], "HOTEL": [["HOTEL"]], "PHARMACY": [["PHARMACY"]], "HARDWARE": [["HARD", "WARE"], ["HARDWARE"]],
           # (the list of 2026-11-26's fourth phase: Heaven's nine shop kinds)
-          "ELECTRONICS": [["ELECTRO", "NICS"]], "JEWELLER": [["JEWEL", "LER"]], "BOOKS": [["BOOKS"]], "SPORTS": [["SPORTS"]],
+          "ELECTRONICS": [["ELECTRONICS"]], "JEWELLER": [["JEWELLER"]], "BOOKS": [["BOOKS"]], "SPORTS": [["SPORTS"]],
           "OUTDOOR": [["OUT", "DOOR"]], "HERBS": [["HERBS"]]}
 
 

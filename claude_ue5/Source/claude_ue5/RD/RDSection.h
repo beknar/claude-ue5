@@ -236,6 +236,8 @@ public:
 	struct FTownBld
 	{
 		uint8 Kind = 0; FIntPoint Min = FIntPoint::ZeroValue, Max = FIntPoint::ZeroValue;
+		/** the list of 2026-11-26: a medieval city's store's kind (0 the general store, 1 the outfitter, 2 the apothecary), -1 none */
+		int8 Store17 = -1;
 		int32 DoorSide = 0; FIntPoint DoorTile = FIntPoint::ZeroValue; uint8 State = 0; uint8 Style = 0; int32 Storeys = 2;
 		TArray<int32> Rooms; int32 Door = -1; bool bBoarded = false; uint32 Seed = 0; FString Label;
 	};

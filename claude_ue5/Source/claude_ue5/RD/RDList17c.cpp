@@ -55,9 +55,7 @@ int32 ARDSection::StoreKind17(int32 BI) const
 	// (a medieval city's stores in the order they stand in the plan: 0 the general store, 1 the outfitter, 2 the apothecary; -1 not a store
 	// or not one of them (Heaven's market: the general store's))
 	if (!TownBlds.IsValidIndex(BI) || TownBlds[BI].Kind != TK_Store || Theme == FName(TEXT("Heaven"))) return -1;
-	int32 K = 0;
-	for (int32 I = 0; I < BI; ++I) if (TownBlds[I].Kind == TK_Store) ++K;
-	return FMath::Min(K, 2);
+	return TownBlds[BI].Store17;
 }
 
 int32 ARDSection::ShopOrder17(int32 BI) const
@@ -105,10 +103,14 @@ FString ARDDungeonGenerator::ShopWord17(int32 HeavenKind)
 	return HeavenKind >= 0 && HeavenKind < RDHeavenShops17().Num() ? FString(RDHeavenShops17()[HeavenKind].Word) : FString(TEXT("MARKET"));
 }
 
-TArray<FName> ARDDungeonGenerator::StoreStock17(const TArray<int32>& Trades) const
+TArray<FName> ARDDungeonGenerator::StoreStock17(const TArray<int32>& Trades, bool* bAnyFit) const
 {
+	// (what fits her from each trade; when nothing of the whole store does, all of it (PR #140's review: a trade that fitted nothing gave
+	// its whole band, every weapon to the Mage at the outfitter))
 	TArray<FName> Out;
-	for (const int32 T : Trades) for (const FName& N : StallStock17(T)) Out.AddUnique(N);
+	for (const int32 T : Trades) for (const FName& N : StallStock17(T, nullptr, true)) Out.AddUnique(N);
+	if (bAnyFit) *bAnyFit = Out.Num() > 0;
+	if (Out.Num() == 0) for (const int32 T : Trades) for (const FName& N : StallStock17(T)) Out.AddUnique(N);
 	return Out;
 }
 

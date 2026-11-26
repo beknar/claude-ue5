@@ -8284,13 +8284,14 @@ def stores17():
 def step_shops17():
     """the square's shops (the user's "3x more stands and shops, each one different in what they offer ... of the same Tier that the town
     is in"; RD/RDList17c.cpp): in each medieval city three stores (the general store, the outfitter, the apothecary), each opened by F
-    before its counter (its title, its trades' things only: the kinds of a table of the test's own; every tiered thing's highest tier
-    under the town's one tier), a thing bought in each; a picture of each new store's front with its sign. In Brokenspire on one seed
-    with rd.Shops17 0 and 1: the buildings of before all there and two stores more, the containers of before the same and in the same
-    order (the stores take the plan's draws: the homes lay out anew once; the step records how many buildings and containers it moved)"""
+    before its counter (its title, its trades' things only: the kinds of a table of the test's own; the weapons and shields only those
+    made for her hero, read from the items' own fits), a thing bought in each (taken back after); a picture of each new store's front.
+    In Brokenspire on one seed with rd.Shops17 0 and 1: one store and three (the stores take the plan's draws: the homes lay out anew
+    once; the step records how many buildings and containers there are each way)"""
     g = G["gen"]; res = {"cities": {}}; quiet(True)
     cv0 = unreal.SystemLibrary.get_console_variable_int_value("rd.Shops17")
     kinds = item_kinds21()
+    hero = str(g.get_editor_property("current_hero")); fits = weapon_fits17(hero); bought = []
     g0_all = gold(); g.add_gold(300000, "the test")
     try:
         seed0 = G["gi"].get_editor_property("town_seed")
@@ -8317,12 +8318,16 @@ def step_shops17():
                 title = str(g.get_town_title21()); pn = str(g.get_town_panel())
                 buys = [pp for pp in panel() if pp[0] == "buy"]
                 wrong = [pp[1] for pp in buys if kinds.get(pp[1]) not in STORE_KINDS17[s["kind"]]]
+                # (fit for her: a weapon or shield offered is one made for her hero, where any of the store is (PR #140's review))
+                if not any(pp[0] == "none" for pp in panel()):
+                    wrong += [pp[1] for pp in buys if kinds.get(pp[1]) in ("WEAPON", "SHIELD") and pp[1] not in fits]
                 sale = None
                 i = next((j for j, pp in enumerate(panel()) if pp[0] == "buy" and pp[3] == "1"), -1)
                 if i >= 0:
                     nm = panel()[i][1]; gb = gold(); n0 = c.get_item_count(nm)
                     w0 = len(g.get_editor_property("weapons"))
                     sale = {"item": nm, "ok": bool(g.activate_town_entry(i)), "paid": gb - gold(), "count": c.get_item_count(nm) - n0 + len(g.get_editor_property("weapons")) - w0}
+                    if c.get_item_count(nm) > n0: bought.append(nm)
                 g.close_town_panel(); yield from rwait(0.2)
                 r["opened"].append({"kind": s["kind"], "f": f_, "panel": pn, "title": title, "lines": len(buys), "not_its_trade": wrong[:4], "sale": sale, "stall": g.get_store_stall17()})
                 if s["kind"] > 0:
@@ -8339,7 +8344,9 @@ def step_shops17():
         res["error"] = str(e_) + traceback.format_exc()[-600:]
     finally:
         unreal.SystemLibrary.execute_console_command(G["w"], f"rd.Shops17 {cv0}")
-        try: G["gen"].close_town_panel(); G["gen"].add_gold(-(gold() - g0_all), "the test")
+        try:
+            G["gen"].close_town_panel(); G["gen"].add_gold(-(gold() - g0_all), "the test")
+            for nm in bought: cb().remove_item(nm, 1)          # (what she bought taken back (the weapons she bought stay with her weapons))
         except Exception: pass
         quiet(False)
     def city_ok(r):

@@ -161,7 +161,19 @@ bool ARDDungeonGenerator::ShopSells21(int32 Kind, FName Item) const
 	if (Kind < 0) return true;
 	const int32 Ix = FindItem(Item);
 	if (Ix < 0) return false;
-	// (the list of 2026-11-26: a kind sells its trades' things (the grocery's food, the pharmacy's potions...))
+	// (the list of 2026-11-26: a kind sells its trades' things (the grocery's food, the pharmacy's potions...); rd.Shops17 0 as before)
+	extern bool RDShops17On();
+	if (!RDShops17On())
+	{
+		const ERDItemKind K = Items[Ix].Kind;
+		switch (Kind)
+		{
+		case 0: return K == ERDItemKind::Food;
+		case 1: return K == ERDItemKind::Healing || K == ERDItemKind::Mana || K == ERDItemKind::Speed;
+		case 2: return K == ERDItemKind::Repair || K == ERDItemKind::Torch;
+		default: return true;
+		}
+	}
 	for (const int32 T : StoreTrades17(-1, Kind)) if (StallSells17(T, Items[Ix])) return true;
 	return false;
 }

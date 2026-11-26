@@ -1,11 +1,69 @@
 {
- "tag": "p17b",
+ "tag": "p17e",
  "plan": [
+  "services",
   "shops17",
   "heaven21_shops"
  ],
  "level": "brokenspire",
  "steps": [
+  {
+   "step": "services",
+   "ok": true,
+   "buy": {
+    "ok": true,
+    "gold": -12,
+    "count": 1
+   },
+   "sell": {
+    "ok": true,
+    "gold": 4,
+    "count": 0
+   },
+   "heal": {
+    "ok": true,
+    "gold": -25,
+    "hp": 1.0
+   },
+   "weapon": "Viking Shortsword",
+   "repair": {
+    "line": 0,
+    "ok": true,
+    "gold": -9,
+    "wear": 1.0
+   },
+   "anvil_opens_crafting": true,
+   "bless": {
+    "ok": true,
+    "gold": -20,
+    "blessing": "Blessing of the Spire"
+   },
+   "deposit": {
+    "ok": true,
+    "carried": -1,
+    "stash": [
+     "Small Healing Potion"
+    ]
+   },
+   "withdraw": {
+    "ok": true,
+    "carried": 0,
+    "stash": 0
+   },
+   "circle": [
+    "here|Brokenspire|YOU ARE HERE|0",
+    "castle|Mistward Castle|SEALED|0",
+    "none|No other circle found yet|FIND|0",
+    "bye|Step away||1"
+   ],
+   "board": [
+    "Quest: Rats in the Cellars",
+    "Quest: The Drinkers",
+    "Quest: Dead Soldiers Walking"
+   ],
+   "wild": true,
+   "circle_others_ok": true
+  },
   {
    "step": "shops17",
    "ok": true,
@@ -53,7 +111,7 @@
        "f": "store",
        "panel": "store",
        "title": "The apothecary",
-       "lines": 29,
+       "lines": 25,
        "not_its_trade": [],
        "sale": {
         "item": "Small Healing Potion",
@@ -108,7 +166,7 @@
        "f": "store",
        "panel": "store",
        "title": "The apothecary",
-       "lines": 28,
+       "lines": 22,
        "not_its_trade": [],
        "sale": {
         "item": "Legendary Healing Potion",
@@ -163,7 +221,7 @@
        "f": "store",
        "panel": "store",
        "title": "The apothecary",
-       "lines": 28,
+       "lines": 22,
        "not_its_trade": [],
        "sale": {
         "item": "Legendary Healing Potion",
@@ -218,7 +276,7 @@
        "f": "store",
        "panel": "store",
        "title": "The apothecary",
-       "lines": 28,
+       "lines": 22,
        "not_its_trade": [],
        "sale": {
         "item": "Legendary Healing Potion",
@@ -273,7 +331,7 @@
        "f": "store",
        "panel": "store",
        "title": "The apothecary",
-       "lines": 28,
+       "lines": 22,
        "not_its_trade": [],
        "sale": {
         "item": "Legendary Healing Potion",
@@ -292,13 +350,13 @@
      3
     ],
     "buildings": [
-     137,
-     129
+     133,
+     134
     ],
     "buildings_same_place": 20,
     "containers": [
-     556,
-     569
+     546,
+     571
     ]
    },
    "sign_faces": {
@@ -606,17 +664,17 @@
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
  "shots": [
-  "bs_p17b_shops17_Brokenspire_1.png",
-  "bs_p17b_shops17_Brokenspire_2.png",
-  "bs_p17b_shops17_VelMorrath_1.png",
-  "bs_p17b_shops17_VelMorrath_2.png",
-  "bs_p17b_shops17_Ashenreach_1.png",
-  "bs_p17b_shops17_Ashenreach_2.png",
-  "bs_p17b_shops17_Graymourne_1.png",
-  "bs_p17b_shops17_Graymourne_2.png",
-  "bs_p17b_shops17_KethrysSpire_1.png",
-  "bs_p17b_shops17_KethrysSpire_2.png",
-  "bs_p17b_heaven21_shop.png"
+  "bs_p17e_shops17_Brokenspire_1.png",
+  "bs_p17e_shops17_Brokenspire_2.png",
+  "bs_p17e_shops17_VelMorrath_1.png",
+  "bs_p17e_shops17_VelMorrath_2.png",
+  "bs_p17e_shops17_Ashenreach_1.png",
+  "bs_p17e_shops17_Ashenreach_2.png",
+  "bs_p17e_shops17_Graymourne_1.png",
+  "bs_p17e_shops17_Graymourne_2.png",
+  "bs_p17e_shops17_KethrysSpire_1.png",
+  "bs_p17e_shops17_KethrysSpire_2.png",
+  "bs_p17e_heaven21_shop.png"
  ],
  "error": null,
  "saves_put_back": 1,
