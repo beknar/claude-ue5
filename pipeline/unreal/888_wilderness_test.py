@@ -8205,6 +8205,138 @@ def step_caveport16():
 STEPS["allies16"] = step_allies16; STEPS["loading16"] = step_loading16; STEPS["caveport16"] = step_caveport16
 
 
+# ================================================================================================ the list of 2026-11-26's second phase
+def step_loading17():
+    """the moving loading screen (RD/RDList17.cpp): the cover over the view after each of three trips by the map's travel (Ashenreach,
+    Brokenspire, Graymourne) is the moving widget, which counts its own paints and the distinct phases of its turning ring of 64 while
+    the cover is up (the cover line's last two fields, read in the widget's OnPaint, not from the clock); a fourth trip under
+    rd.LoadingCover 2 (the old plain board) paints none of them. Each moving cover: 8 paints at least and 16 distinct phases (a quarter
+    turn seen; a third of its paints if fewer: a town's build stalls the frames, and the first run's Graymourne cover painted 247 times
+    in 42 phases). And the board itself seen moving (PR #138's review): two screenshots with the interface (`shot showui`: HighResShot
+    leaves Slate out) 0.8 s apart under the first cover, its ring's box changed (a mean luma difference over 1.5) and a corner of the
+    board not (under 0.5)"""
+    g = G["gen"]; res = {"trips": []}; quiet(True)
+    yield from wait_ready(90)
+    try:
+        for k, (town, mode) in enumerate([("Ashenreach", 1), ("Brokenspire", 1), ("Graymourne", 1), ("Brokenspire", 2)]):
+            unreal.SystemLibrary.execute_console_command(G["w"], f"rd.LoadingCover {mode}")
+            n0 = len(cover_lines16())
+            ok_ = G["gen"].travel_to_town16(town)
+            # (the pictures under the first moving cover that stays up for both: a short cover lifted between them once (the second a
+            # picture of the town))
+            if mode == 1 and "picture_diff" not in res:
+                yield from rwait(0.3)
+                pics = []; up = []
+                for j in range(2):
+                    up.append(bool(G["gen"].is_cover_up16()))
+                    p_ = yield from shot_ui17()
+                    up.append(bool(G["gen"].is_cover_up16()))
+                    pics.append(p_); yield from rwait(0.5)
+                res.setdefault("picture_tries", []).append({"to": town, "pictures": [os.path.basename(p_) if p_ else None for p_ in pics], "cover_up": up})
+                if all(pics) and all(up):
+                    res["picture_diff"] = loading_pictures17(pics[0], pics[1]); res["cover_up_at_pictures"] = True
+            waited = yield from wait_cover16()
+            ls = cover_lines16()[n0:]
+            got = [(int(l[10]), int(l[11])) if len(l) > 11 else (None, None) for l in ls]
+            res["trips"].append({"to": town, "cover": mode, "ok": bool(ok_), "waited_s": waited, "up_s": [float(l[1]) for l in ls], "paints_phases": got})
+            yield from rwait(3.0)
+        res["state"] = str(unreal.RDDungeonGenerator.get_loading_state17())
+    except Exception as e_:
+        res["error"] = str(e_)
+    finally:
+        unreal.SystemLibrary.execute_console_command(G["w"], "rd.LoadingCover 1")
+        quiet(False)
+    tr = res["trips"]
+    def moved(t): return t["paints_phases"] and all(p is not None and p >= 8 and ph >= min(16, p // 3) for p, ph in t["paints_phases"])
+    def still(t): return t["paints_phases"] and all(p == 0 and ph == 0 for p, ph in t["paints_phases"])
+    pd = res.get("picture_diff") or {}
+    ok = ("error" not in res and len(tr) == 4 and all(t["ok"] and t["waited_s"] is not None for t in tr)
+          and all(moved(t) for t in tr[:3]) and still(tr[3]) and res.get("cover_up_at_pictures") and pd.get("ring", 0) > 1.5 and pd.get("corner", 99) < 0.5)
+    step_result("loading17", ok, **res)
+
+
+def shot_ui17(sec=15.0):
+    """a screenshot of the play window with its interface (the engine's `shot showui`: the viewport's Slate widgets included), its path
+    (the newest PNG made after the call), or None"""
+    before = set(os.listdir(SHOTS)) if os.path.isdir(SHOTS) else set()
+    unreal.SystemLibrary.execute_console_command(G["w"], "shot showui")
+    t0 = time.time()
+    while time.time() - t0 < sec:
+        yield from rwait(0.3)
+        new = [f for f in (os.listdir(SHOTS) if os.path.isdir(SHOTS) else []) if f.lower().endswith(".png") and f not in before]
+        if new:
+            fp = os.path.join(SHOTS, sorted(new, key=lambda f: os.path.getmtime(os.path.join(SHOTS, f)))[-1])
+            n0 = -1
+            for _ in range(20):
+                n = os.path.getsize(fp)
+                if n > 0 and n == n0: return fp
+                n0 = n; yield from rwait(0.2)
+    return None
+
+
+def loading_pictures17(a, b):
+    """the mean luma difference of two pictures of the cover in the ring's box (its middle at 0.5, 0.44 of the picture) and in a corner of
+    the board (the top left), each pixel"""
+    import struct
+    def size(p):
+        d = open(p, "rb").read(24); return struct.unpack(">II", d[16:24])
+    w, h = size(a)
+    u = h / 1080.0; r = int(95 * u); cx, cy = int(w * 0.5), int(h * 0.44)
+    out = {"size": [w, h]}
+    for name, box in (("ring", (cx - r, cy - r, cx + r, cy + r)), ("corner", (int(40 * u), int(40 * u), int(40 * u) + 2 * r, int(40 * u) + 2 * r))):
+        pa, pb = kit().pixels(a, box), kit().pixels(b, box)
+        n = sum(len(row) for row in pa)
+        out[name] = round(sum(abs(x - y) for ra, rb in zip(pa, pb) for x, y in zip(ra, rb)) / max(n, 1), 3)
+    return out
+
+
+def step_minimap17w():
+    """the wilds' minimap on whole pixels (PR #138's review: the town's step measures the town's walls only): play paused 3 km out, two
+    1920 x 1080 pictures 1.5 px of the minimap apart (2.8 m at its 280 m radius), snapped and with rd.MinimapSnap 0; snapped, the
+    second is the first moved by whole pixels (the least mean luma difference over whole-pixel shifts of the minimap's box), under half
+    the old drawing's, each less the floor of two pictures taken at the same place (the world behind the see-through minimap changes as
+    the camera moves 2.8 m: the first run read 0.27 against 0.53 with that floor in both)"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    try:
+        g.wild_put_her(3000.0, 1200.0); yield from wait_chunks(30, 50); ground_put(3000.0, 1200.0); yield from rwait(4.0)
+        pawn = G["pawn"]; at0 = pawn.get_actor_location()
+        unreal.GameplayStatics.set_game_paused(G["w"], True)
+        for snap in (1, 0):
+            unreal.SystemLibrary.execute_console_command(G["w"], f"rd.MinimapSnap {snap}")
+            pics = []
+            for k, d in enumerate((0.0, 280.0, 0.0)):
+                pawn.set_actor_location(unreal.Vector(at0.x + d * 0.6, at0.y + d * 0.8, at0.z), False, True)
+                yield from rwait(0.6)
+                pics.append((yield from shot_wait13(f"minimap17w_{snap}_{k}", "1920x1080")))
+            st = str(G["pc"].get_hud().get_minimap_state17()).split("|")
+            r = {"pictures": [os.path.basename(p_) if p_ else None for p_ in pics], "state": st}
+            if all(pics) and len(st) > 7:
+                sc = 1080.0 / max(float(st[5]), 1.0); cx, cy = float(st[6]) * sc, float(st[7]) * sc; half = 100.0
+                a, b = kit().pixels(pics[0], (cx - half, cy - half, cx + half, cy + half)), kit().pixels(pics[1], (cx - half, cy - half, cx + half, cy + half))
+                # (the arrow and its backdrop at the disc's middle are drawn where she is on the screen, not on the map: left out, 40 px)
+                d_, dx, dy = kit().shifted_diff(a, b, 3, 6, 20)
+                r["shift_diff"] = round(d_, 3); r["shift"] = (dx, dy)
+                c = kit().pixels(pics[2], (cx - half, cy - half, cx + half, cy + half))
+                r["floor"] = round(kit().shifted_diff(a, c, 0, 6, 20)[0], 3)
+            res["snap" if snap else "old"] = r
+        pawn.set_actor_location(at0, False, True)
+    except Exception as e_:
+        import traceback
+        res["error"] = str(e_) + traceback.format_exc()[-600:]
+    finally:
+        unreal.SystemLibrary.execute_console_command(G["w"], "rd.MinimapSnap 1")
+        unreal.GameplayStatics.set_game_paused(G["w"], False)
+        quiet(False)
+    on, off = res.get("snap", {}), res.get("old", {})
+    ok = ("error" not in res and on.get("shift_diff") is not None and off.get("shift_diff") is not None and "floor" in on and "floor" in off
+          and on["shift_diff"] - on["floor"] < 0.5 * (off["shift_diff"] - off["floor"]))
+    step_result("minimap17w", ok, **res)
+
+
+STEPS["loading17"] = step_loading17; STEPS["minimap17w"] = step_minimap17w
+
+
 # ================================================================================================ the list of 2026-11-22's third phase
 def lod16(): 
     f = str(G["gen"].get_wild_lod16()).split("|")

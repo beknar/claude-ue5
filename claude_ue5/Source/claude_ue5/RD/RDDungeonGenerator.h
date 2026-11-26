@@ -1048,6 +1048,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") TArray<FString> GetCoverLines16() const { return Cover16Lines; }
 	/** tests: the map's travel to a town by name, as the package's -RDTownGo=town: does (found first, the refusal for enemies near passed) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List16") bool TravelToTown16(const FString& Name);
+	/** the list of 2026-11-26's second phase (RDList17.cpp): the moving loading screen; tests: "<paints>|<phase 0..1 of the ring's turn>|<tip index>|<seconds
+	 *  since its first paint>", the widget's own counters (it paints on the movie player's thread too) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List17") static FString GetLoadingState17();
 	/** (a plain member, not a UPROPERTY: the maps hold the generator, and a package staged on an earlier cook reads its saved properties
 	 *  unversioned (the reel of 2026-11-18's lesson)) */
 	float Cover16Cap = 8.f;

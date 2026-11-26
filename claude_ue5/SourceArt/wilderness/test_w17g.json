@@ -1,0 +1,71 @@
+{
+ "tag": "w17g",
+ "plan": [
+  "minimap17w"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "minimap17w",
+   "ok": true,
+   "snap": {
+    "pictures": [
+     "wd_w17g_minimap17w_1_0.png",
+     "wd_w17g_minimap17w_1_1.png",
+     "wd_w17g_minimap17w_1_2.png"
+    ],
+    "state": [
+     "wild",
+     "690.000",
+     "1236.000",
+     "1",
+     "2.00",
+     "724",
+     "1121.29",
+     "158.71"
+    ],
+    "shift_diff": 0.012,
+    "shift": [
+     -1,
+     1
+    ],
+    "floor": 0.0
+   },
+   "old": {
+    "pictures": [
+     "wd_w17g_minimap17w_0_0.png",
+     "wd_w17g_minimap17w_0_1.png",
+     "wd_w17g_minimap17w_0_2.png"
+    ],
+    "state": [
+     "wild",
+     "690.337",
+     "1236.092",
+     "0",
+     "2.01",
+     "724",
+     "1121.29",
+     "158.71"
+    ],
+    "shift_diff": 0.217,
+    "shift": [
+     -1,
+     1
+    ],
+    "floor": 0.0
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_w17g_minimap17w_1_0.png",
+  "wd_w17g_minimap17w_1_1.png",
+  "wd_w17g_minimap17w_1_2.png",
+  "wd_w17g_minimap17w_0_0.png",
+  "wd_w17g_minimap17w_0_1.png",
+  "wd_w17g_minimap17w_0_2.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

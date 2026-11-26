@@ -292,16 +292,25 @@ void ARDHUD::DrawWildMinimap(float Sc, const FVector& L, float Yaw)
 	const FVector2D Here(L.X / 100.0, L.Y / 100.0);
 	const double Rm = Gen->WildMiniRadiusM;
 	const float K = R / (float)Rm;
-	auto ToS = [&](const FVector2D& Wm) { return C + FVector2D((float)(Wm.Y - Here.Y), -(float)(Wm.X - Here.X)) * K; };
+	// (the list of 2026-11-26: on whole pixels, as the town's minimap)
+	const FVector2D Base = MapBase17(TEXT("wild"), C, Here, K, LinePx17(3.f * Sc));
+	auto ToS = [&](const FVector2D& Wm) { return Base + FVector2D(Wm.Y, -Wm.X) * K; };
 	if (UTexture2D* T = GetSoftDisc()) DrawTexture(T, C.X - R * 1.3f, C.Y - R * 1.3f, R * 2.6f, R * 2.6f, 0.f, 0.f, 1.f, 1.f, FLinearColor(0.004f, 0.005f, 0.007f, 0.85f), BLEND_Translucent);
-	if (UTexture2D* M = Gen->WildMini(Here)) DrawTexture(M, C.X - R, C.Y - R, R * 2.f, R * 2.f, 0, 0, 1, 1, FLinearColor::White, BLEND_Translucent);
+	// (the ground's picture is made on a grid fixed to the world and drawn round the point it was made for, so it slides with the roads and marks
+	// instead of jumping every 3 m)
+	if (UTexture2D* M = Gen->WildMini(Here))
+	{
+		extern bool RDMinimapSnap17();
+		const FVector2D Mc = RDMinimapSnap17() ? ToS(Gen->WildMiniFor) : C;
+		DrawTexture(M, RDMinimapSnap17() ? FMath::RoundToFloat(Mc.X - R) : Mc.X - R, RDMinimapSnap17() ? FMath::RoundToFloat(Mc.Y - R) : Mc.Y - R, R * 2.f, R * 2.f, 0, 0, 1, 1, FLinearColor::White, BLEND_Translucent);
+	}
 	// the roads (the fourteenth phase): the major ones pale stone in a dark edge, the minor ones thin brown, inside the disc
 	{
 		const FBox2D Vb(Here - FVector2D(Rm), Here + FVector2D(Rm));
 		auto Seg = [&](const FVector2D& Pa, const FVector2D& Pb, const FLinearColor& Cl, float Wp)
 		{
 			const FVector2D Sa = ToS(Pa), Sb = ToS(Pb);
-			if (FVector2D::Distance(Sa, C) < R * 0.94f && FVector2D::Distance(Sb, C) < R * 0.94f) DrawLine(Sa.X, Sa.Y, Sb.X, Sb.Y, Cl, Wp);
+			if (FVector2D::Distance(Sa, C) < R * 0.94f && FVector2D::Distance(Sb, C) < R * 0.94f) DrawLine(Sa.X, Sa.Y, Sb.X, Sb.Y, Cl, LinePx17(Wp));
 		};
 		TArray<int32> Mn, Mj; Gen->Wild->RoadsIn(Vb, true, Mn); Gen->Wild->RoadsIn(Vb, false, Mj);
 		for (int32 Pass = 0; Pass < 3; ++Pass)

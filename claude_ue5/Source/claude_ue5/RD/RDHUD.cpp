@@ -1247,7 +1247,10 @@ void ARDHUD::DrawTacticalMinimap(float Sc, const FVector& L, float Yaw)
 	const float Ring = Ra ? R * 1.03f / FMath::Max((float)(Ra->Inner.Z - Ra->Inner.X), 0.2f) : R;
 	const FVector2D C(Canvas->ClipX - Mg - Ring, Mg + (Ra ? 0.f : 14.f * Sc) + Ring);
 	const float Half = StylizedMinimapMeters * 50.f, K = R / Half, TS = Gen->TileSize, Tp = TS * K;
-	auto ToS = [&](const FVector2D& W) { return C + FVector2D(W.Y - L.Y, -(W.X - L.X)) * K; };
+	// (the list of 2026-11-26: on whole pixels, as the towns' and the wilds' minimaps)
+	const float WallPx = LinePx17(1.4f * Sc);
+	const FVector2D Base = MapBase17(TEXT("tactical"), C, FVector2D(L.X, L.Y), K, WallPx);
+	auto ToS = [&](const FVector2D& W) { return Base + FVector2D(W.Y, -W.X) * K; };
 	auto Fade = [&](const FVector2D& S) { return FMath::Clamp((1.f - FVector2D::Distance(S, C) / R) / 0.38f, 0.f, 1.f); };
 	// the feathered backdrop, no frame
 	if (UTexture2D* T = GetSoftDisc()) DrawTexture(T, C.X - R * 1.3f, C.Y - R * 1.3f, R * 2.6f, R * 2.6f, 0.f, 0.f, 1.f, 1.f, FLinearColor(0.004f, 0.005f, 0.007f, 0.92f), BLEND_Translucent);
@@ -1279,7 +1282,7 @@ void ARDHUD::DrawTacticalMinimap(float Sc, const FVector& L, float Yaw)
 			if (!(*V & 2)) continue;
 			// a wall where this floor meets no floor (world +X is up on the screen, +Y right)
 			const FVector2D W0(X * TS, Y * TS), W1((X + 1) * TS, (Y + 1) * TS);
-			auto Edge = [&](const FVector2D& A_, const FVector2D& B_) { const FVector2D P = ToS(A_), Q = ToS(B_); DrawLine(P.X, P.Y, Q.X, Q.Y, RDTacA(Wall, A), 1.4f * Sc); };
+			auto Edge = [&](const FVector2D& A_, const FVector2D& B_) { const FVector2D P = ToS(A_), Q = ToS(B_); DrawLine(P.X, P.Y, Q.X, Q.Y, RDTacA(Wall, A), WallPx); };
 			if (!Tiles.Contains(FIntPoint(X + 1, Y))) Edge(FVector2D(W1.X, W0.Y), FVector2D(W1.X, W1.Y));
 			if (!Tiles.Contains(FIntPoint(X - 1, Y))) Edge(FVector2D(W0.X, W0.Y), FVector2D(W0.X, W1.Y));
 			if (!Tiles.Contains(FIntPoint(X, Y + 1))) Edge(FVector2D(W0.X, W1.Y), FVector2D(W1.X, W1.Y));
