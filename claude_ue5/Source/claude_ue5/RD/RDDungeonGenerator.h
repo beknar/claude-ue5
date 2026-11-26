@@ -2302,6 +2302,50 @@ public:
 	int32 StoreKindOpen17(int32& HeavenKind) const;
 	/** tests: every store and shop, "<building>|<word>|<medieval kind>|<Heaven kind>|<door x>|<door y>|<counter x>|<counter y>|<trades>" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List17") TArray<FString> GetStores17() const;
+	/** the list of 2026-11-26's fifth phase (RDBuilding17.cpp): Closed Structures, a building a level of its own. Whether the town is built closed
+	 *  (rd.Structures17, else the game instance's choice), whether a building is entered so, F at its door, in and out, the level's furnishing and
+	 *  its windows' view of the street */
+	bool Closed17() const;
+	bool IsEnterable17(const ARDSection* S, int32 BI) const;
+	int32 BuildingDoorNear17(const FVector& From, bool bOut) const;
+	bool BuildingDoorFirst17(const FVector& From, int32 I, float NearerThan, const ARDSection* BestS, bool bBestDoor, int32 BestI) const;
+	FString BuildingDescribe17(const FVector& From, float NearerThan, const ARDSection* BestS, bool bBestDoor, int32 BestI) const;
+	FString BuildingDoorUse17(const FVector& From, float NearerThan, const ARDSection* BestS, bool bBestDoor, int32 BestI);
+	static FString RDTTheLabel17(const ARDSection* S, int32 BI);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List17") bool EnterBuilding17(int32 BI);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List17") bool LeaveBuilding17();
+	void UnloadBuilding17();
+	void TickBuilding17(float Dt);
+	void CaptureBuildingView17(int32 BI);
+	/** tests: "<closed>|<in>|<pending>|<level loaded>|<pieces laid>|<panes>|<load ms>|<capture ms>|<entered>|<view x>|<view y>|<view z>"; a building's
+	 *  furnishing as drawn, recorded or (bLevel) laid in its level, "<mesh>|<x>|<y>|<z>|<yaw>"; every enterable building; the panes shown or not */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List17") FString GetBuilding17State() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List17") TArray<FString> GetBuildingPieces17(int32 BI, bool bLevel) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List17") TArray<FString> GetEnterable17() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List17") void SetBuildingPanes17(bool bShow);
+	/** tests: a building's windows, "<x>|<y>|<z>|<out x>|<out y>" (the window's middle 1.5 m up, its outward normal) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List17") TArray<FString> GetBuildingWindows17(int32 BI) const;
+	/** the building level's map (949: an empty level), the windows' view material (948's M_HT24_View) and the pane's mesh (the engine's plane) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List17") FString BuildingLevel17;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List17") TObjectPtr<UMaterialInterface> BuildingViewMaterial17;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List17") TObjectPtr<UStaticMesh> BuildingPaneMesh17;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List17") float BuildingViewScale17 = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List17") FVector2D BuildingPaneSize17 = FVector2D(110.f, 120.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List17") float BuildingPaneIn17 = 20.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List17") int32 BuildingCaptureSize17 = 512;
+	UPROPERTY(Transient) TObjectPtr<class ULevelStreamingDynamic> BuildingStream17;
+	UPROPERTY(Transient) TObjectPtr<AActor> BuildingActor17;
+	UPROPERTY(Transient) TObjectPtr<class UTextureRenderTargetCube> BuildingView17;
+	/** a cube for each window of the building she is in, captured just inside it (one cube at the building's middle: a house just outside a
+	 *  window 10 m from it stood elsewhere in it, the tavern's pane against its street 0.17) */
+	UPROPERTY(Transient) TArray<TObjectPtr<class UTextureRenderTargetCube>> BuildingViews17;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List17") int32 BuildingWindowCapture17 = 128;
+	TWeakObjectPtr<ARDSection> Building17For;
+	int32 InBuilding17 = -1, PendingBuilding17 = -1, Building17Count = 0, Building17Pieces = 0, Building17Panes = 0, Building17Entered = 0;
+	double Building17Asked = 0.0;
+	float Building17LoadMs = 0.f, Building17CaptureMs = 0.f;
+	FVector Building17ViewAt = FVector::ZeroVector;
+	bool bBuilding17Walked = false;
 	bool InHeaven21() const;
 	/** the building whose counter or keeper opened the store (a shop's stock by its kind) */
 	int32 StoreBld21 = -1;

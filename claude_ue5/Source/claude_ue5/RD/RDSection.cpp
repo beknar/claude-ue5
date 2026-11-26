@@ -568,6 +568,8 @@ bool ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollisio
 	}
 	if (P->ActorClass)
 	{
+		// (the list of 2026-11-26: a closed building's blueprint prop is laid by its level (RDBuilding17.cpp))
+		if (Bld16 >= 0 && RecordsBuilding17(Bld16)) { RecordActor17(Bld16, P->ActorClass, W); return true; }
 		FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		AActor* A = GetWorld()->SpawnActor<AActor>(P->ActorClass, W, Sp);
 		if (A)
@@ -581,6 +583,14 @@ bool ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollisio
 		return true;
 	}
 	if (!P->Mesh) return true;
+	// (the list of 2026-11-26's fifth phase: a closed building's furnishing recorded, laid by its own level (RDBuilding17.cpp))
+	if (Bld16 >= 0 && !P->bHidden && RecordsBuilding17(Bld16))
+	{
+		const bool bColR = P->bCollision && !bForceNoCollision;
+		RecordPiece17(Bld16, P->Mesh, P->Material, bColR, P->Mesh->GetBounds().SphereRadius * (float)W.GetScale3D().GetMax() < 40.f, P->CullDistance, W);
+		++NumInstances;
+		return true;
+	}
 	// (the list of 2026-11-22's seventh phase: a town building's interior in components of its own (RDList16e.cpp))
 	if (Bld16 >= 0 && Generator && Generator->bTown && !P->bHidden && ARDDungeonGenerator::InteriorBatch16())
 	{

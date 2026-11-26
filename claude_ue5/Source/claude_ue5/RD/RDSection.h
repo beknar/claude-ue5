@@ -839,6 +839,19 @@ public:
 	/** the list of 2026-11-26's fourth phase (RDList17c.cpp): a medieval city's store's kind (0 the general store, 1 the outfitter, 2 the
 	 *  apothecary, -1 not one), its sign's words, a Heaven shop's place among the shops, the gondola shelves a Heaven shop kind takes */
 	int32 StoreKind17(int32 BI) const;
+	/** the list of 2026-11-26's fifth phase (RDBuilding17.cpp): an enterable building's furnishing recorded, not drawn, in Closed Structures (its
+	 *  level lays it): its pieces by mesh, material and collision, its blueprint props */
+	struct FBldRecPiece17 { UStaticMesh* Mesh = nullptr; UMaterialInterface* Mat = nullptr; bool bCol = false, bSmall = false; float Cull = 0.f; TArray<FTransform> T; };
+	struct FBldRec17 { TMap<FString, FBldRecPiece17> Pieces; TArray<TPair<TObjectPtr<UClass>, FTransform>> Actors; int32 N = 0; };
+	TMap<int32, FBldRec17> BldRec17;
+	/** the record's meshes, materials and classes held for the collector (PR #141's review: its own pointers are plain) */
+	UPROPERTY(Transient) TArray<TObjectPtr<UObject>> BldRecRefs17;
+	bool BldClosed17 = false;
+	/** a closed building entered so: one whose furnishing this town recorded */
+	bool HasRecord17(int32 BI) const { return BldClosed17 && BldRec17.Contains(BI); }
+	bool RecordsBuilding17(int32 BI) const;
+	void RecordPiece17(int32 BI, UStaticMesh* Mesh, UMaterialInterface* Mat, bool bCol, bool bSmall, float Cull, const FTransform& W);
+	void RecordActor17(int32 BI, UClass* Class, const FTransform& W);
 	FString StoreWord17(int32 BI) const;
 	int32 ShopOrder17(int32 BI) const;
 	int32 GondolaOf17(int32 Kind) const;

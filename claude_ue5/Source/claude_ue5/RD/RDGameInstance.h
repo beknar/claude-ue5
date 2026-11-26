@@ -168,6 +168,8 @@ public:
 	// stands in Heaven, and the city round it in three cube pictures (low, middle and high floors) at the hour she went in (not saved:
 	// a game loaded in the tower level builds it from its default seed with no pictures)
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Tower24") int32 TowerSeed24 = 0;
+	/** the list of 2026-11-26: the Structures option, 0 Immersive Interiors, 1 Closed Structures (the Options page's, the sixth phase) */
+	int32 Structures17 = 0;
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Tower24") int32 TowerFloors24 = 0;
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Tower24") FString TowerName24;
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Tower24") FVector TowerAt24 = FVector::ZeroVector;
