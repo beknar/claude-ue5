@@ -1064,8 +1064,11 @@ void ARDDungeonGenerator::SetMenuOpen(bool bOpen)
 
 void ARDDungeonGenerator::MoveMenuCursor(int32 Step)
 {
-	const int32 N = FMath::Max(MenuItems().Num(), 1);
+	const TArray<FName> It = MenuItems();
+	const int32 N = FMath::Max(It.Num(), 1);
 	MenuCursor = ((MenuCursor + Step) % N + N) % N;
+	// (the list of 2026-11-26: a line of words is passed over (PR #142's review))
+	if (It.IsValidIndex(MenuCursor) && It[MenuCursor] == TEXT("structnote")) MenuCursor = ((MenuCursor + (Step >= 0 ? 1 : -1)) % N + N) % N;
 }
 
 void ARDDungeonGenerator::MoveMenuGrid(int32 Dx, int32 Dy)
@@ -1308,7 +1311,7 @@ void ARDDungeonGenerator::TickMenu(APlayerController* PC)
 	for (int32 I = 0; I < MenuRowBoxes.Num() && I < It.Num(); ++I)
 	{
 		const bool bIn = MenuRowBoxes[I].IsInside(M);
-		if (bIn && (Dx != 0.f || Dy != 0.f || PC->WasInputKeyJustPressed(EKeys::LeftMouseButton))) MenuCursor = I;
+		if (bIn && It[I] != TEXT("structnote") && (Dx != 0.f || Dy != 0.f || PC->WasInputKeyJustPressed(EKeys::LeftMouseButton))) MenuCursor = I;
 		const int32 V = RDMenuVolumeOf(It[I]);
 		if (V >= 0 && MenuTrackBoxes.IsValidIndex(I))
 		{

@@ -8578,6 +8578,15 @@ def step_closed17():
         if c0 != 0: yield from apply(0)
         g = G["gen"]
         res["immersive_line"] = struct_lines17()
+        # (the cursor passes over the line of words, down and up)
+        g.set_menu_open(True); l0 = [str(l) for l in g.get_menu_lines()]
+        if "button|Options" in l0: g.activate_menu_line(l0.index("button|Options"))
+        ls = [str(l) for l in g.get_menu_lines()]; kn = next((i for i, l in enumerate(ls) if l.startswith("note|")), -1)
+        for _ in range((kn - 1 - g.get_menu_cursor()) % max(len(ls), 1)): g.move_menu_cursor(1)
+        at0 = g.get_menu_cursor(); g.move_menu_cursor(1); down = g.get_menu_cursor(); g.move_menu_cursor(-1); up = g.get_menu_cursor()
+        res["note_cursor"] = [kn, at0, down, up]
+        res["note_skipped"] = kn > 0 and down == kn + 1 and up == kn - 1
+        g.set_menu_open(False)
         imm = town_counts17(); res["immersive"] = imm
         res["immersive_closed"] = bstate17()["closed"]
         # ---- chosen: Closed
@@ -8621,7 +8630,6 @@ def step_closed17():
         if home:
             yield from enter(home)
             cl = S.get_container_location(ci)
-            res["container_shown"] = True
             put(V(cl.x + 90, cl.y, 0)); G["pawn"].get_movement_component().stop_movement_immediately(); yield from wait(0.4)
             for dx, dy in ((90, 0), (-90, 0), (0, 90), (0, -90)):
                 put(V(cl.x + dx, cl.y + dy, 0)); G["pawn"].get_movement_component().stop_movement_immediately(); yield from wait(0.3)
@@ -8638,6 +8646,8 @@ def step_closed17():
             G["travel_until"] = time.time() + 150
             yield from until_loaded(150); refresh(); yield from wait(1.5)
             p = G["pawn"].get_actor_location(); res["loaded_off_door_m"] = round(math.hypot(p.x - want.x, p.y - want.y) / 100, 2)
+            ow = math.degrees(math.atan2(home["out"].y, home["out"].x)); yw = G["pawn"].get_actor_rotation().yaw
+            res["loaded_yaw_off"] = round(abs(((yw - ow) + 180) % 360 - 180), 1)
             res["loaded_in"] = bstate17()["in"]
         # ---- chosen back: Immersive; the container still looted
         yield from apply(0); g = G["gen"]
@@ -8660,7 +8670,7 @@ def step_closed17():
           and res.get("tavern_f") == "enter building" and res.get("innkeeper_hidden") is False and res.get("innkeeper_f") in ("bark", "talk", "hotel")
           and res.get("store_f") == "enter building" and res.get("counter_f") == "store" and res.get("counter_title") == "The general store" and res.get("counter_lines", 0) > 0
           and res.get("container_looted_closed") and res.get("container_looted_immersive") and res.get("load_chosen") and res.get("loaded_off_door_m", 9) < 2.0
-          and res.get("loaded_in") == -1)
+          and res.get("loaded_in") == -1 and res.get("loaded_yaw_off", 999) < 10 and res.get("immersive_again") == res.get("immersive") and res.get("note_skipped"))
     step_result("closed17", ok, **res)
 
 

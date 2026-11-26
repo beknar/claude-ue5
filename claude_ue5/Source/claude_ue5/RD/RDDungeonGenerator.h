@@ -2315,6 +2315,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List17") bool SetStructures17(int32 Mode, bool bApply);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List17") int32 GetStructures17() const { return StructuresChoice17(); }
 	FVector SavePoint17(const FVector& Her) const;
+	float SaveYaw17(float Yaw) const;
+	void EnsureStructures17() const;
 	bool IsEnterable17(const ARDSection* S, int32 BI) const;
 	int32 BuildingDoorNear17(const FVector& From, bool bOut) const;
 	bool BuildingDoorFirst17(const FVector& From, int32 I, float NearerThan, const ARDSection* BestS, bool bBestDoor, int32 BestI) const;

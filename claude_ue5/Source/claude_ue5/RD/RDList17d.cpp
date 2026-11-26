@@ -28,12 +28,19 @@ FString ARDDungeonGenerator::StructuresName17(int32 Mode)
 FString ARDDungeonGenerator::StructuresWords17(int32 Mode)
 {
 	return Mode == 1
-		? FString(TEXT("Each building is a closed shell in the town; its door opens a level of its own for it. Its windows show pictures. Lighter to draw."))
-		: FString(TEXT("Every building is built with its rooms in the town: walk in through its door, see in through its windows."));
+		? FString(TEXT("Each building a closed shell; its door opens a level of its own. Windows show pictures."))
+		: FString(TEXT("Every building has its rooms in the town: walk in at its door, see in at its windows."));
+}
+
+void ARDDungeonGenerator::EnsureStructures17() const
+{
+	URDGameInstance* GI = URDGameInstance::Of(this);
+	if (GI && !GI->bStructuresLoaded17) { GI->bStructuresLoaded17 = true; const_cast<ARDDungeonGenerator*>(this)->LoadStructures17(); }
 }
 
 int32 ARDDungeonGenerator::StructuresChoice17() const
 {
+	EnsureStructures17();          // (PR #142's review: the castle's page read it before any town had)
 	const URDGameInstance* GI = URDGameInstance::Of(this);
 	return GI ? FMath::Clamp(GI->Structures17, 0, 1) : 0;
 }
@@ -59,7 +66,9 @@ bool ARDDungeonGenerator::SetStructures17(int32 Mode, bool bApply)
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	if (!GI) return false;
 	Mode = FMath::Clamp(Mode, 0, 1);
-	GI->Structures17 = Mode; GI->StructuresCmd17 = -1;
+	if (bMenuDryRun) return true;          // (PR #142's review: a dry run wrote the ini and moved her)
+	EnsureStructures17();
+	GI->Structures17 = Mode; GI->StructuresCmd17 = -1; GI->bStructuresRead17 = true; GI->bStructuresLoaded17 = true;
 	if (GConfig) { GConfig->SetInt(TEXT("RandomDungeon.Options"), TEXT("Structures"), Mode, GGameUserSettingsIni); GConfig->Flush(false, GGameUserSettingsIni); }
 	UE_LOG(LogRDList17d, Log, TEXT("RDSTRUCTURES17 %s"), *StructuresName17(Mode));
 	// (applied at once in a town whose build differs: the game saved and loaded where she stands, the town built again in the new mode)
@@ -67,10 +76,20 @@ bool ARDDungeonGenerator::SetStructures17(int32 Mode, bool bApply)
 	// (against the town as it was built (PR #141's review: the live setting can differ from it))
 	if (!bApply || !bTown || !S || S->BldClosed17 == Closed17() || (PlayerCombat && PlayerCombat->IsDead())) return true;
 	if (InBuilding17 >= 0) LeaveBuilding17();
-	if (bMenuDryRun) return true;
 	SetMenuOpen(false);
-	if (!SaveGameNow(TEXT("autosave"), TEXT("structures"), FString())) return false;
-	return LoadGameFrom(TEXT("autosave"));
+	// (a slot of its own (PR #142's review: the player's autosave was taken over and shown as "structures"); the load lets it go)
+	if (!SaveGameNow(TEXT("structures17"), TEXT("structures"), FString())) return false;
+	const bool bOk = LoadGameFrom(TEXT("structures17"));
+	UGameplayStatics::DeleteGameInSlot(TEXT("structures17"), 0);
+	return bOk;
+}
+
+float ARDDungeonGenerator::SaveYaw17(float Yaw) const
+{
+	const ARDSection* S = GetSection(FIntPoint::ZeroValue);
+	if (InBuilding17 < 0 || !S || !S->TownBlds.IsValidIndex(InBuilding17)) return Yaw;
+	const ARDSection::FTownBld& B = S->TownBlds[InBuilding17];
+	return FVector(RDL17dDir4[B.DoorSide].X, RDL17dDir4[B.DoorSide].Y, 0.f).Rotation().Yaw;
 }
 
 FVector ARDDungeonGenerator::SavePoint17(const FVector& Her) const

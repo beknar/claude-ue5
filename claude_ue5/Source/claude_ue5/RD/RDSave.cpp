@@ -80,7 +80,8 @@ bool ARDDungeonGenerator::SaveGameNow(const FString& Slot, const FString& Why, c
 	URDSaveGame* Sv = Cast<URDSaveGame>(UGameplayStatics::CreateSaveGameObject(URDSaveGame::StaticClass()));
 	Sv->SavedAt = FDateTime::Now();
 	Sv->Level = UWorld::RemovePIEPrefix(GetWorld()->GetOutermost()->GetName());
-	Sv->Hero = CurrentHero; Sv->At = SavePoint17(Her->GetActorLocation());          // (the list of 2026-11-26: inside a building's level, at its door's outside) Sv->Yaw = Her->GetActorRotation().Yaw;
+	// (the list of 2026-11-26: inside a building's level, at its door's outside, facing out of it)
+	Sv->Hero = CurrentHero; Sv->At = SavePoint17(Her->GetActorLocation()); Sv->Yaw = SaveYaw17(Her->GetActorRotation().Yaw);
 	Sv->Why = Why; Sv->Place = Place; Sv->bInTown = bTown; Sv->Name = Name;
 	// (the list of 2026-11-16: the world it was made in; an older world's give-back still waiting (loaded in the castle, saved there)
 	// done first, so what is written is whole (PR #89's review))

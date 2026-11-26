@@ -3146,7 +3146,10 @@ void ARDHUD::DrawMenu(float Sc)
 		{
 			// (the list of 2026-11-26: a line of words about the choice above it)
 			Gen->MenuTrackBoxes.Add(FBox2D(ForceInit));
-			UI.Text(P[1], FLinearColor(0.70f, 0.68f, 0.62f), R0.X + 24.f * Sc, R0.Y + 14.f * Sc, Small, Sc * 1.0f);
+			// (fitted to the row (PR #142's review: measured nowhere, the words could run past the board))
+			float Nw, Nh; UI.TextSize(P[1], Nw, Nh, Small, Sc);
+			const float Ns = Sc * FMath::Min(1.f, (R1.X - R0.X - 40.f * Sc) / FMath::Max(Nw, 1.f));
+			UI.Text(P[1], FLinearColor(0.70f, 0.68f, 0.62f), R0.X + 24.f * Sc, R0.Y + 14.f * Sc, Small, Ns);
 		}
 		else if (P[0] == TEXT("choice") && P.Num() >= 3)
 		{

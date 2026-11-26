@@ -44,8 +44,8 @@ bool ARDDungeonGenerator::Closed17() const
 {
 	const int32 C = CVarRDStructures17.GetValueOnGameThread();
 	if (C >= 0) return C != 0;
-	URDGameInstance* GI = URDGameInstance::Of(this);
-	if (GI && !GI->bStructuresLoaded17) { GI->bStructuresLoaded17 = true; const_cast<ARDDungeonGenerator*>(this)->LoadStructures17(); }          // (the option read before the first town is planned)
+	EnsureStructures17();          // (the option read before the first town is planned)
+	const URDGameInstance* GI = URDGameInstance::Of(this);
 	return GI && GI->Structures17 == 1;
 }
 
