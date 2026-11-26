@@ -8892,6 +8892,13 @@ def step_fortress25():
 STEPS.update({"fortress25": step_fortress25})
 
 
+def is_pickup(comp):
+    """an armory table's weapon or shield to take: its mesh is tagged RDPickup (ARDSection::AddPickup). PR #135's review: left out by
+    name, the castle's wall swords and shields (SM_Sword_1, SM_Shield_1) would have been let through too"""
+    try: return bool(comp.component_has_tag("RDPickup"))
+    except Exception: return False
+
+
 def step_fortress26():
     """the list of 2026-11-22 ("the heaven dungeon's assets should be taken from any modern city building pack, looking like the inside of a
     modern building for the first two levels"): tier 1's first hall and a set of tier 2 built in the Office theme: their walls, floors and
@@ -8927,6 +8934,7 @@ def step_fortress26():
         for comp in S.get_components_by_class(unreal.StaticMeshComponent):
             m = comp.get_editor_property("static_mesh")
             if not m or not comp.is_visible(): continue
+            if is_pickup(comp): continue          # (an armory table's sword or shield is an item to take, not a castle piece)
             k = m.get_name(); n[k] = n.get(k, 0) + (comp.get_instance_count() if isinstance(comp, unreal.InstancedStaticMeshComponent) else 1)
             if k in castle_m and len(where) < 12:
                 try:
@@ -8942,7 +8950,7 @@ def step_fortress26():
         res[nm] = {"office": sum(v for k, v in n.items() if "HVO" in k), "facility": sum(v for k, v in n.items() if "HVF" in k),
                    "heaven_furniture": sum(v for k, v in n.items() if k.startswith("SM_HV_") or k.startswith("SM_HV2") or k.startswith("SM_HV3")),
                    "office_things": sum(v for k, v in n.items() if any(x in k for x in ("Printer", "Water_Dispenser", "Shelving", "Planters", "Drawer"))),
-                   "castle_left": {k: v for k, v in n.items() if k in castle_m and not k.startswith("SM_Shield_") and not k.startswith("SM_Sword_")}}          # (the armory's things to take)
+                   "castle_left": {k: v for k, v in n.items() if k in castle_m}}
     # (pictures: the first hall from its middle, and a room of the tier-2 set from its middle)
     hc = g.get_start_room_center()
     put(V(hc.x - 600, hc.y, hc.z), yaw=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=0.0))
@@ -9021,9 +9029,10 @@ def step_fortress27():
         for comp in S.get_components_by_class(unreal.StaticMeshComponent):
             m = comp.get_editor_property("static_mesh")
             if not m or not comp.is_visible(): continue
+            if is_pickup(comp): continue          # (an armory table's sword or shield is an item to take, not a castle piece)
             k = m.get_name(); n[k] = n.get(k, 0) + (comp.get_instance_count() if isinstance(comp, unreal.InstancedStaticMeshComponent) else 1)
         r["walls_ceilings"] = sum(v for k, v in n.items() if k in shell_m)
-        r["castle_left"] = {k: v for k, v in n.items() if k in castle_m and not k.startswith("SM_Shield_") and not k.startswith("SM_Sword_")}          # (a shield or sword on an armory's table is an item to take)
+        r["castle_left"] = {k: v for k, v in n.items() if k in castle_m}
         r["alien_instances"] = sum(v for k, v in n.items() if k.startswith("SM_") and any(x in k for x in ("Rock", "Pebble", "Spike", "Tree", "Flower", "Moss", "Mushroom", "Plant", "Root", "IceCrystal")))
         # (the blocking clusters' tiles blocked for the monsters' paths)
         bl = list(S.get_alien_blocking27())
@@ -9073,7 +9082,7 @@ def step_fortress27():
             quiet(False)
             put(V(her.x, her.y, her.z + 100)); yield from wait(0.3)
             m = g.spawn_monster_named("Soldier", V(mon.x, mon.y, mon.z + 100), 4, 1.0, 0.0, 1.0); yield from wait(0.3)
-            if not m: continue
+            if not m: quiet(True); continue
             try: m.set_editor_property("aggro_distance", 3000.0)
             except Exception: pass
             start = (m.get_actor_location() - her).length(); closest = start
@@ -9092,7 +9101,7 @@ def step_fortress27():
     res["sky_in"] = round(g.get_alien_sky27(), 2); res["fog_in"] = round(g.get_fog_density27(), 4)
     quiet(False); res["pictures"] = shots
     ok = res["open_themes"] == ["Alien"] and res["themes"][2:5] == ["Alien"] * 3 and res["force_walls_tier3"] > 0 and res["sky_in"] < 0.05 \
-         and pushes and all(p < -10 for p in pushes) and chase.get("crossed") and chase.get("closest_m", 99) <= 3.5          # (a Soldier strikes from about 3 m)
+         and pushes and all(p < -10 for p in pushes) and chase.get("crossed") and chase.get("closest_m", 99) < 3.0
     for t in (3, 4, 5):
         r = res.get("tier%d" % t, {})
         ok = ok and r.get("generated") and r.get("open") == 1 and r.get("walls_ceilings", 1) == 0 and r.get("ground", 0) > 100 and r.get("blockers", 0) > 50 \

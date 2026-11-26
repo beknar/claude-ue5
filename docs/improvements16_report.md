@@ -44,9 +44,9 @@ Two runs failed, and both were fixed:
 The same package and places as BEFORE (16016's seeds, BEFORE's places replayed), at 3840 x 2160, Epic quality, on the RTX 3060. Measured on 2026-11-25: 82 places in the wilds, then the two dungeon halls. Every place was measured but the canyon networks' run, which the run refuses as in BEFORE.
 - **The worst places gained the most**: the temperate autumn forests 17.9 to 21.9 FPS (+22 %; the GPU 55 to 44.5 ms a frame), and the volcanoes 13.8 to 16.5 (+20 %).
 - **The cities**: 24.5 to 33.8 FPS, from -3 % to +8 % against BEFORE (Heaven's square +8 %, Brokenspire's square at noon +6 %).
-- **The biomes**: mostly within ±5 %; the wetlands standing -11 % (running -0 %), the plains -5 to -6 %.
+- **The biomes**: mostly within ±5 %. Below that: the wetlands standing -11 % (running -0 %), the plains -5 to -6 %, the geothermal caldera -5 to -6 %. These are the table's percentages, which drop the decimal: the wetlands' is -11.5, the castle's hall -7.5.
 - **The halls**: the castle's first hall 34.7 FPS (-7 %), the fortress's 36.3 (+6 %).
-- **Against MID** (the level-of-detail work alone, before phases 8 to 27's content), most places read the same or up to 6 % lower.
+- **Against MID** (the level-of-detail work alone, before phases 8 to 27's content), most places read the same or a few % lower. The largest falls are Ashenreach at midnight: its street 32.1 to 27.9 (-13 %) and its square 32.6 to 29.4 (-10 %). The fortress's hall rose 33.6 to 36.3 (+8 %).
 
 The GPU is the limit nearly everywhere: 24 to 45 ms a frame against 4 to 20 ms on the game thread. The volcanoes' game thread is the exception, at 27 ms.
 
