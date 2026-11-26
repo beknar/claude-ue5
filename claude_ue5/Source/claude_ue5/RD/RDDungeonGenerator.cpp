@@ -1876,7 +1876,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 {
 	Super::Tick(Dt);
 	++GenTicks;
-	if (bOptionsMenu) KeepWindowLimits();
+	if (bOptionsMenu) { TickDeferredDisplay16(); KeepWindowLimits(); }
 	if (bOpeningMenu) return;
 	// (the list of 2026-11-22: -RDPerf, the frame rate in every city and biome, and the castle's and a dungeon's first hall)
 	if (bTown || bTownLink) TickPerf16(UGameplayStatics::GetPlayerPawn(this, 0));

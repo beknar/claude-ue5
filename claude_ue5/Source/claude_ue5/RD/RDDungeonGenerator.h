@@ -1006,6 +1006,10 @@ public:
 	 *  fullscreen, 2 windowed): set and applied as Apply does (the packaged game's check of Apply); and -RDMarkFile=<path>:
 	 *  "castle|<map>|<hero>" written there (a packaged game's test knows it reached the castle) */
 	void ApplyDisplayFromCommandLine();
+	/** list 16's package: the command line's display waits for the movie player's loading screen to finish (it draws into the
+	 *  window's back buffer on its own thread; a resize under it crashed the D3D12 render pass) */
+	void TickDeferredDisplay16();
+	bool bDisplayDeferred16 = false;   // (a plain member: a UPROPERTY added to the generator breaks a package staged on an earlier cook)
 	/** the list of 2026-11-11: the smallest the game's window may be dragged to (a packaged game's): 960 x 540 of the screen's
 	 *  pixels inside, its frame added; set by the castle's and the menu's start, after Apply, and whenever its scaling changes */
 	static void ApplyWindowLimits();

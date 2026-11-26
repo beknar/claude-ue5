@@ -16,6 +16,8 @@
 #include "Misc/CommandLine.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Parse.h"
+#include "MoviePlayer.h"
+#include "RenderingThread.h"
 #include "Engine/GameViewportClient.h"
 #include "Widgets/SWindow.h"
 #include "Framework/Application/SlateApplication.h"
@@ -246,6 +248,24 @@ void ARDDungeonGenerator::ApplyDisplayFromCommandLine()
 	TArray<FString> P; S.ParseIntoArray(P, TEXT("x"));
 	if (P.Num() < 3) { UE_LOG(LogRDMistward4, Warning, TEXT("RDOPTIONS -RDApplyDisplay=%s: want <width>x<height>x<mode>"), *S); return; }
 	PendingResolution = FIntPoint(FCString::Atoi(*P[0]), FCString::Atoi(*P[1])); PendingWindowMode = FMath::Clamp(FCString::Atoi(*P[2]), 0, 2);
+	// (list 16's package: this runs in BeginPlay, inside the map's load, while the movie player's loading screen still draws into
+	// the window's back buffer on its own thread; resized under it, the D3D12 render pass set a released target (an access
+	// violation in FD3D12CommandContext::SetRenderTargets, the main thread in FD3D12Viewport::Resize). Applied once it is done)
+	if (!GIsEditor && IsMoviePlayerEnabled() && (!GetMoviePlayer()->IsLoadingFinished() || GetMoviePlayer()->IsMovieCurrentlyPlaying()))
+	{
+		bDisplayDeferred16 = true;
+		UE_LOG(LogRDMistward4, Log, TEXT("RDOPTIONS -RDApplyDisplay=%s: waits for the loading screen to finish"), *S);
+		return;
+	}
+	ApplyDisplaySettings();
+}
+
+void ARDDungeonGenerator::TickDeferredDisplay16()
+{
+	if (!bDisplayDeferred16) return;
+	if (IsMoviePlayerEnabled() && (!GetMoviePlayer()->IsLoadingFinished() || GetMoviePlayer()->IsMovieCurrentlyPlaying())) return;
+	bDisplayDeferred16 = false;
+	FlushRenderingCommands();
 	ApplyDisplaySettings();
 }
 

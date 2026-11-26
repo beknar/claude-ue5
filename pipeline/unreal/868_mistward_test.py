@@ -8892,6 +8892,13 @@ def step_fortress25():
 STEPS.update({"fortress25": step_fortress25})
 
 
+def is_pickup(comp):
+    """an armory table's weapon or shield to take: its mesh is tagged RDPickup (ARDSection::AddPickup). PR #135's review: left out by
+    name, the castle's wall swords and shields (SM_Sword_1, SM_Shield_1) would have been let through too"""
+    try: return bool(comp.component_has_tag("RDPickup"))
+    except Exception: return False
+
+
 def step_fortress26():
     """the list of 2026-11-22 ("the heaven dungeon's assets should be taken from any modern city building pack, looking like the inside of a
     modern building for the first two levels"): tier 1's first hall and a set of tier 2 built in the Office theme: their walls, floors and
@@ -8927,6 +8934,7 @@ def step_fortress26():
         for comp in S.get_components_by_class(unreal.StaticMeshComponent):
             m = comp.get_editor_property("static_mesh")
             if not m or not comp.is_visible(): continue
+            if is_pickup(comp): continue          # (an armory table's sword or shield is an item to take, not a castle piece)
             k = m.get_name(); n[k] = n.get(k, 0) + (comp.get_instance_count() if isinstance(comp, unreal.InstancedStaticMeshComponent) else 1)
             if k in castle_m and len(where) < 12:
                 try:
@@ -9021,9 +9029,10 @@ def step_fortress27():
         for comp in S.get_components_by_class(unreal.StaticMeshComponent):
             m = comp.get_editor_property("static_mesh")
             if not m or not comp.is_visible(): continue
+            if is_pickup(comp): continue          # (an armory table's sword or shield is an item to take, not a castle piece)
             k = m.get_name(); n[k] = n.get(k, 0) + (comp.get_instance_count() if isinstance(comp, unreal.InstancedStaticMeshComponent) else 1)
         r["walls_ceilings"] = sum(v for k, v in n.items() if k in shell_m)
-        r["castle_left"] = {k: v for k, v in n.items() if k in castle_m and not k.startswith("SM_Shield_")}          # (a shield on an armory's table is an item to take)
+        r["castle_left"] = {k: v for k, v in n.items() if k in castle_m}
         r["alien_instances"] = sum(v for k, v in n.items() if k.startswith("SM_") and any(x in k for x in ("Rock", "Pebble", "Spike", "Tree", "Flower", "Moss", "Mushroom", "Plant", "Root", "IceCrystal")))
         # (the blocking clusters' tiles blocked for the monsters' paths)
         bl = list(S.get_alien_blocking27())
@@ -9073,17 +9082,19 @@ def step_fortress27():
             quiet(False)
             put(V(her.x, her.y, her.z + 100)); yield from wait(0.3)
             m = g.spawn_monster_named("Soldier", V(mon.x, mon.y, mon.z + 100), 4, 1.0, 0.0, 1.0); yield from wait(0.3)
-            if not m: continue
+            if not m: quiet(True); continue
             try: m.set_editor_property("aggro_distance", 3000.0)
             except Exception: pass
             start = (m.get_actor_location() - her).length(); closest = start
             for k in range(60):
                 yield from wait(0.25); closest = min(closest, (m.get_actor_location() - G["pawn"].get_actor_location()).length())
             crossed = ((m.get_actor_location().x - a_.x) * d.x + (m.get_actor_location().y - a_.y) * d.y) > 150
-            chase = {"start_m": round(start / 100.0, 1), "closest_m": round(closest / 100.0, 1), "crossed": bool(crossed)}
+            tries = chase.get("tries", 0) + 1
+            chase = {"start_m": round(start / 100.0, 1), "closest_m": round(closest / 100.0, 1), "crossed": bool(crossed), "tries": tries}
             m.destroy_actor()
             quiet(True)
-            break
+            # (a vault's or an arena's doorway keeps its locked door in the open: try the next doorway, up to four)
+            if crossed or tries >= 4: break
     res["chase"] = chase
     # (the sky back down in the office's first hall)
     hc = g.get_start_room_center(); put(V(hc.x, hc.y, hc.z + 100), yaw=0.0); yield from wait(3.0)

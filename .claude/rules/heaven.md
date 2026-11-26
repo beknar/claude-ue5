@@ -168,4 +168,5 @@ The city is a wilderness town on `brokenspire` with the modern plan (`FRDWildTow
   - **A blocker for her is not a blocker for the camera**: the ridges' blockers ignore the camera channel.
   - **A test that reads back what the code just wrote proves nothing**: the blocked tiles were asked where `MarkBlocked` had marked them. Walk her to the edges, push her at the force wall, and have a monster chase her across a doorway.
   - **A rule that leaves a piece out must win over a copy that brings it in**: the office's cork board was copied in before the "left out" list ran, and stood on no wall.
+- **PR #135's review**: a test that excuses a thing by its mesh's name excuses every piece made from that mesh. The armoury's swords to take were left out of "castle left" as `SM_Sword_*`, and the castle's wall swords are `SM_Sword_1` too: one come back would have passed. The pickups are told by their component's tag (`RDPickup`). A test's limit is loosened only by a measure that needed it: the chase's 3.5 m had no run behind it (1.4 m measured).
 
