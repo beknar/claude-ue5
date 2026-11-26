@@ -515,10 +515,12 @@ void URDConsole::TickSelfTest()
 		SendKey(EKeys::Up); const FString B = GetInputText();
 		SendKey(EKeys::Down); const FString C = GetInputText();
 		if (Box.IsValid()) Box->SetText(FText::GetEmpty());
-		SendChars(TEXT("rd.Wild")); SendKey(EKeys::Tab); const FString D = GetInputText();
+		// (a prefix only one command has: rd.Wild alone is rd.WildRunSpeed's and rd.WildLod's (the list of 2026-11-22), and Tab rightly
+		// stops at what they share)
+		SendChars(TEXT("rd.WildR")); SendKey(EKeys::Tab); const FString D = GetInputText();
 		if (Box.IsValid()) Box->SetText(FText::GetEmpty());
 		Check(TEXT("recalls"), A == TEXT("t.MaxFPS") && B == TEXT("rd.WildRunSpeed") && C == TEXT("t.MaxFPS"), FString::Printf(TEXT("Up \"%s\", Up \"%s\", Down \"%s\""), *A, *B, *C));
-		Check(TEXT("completes"), D == TEXT("rd.WildRunSpeed "), FString::Printf(TEXT("rd.Wild and Tab: \"%s\""), *D));
+		Check(TEXT("completes"), D == TEXT("rd.WildRunSpeed "), FString::Printf(TEXT("rd.WildR and Tab: \"%s\""), *D));
 		SendChars(TEXT("nosuchcommand")); SendKey(EKeys::Enter);
 		const FString No = LineAfter(TEXT("nosuchcommand"), TEXT(""));
 		Check(TEXT("unknown"), No.Contains(TEXT("not recognized")), FString::Printf(TEXT("printed \"%s\""), *No));

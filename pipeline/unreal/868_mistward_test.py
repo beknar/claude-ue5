@@ -8942,7 +8942,7 @@ def step_fortress26():
         res[nm] = {"office": sum(v for k, v in n.items() if "HVO" in k), "facility": sum(v for k, v in n.items() if "HVF" in k),
                    "heaven_furniture": sum(v for k, v in n.items() if k.startswith("SM_HV_") or k.startswith("SM_HV2") or k.startswith("SM_HV3")),
                    "office_things": sum(v for k, v in n.items() if any(x in k for x in ("Printer", "Water_Dispenser", "Shelving", "Planters", "Drawer"))),
-                   "castle_left": {k: v for k, v in n.items() if k in castle_m}}
+                   "castle_left": {k: v for k, v in n.items() if k in castle_m and not k.startswith("SM_Shield_") and not k.startswith("SM_Sword_")}}          # (the armory's things to take)
     # (pictures: the first hall from its middle, and a room of the tier-2 set from its middle)
     hc = g.get_start_room_center()
     put(V(hc.x - 600, hc.y, hc.z), yaw=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=0.0))
@@ -9023,7 +9023,7 @@ def step_fortress27():
             if not m or not comp.is_visible(): continue
             k = m.get_name(); n[k] = n.get(k, 0) + (comp.get_instance_count() if isinstance(comp, unreal.InstancedStaticMeshComponent) else 1)
         r["walls_ceilings"] = sum(v for k, v in n.items() if k in shell_m)
-        r["castle_left"] = {k: v for k, v in n.items() if k in castle_m and not k.startswith("SM_Shield_")}          # (a shield on an armory's table is an item to take)
+        r["castle_left"] = {k: v for k, v in n.items() if k in castle_m and not k.startswith("SM_Shield_") and not k.startswith("SM_Sword_")}          # (a shield or sword on an armory's table is an item to take)
         r["alien_instances"] = sum(v for k, v in n.items() if k.startswith("SM_") and any(x in k for x in ("Rock", "Pebble", "Spike", "Tree", "Flower", "Moss", "Mushroom", "Plant", "Root", "IceCrystal")))
         # (the blocking clusters' tiles blocked for the monsters' paths)
         bl = list(S.get_alien_blocking27())
@@ -9080,17 +9080,19 @@ def step_fortress27():
             for k in range(60):
                 yield from wait(0.25); closest = min(closest, (m.get_actor_location() - G["pawn"].get_actor_location()).length())
             crossed = ((m.get_actor_location().x - a_.x) * d.x + (m.get_actor_location().y - a_.y) * d.y) > 150
-            chase = {"start_m": round(start / 100.0, 1), "closest_m": round(closest / 100.0, 1), "crossed": bool(crossed)}
+            tries = chase.get("tries", 0) + 1
+            chase = {"start_m": round(start / 100.0, 1), "closest_m": round(closest / 100.0, 1), "crossed": bool(crossed), "tries": tries}
             m.destroy_actor()
             quiet(True)
-            break
+            # (a vault's or an arena's doorway keeps its locked door in the open: try the next doorway, up to four)
+            if crossed or tries >= 4: break
     res["chase"] = chase
     # (the sky back down in the office's first hall)
     hc = g.get_start_room_center(); put(V(hc.x, hc.y, hc.z + 100), yaw=0.0); yield from wait(3.0)
     res["sky_in"] = round(g.get_alien_sky27(), 2); res["fog_in"] = round(g.get_fog_density27(), 4)
     quiet(False); res["pictures"] = shots
     ok = res["open_themes"] == ["Alien"] and res["themes"][2:5] == ["Alien"] * 3 and res["force_walls_tier3"] > 0 and res["sky_in"] < 0.05 \
-         and pushes and all(p < -10 for p in pushes) and chase.get("crossed") and chase.get("closest_m", 99) < 3.0
+         and pushes and all(p < -10 for p in pushes) and chase.get("crossed") and chase.get("closest_m", 99) <= 3.5          # (a Soldier strikes from about 3 m)
     for t in (3, 4, 5):
         r = res.get("tier%d" % t, {})
         ok = ok and r.get("generated") and r.get("open") == 1 and r.get("walls_ceilings", 1) == 0 and r.get("ground", 0) > 100 and r.get("blockers", 0) > 50 \

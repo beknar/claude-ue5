@@ -17,8 +17,13 @@ Built and compiled, but no test has run it yet:
 ## The list of 2026-11-22's twenty-fifth phase: the fortress's defenders
 
 - [ ] **The defenders' voices and guns**: the drones, aliens and creatures speak with the Horned set (no set of their own on the map); the Sci-Fi defender's, the Dystopia gunner's and the mech's guns are separate meshes on other skeletons and not in their hands; the medics heal with the reload clip (no pack has a healing clip).
-- [ ] **The open alien tiers (phase 27)**: not played through: a fight in the open (the monsters see farther with no walls; the ridges' blockers stop their sight), a vault's and an arena's force-field doors in play, the ceiling traps (they fall from the room's height, out of the open sky). The generator gained properties: a full cook for a package.
-- [ ] **A package needs a full cook**: `FRDMonsterDef` and `ARDMonster` gained properties (the heal, the colour sets, the drop): a `-SkipCook` package staged on an earlier cook would read past them.
+- [ ] **The open alien tiers (phase 27)**: not played through: a fight in the open (the monsters see farther with no walls; the ridges' blockers stop their sight), a vault's and an arena's force-field doors in play, the ceiling traps (they fall from the room's height, out of the open sky).
+- [x] **A package needs a full cook** (`FRDMonsterDef` and `ARDMonster` gained properties): phase 28's package (`builds\list16final`, 2026-11-25) was fully cooked, 0 cook errors; its `fortress_open` run opened tier 3 round her (the sky 1.0, 10,594 cluster parts placed).
+
+## The list of 2026-11-22's twenty-eighth phase: AFTER and the package
+
+- [ ] **The package's other runs were not repeated on the last build**: the fixes for the console's completion check and for the display crash were built afterwards (`-SkipCook`, code only). Only the display (3 runs) and console runs went on that build; the 20 other runs passed on the build before it.
+- [ ] **A window resized by the player during a map's load**: the movie player's loading screen draws into the window's back buffer on its own thread, and a resize under it crashed the D3D12 render pass (`-RDApplyDisplay` in the castle's BeginPlay; the apply now waits for it). A player dragging the window's edge or pressing Alt+Enter during a load could still meet it. It was not tried.
 - [ ] **Not measured in a dungeon's play**: the defenders met in the fortress's rooms (the test spawns them by the start hall) and in the wilds at tiers 26 to 30, and the caves after `935` / `945 level` (rerun, not tested).
 
 ## The list of 2026-11-22 ([docs/improvements16.txt](docs/improvements16.txt)), its twenty-fourth phase: the skyscrapers' level
