@@ -3142,6 +3142,12 @@ void ARDHUD::DrawMenu(float Sc)
 			const bool bCaret = bOn && FMath::Fmod((float)FPlatformTime::Seconds(), 1.f) < 0.55f;
 			UI.Text(V + (bCaret ? TEXT("|") : TEXT("")), bOn ? FLinearColor::White : Dim, F0.X + 10.f * Sc, R0.Y + 12.f * Sc, Small, Sc * 1.2f);
 		}
+		else if (P[0] == TEXT("note"))
+		{
+			// (the list of 2026-11-26: a line of words about the choice above it)
+			Gen->MenuTrackBoxes.Add(FBox2D(ForceInit));
+			UI.Text(P[1], FLinearColor(0.70f, 0.68f, 0.62f), R0.X + 24.f * Sc, R0.Y + 14.f * Sc, Small, Sc * 1.0f);
+		}
 		else if (P[0] == TEXT("choice") && P.Num() >= 3)
 		{
 			// (mistward4: a choice: its label, and its value between arrows (A D or a click change it))

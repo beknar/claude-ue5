@@ -8529,6 +8529,143 @@ def step_building17():
 
 STEPS.update({"building17": step_building17})
 
+
+# ================================================================================================ the list of 2026-11-26's sixth phase
+def struct_lines17():
+    g = G["gen"]; g.set_menu_open(True)
+    l0 = [str(l) for l in g.get_menu_lines()]
+    if "button|Options" in l0: g.activate_menu_line(l0.index("button|Options"))
+    ls = [str(l) for l in g.get_menu_lines()]
+    g.set_menu_open(False)
+    ch = next((l for l in ls if l.startswith("choice|Structures|")), "")
+    k = ls.index(ch) if ch else -1
+    note = ls[k + 1] if 0 <= k < len(ls) - 1 and ls[k + 1].startswith("note|") else ""
+    return ch.split("|")[-1] if ch else None, note[5:]
+def town_counts17():
+    S = section()
+    return {"containers": S.get_num_containers(), "spots": len(spots()), "beds": len([l for l in G["gen"].get_town_spot_lines()]),
+            "buildings": len(blds())}
+def step_closed17():
+    """Closed Structures chosen (the user's "put this game mode behind the Options button ... call the default mode 'Immersive Interiors'
+    and the new mode 'Closed Structures'. Describe both game modes"; RD/RDList17d.cpp): the Options page's Structures line and the line of
+    words under it in both modes; chosen from the page, the game saved and loaded where she stood and the town built again in the new mode
+    (rd.Structures17 left to the option): Immersive -> Closed -> Immersive. In Closed: the same buildings, containers and spots as Immersive
+    on the town's seed, no furnishing drawn in the town; the tavern entered and its innkeeper there and spoken to; the general store entered
+    and its counter's F opens its store; a home's container opened inside, then looted in Immersive too; a save made inside a building loaded
+    at its door's outside"""
+    g = G["gen"]; res = {}; quiet(True)
+    set_structures17(-1)
+    c0 = g.get_structures17()
+    def kind_name(i):
+        b = next((x for x in blds() if x["i"] == i), None)
+        return b["kind"] if b else "?"
+    def apply(mode):
+        G["travel_until"] = time.time() + 150
+        G["gen"].set_structures17(mode, True)
+        yield from until_loaded(150)
+        refresh(); yield from wait(2.0); refresh()
+    def enter(e):
+        g = G["gen"]
+        put(V(e["door"].x + e["out"].x * 150.0, e["door"].y + e["out"].y * 150.0, 0), yaw=math.degrees(math.atan2(-e["out"].y, -e["out"].x)))
+        G["pawn"].get_movement_component().stop_movement_immediately(); yield from wait(0.4)
+        f_ = str(g.interact_nearest(G["pawn"].get_actor_location())); t0 = time.time()
+        while time.time() - t0 < 20 and bstate17()["in"] != e["i"]: yield
+        while time.time() - t0 < 30 and g.is_cover_up16(): yield
+        yield from rwait(0.5)
+        return f_
+    try:
+        # ---- the page in Immersive
+        if c0 != 0: yield from apply(0)
+        g = G["gen"]
+        res["immersive_line"] = struct_lines17()
+        imm = town_counts17(); res["immersive"] = imm
+        res["immersive_closed"] = bstate17()["closed"]
+        # ---- chosen: Closed
+        yield from apply(1); g = G["gen"]
+        res["closed_line"] = struct_lines17()
+        res["closed_state"] = bstate17()["closed"]
+        clo = town_counts17(); res["closed"] = clo
+        en = enterable17(); res["enterable"] = len(en)
+        il = [str(l).split("|") for l in g.get_interior_lines16()]
+        eset = {e["i"] for e in en}
+        res["batches_in_town"] = sum(int(l[3]) for l in il if int(l[0]) in eset)          # (the enterable ones'; a burned house keeps its own)
+        # (the tavern: its innkeeper inside, spoken to)
+        tav = next((e for e in en if kind_name(e["i"]) == "tavern"), None)
+        if tav:
+            res["tavern_f"] = yield from enter(tav)
+            inn = next((f for f in folk() if f["role"] == "Innkeeper"), None)
+            if inn:
+                t = g.get_townsfolk(inn["i"]); res["innkeeper_hidden"] = bool(t.get_editor_property("hidden"))
+                put(V(inn["at"].x + 120, inn["at"].y, 0)); G["pawn"].get_movement_component().stop_movement_immediately(); yield from wait(0.4)
+                res["innkeeper_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.3); g.close_town_panel()
+            g.leave_building17(); yield from rwait(1.0)
+        # (the general store: its counter's F opens its store)
+        sto = next((e for e in en if kind_name(e["i"]) == "store"), None)
+        if sto:
+            res["store_f"] = yield from enter(sto)
+            ck = next((s for s in stores17() if s["bld"] == sto["i"]), None)
+            if ck:
+                d = ck["counter"] - ck["door"]; dl = max(math.hypot(d.x, d.y), 1.0)
+                put(V(ck["counter"].x - d.x / dl * 140.0, ck["counter"].y - d.y / dl * 140.0, 0)); G["pawn"].get_movement_component().stop_movement_immediately(); yield from wait(0.3)
+                res["counter_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.3)
+                res["counter_title"] = str(g.get_town_title21()); res["counter_lines"] = len([p for p in panel() if p[0] == "buy"])
+                g.close_town_panel(); yield from rwait(0.2)
+            g.leave_building17(); yield from rwait(1.0)
+        # (a home's container opened inside)
+        S = section(); ci = -1; home = None
+        for e in en:
+            if kind_name(e["i"]) != "home": continue
+            for i in range(S.get_num_containers()):
+                if S.town_building_at(S.get_container_location(i)) == e["i"] and not S.is_container_looted(i): ci = i; home = e; break
+            if home: break
+        if home:
+            yield from enter(home)
+            cl = S.get_container_location(ci)
+            res["container_shown"] = True
+            put(V(cl.x + 90, cl.y, 0)); G["pawn"].get_movement_component().stop_movement_immediately(); yield from wait(0.4)
+            for dx, dy in ((90, 0), (-90, 0), (0, 90), (0, -90)):
+                put(V(cl.x + dx, cl.y + dy, 0)); G["pawn"].get_movement_component().stop_movement_immediately(); yield from wait(0.3)
+                g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(0.6); g.close_town_panel()
+                if S.is_container_looted(ci): break
+            res["container_looted_closed"] = bool(S.is_container_looted(ci)); res["container"] = ci
+            # (a save made inside: at its door's outside when loaded)
+            yield from menu_save("Closed17 Inside")
+            want = V(home["door"].x + home["out"].x * 180.0, home["door"].y + home["out"].y * 180.0, 0)
+            g.leave_building17(); yield from rwait(1.0)
+            put(V(want.x + 2000, want.y, 0)); yield from wait(1.0)
+            k, page = yield from menu_load_line("Closed17 Inside")
+            res["load_chosen"] = g.activate_menu_line(k) if k >= 0 else False
+            G["travel_until"] = time.time() + 150
+            yield from until_loaded(150); refresh(); yield from wait(1.5)
+            p = G["pawn"].get_actor_location(); res["loaded_off_door_m"] = round(math.hypot(p.x - want.x, p.y - want.y) / 100, 2)
+            res["loaded_in"] = bstate17()["in"]
+        # ---- chosen back: Immersive; the container still looted
+        yield from apply(0); g = G["gen"]
+        res["back_state"] = bstate17()["closed"]; res["back_line"] = struct_lines17()
+        if ci >= 0: res["container_looted_immersive"] = bool(section().is_container_looted(ci))
+        res["immersive_again"] = town_counts17()
+    except Exception as e_:
+        import traceback
+        res["error"] = str(e_) + traceback.format_exc()[-700:]
+    finally:
+        try:
+            if G["gen"].get_structures17() != c0: G["gen"].set_structures17(c0, False)
+        except Exception: pass
+        quiet(False)
+    words = ("Immersive Interiors", "Closed Structures")
+    il_, cl_ = res.get("immersive_line", (None, "")), res.get("closed_line", (None, ""))
+    ok = ("error" not in res and il_[0] == words[0] and cl_[0] == words[1] and len(il_[1]) > 40 and len(cl_[1]) > 40 and il_[1] != cl_[1]
+          and res.get("immersive_closed") == 0 and res.get("closed_state") == 1 and res.get("back_state") == 0
+          and res.get("immersive") == res.get("closed") and res.get("enterable", 0) > 20 and res.get("batches_in_town") == 0
+          and res.get("tavern_f") == "enter building" and res.get("innkeeper_hidden") is False and res.get("innkeeper_f") in ("bark", "talk", "hotel")
+          and res.get("store_f") == "enter building" and res.get("counter_f") == "store" and res.get("counter_title") == "The general store" and res.get("counter_lines", 0) > 0
+          and res.get("container_looted_closed") and res.get("container_looted_immersive") and res.get("load_chosen") and res.get("loaded_off_door_m", 9) < 2.0
+          and res.get("loaded_in") == -1)
+    step_result("closed17", ok, **res)
+
+
+STEPS.update({"closed17": step_closed17})
+
 def run():
     G["saves"] = saves_snapshot()
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None

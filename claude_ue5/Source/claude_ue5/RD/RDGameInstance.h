@@ -170,6 +170,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Tower24") int32 TowerSeed24 = 0;
 	/** the list of 2026-11-26: the Structures option, 0 Immersive Interiors, 1 Closed Structures (the Options page's, the sixth phase) */
 	int32 Structures17 = 0;
+	/** -RDStructures=closed|immersive (-1: none), read once; the option read from the ini */
+	int32 StructuresCmd17 = -1;
+	bool bStructuresRead17 = false, bStructuresLoaded17 = false;
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Tower24") int32 TowerFloors24 = 0;
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Tower24") FString TowerName24;
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Tower24") FVector TowerAt24 = FVector::ZeroVector;

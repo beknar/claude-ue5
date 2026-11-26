@@ -1,0 +1,66 @@
+{
+ "tag": "c17b",
+ "plan": [
+  "closed17"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "closed17",
+   "ok": true,
+   "immersive_line": [
+    "Immersive Interiors",
+    "Every building is built with its rooms in the town: walk in through its door, see in through its windows."
+   ],
+   "immersive": {
+    "containers": 623,
+    "spots": 73,
+    "beds": 73,
+    "buildings": 129
+   },
+   "immersive_closed": 0,
+   "closed_line": [
+    "Closed Structures",
+    "Each building is a closed shell in the town; its door opens a level of its own for it. Its windows show pictures. Lighter to draw."
+   ],
+   "closed_state": 1,
+   "closed": {
+    "containers": 623,
+    "spots": 73,
+    "beds": 73,
+    "buildings": 129
+   },
+   "enterable": 76,
+   "batches_in_town": 0,
+   "tavern_f": "enter building",
+   "innkeeper_hidden": false,
+   "innkeeper_f": "bark",
+   "store_f": "enter building",
+   "counter_f": "store",
+   "counter_title": "The general store",
+   "counter_lines": 54,
+   "container_shown": true,
+   "container_looted_closed": true,
+   "container": 113,
+   "load_chosen": true,
+   "loaded_off_door_m": 0.0,
+   "loaded_in": -1,
+   "back_state": 0,
+   "back_line": [
+    "Immersive Interiors",
+    "Every building is built with its rooms in the town: walk in through its door, see in through its windows."
+   ],
+   "container_looted_immersive": true,
+   "immersive_again": {
+    "containers": 623,
+    "spots": 73,
+    "beds": 73,
+    "buildings": 129
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "error": null,
+ "saves_put_back": 2,
+ "windows_shown_again": 2
+}

@@ -932,8 +932,9 @@ TArray<FName> ARDDungeonGenerator::MenuItems() const
 		return L;
 	}
 	// (the list of 2026-11-10: where there are quests (the towns and the game's dungeons), the quest window on or off)
-	if (bTown || bTownLink) return { Vol[0], Vol[1], Vol[2], Vol[3], TEXT("controls"), TEXT("questwin"), TEXT("res"), TEXT("mode"), TEXT("apply"), TEXT("back") };
-	return { Vol[0], Vol[1], Vol[2], Vol[3], TEXT("controls"), TEXT("res"), TEXT("mode"), TEXT("apply"), TEXT("back") };
+	// (the list of 2026-11-26: the Structures, Immersive Interiors or Closed Structures, and what the chosen one is)
+	if (bTown || bTownLink) return { Vol[0], Vol[1], Vol[2], Vol[3], TEXT("controls"), TEXT("questwin"), TEXT("structures"), TEXT("structnote"), TEXT("res"), TEXT("mode"), TEXT("apply"), TEXT("back") };
+	return { Vol[0], Vol[1], Vol[2], Vol[3], TEXT("controls"), TEXT("structures"), TEXT("structnote"), TEXT("res"), TEXT("mode"), TEXT("apply"), TEXT("back") };
 }
 
 static int32 RDMenuVolumeOf(const FName& Id)
@@ -988,6 +989,8 @@ TArray<FString> ARDDungeonGenerator::GetMenuLines() const
 		else if (Id == TEXT("quit")) Out.Add(TEXT("button|Quit"));
 		else if (Id == TEXT("controls")) Out.Add(FString::Printf(TEXT("choice|Controls hint|%s"), bControlsShown ? TEXT("On") : TEXT("Off")));
 		else if (Id == TEXT("questwin")) Out.Add(FString::Printf(TEXT("choice|Quest window|%s"), bQuestWindowShown ? TEXT("On") : TEXT("Off")));
+		else if (Id == TEXT("structures")) Out.Add(FString::Printf(TEXT("choice|Structures|%s"), *StructuresName17(StructuresChoice17())));
+		else if (Id == TEXT("structnote")) Out.Add(FString::Printf(TEXT("note|%s"), *StructuresWords17(StructuresChoice17())));
 		else if (Id == TEXT("res"))
 			// (windowed fullscreen covers the screen whatever the size chosen: the engine sizes that window to the screen)
 			Out.Add(PendingWindowMode == 1 ? FString(TEXT("choice|Resolution|the screen's own (windowed fullscreen)"))
@@ -1091,6 +1094,7 @@ void ARDDungeonGenerator::StepMenuValue(int32 Step)
 	// (mistward4's choices: the controls hint on / off, a resolution, a display mode; the last two wait for Apply)
 	if (Id == TEXT("controls")) SetControlsHintShown(!bControlsShown);
 	else if (Id == TEXT("questwin")) SetQuestWindowShown(!bQuestWindowShown);
+	else if (Id == TEXT("structures")) SetStructures17(1 - StructuresChoice17(), true);
 	else if (Id == TEXT("deathdrop")) SetKeepItemsOnDeath(!bKeepItemsOnDeath);
 	else if (Id == TEXT("difficulty")) SetDifficulty(((Difficulty + Step) % NumDifficulties + NumDifficulties) % NumDifficulties);
 	else if (Id == TEXT("saveover"))
@@ -1165,7 +1169,8 @@ bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
 	if (Id == TEXT("loadauto") || Id == TEXT("loadsave")) { LastMenuAction = Id.ToString(); return LoadGameFrom(Id == TEXT("loadauto") ? TEXT("autosave") : TEXT("save")); }
 	if (Id.ToString().StartsWith(TEXT("load:"))) { LastMenuAction = Id.ToString(); return LoadGameFrom(Id.ToString().RightChop(5)); }
 	if (Id == TEXT("apply")) { LastMenuAction = TEXT("apply"); return ApplyDisplaySettings(); }
-	if (Id == TEXT("controls") || Id == TEXT("questwin") || Id == TEXT("res") || Id == TEXT("mode") || Id == TEXT("deathdrop") || Id == TEXT("difficulty")) { LastMenuAction = Id.ToString(); MenuCursor = L; StepMenuValue(1); return true; }
+	if (Id == TEXT("structnote")) return false;
+	if (Id == TEXT("controls") || Id == TEXT("questwin") || Id == TEXT("structures") || Id == TEXT("res") || Id == TEXT("mode") || Id == TEXT("deathdrop") || Id == TEXT("difficulty")) { LastMenuAction = Id.ToString(); MenuCursor = L; StepMenuValue(1); return true; }
 	if (Id == TEXT("town"))
 	{
 		LastMenuAction = TEXT("town");
