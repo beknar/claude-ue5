@@ -63,6 +63,7 @@ Each level's document has its full description and its rebuild notes. [docs/leve
 
 The README's parts, each in a document of its own:
 
+- [docs/game-guide.md](docs/game-guide.md) ([HTML](docs/game-guide.html)): the player's guide: the six heroes tier by tier, their abilities and costs, spells, curses, slashes and arts, equipment and how far it improves, crafting, what the wilderness gives, and the controls on keyboard and gamepad
 - [docs/capabilities.md](docs/capabilities.md): everything the project does today, in full: characters, worlds, combat, magic, Mistward Castle, Brokenspire, the wilderness and its cities, space flight, input, tests, reels, tooling
 - [docs/levels/character_levels.md](docs/levels/character_levels.md): the photo studio, the meadow levels and the JRPG and Tripo characters (with their rebuild notes)
 - [docs/levels/castle_level.md](docs/levels/castle_level.md): the medieval village with walk-in houses, and its rebuild order

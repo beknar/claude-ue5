@@ -20,6 +20,14 @@ Built and compiled, but no test has run it yet:
 - [ ] **The open alien tiers (phase 27)**: not played through: a fight in the open (the monsters see farther with no walls; the ridges' blockers stop their sight), a vault's and an arena's force-field doors in play, the ceiling traps (they fall from the room's height, out of the open sky).
 - [x] **A package needs a full cook** (`FRDMonsterDef` and `ARDMonster` gained properties): phase 28's package (`builds\list16final`, 2026-11-25) was fully cooked, 0 cook errors; its `fortress_open` run opened tier 3 round her (the sky 1.0, 10,594 cluster parts placed).
 
+## Found while writing the player's guide (2026-11-25, `docs/game-guide.md`'s "where data and code disagree"; read in the code, not tried in play)
+
+- [ ] **The secondary abilities on the gamepad**: for the Warrior, Mage, Warlock and Summoner an `@` ability made ready with the D-pad is not fired by RB; she attacks instead. Only the Rogue's and the Martial Artist's input path calls `UseAbility` (`RDCombat.cpp` near 2353-2357; `QuickItemAttack` in `RDList14.cpp` takes items only). Their number keys work. `docs/secondary.md` and `docs/controls.md` say the D-pad and the attack button work for all.
+- [ ] **The roll's dodge window** reads (1, 1) on the castle's map (`RollDodge`): the Rogue's and the Martial Artist's rolls dodge almost nothing.
+- [ ] **Summon Tier 6 to 10's kind choices** list Summon Tier 5's five kinds, not their own: stepping the kind drops the Iron Golem (and the others) for a tier-5 kind. Summon Tier 5's text says "5 at most" against a count of 3.
+- [ ] **The hero menu's Warrior** still says she starts with the painted viking shield, and her figure holds it: the game gives her none (the menu level keeps stale hero copies).
+- [ ] **Stale numbers in text**: the spell table's Fire Bolt line and its scroll say 7 mana and 23 damage, while every caster's own is a free cantrip doing 25. Dark Fire is 14 mana and 38 damage on the heroes, against the table's 12 and 34. `docs/classes.md` (2026-11-10) and `docs/controls.md` predate many later features.
+
 ## The list of 2026-11-22's twenty-eighth phase: AFTER and the package
 
 - [ ] **The package's other runs were not repeated on the last build**: the fixes for the console's completion check and for the display crash were built afterwards (`-SkipCook`, code only). Only the display (3 runs) and console runs went on that build; the 20 other runs passed on the build before it.
