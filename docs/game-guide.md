@@ -43,7 +43,7 @@ A new game starts in **Brokenspire**, the starting town, in a continent of wilds
 - **The caves** under every landmark tower take the region's tier. Monsters there are the region's kinds.
 - **Gold and prices** go by the game's tier, the deepest opened in any dungeon: x 1 at tier 1, 8 at tier 5, about 17 % a tier after (17.5 at tier 10, 185 at 25, 405 at 30). A kill or container pays by the tier where she earned it.
 
-![The great hall of Mistward Castle, tier 1, with the Rogue's trap outline showing a trap only she sees](images/guide/trap_rogue.jpg)
+![Mistward Castle: the Rogue disarms a pit trap](images/guide/trap_rogue.jpg)
 
 ## Rules common to every hero
 
@@ -400,7 +400,7 @@ From tier 5 on a fight takes as many blows each way as at tier 5: the hero's pow
 
 She fights with what she finds. Her own dagger stays the weakest weapon on purpose; found swords, bows, crossbows and shields are her strength, with +30 % on every melee blow. She alone takes the bosses' slashes, works the forge and breaks locks open in the wilds.
 
-**Resources:** hit points only. 140 at tier 1, +18 % a tier to tier 5 (241), then x 1.09 a tier (1350 at tier 25, 2077 at tier 30).
+**Resources:** hit points only. 140 at tier 1, +18 % a tier to tier 5 (241), then x 1.09 a tier (1350 at tier 25, 2076 at tier 30).
 
 **What she wields and wears**
 
@@ -468,7 +468,7 @@ Source: `SourceArt/balance/secondary.json` as written by `911` (read from the ma
 
 **What she crafts:** see [crafting](#crafting). Besides what any hero makes at an anvil, she alone works **the forge** (a tier-1 copy of a weapon, shield or set of armour she has looted, `ForgeHeroes`), and she alone can break a locked wild container open. She cannot brew healing or mana potions (`PotionBrewers` is the Mage and the Martial Artist).
 
-**How far she improves:** her dagger reaches 138 at tier 25 and 236 at tier 30. Her real growth is the gear: a Divine two-handed sword does up to 1442 a blow before her +30 % (Divine Ursag's Horn Blade, tiers 29-30), Divine Epic Plate takes 70 % off every blow, a Divine Broddi's Shield 60 % (90 % while she blocks), Divine HP Potency Ring 10 adds 250 % hit points.
+**How far she improves:** her dagger reaches 138 at tier 25 and 243 at tier 30. Her real growth is the gear: a Divine two-handed sword does up to 1442 a blow before her +30 % (Divine Ursag's Horn Blade, tiers 29-30), Divine Epic Plate takes 70 % off every blow, a Divine Broddi's Shield 60 % (90 % while she blocks), Divine HP Potency Ring 10 adds 250 % hit points.
 
 ---
 
@@ -539,7 +539,7 @@ Her spells are cast with her own three cast clips (`AS_Caster_Cast1` to `3`); St
 
 **What she crafts:** every anvil recipe any hero makes; she is one of the two **potion brewers** (healing and mana potions at the alchemist's table); she makes the scrolls of every type, since she reads them all.
 
-**How far she improves:** her spells' damage grows x 1.48 to tier 5, x 2.61 at 10, x 14.28 at 25 and x 25.17 at 30, and a boosted spell x 1.7 on top. Apocalypse (380 base) does 9565 at tier 30 to every monster she can see within 25 m, 16260 with a sixth-rank boost. Her mana grows with Magic rings up to +250 % (Divine Magic Potency Ring 10).
+**How far she improves:** her spells' damage grows x 1.48 to tier 5, x 2.61 at 10, x 14.28 at 25 and x 25.16 at 30, and a boosted spell x 1.7 on top. Apocalypse (380 base) does 9561 at tier 30 to every monster she can see within 25 m, 16253 with a sixth-rank boost. Her mana grows with Magic rings up to +250 % (Divine Magic Potency Ring 10).
 
 ---
 
@@ -711,7 +711,7 @@ Fists, feet and chi. Her chi attacks are spells: they cost mana, take her spell 
 | Dodge | B | 0 | a roll 4.2 m, as the Rogue's | 4.2 m | does not grow |
 | Found knives and daggers | attack | 0 | melee, +30 %; Dexterity rings add | the weapon's | the weapon's tier and quality |
 
-**Her chi attacks.** She starts with the first two and unlocks two more, in this order, at each tier's boss (`LockedWeapons`, `UnlockPerBoss` 2). Their damage follows 23 x (mana / 7) ^ 0.75 (`balance6.json`'s `chi`, then x 1.042 by `872`):
+**Her chi attacks.** She starts with the first two and unlocks two more, in this order, at each tier's boss (`LockedWeapons`, `UnlockPerBoss` 2). Their damage follows 23 x (mana / 7) ^ 0.75 (`balance6.json`'s `chi`, written by `880`):
 
 | Unlocked | Chi attack | Mana | Base damage | Burst radius | Look |
 |---|---|---|---|---|---|
@@ -785,7 +785,7 @@ Not the same as the Mage's tome spell **Iron Skin** (her armour's share of a blo
 
 **What she crafts:** the anvil's recipes; she is one of the two **potion brewers** (healing and mana potions); no scrolls (she reads none), not at the forge.
 
-**How far she improves:** Heaven's Gale does 446.6 x 14.28 = 6378 at tier 25 and 11241 at tier 30 for 88 mana; her fists 628 at tier 25 and 1107 at tier 30. A Divine Wrist Blade does 723 + 30 % = 940 before a Dexterity ring.
+**How far she improves:** Heaven's Gale does 446.6 x the tier's multiplier (14.277) = 6376 at tier 25 and 11237 at tier 30 for 88 mana; her fists 628 at tier 25 and 1107 at tier 30. A Divine Wrist Blade does 723 + 30 % = 940 before a Dexterity ring.
 
 ---
 
@@ -797,7 +797,7 @@ Her summons fight for her; her own spells are the Mage's first two. She calls a 
 
 **Resources:** hit points 85 (+25 % a tier to tier 5, then x 1.09); mana 60, +10 % a tier to tier 5 (84), then x 1.09 a tier (471 at tier 25), back at 4 % of her pool a second; Magic rings. **A summoning costs half her mana pool** whatever its tier (`ManaShare` 0.5: 30 of 60 at tier 1).
 
-**What she wields and wears:** her spells, her bare hands (20 a blow, an entry of her weapons since the list of 2026-11-20; Enter on a found weapon in her hands puts it away), found daggers and knives (never enchanted); no armour.
+**What she wields and wears:** her spells, her bare hands (an entry of her weapons since the list of 2026-11-20 that strikes nothing: "Your hands are empty: draw a weapon or a spell"; Enter on a found weapon in her hands puts it away), found daggers and knives (never enchanted); no armour.
 
 **Primary abilities**
 
@@ -806,43 +806,43 @@ Her summons fight for her; her own spells are the Mage's first two. She calls a 
 | Fire Bolt (cantrip) | 0 | as the Mage's | 25 | spell growth: +15 % a tier to 5, then x 1.12 |
 | Dark Fire | 14 | as the Mage's (burn and drain) | 38 | spell growth |
 | Summonings (below) | half her pool | calls a monster that fights at her side until it falls; she leads at most the summoning's number of each kind. At the cap a cast replaces her most hurt summon of it; at the cap with none hurt it is refused before the mana is taken | - | the tier she has reached, Minion Health and Damage, Frenzy |
-| Bare Hands | 0 | a blow of her fists | 20 | none |
+| Bare Hands | 0 | her hands empty: strikes nothing (`RDCombat.cpp`'s `StartAttackWith` refuses `bUnarmed15`) | none | none |
 | Scrolls | 0 | a spell once, all four types | the spell's | spell growth |
 
 Her own spells at every tier:
 
-| Tier | Fire Bolt (cantrip) | Dark Fire | Bare Hands |
-|---|---|---|---|
-| 1 | 25.0 | 38.0 | 20.0 |
-| 2 | 28.8 | 43.7 | 23.0 |
-| 3 | 32.5 | 49.4 | 26.0 |
-| 4 | 36.3 | 55.1 | 29.0 |
-| 5 | 40.0 | 60.8 | 32.0 |
-| 6 | 44.8 | 68.1 | 35.8 |
-| 7 | 50.2 | 76.3 | 40.1 |
-| 8 | 56.2 | 85.4 | 45.0 |
-| 9 | 62.9 | 95.7 | 50.4 |
-| 10 | 70.5 | 107.2 | 56.4 |
-| 11 | 79.0 | 120.0 | 63.2 |
-| 12 | 88.4 | 134.4 | 70.7 |
-| 13 | 99.0 | 150.5 | 79.2 |
-| 14 | 110.9 | 168.6 | 88.7 |
-| 15 | 124.2 | 188.8 | 99.4 |
-| 16 | 139.1 | 211.5 | 111.3 |
-| 17 | 155.8 | 236.9 | 124.7 |
-| 18 | 174.5 | 265.3 | 139.6 |
-| 19 | 195.5 | 297.1 | 156.4 |
-| 20 | 218.9 | 332.8 | 175.2 |
-| 21 | 245.2 | 372.7 | 196.2 |
-| 22 | 274.6 | 417.5 | 219.7 |
-| 23 | 307.6 | 467.5 | 246.1 |
-| 24 | 344.5 | 523.7 | 275.6 |
-| 25 | 385.9 | 586.5 | 308.7 |
-| 26 | 432.2 | 656.9 | 345.7 |
-| 27 | 484.0 | 735.7 | 387.2 |
-| 28 | 542.1 | 824.0 | 433.7 |
-| 29 | 607.1 | 922.9 | 485.7 |
-| 30 | 680.0 | 1033.6 | 544.0 |
+| Tier | Fire Bolt (cantrip) | Dark Fire |
+|---|---|---|
+| 1 | 25.0 | 38.0 |
+| 2 | 28.8 | 43.7 |
+| 3 | 32.5 | 49.4 |
+| 4 | 36.3 | 55.1 |
+| 5 | 40.0 | 60.8 |
+| 6 | 44.8 | 68.1 |
+| 7 | 50.2 | 76.3 |
+| 8 | 56.2 | 85.4 |
+| 9 | 62.9 | 95.7 |
+| 10 | 70.5 | 107.2 |
+| 11 | 79.0 | 120.0 |
+| 12 | 88.4 | 134.4 |
+| 13 | 99.0 | 150.5 |
+| 14 | 110.9 | 168.6 |
+| 15 | 124.2 | 188.8 |
+| 16 | 139.1 | 211.5 |
+| 17 | 155.8 | 236.9 |
+| 18 | 174.5 | 265.3 |
+| 19 | 195.5 | 297.1 |
+| 20 | 218.9 | 332.8 |
+| 21 | 245.2 | 372.7 |
+| 22 | 274.6 | 417.5 |
+| 23 | 307.6 | 467.5 |
+| 24 | 344.5 | 523.7 |
+| 25 | 385.9 | 586.5 |
+| 26 | 432.2 | 656.9 |
+| 27 | 484.0 | 735.7 |
+| 28 | 542.1 | 824.0 |
+| 29 | 607.1 | 922.9 |
+| 30 | 680.0 | 1033.6 |
 
 **Her summonings.** Each summoning offers five kinds of its tier; she picks one with Enter (A) on the summoning in her hands, and her choice is saved (`SummonKinds`, `RDList15b.cpp`). A summon has the hit points and blows of a monster of the tier she has reached (or the summoning's own tier, if higher), times the summoning's factor (`ARDDungeonGenerator::SummonStrength`), and grows when a new tier opens:
 
@@ -911,7 +911,7 @@ The Summoner learns no tomes (her `Learns` is empty); she reads every scroll. A 
 
 ### Spell damage by tier
 
-Each damaging spell's base damage and what it does at seven tiers for the Mage (x 1, 1.48, 2.61, 4.59, 8.09, 14.28, 25.17) and for the Warlock at tiers 10 and 30 (x 3.17, 30.6). A Spell Boost multiplies by up to 1.7 more. For any other tier, multiply the base by [the multiplier table](#growth-by-tier).
+Each damaging spell's base damage and what it does at seven tiers for the Mage (x 1, 1.48, 2.61, 4.59, 8.09, 14.28, 25.16) and for the Warlock at tiers 10 and 30 (x 3.17, 30.6). A Spell Boost multiplies by up to 1.7 more. For any other tier, multiply the base by [the multiplier table](#growth-by-tier). Fire Bolt's row uses the spell table's base (23, its scroll's); every caster's own Fire Bolt is the free cantrip of 25.
 
 | Spell | Base | Mage t1 | Mage t5 | Mage t10 | Mage t15 | Mage t20 | Mage t25 | Mage t30 | Warlock t10 | Warlock t30 |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -1596,8 +1596,6 @@ The wilds round Brokenspire are the second half of the game's growth: what a her
 
 The last column is the ring's bonus as written on the map (`Amount`, read from `mistward_castle`): 3.5 to 4.5, that is +350 % to +450 %. That is the strongest ring of its kind on the map counted as Divine (+250 %) times the factor. Source: `roamers15.json`, `RDList15j.cpp`.
 
-![A named roamer in the snow](images/guide/roamer.jpg)
-
 ### The 34 structures' named rings
 
 The first chest of each of the 34 kinds of structure she opens holds that structure's ring, once a game (`rewards15.json`, `RDList15k.cpp`). Each is a copy of the strongest ring of its kind x 1.3 to 1.6 (+325 % to +400 % as written on the map):
@@ -1716,6 +1714,7 @@ What the code or the maps' data do against what a document, a line in the game o
    - The hero menu's card says she starts with "Dagger and the painted viking shield: hers for good". Her figure on the menu holds a shield.
    - The game gives her none. `mistward_castle`'s hero says "Dagger: hers for good ...; no shield until she finds one", and its `StartShield` is empty (the list of 2026-11-08b took it away, `899`, `914`).
    - The menu level (`mistward_castle_select`) keeps hero copies of its own, which were not written again.
+   - The same stale copies show the old mana regeneration on the cards ("Mana Back 2.0 a second" for the Mage, 1.2 for the Warlock). The game uses `mana_regen_share` (`balance6.json`): 2.5 % of the pool a second, 2.5 for the Mage and 1.5 for the Warlock at tier 1.
 2. **The casters' Fire Bolt.**
    - The spell table's Fire Bolt line, and its scroll, read 7 mana and 23 damage.
    - Every caster's own Fire Bolt is a free cantrip doing 25 (`918 cantrip`).
