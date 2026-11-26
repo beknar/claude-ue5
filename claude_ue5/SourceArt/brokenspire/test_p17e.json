@@ -1,0 +1,682 @@
+{
+ "tag": "p17e",
+ "plan": [
+  "services",
+  "shops17",
+  "heaven21_shops"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "services",
+   "ok": true,
+   "buy": {
+    "ok": true,
+    "gold": -12,
+    "count": 1
+   },
+   "sell": {
+    "ok": true,
+    "gold": 4,
+    "count": 0
+   },
+   "heal": {
+    "ok": true,
+    "gold": -25,
+    "hp": 1.0
+   },
+   "weapon": "Viking Shortsword",
+   "repair": {
+    "line": 0,
+    "ok": true,
+    "gold": -9,
+    "wear": 1.0
+   },
+   "anvil_opens_crafting": true,
+   "bless": {
+    "ok": true,
+    "gold": -20,
+    "blessing": "Blessing of the Spire"
+   },
+   "deposit": {
+    "ok": true,
+    "carried": -1,
+    "stash": [
+     "Small Healing Potion"
+    ]
+   },
+   "withdraw": {
+    "ok": true,
+    "carried": 0,
+    "stash": 0
+   },
+   "circle": [
+    "here|Brokenspire|YOU ARE HERE|0",
+    "castle|Mistward Castle|SEALED|0",
+    "none|No other circle found yet|FIND|0",
+    "bye|Step away||1"
+   ],
+   "board": [
+    "Quest: Rats in the Cellars",
+    "Quest: The Drinkers",
+    "Quest: Dead Soldiers Walking"
+   ],
+   "wild": true,
+   "circle_others_ok": true
+  },
+  {
+   "step": "shops17",
+   "ok": true,
+   "cities": {
+    "Brokenspire": {
+     "stores": [
+      0,
+      1,
+      2
+     ],
+     "tier": 1,
+     "opened": [
+      {
+       "kind": 0,
+       "f": "store",
+       "panel": "store",
+       "title": "The general store",
+       "lines": 54,
+       "not_its_trade": [],
+       "sale": {
+        "item": "Small Healing Potion",
+        "ok": true,
+        "paid": 12,
+        "count": 1
+       },
+       "stall": -1
+      },
+      {
+       "kind": 1,
+       "f": "store",
+       "panel": "store",
+       "title": "The outfitter",
+       "lines": 22,
+       "not_its_trade": [],
+       "sale": {
+        "item": "Viking Sword",
+        "ok": true,
+        "paid": 40,
+        "count": 1
+       },
+       "stall": -1
+      },
+      {
+       "kind": 2,
+       "f": "store",
+       "panel": "store",
+       "title": "The apothecary",
+       "lines": 25,
+       "not_its_trade": [],
+       "sale": {
+        "item": "Small Healing Potion",
+        "ok": true,
+        "paid": 12,
+        "count": 1
+       },
+       "stall": -1
+      }
+     ]
+    },
+    "Vel Morrath": {
+     "stores": [
+      0,
+      1,
+      2
+     ],
+     "tier": 5,
+     "opened": [
+      {
+       "kind": 0,
+       "f": "store",
+       "panel": "store",
+       "title": "The general store",
+       "lines": 52,
+       "not_its_trade": [],
+       "sale": {
+        "item": "Legendary Healing Potion",
+        "ok": true,
+        "paid": 320,
+        "count": 1
+       },
+       "stall": -1
+      },
+      {
+       "kind": 1,
+       "f": "store",
+       "panel": "store",
+       "title": "The outfitter",
+       "lines": 10,
+       "not_its_trade": [],
+       "sale": {
+        "item": "Dwarf Crossbow",
+        "ok": true,
+        "paid": 220,
+        "count": 1
+       },
+       "stall": -1
+      },
+      {
+       "kind": 2,
+       "f": "store",
+       "panel": "store",
+       "title": "The apothecary",
+       "lines": 22,
+       "not_its_trade": [],
+       "sale": {
+        "item": "Legendary Healing Potion",
+        "ok": true,
+        "paid": 320,
+        "count": 1
+       },
+       "stall": -1
+      }
+     ]
+    },
+    "Ashenreach": {
+     "stores": [
+      0,
+      1,
+      2
+     ],
+     "tier": 10,
+     "opened": [
+      {
+       "kind": 0,
+       "f": "store",
+       "panel": "store",
+       "title": "The general store",
+       "lines": 52,
+       "not_its_trade": [],
+       "sale": {
+        "item": "Legendary Healing Potion",
+        "ok": true,
+        "paid": 320,
+        "count": 1
+       },
+       "stall": -1
+      },
+      {
+       "kind": 1,
+       "f": "store",
+       "panel": "store",
+       "title": "The outfitter",
+       "lines": 10,
+       "not_its_trade": [],
+       "sale": {
+        "item": "Fine Dwarf Crossbow",
+        "ok": true,
+        "paid": 600,
+        "count": 1
+       },
+       "stall": -1
+      },
+      {
+       "kind": 2,
+       "f": "store",
+       "panel": "store",
+       "title": "The apothecary",
+       "lines": 22,
+       "not_its_trade": [],
+       "sale": {
+        "item": "Legendary Healing Potion",
+        "ok": true,
+        "paid": 320,
+        "count": 1
+       },
+       "stall": -1
+      }
+     ]
+    },
+    "Graymourne": {
+     "stores": [
+      0,
+      1,
+      2
+     ],
+     "tier": 15,
+     "opened": [
+      {
+       "kind": 0,
+       "f": "store",
+       "panel": "store",
+       "title": "The general store",
+       "lines": 52,
+       "not_its_trade": [],
+       "sale": {
+        "item": "Legendary Healing Potion",
+        "ok": true,
+        "paid": 320,
+        "count": 1
+       },
+       "stall": -1
+      },
+      {
+       "kind": 1,
+       "f": "store",
+       "panel": "store",
+       "title": "The outfitter",
+       "lines": 10,
+       "not_its_trade": [],
+       "sale": {
+        "item": "Masterwork Dwarf Crossbow",
+        "ok": true,
+        "paid": 1315,
+        "count": 1
+       },
+       "stall": -1
+      },
+      {
+       "kind": 2,
+       "f": "store",
+       "panel": "store",
+       "title": "The apothecary",
+       "lines": 22,
+       "not_its_trade": [],
+       "sale": {
+        "item": "Legendary Healing Potion",
+        "ok": true,
+        "paid": 320,
+        "count": 1
+       },
+       "stall": -1
+      }
+     ]
+    },
+    "Kethrys Spire": {
+     "stores": [
+      0,
+      1,
+      2
+     ],
+     "tier": 20,
+     "opened": [
+      {
+       "kind": 0,
+       "f": "store",
+       "panel": "store",
+       "title": "The general store",
+       "lines": 52,
+       "not_its_trade": [],
+       "sale": {
+        "item": "Legendary Healing Potion",
+        "ok": true,
+        "paid": 320,
+        "count": 1
+       },
+       "stall": -1
+      },
+      {
+       "kind": 1,
+       "f": "store",
+       "panel": "store",
+       "title": "The outfitter",
+       "lines": 10,
+       "not_its_trade": [],
+       "sale": {
+        "item": "Exalted Dwarf Crossbow",
+        "ok": true,
+        "paid": 2882,
+        "count": 1
+       },
+       "stall": -1
+      },
+      {
+       "kind": 2,
+       "f": "store",
+       "panel": "store",
+       "title": "The apothecary",
+       "lines": 22,
+       "not_its_trade": [],
+       "sale": {
+        "item": "Legendary Healing Potion",
+        "ok": true,
+        "paid": 320,
+        "count": 1
+       },
+       "stall": -1
+      }
+     ]
+    }
+   },
+   "streams": {
+    "stores": [
+     1,
+     3
+    ],
+    "buildings": [
+     133,
+     134
+    ],
+    "buildings_same_place": 20,
+    "containers": [
+     546,
+     571
+    ]
+   },
+   "sign_faces": {
+    "Town.SignFace_OUTFITTER": true,
+    "Town.SignFace_APOTHECARY": true
+   },
+   "cities_ok": {
+    "Brokenspire": true,
+    "Vel Morrath": true,
+    "Ashenreach": true,
+    "Graymourne": true,
+    "Kethrys Spire": true
+   }
+  },
+  {
+   "step": "heaven21_shops",
+   "ok": true,
+   "shops": 13,
+   "checkouts": 13,
+   "gondolas": [
+    {
+     "bld": 3,
+     "kind": -1,
+     "reported": 24,
+     "in_rect": 24
+    },
+    {
+     "bld": 29,
+     "kind": 0,
+     "reported": 8,
+     "in_rect": 8
+    },
+    {
+     "bld": 30,
+     "kind": 1,
+     "reported": 8,
+     "in_rect": 8
+    },
+    {
+     "bld": 31,
+     "kind": 2,
+     "reported": 8,
+     "in_rect": 8
+    },
+    {
+     "bld": 32,
+     "kind": 3,
+     "reported": 8,
+     "in_rect": 8
+    },
+    {
+     "bld": 33,
+     "kind": 4,
+     "reported": 8,
+     "in_rect": 8
+    },
+    {
+     "bld": 34,
+     "kind": 5,
+     "reported": 8,
+     "in_rect": 8
+    },
+    {
+     "bld": 35,
+     "kind": 6,
+     "reported": 8,
+     "in_rect": 8
+    },
+    {
+     "bld": 36,
+     "kind": 7,
+     "reported": 12,
+     "in_rect": 12
+    },
+    {
+     "bld": 37,
+     "kind": 8,
+     "reported": 12,
+     "in_rect": 12
+    },
+    {
+     "bld": 38,
+     "kind": 0,
+     "reported": 8,
+     "in_rect": 8
+    },
+    {
+     "bld": 39,
+     "kind": 1,
+     "reported": 12,
+     "in_rect": 12
+    },
+    {
+     "bld": 40,
+     "kind": 2,
+     "reported": 8,
+     "in_rect": 8
+    }
+   ],
+   "rows_per_shop": [
+    4,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    3,
+    2,
+    2,
+    3,
+    2
+   ],
+   "gondolas_off_their_rows": [],
+   "gondola_vertices": {
+    "0": 1836,
+    "1": 1908,
+    "2": 1884
+   },
+   "clerk_spoken_to": {
+    "kind": 0,
+    "f": "store",
+    "panel": "store",
+    "title": "The grocery"
+   },
+   "sales": [
+    {
+     "kind": -1,
+     "clerk_role": "Trader",
+     "clerk_off_cm": 372,
+     "f": "store",
+     "panel": "store",
+     "title": "The market",
+     "buy_lines": 52,
+     "not_its_trade": [],
+     "sale": {
+      "item": "Phoenix Serum",
+      "ok": true,
+      "gold": -320,
+      "count": 1
+     }
+    },
+    {
+     "kind": 0,
+     "clerk_role": "Worker",
+     "clerk_off_cm": 502,
+     "f": "store",
+     "panel": "store",
+     "title": "The grocery",
+     "buy_lines": 14,
+     "not_its_trade": [],
+     "sale": {
+      "item": "Morels",
+      "ok": true,
+      "gold": -4,
+      "count": 1
+     }
+    },
+    {
+     "kind": 1,
+     "clerk_role": "Worker",
+     "clerk_off_cm": 0,
+     "f": "store",
+     "panel": "store",
+     "title": "The pharmacy",
+     "buy_lines": 3,
+     "not_its_trade": [],
+     "sale": {
+      "item": "Phoenix Serum",
+      "ok": true,
+      "gold": -320,
+      "count": 1
+     }
+    },
+    {
+     "kind": 2,
+     "clerk_role": "Worker",
+     "clerk_off_cm": 410,
+     "f": "store",
+     "panel": "store",
+     "title": "The hardware store",
+     "buy_lines": 32,
+     "not_its_trade": [],
+     "sale": {
+      "item": "Sun Stone",
+      "ok": true,
+      "gold": -3,
+      "count": 1
+     }
+    },
+    {
+     "kind": 3,
+     "clerk_role": "Worker",
+     "clerk_off_cm": 502,
+     "f": "store",
+     "panel": "store",
+     "title": "The electronics store",
+     "buy_lines": 3,
+     "not_its_trade": [],
+     "sale": {
+      "item": "Road Flare",
+      "ok": true,
+      "gold": -6,
+      "count": 1
+     }
+    },
+    {
+     "kind": 4,
+     "clerk_role": "Worker",
+     "clerk_off_cm": 410,
+     "f": "store",
+     "panel": "store",
+     "title": "The jeweller",
+     "buy_lines": 6,
+     "not_its_trade": [],
+     "sale": {
+      "item": "Celestial Magic Potency Ring 10",
+      "ok": true,
+      "gold": -14788,
+      "count": 1
+     }
+    },
+    {
+     "kind": 5,
+     "clerk_role": "Worker",
+     "clerk_off_cm": 410,
+     "f": "store",
+     "panel": "store",
+     "title": "The bookshop",
+     "buy_lines": 9,
+     "not_its_trade": [],
+     "sale": {
+      "item": "Scroll of Undying Pact",
+      "ok": true,
+      "gold": -200,
+      "count": 1
+     }
+    },
+    {
+     "kind": 6,
+     "clerk_role": "Worker",
+     "clerk_off_cm": 410,
+     "f": "store",
+     "panel": "store",
+     "title": "The sporting goods store",
+     "buy_lines": 9,
+     "not_its_trade": [],
+     "sale": {
+      "item": "Celestial Dwarf Crossbow",
+      "ok": true,
+      "gold": -6319,
+      "count": 1
+     }
+    },
+    {
+     "kind": 7,
+     "clerk_role": "Worker",
+     "clerk_off_cm": 410,
+     "f": "store",
+     "panel": "store",
+     "title": "The outdoor outfitter",
+     "buy_lines": 7,
+     "not_its_trade": [],
+     "sale": {
+      "item": "Celestial Epic Plate (Female)",
+      "ok": true,
+      "gold": -11091,
+      "count": 1
+     }
+    },
+    {
+     "kind": 8,
+     "clerk_role": "Worker",
+     "clerk_off_cm": 0,
+     "f": "store",
+     "panel": "store",
+     "title": "The herbalist",
+     "buy_lines": 19,
+     "not_its_trade": [],
+     "sale": {
+      "item": "Hound Fang",
+      "ok": true,
+      "gold": -3,
+      "count": 1
+     }
+    }
+   ],
+   "shots": [
+    "shop"
+   ],
+   "kinds_present": [
+    -1,
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "bs_p17e_shops17_Brokenspire_1.png",
+  "bs_p17e_shops17_Brokenspire_2.png",
+  "bs_p17e_shops17_VelMorrath_1.png",
+  "bs_p17e_shops17_VelMorrath_2.png",
+  "bs_p17e_shops17_Ashenreach_1.png",
+  "bs_p17e_shops17_Ashenreach_2.png",
+  "bs_p17e_shops17_Graymourne_1.png",
+  "bs_p17e_shops17_Graymourne_2.png",
+  "bs_p17e_shops17_KethrysSpire_1.png",
+  "bs_p17e_shops17_KethrysSpire_2.png",
+  "bs_p17e_heaven21_shop.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

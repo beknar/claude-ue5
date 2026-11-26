@@ -168,7 +168,8 @@ def check_town():
     castle = [b for b in B if b["kind"] == "castle"]
     res["castle_rooms"] = castle[0]["rooms"] if castle else 0
     res["mistgate"] = place("mistgate") is not None
-    ok = all(kinds.get(k, 0) == 1 for k in TRADES) and len(homes) >= 20 and all(v > 0 for v in res["homes"].values()) \
+    # (the list of 2026-11-26's fourth phase: three stores (the general store, the outfitter, the apothecary))
+    ok = all(kinds.get(k, 0) == (3 if k == "store" else 1) for k in TRADES) and len(homes) >= 20 and all(v > 0 for v in res["homes"].values()) \
         and all(sk.get(k, 0) >= n for k, n in (("well", 1), ("board", 1), ("circle", 1), ("stall", 12), ("still", 1), ("mill", 1), ("graveyard", 1), ("grave", 6), ("gate", 1), ("tower", 8),
                                                 ("counter", 1), ("basin", 1), ("altar", 1), ("stash", 1), ("smith", 1))) \
         and not unreached and res["castle_rooms"] == 4 and res["mistgate"]
@@ -2229,7 +2230,7 @@ def step_holy():
     quiet(False)
     k = kinds
     ok = (res["north_east"] and res["plan"] == 1 and cat is not None and res["cathedral"]["rooms"] == 7 and res["cathedral"]["from_middle_m"] < 120
-          and k.get("monastery", 0) == 1 and k.get("chapel", 0) >= 3 and k.get("temple", 0) == 1 and all(k.get(t, 0) == 1 for t in ("smithy", "store", "healer", "storehouse", "tavern", "barracks"))
+          and k.get("monastery", 0) == 1 and k.get("chapel", 0) >= 3 and k.get("temple", 0) == 1 and k.get("store", 0) == 3 and all(k.get(t, 0) == 1 for t in ("smithy", "healer", "storehouse", "tavern", "barracks"))
           and k.get("witch's hut", 0) == 0 and res["homes"]["all"] >= 80 and res["homes"]["burned"] + res["homes"]["boarded"] < res["homes"]["all"] * 0.2
           and sk.get("fountain", 0) == 1 and sk.get("shrine", 0) >= 4 and sk.get("statue", 0) >= 4
           and all(e["with_rooms"] == e["n"] and e["with_door"] == e["n"] for e in per.values()) and n_cont > 100
@@ -2395,7 +2396,7 @@ def step_forge():
     k = kinds
     ok = (res["north_middle"] and res["plan"] == 2 and fd is not None and res["foundry"]["rooms"] == 7 and res["foundry"]["from_middle_m"] < 120
           and "war_engine" in res["dungeon_level"] and res["biome_6km_north"] == "burned plain"
-          and k.get("workshop", 0) >= 3 and all(k.get(t, 0) == 1 for t in ("smithy", "store", "healer", "storehouse", "tavern", "barracks", "temple"))
+          and k.get("workshop", 0) >= 3 and k.get("store", 0) == 3 and all(k.get(t, 0) == 1 for t in ("smithy", "healer", "storehouse", "tavern", "barracks", "temple"))
           and k.get("witch's hut", 0) == 0 and k.get("cathedral", 0) == 0 and res["homes"]["all"] >= 80
           and sk.get("anvil", 0) == 1 and sk.get("forge", 0) == 4 and sk.get("cart", 0) == 3 and sk.get("barricade", 0) == 4
           and all(e["with_rooms"] == e["n"] and e["with_door"] == e["n"] for e in per.values()) and n_cont > 100
@@ -2614,7 +2615,7 @@ def step_spire():
           and res["plan"] == 4 and tw is not None and res["tower"]["rooms"] == 2 and res["tower"]["from_middle_m"] < 120 and res["tower"]["top_m"] >= 50
           and "kethrys_spire" in res["dungeon_level"] and k.get("library", 0) >= 2 and k.get("laboratory", 0) >= 2 and k.get("study", 0) >= 1 and k.get("meditation chamber", 0) >= 1
           and res["window_lights"]["n"] >= 2 and res["window_lights"]["moved_cm_min"] > 50 and res["window_lights"]["lowest_m"] > res["tower"]["top_m"] * 0.4
-          and all(k.get(t, 0) == 1 for t in ("smithy", "store", "healer", "storehouse", "tavern", "barracks", "temple")) and k.get("witch's hut", 0) == 0
+          and k.get("store", 0) == 3 and all(k.get(t, 0) == 1 for t in ("smithy", "healer", "storehouse", "tavern", "barracks", "temple")) and k.get("witch's hut", 0) == 0
           and res["homes"]["all"] >= 80 and res["homes"]["burned"] + res["homes"]["boarded"] < res["homes"]["all"] * 0.1
           and sk.get("rune", 0) >= 2 and sk.get("crystal", 0) >= 6 and pc["SM_TowerRound_Window_8m_A"] >= 2 and pc["SM_TowerRound_Cap_4m_A"] >= 1
           and pc["SM_IceCrystal01"] >= 6 and pc["SM_Rune_01a"] >= 12
@@ -3167,7 +3168,7 @@ def step_port():
           and "sewers" in res["dungeon_level"] and res["harbour_water"]
           and sk.get("pier", 0) == 5 and sk.get("ship", 0) == 5 and sk.get("boat", 0) == 5 and sk.get("wreck", 0) == 2 and sk.get("gibbet", 0) == 3 and sk.get("body", 0) >= 8 and sk.get("dock props", 0) >= 3
           and pc_["SM_Gangway_01"] >= 5 * 14 and pc_["SM_VikingBoat_01a"] == 5 and pc_["SM_SmallBoat"] == 5 and pc_["SM_BrokenShip"] == 2 and pc_["SM_Sewer_Tube_Gate_01a"] == 1
-          and k.get("warehouse", 0) >= 3 and all(k.get(t, 0) == 1 for t in ("smithy", "store", "healer", "storehouse", "tavern", "barracks", "temple"))
+          and k.get("warehouse", 0) >= 3 and k.get("store", 0) == 3 and all(k.get(t, 0) == 1 for t in ("smithy", "healer", "storehouse", "tavern", "barracks", "temple"))
           and k.get("cathedral", 0) == 0 and k.get("foundry", 0) == 0 and res["homes"]["all"] >= 40
           and all(e["with_rooms"] == e["n"] and e["with_door"] == e["n"] for e in per.values()) and n_cont > 100
           and all(roles.get(r, 0) >= 1 for r in ("Elder", "Scholar", "Captain", "Sailor", "Dockhand", "Fisher", "Mourner"))
@@ -5276,6 +5277,13 @@ def item_kinds21():
     return {str(i.name): str(i.kind).split(".")[-1].split(":")[0].strip("<> ").upper() for i in G["gen"].get_editor_property("items")}
 
 
+# (the list of 2026-11-26's fourth phase: each store kind's item kinds, by the names Python gives them; the market and the general store the
+# general store's)
+_GENERAL17 = {"HEALING", "MANA", "SPEED", "FOOD", "COMPONENT", "REPAIR", "TORCH", "RECIPE"}
+SHOP_KINDS17 = {-1: _GENERAL17, 0: {"FOOD"}, 1: {"HEALING", "MANA", "SPEED"}, 2: {"REPAIR", "COMPONENT"}, 3: {"TORCH", "RECIPE"}, 4: {"RING"},
+                5: {"SCROLL", "TOME"}, 6: {"WEAPON", "SLASH"}, 7: {"ARMOUR", "SHIELD"}, 8: {"COMPONENT"}}
+STORE_KINDS17 = {0: _GENERAL17, 1: {"WEAPON", "ARMOUR", "SHIELD"}, 2: {"HEALING", "MANA", "SPEED", "SCROLL", "COMPONENT"}}
+STORE_TITLES17 = {0: "The general store", 1: "The outfitter", 2: "The apothecary"}
 def step_heaven21_shops():
     """the list of 2026-11-22: "the insides of shops in Heaven should look like typical shops with rows and shelves full of food and
     other things that can be purchased from the sales person manning that shop": every shop and the market with rows of gondola
@@ -5322,12 +5330,13 @@ def step_heaven21_shops():
         verts[k] = n_ if m else None
     res["gondola_vertices"] = verts
     kinds = item_kinds21()
-    want = {-1: None, 0: {"FOOD"}, 1: {"HEALING", "MANA", "SPEED"}, 2: {"REPAIR", "TORCH"}}
+    # (the list of 2026-11-26: nine kinds, each its trades' things; the market the general store's)
+    want = SHOP_KINDS17
     sales = []; shots = []
-    g.add_gold(5000, "the test")
+    g0_all = gold(); g.add_gold(300000, "the test")
     F = folk()
     try:
-        for k in (-1, 0, 1, 2):
+        for k in range(-1, 9):
             x = next((y for y in sh if y["kind"] == k), None)
             if not x: continue
             clerk = min(F, key=lambda f: dist2(f["at"], x["clerk"])) if F else None
@@ -5340,9 +5349,10 @@ def step_heaven21_shops():
             sale = None
             i = next((j for j, pp in enumerate(panel()) if pp[0] == "buy" and pp[3] == "1"), -1)
             if i >= 0:
-                nm = panel()[i][1]; g0 = gold(); n0 = cb().get_item_count(nm)
+                nm = panel()[i][1]; g0 = gold(); n0 = cb().get_item_count(nm); w0 = len(g.get_editor_property("weapons"))
                 ok_ = g.activate_town_entry(i)
-                sale = {"item": nm, "ok": ok_, "gold": gold() - g0, "count": cb().get_item_count(nm) - n0}
+                # (a weapon bought joins her weapons, not her pack (the list of 2026-11-26's sporting goods store))
+                sale = {"item": nm, "ok": ok_, "gold": gold() - g0, "count": cb().get_item_count(nm) - n0 + len(g.get_editor_property("weapons")) - w0}
             g.close_town_panel(); yield from rwait(0.3)
             sales.append({"kind": k, "clerk_role": clerk["role"] if clerk else None, "clerk_off_cm": round(dist2(clerk["at"], x["clerk"])) if clerk else None,
                           "f": f_, "panel": pnl, "title": title, "buy_lines": len(buys), "not_its_trade": wrong[:4], "sale": sale})
@@ -5362,14 +5372,18 @@ def step_heaven21_shops():
             pth = yield from shot_file19("heaven21_shop"); shots.append("shop" if pth else "shop?")
     finally:
         if g.is_town_panel_open(): g.close_town_panel()
+        try: g.add_gold(-(gold() - g0_all), "the test")
+        except Exception: pass
         quiet(False)
     res["sales"] = sales; res["shots"] = shots
-    titles = {-1: "The market", 0: "The grocery", 1: "The pharmacy", 2: "The hardware store"}
+    res["kinds_present"] = sorted({x["kind"] for x in sh})
+    titles = {-1: "The market", 0: "The grocery", 1: "The pharmacy", 2: "The hardware store", 3: "The electronics store", 4: "The jeweller", 5: "The bookshop",
+              6: "The sporting goods store", 7: "The outdoor outfitter", 8: "The herbalist"}
     cs_ = res.get("clerk_spoken_to") or {}
     ok = res["shops"] >= 4 and res["checkouts"] == res["shops"] and all(p_["in_rect"] >= 2 and p_["in_rect"] == p_["reported"] for p_ in per) \
         and not bad_rows and all(r_ >= 2 for r_ in rows_per) and all(v and v > 1000 for v in verts.values()) \
         and cs_.get("f") in ("bark", "store") and cs_.get("panel") == "store" and cs_.get("title") == titles[cs_.get("kind", -1)] \
-        and len(sales) >= 3 and all(x["panel"] == "store" and x["title"] == titles[x["kind"]] and x["buy_lines"] > 0 and not x["not_its_trade"]
+        and res["kinds_present"] == [-1] + list(range(9)) and len(sales) == 10 and all(x["panel"] == "store" and x["title"] == titles[x["kind"]] and x["buy_lines"] > 0 and not x["not_its_trade"]
                                      and x["sale"] and x["sale"]["ok"] and x["sale"]["count"] == 1 and x["sale"]["gold"] < 0 for x in sales)
     step_result("heaven21_shops", bool(ok), **res)
 
@@ -8257,6 +8271,96 @@ def step_stalls17():
 
 
 STEPS.update({"stalls17": step_stalls17, "stalls17pics": step_stalls17pics})
+
+
+# ================================================================================================ the list of 2026-11-26's fourth phase
+def stores17():
+    out = []
+    for l in G["gen"].get_stores17():
+        p = str(l).split("|")
+        out.append({"bld": int(p[0]), "word": p[1], "kind": int(p[2]), "hkind": int(p[3]), "door": V(float(p[4]), float(p[5]), 0), "counter": V(float(p[6]), float(p[7]), 0),
+                    "trades": [int(x) for x in p[8].split(",") if x]})
+    return out
+def step_shops17():
+    """the square's shops (the user's "3x more stands and shops, each one different in what they offer ... of the same Tier that the town
+    is in"; RD/RDList17c.cpp): in each medieval city three stores (the general store, the outfitter, the apothecary), each opened by F
+    before its counter (its title, its trades' things only: the kinds of a table of the test's own; the weapons and shields only those
+    made for her hero, read from the items' own fits), a thing bought in each (taken back after); a picture of each new store's front.
+    In Brokenspire on one seed with rd.Shops17 0 and 1: one store and three (the stores take the plan's draws: the homes lay out anew
+    once; the step records how many buildings and containers there are each way)"""
+    g = G["gen"]; res = {"cities": {}}; quiet(True)
+    cv0 = unreal.SystemLibrary.get_console_variable_int_value("rd.Shops17")
+    kinds = item_kinds21()
+    hero = str(g.get_editor_property("current_hero")); fits = weapon_fits17(hero); bought = []
+    g0_all = gold(); g.add_gold(300000, "the test")
+    try:
+        seed0 = G["gi"].get_editor_property("town_seed")
+        snaps = {}
+        for on in (0, 1):
+            unreal.SystemLibrary.execute_console_command(G["w"], f"rd.Shops17 {on}")
+            g.rebuild_town(seed0); yield from rwait(2.5); refresh(); g = G["gen"]
+            S = section()
+            snaps[on] = {"b": [[round(b["c"].x), round(b["c"].y), b["kind"]] for b in blds()],
+                         "c": [[round(S.get_container_location(i).x), round(S.get_container_location(i).y)] for i in range(S.get_num_containers())]}
+        b0, b1 = snaps[0]["b"], snaps[1]["b"]
+        res["streams"] = {"stores": [sum(1 for b in b0 if b[2] == "store"), sum(1 for b in b1 if b[2] == "store")], "buildings": [len(b0), len(b1)],
+                          "buildings_same_place": sum(1 for b in b0 if b in b1), "containers": [len(snaps[0]["c"]), len(snaps[1]["c"])]}
+        for city in ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne", "Kethrys Spire"):
+            if city != "Brokenspire": yield from to_town(city)
+            refresh(); g = G["gen"]; c = cb()
+            st = [s for s in stores17() if s["kind"] >= 0]
+            r = {"stores": sorted(s["kind"] for s in st), "tier": g.get_town_tier17(), "opened": []}
+            for s in sorted(st, key=lambda s: s["kind"]):
+                d = s["counter"] - s["door"]; dl = max(math.hypot(d.x, d.y), 1.0)
+                at = V(s["counter"].x - d.x / dl * 140.0, s["counter"].y - d.y / dl * 140.0, 0)
+                put(at, yaw=math.degrees(math.atan2(d.y, d.x))); G["pawn"].get_movement_component().stop_movement_immediately(); yield from wait(0.3)
+                f_ = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.3)
+                title = str(g.get_town_title21()); pn = str(g.get_town_panel())
+                buys = [pp for pp in panel() if pp[0] == "buy"]
+                wrong = [pp[1] for pp in buys if kinds.get(pp[1]) not in STORE_KINDS17[s["kind"]]]
+                # (fit for her: a weapon or shield offered is one made for her hero, where any of the store is (PR #140's review))
+                if not any(pp[0] == "none" for pp in panel()):
+                    wrong += [pp[1] for pp in buys if kinds.get(pp[1]) in ("WEAPON", "SHIELD") and pp[1] not in fits]
+                sale = None
+                i = next((j for j, pp in enumerate(panel()) if pp[0] == "buy" and pp[3] == "1"), -1)
+                if i >= 0:
+                    nm = panel()[i][1]; gb = gold(); n0 = c.get_item_count(nm)
+                    w0 = len(g.get_editor_property("weapons"))
+                    sale = {"item": nm, "ok": bool(g.activate_town_entry(i)), "paid": gb - gold(), "count": c.get_item_count(nm) - n0 + len(g.get_editor_property("weapons")) - w0}
+                    if c.get_item_count(nm) > n0: bought.append(nm)
+                g.close_town_panel(); yield from rwait(0.2)
+                r["opened"].append({"kind": s["kind"], "f": f_, "panel": pn, "title": title, "lines": len(buys), "not_its_trade": wrong[:4], "sale": sale, "stall": g.get_store_stall17()})
+                if s["kind"] > 0:
+                    out_ = V(-d.x / dl, -d.y / dl, 0)
+                    put(V(s["door"].x + out_.x * 700.0, s["door"].y + out_.y * 700.0, 0), yaw=math.degrees(math.atan2(-out_.y, -out_.x)))
+                    G["pawn"].get_movement_component().stop_movement_immediately()
+                    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4, yaw=math.degrees(math.atan2(-out_.y, -out_.x)))); yield from wait(1.5)
+                    shot(f"shops17_{city.replace(' ', '')}_{s['kind']}"); yield from rwait(1.2)
+            res["cities"][city] = r
+        pcs = g.get_editor_property("pieces")
+        res["sign_faces"] = {k: pcs.get(unreal.Name(k)) is not None for k in ("Town.SignFace_OUTFITTER", "Town.SignFace_APOTHECARY")}
+    except Exception as e_:
+        import traceback
+        res["error"] = str(e_) + traceback.format_exc()[-600:]
+    finally:
+        unreal.SystemLibrary.execute_console_command(G["w"], f"rd.Shops17 {cv0}")
+        try:
+            G["gen"].close_town_panel(); G["gen"].add_gold(-(gold() - g0_all), "the test")
+            for nm in bought: cb().remove_item(nm, 1)          # (what she bought taken back (the weapons she bought stay with her weapons))
+        except Exception: pass
+        quiet(False)
+    def city_ok(r):
+        return (r["stores"] == [0, 1, 2] and len(r["opened"]) == 3
+                and all(o["panel"] == "store" and o["title"] == STORE_TITLES17[o["kind"]] and o["lines"] > 0 and not o["not_its_trade"] and o["stall"] == -1
+                        and o["sale"] and o["sale"]["ok"] and o["sale"]["count"] >= 1 and o["sale"]["paid"] > 0 for o in r["opened"]))
+    res["cities_ok"] = {k: city_ok(v) for k, v in res["cities"].items()}
+    sr = res.get("streams", {})
+    ok = ("error" not in res and len(res["cities"]) == 5 and all(res["cities_ok"].values()) and sr.get("stores") == [1, 3]
+          and all(res.get("sign_faces", {}).values()))
+    step_result("shops17", ok, **res)
+
+
+STEPS.update({"shops17": step_shops17})
 
 def run():
     G["saves"] = saves_snapshot()

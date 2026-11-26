@@ -34,7 +34,9 @@ SIGNS = {"SMITHY": [["Smithy"]], "GENERALGOODS": [["General", "Goods"]], "HEALER
          "HEDGEWITCH": [["Hedge", "Witch"]], "MONASTERY": [["Monastery"], ["Monas-", "tery"]], "WORKSHOP": [["Workshop"], ["Work-", "shop"]],
          "WAREHOUSE": [["Ware", "House"], ["Warehouse"]], "SLUICEHOUSE": [["Sluice", "House"]], "LIBRARY": [["Library"]],
          "LABORATORY": [["Labora-", "tory"], ["Laboratory"]], "STUDY": [["Study"]], "MEDITATION": [["Medita-", "tion"], ["Meditation"]],
-         "TOWER": [["Tower"]], "OFFICES": [["Offices"]], "SHOP": [["Shop"]]}
+         "TOWER": [["Tower"]], "OFFICES": [["Offices"]], "SHOP": [["Shop"]],
+         # (the list of 2026-11-26's fourth phase: the medieval cities' two more stores)
+         "OUTFITTER": [["Outfitter"], ["Out-", "fitter"]], "APOTHECARY": [["Apothe-", "cary"], ["Apothecary"]]}
 
 B = json.load(open(BOARD, encoding="utf-8"))
 BANDS = sorted((b for b in B["bands"] if b[2] - b[1] > 5.0), key=lambda b: b[0])
@@ -136,7 +138,10 @@ def paint(key, options):
 MODERN = {"GEARSHOP": [["GEAR", "SHOP"]], "GROCERY": [["GROCERY"]], "CLINIC": [["CLINIC"]], "CHAPEL": [["CHAPEL"]], "STORAGE": [["STORAGE"]],
           "BAR": [["BAR"]], "SECURITY": [["SECURITY"]], "TOWER": [["TOWER"]], "OFFICES": [["OFFICES"]], "SHOP": [["SHOP"]],
           # (the list of 2026-11-22's phase 21: the market, the bank, the hotel, the shops' own trades)
-          "MARKET": [["MARKET"]], "BANK": [["BANK"]], "HOTEL": [["HOTEL"]], "PHARMACY": [["PHARMACY"]], "HARDWARE": [["HARD", "WARE"], ["HARDWARE"]]}
+          "MARKET": [["MARKET"]], "BANK": [["BANK"]], "HOTEL": [["HOTEL"]], "PHARMACY": [["PHARMACY"]], "HARDWARE": [["HARD", "WARE"], ["HARDWARE"]],
+          # (the list of 2026-11-26's fourth phase: Heaven's nine shop kinds)
+          "ELECTRONICS": [["ELECTRONICS"]], "JEWELLER": [["JEWELLER"]], "BOOKS": [["BOOKS"]], "SPORTS": [["SPORTS"]],
+          "OUTDOOR": [["OUT", "DOOR"]], "HERBS": [["HERBS"]]}
 
 
 def paint_modern(key, options, font_path):

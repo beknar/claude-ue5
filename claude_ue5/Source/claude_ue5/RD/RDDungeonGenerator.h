@@ -2292,6 +2292,16 @@ public:
 	/** a themed container piece's word for her ("Heaven.Barrel" -> "fridge") */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heaven21") TMap<FName, FString> ContainerWords21;
 	int32 ShopKindOfWho21() const;
+	/** the list of 2026-11-26's fourth phase (RDList17c.cpp): a store's trades (of the stands' twelve) by a medieval store's kind or a
+	 *  Heaven shop's (the general store's for neither), its title and words, its stock at the town's tier, the kind of the store the panel
+	 *  was opened at */
+	static const TArray<int32>& StoreTrades17(int32 Medieval, int32 HeavenKind);
+	static FString StoreTitle17(int32 Medieval, int32 HeavenKind, bool bHeaven, FString* Body = nullptr);
+	static FString ShopWord17(int32 HeavenKind);
+	TArray<FName> StoreStock17(const TArray<int32>& Trades, bool* bAnyFit = nullptr) const;
+	int32 StoreKindOpen17(int32& HeavenKind) const;
+	/** tests: every store and shop, "<building>|<word>|<medieval kind>|<Heaven kind>|<door x>|<door y>|<counter x>|<counter y>|<trades>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List17") TArray<FString> GetStores17() const;
 	bool InHeaven21() const;
 	/** the building whose counter or keeper opened the store (a shop's stock by its kind) */
 	int32 StoreBld21 = -1;
@@ -3069,7 +3079,7 @@ public:
 	bool IsReagent17(FName Part) const;
 	mutable TSet<FName> Reagents17;
 	mutable int32 Reagents17N = -1;
-	TArray<FName> StallStock17(int32 Trade, bool* bAllFit = nullptr) const;
+	TArray<FName> StallStock17(int32 Trade, bool* bAllFit = nullptr, bool bFitOnly = false) const;
 	static FString StallName17(int32 Trade, bool bModern);
 	static FString StallBody17(int32 Trade);
 	/** the trade of the stand nearest a point within R (-1: none), and where it stands */

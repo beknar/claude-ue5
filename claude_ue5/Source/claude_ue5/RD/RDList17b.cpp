@@ -139,7 +139,7 @@ static int32 RDS17TierAt(const FRDItemDef& It, int32 T)
 	return Best;
 }
 
-TArray<FName> ARDDungeonGenerator::StallStock17(int32 Trade, bool* bAllFit) const
+TArray<FName> ARDDungeonGenerator::StallStock17(int32 Trade, bool* bAllFit, bool bFitOnly) const
 {
 	const int32 Tt = TownTier17();
 	TArray<const FRDItemDef*> Pool;
@@ -157,6 +157,7 @@ TArray<FName> ARDDungeonGenerator::StallStock17(int32 Trade, bool* bAllFit) cons
 	if (Want > 0) for (const FRDItemDef* It : Pool) if (RDS17TierAt(*It, Tt) == Want) Band.Add(It);
 	TArray<const FRDItemDef*> Fit = Band.FilterByPredicate([this](const FRDItemDef* It) { return StallFits17(*It); });
 	if (bAllFit) *bAllFit = Fit.Num() > 0;
+	if (bFitOnly && Fit.Num() == 0) return TArray<FName>();
 	TArray<const FRDItemDef*>& Use = Fit.Num() > 0 ? Fit : Band;
 	// (by kind, then the cheapest first: the panel scrolls (a cap at 16 dearest first left the potion seller without its small potions))
 	TMap<const FRDItemDef*, int32> Price; for (const FRDItemDef* It : Use) Price.Add(It, PriceOf(It->Name));
