@@ -1,0 +1,13 @@
+
+the town squares in every city need 3x more stands and shops, each one different in what they offer.  the town square shops and stands need to offer items that are of the same Tier that the town is in.
+
+loading screen needs to show some animation and movement
+
+in full screen 1080p, the mini-map's building outlines shimmer when the character is moving
+
+make a game mode that a player can choose from the ESC menu that makes all buildings their own level, where opening a door opens a new level just for that building.  for this new mode, the windows show a solid or glowing texture depicting the inside of that room.  call the default mode 'Immersive Interiors' and the new mode 'Closed Structures'.   In the new mode, when looking outside a window, show a solid or glowing texture depicting the outside of that building. Describe both game modes.  Put this game mode behind the Options button. 
+
+with the new game mode enabled, in 1080P and 4K full screen resolutions, measure current performance in FPS in all the cities, wilderness in all biomes, and record it in docs/performance.md under a new heading called 'Closed Structures'.
+
+break up these changes into appropriate pieces, formulate a plan to implement it, write that plan to an MD file in the docs directory, review the plan, then create a PR for reasonably sized portions of the plan and execute each PR in an order that would be most efficient and makes sense.  If there are opportunities to do parallel actions.  once the PR is merged, build the shipping binary.  do not stop until the last PR is finished in the plan MD file.
+
