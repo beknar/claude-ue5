@@ -8372,7 +8372,7 @@ def enterable17():
     out = []
     for l in G["gen"].get_enterable17():
         p = str(l).split("|")
-        out.append({"i": int(p[0]), "kind": int(p[1]), "label": p[2], "rec": int(p[3]), "door": V(float(p[4]), float(p[5]), 0), "out": V(float(p[6]), float(p[7]), 0), "windows": int(p[8])})
+        out.append({"i": int(p[0]), "kind": int(p[1]), "label": p[2], "rec": int(p[3]), "door": V(float(p[4]), float(p[5]), 0), "out": V(float(p[6]), float(p[7]), 0), "windows": int(p[8]), "door_i": int(p[9]) if len(p) > 9 else -1})
     return out
 def pieces17(bi, level=False):
     return sorted(str(l) for l in G["gen"].get_building_pieces17(bi, level))
@@ -8413,6 +8413,7 @@ def step_building17():
         res["closed_batches_in_town"] = sum(int(l[3]) for l in il if int(l[0]) in rec)
         def visit(e, city):
             g = G["gen"]; r = {"city": city, "i": e["i"], "kind": kind_name(e["i"]), "label": e["label"], "rec": e["rec"], "windows": e["windows"]}
+            walk_in = kind_name(e["i"]) == "store"
             put(V(e["door"].x + e["out"].x * 150.0, e["door"].y + e["out"].y * 150.0, 0), yaw=math.degrees(math.atan2(-e["out"].y, -e["out"].x)))
             G["pawn"].get_movement_component().stop_movement_immediately(); yield from wait(0.4)
             r["prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
@@ -8470,6 +8471,22 @@ def step_building17():
             st2 = bstate17(); r["after"] = {"in": st2["in"], "loaded": st2["loaded"]}
             h = G["pawn"].get_actor_location(); want = V(e["door"].x + e["out"].x * 180.0, e["door"].y + e["out"].y * 180.0, 0)
             r["out_off_m"] = round(math.hypot(h.x - want.x, h.y - want.y) / 100, 2)
+            # (walked in at the door left open, and out again (PR #141's review: the walk rules were never tried))
+            if walk_in and e["door_i"] >= 0:
+                S = section(); S.push_door(e["door_i"], V(e["door"].x + e["out"].x * 150.0, e["door"].y + e["out"].y * 150.0, 100.0)); yield from rwait(1.5)
+                t3 = time.time(); got = False
+                while time.time() - t3 < 8 and not got:
+                    G["pawn"].add_movement_input(V(-e["out"].x, -e["out"].y, 0), 1.0); yield
+                    got = bstate17()["in"] == e["i"]
+                r["walked_in"] = got
+                while time.time() - t3 < 20 and bstate17()["pending"] >= 0: yield
+                yield from rwait(1.0)
+                put(V(e["door"].x - e["out"].x * 120.0, e["door"].y - e["out"].y * 120.0, 0), yaw=math.degrees(math.atan2(e["out"].y, e["out"].x)))
+                G["pawn"].get_movement_component().stop_movement_immediately(); yield from wait(0.3)
+                t4 = time.time()
+                while time.time() - t4 < 8 and bstate17()["in"] == e["i"]:
+                    G["pawn"].add_movement_input(V(e["out"].x, e["out"].y, 0), 1.0); yield
+                r["walked_out"] = bstate17()["in"] == -1
             return r
         for want_kind in ("home", "tavern", "store"):
             e = next((x for x in en if kind_name(x["i"]) == want_kind and x["rec"] > 0 and x["windows"] > 0), None) or next((x for x in en if kind_name(x["i"]) == want_kind), None)
@@ -8485,6 +8502,12 @@ def step_building17():
         try: G["pawn"].set_actor_hidden_in_game(False)
         except Exception: pass
         set_structures17(cv0)
+        # (the town built again under the setting put back, in Brokenspire (PR #141's review: a closed town left with the setting back read
+        # as Immersive, every building empty))
+        try:
+            yield from to_town("Brokenspire"); refresh(); G["gen"].rebuild_town(seed0); yield from rwait(2.0); refresh()
+        except Exception as e2:
+            res["restore_error"] = str(e2)
         quiet(False)
     def b_ok(r):
         st = r.get("state", {})
@@ -8494,10 +8517,13 @@ def step_building17():
                 # (the pane's picture against the street through the frame: 0.68 to 0.94 with a cube at each window (one at the building's middle read 0.17 to 0.91: seen from
                 # the building's middle, the frame from 2.6 m before it: near things part); 0.4. Its brightness is recorded, not held: the cube's
                 # capture and the screen are exposed apart (13 to 25 of 255 off))
-                and (r["windows"] == 0 or r.get("view_corr", -1) >= 0.4 or (not r.get("view_spread") and r.get("windows_tried"))))
+                and (r["windows"] == 0 or r.get("view_corr", -1) >= 0.4 or (not r.get("view_spread") and r.get("windows_tried")))
+                and (r["kind"] != "store" or (r.get("walked_in") and r.get("walked_out"))))
     res["buildings_ok"] = [b_ok(r) for r in res["buildings"]]
+    # (a window measured in three buildings of four at least: one onto a near wall in every one of its windows is recorded untested)
+    res["views_measured"] = sum(1 for r in res["buildings"] if r.get("view_spread"))
     ok = ("error" not in res and res.get("enterable", 0) > 20 and not res.get("record_differs") and res.get("closed_batches_in_town") == 0
-          and len(res["buildings"]) == 4 and all(res["buildings_ok"]))
+          and len(res["buildings"]) == 4 and all(res["buildings_ok"]) and res["views_measured"] >= 3)
     step_result("building17", ok, **res)
 
 

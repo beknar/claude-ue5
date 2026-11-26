@@ -114,7 +114,7 @@ void ARDDungeonGenerator::TickTownInteriors16(float Dt)
 		uint8 Why = bShow ? 1 : 0;          // (1 off or never hidden, 2 inside, 3 a door open, 4 a window seen, 5 her building's level; 0 hidden)
 		int32 WhyWin = -1;
 		// (the list of 2026-11-26: Closed Structures: a closed building's lights, hearth, props and people only while she is in its level)
-		if (S->BldClosed17 && IsEnterable17(S, BI))
+		if (S->HasRecord17(BI))
 		{
 			bShow = InBuilding17 == BI; Why = bShow ? 5 : 0;
 			if (!bFull && !bShow) continue;

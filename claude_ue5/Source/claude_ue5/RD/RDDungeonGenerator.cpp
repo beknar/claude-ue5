@@ -1621,7 +1621,7 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 	// (the list of 2026-11-22's twentieth phase: Heaven's lifts, at their doors and on their platforms)
 	if (bTower24) { const FString Tw = TowerUseHere24(From); if (!Tw.IsEmpty()) return Tw; }          // (phase 24: the tower's lifts and doors)
 	if (bTown && TownPlan == 5) { const FString Tw = TowerUse24(From, Best ? BestD : 1e9f, Best, bBestDoor, BestI); if (!Tw.IsEmpty()) return Tw; }          // (a tower's door: into the tower)
-	if (bTown) { const FString Bu = BuildingDoorUse17(From); if (!Bu.IsEmpty()) return Bu; }          // (the list of 2026-11-26: Closed Structures' doors)
+	if (bTown) { const FString Bu = BuildingDoorUse17(From, Best ? BestD : 1e9f, Best, bBestDoor, BestI); if (!Bu.IsEmpty()) return Bu; }          // (the list of 2026-11-26: Closed Structures' doors)
 	if (bTown && TownPlan == 5) if (ARDSection* Hs = GetSection(FIntPoint::ZeroValue)) { const FString Lf = Hs->LiftUse20(From, Best ? BestD : 1e9f); if (!Lf.IsEmpty()) return Lf; }
 	if (bTown || bTownLink) { const FString Tw = TownInteract(From); if (!Tw.IsEmpty()) return Tw; }
 	// (the third list: an armory table's weapon, a shrine, a fountain, a vault's door)
@@ -1749,7 +1749,7 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 		}
 	if (bTower24) { const FString Tw = TowerDescribeHere24(From); if (!Tw.IsEmpty()) return Tw; }
 	if (bTown && TownPlan == 5) { const FString Tw = TowerDescribe24(From, Best ? BestD : 1e9f, Best, bBestDoor, BestI); if (!Tw.IsEmpty()) return Tw; }
-	if (bTown) { const FString Bu = BuildingDescribe17(From); if (!Bu.IsEmpty()) return Bu; }
+	if (bTown) { const FString Bu = BuildingDescribe17(From, Best ? BestD : 1e9f, Best, bBestDoor, BestI); if (!Bu.IsEmpty()) return Bu; }
 	if (bTown && TownPlan == 5) if (const ARDSection* Hs = GetSection(FIntPoint::ZeroValue)) { const FString Lf = Hs->LiftDescribe20(From, Best ? BestD : 1e9f); if (!Lf.IsEmpty()) return Lf; }          // (the twentieth phase)
 	if (bTown || bTownLink) { const FString Tw = TownDescribe(From); if (!Tw.IsEmpty()) return Tw; }
 	if (bSpecialRooms || bWeaponPickups) { const FString Sp = DescribeSpecialNear(From); if (!Sp.IsEmpty()) return Sp; }

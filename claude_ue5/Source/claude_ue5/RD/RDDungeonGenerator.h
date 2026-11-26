@@ -2308,8 +2308,9 @@ public:
 	bool Closed17() const;
 	bool IsEnterable17(const ARDSection* S, int32 BI) const;
 	int32 BuildingDoorNear17(const FVector& From, bool bOut) const;
-	FString BuildingDescribe17(const FVector& From) const;
-	FString BuildingDoorUse17(const FVector& From);
+	bool BuildingDoorFirst17(const FVector& From, int32 I, float NearerThan, const ARDSection* BestS, bool bBestDoor, int32 BestI) const;
+	FString BuildingDescribe17(const FVector& From, float NearerThan, const ARDSection* BestS, bool bBestDoor, int32 BestI) const;
+	FString BuildingDoorUse17(const FVector& From, float NearerThan, const ARDSection* BestS, bool bBestDoor, int32 BestI);
 	static FString RDTTheLabel17(const ARDSection* S, int32 BI);
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List17") bool EnterBuilding17(int32 BI);
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List17") bool LeaveBuilding17();

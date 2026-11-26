@@ -68,6 +68,8 @@ bool ARDSection::RecordsBuilding17(int32 BI) const
 void ARDSection::RecordPiece17(int32 BI, UStaticMesh* Mesh, UMaterialInterface* Mat, bool bCol, bool bSmall, float Cull, const FTransform& W)
 {
 	FBldRec17& R = BldRec17.FindOrAdd(BI);
+	if (Mesh) BldRecRefs17.AddUnique(Mesh);
+	if (Mat) BldRecRefs17.AddUnique(Mat);
 	const FString Key = FString::Printf(TEXT("%s|%s|%d|%d"), Mesh ? *Mesh->GetPathName() : TEXT("-"), Mat ? *Mat->GetPathName() : TEXT("-"), bCol ? 1 : 0, bSmall ? 1 : 0);
 	FBldRecPiece17& P = R.Pieces.FindOrAdd(Key);
 	P.Mesh = Mesh; P.Mat = Mat; P.bCol = bCol; P.bSmall = bSmall; P.Cull = Cull;
@@ -78,6 +80,7 @@ void ARDSection::RecordPiece17(int32 BI, UStaticMesh* Mesh, UMaterialInterface* 
 void ARDSection::RecordActor17(int32 BI, UClass* Class, const FTransform& W)
 {
 	FBldRec17& R = BldRec17.FindOrAdd(BI);
+	if (Class) BldRecRefs17.AddUnique(Class);
 	R.Actors.Add({ Class, W });
 	++R.N;
 }
@@ -91,7 +94,7 @@ int32 ARDDungeonGenerator::BuildingDoorNear17(const FVector& From, bool bOut) co
 	int32 Best = -1; float BestD = 260.f;
 	for (int32 I = 0; I < S->TownBlds.Num(); ++I)
 	{
-		if (bOut ? I != InBuilding17 : !IsEnterable17(S, I)) continue;
+		if (bOut ? I != InBuilding17 : !S->HasRecord17(I)) continue;
 		const ARDSection::FTownBld& B = S->TownBlds[I];
 		if (B.Door < 0) continue;
 		const FVector Out(RDB17Dir4[B.DoorSide].X, RDB17Dir4[B.DoorSide].Y, 0.f);
@@ -103,22 +106,37 @@ int32 ARDDungeonGenerator::BuildingDoorNear17(const FVector& From, bool bOut) co
 	return Best;
 }
 
-FString ARDDungeonGenerator::BuildingDescribe17(const FVector& From) const
+bool ARDDungeonGenerator::BuildingDoorFirst17(const FVector& From, int32 I, float NearerThan, const ARDSection* BestS, bool bBestDoor, int32 BestI) const
 {
-	if (!bTown || !Closed17() || PendingBuilding17 >= 0) return FString();
+	// (PR #141's review: a nearer door, container or person keeps F, as every town target yields; the building's own door leaf is no rival
+	// (F at it goes in or out))
 	const ARDSection* S = GetSection(FIntPoint::ZeroValue);
-	if (!S) return FString();
-	if (InBuilding17 >= 0) { if (BuildingDoorNear17(From, true) >= 0) return FString::Printf(TEXT("leave %s"), *RDTTheLabel17(S, InBuilding17)); return FString(); }
-	const int32 I = BuildingDoorNear17(From, false);
-	return I >= 0 ? FString::Printf(TEXT("enter %s"), *RDTTheLabel17(S, I)) : FString();
+	if (!S || !S->TownBlds.IsValidIndex(I)) return false;
+	if (bBestDoor && BestS == S && BestI == S->TownBlds[I].Door) return true;
+	const ARDSection::FTownBld& B = S->TownBlds[I];
+	const FVector Out(RDB17Dir4[B.DoorSide].X, RDB17Dir4[B.DoorSide].Y, 0.f);
+	const float D = FVector::Dist2D(S->LocalToWorld(B.DoorTile) + Out * (TileSize * 0.5f), From);
+	if (D >= NearerThan) return false;
+	for (const ARDTownsfolk* T : TownPeople) if (T && !T->IsHidden() && FVector::Dist2D(T->GetActorLocation(), From) < FMath::Min(D, 160.f) && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) return false;
+	return true;
 }
 
-FString ARDDungeonGenerator::BuildingDoorUse17(const FVector& From)
+FString ARDDungeonGenerator::BuildingDescribe17(const FVector& From, float NearerThan, const ARDSection* BestS, bool bBestDoor, int32 BestI) const
 {
-	if (!bTown || !Closed17() || PendingBuilding17 >= 0) return FString();
-	if (InBuilding17 >= 0) return BuildingDoorNear17(From, true) >= 0 && LeaveBuilding17() ? FString(TEXT("leave building")) : FString();
+	const ARDSection* S = GetSection(FIntPoint::ZeroValue);
+	if (!bTown || !S || !S->BldClosed17 || PendingBuilding17 >= 0) return FString();
+	if (InBuilding17 >= 0) { if (BuildingDoorNear17(From, true) >= 0 && BuildingDoorFirst17(From, InBuilding17, NearerThan, BestS, bBestDoor, BestI)) return FString::Printf(TEXT("leave %s"), *RDTTheLabel17(S, InBuilding17)); return FString(); }
 	const int32 I = BuildingDoorNear17(From, false);
-	return I >= 0 && EnterBuilding17(I) ? FString(TEXT("enter building")) : FString();
+	return I >= 0 && BuildingDoorFirst17(From, I, NearerThan, BestS, bBestDoor, BestI) ? FString::Printf(TEXT("enter %s"), *RDTTheLabel17(S, I)) : FString();
+}
+
+FString ARDDungeonGenerator::BuildingDoorUse17(const FVector& From, float NearerThan, const ARDSection* BestS, bool bBestDoor, int32 BestI)
+{
+	const ARDSection* S = GetSection(FIntPoint::ZeroValue);
+	if (!bTown || !S || !S->BldClosed17 || PendingBuilding17 >= 0) return FString();
+	if (InBuilding17 >= 0) return BuildingDoorNear17(From, true) >= 0 && BuildingDoorFirst17(From, InBuilding17, NearerThan, BestS, bBestDoor, BestI) && LeaveBuilding17() ? FString(TEXT("leave building")) : FString();
+	const int32 I = BuildingDoorNear17(From, false);
+	return I >= 0 && BuildingDoorFirst17(From, I, NearerThan, BestS, bBestDoor, BestI) && EnterBuilding17(I) ? FString(TEXT("enter building")) : FString();
 }
 
 FString ARDDungeonGenerator::RDTTheLabel17(const ARDSection* S, int32 BI)
@@ -132,14 +150,14 @@ bool ARDDungeonGenerator::EnterBuilding17(int32 BI)
 {
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	if (!S || !S->TownBlds.IsValidIndex(BI) || BuildingLevel17.IsEmpty() || (PlayerCombat && PlayerCombat->IsDead())) return false;
-	if (!S->BldRec17.Contains(BI) && !IsEnterable17(S, BI)) return false;
+	if (!S->HasRecord17(BI)) return false;
 	if (InBuilding17 >= 0) UnloadBuilding17();
 	bool bOk = false;
 	Building17Asked = FPlatformTime::Seconds();
 	ULevelStreamingDynamic* L = ULevelStreamingDynamic::LoadLevelInstance(GetWorld(), BuildingLevel17, FVector::ZeroVector, FRotator::ZeroRotator, bOk, FString::Printf(TEXT("RDBuilding17_%d_%d"), BI, ++Building17Count));
 	if (!bOk || !L) { UE_LOG(LogRDBuilding17, Warning, TEXT("RDBUILDING17 the level %s did not load"), *BuildingLevel17); return false; }
 	BuildingStream17 = L; PendingBuilding17 = BI;
-	ShowCover16(TEXT("building"));
+	if (!bBuilding17Walked) ShowCover16(TEXT("building"));          // (a walk-in is not covered: the cover holds her input still in the doorway)
 	UE_LOG(LogRDBuilding17, Log, TEXT("RDBUILDING17 into %d (%s): the level asked for"), BI, *RDTTheLabel17(S, BI));
 	return true;
 }
@@ -219,7 +237,6 @@ void ARDDungeonGenerator::TickBuilding17(float Dt)
 		// (she is put inside its door, facing in)
 		const FVector Out(RDB17Dir4[B.DoorSide].X, RDB17Dir4[B.DoorSide].Y, 0.f);
 		const FVector In0 = S->LocalToWorld(B.DoorTile) - Out * 40.f;
-		if (!bBuilding17Walked)
 		{
 			Her->SetActorLocation(FVector(In0.X, In0.Y, Her->GetActorLocation().Z), false, nullptr, ETeleportType::TeleportPhysics);
 			if (ACharacter* Ch = Cast<ACharacter>(Her)) Ch->GetCharacterMovement()->StopMovementImmediately();
@@ -233,10 +250,10 @@ void ARDDungeonGenerator::TickBuilding17(float Dt)
 		UE_LOG(LogRDBuilding17, Log, TEXT("RDBUILDING17 in %d: %d pieces, %d panes, %.0f ms"), BI, Building17Pieces, Building17Panes, Building17LoadMs);
 		return;
 	}
-	if (!bTown || !Closed17()) return;
-	// ---- walked in at a door left open: entered; walked out of the one she is in: left
+	if (!bTown || !S->BldClosed17) return;
+	// ---- walked in at a door left open: entered; walked from the one she is in into the next: that one; walked out: left
 	const int32 Here = S->TownBuildingAt(Her->GetActorLocation());
-	if (InBuilding17 < 0 && Here >= 0 && IsEnterable17(S, Here) && S->BldRec17.Contains(Here)) { bBuilding17Walked = true; EnterBuilding17(Here); return; }
+	if (Here >= 0 && Here != InBuilding17 && S->HasRecord17(Here)) { bBuilding17Walked = true; if (!EnterBuilding17(Here)) bBuilding17Walked = false; return; }
 	if (InBuilding17 >= 0 && Here != InBuilding17)
 	{
 		const ARDSection::FTownBld& B = S->TownBlds[InBuilding17];
@@ -270,7 +287,9 @@ void ARDDungeonGenerator::UnloadBuilding17()
 	BuildingActor17 = nullptr;
 	if (ULevelStreamingDynamic* L = BuildingStream17.Get()) { L->SetShouldBeLoaded(false); L->SetShouldBeVisible(false); L->SetIsRequestingUnloadAndRemoval(true); }
 	BuildingStream17 = nullptr;
-	InBuilding17 = -1; PendingBuilding17 = -1;
+	InBuilding17 = -1; PendingBuilding17 = -1; bBuilding17Walked = false;
+	// (the visit's cubes let go after it (heaven.md: session state carried for one visit))
+	BuildingViews17.Reset(); BuildingView17 = nullptr;
 }
 
 void ARDDungeonGenerator::CaptureBuildingView17(int32 BI)
@@ -304,11 +323,15 @@ void ARDDungeonGenerator::CaptureBuildingView17(int32 BI)
 		Cap->CaptureScene(); if (Wk == 0) Cap->CaptureScene();          // (the first twice: the GPU's copy of the moved pieces comes with the first)
 		++Wk;
 	}
-	if (!BuildingView17) { BuildingView17 = NewObject<UTextureRenderTargetCube>(this); BuildingView17->Init(FMath::Clamp(BuildingCaptureSize17, 128, 2048), PF_FloatRGBA); }
-	Cap->TextureTarget = BuildingView17;
 	const FVector Ctr = S->TownBldPoint24(S->TownBlds[BI], 0.f, 0.f, 0.f);
-	Cap->SetWorldLocation(FVector(Ctr.X, Ctr.Y, S->GetActorLocation().Z + 160.f));
-	Cap->CaptureScene();
+	int32 Nw = 0; for (const ARDSection::FTownWin16& Wn : S->TownWindows16) if (Wn.Bld == BI) ++Nw;
+	if (Nw > 40)
+	{
+		if (!BuildingView17) { BuildingView17 = NewObject<UTextureRenderTargetCube>(this); BuildingView17->Init(FMath::Clamp(BuildingCaptureSize17, 128, 2048), PF_FloatRGBA); }
+		Cap->TextureTarget = BuildingView17;
+		Cap->SetWorldLocation(FVector(Ctr.X, Ctr.Y, S->GetActorLocation().Z + 160.f));
+		Cap->CaptureScene();
+	}
 	if (bClouds) Cl->SetVisibility(true);
 	Cap->DestroyComponent();
 	TowerBackInCity24(Moved);
@@ -373,7 +396,7 @@ TArray<FString> ARDDungeonGenerator::GetBuildingPieces17(int32 BI, bool bLevel) 
 
 TArray<FString> ARDDungeonGenerator::GetEnterable17() const
 {
-	// (tests: every enterable building, "<index>|<kind>|<label>|<recorded pieces>|<door x>|<door y>|<out x>|<out y>|<windows>")
+	// (tests: every enterable building, "<index>|<kind>|<label>|<recorded pieces>|<door x>|<door y>|<out x>|<out y>|<windows>|<door index>")
 	TArray<FString> Out;
 	const ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	if (!S) return Out;
@@ -385,7 +408,7 @@ TArray<FString> ARDDungeonGenerator::GetEnterable17() const
 		const FVector Door = S->LocalToWorld(B.DoorTile) + Out_ * (TileSize * 0.5f);
 		const ARDSection::FBldRec17* R = S->BldRec17.Find(I);
 		int32 Nw = 0; for (const ARDSection::FTownWin16& Wn : S->TownWindows16) if (Wn.Bld == I) ++Nw;
-		Out.Add(FString::Printf(TEXT("%d|%d|%s|%d|%.0f|%.0f|%.0f|%.0f|%d"), I, (int32)B.Kind, *B.Label, R ? R->N : 0, Door.X, Door.Y, Out_.X, Out_.Y, Nw));
+		Out.Add(FString::Printf(TEXT("%d|%d|%s|%d|%.0f|%.0f|%.0f|%.0f|%d|%d"), I, (int32)B.Kind, *B.Label, R ? R->N : 0, Door.X, Door.Y, Out_.X, Out_.Y, Nw, B.Door));
 	}
 	return Out;
 }

@@ -844,7 +844,11 @@ public:
 	struct FBldRecPiece17 { UStaticMesh* Mesh = nullptr; UMaterialInterface* Mat = nullptr; bool bCol = false, bSmall = false; float Cull = 0.f; TArray<FTransform> T; };
 	struct FBldRec17 { TMap<FString, FBldRecPiece17> Pieces; TArray<TPair<TObjectPtr<UClass>, FTransform>> Actors; int32 N = 0; };
 	TMap<int32, FBldRec17> BldRec17;
+	/** the record's meshes, materials and classes held for the collector (PR #141's review: its own pointers are plain) */
+	UPROPERTY(Transient) TArray<TObjectPtr<UObject>> BldRecRefs17;
 	bool BldClosed17 = false;
+	/** a closed building entered so: one whose furnishing this town recorded */
+	bool HasRecord17(int32 BI) const { return BldClosed17 && BldRec17.Contains(BI); }
 	bool RecordsBuilding17(int32 BI) const;
 	void RecordPiece17(int32 BI, UStaticMesh* Mesh, UMaterialInterface* Mat, bool bCol, bool bSmall, float Cull, const FTransform& W);
 	void RecordActor17(int32 BI, UClass* Class, const FTransform& W);

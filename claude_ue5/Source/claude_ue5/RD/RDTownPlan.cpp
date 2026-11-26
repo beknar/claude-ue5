@@ -136,8 +136,8 @@ void ARDSection::PlanTown(FRandomStream& R)
 {
 	N = Generator->SectionTiles;
 	// (the list of 2026-11-26: Closed Structures read when the town is planned; the furnishing's record made anew with the static build)
-	BldClosed17 = Generator->Closed17();
-	if (bBuildStatic) BldRec17.Reset();
+	// (PR #141's review: set with the static build only, so a replan after the option changed never disagrees with what was drawn)
+	if (bBuildStatic) { BldClosed17 = Generator->Closed17(); BldRec17.Reset(); BldRecRefs17.Reset(); }
 	Rooms.Reset(); Corrs.Reset(); DoorEdges.Reset(); Portals.Reset(); Cells.Reset(); Fixtures.Reset(); SpecialChests.Reset();
 	Pickups.Reset();
 	Type.Init(0, N * N); Owner.Init(-1, N * N); Blocked.Init(0, N * N); CeilH.Init(0.f, N * N);

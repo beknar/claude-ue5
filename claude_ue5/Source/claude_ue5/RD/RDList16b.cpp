@@ -160,7 +160,7 @@ void ARDDungeonGenerator::TickCover16(float Dt)
 	if (bTown)
 	{
 		const URDGameInstance* GI = URDGameInstance::Of(this);
-		bBuilt = !bTownLoading && !bTownTraveling && (!S || !S->IsBuilding()) && (!GI || !GI->bLoadPending) && bTownPlaced;
+		bBuilt = !bTownLoading && !bTownTraveling && (!S || !S->IsBuilding()) && (!GI || !GI->bLoadPending) && bTownPlaced && PendingBuilding17 < 0;          // (the list of 2026-11-26: a building's level in)
 		if (bBuilt && bWild)
 		{
 			if (!IsWildReady()) bBuilt = false;
