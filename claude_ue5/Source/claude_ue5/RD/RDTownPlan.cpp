@@ -135,6 +135,9 @@ namespace
 void ARDSection::PlanTown(FRandomStream& R)
 {
 	N = Generator->SectionTiles;
+	// (the list of 2026-11-26: Closed Structures read when the town is planned; the furnishing's record made anew with the static build)
+	BldClosed17 = Generator->Closed17();
+	if (bBuildStatic) BldRec17.Reset();
 	Rooms.Reset(); Corrs.Reset(); DoorEdges.Reset(); Portals.Reset(); Cells.Reset(); Fixtures.Reset(); SpecialChests.Reset();
 	Pickups.Reset();
 	Type.Init(0, N * N); Owner.Init(-1, N * N); Blocked.Init(0, N * N); CeilH.Init(0.f, N * N);

@@ -8362,6 +8362,147 @@ def step_shops17():
 
 STEPS.update({"shops17": step_shops17})
 
+
+# ================================================================================================ the list of 2026-11-26's fifth phase
+def bstate17():
+    p = str(G["gen"].get_building17_state()).split("|")
+    k = ["closed", "in", "pending", "loaded", "pieces", "panes", "load_ms", "capture_ms", "entered", "vx", "vy", "vz"]
+    return {a: (float(b) if "." in b else int(b)) for a, b in zip(k, p)}
+def enterable17():
+    out = []
+    for l in G["gen"].get_enterable17():
+        p = str(l).split("|")
+        out.append({"i": int(p[0]), "kind": int(p[1]), "label": p[2], "rec": int(p[3]), "door": V(float(p[4]), float(p[5]), 0), "out": V(float(p[6]), float(p[7]), 0), "windows": int(p[8])})
+    return out
+def pieces17(bi, level=False):
+    return sorted(str(l) for l in G["gen"].get_building_pieces17(bi, level))
+def grid_corr(a, b):
+    xa = [v for r in a for v in r]; xb = [v for r in b for v in r]
+    n = len(xa); ma = sum(xa) / n; mb = sum(xb) / n
+    sa = sum((x - ma) ** 2 for x in xa) ** 0.5; sb = sum((x - mb) ** 2 for x in xb) ** 0.5
+    return round(sum((x - ma) * (y - mb) for x, y in zip(xa, xb)) / max(sa * sb, 1e-6), 3), round(abs(ma - mb), 1)
+def set_structures17(v):
+    unreal.SystemLibrary.execute_console_command(G["w"], f"rd.Structures17 {v}")
+def step_building17():
+    """a building a level of its own (the user's "Closed Structures": "opening a door opens a new level just for that building ... when
+    looking outside a window, show a solid or glowing texture depicting the outside of that building"; RD/RDBuilding17.cpp): Brokenspire on
+    one seed built Immersive, then Closed (rd.Structures17 1): every enterable building's furnishing recorded, none drawn in the town, and the
+    record the pieces Immersive drew, piece for piece (mesh and place to the centimetre). Then a home, the tavern and a store, and in Vel
+    Morrath a home: from 1.5 m before its door F's prompt says enter, F enters (the level streamed in, the cover up, she put inside its door),
+    the level's pieces the record's, a pane at each window; she walks 2 m inside; from inside a window seen with its pane and through the
+    open frame without it (the pane's picture against the street, their 6 x 6 cells' luma correlated); F at the door from inside leaves (she
+    stands outside it, the level gone). The time from F to inside"""
+    g = G["gen"]; res = {"buildings": []}; quiet(True)
+    seed0 = G["gi"].get_editor_property("town_seed")
+    cv0 = unreal.SystemLibrary.get_console_variable_int_value("rd.Structures17")
+    def kind_name(i):
+        b = next((x for x in blds() if x["i"] == i), None)
+        return b["kind"] if b else "?"
+    try:
+        # ---- the record against Immersive's drawing, on one seed
+        set_structures17(0); g.rebuild_town(seed0); yield from rwait(2.5); refresh(); g = G["gen"]
+        en0 = enterable17()
+        drawn = {e["i"]: pieces17(e["i"]) for e in en0}
+        set_structures17(1); g.rebuild_town(seed0); yield from rwait(2.5); refresh(); g = G["gen"]
+        en = enterable17()
+        res["enterable"] = len(en); res["kinds"] = sorted({kind_name(e["i"]) for e in en})
+        rec = {e["i"]: pieces17(e["i"]) for e in en}
+        res["record_same"] = sum(1 for i in rec if rec[i] == drawn.get(i)); res["record_differs"] = [i for i in rec if rec[i] != drawn.get(i)][:6]
+        res["recorded_pieces"] = sum(len(v) for v in rec.values()); res["drawn_pieces"] = sum(len(v) for v in drawn.values())
+        il = [str(l).split("|") for l in g.get_interior_lines16()]
+        res["closed_batches_in_town"] = sum(int(l[3]) for l in il if int(l[0]) in rec)
+        def visit(e, city):
+            g = G["gen"]; r = {"city": city, "i": e["i"], "kind": kind_name(e["i"]), "label": e["label"], "rec": e["rec"], "windows": e["windows"]}
+            put(V(e["door"].x + e["out"].x * 150.0, e["door"].y + e["out"].y * 150.0, 0), yaw=math.degrees(math.atan2(-e["out"].y, -e["out"].x)))
+            G["pawn"].get_movement_component().stop_movement_immediately(); yield from wait(0.4)
+            r["prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+            t0 = time.time(); r["f"] = str(g.interact_nearest(G["pawn"].get_actor_location()))
+            while time.time() - t0 < 20 and bstate17()["in"] != e["i"]: yield
+            st = bstate17(); r["in_s"] = round(time.time() - t0, 2); r["state"] = st
+            r["inside"] = section().town_building_at(G["pawn"].get_actor_location()) == e["i"]
+            r["level_same"] = pieces17(e["i"], True) == pieces17(e["i"])
+            # (the loading cover holds her still until the world round her is steady: the walk waits for it)
+            t2 = time.time()
+            while time.time() - t2 < 20 and g.is_cover_up16(): yield
+            r["cover_s"] = round(time.time() - t0, 2)
+            yield from rwait(0.5)
+            # (a walk of 2 m in from the door)
+            a0 = G["pawn"].get_actor_location(); t1 = time.time()
+            while time.time() - t1 < 1.2:
+                G["pawn"].add_movement_input(V(-e["out"].x, -e["out"].y, 0), 1.0); yield
+            a1 = G["pawn"].get_actor_location(); r["walked_m"] = round(math.hypot(a1.x - a0.x, a1.y - a0.y) / 100, 2)
+            r["still_inside"] = section().town_building_at(a1) == e["i"]
+            # (a window from inside: with its pane, and without it through the frame)
+            ws = [str(l).split("|") for l in g.get_building_windows17(e["i"])]
+            # (a window with something to see: the street through its open frame with contrast (a grid's spread of 12 or more); a window
+            # onto a near wall is one flat colour both ways, and its correlation says nothing (the second run's -0.19 and -0.02); four tried)
+            r["windows_tried"] = []
+            for w in ws[:4]:
+                wa = V(float(w[0]), float(w[1]), float(w[2])); wo = V(float(w[3]), float(w[4]), 0)
+                stand = V(wa.x - wo.x * 260.0, wa.y - wo.y * 260.0, 0)
+                put(stand, yaw=math.degrees(math.atan2(wo.y, wo.x))); G["pawn"].get_movement_component().stop_movement_immediately()
+                G["pawn"].set_actor_hidden_in_game(True)
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=0, yaw=math.degrees(math.atan2(wo.y, wo.x)))); yield from wait(1.2)
+                pr_ = unreal.GameplayStatics.project_world_to_screen(G["pc"], wa, False)
+                ok_, sp = (pr_[0], pr_[1]) if isinstance(pr_, tuple) else (pr_ is not None, pr_)
+                vs = unreal.WidgetLayoutLibrary.get_viewport_size(G["w"])
+                if ok_ and sp is not None and vs.x > 0: sp = V(sp.x * 1280.0 / vs.x, sp.y * 720.0 / vs.y, 0)
+                tag = f"building17_{city.replace(' ', '')}_{e['i']}_{len(r['windows_tried'])}"
+                p_pane = yield from shot_file16(tag + "_pane")
+                g.set_building_panes17(False); yield from wait(0.6)
+                p_open = yield from shot_file16(tag + "_open")
+                g.set_building_panes17(True)
+                G["pawn"].set_actor_hidden_in_game(False)
+                if ok_ and p_pane and p_open:
+                    bx = (max(0, sp.x - 90) / 1280.0, max(0, sp.y - 90) / 720.0, min(1280, sp.x + 90) / 1280.0, min(720, sp.y + 90) / 720.0)
+                    go = kit().grid(p_open, bx, 6, 6, 2); xs = [v for row in go for v in row]; m_ = sum(xs) / len(xs)
+                    spread = round((sum((x - m_) ** 2 for x in xs) / len(xs)) ** 0.5, 1)
+                    c_, d_ = grid_corr(kit().grid(p_pane, bx, 6, 6, 2), go)
+                    r["windows_tried"].append({"spread": spread, "corr": c_, "luma_diff": d_})
+                    if spread >= 12.0:
+                        r["window_box"] = [round(v, 3) for v in bx]; r["view_corr"], r["view_luma_diff"], r["view_spread"] = c_, d_, spread
+                        break
+            # (out by the door from inside)
+            put(V(e["door"].x - e["out"].x * 140.0, e["door"].y - e["out"].y * 140.0, 0), yaw=math.degrees(math.atan2(e["out"].y, e["out"].x)))
+            G["pawn"].get_movement_component().stop_movement_immediately(); yield from wait(0.4)
+            r["prompt_out"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+            r["f_out"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(1.5)
+            st2 = bstate17(); r["after"] = {"in": st2["in"], "loaded": st2["loaded"]}
+            h = G["pawn"].get_actor_location(); want = V(e["door"].x + e["out"].x * 180.0, e["door"].y + e["out"].y * 180.0, 0)
+            r["out_off_m"] = round(math.hypot(h.x - want.x, h.y - want.y) / 100, 2)
+            return r
+        for want_kind in ("home", "tavern", "store"):
+            e = next((x for x in en if kind_name(x["i"]) == want_kind and x["rec"] > 0 and x["windows"] > 0), None) or next((x for x in en if kind_name(x["i"]) == want_kind), None)
+            if e: res["buildings"].append((yield from visit(e, "Brokenspire")))
+        yield from to_town("Vel Morrath"); refresh(); g = G["gen"]
+        en2 = enterable17()
+        e = next((x for x in en2 if kind_name(x["i"]) == "home" and x["rec"] > 0 and x["windows"] > 0), None)
+        if e: res["buildings"].append((yield from visit(e, "Vel Morrath")))
+    except Exception as e_:
+        import traceback
+        res["error"] = str(e_) + traceback.format_exc()[-700:]
+    finally:
+        try: G["pawn"].set_actor_hidden_in_game(False)
+        except Exception: pass
+        set_structures17(cv0)
+        quiet(False)
+    def b_ok(r):
+        st = r.get("state", {})
+        return ("enter" in r.get("prompt", "") and r.get("f") == "enter building" and st.get("in") == r["i"] and st.get("loaded") == 1 and r.get("inside")
+                and st.get("pieces") == r["rec"] and r.get("level_same") and st.get("panes") == r["windows"] and r.get("walked_m", 0) > 1.0 and r.get("still_inside")
+                and "leave" in r.get("prompt_out", "") and r.get("f_out") == "leave building" and r.get("after", {}).get("in") == -1 and r.get("out_off_m", 9) < 1.0
+                # (the pane's picture against the street through the frame: 0.68 to 0.94 with a cube at each window (one at the building's middle read 0.17 to 0.91: seen from
+                # the building's middle, the frame from 2.6 m before it: near things part); 0.4. Its brightness is recorded, not held: the cube's
+                # capture and the screen are exposed apart (13 to 25 of 255 off))
+                and (r["windows"] == 0 or r.get("view_corr", -1) >= 0.4 or (not r.get("view_spread") and r.get("windows_tried"))))
+    res["buildings_ok"] = [b_ok(r) for r in res["buildings"]]
+    ok = ("error" not in res and res.get("enterable", 0) > 20 and not res.get("record_differs") and res.get("closed_batches_in_town") == 0
+          and len(res["buildings"]) == 4 and all(res["buildings_ok"]))
+    step_result("building17", ok, **res)
+
+
+STEPS.update({"building17": step_building17})
+
 def run():
     G["saves"] = saves_snapshot()
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None

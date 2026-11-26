@@ -111,8 +111,23 @@ void ARDDungeonGenerator::TickTownInteriors16(float Dt)
 		FTownInterior16& I = TownInt16[BI];
 		if (!bFull && (!I.bSet || I.bShown)) continue;
 		bool bShow = !bOn || I.bNever;
-		uint8 Why = bShow ? 1 : 0;          // (1 off or never hidden, 2 inside, 3 a door open, 4 a window seen; 0 hidden)
+		uint8 Why = bShow ? 1 : 0;          // (1 off or never hidden, 2 inside, 3 a door open, 4 a window seen, 5 her building's level; 0 hidden)
 		int32 WhyWin = -1;
+		// (the list of 2026-11-26: Closed Structures: a closed building's lights, hearth, props and people only while she is in its level)
+		if (S->BldClosed17 && IsEnterable17(S, BI))
+		{
+			bShow = InBuilding17 == BI; Why = bShow ? 5 : 0;
+			if (!bFull && !bShow) continue;
+			I.Why = Why; I.WhyWin = -1;
+			if (bFull) { if (bShow) ++TownIntShown16; else ++TownIntHidden16; }
+			if (I.bShown == bShow && I.bSet) continue;
+			I.bShown = bShow; I.bSet = true;
+			for (const FTownInterior16::FProp& Pp : I.Props) if (USceneComponent* C = Pp.C.Get()) C->SetHiddenInGame(bShow ? Pp.bHidden0 : true);
+			if (const TArray<TWeakObjectPtr<USceneComponent>>* Ls = TownBldLights.Find(BI))
+				for (const TWeakObjectPtr<USceneComponent>& W : *Ls) if (USceneComponent* C = W.Get()) C->SetHiddenInGame(!bShow);
+			for (const TWeakObjectPtr<USceneComponent>& W : I.Hearths) if (USceneComponent* C = W.Get()) C->SetHiddenInGame(!bShow);
+			continue;
+		}
 		auto Inside = [&](const FVector& P, float Pad) { return P.X > I.A.X - Pad && P.X < I.B.X + Pad && P.Y > I.A.Y - Pad && P.Y < I.B.Y + Pad; };
 		if (!bShow) { bShow = Inside(Cam, 100.f) || Inside(Me, 100.f); if (bShow) Why = 2; }
 		const FVector2D Mid = (I.A + I.B) * 0.5f;

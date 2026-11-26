@@ -29,7 +29,7 @@ $KNOWN_BAD = 'LogAssetRegistry: Error: Package is unloadable: .*/Content/(Kitche
 $repo = Split-Path -Parent $PSScriptRoot
 $ue = "E:\Program Files\Epic Games\UE_5.8"
 $proj = "$repo\claude_ue5\claude_ue5.uproject"
-$maps = "/Game/RandomDungeon/Maps/mistward_castle_select", "/Game/RandomDungeon/Maps/brokenspire", "/Game/RandomDungeon/Maps/mistward_castle", "/Game/RandomDungeon/Maps/vel_morrath", "/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewers", "/Game/RandomDungeon/Maps/kethrys_spire", "/Game/RandomDungeon/Maps/heaven_fortress", "/Game/RandomDungeon/Maps/caves", "/Game/RandomDungeon/Maps/heaven_tower"
+$maps = "/Game/RandomDungeon/Maps/mistward_castle_select", "/Game/RandomDungeon/Maps/brokenspire", "/Game/RandomDungeon/Maps/mistward_castle", "/Game/RandomDungeon/Maps/vel_morrath", "/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewers", "/Game/RandomDungeon/Maps/kethrys_spire", "/Game/RandomDungeon/Maps/heaven_fortress", "/Game/RandomDungeon/Maps/caves", "/Game/RandomDungeon/Maps/heaven_tower", "/Game/RandomDungeon/Maps/town_building"
 if (-not $Out) { $Out = "$repo\builds\mistward_castle" }
 # (a relative -Out is the caller's folder: handed on as it is, UnrealAutomationTool archived it under the engine's own folder)
 elseif (-not [IO.Path]::IsPathRooted($Out)) { $Out = Join-Path (Get-Location).Path $Out }
