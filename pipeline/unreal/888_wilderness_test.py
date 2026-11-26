@@ -8205,6 +8205,42 @@ def step_caveport16():
 STEPS["allies16"] = step_allies16; STEPS["loading16"] = step_loading16; STEPS["caveport16"] = step_caveport16
 
 
+# ================================================================================================ the list of 2026-11-26's second phase
+def step_loading17():
+    """the moving loading screen (RD/RDList17.cpp): the cover over the view after each of three trips by the map's travel (Ashenreach,
+    Brokenspire, Graymourne) is the moving widget, which counts its own paints and the distinct phases of its turning ring of 64 while
+    the cover is up (the cover line's last two fields, read in the widget's OnPaint, not from the clock); a fourth trip under
+    rd.LoadingCover 2 (the old plain board) paints none of them. Each moving cover: 8 paints at least and 16 distinct phases (a quarter turn seen; a third of its paints if fewer: a town's build stalls
+    the frames, and the first run's Graymourne cover painted 247 times in 42 phases)"""
+    g = G["gen"]; res = {"trips": []}; quiet(True)
+    yield from wait_ready(90)
+    try:
+        for k, (town, mode) in enumerate([("Ashenreach", 1), ("Brokenspire", 1), ("Graymourne", 1), ("Brokenspire", 2)]):
+            unreal.SystemLibrary.execute_console_command(G["w"], f"rd.LoadingCover {mode}")
+            n0 = len(cover_lines16())
+            ok_ = G["gen"].travel_to_town16(town)
+            waited = yield from wait_cover16()
+            ls = cover_lines16()[n0:]
+            got = [(int(l[10]), int(l[11])) if len(l) > 11 else (None, None) for l in ls]
+            res["trips"].append({"to": town, "cover": mode, "ok": bool(ok_), "waited_s": waited, "up_s": [float(l[1]) for l in ls], "paints_phases": got})
+            yield from rwait(3.0)
+        res["state"] = str(unreal.RDDungeonGenerator.get_loading_state17())
+    except Exception as e_:
+        res["error"] = str(e_)
+    finally:
+        unreal.SystemLibrary.execute_console_command(G["w"], "rd.LoadingCover 1")
+        quiet(False)
+    tr = res["trips"]
+    def moved(t): return t["paints_phases"] and all(p is not None and p >= 8 and ph >= min(16, p // 3) for p, ph in t["paints_phases"])
+    def still(t): return t["paints_phases"] and all(p == 0 and ph == 0 for p, ph in t["paints_phases"])
+    ok = ("error" not in res and len(tr) == 4 and all(t["ok"] and t["waited_s"] is not None for t in tr)
+          and all(moved(t) for t in tr[:3]) and still(tr[3]))
+    step_result("loading17", ok, **res)
+
+
+STEPS["loading17"] = step_loading17
+
+
 # ================================================================================================ the list of 2026-11-22's third phase
 def lod16(): 
     f = str(G["gen"].get_wild_lod16()).split("|")

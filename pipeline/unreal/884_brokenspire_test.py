@@ -8012,6 +8012,84 @@ STEPS.update({"tower24_enter": step_tower24_enter, "tower24_floors": step_tower2
               "tower24_window": step_tower24_window, "tower24_exit": step_tower24_exit})
 
 
+
+# ================================================================================================ the list of 2026-11-26's second phase
+def mini_state17():
+    p = str(G["pc"].get_hud().get_minimap_state17()).split("|")
+    return {"kind": p[0], "bx": float(p[1]), "by": float(p[2]), "snap": p[3] == "1", "wall_px": float(p[4]), "clip_y": float(p[5]), "cx": float(p[6]), "cy": float(p[7])}
+
+
+def step_minimap17():
+    """the minimap on whole pixels (the user's "in full screen 1080p, the mini-map's building outlines shimmer when the character is
+    moving"; RD/RDList17.cpp): play paused in the square, she is stepped 0.1 px of the minimap at a time (3.5 cm at 1080p's scale)
+    eleven times, each frame's drawn wall lines read from the HUD. With rd.MinimapSnap 1 every line's start keeps its place within its
+    pixel (the share of lines whose sub-pixel fraction is one the first frame had: 0.95 or more at every step), the base is whole and the
+    walls' thickness whole; with rd.MinimapSnap 0 (the old drawing) the fractions slide (that share under 0.5 at some step). Then two
+    1920 x 1080 pictures 1.5 px of the map apart: snapped, the second is the first moved by whole pixels (the least mean luma difference
+    over whole-pixel shifts of the minimap's box), under half the old drawing's"""
+    g = G["gen"]; res = {}; quiet(True)
+    sq = place("square")
+    if sq: put(sq, yaw=0.0)
+    yield from rwait(3.0)
+    pawn = G["pawn"]; at0 = pawn.get_actor_location()
+    unreal.GameplayStatics.set_game_paused(G["w"], True)
+    try:
+        for snap in (1, 0):
+            unreal.SystemLibrary.execute_console_command(G["w"], f"rd.MinimapSnap {snap}")
+            r = {"steps": []}; first = None
+            k_px = None
+            for k in range(11):
+                pawn.set_actor_location(unreal.Vector(at0.x, at0.y + k * 3.5 * (1080.0 / 720.0), at0.z), False, True)
+                yield from rwait(0.25)
+                st = mini_state17()
+                lines = [str(l).split("|") for l in G["pc"].get_hud().get_mini_lines17()]
+                fr = set()
+                for l in lines:
+                    x0, y0 = float(l[0]), float(l[1])
+                    fr.add((round(x0 - math.floor(x0), 2) % 1.0, round(y0 - math.floor(y0), 2) % 1.0))
+                if first is None: first = fr
+                share = (sum(1 for f in fr if f in first) / max(len(fr), 1)) if fr else 0.0
+                r["steps"].append({"bx": st["bx"], "by": st["by"], "lines": len(lines), "fractions": len(fr), "share_same": round(share, 3)})
+                r["wall_px"] = st["wall_px"]; r["clip_y"] = st["clip_y"]; r["centre"] = (st["cx"], st["cy"])
+            r["base_whole"] = all(abs(s_["bx"] - round(s_["bx"])) < 1e-3 and abs(s_["by"] - round(s_["by"])) < 1e-3 for s_ in r["steps"])
+            r["least_share"] = min(s_["share_same"] for s_ in r["steps"])
+            # (the pictures at 1080p: the minimap's box, she moved 1.5 px of the map between them (52.5 cm at 1080p's scale))
+            pics = []
+            for k, dy in enumerate((0.0, 52.5)):
+                pawn.set_actor_location(unreal.Vector(at0.x, at0.y + dy, at0.z), False, True)
+                yield from rwait(0.4)
+                fp = os.path.join(SHOTS, f"bs_{TAG}_minimap17_{snap}_{k}.png")
+                if os.path.exists(fp): os.remove(fp)
+                shot(f"minimap17_{snap}_{k}", "1920x1080"); t0 = time.time(); last = -1; got = None
+                while time.time() - t0 < 15.0:
+                    yield from rwait(0.4)
+                    if os.path.exists(fp):
+                        n = os.path.getsize(fp)
+                        if n > 0 and n == last: got = fp; break
+                        last = n
+                pics.append(got)
+            if all(pics):
+                sc = 1080.0 / max(r["clip_y"], 1.0); cx, cy = r["centre"][0] * sc, r["centre"][1] * sc; half = 100.0
+                box = (cx - half, cy - half, cx + half, cy + half)
+                a, b = kit().pixels(pics[0], box), kit().pixels(pics[1], box)
+                d, dx, dy_ = kit().shifted_diff(a, b, 3, 6)
+                r["shift_diff"] = round(d, 3); r["shift"] = (dx, dy_)
+            res["snap" if snap else "old"] = r
+    except Exception as e_:
+        import traceback
+        res["error"] = str(e_) + traceback.format_exc()[-600:]
+    finally:
+        unreal.SystemLibrary.execute_console_command(G["w"], "rd.MinimapSnap 1")
+        unreal.GameplayStatics.set_game_paused(G["w"], False)
+        quiet(False)
+    on, off = res.get("snap", {}), res.get("old", {})
+    ok = ("error" not in res and on.get("base_whole") and on.get("least_share", 0) >= 0.95 and abs(on.get("wall_px", 0.5) - round(on.get("wall_px", 0.5))) < 1e-3
+          and off.get("least_share", 1) < 0.5 and on.get("shift_diff") is not None and off.get("shift_diff") is not None and on["shift_diff"] < 0.5 * off["shift_diff"])
+    step_result("minimap17", ok, **res)
+
+
+STEPS.update({"minimap17": step_minimap17})
+
 def run():
     G["saves"] = saves_snapshot()
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None

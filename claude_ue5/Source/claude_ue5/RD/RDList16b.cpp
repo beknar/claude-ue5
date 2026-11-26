@@ -24,14 +24,19 @@
 #include "Widgets/Text/STextBlock.h"
 #include "Styling/CoreStyle.h"
 DEFINE_LOG_CATEGORY_STATIC(LogRDList16b, Log, All);
+TSharedRef<SWidget> RDLoadingWidget17();          // (RDList17.cpp)
+void RDLoadingBegin17();
+FString RDLoadingEnd17();
 
 namespace
 {
-	TAutoConsoleVariable<int32> CVarRDLoadingCover(TEXT("rd.LoadingCover"), 1, TEXT("The loading cover over the view after a level opens, a travel or a respawn (1) or none (0)"));
+	TAutoConsoleVariable<int32> CVarRDLoadingCover(TEXT("rd.LoadingCover"), 1, TEXT("The loading cover over the view after a level opens, a travel or a respawn: the moving one (1), the plain one (2) or none (0)"));
 
-	// (the cover: a dark board with the word, over everything the game draws)
+	// (the cover: a dark board with the word, over everything the game draws; since the list of 2026-11-26 the moving board of RDList17.cpp, the
+	// plain one under rd.LoadingCover 2)
 	TSharedRef<SWidget> RDCover16Widget()
 	{
+		if (CVarRDLoadingCover.GetValueOnAnyThread() != 2) return RDLoadingWidget17();
 		return SNew(SBorder)
 			.BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
 			.BorderBackgroundColor(FLinearColor(0.035f, 0.03f, 0.028f, 1.f))
@@ -67,6 +72,8 @@ void URDGameInstance::Init()
 {
 	Super::Init();
 	if (!IsRunningDedicatedServer()) FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &URDGameInstance::BeginLoadingScreen16);
+	// (the list of 2026-11-26: how the loading screen moved while the map loaded, for the package's run)
+	if (!IsRunningDedicatedServer()) FCoreUObjectDelegates::PostLoadMapWithWorld.AddLambda([](UWorld* W) { if (IsMoviePlayerEnabled()) UE_LOG(LogRDList16b, Log, TEXT("RDLOADING17 painted %s during the load of %s"), *RDLoadingEnd17(), W ? *W->GetMapName() : TEXT("?")); });
 }
 
 void URDGameInstance::BeginLoadingScreen16(const FString& Map)
@@ -76,8 +83,10 @@ void URDGameInstance::BeginLoadingScreen16(const FString& Map)
 	FLoadingScreenAttributes A;
 	A.bAutoCompleteWhenLoadingCompletes = true;
 	A.MinimumLoadingScreenDisplayTime = 0.f;
+	RDLoadingBegin17();
 	A.WidgetLoadingScreen = RDCover16Widget();
 	GetMoviePlayer()->SetupLoadingScreen(A);
+	UE_LOG(LogRDList16b, Log, TEXT("RDLOADING17 the loading screen for %s (%s)"), *Map, CVarRDLoadingCover.GetValueOnGameThread() == 2 ? TEXT("plain") : TEXT("moving"));
 }
 
 void ARDDungeonGenerator::ShowCover16(const FString& Why)
@@ -98,6 +107,7 @@ void ARDDungeonGenerator::ShowCover16(const FString& Why)
 	if (!bCover16)
 	{
 		Cover16Start = FPlatformTime::Seconds();
+		RDLoadingBegin17();          // (the list of 2026-11-26: how the cover moved while it was up)
 		// (under the cover she neither moves nor turns, and nothing hurts her: she cannot see (PR #112's review))
 		if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0)) { PC->SetIgnoreMoveInput(true); PC->SetIgnoreLookInput(true); }
 		Cover16Health = PlayerCombat ? PlayerCombat->GetHealth() : -1.f;
@@ -119,8 +129,9 @@ void ARDDungeonGenerator::HideCover16(const FString& How)
 	const APawn* P = UGameplayStatics::GetPlayerPawn(this, 0);
 	const FVector At = P ? P->GetActorLocation() : FVector::ZeroVector;
 	// (and the frames under it since the world was built: how many, their mean time, the steady run at the lift)
-	const FString L = FString::Printf(TEXT("%s|%.2f|%.2f|%s|%d|%.0f|%.0f|%d|%.1f|%d"), *Cover16Why, Now - Cover16Start, Cover16ReadyAt < 0.0 ? -1.0 : Now - Cover16ReadyAt, *How, IStreamingManager::Get().GetNumWantingResources(), At.X, At.Y,
-		Cover16Frames, Cover16Frames > 0 ? 1000.0 * Cover16FrameSum / Cover16Frames : 0.0, Cover16Steady);
+	// (since the list of 2026-11-26 one more field: the widget's paints while it was up and the distinct phases of its ring of 64, "<paints>|<phases>")
+	const FString L = FString::Printf(TEXT("%s|%.2f|%.2f|%s|%d|%.0f|%.0f|%d|%.1f|%d|%s"), *Cover16Why, Now - Cover16Start, Cover16ReadyAt < 0.0 ? -1.0 : Now - Cover16ReadyAt, *How, IStreamingManager::Get().GetNumWantingResources(), At.X, At.Y,
+		Cover16Frames, Cover16Frames > 0 ? 1000.0 * Cover16FrameSum / Cover16Frames : 0.0, Cover16Steady, *RDLoadingEnd17());
 	Cover16Lines.Add(L);
 	UE_LOG(LogRDList16b, Log, TEXT("RDCOVER16 lifted: %s"), *L);
 }

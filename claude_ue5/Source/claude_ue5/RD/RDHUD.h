@@ -38,6 +38,20 @@ public:
 	/** the list of 2026-11-20's eleventh phase: the major roads' segments the big map drew by tier in its last frame, "x m|y m|r|g|b" (tests: the map itself, PR #103's review) */
 	TArray<FString> RoadsDrawn15;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetRoadsDrawn15() const { return RoadsDrawn15; }
+	/** the list of 2026-11-26's second phase (RDList17.cpp): the minimap drawn on whole pixels; tests: "<town|wild|tactical>|<base x>|<base y>|<snapped 0/1>|<wall
+	 *  line px>|<clip y>|<centre x>|<centre y>" of the last frame's minimap (the base is where the world's origin lands on the screen: whole pixels when snapped) */
+	FString MinimapState17;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") FString GetMinimapState17() const { return MinimapState17; }
+	/** tests: the town minimap's wall lines of the last frame, "<x0>|<y0>|<x1>|<y1>|<px>" (screen pixels; at most 600) */
+	TArray<FString> MiniLines17;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetMiniLines17() const { return MiniLines17; }
+	void MiniLine17(const FVector2D& A, const FVector2D& B, float Px) { if (MiniLines17.Num() < 600) MiniLines17.Add(FString::Printf(TEXT("%.3f|%.3f|%.3f|%.3f|%.2f"), A.X, A.Y, B.X, B.Y, Px)); }
+	/** the screen point of the world's origin for a map centred on C at her place L (cm, or m for the wilds) with K pixels a unit, rounded to whole pixels
+	 *  under rd.MinimapSnap (the default): every point of the map is then that base plus its fixed fraction, so a line's place in its pixels does not
+	 *  change as she moves (the shimmer of 1.6 px lines at 1080p) */
+	FVector2D MapBase17(const TCHAR* Kind, const FVector2D& C, const FVector2D& L, double K, float WallPx);
+	/** a line's thickness in whole pixels (at least 1) under rd.MinimapSnap, else as given */
+	static float LinePx17(float Px);
 	/** the twelfth phase: a treasure map's picture drawn beside the big map in its last frame */
 	bool TreasureShown15 = false;
 	/** the thirteenth phase: the contracts' marks drawn on the big map in its last frame ("x|y|name", metres) */

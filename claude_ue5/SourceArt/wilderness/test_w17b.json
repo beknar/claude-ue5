@@ -1,0 +1,80 @@
+{
+ "tag": "w17b",
+ "plan": [
+  "loading17"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "loading17",
+   "ok": true,
+   "trips": [
+    {
+     "to": "Ashenreach",
+     "cover": 1,
+     "ok": true,
+     "waited_s": 11.03,
+     "up_s": [
+      47.55
+     ],
+     "paints_phases": [
+      [
+       118,
+       48
+      ]
+     ]
+    },
+    {
+     "to": "Brokenspire",
+     "cover": 1,
+     "ok": true,
+     "waited_s": 3.44,
+     "up_s": [
+      7.19
+     ],
+     "paints_phases": [
+      [
+       50,
+       24
+      ]
+     ]
+    },
+    {
+     "to": "Graymourne",
+     "cover": 1,
+     "ok": true,
+     "waited_s": 5.58,
+     "up_s": [
+      8.86
+     ],
+     "paints_phases": [
+      [
+       26,
+       16
+      ]
+     ]
+    },
+    {
+     "to": "Brokenspire",
+     "cover": 2,
+     "ok": true,
+     "waited_s": 3.27,
+     "up_s": [
+      6.96
+     ],
+     "paints_phases": [
+      [
+       0,
+       0
+      ]
+     ]
+    }
+   ],
+   "state": "194|0.3338|11|50.003"
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 1
+}

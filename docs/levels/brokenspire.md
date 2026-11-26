@@ -599,3 +599,8 @@ Rebuild note (the list of 2026-11-22's sixth and seventh phases): C++ only; a ci
 - Measured in the editor's play window at noon in each square (`884 nanite16`, 2026-11-23, `test_t16zz.json`: 331 of the pieces' 340 meshes Nanite), Nanite's frames first with nothing switched: Brokenspire 22.2 a second, Vel Morrath 22.4, Ashenreach 22.4, Graymourne 5.7, Kethrys Spire 21.2, Heaven 18.5 (Graymourne is as slow in the editor's play window before Nanite; the packaged game runs it at 25.2 at noon, MID); each city's picture with `r.Nanite 0` (the fallbacks) within 3.9 in mean luma of Nanite's: nothing missing or drawn wrong. With the fallbacks every city but Heaven ran at 0.5 to 1.2 a second (Heaven 13.5): in the editor the fallbacks are not the cities as they were, so the frame rates before and after are the packaged game's (BEFORE and MID in `docs/performance.md`).
 
 Rebuild note (the fifth phase): `944 nanite_town`, then `869`; check with `884_brokenspire_test.ps1 nanite16 <tag> 3600 -Light`.
+
+
+## The list of 2026-11-26: the minimap on whole pixels
+
+The town's minimap's walls no longer shimmer as she walks: the map moves a whole pixel at a time and its lines are whole pixels thick (`RD/RDList17.cpp`, `884 minimap17`); see [the wilderness's document](wilderness.md#the-list-of-2026-11-26-the-moving-loading-screen-the-minimaps-on-whole-pixels) for the measures and the moving loading screen.

@@ -1,0 +1,211 @@
+{
+ "tag": "m17a",
+ "plan": [
+  "minimap17"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "minimap17",
+   "ok": true,
+   "snap": {
+    "steps": [
+     {
+      "bx": 972.0,
+      "by": 144.0,
+      "lines": 142,
+      "fractions": 135,
+      "share_same": 1.0
+     },
+     {
+      "bx": 972.0,
+      "by": 144.0,
+      "lines": 142,
+      "fractions": 135,
+      "share_same": 1.0
+     },
+     {
+      "bx": 972.0,
+      "by": 144.0,
+      "lines": 142,
+      "fractions": 135,
+      "share_same": 1.0
+     },
+     {
+      "bx": 972.0,
+      "by": 144.0,
+      "lines": 142,
+      "fractions": 135,
+      "share_same": 1.0
+     },
+     {
+      "bx": 971.0,
+      "by": 144.0,
+      "lines": 140,
+      "fractions": 134,
+      "share_same": 0.993
+     },
+     {
+      "bx": 971.0,
+      "by": 144.0,
+      "lines": 140,
+      "fractions": 134,
+      "share_same": 0.993
+     },
+     {
+      "bx": 971.0,
+      "by": 144.0,
+      "lines": 140,
+      "fractions": 134,
+      "share_same": 0.993
+     },
+     {
+      "bx": 971.0,
+      "by": 144.0,
+      "lines": 140,
+      "fractions": 134,
+      "share_same": 0.993
+     },
+     {
+      "bx": 971.0,
+      "by": 144.0,
+      "lines": 140,
+      "fractions": 134,
+      "share_same": 0.993
+     },
+     {
+      "bx": 971.0,
+      "by": 144.0,
+      "lines": 140,
+      "fractions": 134,
+      "share_same": 0.993
+     },
+     {
+      "bx": 971.0,
+      "by": 144.0,
+      "lines": 140,
+      "fractions": 134,
+      "share_same": 0.993
+     }
+    ],
+    "wall_px": 1.0,
+    "clip_y": 724.0,
+    "centre": [
+     1121.29,
+     158.71
+    ],
+    "base_whole": true,
+    "least_share": 0.993,
+    "shift_diff": 0.333,
+    "shift": [
+     -1,
+     0
+    ]
+   },
+   "old": {
+    "steps": [
+     {
+      "bx": 971.892,
+      "by": 144.346,
+      "lines": 140,
+      "fractions": 134,
+      "share_same": 1.0
+     },
+     {
+      "bx": 971.792,
+      "by": 144.346,
+      "lines": 140,
+      "fractions": 134,
+      "share_same": 0.03
+     },
+     {
+      "bx": 971.691,
+      "by": 144.346,
+      "lines": 140,
+      "fractions": 134,
+      "share_same": 0.037
+     },
+     {
+      "bx": 971.59,
+      "by": 144.346,
+      "lines": 140,
+      "fractions": 134,
+      "share_same": 0.037
+     },
+     {
+      "bx": 971.49,
+      "by": 144.346,
+      "lines": 141,
+      "fractions": 135,
+      "share_same": 0.0
+     },
+     {
+      "bx": 971.389,
+      "by": 144.346,
+      "lines": 141,
+      "fractions": 135,
+      "share_same": 0.23
+     },
+     {
+      "bx": 971.289,
+      "by": 144.346,
+      "lines": 141,
+      "fractions": 135,
+      "share_same": 0.03
+     },
+     {
+      "bx": 971.188,
+      "by": 144.346,
+      "lines": 141,
+      "fractions": 135,
+      "share_same": 0.015
+     },
+     {
+      "bx": 971.088,
+      "by": 144.346,
+      "lines": 141,
+      "fractions": 135,
+      "share_same": 0.022
+     },
+     {
+      "bx": 970.987,
+      "by": 144.346,
+      "lines": 141,
+      "fractions": 135,
+      "share_same": 0.037
+     },
+     {
+      "bx": 970.887,
+      "by": 144.346,
+      "lines": 141,
+      "fractions": 135,
+      "share_same": 0.504
+     }
+    ],
+    "wall_px": 1.07,
+    "clip_y": 724.0,
+    "centre": [
+     1121.29,
+     158.71
+    ],
+    "base_whole": false,
+    "least_share": 0.0,
+    "shift_diff": 2.326,
+    "shift": [
+     -1,
+     0
+    ]
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "bs_m17a_minimap17_1_0.png",
+  "bs_m17a_minimap17_1_1.png",
+  "bs_m17a_minimap17_0_0.png",
+  "bs_m17a_minimap17_0_1.png"
+ ],
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

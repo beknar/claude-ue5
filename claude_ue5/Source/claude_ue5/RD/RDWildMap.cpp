@@ -237,12 +237,15 @@ UTexture2D* ARDDungeonGenerator::WildFog(const FVector2D& Mid, double Mpp, const
 }
 
 // ------------------------------------------------------------------------------------------------ the minimap's picture
-UTexture2D* ARDDungeonGenerator::WildMini(const FVector2D& At)
+UTexture2D* ARDDungeonGenerator::WildMini(const FVector2D& Her)
 {
 	const double Now = FPlatformTime::Seconds();
-	if (WildMiniTex && Now - WildMiniTime < 0.2 && FVector2D::Distance(At, WildMiniFor) < 3.0) return WildMiniTex;
 	const int32 N = 256, L = WildMiniLevel;
 	const double Rm = WildMiniRadiusM, Tm = 2.0 * Rm / N;
+	// (the list of 2026-11-26: made for a point on a grid of its own texels fixed to the world, so a picture made again samples the same places and
+	// the minimap's shapes do not jump; the HUD draws it round that point)
+	const FVector2D At(FMath::RoundToDouble(Her.X / Tm) * Tm, FMath::RoundToDouble(Her.Y / Tm) * Tm);
+	if (WildMiniTex && Now - WildMiniTime < 0.2 && FVector2D::Distance(At, WildMiniFor) < 3.0) return WildMiniTex;
 	const double Span = WildMapTileSpan(L), Pm = Span / RDWTileN;
 	TArray<FColor> Px; Px.SetNumUninitialized(N * N);
 	for (int32 R = 0; R < N; ++R)

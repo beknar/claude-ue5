@@ -196,7 +196,10 @@ void ARDHUD::DrawTownMinimap(float Sc, const FVector& L, float Yaw)
 	const float Ring = Ra ? R * 1.03f / FMath::Max((float)(Ra->Inner.Z - Ra->Inner.X), 0.2f) : R;
 	const FVector2D C(Canvas->ClipX - Mg - Ring, Mg + (Ra ? 0.f : 14.f * Sc) + Ring);
 	const float Half = StylizedMinimapMeters * 50.f * 1.25f, K = R / Half, TS = Gen->TileSize, Tp = TS * K;
-	auto ToS = [&](const FVector2D& W) { return C + FVector2D(W.Y - L.Y, -(W.X - L.X)) * K; };
+	// (the list of 2026-11-26: on whole pixels, every point the base plus its own fixed fraction, the walls whole pixels thick)
+	const float WallPx = LinePx17(1.6f * Sc), EdgePx = LinePx17(2.2f * Sc);
+	const FVector2D Base = MapBase17(TEXT("town"), C, FVector2D(L.X, L.Y), K, WallPx);
+	auto ToS = [&](const FVector2D& W) { return Base + FVector2D(W.Y, -W.X) * K; };
 	auto Fade = [&](const FVector2D& P) { return FMath::Clamp((1.f - FVector2D::Distance(P, C) / R) / 0.38f, 0.f, 1.f); };
 	if (UTexture2D* T = GetSoftDisc()) DrawTexture(T, C.X - R * 1.3f, C.Y - R * 1.3f, R * 2.6f, R * 2.6f, 0.f, 0.f, 1.f, 1.f, FLinearColor(0.004f, 0.005f, 0.007f, 0.92f), BLEND_Translucent);
 	{
@@ -223,16 +226,16 @@ void ARDHUD::DrawTownMinimap(float Sc, const FVector& L, float Yaw)
 			if (V >= 0)
 			{
 				// (a building's walls: where its floor meets anything else; its doorway left open)
-				auto Edge = [&](const FVector2D& A_, const FVector2D& B_) { const FVector2D Pa = ToS(A_), Pb = ToS(B_); DrawLine(Pa.X, Pa.Y, Pb.X, Pb.Y, RDTA(Wall, A), 1.6f * Sc); };
+				auto Edge = [&](const FVector2D& A_, const FVector2D& B_) { const FVector2D Pa = ToS(A_), Pb = ToS(B_); DrawLine(Pa.X, Pa.Y, Pb.X, Pb.Y, RDTA(Wall, A), WallPx); MiniLine17(Pa, Pb, WallPx); };
 				if (At(X + 1, Y) != V) Edge(FVector2D(W1.X, W0.Y), FVector2D(W1.X, W1.Y));
 				if (At(X - 1, Y) != V) Edge(FVector2D(W0.X, W0.Y), FVector2D(W0.X, W1.Y));
 				if (At(X, Y + 1) != V) Edge(FVector2D(W0.X, W1.Y), FVector2D(W1.X, W1.Y));
 				if (At(X, Y - 1) != V) Edge(FVector2D(W0.X, W0.Y), FVector2D(W1.X, W0.Y));
 			}
-			else if (V != -1 && At(X + 1, Y) == -1) { const FVector2D Pa = ToS(FVector2D(W1.X, W0.Y)), Pb = ToS(W1); DrawLine(Pa.X, Pa.Y, Pb.X, Pb.Y, RDTA(Wall, A), 2.2f * Sc); }
-			else if (V != -1 && At(X - 1, Y) == -1) { const FVector2D Pa = ToS(W0), Pb = ToS(FVector2D(W0.X, W1.Y)); DrawLine(Pa.X, Pa.Y, Pb.X, Pb.Y, RDTA(Wall, A), 2.2f * Sc); }
-			if (V != -1 && V < 0 && At(X, Y + 1) == -1) { const FVector2D Pa = ToS(FVector2D(W0.X, W1.Y)), Pb = ToS(W1); DrawLine(Pa.X, Pa.Y, Pb.X, Pb.Y, RDTA(Wall, A), 2.2f * Sc); }
-			if (V != -1 && V < 0 && At(X, Y - 1) == -1) { const FVector2D Pa = ToS(W0), Pb = ToS(FVector2D(W1.X, W0.Y)); DrawLine(Pa.X, Pa.Y, Pb.X, Pb.Y, RDTA(Wall, A), 2.2f * Sc); }
+			else if (V != -1 && At(X + 1, Y) == -1) { const FVector2D Pa = ToS(FVector2D(W1.X, W0.Y)), Pb = ToS(W1); DrawLine(Pa.X, Pa.Y, Pb.X, Pb.Y, RDTA(Wall, A), EdgePx); MiniLine17(Pa, Pb, EdgePx); }
+			else if (V != -1 && At(X - 1, Y) == -1) { const FVector2D Pa = ToS(W0), Pb = ToS(FVector2D(W0.X, W1.Y)); DrawLine(Pa.X, Pa.Y, Pb.X, Pb.Y, RDTA(Wall, A), EdgePx); MiniLine17(Pa, Pb, EdgePx); }
+			if (V != -1 && V < 0 && At(X, Y + 1) == -1) { const FVector2D Pa = ToS(FVector2D(W0.X, W1.Y)), Pb = ToS(W1); DrawLine(Pa.X, Pa.Y, Pb.X, Pb.Y, RDTA(Wall, A), EdgePx); MiniLine17(Pa, Pb, EdgePx); }
+			if (V != -1 && V < 0 && At(X, Y - 1) == -1) { const FVector2D Pa = ToS(W0), Pb = ToS(FVector2D(W1.X, W0.Y)); DrawLine(Pa.X, Pa.Y, Pb.X, Pb.Y, RDTA(Wall, A), EdgePx); MiniLine17(Pa, Pb, EdgePx); }
 		}
 	// doors: a warm bar across each doorway
 	for (const ARDSection::FTownBld& B : S->TownBlds)
