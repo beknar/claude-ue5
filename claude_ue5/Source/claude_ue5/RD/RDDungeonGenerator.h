@@ -3058,6 +3058,30 @@ public:
 	void SetTownNote(const FString& Text);
 	/** what the trader has for sale now (the open tier's potions, food, repair items, scrolls) */
 	TArray<FName> TownStock() const;
+	/** the list of 2026-11-26's third phase (RDList17b.cpp): the squares' twelve stands. A town's tier by the roads' chain (Brokenspire 1 ...
+	 *  Heaven 25; 0 for a name not in it), the town she is in (else the game's) */
+	static int32 TownTierOf17(const FString& Town);
+	int32 TownTier17() const;
+	/** whether a stand of trade Trade (0-11) sells the thing, whether her hero can use it, and a stand's stock at the town's tier (bAllFit:
+	 *  whether any of the band fits her; none fitting, all of it) */
+	bool StallSells17(int32 Trade, const FRDItemDef& It) const;
+	bool StallFits17(const FRDItemDef& It) const;
+	bool IsReagent17(FName Part) const;
+	mutable TSet<FName> Reagents17;
+	mutable int32 Reagents17N = -1;
+	TArray<FName> StallStock17(int32 Trade, bool* bAllFit = nullptr) const;
+	static FString StallName17(int32 Trade, bool bModern);
+	static FString StallBody17(int32 Trade);
+	/** the trade of the stand nearest a point within R (-1: none), and where it stands */
+	int32 StallAt17(const FVector& At, float R, FVector* Where = nullptr) const;
+	/** tests: every stand of the town, "<trade>|<name>|<x>|<y>|<z>|<yaw>|<new 0/1>|<keeper's index in TownPeople or -1>"; a stand's stock,
+	 *  its first line "tier|<town tier>|<any fits 0/1>" then "<item>|<kind>|<tiers>|<price>|<fits>|<sold by the trade>"; the town's tier */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List17") TArray<FString> GetStalls17() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List17") TArray<FString> GetStallStock17(int32 Trade) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List17") int32 GetTownTier17() const { return TownTier17(); }
+	/** the stand whose store the panel shows (-1: not a stand's) */
+	int32 StoreStall17 = -1;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List17") int32 GetStoreStall17() const { return StoreStall17; }
 
 	/** random_dungeonmagic_level4: the painted interface (panels, bar frames and fills, slots, icons...; pipeline/unreal/830).
 	 *  The HUD draws a piece where it has one and its plain boxes where it has not (the other dungeon levels have none). */

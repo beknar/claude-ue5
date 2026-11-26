@@ -834,7 +834,10 @@ void ARDDungeonGenerator::SpawnTownPeople()
 		FVector At = Po.At;
 		const FIntPoint T0 = S->WorldToLocal(At);
 		const int32 Room0 = S->RoomAtLocal(T0);
-		if (!S->IsWalkable(T0))
+		// (the list of 2026-11-26: a stand's keeper stands where posted, behind its stand, and never walks off it)
+		const bool bStallKeeper = Po.Role == ERDTownRole::Trader && Po.Index >= 4000 && Po.Index < 4016;
+		const int32 Stall17 = bStallKeeper ? Po.Index - 4000 : -1;
+		if (!S->IsWalkable(T0) && !bStallKeeper)
 			for (int32 Rr = 1; Rr <= 4; ++Rr)
 			{
 				bool bFound = false;
@@ -850,6 +853,7 @@ void ARDDungeonGenerator::SpawnTownPeople()
 		ARDTownsfolk* T = GetWorld()->SpawnActor<ARDTownsfolk>(ARDTownsfolk::StaticClass(), FTransform(FRotator(0, Po.Yaw, 0), At + FVector(0, 0, 92.f)), Sp);
 		if (!T) continue;
 		T->Init(this, S, D, At + FVector(0, 0, 92.f), Po.Yaw, Po.Wander, HashCombine((uint32)StartSeed, (uint32)K * 7919u));
+		T->Stall17 = Stall17;
 		// (its building: a keeper's where it works (its post inside); a resident's home, a step inside its door)
 		if (S->TownBlds.IsValidIndex(Po.Bld))
 		{
@@ -1437,23 +1441,30 @@ FString ARDDungeonGenerator::TownDescribe(const FVector& From) const
 	if (const FString Th = TownThingDescribe(From); !Th.IsEmpty()) return Th;
 	const ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	if (!S) return FString();
+	// (the list of 2026-11-26: the nearest spot in reach, not the first in the list: twelve stands stand near the board)
+	FString SpotSays; float SpotD = MAX_flt;
 	for (const ARDSection::FTownSpot& Sp : S->TownSpots)
 	{
 		const float D = FVector::Dist2D(Sp.At, From);
+		if (D >= SpotD) continue;
+		FString Says;
 		switch (Sp.Kind)
 		{
-		case TS_Counter: if (D < 260.f) return TEXT("trade"); break;
-		case TS_Basin: if (D < 260.f) return TEXT("be healed"); break;
-		case TS_Altar: if (D < 330.f) return TEXT("pray at the altar"); break;
-		case TS_Stable: if (D < 420.f && !bMounted) return HasHorse() ? FString(TEXT("the stable: call your horse")) : FString::Printf(TEXT("the stable: a horse for %d gold"), HorsePriceNow()); break;
-		case TS_Stash: if (D < 240.f) return TEXT("open your storage"); break;
-		case TS_Smith: if (D < 230.f) return TEXT("the smith's work"); break;
-		case TS_Circle: if (D < 620.f) return TEXT("touch the teleport circle"); break;
-		case TS_Board: if (D < 260.f) return TEXT("read the quest board"); break;
-		case TS_Gate: if (D < 520.f && !bWild) return TEXT("the gate (barred)"); break;
+		case TS_Counter: if (D < 260.f) Says = TEXT("trade"); break;
+		case TS_Stall: if (D < 260.f && Sp.Bld >= 0) Says = FString::Printf(TEXT("trade at %s"), *StallName17(Sp.Bld & 15, TownPlan == 5).ToLower()); break;
+		case TS_Basin: if (D < 260.f) Says = TEXT("be healed"); break;
+		case TS_Altar: if (D < 330.f) Says = TEXT("pray at the altar"); break;
+		case TS_Stable: if (D < 420.f && !bMounted) Says = HasHorse() ? FString(TEXT("the stable: call your horse")) : FString::Printf(TEXT("the stable: a horse for %d gold"), HorsePriceNow()); break;
+		case TS_Stash: if (D < 240.f) Says = TEXT("open your storage"); break;
+		case TS_Smith: if (D < 230.f) Says = TEXT("the smith's work"); break;
+		case TS_Circle: if (D < 620.f) Says = TEXT("touch the teleport circle"); break;
+		case TS_Board: if (D < 260.f) Says = TEXT("read the quest board"); break;
+		case TS_Gate: if (D < 520.f && !bWild) Says = TEXT("the gate (barred)"); break;
 		default: break;
 		}
+		if (!Says.IsEmpty()) { SpotSays = Says; SpotD = D; }
 	}
+	if (!SpotSays.IsEmpty()) return SpotSays;
 	bool bDoor = false; int32 I = -1;
 	if (S->FindNearestInteractive(From, 260.f, bDoor, I) < 1e8f && bDoor && S->BoardedDoorBld(I) >= 0) return TEXT("pry the boards loose");
 	return FString();
@@ -1529,19 +1540,24 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 		const FName Service = bClerk21 ? FName(TEXT("store")) : (HvS && T->TownRole == ERDTownRole::Innkeeper) ? FName(TEXT("hotel"))
 		                    : T->TownRole == ERDTownRole::Smith ? FName(TEXT("smith")) : T->TownRole == ERDTownRole::Trader ? FName(TEXT("store")) : T->TownRole == ERDTownRole::Healer ? FName(TEXT("healer"))
 		                    : T->TownRole == ERDTownRole::Priest ? FName(TEXT("temple")) : T->TownRole == ERDTownRole::Keeper ? FName(TEXT("stash")) : NAME_None;
-		if (!Service.IsNone()) { StoreBld21 = HvS ? HvS->TownBuildingAt(T->Post) : -1; OpenTownPanel(Service, Who); TownBody = Line; }
+		// (the list of 2026-11-26: a stand's keeper sells the stand's trade)
+		if (!Service.IsNone()) { StoreBld21 = HvS ? HvS->TownBuildingAt(T->Post) : -1; StoreStall17 = T->Stall17; OpenTownPanel(Service, Who); TownBody = Line; }
 		return TEXT("bark");
 	}
 	if (const FString Th = TownThingInteract(From); !Th.IsEmpty()) return Th;
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	if (!S) return FString();
+	// (the list of 2026-11-26: the nearest spot in reach, as the prompt names it)
+	const ARDSection::FTownSpot* Near = nullptr; FName NearPanel = NAME_None; float NearD = MAX_flt;
 	for (const ARDSection::FTownSpot& Sp : S->TownSpots)
 	{
 		const float D = FVector::Dist2D(Sp.At, From);
+		if (D >= NearD) continue;
 		FName Panel = NAME_None;
 		switch (Sp.Kind)
 		{
-		case TS_Counter: if (D < 260.f) { Panel = TEXT("store"); StoreBld21 = Sp.Bld; } break;
+		case TS_Counter: if (D < 260.f) Panel = TEXT("store"); break;
+		case TS_Stall: if (D < 260.f && Sp.Bld >= 0) Panel = TEXT("store"); break;
 		case TS_Basin: if (D < 260.f) Panel = TEXT("healer"); break;
 		case TS_Altar: if (D < 330.f) Panel = TEXT("temple"); break;
 		case TS_Stable: if (D < 420.f && !bMounted) Panel = TEXT("stable"); break;
@@ -1549,16 +1565,21 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 		case TS_Smith: if (D < 230.f) Panel = TEXT("smith"); break;
 		case TS_Circle: if (D < 620.f) Panel = TEXT("circle"); break;
 		case TS_Board: if (D < 260.f) Panel = TEXT("board"); break;
-		case TS_Gate:
-			if (D < 520.f && !bWild)
-			{
-				if (PlayerCombat) PlayerCombat->ShowMessage(TEXT("The gate is barred: the wilderness beyond is not safe yet (it opens in a later chapter)"));
-				return TEXT("gate");
-			}
-			break;
+		case TS_Gate: if (D < 520.f && !bWild) Panel = TEXT("gate"); break;
 		default: break;
 		}
-		if (!Panel.IsNone()) { OpenTownPanel(Panel); return Panel.ToString(); }
+		if (!Panel.IsNone()) { Near = &Sp; NearPanel = Panel; NearD = D; }
+	}
+	if (Near)
+	{
+		if (NearPanel == TEXT("gate"))
+		{
+			if (PlayerCombat) PlayerCombat->ShowMessage(TEXT("The gate is barred: the wilderness beyond is not safe yet (it opens in a later chapter)"));
+			return TEXT("gate");
+		}
+		StoreBld21 = Near->Kind == TS_Counter ? Near->Bld : -1;
+		StoreStall17 = Near->Kind == TS_Stall ? (Near->Bld & 15) : -1;
+		OpenTownPanel(NearPanel); return NearPanel.ToString();
 	}
 	bool bDoor = false; int32 I = -1;
 	if (S->FindNearestInteractive(From, 260.f, bDoor, I) < 1e8f && bDoor)
@@ -1799,6 +1820,7 @@ bool ARDDungeonGenerator::OpenTownPanel(FName Kind, int32 Who)
 void ARDDungeonGenerator::CloseTownPanel()
 {
 	StoreBld21 = -1;          // (a store opened later elsewhere sells its own stock (PR #128's review))
+	StoreStall17 = -1;
 	if (!IsTownPanelOpen()) return;
 	TownPanel = NAME_None; TownWho = -1; TownLines.Reset(); TownRowBoxes.Reset(); TownTabBoxes.Reset();
 	TownPanelClosedFrame = GFrameCounter;
@@ -1930,7 +1952,15 @@ void ARDDungeonGenerator::BuildTownLines()
 		TownTitle = TEXT("The trader's store"); TownSub = FString::Printf(TEXT("buy and sell  ·  you have %d gold"), Gold);
 		// (the list of 2026-11-22's phase 21: Heaven's market, or a shop's own trade by its clerk)
 		const int32 Sk = ShopKindOfWho21();
-		if (InHeaven21())
+		// (the list of 2026-11-26: a stand's own trade at the town's tier)
+		const bool bStall = StoreStall17 >= 0;
+		if (bStall)
+		{
+			TownTitle = StallName17(StoreStall17, TownPlan == 5);
+			TownSub = FString::Printf(TEXT("tier %d wares  ·  buy and sell  ·  you have %d gold"), TownTier17(), Gold);
+			if (TownBody.IsEmpty()) TownBody = StallBody17(StoreStall17);
+		}
+		else if (InHeaven21())
 		{
 			static const TCHAR* Titles[4] = { TEXT("The market"), TEXT("The grocery"), TEXT("The pharmacy"), TEXT("The hardware store") };
 			static const TCHAR* Bodies[4] = { TEXT("Aisle after aisle under white light, a hum of fridges, a till that beeps. \"Anything you need, it's here somewhere.\""),
@@ -1940,10 +1970,13 @@ void ARDDungeonGenerator::BuildTownLines()
 			TownTitle = Titles[FMath::Clamp(Sk + 1, 0, 3)];
 			if (TownBody.IsEmpty()) TownBody = Bodies[FMath::Clamp(Sk + 1, 0, 3)];
 		}
+		bool bFits = true;
+		const TArray<FName> Stock = bStall ? StallStock17(StoreStall17, &bFits) : TownStock();
+		if (TownTab == 0 && bStall && !bFits && Stock.Num()) Add(TEXT("none"), TEXT("None of these is for you"), FString(), FString::Printf(TEXT("Nothing of this trade fits the %s: it can still be bought, and sold again."), *CurrentHero.ToString().ToLower()), false);
 		if (TownTab == 0)
-			for (const FName& It : TownStock())
+			for (const FName& It : Stock)
 			{
-				if (!ShopSells21(Sk, It)) continue;
+				if (!bStall && !ShopSells21(Sk, It)) continue;
 				const int32 Ix = FindItem(It); const int32 P = PriceOf(It);
 				Add(TEXT("buy"), It.ToString(), FString::Printf(TEXT("%d g"), P), Ix >= 0 && !Items[Ix].Looks.IsEmpty() ? Items[Ix].Looks : FString::Printf(TEXT("You carry %d"), PlayerCombat ? PlayerCombat->GetItemCount(It) : 0), Gold >= P, It.ToString());
 			}

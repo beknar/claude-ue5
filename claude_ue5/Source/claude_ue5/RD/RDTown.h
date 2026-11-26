@@ -77,6 +77,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") FString Calling;
 	/** where it belongs and how far it wanders from there (0: it stands) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") FVector Post = FVector::ZeroVector;
+	/** the list of 2026-11-26: a square's stand's keeper: the stand's trade (0-11), else -1 (a plain member: PR #139's review, the trade by
+	 *  the keeper's post's nearness gave a store's trader a stand's trade) */
+	int32 Stall17 = -1;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") float Wander = 0.f;
 	/** paths walked (tests) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") int32 Walks = 0;

@@ -86,14 +86,14 @@ Conventions, as in list 16:
   - **Shops:** every medieval city's one general store becomes **three stores**: general goods, an outfitter for weapons, armour and shields, and an apothecary for potions, herbs and scrolls.
   - **Heaven's shops:** Heaven's 3 shop kinds become **9**: grocery, pharmacy, hardware, electronics, jeweller, bookshop, sporting goods, outdoor outfitter, herbalist. Its shop buildings are not tripled.
 - **"Items of the same Tier that the town is in":** a town's tier is one helper over the chain's table by the town's name (`TownTier17`: 1, 5, 10, 15, 20, 25), so Brokenspire has its tier before the world is made.
-  - **What is offered:** each item at the 5-tier band holding the town's tier (`RDReachedTier`), and the gear whose `Tiers` hold it (or the nearest below).
+  - **What is offered:** each item of the town's own tier, or of the nearest tier below that the trade holds any of (as built: by bands of five, PR #139's review found Brokenspire and Vel Morrath selling the same).
   - **What her hero can use:** filtered as every other offer is:
     - weapons by `WeaponFits`;
     - armour by `Fits` and `Wears`;
     - tomes by `Learns`;
     - scrolls by `ScrollTypes`.
   - **What is never offered:** the weight-0 named rings, the caves' own items (`CaveItemAllowed16`), recipes she cannot learn. Heaven's twins are swapped in.
-  - **One tier for both ways:** a square's seller buys and sells at the town's tier, so nothing bought cheap in a low town sells dear at the game's tier there. `PriceOf` elsewhere is unchanged.
+  - **One price everywhere** (as built, in place of this draft's prices by the town's tier): `PriceOf` as before (gear by its own tier, used-up things by the game's), so nothing bought in one town sells dearer in another.
   - **Other services:** the healer, smith, temple and inn keep their rules.
 - **"The loading screen needs to show some animation and movement":** the shared widget is a Slate widget of our own that paints itself from real time (`FPlatformTime`):
   - a ring of runes turning round a breathing emblem;
@@ -169,7 +169,7 @@ Conventions, as in list 16:
      - 12 stands, each with its keeper;
      - each stand opens from where a player stands before it, and sells only its trade, none shared;
      - every item at the town's band and fit for the hero;
-     - prices the same bought and sold at the town's tier, with the game's tier set both under and over it;
+     - a thing bought at a stand of each city at its price;
      - the town's buildings, containers and step-1 pieces (lamps and carts) in the same places with the switch off (`rd.Stalls17 0`).
    - `check_town`'s 4 stalls become 12.
 
