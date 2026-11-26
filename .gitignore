@@ -117,6 +117,8 @@ renders/
 !docs/images/enemies/*.jpg
 !docs/images/vehicles/*.jpg
 !docs/images/objects/*.jpg
+# the player's guide's pictures (docs/game-guide.md / .html): the game's own pictures from its tests and menu
+!docs/images/guide/*.jpg
 
 # --- Archives ---
 *.zip
