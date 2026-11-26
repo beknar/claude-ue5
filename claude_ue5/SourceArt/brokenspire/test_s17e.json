@@ -1,0 +1,70 @@
+{
+ "tag": "s17e",
+ "plan": [
+  "services"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "services",
+   "ok": true,
+   "buy": {
+    "ok": true,
+    "gold": -12,
+    "count": 1
+   },
+   "sell": {
+    "ok": true,
+    "gold": 4,
+    "count": 0
+   },
+   "heal": {
+    "ok": true,
+    "gold": -25,
+    "hp": 1.0
+   },
+   "weapon": "Viking Shortsword",
+   "repair": {
+    "line": 0,
+    "ok": true,
+    "gold": -9,
+    "wear": 1.0
+   },
+   "anvil_opens_crafting": true,
+   "bless": {
+    "ok": true,
+    "gold": -20,
+    "blessing": "Blessing of the Spire"
+   },
+   "deposit": {
+    "ok": true,
+    "carried": -1,
+    "stash": [
+     "Small Healing Potion"
+    ]
+   },
+   "withdraw": {
+    "ok": true,
+    "carried": 0,
+    "stash": 0
+   },
+   "circle": [
+    "here|Brokenspire|YOU ARE HERE|0",
+    "castle|Mistward Castle|SEALED|0",
+    "none|No other circle found yet|FIND|0",
+    "bye|Step away||1"
+   ],
+   "board": [
+    "Quest: Rats in the Cellars",
+    "Quest: The Drinkers",
+    "Quest: Dead Soldiers Walking"
+   ],
+   "wild": true,
+   "circle_others_ok": true
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "error": null,
+ "saves_put_back": 0,
+ "windows_shown_again": 1
+}

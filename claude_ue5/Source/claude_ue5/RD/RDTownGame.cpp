@@ -836,6 +836,7 @@ void ARDDungeonGenerator::SpawnTownPeople()
 		const int32 Room0 = S->RoomAtLocal(T0);
 		// (the list of 2026-11-26: a stand's keeper stands where posted, behind its stand, and never walks off it)
 		const bool bStallKeeper = Po.Role == ERDTownRole::Trader && Po.Index >= 4000 && Po.Index < 4016;
+		const int32 Stall17 = bStallKeeper ? Po.Index - 4000 : -1;
 		if (!S->IsWalkable(T0) && !bStallKeeper)
 			for (int32 Rr = 1; Rr <= 4; ++Rr)
 			{
@@ -852,6 +853,7 @@ void ARDDungeonGenerator::SpawnTownPeople()
 		ARDTownsfolk* T = GetWorld()->SpawnActor<ARDTownsfolk>(ARDTownsfolk::StaticClass(), FTransform(FRotator(0, Po.Yaw, 0), At + FVector(0, 0, 92.f)), Sp);
 		if (!T) continue;
 		T->Init(this, S, D, At + FVector(0, 0, 92.f), Po.Yaw, Po.Wander, HashCombine((uint32)StartSeed, (uint32)K * 7919u));
+		T->Stall17 = Stall17;
 		// (its building: a keeper's where it works (its post inside); a resident's home, a step inside its door)
 		if (S->TownBlds.IsValidIndex(Po.Bld))
 		{
@@ -1539,7 +1541,7 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 		                    : T->TownRole == ERDTownRole::Smith ? FName(TEXT("smith")) : T->TownRole == ERDTownRole::Trader ? FName(TEXT("store")) : T->TownRole == ERDTownRole::Healer ? FName(TEXT("healer"))
 		                    : T->TownRole == ERDTownRole::Priest ? FName(TEXT("temple")) : T->TownRole == ERDTownRole::Keeper ? FName(TEXT("stash")) : NAME_None;
 		// (the list of 2026-11-26: a stand's keeper sells the stand's trade)
-		if (!Service.IsNone()) { StoreBld21 = HvS ? HvS->TownBuildingAt(T->Post) : -1; StoreStall17 = T->TownRole == ERDTownRole::Trader ? StallAt17(T->Post, 450.f) : -1; OpenTownPanel(Service, Who); TownBody = Line; }
+		if (!Service.IsNone()) { StoreBld21 = HvS ? HvS->TownBuildingAt(T->Post) : -1; StoreStall17 = T->Stall17; OpenTownPanel(Service, Who); TownBody = Line; }
 		return TEXT("bark");
 	}
 	if (const FString Th = TownThingInteract(From); !Th.IsEmpty()) return Th;

@@ -8095,6 +8095,16 @@ STEPS.update({"minimap17": step_minimap17})
 
 # ================================================================================================ the list of 2026-11-26's third phase
 TIERS17 = {"Brokenspire": 1, "Vel Morrath": 5, "Ashenreach": 10, "Graymourne": 15, "Kethrys Spire": 20, "Heaven": 25}
+# (each trade's item kinds, written here apart from the C++ (PR #139's review: "sold" read from StallSells17 checked it against itself):
+# ERDItemKind's order: 0 Healing 1 Mana 2 Speed 3 Food 4 Armour 5 Weapon 6 Component 7 Repair 8 Ring 9 Tome 10 Shield 11 Torch 13 Slash
+# 15 Scroll 18 Recipe)
+TRADE_KINDS17 = {0: {5}, 1: {4}, 2: {10}, 3: {8}, 4: {0, 1, 2}, 5: {3}, 6: {15}, 7: {9}, 8: {6}, 9: {6, 7}, 10: {11, 18}, 11: {13}}
+def weapon_fits17(hero):
+    """the weapons and shields made for a hero (their WeaponFits), read from the generator's items"""
+    out = set()
+    for it in G["gen"].get_editor_property("items"):
+        if any(str(f.get_editor_property("hero")) == hero for f in it.get_editor_property("weapon_fits")): out.add(str(it.get_editor_property("name")))
+    return out
 def stalls17():
     out = []
     for l in G["gen"].get_stalls17():
@@ -8148,6 +8158,8 @@ def step_stalls17():
     town on one seed with rd.Stalls17 0 and 1: its buildings, containers and other spots in the same places (the plan's streams kept)"""
     g = G["gen"]; c = cb(); res = {"cities": {}}; quiet(True)
     hero0 = str(g.get_editor_property("current_hero"))
+    cv0 = unreal.SystemLibrary.get_console_variable_int_value("rd.Stalls17")
+    fits = {h: weapon_fits17(h) for h in ("Warrior", "Mage")}
     g.add_gold(200000, "the test"); g0_all = gold()
     try:
         # (the streams: Brokenspire on its seed, the stands off and on)
@@ -8166,6 +8178,10 @@ def step_stalls17():
             st = stalls17(); r["stalls"] = len(st); r["trades"] = sorted(s["trade"] for s in st)
             yield from stalls17_picture(city, st)
             r["keepers"] = sum(1 for s in st if s["keeper"] >= 0)
+            # (every stand clear of every other spot: 4.2 m, a fountain 6.2, the rune circle 6.5 (PR #139's review: spots planned after them))
+            need = {"fountain": 620.0, "rune": 650.0}
+            r["too_near"] = [[s["trade"], p["kind"], round(math.hypot(s["at"].x - p["at"].x, s["at"].y - p["at"].y))] for s in st for p in spots()
+                             if p["kind"] != "stall" and math.hypot(s["at"].x - p["at"].x, s["at"].y - p["at"].y) < need.get(p["kind"], 420.0)]
             # (each stand opened by F from before its counter)
             opened = []; bad_stock = []
             for s in st:
@@ -8179,11 +8195,14 @@ def step_stalls17():
                 g.close_town_panel(); yield from rwait(0.15)
                 tier, anyfit, stock = stall_stock17(s["trade"])
                 names = {x["item"] for x in stock}
-                band = (max(tier, 1) - 1) // 5
+                # (the town's own tier, or one tier below it for the whole trade: every tiered thing's highest tier under the town's the same)
+                tops = {max(t for t in x["tiers"] if t <= tier) for x in stock if x["tiers"] and any(t <= tier for t in x["tiers"])}
+                if len(tops) > 1 or any(x["tiers"] and not any(t <= tier for t in x["tiers"]) for x in stock): bad_stock.append([s["trade"], "tiers", sorted(tops)])
+                hero = str(g.get_editor_property("current_hero"))
                 for x in stock:
-                    xb = [(max(t, 1) - 1) // 5 for t in x["tiers"]] or [band]
-                    ok_band = (not x["tiers"]) or any(b <= band for b in xb)
-                    if not x["sold"] or (anyfit and not x["fits"]) or not ok_band: bad_stock.append([s["trade"], x["item"], x["tiers"], x["sold"], x["fits"]])
+                    wrong_kind = x["kind"] not in TRADE_KINDS17[s["trade"]]
+                    unfit = anyfit and x["kind"] in (5, 10) and x["item"] not in fits.get(hero, set())
+                    if wrong_kind or unfit or (anyfit and not x["fits"]): bad_stock.append([s["trade"], x["item"], x["kind"], x["tiers"], x["fits"]])
                 opened.append({"trade": s["trade"], "prompt": pr, "panel": pn, "store_stall": ss, "lines": len(buys), "stock": len(stock), "same": set(buys) == names, "any_fit": anyfit})
             r["opened"] = opened; r["bad_stock"] = bad_stock[:12]; r["bad_stock_n"] = len(bad_stock)
             # (the Mage: the stands' stock fit for her where any is)
@@ -8192,7 +8211,7 @@ def step_stalls17():
             for s in st:
                 tier, anyfit, stock = stall_stock17(s["trade"])
                 mage_lines += len(stock)
-                mage_bad += sum(1 for x in stock if not x["sold"] or (anyfit and not x["fits"]))
+                mage_bad += sum(1 for x in stock if x["kind"] not in TRADE_KINDS17[s["trade"]] or (anyfit and (not x["fits"] or (x["kind"] in (5, 10) and x["item"] not in fits["Mage"]))))
             r["mage"] = {"lines": mage_lines, "bad": mage_bad}
             g.switch_hero(hero0); yield from rwait(1.0); refresh(); g = G["gen"]; c = cb()
             # (one thing bought at the stand with the cheapest thing)
@@ -8217,7 +8236,7 @@ def step_stalls17():
         import traceback
         res["error"] = str(e_) + traceback.format_exc()[-700:]
     finally:
-        unreal.SystemLibrary.execute_console_command(G["w"], "rd.Stalls17 1")
+        unreal.SystemLibrary.execute_console_command(G["w"], f"rd.Stalls17 {cv0}")
         try:
             g = G["gen"]; g.close_town_panel()
             if str(g.get_editor_property("current_hero")) != hero0: g.switch_hero(hero0)
@@ -8226,7 +8245,7 @@ def step_stalls17():
         quiet(False)
     def city_ok(name, r):
         op = r.get("opened", [])
-        return (r.get("stalls") == 12 and r.get("trades") == list(range(12)) and r.get("keepers") == 12 and r.get("tier") == TIERS17[name]
+        return (r.get("stalls") == 12 and r.get("trades") == list(range(12)) and r.get("keepers") == 12 and r.get("tier") == TIERS17[name] and not r.get("too_near")
                 and len(op) == 12 and all(o["panel"] == "store" and o["store_stall"] == o["trade"] and "trade at" in o["prompt"] and o["same"] for o in op)
                 and r.get("bad_stock_n", 1) == 0 and r.get("mage", {}).get("bad", 1) == 0
                 and (r.get("bought") or {}).get("ok") and r["bought"]["paid"] == r["bought"]["price"] and r["bought"]["count"] >= 1)

@@ -1028,7 +1028,10 @@ private:
 	void MarkBlocked(const FVector& Loc, float Yaw, const FVector2D& Size, bool bLaneToo = false);
 	/** the list of 2026-11-26's third phase (RDList17b.cpp): the square's twelve stands, their trades and keepers (no draw of the plan's
 	 *  streams); a stand's FTownSpot::Bld is its trade, 16 added for a new one (its mesh by a hash) */
-	void PlanStalls17(const FVector& Mid, const FVector& Ua, const FVector& Va, bool bModern);
+	void PlanStalls17();
+	void PostStallKeepers17();
+	/** the square's middle and axes, kept by the plan for PlanStalls17 */
+	FVector Stall17Mid = FVector::ZeroVector, Stall17Ua = FVector::ForwardVector, Stall17Va = FVector::RightVector;
 	USceneComponent* AddPivot(USceneComponent* Parent, const FTransform& Rel);
 	UStaticMeshComponent* AddMesh(USceneComponent* Parent, UStaticMesh* Mesh, const FTransform& Rel, bool bCollision);
 

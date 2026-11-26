@@ -61,19 +61,28 @@ int32 ARDDungeonGenerator::TownTier17() const
 }
 
 // ================================================================================================ what each trade sells
-static bool RDS17UsedInMade(const ARDDungeonGenerator* G, FName Part, bool bBrews)
+static bool RDS17Forged(ERDItemKind K)
 {
-	// (a material is a reagent when a potion, a scroll or a meal is made of it, else a crafting material)
-	for (const FRDRecipe& R : G->Recipes)
+	return K == ERDItemKind::Weapon || K == ERDItemKind::Armour || K == ERDItemKind::Shield || K == ERDItemKind::Repair || K == ERDItemKind::Ring || K == ERDItemKind::Slash
+		|| K == ERDItemKind::Component || K == ERDItemKind::Torch || K == ERDItemKind::Light || K == ERDItemKind::Teleport || K == ERDItemKind::Key || K == ERDItemKind::Token;
+}
+
+bool ARDDungeonGenerator::IsReagent17(FName Part) const
+{
+	// (a material is a reagent when anything brewed, cooked or written is made of it (potions, meals, scrolls, the climate's and the
+	// caves' brews: whatever is not forged), else a crafting material; the set made once per item and recipe table)
+	if (Reagents17N != Items.Num() * 100003 + Recipes.Num())
 	{
-		const int32 Ix = G->FindItem(R.Item);
-		if (Ix < 0) continue;
-		const ERDItemKind K = G->Items[Ix].Kind;
-		const bool bBrew = K == ERDItemKind::Healing || K == ERDItemKind::Mana || K == ERDItemKind::Speed || K == ERDItemKind::Scroll || K == ERDItemKind::Food;
-		if (bBrew != bBrews) continue;
-		for (const FRDRecipePart& P : R.Parts) if (P.AnyOf.Contains(Part)) return true;
+		Reagents17.Reset();
+		for (const FRDRecipe& R : Recipes)
+		{
+			const int32 Ix = FindItem(R.Item);
+			if (Ix < 0 || RDS17Forged(Items[Ix].Kind)) continue;
+			for (const FRDRecipePart& P : R.Parts) for (const FName& N : P.AnyOf) Reagents17.Add(N);
+		}
+		Reagents17N = Items.Num() * 100003 + Recipes.Num();
 	}
-	return false;
+	return Reagents17.Contains(Part);
 }
 
 bool ARDDungeonGenerator::StallSells17(int32 Trade, const FRDItemDef& It) const
@@ -88,8 +97,8 @@ bool ARDDungeonGenerator::StallSells17(int32 Trade, const FRDItemDef& It) const
 	case 5: return It.Kind == ERDItemKind::Food;
 	case 6: return It.Kind == ERDItemKind::Scroll;
 	case 7: return It.Kind == ERDItemKind::Tome;
-	case 8: return It.Kind == ERDItemKind::Component && RDS17UsedInMade(this, It.Name, true);
-	case 9: return It.Kind == ERDItemKind::Repair || (It.Kind == ERDItemKind::Component && !RDS17UsedInMade(this, It.Name, true));
+	case 8: return It.Kind == ERDItemKind::Component && IsReagent17(It.Name);
+	case 9: return It.Kind == ERDItemKind::Repair || (It.Kind == ERDItemKind::Component && !IsReagent17(It.Name));
 	case 10: return It.Kind == ERDItemKind::Torch || It.Kind == ERDItemKind::Recipe;
 	case 11: return It.Kind == ERDItemKind::Slash;
 	default: return false;
@@ -122,17 +131,17 @@ bool ARDDungeonGenerator::StallFits17(const FRDItemDef& It) const
 	}
 }
 
-// (an item's tiers in the bands of five: the band holding T is (T - 1) / 5)
-static int32 RDS17BandAt(const FRDItemDef& It, int32 Band)
+// (an item's highest tier at or under T (0: none); an item of no tiers is of every tier)
+static int32 RDS17TierAt(const FRDItemDef& It, int32 T)
 {
-	if (It.Tiers.Num() == 0) return 1;          // (every tier)
-	for (const int32 X : It.Tiers) if ((FMath::Max(X, 1) - 1) / 5 == Band) return 1;
-	return 0;
+	if (It.Tiers.Num() == 0) return T;
+	int32 Best = 0; for (const int32 X : It.Tiers) if (X <= T) Best = FMath::Max(Best, X);
+	return Best;
 }
 
 TArray<FName> ARDDungeonGenerator::StallStock17(int32 Trade, bool* bAllFit) const
 {
-	const int32 Tt = TownTier17(), Band0 = (FMath::Max(Tt, 1) - 1) / 5;
+	const int32 Tt = TownTier17();
 	TArray<const FRDItemDef*> Pool;
 	for (const FRDItemDef& It : Items)
 	{
@@ -140,15 +149,18 @@ TArray<FName> ARDDungeonGenerator::StallStock17(int32 Trade, bool* bAllFit) cons
 		if (bRecipes14 && IsLockedRecipe14(It.Name)) continue;          // (what only a found recipe makes is not sold)
 		Pool.Add(&It);
 	}
-	// (the band holding the town's tier, else the nearest band below that holds any of the trade)
+	// (the town's own tier, else the nearest tier below that the trade holds any of: an item of the band copies (910's potions, food and
+	// scrolls) is of each tier it lists)
+	int32 Want = 0;
+	for (const FRDItemDef* It : Pool) Want = FMath::Max(Want, RDS17TierAt(*It, Tt));
 	TArray<const FRDItemDef*> Band;
-	for (int32 B = Band0; B >= 0 && Band.Num() == 0; --B)
-		for (const FRDItemDef* It : Pool) if (RDS17BandAt(*It, B)) Band.Add(It);
+	if (Want > 0) for (const FRDItemDef* It : Pool) if (RDS17TierAt(*It, Tt) == Want) Band.Add(It);
 	TArray<const FRDItemDef*> Fit = Band.FilterByPredicate([this](const FRDItemDef* It) { return StallFits17(*It); });
 	if (bAllFit) *bAllFit = Fit.Num() > 0;
 	TArray<const FRDItemDef*>& Use = Fit.Num() > 0 ? Fit : Band;
 	// (by kind, then the cheapest first: the panel scrolls (a cap at 16 dearest first left the potion seller without its small potions))
-	Use.Sort([this](const FRDItemDef& A, const FRDItemDef& B) { return A.Kind != B.Kind ? (uint8)A.Kind < (uint8)B.Kind : PriceOf(A.Name) < PriceOf(B.Name); });
+	TMap<const FRDItemDef*, int32> Price; for (const FRDItemDef* It : Use) Price.Add(It, PriceOf(It->Name));
+	Use.Sort([&Price](const FRDItemDef& A, const FRDItemDef& B) { return A.Kind != B.Kind ? (uint8)A.Kind < (uint8)B.Kind : Price[&A] < Price[&B]; });
 	TArray<FName> Out;
 	for (const FRDItemDef* It : Use) Out.Add(HeavenGood22(It->Name));
 	return Out;
@@ -179,9 +191,10 @@ int32 ARDDungeonGenerator::StallAt17(const FVector& At, float R, FVector* Where)
 }
 
 // ================================================================================================ the plan's stands
-void ARDSection::PlanStalls17(const FVector& Mid, const FVector& Ua, const FVector& Va, bool bModern)
+void ARDSection::PlanStalls17()
 {
 	if (!RDStalls17On()) return;
+	const FVector Mid = Stall17Mid, Ua = Stall17Ua, Va = Stall17Va;
 	// (the trades on this square: the twelve in an order of the town's own, by its seed)
 	int32 Order[12]; for (int32 K = 0; K < 12; ++K) Order[K] = K;
 	FRandomStream Hr(HashCombine((uint32)Seed, 0x5717u));
@@ -234,9 +247,14 @@ void ARDSection::PlanStalls17(const FVector& Mid, const FVector& Ua, const FVect
 		TownSpots.Add(St);
 		++Made;
 	}
+	UE_LOG(LogRDList17b, Log, TEXT("RDSTALLS17 %d stands (%d old, %d new of %d wanted)"), Old.Num() + Made, Old.Num(), Made, Want);
+}
+
+void ARDSection::PostStallKeepers17()
+{
 	// (a keeper behind each: a trader of the stand, 2 m behind its counter, spawned where posted (Index 4000 + the trade: the spawn moves
 	// any other post off a blocked tile, and moved nine keepers of twelve to the first free tile it met, up to 12 m off; one tile back,
-	// four of twelve still met a neighbour's))
+	// four of twelve still met a neighbour's); posted after every other post, so the town's own trader stays the first)
 	for (const FTownSpot& Sp : TownSpots)
 	{
 		if (Sp.Kind != TS_Stall || Sp.Bld < 0) continue;
@@ -244,7 +262,6 @@ void ARDSection::PlanStalls17(const FVector& Mid, const FVector& Ua, const FVect
 		FTownPost P_; P_.Role = ERDTownRole::Trader; P_.At = Sp.At - F_ * 200.f; P_.Yaw = F_.Rotation().Yaw; P_.Bld = -1; P_.Wander = 0.f; P_.Index = 4000 + (Sp.Bld & 15);
 		TownPosts.Add(P_);
 	}
-	UE_LOG(LogRDList17b, Log, TEXT("RDSTALLS17 %d stands (%d old, %d new of %d wanted)"), Old.Num() + Made, Old.Num(), Made, Want);
 }
 
 // ================================================================================================ the tests
@@ -257,9 +274,9 @@ TArray<FString> ARDDungeonGenerator::GetStalls17() const
 		if (Sp.Kind == TS_Stall)
 		{
 			// (its keeper: the trader posted nearest behind it)
-			int32 Keeper = -1; float Kd = 450.f;
+			int32 Keeper = -1;
 			for (int32 I = 0; I < TownPeople.Num(); ++I)
-				if (const ARDTownsfolk* T = TownPeople[I]; IsValid(T) && T->TownRole == ERDTownRole::Trader && FVector::Dist2D(T->Post, Sp.At) < Kd) { Kd = FVector::Dist2D(T->Post, Sp.At); Keeper = I; }
+				if (const ARDTownsfolk* T = TownPeople[I]; IsValid(T) && Sp.Bld >= 0 && T->Stall17 == (Sp.Bld & 15)) { Keeper = I; break; }
 			Out.Add(FString::Printf(TEXT("%d|%s|%.0f|%.0f|%.0f|%.1f|%d|%d"), Sp.Bld < 0 ? -1 : (Sp.Bld & 15), Sp.Bld < 0 ? TEXT("") : *StallName17(Sp.Bld & 15, TownPlan == 5),
 				Sp.At.X, Sp.At.Y, Sp.At.Z, Sp.Yaw, Sp.Bld >= 16 ? 1 : 0, Keeper));
 		}

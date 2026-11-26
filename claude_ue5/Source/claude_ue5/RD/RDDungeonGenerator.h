@@ -3066,6 +3066,9 @@ public:
 	 *  whether any of the band fits her; none fitting, all of it) */
 	bool StallSells17(int32 Trade, const FRDItemDef& It) const;
 	bool StallFits17(const FRDItemDef& It) const;
+	bool IsReagent17(FName Part) const;
+	mutable TSet<FName> Reagents17;
+	mutable int32 Reagents17N = -1;
 	TArray<FName> StallStock17(int32 Trade, bool* bAllFit = nullptr) const;
 	static FString StallName17(int32 Trade, bool bModern);
 	static FString StallBody17(int32 Trade);

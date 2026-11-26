@@ -1,7 +1,9 @@
 {
- "tag": "s17c",
+ "tag": "s17d",
  "plan": [
-  "stalls17"
+  "stalls17",
+  "services",
+  "heaven21_services"
  ],
  "level": "brokenspire",
  "steps": [
@@ -27,14 +29,25 @@
       11
      ],
      "keepers": 12,
+     "too_near": [],
      "opened": [
       {
        "trade": 3,
        "prompt": "trade at the jeweller's stand",
        "panel": "store",
        "store_stall": 3,
-       "lines": 30,
-       "stock": 30,
+       "lines": 6,
+       "stock": 6,
+       "same": true,
+       "any_fit": true
+      },
+      {
+       "trade": 5,
+       "prompt": "trade at the food stall",
+       "panel": "store",
+       "store_stall": 5,
+       "lines": 15,
+       "stock": 15,
        "same": true,
        "any_fit": true
       },
@@ -43,48 +56,38 @@
        "prompt": "trade at the scribe's stand",
        "panel": "store",
        "store_stall": 6,
-       "lines": 30,
-       "stock": 30,
+       "lines": 4,
+       "stock": 4,
        "same": true,
        "any_fit": false
-      },
-      {
-       "trade": 5,
-       "prompt": "trade at the food stall",
-       "panel": "store",
-       "store_stall": 5,
-       "lines": 22,
-       "stock": 22,
-       "same": true,
-       "any_fit": true
       },
       {
        "trade": 1,
        "prompt": "trade at the armourer's stand",
        "panel": "store",
        "store_stall": 1,
-       "lines": 27,
-       "stock": 27,
+       "lines": 8,
+       "stock": 8,
        "same": true,
        "any_fit": true
       },
       {
-       "trade": 4,
-       "prompt": "trade at the potion seller's stand",
+       "trade": 0,
+       "prompt": "trade at the weaponsmith's stand",
        "panel": "store",
-       "store_stall": 4,
-       "lines": 24,
-       "stock": 24,
+       "store_stall": 0,
+       "lines": 9,
+       "stock": 9,
        "same": true,
        "any_fit": true
       },
       {
-       "trade": 11,
-       "prompt": "trade at the enchanter's stand",
+       "trade": 10,
+       "prompt": "trade at the chandler's stand",
        "panel": "store",
-       "store_stall": 11,
-       "lines": 30,
-       "stock": 30,
+       "store_stall": 10,
+       "lines": 1,
+       "stock": 1,
        "same": true,
        "any_fit": true
       },
@@ -109,42 +112,42 @@
        "any_fit": true
       },
       {
-       "trade": 7,
-       "prompt": "trade at the bookseller's stand",
-       "panel": "store",
-       "store_stall": 7,
-       "lines": 13,
-       "stock": 13,
-       "same": true,
-       "any_fit": false
-      },
-      {
-       "trade": 10,
-       "prompt": "trade at the chandler's stand",
-       "panel": "store",
-       "store_stall": 10,
-       "lines": 10,
-       "stock": 10,
-       "same": true,
-       "any_fit": true
-      },
-      {
        "trade": 2,
        "prompt": "trade at the shieldmaker's stand",
        "panel": "store",
        "store_stall": 2,
-       "lines": 22,
-       "stock": 22,
+       "lines": 5,
+       "stock": 5,
        "same": true,
        "any_fit": true
       },
       {
-       "trade": 0,
-       "prompt": "trade at the weaponsmith's stand",
+       "trade": 11,
+       "prompt": "trade at the enchanter's stand",
        "panel": "store",
-       "store_stall": 0,
-       "lines": 29,
-       "stock": 29,
+       "store_stall": 11,
+       "lines": 6,
+       "stock": 6,
+       "same": true,
+       "any_fit": true
+      },
+      {
+       "trade": 7,
+       "prompt": "trade at the bookseller's stand",
+       "panel": "store",
+       "store_stall": 7,
+       "lines": 5,
+       "stock": 5,
+       "same": true,
+       "any_fit": false
+      },
+      {
+       "trade": 4,
+       "prompt": "trade at the potion seller's stand",
+       "panel": "store",
+       "store_stall": 4,
+       "lines": 6,
+       "stock": 6,
        "same": true,
        "any_fit": true
       }
@@ -152,7 +155,7 @@
      "bad_stock": [],
      "bad_stock_n": 0,
      "mage": {
-      "lines": 286,
+      "lines": 112,
       "bad": 0
      },
      "bought": {
@@ -181,14 +184,15 @@
       11
      ],
      "keepers": 12,
+     "too_near": [],
      "opened": [
       {
        "trade": 11,
        "prompt": "trade at the enchanter's stand",
        "panel": "store",
        "store_stall": 11,
-       "lines": 30,
-       "stock": 30,
+       "lines": 6,
+       "stock": 6,
        "same": true,
        "any_fit": true
       },
@@ -197,8 +201,8 @@
        "prompt": "trade at the armourer's stand",
        "panel": "store",
        "store_stall": 1,
-       "lines": 27,
-       "stock": 27,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -207,8 +211,8 @@
        "prompt": "trade at the shieldmaker's stand",
        "panel": "store",
        "store_stall": 2,
-       "lines": 22,
-       "stock": 22,
+       "lines": 4,
+       "stock": 4,
        "same": true,
        "any_fit": true
       },
@@ -217,8 +221,8 @@
        "prompt": "trade at the potion seller's stand",
        "panel": "store",
        "store_stall": 4,
-       "lines": 24,
-       "stock": 24,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -237,8 +241,8 @@
        "prompt": "trade at the bookseller's stand",
        "panel": "store",
        "store_stall": 7,
-       "lines": 13,
-       "stock": 13,
+       "lines": 4,
+       "stock": 4,
        "same": true,
        "any_fit": false
       },
@@ -247,8 +251,8 @@
        "prompt": "trade at the chandler's stand",
        "panel": "store",
        "store_stall": 10,
-       "lines": 10,
-       "stock": 10,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -257,8 +261,8 @@
        "prompt": "trade at the jeweller's stand",
        "panel": "store",
        "store_stall": 3,
-       "lines": 30,
-       "stock": 30,
+       "lines": 6,
+       "stock": 6,
        "same": true,
        "any_fit": true
       },
@@ -267,8 +271,8 @@
        "prompt": "trade at the scribe's stand",
        "panel": "store",
        "store_stall": 6,
-       "lines": 30,
-       "stock": 30,
+       "lines": 6,
+       "stock": 6,
        "same": true,
        "any_fit": false
       },
@@ -277,8 +281,8 @@
        "prompt": "trade at the weaponsmith's stand",
        "panel": "store",
        "store_stall": 0,
-       "lines": 29,
-       "stock": 29,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -297,8 +301,8 @@
        "prompt": "trade at the food stall",
        "panel": "store",
        "store_stall": 5,
-       "lines": 22,
-       "stock": 22,
+       "lines": 14,
+       "stock": 14,
        "same": true,
        "any_fit": true
       }
@@ -306,7 +310,7 @@
      "bad_stock": [],
      "bad_stock_n": 0,
      "mage": {
-      "lines": 286,
+      "lines": 103,
       "bad": 0
      },
      "bought": {
@@ -335,14 +339,15 @@
       11
      ],
      "keepers": 12,
+     "too_near": [],
      "opened": [
       {
        "trade": 11,
        "prompt": "trade at the enchanter's stand",
        "panel": "store",
        "store_stall": 11,
-       "lines": 30,
-       "stock": 30,
+       "lines": 6,
+       "stock": 6,
        "same": true,
        "any_fit": true
       },
@@ -351,8 +356,8 @@
        "prompt": "trade at the scribe's stand",
        "panel": "store",
        "store_stall": 6,
-       "lines": 30,
-       "stock": 30,
+       "lines": 6,
+       "stock": 6,
        "same": true,
        "any_fit": false
       },
@@ -361,8 +366,8 @@
        "prompt": "trade at the bookseller's stand",
        "panel": "store",
        "store_stall": 7,
-       "lines": 10,
-       "stock": 10,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": false
       },
@@ -371,8 +376,8 @@
        "prompt": "trade at the armourer's stand",
        "panel": "store",
        "store_stall": 1,
-       "lines": 28,
-       "stock": 28,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -381,8 +386,8 @@
        "prompt": "trade at the food stall",
        "panel": "store",
        "store_stall": 5,
-       "lines": 22,
-       "stock": 22,
+       "lines": 14,
+       "stock": 14,
        "same": true,
        "any_fit": true
       },
@@ -391,8 +396,8 @@
        "prompt": "trade at the weaponsmith's stand",
        "panel": "store",
        "store_stall": 0,
-       "lines": 29,
-       "stock": 29,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -421,8 +426,8 @@
        "prompt": "trade at the potion seller's stand",
        "panel": "store",
        "store_stall": 4,
-       "lines": 24,
-       "stock": 24,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -431,8 +436,8 @@
        "prompt": "trade at the chandler's stand",
        "panel": "store",
        "store_stall": 10,
-       "lines": 10,
-       "stock": 10,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -441,8 +446,8 @@
        "prompt": "trade at the shieldmaker's stand",
        "panel": "store",
        "store_stall": 2,
-       "lines": 22,
-       "stock": 22,
+       "lines": 4,
+       "stock": 4,
        "same": true,
        "any_fit": true
       },
@@ -451,8 +456,8 @@
        "prompt": "trade at the jeweller's stand",
        "panel": "store",
        "store_stall": 3,
-       "lines": 30,
-       "stock": 30,
+       "lines": 6,
+       "stock": 6,
        "same": true,
        "any_fit": true
       }
@@ -460,7 +465,7 @@
      "bad_stock": [],
      "bad_stock_n": 0,
      "mage": {
-      "lines": 287,
+      "lines": 103,
       "bad": 0
      },
      "bought": {
@@ -489,14 +494,15 @@
       11
      ],
      "keepers": 12,
+     "too_near": [],
      "opened": [
       {
        "trade": 6,
        "prompt": "trade at the scribe's stand",
        "panel": "store",
        "store_stall": 6,
-       "lines": 30,
-       "stock": 30,
+       "lines": 6,
+       "stock": 6,
        "same": true,
        "any_fit": false
       },
@@ -515,8 +521,8 @@
        "prompt": "trade at the bookseller's stand",
        "panel": "store",
        "store_stall": 7,
-       "lines": 11,
-       "stock": 11,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": false
       },
@@ -525,8 +531,8 @@
        "prompt": "trade at the armourer's stand",
        "panel": "store",
        "store_stall": 1,
-       "lines": 28,
-       "stock": 28,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -535,8 +541,8 @@
        "prompt": "trade at the food stall",
        "panel": "store",
        "store_stall": 5,
-       "lines": 22,
-       "stock": 22,
+       "lines": 14,
+       "stock": 14,
        "same": true,
        "any_fit": true
       },
@@ -545,8 +551,8 @@
        "prompt": "trade at the potion seller's stand",
        "panel": "store",
        "store_stall": 4,
-       "lines": 24,
-       "stock": 24,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -555,8 +561,8 @@
        "prompt": "trade at the shieldmaker's stand",
        "panel": "store",
        "store_stall": 2,
-       "lines": 22,
-       "stock": 22,
+       "lines": 4,
+       "stock": 4,
        "same": true,
        "any_fit": true
       },
@@ -565,8 +571,8 @@
        "prompt": "trade at the weaponsmith's stand",
        "panel": "store",
        "store_stall": 0,
-       "lines": 29,
-       "stock": 29,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -585,8 +591,8 @@
        "prompt": "trade at the chandler's stand",
        "panel": "store",
        "store_stall": 10,
-       "lines": 10,
-       "stock": 10,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -595,8 +601,8 @@
        "prompt": "trade at the enchanter's stand",
        "panel": "store",
        "store_stall": 11,
-       "lines": 30,
-       "stock": 30,
+       "lines": 6,
+       "stock": 6,
        "same": true,
        "any_fit": true
       },
@@ -605,8 +611,8 @@
        "prompt": "trade at the jeweller's stand",
        "panel": "store",
        "store_stall": 3,
-       "lines": 30,
-       "stock": 30,
+       "lines": 6,
+       "stock": 6,
        "same": true,
        "any_fit": true
       }
@@ -614,7 +620,7 @@
      "bad_stock": [],
      "bad_stock_n": 0,
      "mage": {
-      "lines": 287,
+      "lines": 103,
       "bad": 0
      },
      "bought": {
@@ -643,14 +649,15 @@
       11
      ],
      "keepers": 12,
+     "too_near": [],
      "opened": [
       {
        "trade": 2,
        "prompt": "trade at the shieldmaker's stand",
        "panel": "store",
        "store_stall": 2,
-       "lines": 22,
-       "stock": 22,
+       "lines": 4,
+       "stock": 4,
        "same": true,
        "any_fit": true
       },
@@ -659,8 +666,8 @@
        "prompt": "trade at the bookseller's stand",
        "panel": "store",
        "store_stall": 7,
-       "lines": 10,
-       "stock": 10,
+       "lines": 2,
+       "stock": 2,
        "same": true,
        "any_fit": false
       },
@@ -669,8 +676,8 @@
        "prompt": "trade at the chandler's stand",
        "panel": "store",
        "store_stall": 10,
-       "lines": 10,
-       "stock": 10,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -689,8 +696,8 @@
        "prompt": "trade at the scribe's stand",
        "panel": "store",
        "store_stall": 6,
-       "lines": 30,
-       "stock": 30,
+       "lines": 6,
+       "stock": 6,
        "same": true,
        "any_fit": false
       },
@@ -699,8 +706,8 @@
        "prompt": "trade at the potion seller's stand",
        "panel": "store",
        "store_stall": 4,
-       "lines": 24,
-       "stock": 24,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -709,8 +716,8 @@
        "prompt": "trade at the enchanter's stand",
        "panel": "store",
        "store_stall": 11,
-       "lines": 30,
-       "stock": 30,
+       "lines": 6,
+       "stock": 6,
        "same": true,
        "any_fit": true
       },
@@ -719,8 +726,8 @@
        "prompt": "trade at the armourer's stand",
        "panel": "store",
        "store_stall": 1,
-       "lines": 28,
-       "stock": 28,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -729,8 +736,8 @@
        "prompt": "trade at the weaponsmith's stand",
        "panel": "store",
        "store_stall": 0,
-       "lines": 29,
-       "stock": 29,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -739,8 +746,8 @@
        "prompt": "trade at the food stall",
        "panel": "store",
        "store_stall": 5,
-       "lines": 22,
-       "stock": 22,
+       "lines": 14,
+       "stock": 14,
        "same": true,
        "any_fit": true
       },
@@ -759,8 +766,8 @@
        "prompt": "trade at the jeweller's stand",
        "panel": "store",
        "store_stall": 3,
-       "lines": 30,
-       "stock": 30,
+       "lines": 6,
+       "stock": 6,
        "same": true,
        "any_fit": true
       }
@@ -768,7 +775,7 @@
      "bad_stock": [],
      "bad_stock_n": 0,
      "mage": {
-      "lines": 287,
+      "lines": 103,
       "bad": 0
      },
      "bought": {
@@ -797,14 +804,15 @@
       11
      ],
      "keepers": 12,
+     "too_near": [],
      "opened": [
       {
        "trade": 2,
        "prompt": "trade at the safety gear kiosk",
        "panel": "store",
        "store_stall": 2,
-       "lines": 22,
-       "stock": 22,
+       "lines": 4,
+       "stock": 4,
        "same": true,
        "any_fit": true
       },
@@ -813,8 +821,8 @@
        "prompt": "trade at the bookshop's cart",
        "panel": "store",
        "store_stall": 7,
-       "lines": 11,
-       "stock": 11,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": false
       },
@@ -823,8 +831,8 @@
        "prompt": "trade at the sporting goods kiosk",
        "panel": "store",
        "store_stall": 0,
-       "lines": 29,
-       "stock": 29,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -833,8 +841,8 @@
        "prompt": "trade at the electronics kiosk",
        "panel": "store",
        "store_stall": 10,
-       "lines": 10,
-       "stock": 10,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -843,8 +851,8 @@
        "prompt": "trade at the novelty kiosk",
        "panel": "store",
        "store_stall": 11,
-       "lines": 30,
-       "stock": 30,
+       "lines": 6,
+       "stock": 6,
        "same": true,
        "any_fit": true
       },
@@ -853,8 +861,8 @@
        "prompt": "trade at the jeweller's kiosk",
        "panel": "store",
        "store_stall": 3,
-       "lines": 30,
-       "stock": 30,
+       "lines": 6,
+       "stock": 6,
        "same": true,
        "any_fit": true
       },
@@ -863,8 +871,8 @@
        "prompt": "trade at the outdoor outfitter's cart",
        "panel": "store",
        "store_stall": 1,
-       "lines": 28,
-       "stock": 28,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       },
@@ -873,8 +881,8 @@
        "prompt": "trade at the print shop kiosk",
        "panel": "store",
        "store_stall": 6,
-       "lines": 30,
-       "stock": 30,
+       "lines": 6,
+       "stock": 6,
        "same": true,
        "any_fit": false
       },
@@ -883,8 +891,8 @@
        "prompt": "trade at the food truck",
        "panel": "store",
        "store_stall": 5,
-       "lines": 22,
-       "stock": 22,
+       "lines": 14,
+       "stock": 14,
        "same": true,
        "any_fit": true
       },
@@ -913,8 +921,8 @@
        "prompt": "trade at the pharmacy kiosk",
        "panel": "store",
        "store_stall": 4,
-       "lines": 24,
-       "stock": 24,
+       "lines": 3,
+       "stock": 3,
        "same": true,
        "any_fit": true
       }
@@ -922,7 +930,7 @@
      "bad_stock": [],
      "bad_stock_n": 0,
      "mage": {
-      "lines": 287,
+      "lines": 103,
       "bad": 0
      },
      "bought": {
@@ -951,16 +959,156 @@
     "Kethrys Spire": true,
     "Heaven": true
    }
+  },
+  {
+   "step": "services",
+   "ok": false,
+   "buy": {
+    "ok": true,
+    "gold": -12,
+    "count": 0
+   },
+   "sell": {
+    "ok": true,
+    "gold": 1,
+    "count": 0
+   },
+   "heal": {
+    "ok": true,
+    "gold": -25,
+    "hp": 1.0
+   },
+   "weapon": "Viking Shortsword",
+   "repair": {
+    "line": 0,
+    "ok": true,
+    "gold": -9,
+    "wear": 1.0
+   },
+   "anvil_opens_crafting": true,
+   "bless": {
+    "ok": true,
+    "gold": -20,
+    "blessing": "Blessing of the Spire"
+   },
+   "deposit": {
+    "ok": true,
+    "carried": -1,
+    "stash": [
+     "Small Healing Potion"
+    ]
+   },
+   "withdraw": {
+    "ok": true,
+    "carried": 0,
+    "stash": 0
+   },
+   "circle": [
+    "travel|Brokenspire|TRAVEL|1",
+    "travel|Vel Morrath|TRAVEL|1",
+    "travel|Ashenreach|TRAVEL|1",
+    "travel|Graymourne|TRAVEL|1",
+    "travel|Kethrys Spire|TRAVEL|1",
+    "here|Heaven|YOU ARE HERE|0",
+    "castle|Mistward Castle|TRAVEL|1",
+    "bye|Step away||1"
+   ],
+   "board": [
+    "Quest: Contract: Rogue Defenders"
+   ],
+   "wild": true,
+   "circle_others_ok": true
+  },
+  {
+   "step": "heaven21_services",
+   "ok": true,
+   "faces": {
+    "CHAPEL": 4,
+    "HOTEL": 2,
+    "GEARSHOP": 2,
+    "MARKET": 2,
+    "CLINIC": 2,
+    "BANK": 2,
+    "SECURITY": 2,
+    "TOWER": 18,
+    "OFFICES": 24,
+    "PHARMACY": 2,
+    "HARDWARE": 10,
+    "GROCERY": 12
+   },
+   "pieces": {
+    "clinic_desk": 1,
+    "vault": 1,
+    "workbench": 1,
+    "vice": 1,
+    "parts_bin": 1
+   },
+   "medieval_service_pieces": {},
+   "in_their_buildings": {
+    "clinic_desk": true,
+    "vault": true,
+    "workbench": true,
+    "vice": true
+   },
+   "clinic_price": 21,
+   "keepers": {
+    "Trader": {
+     "f": "bark",
+     "panel": "store",
+     "title": "The market"
+    },
+    "Healer": {
+     "f": "bark",
+     "panel": "healer",
+     "title": "The clinic"
+    },
+    "Smith": {
+     "f": "bark",
+     "panel": "smith",
+     "title": "The gear shop"
+    },
+    "Keeper": {
+     "f": "bark",
+     "panel": "stash",
+     "title": "Your safe-deposit box"
+    },
+    "Innkeeper": {
+     "f": "bark",
+     "panel": "hotel",
+     "title": "The hotel",
+     "was_asleep": true,
+     "night": {
+      "ok": true,
+      "hour": 7.0,
+      "day_on": 1,
+      "health_full": true,
+      "gold": -31
+     }
+    },
+    "Priest": {
+     "f": "bark",
+     "panel": "temple",
+     "title": "The chapel"
+    }
+   },
+   "shots": [
+    "clinic",
+    "bank",
+    "gearshop"
+   ]
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor",
  "shots": [
-  "bs_s17c_stalls17_Brokenspire.png",
-  "bs_s17c_stalls17_VelMorrath.png",
-  "bs_s17c_stalls17_Ashenreach.png",
-  "bs_s17c_stalls17_Graymourne.png",
-  "bs_s17c_stalls17_KethrysSpire.png",
-  "bs_s17c_stalls17_Heaven.png"
+  "bs_s17d_stalls17_Brokenspire.png",
+  "bs_s17d_stalls17_VelMorrath.png",
+  "bs_s17d_stalls17_Ashenreach.png",
+  "bs_s17d_stalls17_Graymourne.png",
+  "bs_s17d_stalls17_KethrysSpire.png",
+  "bs_s17d_stalls17_Heaven.png",
+  "bs_s17d_heaven21_clinic.png",
+  "bs_s17d_heaven21_bank.png",
+  "bs_s17d_heaven21_gearshop.png"
  ],
  "error": null,
  "saves_put_back": 1,

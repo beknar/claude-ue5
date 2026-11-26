@@ -1034,7 +1034,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 		{
 			FTownSpot L; L.Kind = TS_Lamp; L.At = C; TownSpots.Add(L);
 		}
-		PlanStalls17(Mid, Ua, Va, bModern);          // (the list of 2026-11-26: twelve stands, their trades and keepers (RDList17b.cpp))
+		Stall17Mid = Mid; Stall17Ua = Ua; Stall17Va = Va;          // (the list of 2026-11-26: for the stands, placed at the plan's end)
 		// the elder by the board, the preacher, children and the town's idiot about the square
 		// (the holy city's elder is its archbishop, before the cathedral's door: below)
 		FTownPost Pe; Pe.Role = ERDTownRole::Elder; Pe.At = Bd.At + Ua * -220.f + Va * 160.f; Pe.Yaw = Bd.Yaw + 180.f; if (!bMid) TownPosts.Add(Pe);
@@ -1260,6 +1260,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 			St.At = TileWorld(B.DoorTile) + Out * 360.f + Across * FMath::Min(Half - 150.f, 520.f); St.Yaw = Out.Rotation().Yaw;
 			TownSpots.Add(St);
 		}
+	PlanStalls17();          // (the list of 2026-11-26: the square's twelve stands, after every other spot (PR #139's review: the holy city's door statues, the rune, the barricades came after them))
 	UE_LOG(LogRDTown, Log, TEXT("RDTOWN plan seed %d gate side %d: %d buildings (%d rooms), %d spots, %d posts"), R.GetInitialSeed(), F.G, TownBlds.Num(), Rooms.Num(), TownSpots.Num(), TownPosts.Num());
 }
 
@@ -2545,6 +2546,7 @@ void ARDSection::TownLife(FRandomStream& R)
 		}
 	}
 	PlanHouseholds();          // (the list of 2026-11-10: the homes' second grown-ups and children)
+	PostStallKeepers17();          // (the list of 2026-11-26: the stands' keepers, after every other post (PR #139's review: the first trader was a kiosk's))
 	// ---- the well (three about it, chatting), the market's stalls (a buyer before each)
 	for (const FTownSpot& Sp : TownSpots)
 	{
