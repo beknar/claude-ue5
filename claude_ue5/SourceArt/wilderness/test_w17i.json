@@ -1,5 +1,5 @@
 {
- "tag": "w17b",
+ "tag": "w17i",
  "plan": [
   "loading17"
  ],
@@ -13,14 +13,14 @@
      "to": "Ashenreach",
      "cover": 1,
      "ok": true,
-     "waited_s": 11.03,
+     "waited_s": 3.59,
      "up_s": [
-      47.55
+      48.31
      ],
      "paints_phases": [
       [
-       118,
-       48
+       94,
+       44
       ]
      ]
     },
@@ -28,14 +28,14 @@
      "to": "Brokenspire",
      "cover": 1,
      "ok": true,
-     "waited_s": 3.44,
+     "waited_s": 5.5,
      "up_s": [
-      7.19
+      8.71
      ],
      "paints_phases": [
       [
-       50,
-       24
+       76,
+       39
       ]
      ]
     },
@@ -43,14 +43,14 @@
      "to": "Graymourne",
      "cover": 1,
      "ok": true,
-     "waited_s": 5.58,
+     "waited_s": 4.35,
      "up_s": [
-      8.86
+      7.53
      ],
      "paints_phases": [
       [
-       26,
-       16
+       32,
+       19
       ]
      ]
     },
@@ -58,9 +58,9 @@
      "to": "Brokenspire",
      "cover": 2,
      "ok": true,
-     "waited_s": 3.27,
+     "waited_s": 8.3,
      "up_s": [
-      6.96
+      11.78
      ],
      "paints_phases": [
       [
@@ -70,7 +70,31 @@
      ]
     }
    ],
-   "state": "194|0.3338|11|50.003"
+   "picture_tries": [
+    {
+     "to": "Ashenreach",
+     "pictures": [
+      "ScreenShot00004.png",
+      "ScreenShot00005.png"
+     ],
+     "cover_up": [
+      true,
+      true,
+      true,
+      true
+     ]
+    }
+   ],
+   "picture_diff": {
+    "size": [
+     1292,
+     800
+    ],
+    "ring": 2.45,
+    "corner": 0.43
+   },
+   "cover_up_at_pictures": true,
+   "state": "202|0.0000|0|0.000"
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor",

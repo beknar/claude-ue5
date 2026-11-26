@@ -26,21 +26,20 @@ namespace
 	// (the widget's counters for the tests: it paints on the movie player's thread too)
 	std::atomic<int32> GRDLoading17Paints{ 0 };
 	std::atomic<double> GRDLoading17First{ 0.0 }, GRDLoading17Last{ 0.0 };
-	// (the ring's phases painted since a map's load began, in 64 buckets, and the paints then: the package's log says how it moved during LoadMap)
-	std::atomic<uint64> GRDLoading17Mask{ 0 };
-	std::atomic<int32> GRDLoading17PaintsAtLoad{ 0 };
+	// (the ring's phases painted, in 64 buckets, and the paints, since [0] the cover went up and [1] a map's load began: kept apart, the
+	// town's cover goes up in BeginPlay, inside the load (PR #138's review))
+	std::atomic<uint64> GRDLoading17Mask[2] = { 0, 0 };
+	std::atomic<int32> GRDLoading17PaintsAt[2] = { 0, 0 };
 
 	const TCHAR* const RDLoadingTips17[] = {
 		TEXT("F opens doors, chests and the people you stand nearest to."),
 		TEXT("A torch burns down; blind-fish oil makes it last twice as long."),
-		TEXT("The market's stands each sell their own trade, at the town's tier."),
 		TEXT("Rest at an inn or a camp to move the day on."),
 		TEXT("Monster contracts are posted on the wild towns' boards."),
 		TEXT("Each city's dungeon opens with the key of the one before it."),
 		TEXT("Warming meals and warm gear keep the cold of the north away."),
 		TEXT("Call your horse with J, or up on the D-pad."),
 		TEXT("Landmark towers hide caves at their feet."),
-		TEXT("The Options page chooses Immersive Interiors or Closed Structures."),
 		TEXT("Locked chests can be picked or broken, if nobody sees you."),
 		TEXT("Waystones remember the way; the map's fast travel takes you to any town you have found."),
 	};
@@ -95,7 +94,8 @@ namespace
 			// the ring of runes: twelve marks turning, the leading one brightest
 			{
 				const float Turn = (float)FMath::Fmod(T / RDLoadingTurnSeconds17, 1.0);
-				GRDLoading17Mask.fetch_or(uint64(1) << FMath::Clamp((int32)(Turn * 64.f), 0, 63));
+				const uint64 Bit = uint64(1) << FMath::Clamp((int32)(Turn * 64.f), 0, 63);
+				GRDLoading17Mask[0].fetch_or(Bit); GRDLoading17Mask[1].fetch_or(Bit);
 				const float Rr = 74.f * U;
 				for (int32 I = 0; I < 12; ++I)
 				{
@@ -143,8 +143,10 @@ namespace
 }
 
 // (RDList16b.cpp's map-load hooks: the paints and the distinct phases of the ring between the start of a load and its end, "<paints>|<phases of 64>")
-void RDLoadingBegin17() { GRDLoading17Mask.store(0); GRDLoading17PaintsAtLoad.store(GRDLoading17Paints.load()); }
-FString RDLoadingEnd17() { return FString::Printf(TEXT("%d|%d"), GRDLoading17Paints.load() - GRDLoading17PaintsAtLoad.load(), FMath::CountBits(GRDLoading17Mask.load())); }
+// (Which: 0 the cover, 1 a map's load; a new cover starts its ring and tips from their beginning)
+void RDLoadingBegin17(int32 Which) { GRDLoading17Mask[Which & 1].store(0); GRDLoading17PaintsAt[Which & 1].store(GRDLoading17Paints.load()); if (Which == 0) GRDLoading17First.store(0.0); }
+FString RDLoadingEnd17(int32 Which) { return FString::Printf(TEXT("%d|%d"), GRDLoading17Paints.load() - GRDLoading17PaintsAt[Which & 1].load(), FMath::CountBits(GRDLoading17Mask[Which & 1].load())); }
+bool RDMinimapSnap17() { return CVarRDMinimapSnap.GetValueOnGameThread() != 0; }
 
 // (RDList16b.cpp's cover takes this widget for both of its paths)
 TSharedRef<SWidget> RDLoadingWidget17()

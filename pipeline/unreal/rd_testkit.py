@@ -61,17 +61,20 @@ def pixels(path, box_px):
     return out
 
 
-def shifted_diff(a, b, reach=3, margin=6):
+def shifted_diff(a, b, reach=3, margin=6, hole=0):
     """the least mean absolute luma difference between two equal boxes of pixels (rows) over whole-pixel shifts of b within reach, the
-    box's margin left out: (difference, dx, dy)"""
+    box's margin left out, and a square hole of that half size at its middle (what is drawn at a fixed place on the screen, the minimap's
+    arrow): (difference, dx, dy)"""
     best = None
     h, w = len(a), len(a[0]) if a else 0
+    hx0, hx1, hy0, hy1 = w // 2 - hole, w // 2 + hole, h // 2 - hole, h // 2 + hole
     for dy in range(-reach, reach + 1):
         for dx in range(-reach, reach + 1):
             s = 0.0; n = 0
             for y in range(margin, h - margin, 1):
                 ra, rb = a[y], b[y + dy]
                 for x in range(margin, w - margin, 1):
+                    if hole and hx0 <= x < hx1 and hy0 <= y < hy1: continue
                     s += abs(ra[x] - rb[x + dx]); n += 1
             d = s / max(n, 1)
             if best is None or d < best[0]: best = (d, dx, dy)

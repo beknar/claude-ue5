@@ -300,8 +300,9 @@ void ARDHUD::DrawWildMinimap(float Sc, const FVector& L, float Yaw)
 	// instead of jumping every 3 m)
 	if (UTexture2D* M = Gen->WildMini(Here))
 	{
-		const FVector2D Mc = ToS(Gen->WildMiniFor);
-		DrawTexture(M, FMath::RoundToFloat(Mc.X - R), FMath::RoundToFloat(Mc.Y - R), R * 2.f, R * 2.f, 0, 0, 1, 1, FLinearColor::White, BLEND_Translucent);
+		extern bool RDMinimapSnap17();
+		const FVector2D Mc = RDMinimapSnap17() ? ToS(Gen->WildMiniFor) : C;
+		DrawTexture(M, RDMinimapSnap17() ? FMath::RoundToFloat(Mc.X - R) : Mc.X - R, RDMinimapSnap17() ? FMath::RoundToFloat(Mc.Y - R) : Mc.Y - R, R * 2.f, R * 2.f, 0, 0, 1, 1, FLinearColor::White, BLEND_Translucent);
 	}
 	// the roads (the fourteenth phase): the major ones pale stone in a dark edge, the minor ones thin brown, inside the disc
 	{

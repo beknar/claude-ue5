@@ -8021,8 +8021,8 @@ def mini_state17():
 
 def step_minimap17():
     """the minimap on whole pixels (the user's "in full screen 1080p, the mini-map's building outlines shimmer when the character is
-    moving"; RD/RDList17.cpp): play paused in the square, she is stepped 0.1 px of the minimap at a time (3.5 cm at 1080p's scale)
-    eleven times, each frame's drawn wall lines read from the HUD. With rd.MinimapSnap 1 every line's start keeps its place within its
+    moving"; RD/RDList17.cpp): play paused in the square, she is stepped 0.1 px of the minimap at a time along both axes (5.25 cm
+    each way at the play window's 720 rows) eleven times, each frame's drawn wall lines read from the HUD. With rd.MinimapSnap 1 every line's start keeps its place within its
     pixel (the share of lines whose sub-pixel fraction is one the first frame had: 0.95 or more at every step), the base is whole and the
     walls' thickness whole; with rd.MinimapSnap 0 (the old drawing) the fractions slide (that share under 0.5 at some step). Then two
     1920 x 1080 pictures 1.5 px of the map apart: snapped, the second is the first moved by whole pixels (the least mean luma difference
@@ -8039,7 +8039,7 @@ def step_minimap17():
             r = {"steps": []}; first = None
             k_px = None
             for k in range(11):
-                pawn.set_actor_location(unreal.Vector(at0.x, at0.y + k * 3.5 * (1080.0 / 720.0), at0.z), False, True)
+                pawn.set_actor_location(unreal.Vector(at0.x + k * 3.5 * (1080.0 / 720.0), at0.y + k * 3.5 * (1080.0 / 720.0), at0.z), False, True)
                 yield from rwait(0.25)
                 st = mini_state17()
                 lines = [str(l).split("|") for l in G["pc"].get_hud().get_mini_lines17()]
@@ -8081,6 +8081,8 @@ def step_minimap17():
     finally:
         unreal.SystemLibrary.execute_console_command(G["w"], "rd.MinimapSnap 1")
         unreal.GameplayStatics.set_game_paused(G["w"], False)
+        try: pawn.set_actor_location(at0, False, True)          # (put back where she stood (PR #138's review))
+        except Exception: pass
         quiet(False)
     on, off = res.get("snap", {}), res.get("old", {})
     ok = ("error" not in res and on.get("base_whole") and on.get("least_share", 0) >= 0.95 and abs(on.get("wall_px", 0.5) - round(on.get("wall_px", 0.5))) < 1e-3

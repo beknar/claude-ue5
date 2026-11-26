@@ -240,11 +240,15 @@ UTexture2D* ARDDungeonGenerator::WildFog(const FVector2D& Mid, double Mpp, const
 UTexture2D* ARDDungeonGenerator::WildMini(const FVector2D& Her)
 {
 	const double Now = FPlatformTime::Seconds();
-	const int32 N = 256, L = WildMiniLevel;
+	// (300 texels across the minimap's 300 px at 1080p (600 at 4K): a texel a whole pixel, so the picture moves by whole pixels with the
+	// rest of the map (256 left a texel 1.17 px, and its edges shimmered: 888 minimap17w))
+	const int32 N = 300, L = WildMiniLevel;
 	const double Rm = WildMiniRadiusM, Tm = 2.0 * Rm / N;
 	// (the list of 2026-11-26: made for a point on a grid of its own texels fixed to the world, so a picture made again samples the same places and
 	// the minimap's shapes do not jump; the HUD draws it round that point)
-	const FVector2D At(FMath::RoundToDouble(Her.X / Tm) * Tm, FMath::RoundToDouble(Her.Y / Tm) * Tm);
+	// (rd.MinimapSnap 0: made round her exact place, as before (PR #138's review))
+	extern bool RDMinimapSnap17();
+	const FVector2D At = RDMinimapSnap17() ? FVector2D(FMath::RoundToDouble(Her.X / Tm) * Tm, FMath::RoundToDouble(Her.Y / Tm) * Tm) : Her;
 	if (WildMiniTex && Now - WildMiniTime < 0.2 && FVector2D::Distance(At, WildMiniFor) < 3.0) return WildMiniTex;
 	const double Span = WildMapTileSpan(L), Pm = Span / RDWTileN;
 	TArray<FColor> Px; Px.SetNumUninitialized(N * N);
