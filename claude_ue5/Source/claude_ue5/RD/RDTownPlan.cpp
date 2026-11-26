@@ -1034,6 +1034,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 		{
 			FTownSpot L; L.Kind = TS_Lamp; L.At = C; TownSpots.Add(L);
 		}
+		PlanStalls17(Mid, Ua, Va, bModern);          // (the list of 2026-11-26: twelve stands, their trades and keepers (RDList17b.cpp))
 		// the elder by the board, the preacher, children and the town's idiot about the square
 		// (the holy city's elder is its archbishop, before the cathedral's door: below)
 		FTownPost Pe; Pe.Role = ERDTownRole::Elder; Pe.At = Bd.At + Ua * -220.f + Va * 160.f; Pe.Yaw = Bd.Yaw + 180.f; if (!bMid) TownPosts.Add(Pe);
@@ -2072,7 +2073,8 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 				}
 				break;
 			}
-			case TS_Stall: AddPieceAt(FName(*FString::Printf(TEXT("Town.Stall%d"), 1 + R.RandRange(0, 2))), Sp.At, Sp.Yaw); break;
+			// (the list of 2026-11-26: a new stand's mesh by a hash of its place, the old four's from the step's stream as before)
+			case TS_Stall: AddPieceAt(FName(*FString::Printf(TEXT("Town.Stall%d"), 1 + (Sp.Bld >= 16 ? (int32)(HashCombine(GetTypeHash(FMath::RoundToInt(Sp.At.X)), GetTypeHash(FMath::RoundToInt(Sp.At.Y))) % 3u) : R.RandRange(0, 2)))), Sp.At, Sp.Yaw); break;
 			case TS_Lamp:
 				AddPieceAt(TEXT("Town.Lamp"), Sp.At, R.FRandRange(0, 360));
 				AddEffect(TEXT("BrazierFire"), Sp.At + FVector(0, 0, 105.f), 1.2f);
@@ -2555,7 +2557,9 @@ void ARDSection::TownLife(FRandomStream& R)
 		if (Sp.Kind == TS_Stall)
 		{
 			const FVector F_ = FRotator(0, Sp.Yaw, 0).RotateVector(FVector(1, 0, 0));
-			Work(TEXT("Talk"), Sp.At + F_ * 230.f, (-F_).Rotation().Yaw, TW_Chat, -1);
+			// (the list of 2026-11-26: a worked stand's buyer stands to one side of its front, so F before the counter reaches the stand, not him)
+			const FVector Side = Sp.Bld >= 0 ? FVector(-F_.Y, F_.X, 0.f) * 190.f : FVector::ZeroVector;
+			Work(TEXT("Talk"), Sp.At + F_ * 230.f + Side, (-F_).Rotation().Yaw, TW_Chat, -1);
 		}
 	}
 	// ---- the refugees' camp: a pot over the first tent's fire, a spit over the second's, the third's a fire to talk by

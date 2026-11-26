@@ -169,7 +169,7 @@ def check_town():
     res["castle_rooms"] = castle[0]["rooms"] if castle else 0
     res["mistgate"] = place("mistgate") is not None
     ok = all(kinds.get(k, 0) == 1 for k in TRADES) and len(homes) >= 20 and all(v > 0 for v in res["homes"].values()) \
-        and all(sk.get(k, 0) >= n for k, n in (("well", 1), ("board", 1), ("circle", 1), ("stall", 4), ("still", 1), ("mill", 1), ("graveyard", 1), ("grave", 6), ("gate", 1), ("tower", 8),
+        and all(sk.get(k, 0) >= n for k, n in (("well", 1), ("board", 1), ("circle", 1), ("stall", 12), ("still", 1), ("mill", 1), ("graveyard", 1), ("grave", 6), ("gate", 1), ("tower", 8),
                                                 ("counter", 1), ("basin", 1), ("altar", 1), ("stash", 1), ("smith", 1))) \
         and not unreached and res["castle_rooms"] == 4 and res["mistgate"]
     res["trades_at"] = {b["kind"]: [round(b["c"].x / 100), round(b["c"].y / 100)] for b in B if b["kind"] in TRADES}
@@ -8091,6 +8091,153 @@ def step_minimap17():
 
 
 STEPS.update({"minimap17": step_minimap17})
+
+
+# ================================================================================================ the list of 2026-11-26's third phase
+TIERS17 = {"Brokenspire": 1, "Vel Morrath": 5, "Ashenreach": 10, "Graymourne": 15, "Kethrys Spire": 20, "Heaven": 25}
+def stalls17():
+    out = []
+    for l in G["gen"].get_stalls17():
+        p = str(l).split("|")
+        out.append({"trade": int(p[0]), "name": p[1], "at": V(float(p[2]), float(p[3]), float(p[4])), "yaw": float(p[5]), "new": p[6] == "1", "keeper": int(p[7])})
+    return out
+def stall_stock17(trade):
+    ls = [str(l).split("|") for l in G["gen"].get_stall_stock17(trade)]
+    head = ls[0] if ls else ["tier", "0", "0"]
+    return int(head[1]), head[2] == "1", [{"item": p[0], "kind": int(p[1]), "tiers": [int(x) for x in p[2].split(",") if x], "price": int(p[3]), "fits": p[4] == "1", "sold": p[5] == "1"} for p in ls[1:]]
+def town_snapshot17():
+    """what the plan's streams place: the buildings' middles, the containers, the spots but the stands (their places, kinds), the lamps' instances"""
+    S = section()
+    cs = sorted([round(S.get_container_location(i).x), round(S.get_container_location(i).y)] for i in range(S.get_num_containers()))
+    sp = sorted([p["kind"], round(p["at"].x), round(p["at"].y)] for p in spots() if p["kind"] != "stall")
+    return {"buildings": sorted([round(b["c"].x), round(b["c"].y)] for b in blds()), "containers": cs, "spots": sp}
+def stalls17_picture(city, st):
+    """a picture of the square's stands: from 6 m beyond the stand farthest from their middle, looking back across them"""
+    if not st: return
+    cx = sum(s["at"].x for s in st) / len(st); cy = sum(s["at"].y for s in st) / len(st)
+    far = max(st, key=lambda s: (s["at"].x - cx) ** 2 + (s["at"].y - cy) ** 2)
+    dx, dy = far["at"].x - cx, far["at"].y - cy; d = max(math.hypot(dx, dy), 1.0)
+    at = V(far["at"].x + dx / d * 600.0, far["at"].y + dy / d * 600.0, far["at"].z)
+    yaw = math.degrees(math.atan2(-dy, -dx))
+    put(at, yaw=yaw); G["pawn"].get_movement_component().stop_movement_immediately()
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-16, yaw=yaw)); yield from wait(2.0)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-16, yaw=yaw))
+    shot(f"stalls17_{city.replace(' ', '')}"); yield from rwait(1.5)
+
+
+def step_stalls17pics():
+    """pictures only: each city's square's stands (stalls17's views)"""
+    res = {}; quiet(True)
+    try:
+        for city in ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne", "Kethrys Spire", "Heaven"):
+            if city != "Brokenspire": yield from to_town(city)
+            refresh(); st = stalls17(); res[city] = len(st)
+            yield from stalls17_picture(city, st)
+    finally:
+        quiet(False)
+    step_result("stalls17pics", all(v == 12 for v in res.values()), **res)
+
+
+def step_stalls17():
+    """the squares' stands (the user's "the town squares in every city need 3x more stands and shops, each one different in what they
+    offer ... items that are of the same Tier that the town is in"; RD/RDList17b.cpp): in each of the six cities 12 stands on the square
+    (it had 4, Heaven none), each its keeper and a trade of its own (twelve, none shared); the town's tier by the roads' chain; at each
+    stand, from 1.7 m before its counter, F's prompt names it and F opens its store (its trade's stock only); every thing offered is of
+    the trade, of the town's tier band (or the nearest band below holding any), and, when any fits her, fit for her hero (the Warrior
+    and the Mage); one thing bought at a stand of each city (her gold down by its price, the thing in her pack). In Brokenspire, the
+    town on one seed with rd.Stalls17 0 and 1: its buildings, containers and other spots in the same places (the plan's streams kept)"""
+    g = G["gen"]; c = cb(); res = {"cities": {}}; quiet(True)
+    hero0 = str(g.get_editor_property("current_hero"))
+    g.add_gold(200000, "the test"); g0_all = gold()
+    try:
+        # (the streams: Brokenspire on its seed, the stands off and on)
+        seed0 = G["gi"].get_editor_property("town_seed")
+        snaps = {}
+        for on in (0, 1):
+            unreal.SystemLibrary.execute_console_command(G["w"], f"rd.Stalls17 {on}")
+            g.rebuild_town(seed0); yield from rwait(2.5); refresh(); g = G["gen"]
+            snaps[on] = town_snapshot17(); snaps[on]["stalls"] = len(stalls17())
+        res["streams"] = {k: snaps[0][k] == snaps[1][k] for k in ("buildings", "containers", "spots")}
+        res["streams"]["stalls_off_on"] = [snaps[0]["stalls"], snaps[1]["stalls"]]
+        for city in ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne", "Kethrys Spire", "Heaven"):
+            if city != "Brokenspire": yield from to_town(city)
+            refresh(); g = G["gen"]; c = cb()
+            r = {"tier": g.get_town_tier17()}
+            st = stalls17(); r["stalls"] = len(st); r["trades"] = sorted(s["trade"] for s in st)
+            yield from stalls17_picture(city, st)
+            r["keepers"] = sum(1 for s in st if s["keeper"] >= 0)
+            # (each stand opened by F from before its counter)
+            opened = []; bad_stock = []
+            for s in st:
+                f_ = V(math.cos(math.radians(s["yaw"])), math.sin(math.radians(s["yaw"])), 0)
+                put(V(s["at"].x + f_.x * 170.0, s["at"].y + f_.y * 170.0, s["at"].z), yaw=s["yaw"] + 180.0)
+                G["pawn"].get_movement_component().stop_movement_immediately(); yield from wait(0.25)
+                pr = str(g.describe_nearest(G["pawn"].get_actor_location()))
+                g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(0.3)
+                pn = str(g.get_town_panel()); ss = g.get_store_stall17()
+                buys = [p[1] for p in panel() if p[0] == "buy"]
+                g.close_town_panel(); yield from rwait(0.15)
+                tier, anyfit, stock = stall_stock17(s["trade"])
+                names = {x["item"] for x in stock}
+                band = (max(tier, 1) - 1) // 5
+                for x in stock:
+                    xb = [(max(t, 1) - 1) // 5 for t in x["tiers"]] or [band]
+                    ok_band = (not x["tiers"]) or any(b <= band for b in xb)
+                    if not x["sold"] or (anyfit and not x["fits"]) or not ok_band: bad_stock.append([s["trade"], x["item"], x["tiers"], x["sold"], x["fits"]])
+                opened.append({"trade": s["trade"], "prompt": pr, "panel": pn, "store_stall": ss, "lines": len(buys), "stock": len(stock), "same": set(buys) == names, "any_fit": anyfit})
+            r["opened"] = opened; r["bad_stock"] = bad_stock[:12]; r["bad_stock_n"] = len(bad_stock)
+            # (the Mage: the stands' stock fit for her where any is)
+            if str(g.get_editor_property("current_hero")) != "Mage": g.switch_hero("Mage"); yield from rwait(1.0); refresh(); g = G["gen"]
+            mage_bad = 0; mage_lines = 0
+            for s in st:
+                tier, anyfit, stock = stall_stock17(s["trade"])
+                mage_lines += len(stock)
+                mage_bad += sum(1 for x in stock if not x["sold"] or (anyfit and not x["fits"]))
+            r["mage"] = {"lines": mage_lines, "bad": mage_bad}
+            g.switch_hero(hero0); yield from rwait(1.0); refresh(); g = G["gen"]; c = cb()
+            # (one thing bought at the stand with the cheapest thing)
+            best = None
+            for s in st:
+                _, _, stock = stall_stock17(s["trade"])
+                for x in stock:
+                    if best is None or x["price"] < best[1]["price"]: best = (s, x)
+            if best:
+                s, x = best
+                f_ = V(math.cos(math.radians(s["yaw"])), math.sin(math.radians(s["yaw"])), 0)
+                put(V(s["at"].x + f_.x * 170.0, s["at"].y + f_.y * 170.0, s["at"].z), yaw=s["yaw"] + 180.0)
+                G["pawn"].get_movement_component().stop_movement_immediately(); yield from wait(0.25)
+                g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(0.3)
+                n0 = c.get_item_count(x["item"]); gb = gold()
+                i = line_of("buy", x["item"])
+                okb = g.activate_town_entry(i) if i >= 0 else False
+                r["bought"] = {"item": x["item"], "ok": bool(okb), "price": x["price"], "paid": gb - gold(), "count": c.get_item_count(x["item"]) - n0}
+                g.close_town_panel(); yield from rwait(0.2)
+            res["cities"][city] = r
+    except Exception as e_:
+        import traceback
+        res["error"] = str(e_) + traceback.format_exc()[-700:]
+    finally:
+        unreal.SystemLibrary.execute_console_command(G["w"], "rd.Stalls17 1")
+        try:
+            g = G["gen"]; g.close_town_panel()
+            if str(g.get_editor_property("current_hero")) != hero0: g.switch_hero(hero0)
+            g.add_gold(-(gold() - g0_all) - 200000, "the test")
+        except Exception: pass
+        quiet(False)
+    def city_ok(name, r):
+        op = r.get("opened", [])
+        return (r.get("stalls") == 12 and r.get("trades") == list(range(12)) and r.get("keepers") == 12 and r.get("tier") == TIERS17[name]
+                and len(op) == 12 and all(o["panel"] == "store" and o["store_stall"] == o["trade"] and "trade at" in o["prompt"] and o["same"] for o in op)
+                and r.get("bad_stock_n", 1) == 0 and r.get("mage", {}).get("bad", 1) == 0
+                and (r.get("bought") or {}).get("ok") and r["bought"]["paid"] == r["bought"]["price"] and r["bought"]["count"] >= 1)
+    res["cities_ok"] = {k: city_ok(k, v) for k, v in res["cities"].items()}
+    sr = res.get("streams", {})
+    ok = ("error" not in res and len(res["cities"]) == 6 and all(res["cities_ok"].values())
+          and sr.get("buildings") and sr.get("containers") and sr.get("spots") and sr.get("stalls_off_on") == [4, 12])
+    step_result("stalls17", ok, **res)
+
+
+STEPS.update({"stalls17": step_stalls17, "stalls17pics": step_stalls17pics})
 
 def run():
     G["saves"] = saves_snapshot()

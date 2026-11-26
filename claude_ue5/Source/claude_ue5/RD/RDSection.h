@@ -1026,6 +1026,9 @@ private:
 	void AddCellDoor(const FVector& HingeWorld, float Yaw, float Width);
 	bool AddContainer(FName Name, const FVector& Loc, float Yaw, const FString& Kind);
 	void MarkBlocked(const FVector& Loc, float Yaw, const FVector2D& Size, bool bLaneToo = false);
+	/** the list of 2026-11-26's third phase (RDList17b.cpp): the square's twelve stands, their trades and keepers (no draw of the plan's
+	 *  streams); a stand's FTownSpot::Bld is its trade, 16 added for a new one (its mesh by a hash) */
+	void PlanStalls17(const FVector& Mid, const FVector& Ua, const FVector& Va, bool bModern);
 	USceneComponent* AddPivot(USceneComponent* Parent, const FTransform& Rel);
 	UStaticMeshComponent* AddMesh(USceneComponent* Parent, UStaticMesh* Mesh, const FTransform& Rel, bool bCollision);
 
