@@ -1,0 +1,16 @@
+
+for the Closed Structures game mode, windows will be either opaque and reflective for buildings that have glass like in Heaven, or barricaded entirely both outside and inside.
+
+in the cities, the vendor stands in the town square all have the same design.  have at least 20 different designs for vendor stands designs.
+
+in the cities, the town gate looks the same as all the others.  have at least 20 different designs for the town gates that can be used when the town is generated for the first time in a game.
+
+on hills and mountain sides, there is red scrub that appears to be floating in the air.
+
+in the wilderness, there needs to be occasional giant beasts roaming the land, some of which can be hostile.  these beasts should match the upper end of the Tier of that area of wilderness or the lower end of the Tier+1 of that area of wilderness.
+
+in the wilderness, the random item spawns under a tent all have the same look.  the tent is the same every time.  have at least 20 different designs for the random item spawns if it's a tent.  it could be different tent designs, a wrecked house, etc.
+
+break up these changes into appropriate pieces, formulate a plan to implement it, write that plan to an MD file in the docs directory, review the plan, then create a PR for reasonably sized portions of the plan and execute each PR in an order that would be most efficient and makes sense.  If there are opportunities to do parallel actions.  once the PR is merged, build the shipping binary.  do not stop until the last PR is finished in the plan MD file.
+
+
