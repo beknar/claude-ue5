@@ -7,6 +7,12 @@
                                     (WindowHoles18: a piece's in its piece frame, out +X; a house mesh's in the mesh's own frame with the
                                     side's way out) and to SourceArt/list18/windows18.json, for RD/RDList18b.cpp to board them.
 
+    951_improvements18.py stalls    phase 4: the squares' stands of twenty designs a style (SourceArt/list18/stalls18.json): each design's
+                                    parts written as pieces (Stall18.<design>.<n>: a pack's mesh, a Blueprint (the Docks' stands as the town's
+                                    own Town.Stall1-3), or the engine's cube in a Heaven material) in the stand's frame, each design laid once in
+                                    the editor's world and measured (one wider than the 2.6 m square drawn in), the designs and their trades on
+                                    the generator (StallDesigns18); every trade suited by three or more of each style (asserted)
+
 Run on the editor with any level open: it opens brokenspire and saves it."""
 import sys, gc, json, os, math
 import unreal
@@ -202,7 +208,131 @@ def windows():
     del g
 
 
-PARTS = {"windows": windows}
+STALLS = os.path.join(unreal.Paths.project_dir(), "SourceArt", "list18", "stalls18.json")
+TRADES = ["weaponsmith", "armourer", "shieldmaker", "jeweller", "potions", "food", "scribe", "bookseller", "herbalist", "tinker", "chandler", "enchanter"]
+CUBE = "/Engine/BasicShapes/Cube"
+HV = "/Game/RandomDungeon/Heaven"
+
+
+def hv_material(name):
+    """a material instance of Heaven's kit by its name (heaven_kit.py's)"""
+    for p in EAL.list_assets(HV, recursive=True, include_folder=False):
+        if p.split("/")[-1].split(".")[0] == name: return unreal.load_asset(p)
+    return None
+
+
+BP_PIECES = {}          # (a Blueprint's path: the town's own piece of it, Town.Stall1-3: its Adjust as the town has always laid it)
+
+
+def part_piece(p):
+    """a design's part as a piece: a pack's mesh, a Blueprint (its generated class), or the engine's cube in a Heaven material, placed in the
+    stand's frame by its Adjust"""
+    pc = unreal.RDPiece()
+    if "box" in p:
+        cx, cy, cz, ex, ey, ez = p["box"]
+        m = unreal.load_asset(CUBE); assert m, "951: the engine's cube"
+        mat = hv_material(p["material"]); assert mat, "951: Heaven's material " + p["material"]
+        # (the engine's cube is 100 cm about its middle)
+        pc.set_editor_property("mesh", m); pc.set_editor_property("material", mat)
+        pc.set_editor_property("adjust", unreal.Transform(location=unreal.Vector(cx, cy, cz), rotation=unreal.Rotator(0, 0, 0), scale=unreal.Vector(ex / 50.0, ey / 50.0, ez / 50.0)))
+        pc.set_editor_property("size", unreal.Vector(2 * ex, 2 * ey, 2 * ez))
+        return pc
+    sc = p.get("scale", 1.0)
+    sv = unreal.Vector(*sc) if isinstance(sc, list) else unreal.Vector(sc, sc, sc)
+    xf = unreal.Transform(location=unreal.Vector(p["x"], p["y"], p["z"]), rotation=unreal.Rotator(roll=0, pitch=0, yaw=p.get("yaw", 0.0)), scale=sv)
+    if p.get("actor") and p["mesh"].split(".")[0] in BP_PIECES:
+        # (the Docks' market stands: the town's own pieces of them (882), not the draft's guess at their place (they measured 4 m across))
+        src = BP_PIECES[p["mesh"].split(".")[0]]
+        pc.set_editor_property("actor_class", src.get_editor_property("actor_class")); pc.set_editor_property("adjust", src.get_editor_property("adjust"))
+        pc.set_editor_property("size", src.get_editor_property("size"))
+        return pc
+    if p.get("actor"):
+        bp = unreal.load_asset(p["mesh"]); assert bp, "951: the Blueprint " + p["mesh"]
+        pc.set_editor_property("actor_class", bp.generated_class())
+    else:
+        m = unreal.load_asset(p["mesh"]); assert m, "951: the mesh " + p["mesh"]
+        pc.set_editor_property("mesh", m)
+        bb = m.get_bounding_box(); pc.set_editor_property("size", bb.max - bb.min)
+    pc.set_editor_property("adjust", xf)
+    return pc
+
+
+def measure_design(pieces, at):
+    """the design laid in the editor's world at `at` (its parts as actors, as the town lays them): the union of their bounds in the stand's
+    frame, and the actors (to picture, then take away)"""
+    acts = []
+    for pc in pieces:
+        xf = pc.get_editor_property("adjust")
+        loc = xf.translation + at
+        ac = pc.get_editor_property("actor_class")
+        if ac:
+            a = eas.spawn_actor_from_class(ac, loc, xf.rotation.rotator())
+            if a: a.set_actor_scale3d(xf.scale3d)
+        else:
+            a = eas.spawn_actor_from_class(unreal.StaticMeshActor, loc, xf.rotation.rotator())
+            a.static_mesh_component.set_static_mesh(pc.get_editor_property("mesh")); a.set_actor_scale3d(xf.scale3d)
+            mt = pc.get_editor_property("material")
+            if mt:
+                for i in range(a.static_mesh_component.get_num_materials()): a.static_mesh_component.set_material(i, mt)
+        if a: acts.append(a)
+    lo = [1e9] * 3; hi = [-1e9] * 3
+    for a in acts:
+        o, e = a.get_actor_bounds(False)
+        for k, ax in enumerate("xyz"):
+            lo[k] = min(lo[k], getattr(o, ax) - getattr(e, ax) - getattr(at, ax)); hi[k] = max(hi[k], getattr(o, ax) + getattr(e, ax) - getattr(at, ax))
+    return lo, hi, acts
+
+
+def stalls():
+    les.load_level(MAP)
+    unreal.SystemLibrary.execute_console_command(None, "obj gc")
+    g = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
+    data = json.load(open(STALLS, encoding="utf-8"))
+    pieces = {str(k): v for k, v in g.get_editor_property("pieces").items() if not str(k).startswith("Stall18.")}
+    BP_PIECES.clear()
+    for k in ("Town.Stall1", "Town.Stall2", "Town.Stall3"):
+        ac = pieces[k].get_editor_property("actor_class") if k in pieces else None
+        if ac: BP_PIECES[ac.get_path_name().split(".")[0].removesuffix("_C")] = pieces[k]
+    designs, report = [], []
+    at = unreal.Vector(0, 0, 300000)
+    for d in data["designs"]:
+        pcs = [part_piece(p) for p in d["parts"]]
+        lo, hi, acts = measure_design(pcs, at)
+        for a in acts: eas.destroy_actor(a)
+        # (a design wider than the stands' 2.6 m square is drawn in about its middle, parts and places alike)
+        reach = max(abs(lo[0]), abs(hi[0]), abs(lo[1]), abs(hi[1]))
+        k = min(1.0, 130.0 / reach) if reach > 132.0 else 1.0
+        # (a design of the town's own stands (Town.Stall1-3) keeps their size: the squares have always made room for them)
+        if all(p.get("actor") and p["mesh"].split(".")[0] in BP_PIECES for p in d["parts"]): k = 1.0
+        names = []
+        for n, pc in enumerate(pcs):
+            if k < 1.0:
+                xf = pc.get_editor_property("adjust")
+                pc.set_editor_property("adjust", unreal.Transform(location=xf.translation * k, rotation=xf.rotation.rotator(), scale=xf.scale3d * k))
+            nm = f"Stall18.{d['id']}.{n}"
+            pieces[nm] = pc; names.append(unreal.Name(nm))
+        ds = unreal.RDStallDesign18()
+        ds.set_editor_property("id", d["id"]); ds.set_editor_property("modern", d["style"] == "modern")
+        ds.set_editor_property("parts", names)
+        ds.set_editor_property("trades", [] if "any" in d["trades"] else [TRADES.index(t) for t in d["trades"]])
+        designs.append(ds)
+        report.append({"id": d["id"], "measured": [round(v) for v in lo + hi], "scaled": round(k, 3)})
+        REPORT.append(f"stalls: {d['id']} {d['name']}: {len(pcs)} parts, x {lo[0]:.0f}..{hi[0]:.0f} y {lo[1]:.0f}..{hi[1]:.0f} z {lo[2]:.0f}..{hi[2]:.0f}" + (f", drawn in to {k:.3f}" if k < 1.0 else ""))
+    # (every trade has a design of each style that suits it, and the twelve stands of a square can take twelve different ones)
+    for style in (False, True):
+        sd = [d for d in designs if d.get_editor_property("modern") == style]
+        for t in range(12):
+            n = sum(1 for d in sd if not d.get_editor_property("trades") or t in d.get_editor_property("trades"))
+            assert n >= 3, f"951: the {'modern' if style else 'medieval'} trade {TRADES[t]} has {n} designs"
+    g.set_editor_property("pieces", pieces)
+    g.set_editor_property("stall_designs18", designs)
+    g.modify(); les.save_current_level()
+    with open(os.path.join(os.path.dirname(STALLS), "stalls18_measured.json"), "w", encoding="utf-8") as f: json.dump(report, f, indent=1)
+    REPORT.append(f"stalls: {len(designs)} designs, {sum(len(d.get_editor_property('parts')) for d in designs)} parts on brokenspire's generator")
+    del g
+
+
+PARTS = {"windows": windows, "stalls": stalls}
 for part in (sys.argv[1] if len(sys.argv) > 1 else "").split(","):
     if part: PARTS[part]()
 for r in REPORT: print("951", r)

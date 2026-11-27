@@ -52,6 +52,18 @@ struct FRDPiece
 };
 
 /** the list of 2026-11-22's phase 27: a part of one of the Alien Planet pack's baked clusters (947 world): a piece, placed in the cluster's frame */
+/** the list of 2026-11-27's fourth phase (951 stalls, RDList18c.cpp): a square stand's design, its parts pieces of the generator's table laid
+ *  in the stand's frame (its counter +X); the trades it suits (RDList17b.cpp's twelve; none: any), the modern (Heaven's) or the medieval */
+USTRUCT(BlueprintType)
+struct FRDStallDesign18
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") FName Id;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") bool bModern = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") TArray<FName> Parts;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") TArray<int32> Trades;
+};
+
 /** the list of 2026-11-27's third phase (951 windows, RDList18b.cpp): a window opening measured on its piece's or house mesh's own faces.
  *  Key: a window piece's name (Side 0: Box in the piece frame, X from its inner face to its outer, Y along the wall, Z up), or a village house
  *  mesh's path (Side 1 to 4: its +X, -X, +Y, -Y wall; Box's X the reveal's faces along that axis, Y the opening along the wall, Z up) */

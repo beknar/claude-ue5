@@ -2418,6 +2418,10 @@ public:
 	float Building17LoadMs = 0.f, Building17CaptureMs = 0.f;
 	FVector Building17ViewAt = FVector::ZeroVector;
 	bool bBuilding17Walked = false;
+	/** the list of 2026-11-27's fourth phase (RDList18c.cpp, 951 stalls): the squares' stands' designs (rd.Stalls18) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List18") TArray<FRDStallDesign18> StallDesigns18;
+	/** tests: "<x>|<y>|<yaw>|<trade>|<design index>|<design id>|<parts>" a stand of the town's square */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List18") TArray<FString> GetStalls18() const;
 	/** the list of 2026-11-27's third phase (RDList18b.cpp, 951 windows): Closed Structures' windows glass or boarded, outside and in */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List18") TArray<FRDWindowHole18> WindowHoles18;
 	/** a plank of the packs, turned by BoardAdjust18 to the board's frame (thickness X, length Y, width Z: BoardSize18) */

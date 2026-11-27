@@ -211,6 +211,13 @@ The starting town: a Save As copy of mistward_castle whose generator has `bTown`
 - **Python cannot read a UPROPERTY without a Blueprint specifier** (`TownPeople` is `Transient` only): a test reads the state through a getter of lines (`GetTownLodLines16`).
 
 
+## The squares' twenty stands (the list of 2026-11-27's fourth phase: `951 stalls`, `RD/RDList18c.cpp`, `884 stalls18`)
+
+- **A design is a list of pieces, not a merged mesh**: each part a piece of the table placed by its Adjust in the stand's frame; Blueprints (the Docks' stands) stay actors, the instanced pieces keep their instancing and collision.
+- **A Blueprint's place is the town's own piece of it, not a guess from its frame mesh**: the draft's place for the Docks' stands came out 4 m across and would have been drawn in to half; the town's `Town.Stall1-3` (a quarter turn, nothing else) is used as it is.
+- **Measure a design laid, not its parts' numbers**: the stage lays each design in the editor's world and reads its actors' bounds; the test reads the laid instances' boxes in the stand's frame (they matched the stage's to the centimetre).
+- **A matching, not a draw**: twelve stands each a different design suiting its trade is found by augmenting paths over the designs shuffled by the town's seed; a plain draw per stand would repeat or fail a trade with few designs.
+
 ## Closed Structures' windows (the list of 2026-11-27's third phase: `951 windows`, `RD/RDList18b.cpp`, `884 windows18`)
 
 - **An opening is measured on the piece's own faces**: each window piece's triangles laid flat on the wall's plane (2 cm cells), the enclosed empty regions its openings, the faces round them its reveal (inner and outer face). Two-light pieces (`WallWindow2`) have two openings.

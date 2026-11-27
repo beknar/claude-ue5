@@ -1,0 +1,1174 @@
+{
+ "tag": "st18a",
+ "plan": [
+  "stalls18"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "stalls18",
+   "ok": true,
+   "cities": {
+    "Brokenspire": {
+     "stands": 12,
+     "designs": [
+      "m12",
+      "m09",
+      "m18",
+      "m05",
+      "m08",
+      "m13",
+      "m14",
+      "m15",
+      "m04",
+      "m17",
+      "m11",
+      "m20"
+     ],
+     "distinct": 12,
+     "wrong_style": 0,
+     "unsuited": [],
+     "footprints": [
+      {
+       "n": 11,
+       "x": [
+        -107,
+        129
+       ],
+       "y": [
+        -126,
+        96
+       ],
+       "keeper_blocked": false,
+       "id": "m12"
+      },
+      {
+       "n": 5,
+       "x": [
+        -97,
+        127
+       ],
+       "y": [
+        -125,
+        129
+       ],
+       "keeper_blocked": false,
+       "id": "m09"
+      },
+      {
+       "n": 10,
+       "x": [
+        -107,
+        73
+       ],
+       "y": [
+        -127,
+        127
+       ],
+       "keeper_blocked": false,
+       "id": "m18"
+      },
+      {
+       "n": 12,
+       "x": [
+        -91,
+        91
+       ],
+       "y": [
+        -128,
+        128
+       ],
+       "keeper_blocked": false,
+       "id": "m05"
+      },
+      {
+       "n": 10,
+       "x": [
+        -108,
+        114
+       ],
+       "y": [
+        -126,
+        126
+       ],
+       "keeper_blocked": false,
+       "id": "m08"
+      },
+      {
+       "n": 12,
+       "x": [
+        -110,
+        127
+       ],
+       "y": [
+        -126,
+        126
+       ],
+       "keeper_blocked": false,
+       "id": "m13"
+      },
+      {
+       "n": 10,
+       "x": [
+        -102,
+        129
+       ],
+       "y": [
+        -105,
+        115
+       ],
+       "keeper_blocked": false,
+       "id": "m14"
+      },
+      {
+       "n": 5,
+       "x": [
+        -71,
+        126
+       ],
+       "y": [
+        -127,
+        127
+       ],
+       "keeper_blocked": false,
+       "id": "m15"
+      },
+      {
+       "n": 7,
+       "x": [
+        -93,
+        126
+       ],
+       "y": [
+        -128,
+        128
+       ],
+       "keeper_blocked": false,
+       "id": "m04"
+      },
+      {
+       "n": 10,
+       "x": [
+        -105,
+        123
+       ],
+       "y": [
+        -128,
+        128
+       ],
+       "keeper_blocked": false,
+       "id": "m17"
+      },
+      {
+       "n": 13,
+       "x": [
+        -108,
+        118
+       ],
+       "y": [
+        -130,
+        130
+       ],
+       "keeper_blocked": false,
+       "id": "m11"
+      },
+      {
+       "n": 10,
+       "x": [
+        -110,
+        125
+       ],
+       "y": [
+        -130,
+        130
+       ],
+       "keeper_blocked": false,
+       "id": "m20"
+      }
+     ],
+     "outside": [],
+     "keeper_blocked": [],
+     "opened": 12,
+     "stalls17": 12
+    },
+    "Vel Morrath": {
+     "stands": 12,
+     "designs": [
+      "m11",
+      "m15",
+      "m09",
+      "m06",
+      "m01",
+      "m05",
+      "m13",
+      "m19",
+      "m07",
+      "m10",
+      "m08",
+      "m18"
+     ],
+     "distinct": 12,
+     "wrong_style": 0,
+     "unsuited": [],
+     "footprints": [
+      {
+       "n": 13,
+       "x": [
+        -108,
+        118
+       ],
+       "y": [
+        -130,
+        130
+       ],
+       "keeper_blocked": false,
+       "id": "m11"
+      },
+      {
+       "n": 5,
+       "x": [
+        -71,
+        126
+       ],
+       "y": [
+        -127,
+        127
+       ],
+       "keeper_blocked": false,
+       "id": "m15"
+      },
+      {
+       "n": 5,
+       "x": [
+        -97,
+        127
+       ],
+       "y": [
+        -125,
+        129
+       ],
+       "keeper_blocked": false,
+       "id": "m09"
+      },
+      {
+       "n": 10,
+       "x": [
+        -71,
+        85
+       ],
+       "y": [
+        -128,
+        129
+       ],
+       "keeper_blocked": false,
+       "id": "m06"
+      },
+      {
+       "n": 0,
+       "x": [
+        1000000000,
+        -1000000000
+       ],
+       "y": [
+        1000000000,
+        -1000000000
+       ],
+       "keeper_blocked": false,
+       "id": "m01"
+      },
+      {
+       "n": 12,
+       "x": [
+        -91,
+        91
+       ],
+       "y": [
+        -128,
+        128
+       ],
+       "keeper_blocked": false,
+       "id": "m05"
+      },
+      {
+       "n": 12,
+       "x": [
+        -110,
+        127
+       ],
+       "y": [
+        -126,
+        126
+       ],
+       "keeper_blocked": false,
+       "id": "m13"
+      },
+      {
+       "n": 14,
+       "x": [
+        -109,
+        114
+       ],
+       "y": [
+        -130,
+        130
+       ],
+       "keeper_blocked": false,
+       "id": "m19"
+      },
+      {
+       "n": 10,
+       "x": [
+        -107,
+        128
+       ],
+       "y": [
+        -121,
+        121
+       ],
+       "keeper_blocked": false,
+       "id": "m07"
+      },
+      {
+       "n": 8,
+       "x": [
+        -102,
+        90
+       ],
+       "y": [
+        -128,
+        128
+       ],
+       "keeper_blocked": false,
+       "id": "m10"
+      },
+      {
+       "n": 10,
+       "x": [
+        -108,
+        114
+       ],
+       "y": [
+        -126,
+        126
+       ],
+       "keeper_blocked": false,
+       "id": "m08"
+      },
+      {
+       "n": 10,
+       "x": [
+        -107,
+        73
+       ],
+       "y": [
+        -127,
+        127
+       ],
+       "keeper_blocked": false,
+       "id": "m18"
+      }
+     ],
+     "outside": [],
+     "keeper_blocked": [],
+     "opened": 12,
+     "stalls17": 12
+    },
+    "Ashenreach": {
+     "stands": 12,
+     "designs": [
+      "m11",
+      "m14",
+      "m05",
+      "m09",
+      "m16",
+      "m17",
+      "m08",
+      "m01",
+      "m19",
+      "m03",
+      "m02",
+      "m15"
+     ],
+     "distinct": 12,
+     "wrong_style": 0,
+     "unsuited": [],
+     "footprints": [
+      {
+       "n": 13,
+       "x": [
+        -108,
+        118
+       ],
+       "y": [
+        -130,
+        130
+       ],
+       "keeper_blocked": false,
+       "id": "m11"
+      },
+      {
+       "n": 10,
+       "x": [
+        -102,
+        129
+       ],
+       "y": [
+        -105,
+        115
+       ],
+       "keeper_blocked": false,
+       "id": "m14"
+      },
+      {
+       "n": 12,
+       "x": [
+        -91,
+        91
+       ],
+       "y": [
+        -128,
+        128
+       ],
+       "keeper_blocked": false,
+       "id": "m05"
+      },
+      {
+       "n": 5,
+       "x": [
+        -97,
+        127
+       ],
+       "y": [
+        -125,
+        129
+       ],
+       "keeper_blocked": false,
+       "id": "m09"
+      },
+      {
+       "n": 7,
+       "x": [
+        -107,
+        123
+       ],
+       "y": [
+        -125,
+        128
+       ],
+       "keeper_blocked": false,
+       "id": "m16"
+      },
+      {
+       "n": 10,
+       "x": [
+        -105,
+        123
+       ],
+       "y": [
+        -128,
+        128
+       ],
+       "keeper_blocked": false,
+       "id": "m17"
+      },
+      {
+       "n": 10,
+       "x": [
+        -108,
+        114
+       ],
+       "y": [
+        -126,
+        126
+       ],
+       "keeper_blocked": false,
+       "id": "m08"
+      },
+      {
+       "n": 0,
+       "x": [
+        1000000000,
+        -1000000000
+       ],
+       "y": [
+        1000000000,
+        -1000000000
+       ],
+       "keeper_blocked": false,
+       "id": "m01"
+      },
+      {
+       "n": 14,
+       "x": [
+        -109,
+        114
+       ],
+       "y": [
+        -130,
+        130
+       ],
+       "keeper_blocked": false,
+       "id": "m19"
+      },
+      {
+       "n": 0,
+       "x": [
+        1000000000,
+        -1000000000
+       ],
+       "y": [
+        1000000000,
+        -1000000000
+       ],
+       "keeper_blocked": false,
+       "id": "m03"
+      },
+      {
+       "n": 0,
+       "x": [
+        1000000000,
+        -1000000000
+       ],
+       "y": [
+        1000000000,
+        -1000000000
+       ],
+       "keeper_blocked": false,
+       "id": "m02"
+      },
+      {
+       "n": 5,
+       "x": [
+        -71,
+        126
+       ],
+       "y": [
+        -127,
+        127
+       ],
+       "keeper_blocked": false,
+       "id": "m15"
+      }
+     ],
+     "outside": [],
+     "keeper_blocked": [],
+     "opened": 12,
+     "stalls17": 12
+    },
+    "Graymourne": {
+     "stands": 12,
+     "designs": [
+      "m07",
+      "m13",
+      "m14",
+      "m09",
+      "m16",
+      "m06",
+      "m02",
+      "m08",
+      "m12",
+      "m18",
+      "m20",
+      "m15"
+     ],
+     "distinct": 12,
+     "wrong_style": 0,
+     "unsuited": [],
+     "footprints": [
+      {
+       "n": 10,
+       "x": [
+        -107,
+        128
+       ],
+       "y": [
+        -121,
+        121
+       ],
+       "keeper_blocked": false,
+       "id": "m07"
+      },
+      {
+       "n": 12,
+       "x": [
+        -110,
+        127
+       ],
+       "y": [
+        -126,
+        126
+       ],
+       "keeper_blocked": false,
+       "id": "m13"
+      },
+      {
+       "n": 10,
+       "x": [
+        -102,
+        129
+       ],
+       "y": [
+        -105,
+        115
+       ],
+       "keeper_blocked": false,
+       "id": "m14"
+      },
+      {
+       "n": 5,
+       "x": [
+        -97,
+        127
+       ],
+       "y": [
+        -125,
+        129
+       ],
+       "keeper_blocked": false,
+       "id": "m09"
+      },
+      {
+       "n": 7,
+       "x": [
+        -107,
+        123
+       ],
+       "y": [
+        -125,
+        128
+       ],
+       "keeper_blocked": false,
+       "id": "m16"
+      },
+      {
+       "n": 10,
+       "x": [
+        -71,
+        85
+       ],
+       "y": [
+        -128,
+        129
+       ],
+       "keeper_blocked": false,
+       "id": "m06"
+      },
+      {
+       "n": 0,
+       "x": [
+        1000000000,
+        -1000000000
+       ],
+       "y": [
+        1000000000,
+        -1000000000
+       ],
+       "keeper_blocked": false,
+       "id": "m02"
+      },
+      {
+       "n": 10,
+       "x": [
+        -108,
+        114
+       ],
+       "y": [
+        -126,
+        126
+       ],
+       "keeper_blocked": false,
+       "id": "m08"
+      },
+      {
+       "n": 11,
+       "x": [
+        -107,
+        129
+       ],
+       "y": [
+        -126,
+        96
+       ],
+       "keeper_blocked": false,
+       "id": "m12"
+      },
+      {
+       "n": 10,
+       "x": [
+        -107,
+        73
+       ],
+       "y": [
+        -127,
+        127
+       ],
+       "keeper_blocked": false,
+       "id": "m18"
+      },
+      {
+       "n": 10,
+       "x": [
+        -110,
+        125
+       ],
+       "y": [
+        -130,
+        130
+       ],
+       "keeper_blocked": false,
+       "id": "m20"
+      },
+      {
+       "n": 5,
+       "x": [
+        -71,
+        126
+       ],
+       "y": [
+        -127,
+        127
+       ],
+       "keeper_blocked": false,
+       "id": "m15"
+      }
+     ],
+     "outside": [],
+     "keeper_blocked": [],
+     "opened": 12,
+     "stalls17": 12
+    },
+    "Kethrys Spire": {
+     "stands": 12,
+     "designs": [
+      "m10",
+      "m15",
+      "m03",
+      "m01",
+      "m14",
+      "m18",
+      "m05",
+      "m17",
+      "m02",
+      "m04",
+      "m13",
+      "m19"
+     ],
+     "distinct": 12,
+     "wrong_style": 0,
+     "unsuited": [],
+     "footprints": [
+      {
+       "n": 8,
+       "x": [
+        -102,
+        90
+       ],
+       "y": [
+        -128,
+        128
+       ],
+       "keeper_blocked": false,
+       "id": "m10"
+      },
+      {
+       "n": 5,
+       "x": [
+        -71,
+        126
+       ],
+       "y": [
+        -127,
+        127
+       ],
+       "keeper_blocked": false,
+       "id": "m15"
+      },
+      {
+       "n": 0,
+       "x": [
+        1000000000,
+        -1000000000
+       ],
+       "y": [
+        1000000000,
+        -1000000000
+       ],
+       "keeper_blocked": false,
+       "id": "m03"
+      },
+      {
+       "n": 0,
+       "x": [
+        1000000000,
+        -1000000000
+       ],
+       "y": [
+        1000000000,
+        -1000000000
+       ],
+       "keeper_blocked": false,
+       "id": "m01"
+      },
+      {
+       "n": 10,
+       "x": [
+        -102,
+        129
+       ],
+       "y": [
+        -105,
+        115
+       ],
+       "keeper_blocked": false,
+       "id": "m14"
+      },
+      {
+       "n": 10,
+       "x": [
+        -107,
+        73
+       ],
+       "y": [
+        -127,
+        127
+       ],
+       "keeper_blocked": false,
+       "id": "m18"
+      },
+      {
+       "n": 12,
+       "x": [
+        -91,
+        91
+       ],
+       "y": [
+        -128,
+        128
+       ],
+       "keeper_blocked": false,
+       "id": "m05"
+      },
+      {
+       "n": 10,
+       "x": [
+        -105,
+        123
+       ],
+       "y": [
+        -128,
+        128
+       ],
+       "keeper_blocked": false,
+       "id": "m17"
+      },
+      {
+       "n": 0,
+       "x": [
+        1000000000,
+        -1000000000
+       ],
+       "y": [
+        1000000000,
+        -1000000000
+       ],
+       "keeper_blocked": false,
+       "id": "m02"
+      },
+      {
+       "n": 7,
+       "x": [
+        -93,
+        126
+       ],
+       "y": [
+        -128,
+        128
+       ],
+       "keeper_blocked": false,
+       "id": "m04"
+      },
+      {
+       "n": 12,
+       "x": [
+        -110,
+        127
+       ],
+       "y": [
+        -126,
+        126
+       ],
+       "keeper_blocked": false,
+       "id": "m13"
+      },
+      {
+       "n": 14,
+       "x": [
+        -109,
+        114
+       ],
+       "y": [
+        -130,
+        130
+       ],
+       "keeper_blocked": false,
+       "id": "m19"
+      }
+     ],
+     "outside": [],
+     "keeper_blocked": [],
+     "opened": 12,
+     "stalls17": 12
+    },
+    "Heaven": {
+     "stands": 12,
+     "designs": [
+      "h09",
+      "h14",
+      "h11",
+      "h18",
+      "h01",
+      "h07",
+      "h08",
+      "h13",
+      "h03",
+      "h16",
+      "h20",
+      "h06"
+     ],
+     "distinct": 12,
+     "wrong_style": 0,
+     "unsuited": [],
+     "footprints": [
+      {
+       "n": 9,
+       "x": [
+        -110,
+        64
+       ],
+       "y": [
+        -117,
+        117
+       ],
+       "keeper_blocked": false,
+       "id": "h09"
+      },
+      {
+       "n": 12,
+       "x": [
+        -110,
+        102
+       ],
+       "y": [
+        -125,
+        125
+       ],
+       "keeper_blocked": false,
+       "id": "h14"
+      },
+      {
+       "n": 4,
+       "x": [
+        -99,
+        110
+       ],
+       "y": [
+        -112,
+        125
+       ],
+       "keeper_blocked": false,
+       "id": "h11"
+      },
+      {
+       "n": 13,
+       "x": [
+        -110,
+        110
+       ],
+       "y": [
+        -125,
+        125
+       ],
+       "keeper_blocked": false,
+       "id": "h18"
+      },
+      {
+       "n": 1,
+       "x": [
+        -126,
+        125
+       ],
+       "y": [
+        -130,
+        130
+       ],
+       "keeper_blocked": false,
+       "id": "h01"
+      },
+      {
+       "n": 14,
+       "x": [
+        -110,
+        110
+       ],
+       "y": [
+        -125,
+        125
+       ],
+       "keeper_blocked": false,
+       "id": "h07"
+      },
+      {
+       "n": 8,
+       "x": [
+        -104,
+        130
+       ],
+       "y": [
+        -120,
+        120
+       ],
+       "keeper_blocked": false,
+       "id": "h08"
+      },
+      {
+       "n": 26,
+       "x": [
+        -100,
+        100
+       ],
+       "y": [
+        -125,
+        125
+       ],
+       "keeper_blocked": false,
+       "id": "h13"
+      },
+      {
+       "n": 1,
+       "x": [
+        -115,
+        115
+       ],
+       "y": [
+        -120,
+        120
+       ],
+       "keeper_blocked": false,
+       "id": "h03"
+      },
+      {
+       "n": 4,
+       "x": [
+        -60,
+        60
+       ],
+       "y": [
+        -125,
+        125
+       ],
+       "keeper_blocked": false,
+       "id": "h16"
+      },
+      {
+       "n": 4,
+       "x": [
+        -109,
+        87
+       ],
+       "y": [
+        -92,
+        92
+       ],
+       "keeper_blocked": false,
+       "id": "h20"
+      },
+      {
+       "n": 22,
+       "x": [
+        -115,
+        105
+       ],
+       "y": [
+        -125,
+        125
+       ],
+       "keeper_blocked": false,
+       "id": "h06"
+      }
+     ],
+     "outside": [],
+     "keeper_blocked": [],
+     "opened": 12,
+     "stalls17": 12
+    }
+   },
+   "streams_kept": {
+    "buildings": true,
+    "containers": true,
+    "spots": true
+   },
+   "fps": {
+    "on": {
+     "fps": 21.0,
+     "p95_ms": 218.4
+    },
+    "off": {
+     "fps": 9.8,
+     "p95_ms": 129.3
+    },
+    "on2": {
+     "fps": 10.5,
+     "p95_ms": 113.4
+    }
+   },
+   "seen_medieval": [
+    "m01",
+    "m02",
+    "m03",
+    "m04",
+    "m05",
+    "m06",
+    "m07",
+    "m08",
+    "m09",
+    "m10",
+    "m11",
+    "m12",
+    "m13",
+    "m14",
+    "m15",
+    "m16",
+    "m17",
+    "m18",
+    "m19",
+    "m20"
+   ],
+   "seen_modern": [
+    "h01",
+    "h03",
+    "h06",
+    "h07",
+    "h08",
+    "h09",
+    "h11",
+    "h13",
+    "h14",
+    "h16",
+    "h18",
+    "h20"
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "bs_st18a_stalls17_18_Brokenspire.png",
+  "bs_st18a_stalls17_18_VelMorrath.png",
+  "bs_st18a_stalls17_18_Ashenreach.png",
+  "bs_st18a_stalls17_18_Graymourne.png",
+  "bs_st18a_stalls17_18_KethrysSpire.png",
+  "bs_st18a_stalls17_18_Heaven.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

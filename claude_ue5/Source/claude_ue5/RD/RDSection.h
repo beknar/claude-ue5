@@ -247,6 +247,8 @@ public:
 	/** what stands outside: its kind (RDTownSpots), where, its yaw (and the building it belongs to, -1) */
 	struct FTownSpot { uint8 Kind = 0; FVector At = FVector::ZeroVector; float Yaw = 0.f; int32 Bld = -1; };
 	TArray<FTownSpot> TownSpots;
+	/** the list of 2026-11-27's fourth phase: the design laid at a square's stand (RDList18c.cpp), or -1 */
+	int32 StallDesign18At(const FVector& At) const;
 	/** the straight cobbled roads, the forecourt and the stair turret's path (local tile rectangles, max exclusive) */
 	TArray<FIntRect> TownRoads;
 	/** the winding earth roads (since 2026-11-02): their middles (world XY) and half their width (cm) */
@@ -1053,6 +1055,11 @@ private:
 	/** the list of 2026-11-26's third phase (RDList17b.cpp): the square's twelve stands, their trades and keepers (no draw of the plan's
 	 *  streams); a stand's FTownSpot::Bld is its trade, 16 added for a new one (its mesh by a hash) */
 	void PlanStalls17();
+	/** the list of 2026-11-27's fourth phase (RDList18c.cpp): the square's stands' designs (by the stand's place), matched once a town */
+	void PickStalls18();
+	bool LayStall18(const FTownSpot& Sp);
+	bool bStalls18Picked = false;
+	TMap<FIntPoint, int32> Stalls18;
 	void PostStallKeepers17();
 	/** the square's middle and axes, kept by the plan for PlanStalls17 */
 	FVector Stall17Mid = FVector::ZeroVector, Stall17Ua = FVector::ForwardVector, Stall17Va = FVector::RightVector;

@@ -9057,3 +9057,124 @@ def with_windows17(step):
 
 # (the list of 2026-11-27's third phase: building17's views and panes17's pictures are list 17's windows)
 STEPS.update({"building17": with_windows17(step_building17), "panes17": with_windows17(step_panes17)})
+
+
+# ================================================================================================ the list of 2026-11-27's fourth phase
+def stalls18():
+    out = []
+    for l in G["gen"].get_stalls18():
+        p = str(l).split("|")
+        out.append({"at": V(float(p[0]), float(p[1]), 0), "yaw": float(p[2]), "trade": int(p[3]), "d": int(p[4]), "id": p[5], "parts": int(p[6])})
+    return out
+def stall18_footprint(s, part_meshes):
+    """the parts laid at a stand (instances of its design's meshes within 2.2 m of it, the Blueprints aside): their boxes' corners in the
+    stand's frame: [x0, x1, y0, y1], and whether any stands over the keeper's place (2 m behind the counter)"""
+    S = section(); yr = math.radians(s["yaw"]); c, sn = math.cos(yr), math.sin(yr)
+    lo, hi, keeper, n = [1e9, 1e9], [-1e9, -1e9], False, 0
+    for comp in isms(S):
+        m = comp.get_editor_property("static_mesh")
+        if not m or m.get_path_name() not in part_meshes: continue
+        bb = m.get_bounding_box()
+        for i in range(comp.get_instance_count()):
+            t = comp.get_instance_transform(i, True)
+            l = t.translation
+            if math.hypot(l.x - s["at"].x, l.y - s["at"].y) > 220.0: continue
+            n += 1
+            for cx in (bb.min.x, bb.max.x):
+                for cy in (bb.min.y, bb.max.y):
+                    w = t.transform_location(V(cx, cy, bb.min.z))
+                    dx, dy = w.x - s["at"].x, w.y - s["at"].y
+                    u, v = dx * c + dy * sn, -dx * sn + dy * c
+                    lo = [min(lo[0], u), min(lo[1], v)]; hi = [max(hi[0], u), max(hi[1], v)]
+            # (the keeper's place, 2 m behind: inside this instance's box?)
+            kp = V(s["at"].x - c * 200.0, s["at"].y - sn * 200.0, t.translation.z + 50.0)
+            loc = t.inverse_transform_location(kp)
+            if bb.min.x <= loc.x <= bb.max.x and bb.min.y <= loc.y <= bb.max.y: keeper = True
+    return {"n": n, "x": [round(lo[0]), round(hi[0])], "y": [round(lo[1]), round(hi[1])], "keeper_blocked": keeper}
+
+
+def step_stalls18():
+    """the squares' stands of twenty designs (the user's "the vendor stands in the town square all have the same design. Have at least 20
+    different designs"; RD/RDList18c.cpp, 951 stalls): in each of the six cities the square's twelve stands each a design of the town's style
+    (medieval, Heaven's modern), twelve different, each suiting its stand's trade; the parts laid at each stand measured (their meshes'
+    boxes in the stand's frame within its 2.6 m square, give or take 15 cm, none over the keeper's place 2 m behind); F at each stand from
+    before its counter still opens its store; a picture of each square. Brokenspire on its seed with rd.Stalls18 0 and 1: its buildings,
+    containers and other spots the same; its square's frame rate with, without and with again; three more seeds for the designs seen.
+    Ok: every square twelve different designs of its style, all suiting, all within their square, every stand opened by F, the streams
+    kept, 20 medieval designs seen over the towns and seeds"""
+    g = G["gen"]; res = {"cities": {}}; quiet(True)
+    cv0 = unreal.SystemLibrary.get_console_variable_int_value("rd.Stalls18")
+    pcs = {str(k): v for k, v in g.get_editor_property("pieces").items() if str(k).startswith("Stall18.")}
+    designs = g.get_editor_property("stall_designs18")
+    dmesh = []
+    for d in designs:
+        ms = set()
+        for pn in d.get_editor_property("parts"):
+            p = pcs.get(str(pn))
+            if p and p.get_editor_property("mesh") and not p.get_editor_property("actor_class"): ms.add(p.get_editor_property("mesh").get_path_name())
+        dmesh.append(ms)
+    seen_med, seen_mod = set(), set()
+    try:
+        seed0 = G["gi"].get_editor_property("town_seed")
+        snaps, fps = {}, {}
+        for k, on in (("on", 1), ("off", 0), ("on2", 1)):
+            unreal.SystemLibrary.execute_console_command(G["w"], f"rd.Stalls18 {on}")
+            g.rebuild_town(seed0); yield from rwait(3.0); refresh(); g = G["gen"]
+            snaps[on] = town_snapshot17()
+            g.set_town_hour(12.0); put(place("square"), yaw=0.0); G["pawn"].get_movement_component().stop_movement_immediately(); yield from rwait(4.0)
+            fps[k] = (yield from kit().frames(10.0))
+        res["streams_kept"] = {k: snaps[0][k] == snaps[1][k] for k in ("buildings", "containers", "spots")}
+        res["fps"] = fps
+        for city in ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne", "Kethrys Spire", "Heaven"):
+            if city != "Brokenspire": yield from to_town(city)
+            refresh(); g = G["gen"]
+            st = stalls18(); r = {"stands": len(st)}
+            ids = [s["id"] for s in st]
+            r["designs"] = ids; r["distinct"] = len(set(ids))
+            modern = city == "Heaven"
+            r["wrong_style"] = sum(1 for s in st if s["d"] < 0 or designs[s["d"]].get_editor_property("modern") != modern)
+            r["unsuited"] = [[s["id"], s["trade"]] for s in st if s["d"] >= 0 and designs[s["d"]].get_editor_property("trades") and s["trade"] not in designs[s["d"]].get_editor_property("trades")]
+            (seen_mod if modern else seen_med).update(ids)
+            fp = []
+            for s in st:
+                f = stall18_footprint(s, dmesh[s["d"]]) if s["d"] >= 0 else {"n": 0}
+                f["id"] = s["id"]; fp.append(f)
+            r["footprints"] = fp
+            r["outside"] = [f["id"] for f in fp if f["n"] and (f["x"][0] < -145 or f["x"][1] > 145 or f["y"][0] < -145 or f["y"][1] > 145)]
+            r["keeper_blocked"] = [f["id"] for f in fp if f.get("keeper_blocked")]
+            # (F from 1.7 m before each counter opens its store)
+            opened = 0
+            st17 = stalls17()
+            for s in st17:
+                f_ = V(math.cos(math.radians(s["yaw"])), math.sin(math.radians(s["yaw"])), 0)
+                put(V(s["at"].x + f_.x * 170.0, s["at"].y + f_.y * 170.0, s["at"].z), yaw=s["yaw"] + 180.0)
+                G["pawn"].get_movement_component().stop_movement_immediately(); yield from wait(0.25)
+                g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(0.3)
+                if g.get_store_stall17() == s["trade"]: opened += 1
+                g.close_town_panel(); yield from rwait(0.15)
+            r["opened"] = opened; r["stalls17"] = len(st17)
+            yield from stalls17_picture("18_" + city, st17)
+            res["cities"][city] = r
+        # (more seeds in Brokenspire: the designs seen)
+        yield from to_town("Brokenspire"); refresh(); g = G["gen"]
+        for sd in (seed0 + 101, seed0 + 202, seed0 + 303):
+            g.rebuild_town(sd); yield from rwait(3.0); refresh(); g = G["gen"]
+            seen_med.update(s["id"] for s in stalls18())
+        res["seen_medieval"] = sorted(seen_med); res["seen_modern"] = sorted(seen_mod)
+    except Exception as e_:
+        import traceback
+        res["error"] = str(e_) + traceback.format_exc()[-600:]
+    finally:
+        unreal.SystemLibrary.execute_console_command(G["w"], "rd.Stalls18 %d" % cv0)
+        try: G["gen"].rebuild_town(G["gi"].get_editor_property("town_seed"))
+        except Exception: pass
+        yield from rwait(2.5); refresh()
+        quiet(False)
+    cs = res["cities"]
+    ok = ("error" not in res and len(cs) == 6 and all(res.get("streams_kept", {}).values()) and len(res.get("seen_medieval", [])) >= 20
+          and all(r["stands"] == 12 and r["distinct"] == 12 and r["wrong_style"] == 0 and not r["unsuited"] and not r["outside"] and not r["keeper_blocked"]
+                  and r["opened"] == r["stalls17"] == 12 for r in cs.values()))
+    step_result("stalls18", ok, **res)
+
+
+STEPS.update({"stalls18": step_stalls18})
