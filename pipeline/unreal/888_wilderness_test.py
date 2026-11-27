@@ -9003,7 +9003,8 @@ def step_closed17w():
                 # (the list of 2026-11-27: the farmhouse's windows boarded (rd.Windows18), or list 17's panes; the inside boards laid with the furniture)
                 and ((cl.get("panes", 0) > 0 or cl.get("boarded", 0) > 0) if v["kind"] == "house" else True)
                 and v.get("inside") and v.get("in_room_off_cm") is not None and v["in_room_off_cm"] < 50 and v.get("in_room_n") == cl.get("n")
-                and ins.get("laid") == cl.get("n") + cl.get("boards_in", 0) and ins.get("loaded") == 1
+                # (its inside boards laid with it, those that would stand in its furniture left out (PR #148's review))
+                and cl.get("n", 0) + (1 if cl.get("boards_in", 0) > 0 else 0) <= ins.get("laid", -1) <= cl.get("n", 0) + cl.get("boards_in", 0) and ins.get("loaded") == 1
                 and outs.get("in") == -1 and outs.get("loaded") == 0)
     ok = "error" not in res and len(res["visits"]) == 2 and all(good(v) for v in res["visits"])
     step_result("closed17w", ok, **res)

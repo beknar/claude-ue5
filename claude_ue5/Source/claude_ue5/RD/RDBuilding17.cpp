@@ -291,6 +291,7 @@ void ARDDungeonGenerator::UnloadBuilding17()
 	if (ULevelStreamingDynamic* L = BuildingStream17.Get()) { L->SetShouldBeLoaded(false); L->SetShouldBeVisible(false); L->SetIsRequestingUnloadAndRemoval(true); }
 	BuildingStream17 = nullptr;
 	InBuilding17 = -1; PendingBuilding17 = -1; bBuilding17Walked = false;
+	Building17Boards18 = 0; Boards18InnerLeft = 0;          // (the list of 2026-11-27: the test's counters of the building she left)
 	// (the visit's cubes let go after it (heaven.md: session state carried for one visit))
 	BuildingViews17.Reset(); BuildingView17 = nullptr;
 }

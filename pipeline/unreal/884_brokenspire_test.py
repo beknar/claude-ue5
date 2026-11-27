@@ -8946,9 +8946,12 @@ def step_windows18():
     a glass window has no board and no pane; every other window's rays all meet a board (none passing). Then up to three buildings with
     windows entered (their level laid): each of their windows traced from inside, every ray meeting a board. In Immersive (Brokenspire)
     no board stands anywhere. A picture of a boarded window from outside and from inside, and of a glass one (Heaven). Ok: every city
-    measured, no window unmeasured, no bare ray outside or in, Heaven's windows all glass with nothing over them, no board in Immersive"""
+    measured, no window unmeasured, every ray from outside meeting an outside board, every ray from inside meeting an inside board or the
+    furniture standing there (the outside boards left out of it: PR #148's review), inside boards laid in every building entered, Heaven's
+    windows all glass with nothing over them, no board in Immersive. The boards take sight traces for the test only (rd.Boards18Trace)"""
     g = G["gen"]; res = {"cities": {}}; quiet(True)
     cv0 = unreal.SystemLibrary.get_console_variable_int_value("rd.Structures17")
+    unreal.SystemLibrary.execute_console_command(G["w"], "rd.Boards18Trace 1")
     try:
         for city in ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne", "Kethrys Spire", "Heaven"):
             r = {}
@@ -8960,15 +8963,15 @@ def step_windows18():
             ws = wins18()
             r["windows"] = len(ws); r["glass"] = sum(1 for w in ws if w["glass"])
             r["panes17"] = len(list(g.get_panes17()))
-            bare, rays, glass_boarded, unmeas = 0, 0, 0, 0
+            bare, rays, board, glass_boarded, unmeas = 0, 0, 0, 0, 0
             for w in ws:
                 t = trace18(w["idx"], True)
                 if w["glass"]:
                     if t and t["board"] > 0: glass_boarded += 1
                     continue
                 if w["holes"] == 0: unmeas += 1; continue
-                if t: rays += t["rays"]; bare += t["none"]
-            r.update({"rays_out": rays, "bare_out": bare, "glass_boarded": glass_boarded, "unmeasured": unmeas})
+                if t: rays += t["rays"]; bare += t["none"]; board += t["board"]
+            r.update({"rays_out": rays, "bare_out": bare, "board_out": board, "glass_boarded": glass_boarded, "unmeasured": unmeas})
             # ---- inside: up to three buildings with boarded windows entered
             inside = []
             blds_w = []
@@ -8979,11 +8982,11 @@ def step_windows18():
                 while time.time() - t0 < 30 and bstate17().get("in") != bi: yield from rwait(0.5)
                 yield from rwait(1.5)
                 st = bstate17(); b18 = boards18()
-                ri = {"bld": bi, "in": st.get("in"), "boards_in": b18["inside"], "left_out": b18["inside_left"], "rays": 0, "bare": 0}
+                ri = {"bld": bi, "in": st.get("in"), "boards_in": b18["inside"], "left_out": b18["inside_left"], "rays": 0, "bare": 0, "board": 0, "other": 0}
                 for w in ws:
                     if w["bld"] != bi or w["glass"]: continue
                     t = trace18(w["idx"], False)
-                    if t: ri["rays"] += t["rays"]; ri["bare"] += t["none"]
+                    if t: ri["rays"] += t["rays"]; ri["bare"] += t["none"]; ri["board"] += t["board"]; ri["other"] += t["other"]
                 if not inside and city in ("Brokenspire", "Vel Morrath"):
                     sz = section().get_actor_location().z
                     w0 = next((w for w in ws if w["bld"] == bi and not w["glass"] and w["at"].z - sz < 250), None) or next(w for w in ws if w["bld"] == bi and not w["glass"])
@@ -8997,8 +9000,17 @@ def step_windows18():
             gw = next((w for w in ws if w["glass"]), None)
             if gw: r["pic_glass"] = yield from win_pic18(gw, city.replace(" ", "_") + "_glass", False)
             res["cities"][city] = r
-        # ---- Immersive: no board
+        # ---- the frame rate in Brokenspire's square, Closed, with the boards, without (list 17's panes), and with again (PR #148's review)
         yield from to_town("Brokenspire"); refresh(); g = G["gen"]
+        fr = {}
+        for k, wv in (("on", 1), ("off", 0), ("on2", 1)):
+            unreal.SystemLibrary.execute_console_command(G["w"], f"rd.Windows18 {wv}")
+            set_structures17(1); g.rebuild_town(G["gi"].get_editor_property("town_seed")); yield from rwait(4.0); refresh(); g = G["gen"]
+            g.set_town_hour(12.0); put(place("square"), yaw=0.0); G["pawn"].get_movement_component().stop_movement_immediately(); yield from rwait(4.0)
+            fr[k] = (yield from kit().frames(10.0))
+        res["fps_boards"] = fr
+        unreal.SystemLibrary.execute_console_command(G["w"], "rd.Windows18 1")
+        # ---- Immersive: no board
         set_structures17(0); g.rebuild_town(G["gi"].get_editor_property("town_seed")); yield from rwait(4.0); refresh(); g = G["gen"]
         res["immersive_board_components"] = len(section().get_components_by_tag(unreal.InstancedStaticMeshComponent, "RDBoard18"))
     except Exception as e_:
@@ -9010,6 +9022,7 @@ def step_windows18():
         try: G["gen"].leave_building17()
         except Exception: pass
         set_structures17(cv0)
+        unreal.SystemLibrary.execute_console_command(G["w"], "rd.Boards18Trace 0")
         try: G["gen"].rebuild_town(G["gi"].get_editor_property("town_seed"))
         except Exception: pass
         yield from rwait(2.5); refresh()
@@ -9017,9 +9030,10 @@ def step_windows18():
     cs = res["cities"]
     ok = "error" not in res and len(cs) == 6 and res.get("immersive_board_components", 1) == 0
     for city, r in cs.items():
-        medieval_ok = r.get("rays_out", 0) > 0 and r.get("bare_out", 1) == 0 and r.get("unmeasured", 1) == 0 and r.get("panes17", 1) == 0
+        medieval_ok = r.get("rays_out", 0) > 0 and r.get("board_out") == r.get("rays_out") and r.get("unmeasured", 1) == 0 and r.get("panes17", 1) == 0
         ins = r.get("inside", [])
-        ins_ok = all(i.get("in") == i.get("bld") and i.get("rays", 0) > 0 and i.get("bare", 1) == 0 for i in ins)
+        ins_ok = all(i.get("in") == i.get("bld") and i.get("rays", 0) > 0 and i.get("bare", 1) == 0 and i.get("boards_in", 0) > 0 and i.get("board", 0) > 0
+                     and i.get("board", 0) + i.get("other", 0) == i.get("rays") for i in ins)
         if city == "Heaven":
             if not (r.get("windows", 0) > 0 and r.get("glass") == r.get("windows") and r.get("glass_boarded", 1) == 0 and r.get("panes17", 1) == 0): ok = False
         elif not (medieval_ok and ins and ins_ok): ok = False

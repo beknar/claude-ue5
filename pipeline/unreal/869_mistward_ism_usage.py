@@ -162,6 +162,11 @@ for m_ in ("/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewe
         surf = [g_.get_editor_property(k) for k in ("tower_wall_mat24", "tower_tile_wall_mat24", "tower_core_mat24", "tower_floor_mat24", "tower_lobby_floor_mat24", "tower_tile_mat24",
                 "tower_wood_mat24", "tower_concrete_mat24", "tower_ceil_mat24", "tower_glass_mat24", "tower_door_glass_mat24", "tower_inner_glass_mat24", "tower_metal_mat24", "tower_stair_mat24")]
         if cube: use(cube, [m for m in surf if m])
+    # (the list of 2026-11-27 (951, RDList18b.cpp): Closed Structures' boards, a plank drawn through instanced meshes (PR #148's review))
+    try:
+        bm = g_.get_editor_property("board_mesh18")
+        if bm: meshes.add(bm); use(bm)
+    except Exception: pass
     if g_.get_editor_property("cave16"):
         for t in g_.get_editor_property("cave_tunnels16"):
             for tm in (t.get_editor_property("mesh"), t.get_editor_property("floor_mesh")):

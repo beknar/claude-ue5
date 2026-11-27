@@ -207,7 +207,7 @@ void ARDDungeonGenerator::TickWildBld17(float Dt, const FVector& Her)
 		AActor* A = GetWorld()->SpawnActor<AActor>(AActor::StaticClass(), FTransform::Identity, Sp);
 		if (!A) { UnloadWild17(); return; }
 		USceneComponent* Root = NewObject<USceneComponent>(A, TEXT("Root")); A->SetRootComponent(Root); Root->RegisterComponent();
-		Wild17Pieces = 0;
+		Wild17Pieces = 0; Wild17Boards18 = 0;
 		for (const TPair<FString, FWildPiece17>& Kv : B.Pieces)
 		{
 			const FWildPiece17& P = Kv.Value;
@@ -222,6 +222,27 @@ void ARDDungeonGenerator::TickWildBld17(float Dt, const FVector& Her)
 			for (const FTransform& T : P.T) H->AddInstance(T, true);
 			A->AddInstanceComponent(H);
 			Wild17Pieces += P.T.Num();
+		}
+		// (the list of 2026-11-27: the inside boards of its windows, those that would stand in its furniture left out)
+		if (B.Boards18InT.Num() > 0 && BoardMesh18)
+		{
+			TArray<TPair<UStaticMesh*, FTransform>> Furn;
+			for (const TPair<FString, FWildPiece17>& Kv : B.Pieces) for (const FTransform& T : Kv.Value.T) Furn.Add(TPair<UStaticMesh*, FTransform>(const_cast<UStaticMesh*>(ToRawPtr(Kv.Value.Mesh)), T));
+			TArray<FTransform> Bs = B.Boards18InT;
+			Boards18InnerLeft = FilterBoards18(Bs, Furn);
+			if (Bs.Num() > 0)
+			{
+				UInstancedStaticMeshComponent* H = NewObject<UInstancedStaticMeshComponent>(A);
+				H->SetStaticMesh(BoardMesh18); H->SetMobility(EComponentMobility::Static); H->SetupAttachment(Root);
+				H->SetCollisionEnabled(ECollisionEnabled::NoCollision); H->SetCastShadow(false); H->ComponentTags.Add(TEXT("RDBoard18"));
+				TArray<FTransform> Local; Local.Reserve(Bs.Num());
+				for (const FTransform& X : Bs) Local.Add(X.GetRelativeTransform(Root->GetComponentTransform()));
+				H->AddInstances(Local, false, false);
+				H->RegisterComponent();
+				A->AddInstanceComponent(H);
+			}
+			Wild17Boards18 = Bs.Num();
+			Wild17Pieces += Bs.Num();
 		}
 		for (const FVector4& Lp : B.Lamps)
 		{

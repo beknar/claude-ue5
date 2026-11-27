@@ -1,0 +1,327 @@
+{
+ "tag": "w18h",
+ "plan": [
+  "windows18"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "windows18",
+   "ok": true,
+   "cities": {
+    "Brokenspire": {
+     "state": {
+      "boarded": 1228,
+      "glass": 0,
+      "unmeasured": 0,
+      "outside": 19780,
+      "inside": 0,
+      "inside_left": 0,
+      "on": 1
+     },
+     "windows": 1228,
+     "glass": 0,
+     "panes17": 0,
+     "rays_out": 39700,
+     "bare_out": 0,
+     "board_out": 39700,
+     "glass_boarded": 0,
+     "unmeasured": 0,
+     "inside": [
+      {
+       "bld": 0,
+       "in": 0,
+       "boards_in": 738,
+       "left_out": 0,
+       "rays": 2050,
+       "bare": 0,
+       "board": 2050,
+       "other": 0,
+       "pic_in": "bs_w18h_windows18_Brokenspire_in.png"
+      },
+      {
+       "bld": 1,
+       "in": 1,
+       "boards_in": 494,
+       "left_out": 0,
+       "rays": 950,
+       "bare": 0,
+       "board": 936,
+       "other": 14
+      },
+      {
+       "bld": 2,
+       "in": 2,
+       "boards_in": 367,
+       "left_out": 0,
+       "rays": 875,
+       "bare": 0,
+       "board": 875,
+       "other": 0
+      }
+     ],
+     "pic_out": "bs_w18h_windows18_Brokenspire_out.png"
+    },
+    "Vel Morrath": {
+     "state": {
+      "boarded": 1545,
+      "glass": 0,
+      "unmeasured": 0,
+      "outside": 23280,
+      "inside": 0,
+      "inside_left": 0,
+      "on": 1
+     },
+     "windows": 1545,
+     "glass": 0,
+     "panes17": 0,
+     "rays_out": 54600,
+     "bare_out": 0,
+     "board_out": 54600,
+     "glass_boarded": 0,
+     "unmeasured": 0,
+     "inside": [
+      {
+       "bld": 0,
+       "in": 0,
+       "boards_in": 756,
+       "left_out": 0,
+       "rays": 2100,
+       "bare": 0,
+       "board": 2100,
+       "other": 0,
+       "pic_in": "bs_w18h_windows18_Vel_Morrath_in.png"
+      },
+      {
+       "bld": 1,
+       "in": 1,
+       "boards_in": 486,
+       "left_out": 0,
+       "rays": 1150,
+       "bare": 0,
+       "board": 1136,
+       "other": 14
+      },
+      {
+       "bld": 2,
+       "in": 2,
+       "boards_in": 202,
+       "left_out": 0,
+       "rays": 450,
+       "bare": 0,
+       "board": 450,
+       "other": 0
+      }
+     ],
+     "pic_out": "bs_w18h_windows18_Vel_Morrath_out.png"
+    },
+    "Ashenreach": {
+     "state": {
+      "boarded": 1418,
+      "glass": 0,
+      "unmeasured": 0,
+      "outside": 21314,
+      "inside": 0,
+      "inside_left": 0,
+      "on": 1
+     },
+     "windows": 1418,
+     "glass": 0,
+     "panes17": 0,
+     "rays_out": 49850,
+     "bare_out": 0,
+     "board_out": 49850,
+     "glass_boarded": 0,
+     "unmeasured": 0,
+     "inside": [
+      {
+       "bld": 0,
+       "in": 0,
+       "boards_in": 756,
+       "left_out": 0,
+       "rays": 2100,
+       "bare": 0,
+       "board": 2100,
+       "other": 0
+      },
+      {
+       "bld": 1,
+       "in": 1,
+       "boards_in": 486,
+       "left_out": 0,
+       "rays": 1150,
+       "bare": 0,
+       "board": 1140,
+       "other": 10
+      },
+      {
+       "bld": 2,
+       "in": 2,
+       "boards_in": 254,
+       "left_out": 0,
+       "rays": 550,
+       "bare": 0,
+       "board": 550,
+       "other": 0
+      }
+     ],
+     "pic_out": "bs_w18h_windows18_Ashenreach_out.png"
+    },
+    "Graymourne": {
+     "state": {
+      "boarded": 1670,
+      "glass": 0,
+      "unmeasured": 0,
+      "outside": 26062,
+      "inside": 0,
+      "inside_left": 0,
+      "on": 1
+     },
+     "windows": 1670,
+     "glass": 0,
+     "panes17": 0,
+     "rays_out": 52150,
+     "bare_out": 0,
+     "board_out": 52150,
+     "glass_boarded": 0,
+     "unmeasured": 0,
+     "inside": [
+      {
+       "bld": 0,
+       "in": 0,
+       "boards_in": 756,
+       "left_out": 0,
+       "rays": 2100,
+       "bare": 0,
+       "board": 2100,
+       "other": 0
+      },
+      {
+       "bld": 1,
+       "in": 1,
+       "boards_in": 585,
+       "left_out": 0,
+       "rays": 1125,
+       "bare": 0,
+       "board": 1125,
+       "other": 0
+      },
+      {
+       "bld": 2,
+       "in": 2,
+       "boards_in": 301,
+       "left_out": 0,
+       "rays": 625,
+       "bare": 0,
+       "board": 625,
+       "other": 0
+      }
+     ],
+     "pic_out": "bs_w18h_windows18_Graymourne_out.png"
+    },
+    "Kethrys Spire": {
+     "state": {
+      "boarded": 1724,
+      "glass": 0,
+      "unmeasured": 0,
+      "outside": 25632,
+      "inside": 0,
+      "inside_left": 0,
+      "on": 1
+     },
+     "windows": 1724,
+     "glass": 0,
+     "panes17": 0,
+     "rays_out": 59200,
+     "bare_out": 0,
+     "board_out": 59200,
+     "glass_boarded": 0,
+     "unmeasured": 0,
+     "inside": [
+      {
+       "bld": 0,
+       "in": 0,
+       "boards_in": 774,
+       "left_out": 0,
+       "rays": 2150,
+       "bare": 0,
+       "board": 2150,
+       "other": 0
+      },
+      {
+       "bld": 1,
+       "in": 1,
+       "boards_in": 481,
+       "left_out": 0,
+       "rays": 1125,
+       "bare": 0,
+       "board": 1125,
+       "other": 0
+      },
+      {
+       "bld": 2,
+       "in": 2,
+       "boards_in": 313,
+       "left_out": 0,
+       "rays": 725,
+       "bare": 0,
+       "board": 725,
+       "other": 0
+      }
+     ],
+     "pic_out": "bs_w18h_windows18_Kethrys_Spire_out.png"
+    },
+    "Heaven": {
+     "state": {
+      "boarded": 0,
+      "glass": 2097,
+      "unmeasured": 0,
+      "outside": 0,
+      "inside": 0,
+      "inside_left": 0,
+      "on": 1
+     },
+     "windows": 2097,
+     "glass": 2097,
+     "panes17": 0,
+     "rays_out": 0,
+     "bare_out": 0,
+     "board_out": 0,
+     "glass_boarded": 0,
+     "unmeasured": 0,
+     "inside": [],
+     "pic_glass": "bs_w18h_windows18_Heaven_glass.png"
+    }
+   },
+   "fps_boards": {
+    "on": {
+     "fps": 22.5,
+     "p95_ms": 53.4
+    },
+    "off": {
+     "fps": 25.1,
+     "p95_ms": 49.6
+    },
+    "on2": {
+     "fps": 25.6,
+     "p95_ms": 44.1
+    }
+   },
+   "immersive_board_components": 0
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "bs_w18h_windows18_Brokenspire_in.png",
+  "bs_w18h_windows18_Brokenspire_out.png",
+  "bs_w18h_windows18_Vel_Morrath_in.png",
+  "bs_w18h_windows18_Vel_Morrath_out.png",
+  "bs_w18h_windows18_Ashenreach_out.png",
+  "bs_w18h_windows18_Graymourne_out.png",
+  "bs_w18h_windows18_Kethrys_Spire_out.png",
+  "bs_w18h_windows18_Heaven_glass.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

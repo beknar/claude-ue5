@@ -2353,6 +2353,8 @@ public:
 		TMap<FString, FWildPiece17> Pieces; TArray<FVector4> Lamps; TWeakObjectPtr<class UInstancedStaticMeshComponent> PaneC;
 		/** the list of 2026-11-27: its windows boarded, its boards outside and in */
 		int32 Boarded18 = 0, Boards18 = 0, Boards18In = 0;
+		/** its inside boards, laid in its level apart from its furniture */
+		TArray<FTransform> Boards18InT;
 	};
 	TArray<FWildBld17> WildBlds17;
 	TWeakObjectPtr<class ULevelStreamingDynamic> WildStream17;
@@ -2425,7 +2427,11 @@ public:
 	bool Windows18On() const;
 	bool IsGlassWindow18(const ARDSection* S, int32 Bld, FName PieceName) const;
 	void HolesOf18(FName Key, TArray<FBox>& Out, TArray<int32>* Sides = nullptr) const;
-	void BoardsFor18(const FTransform& Frame, const FBox& Hole, bool bOutside, uint32 Seed, TArray<FTransform>& Out) const;
+	void BoardsFor18(const FTransform& Frame, const FBox& Hole, bool bOutside, uint32 Seed, TArray<FTransform>& Out, float MarginL = 8.f, float MarginR = 8.f) const;
+	void BoardsOfHoles18(const FTransform& Frame, const TArray<FBox>& Hs, bool bOutside, uint32 Seed, TArray<FTransform>& Out) const;
+	int32 FilterBoards18(TArray<FTransform>& Boards, const TArray<TPair<UStaticMesh*, FTransform>>& Laid) const;
+	void SyncWindowModes18();
+	int32 Wild17Boards18 = 0;
 	void TickBoards18(ARDSection* S);
 	int32 LayInnerBoards18(ARDSection* S, int32 BI, AActor* A);
 	void AddWildBoards18(int32 Ri, const TArray<TPair<FName, FTransform>>& Wins, class UStaticMeshComponent* House, TArray<TWeakObjectPtr<UActorComponent>>* Keep);
