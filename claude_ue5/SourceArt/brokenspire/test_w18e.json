@@ -1,0 +1,334 @@
+{
+ "tag": "w18e",
+ "plan": [
+  "panes17",
+  "building17"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "panes17",
+   "ok": false,
+   "fps": {
+    "0_12": {
+     "fps": 11.0,
+     "p95_ms": 126.3
+    },
+    "0_0": {
+     "fps": 21.4,
+     "p95_ms": 56.9
+    },
+    "1_12": {
+     "fps": 14.7,
+     "p95_ms": 79.6
+    },
+    "1_0": {
+     "fps": 10.9,
+     "p95_ms": 113.0
+    }
+   },
+   "windows_closed": 1436,
+   "panes": 1436,
+   "panes_off_closed": 0,
+   "wrong_picture": [],
+   "keys_used": [
+    "barracks",
+    "chapel",
+    "healer",
+    "home",
+    "smithy",
+    "store",
+    "storehouse",
+    "tavern",
+    "temple",
+    "witchshut"
+   ],
+   "glowing": 39,
+   "dark": 1397,
+   "glow_mismatch": 72,
+   "glow_mismatch_blds": [
+    "1",
+    "28",
+    "50",
+    "55"
+   ],
+   "lit_lines": [
+    "0|temple|0|17|0|1|0",
+    "1|tavern|1|24|1|11|24",
+    "2|smithy|0|4|0|1|0"
+   ],
+   "pane_luma_night": 57.6,
+   "pane_luma_off": 2.1,
+   "pane_lit_building": 28,
+   "heaven_panes": 2337,
+   "heaven_pane_out_cm": 22.0,
+   "heaven_noon_on": 31.9,
+   "heaven_noon_off": 39.3
+  },
+  {
+   "step": "building17",
+   "ok": false,
+   "buildings": [
+    {
+     "city": "Brokenspire",
+     "i": 12,
+     "kind": "home",
+     "label": "home",
+     "rec": 10,
+     "windows": 19,
+     "prompt": "enter the home",
+     "f": "enter building",
+     "in_s": 0.89,
+     "state": {
+      "closed": 1,
+      "in": 12,
+      "pending": -1,
+      "loaded": 1,
+      "pieces": 10,
+      "panes": 19,
+      "load_ms": 829,
+      "capture_ms": 36,
+      "entered": 1,
+      "vx": 13950,
+      "vy": 11550,
+      "vz": 160
+     },
+     "inside": true,
+     "level_same": true,
+     "cover_s": 7.64,
+     "walked_m": 2.77,
+     "still_inside": true,
+     "windows_tried": [
+      {
+       "spread": 57.3,
+       "corr": 0.977,
+       "luma_diff": 7.8
+      }
+     ],
+     "window_box": [
+      0.399,
+      0.354,
+      0.54,
+      0.604
+     ],
+     "view_corr": 0.977,
+     "view_luma_diff": 7.8,
+     "view_spread": 57.3,
+     "prompt_out": "leave the home",
+     "f_out": "leave building",
+     "after": {
+      "in": -1,
+      "loaded": 0
+     },
+     "out_off_m": 0.0
+    },
+    {
+     "city": "Brokenspire",
+     "i": 1,
+     "kind": "tavern",
+     "label": "tavern",
+     "rec": 53,
+     "windows": 33,
+     "prompt": "enter the tavern",
+     "f": "enter building",
+     "in_s": 0.26,
+     "state": {
+      "closed": 1,
+      "in": 1,
+      "pending": -1,
+      "loaded": 1,
+      "pieces": 53,
+      "panes": 33,
+      "load_ms": 219,
+      "capture_ms": 46,
+      "entered": 2,
+      "vx": -2700,
+      "vy": 4350,
+      "vz": 160
+     },
+     "inside": true,
+     "level_same": true,
+     "cover_s": 8.59,
+     "walked_m": 3.87,
+     "still_inside": true,
+     "windows_tried": [
+      {
+       "spread": 29.1,
+       "corr": 0.822,
+       "luma_diff": 10.4
+      }
+     ],
+     "window_box": [
+      0.398,
+      0.354,
+      0.539,
+      0.604
+     ],
+     "view_corr": 0.822,
+     "view_luma_diff": 10.4,
+     "view_spread": 29.1,
+     "prompt_out": "leave the tavern",
+     "f_out": "leave building",
+     "after": {
+      "in": -1,
+      "loaded": 0
+     },
+     "out_off_m": 0.0
+    },
+    {
+     "city": "Brokenspire",
+     "i": 3,
+     "kind": "store",
+     "label": "store",
+     "rec": 5,
+     "windows": 27,
+     "prompt": "enter the store",
+     "f": "enter building",
+     "in_s": 0.27,
+     "state": {
+      "closed": 1,
+      "in": 3,
+      "pending": -1,
+      "loaded": 1,
+      "pieces": 5,
+      "panes": 27,
+      "load_ms": 235,
+      "capture_ms": 40,
+      "entered": 3,
+      "vx": -11850,
+      "vy": -1650,
+      "vz": 160
+     },
+     "inside": true,
+     "level_same": true,
+     "cover_s": 7.8,
+     "walked_m": 1.5,
+     "still_inside": true,
+     "windows_tried": [
+      {
+       "spread": 13.8,
+       "corr": 0.341,
+       "luma_diff": 1.9
+      }
+     ],
+     "window_box": [
+      0.399,
+      0.354,
+      0.54,
+      0.604
+     ],
+     "view_corr": 0.341,
+     "view_luma_diff": 1.9,
+     "view_spread": 13.8,
+     "prompt_out": "leave the store",
+     "f_out": "leave building",
+     "after": {
+      "in": -1,
+      "loaded": 0
+     },
+     "out_off_m": 0.0,
+     "walked_in": true,
+     "walked_out": true
+    },
+    {
+     "city": "Vel Morrath",
+     "i": 13,
+     "kind": "home",
+     "label": "home",
+     "rec": 9,
+     "windows": 14,
+     "prompt": "enter the home",
+     "f": "enter building",
+     "in_s": 0.39,
+     "state": {
+      "closed": 1,
+      "in": 13,
+      "pending": -1,
+      "loaded": 1,
+      "pieces": 9,
+      "panes": 14,
+      "load_ms": 344,
+      "capture_ms": 32,
+      "entered": 5,
+      "vx": 2732300,
+      "vy": 3751500,
+      "vz": 160
+     },
+     "inside": true,
+     "level_same": true,
+     "cover_s": 7.65,
+     "walked_m": 3.84,
+     "still_inside": true,
+     "windows_tried": [
+      {
+       "spread": 37.9,
+       "corr": 0.649,
+       "luma_diff": 17.4
+      }
+     ],
+     "window_box": [
+      0.4,
+      0.394,
+      0.541,
+      0.644
+     ],
+     "view_corr": 0.649,
+     "view_luma_diff": 17.4,
+     "view_spread": 37.9,
+     "prompt_out": "leave the home",
+     "f_out": "leave building",
+     "after": {
+      "in": -1,
+      "loaded": 0
+     },
+     "out_off_m": 0.0
+    }
+   ],
+   "enterable": 88,
+   "kinds": [
+    "barracks",
+    "chapel",
+    "healer",
+    "home",
+    "smithy",
+    "store",
+    "storehouse",
+    "tavern",
+    "temple",
+    "witch's hut"
+   ],
+   "record_same": 87,
+   "record_differs": [
+    123
+   ],
+   "recorded_pieces": 1201,
+   "drawn_pieces": 1201,
+   "closed_batches_in_town": 0,
+   "buildings_ok": [
+    true,
+    true,
+    false,
+    true
+   ],
+   "views_measured": 4
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "bs_w18e_panes17_night.png",
+  "bs_w18e_panes17_off.png",
+  "bs_w18e_panes17_heaven_on.png",
+  "bs_w18e_panes17_heaven_off.png",
+  "bs_w18e_building17_Brokenspire_12_0_pane.png",
+  "bs_w18e_building17_Brokenspire_12_0_open.png",
+  "bs_w18e_building17_Brokenspire_1_0_pane.png",
+  "bs_w18e_building17_Brokenspire_1_0_open.png",
+  "bs_w18e_building17_Brokenspire_3_0_pane.png",
+  "bs_w18e_building17_Brokenspire_3_0_open.png",
+  "bs_w18e_building17_VelMorrath_13_0_pane.png",
+  "bs_w18e_building17_VelMorrath_13_0_open.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

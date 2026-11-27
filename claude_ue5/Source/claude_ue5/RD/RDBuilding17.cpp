@@ -209,9 +209,11 @@ void ARDDungeonGenerator::TickBuilding17(float Dt)
 			for (const TPair<TObjectPtr<UClass>, FTransform>& Ac : R->Actors)
 				if (Ac.Key) if (AActor* Pa = GetWorld()->SpawnActor<AActor>(Ac.Key, Ac.Value, Sp)) { Pa->AttachToActor(A, FAttachmentTransformRules::KeepWorldTransform); ++Building17Pieces; }
 		}
-		CaptureBuildingView17(BI);
+		// (the list of 2026-11-27: glass left as it is, every other window boarded on its inside; no street captured)
+		Building17Boards18 = Windows18On() ? LayInnerBoards18(S, BI, A) : 0;
+		if (!Windows18On()) CaptureBuildingView17(BI);
 		// (a pane in each window, on its inside, showing the street its own cube saw)
-		if (BuildingPaneMesh17 && BuildingViewMaterial17)
+		if (!Windows18On() && BuildingPaneMesh17 && BuildingViewMaterial17)
 		{
 			int32 Wk = 0;
 			for (const ARDSection::FTownWin16& Wn : S->TownWindows16)

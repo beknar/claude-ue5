@@ -52,6 +52,18 @@ struct FRDPiece
 };
 
 /** the list of 2026-11-22's phase 27: a part of one of the Alien Planet pack's baked clusters (947 world): a piece, placed in the cluster's frame */
+/** the list of 2026-11-27's third phase (951 windows, RDList18b.cpp): a window opening measured on its piece's or house mesh's own faces.
+ *  Key: a window piece's name (Side 0: Box in the piece frame, X from its inner face to its outer, Y along the wall, Z up), or a village house
+ *  mesh's path (Side 1 to 4: its +X, -X, +Y, -Y wall; Box's X the reveal's faces along that axis, Y the opening along the wall, Z up) */
+USTRUCT(BlueprintType)
+struct FRDWindowHole18
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") FName Key;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") int32 Side = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") FBox Box = FBox(ForceInit);
+};
+
 USTRUCT(BlueprintType)
 struct FRDAlienPart27
 {

@@ -300,6 +300,7 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 	const int32 Box0 = Rec.Boxes;
 	int32 Furniture = 0;
 	TArray<FTransform> Win17;          // (the list of 2026-11-26's eighth phase: its windows, for Closed Structures' panes)
+	TArray<TPair<FName, FTransform>> Win18;          // (the list of 2026-11-27: its window pieces, for their boards)
 	// ---- the plinth: stone under the whole floor, from the floor down to the ground's lowest (the floor's collision)
 	{
 		const float Z0 = Gmin - 30.f;
@@ -325,7 +326,7 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 			if (!bDoor && bWindows && R.FRand() < (Si == 0 ? 0.5f : 0.35f)) Nm = Pn(TEXT("WallWindow"));
 			const FTransform T = WallT(Pl, Sd.Out, 2.f);
 			Put(Nm, T);
-			if (!bDoor && Nm != Pn(TEXT("Wall"))) { BoundsCollider(Nm, T); Win17.Add(WallT(Pl, Sd.Out, 152.f)); }
+			if (!bDoor && Nm != Pn(TEXT("Wall"))) { BoundsCollider(Nm, T); Win17.Add(WallT(Pl, Sd.Out, 152.f)); Win18.Emplace(Nm, T); }
 		}
 	for (int32 Cx = -1; Cx <= 1; Cx += 2)
 		for (int32 Cy = -1; Cy <= 1; Cy += 2)
@@ -588,7 +589,7 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 		if (Op17 && Op17->Mesh) Keep17.Add(Op17->Mesh);
 		if (Fp17 && Fp17->Mesh) Keep17.Add(Fp17->Mesh);
 		TakeWildBatch17(Ri17, Rec.Batch, Snap17, Keep17);
-		AddWildPanes17(Ri17, Win17, &Rec.Comps);
+		if (Windows18On()) AddWildBoards18(Ri17, Win18, nullptr, &Rec.Comps); else AddWildPanes17(Ri17, Win17, &Rec.Comps);
 	}
 	// ---- animals inside (a barn's stalls, a coop's hens): a fence across the far half, its gate by the front; the floor's height
 	// for their ground

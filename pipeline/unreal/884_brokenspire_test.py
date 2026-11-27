@@ -8910,3 +8910,136 @@ def tick(dt):
 G["gen_"] = run()
 G["h"] = unreal.register_slate_post_tick_callback(tick)
 print("brokenspire test armed:", PLAN, TAG)
+
+
+# ================================================================================================ the list of 2026-11-27's third phase
+def boards18():
+    p = str(G["gen"].get_boards18_state()).split("|")
+    k = ["boarded", "glass", "unmeasured", "outside", "inside", "inside_left", "on"]
+    return {a: int(b) for a, b in zip(k, p)}
+def wins18():
+    out = []
+    for i, l in enumerate(G["gen"].get_windows18()):
+        p = str(l).split("|")
+        out.append({"idx": i, "bld": int(p[0]), "style": int(p[1]), "glass": p[2] == "1", "piece": p[3], "holes": int(p[4]),
+                    "at": V(float(p[5]), float(p[6]), float(p[7])), "out": V(float(p[8]), float(p[9]), 0)})
+    return out
+def trace18(idx, outside):
+    p = str(G["gen"].trace_window18(idx, outside, 5)).split("|")
+    return {"rays": int(p[0]), "board": int(p[1]), "other": int(p[2]), "none": int(p[3])} if len(p) == 4 else None
+def win_pic18(w, tag, inside):
+    """a picture of the window from 4 m outside (or 1.6 m inside), her body hidden"""
+    o = w["out"]; d = -1.2 if inside else 2.5
+    stand = V(w["at"].x + o.x * d * 100.0, w["at"].y + o.y * d * 100.0, w["at"].z - 150.0)
+    yaw = math.degrees(math.atan2(-o.y, -o.x)) if not inside else math.degrees(math.atan2(o.y, o.x))
+    put(stand, yaw=yaw); G["pawn"].get_movement_component().stop_movement_immediately(); G["pawn"].set_actor_hidden_in_game(True)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=0, yaw=yaw)); yield from wait(1.5)
+    f = yield from shot_file16("windows18_" + tag)
+    G["pawn"].set_actor_hidden_in_game(False)
+    return os.path.basename(f) if f else None
+
+
+def step_windows18():
+    """Closed Structures' windows (the user's "windows will be either opaque and reflective for buildings that have glass like in Heaven,
+    or barricaded entirely both outside and inside"; RD/RDList18b.cpp, 951 windows): in each of the six cities, Closed: every window of
+    every closed building traced through its measured openings on a 5 x 5 grid from outside (the town's own window colliders left out):
+    a glass window has no board and no pane; every other window's rays all meet a board (none passing). Then up to three buildings with
+    windows entered (their level laid): each of their windows traced from inside, every ray meeting a board. In Immersive (Brokenspire)
+    no board stands anywhere. A picture of a boarded window from outside and from inside, and of a glass one (Heaven). Ok: every city
+    measured, no window unmeasured, no bare ray outside or in, Heaven's windows all glass with nothing over them, no board in Immersive"""
+    g = G["gen"]; res = {"cities": {}}; quiet(True)
+    cv0 = unreal.SystemLibrary.get_console_variable_int_value("rd.Structures17")
+    try:
+        for city in ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne", "Kethrys Spire", "Heaven"):
+            r = {}
+            if city != "Brokenspire" or not section(): yield from to_town(city)
+            refresh(); g = G["gen"]
+            set_structures17(1); g.rebuild_town(G["gi"].get_editor_property("town_seed")); yield from rwait(4.0); refresh(); g = G["gen"]
+            g.set_town_hour(12.0); yield from rwait(2.0)
+            r["state"] = boards18()
+            ws = wins18()
+            r["windows"] = len(ws); r["glass"] = sum(1 for w in ws if w["glass"])
+            r["panes17"] = len(list(g.get_panes17()))
+            bare, rays, glass_boarded, unmeas = 0, 0, 0, 0
+            for w in ws:
+                t = trace18(w["idx"], True)
+                if w["glass"]:
+                    if t and t["board"] > 0: glass_boarded += 1
+                    continue
+                if w["holes"] == 0: unmeas += 1; continue
+                if t: rays += t["rays"]; bare += t["none"]
+            r.update({"rays_out": rays, "bare_out": bare, "glass_boarded": glass_boarded, "unmeasured": unmeas})
+            # ---- inside: up to three buildings with boarded windows entered
+            inside = []
+            blds_w = []
+            for w in ws:
+                if not w["glass"] and w["bld"] not in blds_w: blds_w.append(w["bld"])
+            for bi in blds_w[:3]:
+                g.enter_building17(bi); t0 = time.time()
+                while time.time() - t0 < 30 and bstate17().get("in") != bi: yield from rwait(0.5)
+                yield from rwait(1.5)
+                st = bstate17(); b18 = boards18()
+                ri = {"bld": bi, "in": st.get("in"), "boards_in": b18["inside"], "left_out": b18["inside_left"], "rays": 0, "bare": 0}
+                for w in ws:
+                    if w["bld"] != bi or w["glass"]: continue
+                    t = trace18(w["idx"], False)
+                    if t: ri["rays"] += t["rays"]; ri["bare"] += t["none"]
+                if not inside and city in ("Brokenspire", "Vel Morrath"):
+                    sz = section().get_actor_location().z
+                    w0 = next((w for w in ws if w["bld"] == bi and not w["glass"] and w["at"].z - sz < 250), None) or next(w for w in ws if w["bld"] == bi and not w["glass"])
+                    ri["pic_in"] = yield from win_pic18(w0, city.replace(" ", "_") + "_in", True)
+                g.leave_building17(); yield from rwait(1.5)
+                inside.append(ri)
+            r["inside"] = inside
+            # ---- pictures from outside: a boarded window (and Heaven's glass)
+            pick = next((w for w in ws if not w["glass"] and w["holes"] > 0 and w["at"].z - section().get_actor_location().z < 250), None)
+            if pick: r["pic_out"] = yield from win_pic18(pick, city.replace(" ", "_") + "_out", False)
+            gw = next((w for w in ws if w["glass"]), None)
+            if gw: r["pic_glass"] = yield from win_pic18(gw, city.replace(" ", "_") + "_glass", False)
+            res["cities"][city] = r
+        # ---- Immersive: no board
+        yield from to_town("Brokenspire"); refresh(); g = G["gen"]
+        set_structures17(0); g.rebuild_town(G["gi"].get_editor_property("town_seed")); yield from rwait(4.0); refresh(); g = G["gen"]
+        res["immersive_board_components"] = len(section().get_components_by_tag(unreal.InstancedStaticMeshComponent, "RDBoard18"))
+    except Exception as e_:
+        import traceback
+        res["error"] = str(e_) + traceback.format_exc()[-600:]
+    finally:
+        try: G["pawn"].set_actor_hidden_in_game(False)
+        except Exception: pass
+        try: G["gen"].leave_building17()
+        except Exception: pass
+        set_structures17(cv0)
+        try: G["gen"].rebuild_town(G["gi"].get_editor_property("town_seed"))
+        except Exception: pass
+        yield from rwait(2.5); refresh()
+        quiet(False)
+    cs = res["cities"]
+    ok = "error" not in res and len(cs) == 6 and res.get("immersive_board_components", 1) == 0
+    for city, r in cs.items():
+        medieval_ok = r.get("rays_out", 0) > 0 and r.get("bare_out", 1) == 0 and r.get("unmeasured", 1) == 0 and r.get("panes17", 1) == 0
+        ins = r.get("inside", [])
+        ins_ok = all(i.get("in") == i.get("bld") and i.get("rays", 0) > 0 and i.get("bare", 1) == 0 for i in ins)
+        if city == "Heaven":
+            if not (r.get("windows", 0) > 0 and r.get("glass") == r.get("windows") and r.get("glass_boarded", 1) == 0 and r.get("panes17", 1) == 0): ok = False
+        elif not (medieval_ok and ins and ins_ok): ok = False
+    step_result("windows18", ok, **res)
+
+
+STEPS.update({"windows18": step_windows18})
+
+
+def with_windows17(step):
+    """list 17's own windows (rd.Windows18 0: the room pictures and the street's cubes) for the steps that measure them; put back after"""
+    def run_():
+        v0 = unreal.SystemLibrary.get_console_variable_int_value("rd.Windows18")
+        unreal.SystemLibrary.execute_console_command(G["w"], "rd.Windows18 0")
+        try:
+            yield from step()
+        finally:
+            unreal.SystemLibrary.execute_console_command(G["w"], "rd.Windows18 %d" % v0)
+    return run_
+
+
+# (the list of 2026-11-27's third phase: building17's views and panes17's pictures are list 17's windows)
+STEPS.update({"building17": with_windows17(step_building17), "panes17": with_windows17(step_panes17)})

@@ -1466,6 +1466,7 @@ void ARDSection::TownShellBuilding(int32 BI)
 				if (!bDoor && !bBoarded && Nm != TownPiece(B, TEXT("Wall")))
 				{
 					FTownWin16 Wn; Wn.Bld = BI; Wn.At = WallT(P, Sd.Out, Z + 150.f).GetLocation(); Wn.Out = FRotator(0, Yaw0, 0).RotateVector(FVector(Sd.Out.X, Sd.Out.Y, 0));
+					Wn.Piece = Nm; Wn.Xf = WallT(P, Sd.Out, Z);
 					TownWindows16.Add(Wn);
 				}
 				// (a window's sill stands out of the wall where its collision does not reach: a hidden box over the piece's

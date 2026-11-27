@@ -8902,7 +8902,8 @@ def wild_blds17():
     for l in G["gen"].get_wild_blds17():
         p = str(l).split("|")
         out.append({"i": int(p[0]), "kind": p[1], "closed": int(p[2]), "n": int(p[3]), "lamps": int(p[4]), "panes": int(p[5]), "floor": float(p[8]),
-                    "yaw": float(p[9]), "x": float(p[10]), "y": float(p[11]), "glow": float(p[12]), "hx": float(p[13]), "hy": float(p[14])})
+                    "yaw": float(p[9]), "x": float(p[10]), "y": float(p[11]), "glow": float(p[12]), "hx": float(p[13]), "hy": float(p[14]),
+                    "boarded": int(p[15]) if len(p) > 15 else 0, "boards": int(p[16]) if len(p) > 16 else 0, "boards_in": int(p[17]) if len(p) > 17 else 0})
     return out
 def wild17_state():
     p = str(G["gen"].get_wild17_state()).split("|")
@@ -8954,7 +8955,7 @@ def step_closed17w():
                 yield from rwait(1.5)          # (a closed village house's furniture is taken once its household is laid)
                 b = next((x for x in wild_blds17() if abs(x["x"] - b["x"]) < 5 and abs(x["y"] - b["y"]) < 5), b)
                 st, mv = room_census17(b)
-                per[mode] = {"closed": b["closed"], "n": b["n"], "lamps": b["lamps"], "panes": b["panes"], "still": st, "moving": mv, "i": b["i"], "b": b}
+                per[mode] = {"closed": b["closed"], "n": b["n"], "lamps": b["lamps"], "panes": b["panes"], "boarded": b["boarded"], "boards_in": b["boards_in"], "still": st, "moving": mv, "i": b["i"], "b": b}
             v["immersive"] = {k: w for k, w in (per.get(0) or {}).items() if k != "b"}; v["closed"] = {k: w for k, w in (per.get(1) or {}).items() if k != "b"}
             if per.get(1):
                 b = per[1]["b"]
@@ -8999,8 +9000,10 @@ def step_closed17w():
         ins, outs = v.get("in_state") or {}, v.get("out_state") or {}
         return (im.get("closed") == 0 and cl.get("closed") == 1 and cl.get("n", 0) >= 4 and cl.get("n") == im.get("n") and cl.get("lamps") == im.get("lamps") >= 1
                 and im.get("still", 0) - cl.get("still", 0) >= cl.get("n", 99) * 0.9 and cl.get("moving") == im.get("moving") and im.get("panes") == 0
-                and (cl.get("panes", 0) > 0 if v["kind"] == "house" else True)
-                and v.get("inside") and v.get("in_room_off_cm") is not None and v["in_room_off_cm"] < 50 and ins.get("laid") == v.get("in_room_n") == cl.get("n") and ins.get("loaded") == 1
+                # (the list of 2026-11-27: the farmhouse's windows boarded (rd.Windows18), or list 17's panes; the inside boards laid with the furniture)
+                and ((cl.get("panes", 0) > 0 or cl.get("boarded", 0) > 0) if v["kind"] == "house" else True)
+                and v.get("inside") and v.get("in_room_off_cm") is not None and v["in_room_off_cm"] < 50 and v.get("in_room_n") == cl.get("n")
+                and ins.get("laid") == cl.get("n") + cl.get("boards_in", 0) and ins.get("loaded") == 1
                 and outs.get("in") == -1 and outs.get("loaded") == 0)
     ok = "error" not in res and len(res["visits"]) == 2 and all(good(v) for v in res["visits"])
     step_result("closed17w", ok, **res)
