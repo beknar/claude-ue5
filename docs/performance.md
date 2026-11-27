@@ -298,3 +298,189 @@ Measured 2026-11-25 21:38 on NVIDIA GeForce RTX 3060, overall quality level -1 (
 | mistward_castle: first hall | 34.7 | 31.3 | 33.3 | 6.2 | 7.4 | 8.7 | 27.4 | 520 | 0.0, 0.0 | - | -7 % |
 | heaven_fortress: first hall | 36.3 | 28.7 | 29.7 | 3.7 | 4.1 | 5.6 | 26.4 | 545 | 0.0, 0.0 | - | +6 % |
 
+## Closed Structures
+
+Written 2026-11-26 23:45 from the Shipping package's `-RDPerf` run (`pipeline/perf_mistward.ps1 -Structures closed|immersive -WildsOnly`, `RD/RDList16.cpp`), the editor closed, full screen, once in each of the Options page's two modes for buildings ([game-modes.md](game-modes.md)): **Immersive Interiors** (every building built whole in the town) and **Closed Structures** (each building a shell, its furniture laid in a level of its own only while she is inside, its windows pictures). Each city's square and a street about 100 m off it at noon and at midnight, each biome at its nearest site to Brokenspire at noon, standing, then running 30 s from there; the same places in both modes and at both resolutions (replayed from one places file). Each standing place settled 20 s after the world round her was built, then measured until 15 s and 300 frames had passed (at most 45 s), clear weather, her HUD hidden. FPS is the mean over the frames; p95 is the 95th percentile frame time in ms; GPU ms the engine's own GPU time.
+
+### 3840x2160
+
+Measured (Closed Structures 2026-11-26 20:53 and Immersive Interiors 2026-11-26 22:37) on NVIDIA GeForce RTX 3060, overall quality level -1 (0 low to 3 epic) (by group: res0 view3 aa3 shadow3 gi3 refl3 pp3 tex3 fx3 foliage3 shading3), screen percentage 0, vertical sync off and no frame cap.
+
+| Place | Immersive FPS | Closed FPS | Change | Immersive p95 ms | Closed p95 ms | Immersive GPU ms | Closed GPU ms | Where (km) | Biome there |
+|---|---|---|---|---|---|---|---|---|---|
+| Brokenspire: square, noon | 26.5 | 26.6 | +0 % | 42.3 | 41.8 | 36.4 | 36.2 | 0.0, -0.1 | farms |
+| Brokenspire: square, midnight | 32.6 | 33.0 | +1 % | 31.9 | 31.7 | 29.4 | 28.9 | 0.0, -0.1 | farms |
+| Brokenspire: street, noon | 27.0 | 26.0 | -4 % | 41.7 | 43.5 | 35.9 | 37.2 | 0.0, -0.2 | farms |
+| Brokenspire: street, midnight | 33.3 | 33.1 | -1 % | 31.3 | 31.5 | 28.7 | 28.8 | 0.0, -0.2 | farms |
+| Ashenreach: square, noon | 25.8 | 25.8 | +0 % | 43.0 | 42.4 | 37.2 | 37.2 | 35.0, -0.1 | burned plain |
+| Ashenreach: square, midnight | 29.5 | 29.4 | -0 % | 35.0 | 35.4 | 32.6 | 32.6 | 35.0, -0.1 | burned plain |
+| Ashenreach: street, noon | 26.8 | 26.8 | +0 % | 40.2 | 39.9 | 36.0 | 35.8 | 35.0, -0.2 | burned plain |
+| Ashenreach: street, midnight | 29.0 | 29.0 | +0 % | 35.7 | 36.0 | 33.2 | 33.0 | 35.0, -0.2 | burned plain |
+| Graymourne: square, noon | 25.8 | 25.8 | +0 % | 43.4 | 43.8 | 37.3 | 37.4 | 99.0, -0.0 | coastal regions |
+| Graymourne: square, midnight | 29.1 | 29.3 | +1 % | 35.6 | 35.8 | 32.9 | 32.9 | 99.0, -0.0 | coastal regions |
+| Graymourne: street, noon | 27.6 | 27.7 | +0 % | 40.7 | 39.8 | 34.8 | 34.8 | 98.9, -0.0 | coastal regions |
+| Graymourne: street, midnight | 31.3 | 31.1 | -1 % | 33.2 | 34.0 | 30.4 | 30.8 | 98.9, -0.0 | coastal regions |
+| Vel Morrath: square, noon | 25.7 | 24.9 | -3 % | 43.4 | 44.5 | 37.5 | 38.5 | 27.5, 37.6 | mountains |
+| Vel Morrath: square, midnight | 28.4 | 28.4 | +0 % | 36.6 | 36.8 | 33.8 | 33.8 | 27.5, 37.6 | mountains |
+| Vel Morrath: street, noon | 26.8 | 33.1 | +24 % | 41.7 | 32.7 | 35.9 | 28.8 | 27.5, 37.7 | mountains |
+| Vel Morrath: street, midnight | 32.8 | 33.4 | +2 % | 31.7 | 31.2 | 29.2 | 28.6 | 27.5, 37.7 | mountains |
+| Kethrys Spire: square, noon | 24.8 | 25.0 | +1 % | 44.7 | 43.9 | 38.7 | 38.4 | 76.3, -35.0 | glacial |
+| Kethrys Spire: square, midnight | 28.8 | 28.5 | -1 % | 35.9 | 36.6 | 33.3 | 33.6 | 76.3, -35.0 | glacial |
+| Kethrys Spire: street, noon | 26.9 | 26.0 | -3 % | 41.1 | 42.6 | 35.6 | 37.1 | 76.3, -35.1 | glacial |
+| Kethrys Spire: street, midnight | 31.1 | 31.3 | +1 % | 33.4 | 33.6 | 30.7 | 30.6 | 76.3, -35.1 | glacial |
+| Heaven: square, noon | 26.3 | 26.6 | +1 % | 43.3 | 43.1 | 36.5 | 36.0 | 57.1, -55.5 | volcanoes |
+| Heaven: square, midnight | 34.2 | 29.2 | -15 % | 32.5 | 36.0 | 27.7 | 33.0 | 57.1, -55.5 | volcanoes |
+| Heaven: street, noon | 35.7 | 27.9 | -22 % | 31.5 | 39.3 | 25.9 | 34.4 | 57.1, -55.6 | volcanoes |
+| Heaven: street, midnight | 36.8 | 24.0 | -35 % | 31.4 | 55.3 | 25.2 | 33.2 | 57.1, -55.6 | volcanoes |
+| grasslands | 27.7 | 26.6 | -4 % | 38.9 | 41.1 | 35.1 | 36.2 | 4.5, -0.4 | grasslands |
+| grasslands: running | 27.9 | 27.9 | +0 % | 38.1 | 38.3 | 34.8 | 34.7 | 4.4, -0.3 | grasslands |
+| meadows | 27.3 | 26.9 | -1 % | 38.8 | 39.6 | 35.4 | 36.0 | 6.4, 5.9 | meadows |
+| meadows: running | 30.8 | 30.5 | -1 % | 36.5 | 36.9 | 31.4 | 31.6 | 6.4, 6.0 | meadows |
+| farms | 28.8 | 28.8 | +0 % | 37.1 | 36.8 | 33.6 | 33.4 | 1.5, -1.2 | farms |
+| farms: running | 28.3 | 28.3 | +0 % | 37.5 | 37.5 | 34.2 | 34.1 | 1.6, -1.1 | farms |
+| savannahs | 31.3 | 31.4 | +0 % | 34.1 | 34.0 | 30.6 | 30.6 | -6.8, -17.3 | savannahs |
+| savannahs: running | 30.9 | 30.3 | -2 % | 35.1 | 37.0 | 31.1 | 31.7 | -6.6, -17.3 | savannahs |
+| hills | 29.5 | 28.7 | -3 % | 35.9 | 37.1 | 32.8 | 33.7 | -9.7, 5.3 | hills |
+| hills: running | 30.8 | 30.3 | -2 % | 35.5 | 37.3 | 31.4 | 31.8 | -9.7, 5.3 | hills |
+| mountains | 34.8 | 34.4 | -1 % | 30.5 | 31.2 | 27.2 | 27.6 | 10.5, 0.4 | mountains |
+| mountains: running | 32.4 | 31.9 | -2 % | 33.6 | 34.2 | 29.7 | 30.1 | 10.5, 0.5 | mountains |
+| tundras | 26.9 | 25.2 | -6 % | 39.5 | 44.3 | 35.6 | 37.2 | 59.3, -10.2 | tundras |
+| tundras: running | 26.3 | 24.6 | -6 % | 40.4 | 51.6 | 36.2 | 37.5 | 59.4, -10.2 | tundras |
+| plains | 27.0 | 28.2 | +4 % | 39.2 | 37.5 | 35.9 | 34.3 | 0.7, -8.0 | plains |
+| plains: running | 27.7 | 27.9 | +1 % | 38.4 | 38.0 | 35.0 | 34.6 | 0.8, -8.0 | plains |
+| pine forests | 27.7 | 27.8 | +0 % | 38.1 | 37.9 | 34.9 | 34.8 | 31.2, -16.9 | pine forests |
+| pine forests: running | 27.5 | 27.4 | -0 % | 39.6 | 39.8 | 35.2 | 35.3 | 31.3, -17.0 | pine forests |
+| temperate autumn forests | 22.1 | 22.0 | -0 % | 54.7 | 54.5 | 43.9 | 43.9 | 13.3, -38.6 | temperate autumn forests |
+| temperate autumn forests: running | 22.5 | 22.2 | -1 % | 54.7 | 55.4 | 43.1 | 43.7 | 13.3, -38.6 | temperate autumn forests |
+| marshes | 27.1 | 27.1 | +0 % | 38.9 | 39.4 | 35.7 | 35.7 | 24.6, 13.0 | marshes |
+| marshes: running | 27.5 | 27.0 | -2 % | 38.8 | 39.2 | 35.2 | 35.6 | 24.7, 13.0 | marshes |
+| wetlands | 26.0 | 26.2 | +1 % | 42.9 | 42.5 | 37.2 | 36.9 | 20.7, 18.4 | wetlands |
+| wetlands: running | 27.6 | 27.4 | -1 % | 41.8 | 42.5 | 34.9 | 35.1 | 20.7, 18.5 | wetlands |
+| mountains and peaks | 35.2 | 37.7 | +7 % | 30.3 | 28.1 | 27.1 | 25.2 | -15.1, -17.9 | mountains and peaks |
+| mountains and peaks: running | 36.1 | 36.8 | +2 % | 29.7 | 29.4 | 26.3 | 25.8 | -15.1, -17.8 | mountains and peaks |
+| volcanoes | 16.5 | 16.1 | -2 % | 66.2 | 69.1 | 25.8 | 25.9 | 61.6, -55.5 | volcanoes |
+| volcanoes: running | 16.1 | 15.3 | -5 % | 67.9 | 78.9 | 26.5 | 27.2 | 61.5, -55.4 | volcanoes |
+| coastal regions | 28.6 | 28.4 | -1 % | 37.2 | 38.4 | 33.7 | 33.9 | -30.8, -1.3 | coastal regions |
+| coastal regions: running | 29.2 | 29.2 | +0 % | 37.1 | 37.1 | 33.0 | 32.9 | -30.7, -1.2 | coastal regions |
+| arctic regions | 27.1 | 27.1 | +0 % | 38.9 | 39.5 | 35.7 | 35.7 | 84.0, 19.0 | arctic regions |
+| arctic regions: running | 26.8 | 26.6 | -1 % | 39.2 | 39.9 | 36.1 | 36.4 | 83.9, 19.1 | arctic regions |
+| canyons | 30.9 | 30.6 | -1 % | 34.5 | 34.9 | 31.1 | 31.4 | -8.0, -8.7 | canyons |
+| canyons: running | 31.2 | 31.0 | -1 % | 34.4 | 34.7 | 30.8 | 31.0 | -8.1, -8.8 | canyons |
+| mesas | 31.2 | 31.2 | +0 % | 34.1 | 34.0 | 30.7 | 30.7 | -16.4, 4.6 | mesas |
+| mesas: running | 30.7 | 30.7 | +0 % | 35.2 | 35.3 | 31.2 | 31.2 | -16.3, 4.6 | mesas |
+| canyon networks | 39.3 | 38.8 | -1 % | 26.9 | 27.0 | 24.0 | 24.5 | -13.0, -2.9 | canyon networks |
+| canyon networks: running | skipped in both modes: not measured: she was moved 13323 m in a frame | | | | | | | | |
+| cold steppes | 30.4 | 29.9 | -2 % | 34.7 | 35.5 | 31.6 | 32.1 | 39.8, 34.8 | cold steppes |
+| cold steppes: running | 28.7 | 28.7 | +0 % | 37.3 | 37.3 | 33.5 | 33.5 | 39.9, 34.7 | cold steppes |
+| highland moorland | 31.3 | 31.0 | -1 % | 34.0 | 34.3 | 30.8 | 30.9 | 26.6, 19.2 | highland moorland |
+| highland moorland: running | 31.0 | 30.7 | -1 % | 34.5 | 34.9 | 31.1 | 31.3 | 26.7, 19.3 | highland moorland |
+| boreal pine forest | 27.0 | 26.7 | -1 % | 38.9 | 39.9 | 35.7 | 36.2 | 52.6, -23.5 | boreal pine forest |
+| boreal pine forest: running | 26.1 | 25.9 | -1 % | 40.5 | 41.2 | 37.0 | 37.3 | 52.5, -23.5 | boreal pine forest |
+| temperate aspen | 29.6 | 29.2 | -1 % | 36.5 | 37.3 | 32.7 | 33.0 | 31.2, -10.3 | temperate aspen |
+| temperate aspen: running | 29.3 | 29.0 | -1 % | 37.3 | 38.3 | 33.0 | 33.3 | 31.3, -10.2 | temperate aspen |
+| volcanic tundra | 27.5 | 27.4 | -0 % | 38.3 | 38.9 | 34.8 | 34.9 | 61.5, -0.8 | volcanic tundra |
+| volcanic tundra: running | 27.6 | 27.5 | -0 % | 38.5 | 39.2 | 34.7 | 34.8 | 61.6, -0.8 | volcanic tundra |
+| burned plain | 31.8 | 32.2 | +1 % | 33.4 | 32.8 | 30.2 | 29.8 | 37.5, 0.0 | burned plain |
+| burned plain: running | 31.6 | 31.9 | +1 % | 33.8 | 33.1 | 30.3 | 30.1 | 37.5, 0.1 | burned plain |
+| geothermal caldera | 27.4 | 27.6 | +1 % | 38.2 | 38.2 | 35.1 | 35.0 | 27.8, -43.8 | geothermal caldera |
+| geothermal caldera: running | 26.2 | 26.3 | +0 % | 41.6 | 41.6 | 36.8 | 36.8 | 27.9, -43.8 | geothermal caldera |
+| glacial | 24.9 | 24.2 | -3 % | 44.6 | 45.5 | 38.7 | 39.8 | 76.3, -35.0 | glacial |
+| glacial: running | 27.5 | 27.4 | -0 % | 42.6 | 42.8 | 34.9 | 34.9 | 76.3, -35.1 | glacial |
+| taigas | 26.2 | 25.9 | -1 % | 40.3 | 40.9 | 37.0 | 37.4 | 67.6, 20.8 | taigas |
+| taigas: running | 26.0 | 25.2 | -3 % | 41.1 | 42.5 | 37.2 | 38.0 | 67.7, 20.9 | taigas |
+| rocky coastal | 39.6 | 39.1 | -1 % | 27.0 | 27.5 | 24.1 | 24.2 | -22.9, -13.1 | rocky coastal |
+| rocky coastal: running | 38.2 | 37.8 | -1 % | 28.2 | 28.7 | 24.9 | 25.2 | -22.8, -13.1 | rocky coastal |
+
+Over the 81 places measured in both modes: Immersive Interiors 29.0 FPS on average, Closed Structures 28.6 (-1 %). In the cities' squares and streets alone: 29.3 against 28.4 (-3 %).
+
+### 1920x1080
+
+Measured (Closed Structures 2026-11-26 20:01 and Immersive Interiors 2026-11-26 21:45) on NVIDIA GeForce RTX 3060, overall quality level -1 (0 low to 3 epic) (by group: res0 view3 aa3 shadow3 gi3 refl3 pp3 tex3 fx3 foliage3 shading3), screen percentage 0, vertical sync off and no frame cap.
+
+| Place | Immersive FPS | Closed FPS | Change | Immersive p95 ms | Closed p95 ms | Immersive GPU ms | Closed GPU ms | Where (km) | Biome there |
+|---|---|---|---|---|---|---|---|---|---|
+| Brokenspire: square, noon | 25.4 | 27.2 | +7 % | 43.9 | 42.1 | 37.9 | 35.5 | 0.0, -0.1 | farms |
+| Brokenspire: square, midnight | 32.2 | 32.9 | +2 % | 32.8 | 31.8 | 29.5 | 29.0 | 0.0, -0.1 | farms |
+| Brokenspire: street, noon | 25.1 | 27.2 | +8 % | 43.9 | 41.5 | 37.9 | 35.5 | 0.0, -0.2 | farms |
+| Brokenspire: street, midnight | 32.2 | 33.3 | +3 % | 32.0 | 31.3 | 29.6 | 28.6 | 0.0, -0.2 | farms |
+| Ashenreach: square, noon | 23.9 | 25.1 | +5 % | 45.8 | 43.8 | 40.3 | 38.4 | 35.0, -0.1 | burned plain |
+| Ashenreach: square, midnight | 27.1 | 28.3 | +4 % | 38.7 | 37.2 | 35.3 | 33.9 | 35.0, -0.1 | burned plain |
+| Ashenreach: street, noon | 24.8 | 26.9 | +8 % | 43.0 | 40.1 | 37.7 | 35.8 | 35.0, -0.2 | burned plain |
+| Ashenreach: street, midnight | 27.9 | 29.2 | +5 % | 37.5 | 35.6 | 34.5 | 33.0 | 35.0, -0.2 | burned plain |
+| Graymourne: square, noon | 25.4 | 26.2 | +3 % | 44.2 | 43.0 | 37.9 | 36.9 | 99.0, -0.0 | coastal regions |
+| Graymourne: square, midnight | 28.6 | 30.5 | +7 % | 36.9 | 34.2 | 33.5 | 31.5 | 99.0, -0.0 | coastal regions |
+| Graymourne: street, noon | 26.9 | 28.1 | +4 % | 41.3 | 39.5 | 35.7 | 34.2 | 98.9, -0.0 | coastal regions |
+| Graymourne: street, midnight | 30.6 | 31.7 | +4 % | 34.7 | 33.3 | 31.1 | 30.3 | 98.9, -0.0 | coastal regions |
+| Vel Morrath: square, noon | 26.7 | 26.1 | -2 % | 42.0 | 42.7 | 35.9 | 37.0 | 27.5, 37.6 | mountains |
+| Vel Morrath: square, midnight | 27.9 | 28.8 | +3 % | 37.9 | 36.6 | 34.3 | 33.5 | 27.5, 37.6 | mountains |
+| Vel Morrath: street, noon | 29.6 | 32.6 | +10 % | 41.3 | 36.8 | 32.3 | 29.3 | 27.5, 37.7 | mountains |
+| Vel Morrath: street, midnight | 32.6 | 33.6 | +3 % | 32.0 | 31.3 | 29.4 | 28.5 | 27.5, 37.7 | mountains |
+| Kethrys Spire: square, noon | 25.0 | 24.9 | -0 % | 44.3 | 44.0 | 38.4 | 38.7 | 76.3, -35.0 | glacial |
+| Kethrys Spire: square, midnight | 28.6 | 28.8 | +1 % | 36.4 | 36.3 | 33.5 | 33.3 | 76.3, -35.0 | glacial |
+| Kethrys Spire: street, noon | 26.8 | 27.1 | +1 % | 41.0 | 40.7 | 35.9 | 35.5 | 76.3, -35.1 | glacial |
+| Kethrys Spire: street, midnight | 30.9 | 31.4 | +2 % | 33.6 | 33.4 | 30.9 | 30.6 | 76.3, -35.1 | glacial |
+| Heaven: square, noon | 25.9 | 26.9 | +4 % | 43.3 | 42.5 | 37.0 | 35.8 | 57.1, -55.5 | volcanoes |
+| Heaven: square, midnight | 26.6 | 29.4 | +11 % | 44.6 | 36.0 | 35.7 | 32.7 | 57.1, -55.5 | volcanoes |
+| Heaven: street, noon | 27.7 | 31.2 | +13 % | 40.2 | 35.5 | 34.4 | 30.6 | 57.1, -55.6 | volcanoes |
+| Heaven: street, midnight | 29.4 | 33.1 | +13 % | 37.5 | 33.1 | 32.7 | 28.8 | 57.1, -55.6 | volcanoes |
+| grasslands | 26.7 | 28.6 | +7 % | 39.9 | 36.9 | 36.2 | 33.9 | 4.5, -0.4 | grasslands |
+| grasslands: running | 27.4 | 28.9 | +5 % | 39.1 | 36.9 | 35.3 | 33.6 | 4.4, -0.3 | grasslands |
+| meadows | 27.1 | 27.7 | +2 % | 39.2 | 38.7 | 35.6 | 34.9 | 6.4, 5.9 | meadows |
+| meadows: running | 30.5 | 31.5 | +3 % | 36.9 | 35.8 | 31.6 | 30.7 | 6.4, 6.0 | meadows |
+| farms | 28.3 | 29.7 | +5 % | 37.9 | 36.1 | 34.2 | 32.6 | 1.5, -1.2 | farms |
+| farms: running | 27.8 | 29.3 | +5 % | 38.6 | 36.4 | 34.8 | 33.0 | 1.6, -1.1 | farms |
+| savannahs | 30.9 | 31.3 | +1 % | 34.7 | 33.7 | 31.1 | 30.8 | -6.8, -17.3 | savannahs |
+| savannahs: running | 30.4 | 30.9 | +2 % | 35.7 | 35.0 | 31.6 | 31.2 | -6.6, -17.3 | savannahs |
+| hills | 28.1 | 30.4 | +8 % | 38.5 | 35.2 | 34.4 | 31.9 | -9.7, 5.3 | hills |
+| hills: running | 31.0 | 32.1 | +4 % | 35.6 | 34.3 | 31.2 | 30.1 | -9.7, 5.3 | hills |
+| mountains | 33.9 | 36.8 | +9 % | 31.8 | 29.4 | 28.0 | 26.0 | 10.5, 0.4 | mountains |
+| mountains: running | 31.9 | 33.5 | +5 % | 34.1 | 32.7 | 30.1 | 28.7 | 10.5, 0.5 | mountains |
+| tundras | 26.9 | 26.5 | -1 % | 39.4 | 43.2 | 35.7 | 36.0 | 59.3, -10.2 | tundras |
+| tundras: running | 26.2 | 23.1 | -12 % | 40.7 | 55.0 | 36.5 | 37.1 | 59.4, -10.2 | tundras |
+| plains | 28.0 | 28.8 | +3 % | 38.0 | 36.9 | 34.5 | 33.5 | 0.7, -8.0 | plains |
+| plains: running | 27.8 | 28.7 | +3 % | 38.1 | 36.9 | 34.9 | 33.8 | 0.8, -8.0 | plains |
+| pine forests | 27.5 | 27.3 | -1 % | 38.5 | 39.1 | 35.1 | 35.4 | 31.2, -16.9 | pine forests |
+| pine forests: running | 27.3 | 27.3 | +0 % | 40.0 | 39.9 | 35.4 | 35.4 | 31.3, -17.0 | pine forests |
+| temperate autumn forests | 22.0 | 22.2 | +1 % | 54.5 | 54.0 | 44.3 | 43.8 | 13.3, -38.6 | temperate autumn forests |
+| temperate autumn forests: running | 22.3 | 22.3 | +0 % | 54.8 | 54.9 | 43.6 | 43.6 | 13.3, -38.6 | temperate autumn forests |
+| marshes | 26.9 | 27.0 | +0 % | 39.3 | 39.4 | 36.0 | 35.9 | 24.6, 13.0 | marshes |
+| marshes: running | 27.3 | 27.2 | -0 % | 39.1 | 39.2 | 35.4 | 35.5 | 24.7, 13.0 | marshes |
+| wetlands | 26.0 | 26.1 | +0 % | 43.0 | 42.9 | 37.1 | 37.0 | 20.7, 18.4 | wetlands |
+| wetlands: running | 27.5 | 27.5 | +0 % | 41.9 | 42.5 | 35.1 | 35.2 | 20.7, 18.5 | wetlands |
+| mountains and peaks | 35.0 | 37.7 | +8 % | 30.2 | 28.2 | 27.4 | 25.4 | -15.1, -17.9 | mountains and peaks |
+| mountains and peaks: running | 35.8 | 37.0 | +3 % | 29.8 | 29.2 | 26.8 | 25.9 | -15.1, -17.8 | mountains and peaks |
+| volcanoes | 16.6 | 15.7 | -5 % | 63.8 | 70.5 | 25.9 | 26.1 | 61.6, -55.5 | volcanoes |
+| volcanoes: running | 15.9 | 15.1 | -5 % | 69.7 | 73.8 | 26.6 | 26.9 | 61.5, -55.4 | volcanoes |
+| coastal regions | 28.5 | 28.5 | +0 % | 37.4 | 37.4 | 33.8 | 33.9 | -30.8, -1.3 | coastal regions |
+| coastal regions: running | 29.0 | 29.0 | +0 % | 37.3 | 37.1 | 33.2 | 33.2 | -30.7, -1.2 | coastal regions |
+| arctic regions | 27.0 | 27.1 | +0 % | 38.9 | 39.0 | 35.9 | 35.8 | 84.0, 19.0 | arctic regions |
+| arctic regions: running | 26.7 | 26.7 | +0 % | 39.4 | 39.6 | 36.3 | 36.3 | 83.9, 19.1 | arctic regions |
+| canyons | 30.7 | 31.8 | +4 % | 34.6 | 33.7 | 31.3 | 30.2 | -8.0, -8.7 | canyons |
+| canyons: running | 31.0 | 31.8 | +3 % | 34.6 | 34.1 | 31.0 | 30.2 | -8.1, -8.8 | canyons |
+| mesas | 31.1 | 31.2 | +0 % | 33.8 | 33.8 | 30.8 | 30.8 | -16.4, 4.6 | mesas |
+| mesas: running | 30.5 | 30.2 | -1 % | 35.3 | 35.5 | 31.4 | 31.7 | -16.3, 4.6 | mesas |
+| canyon networks | 38.7 | 38.5 | -1 % | 27.3 | 27.4 | 24.5 | 24.7 | -13.0, -2.9 | canyon networks |
+| canyon networks: running | skipped in both modes: not measured: she was moved 13323 m in a frame | | | | | | | | |
+| cold steppes | 30.2 | 30.2 | +0 % | 34.6 | 34.8 | 31.8 | 31.9 | 39.8, 34.8 | cold steppes |
+| cold steppes: running | 28.5 | 28.5 | +0 % | 37.6 | 37.7 | 33.7 | 33.8 | 39.9, 34.7 | cold steppes |
+| highland moorland | 31.1 | 31.1 | +0 % | 34.0 | 34.3 | 30.9 | 30.9 | 26.6, 19.2 | highland moorland |
+| highland moorland: running | 30.8 | 30.8 | +0 % | 34.8 | 34.6 | 31.2 | 31.2 | 26.7, 19.3 | highland moorland |
+| boreal pine forest | 26.8 | 26.9 | +0 % | 39.0 | 39.2 | 36.1 | 35.9 | 52.6, -23.5 | boreal pine forest |
+| boreal pine forest: running | 25.9 | 26.1 | +1 % | 40.9 | 40.5 | 37.3 | 37.1 | 52.5, -23.5 | boreal pine forest |
+| temperate aspen | 29.3 | 29.3 | +0 % | 37.2 | 36.8 | 32.9 | 32.8 | 31.2, -10.3 | temperate aspen |
+| temperate aspen: running | 29.1 | 29.1 | +0 % | 37.4 | 37.3 | 33.2 | 33.1 | 31.3, -10.2 | temperate aspen |
+| volcanic tundra | 27.3 | 27.3 | +0 % | 38.7 | 39.3 | 35.1 | 35.2 | 61.5, -0.8 | volcanic tundra |
+| volcanic tundra: running | 27.5 | 27.5 | +0 % | 38.5 | 38.9 | 34.9 | 34.9 | 61.6, -0.8 | volcanic tundra |
+| burned plain | 31.6 | 32.2 | +2 % | 33.1 | 32.6 | 30.3 | 29.9 | 37.5, 0.0 | burned plain |
+| burned plain: running | 31.4 | 31.6 | +1 % | 34.0 | 33.9 | 30.5 | 30.4 | 37.5, 0.1 | burned plain |
+| geothermal caldera | 27.3 | 27.5 | +1 % | 38.4 | 38.4 | 35.4 | 35.1 | 27.8, -43.8 | geothermal caldera |
+| geothermal caldera: running | 26.0 | 26.1 | +0 % | 41.8 | 42.0 | 37.1 | 37.0 | 27.9, -43.8 | geothermal caldera |
+| glacial | 24.3 | 24.4 | +0 % | 45.1 | 45.0 | 39.4 | 39.4 | 76.3, -35.0 | glacial |
+| glacial: running | 27.2 | 27.7 | +2 % | 43.4 | 42.8 | 35.2 | 34.6 | 76.3, -35.1 | glacial |
+| taigas | 26.1 | 25.6 | -2 % | 40.7 | 41.5 | 37.0 | 37.7 | 67.6, 20.8 | taigas |
+| taigas: running | 25.8 | 25.6 | -1 % | 41.6 | 41.6 | 37.4 | 37.7 | 67.7, 20.9 | taigas |
+| rocky coastal | 39.2 | 38.9 | -1 % | 27.4 | 27.8 | 24.3 | 24.5 | -22.9, -13.1 | rocky coastal |
+| rocky coastal: running | 37.9 | 37.8 | -0 % | 28.6 | 28.9 | 25.2 | 25.3 | -22.8, -13.1 | rocky coastal |
+
+Over the 81 places measured in both modes: Immersive Interiors 28.4 FPS on average, Closed Structures 29.0 (+2 %). In the cities' squares and streets alone: 27.8 against 29.2 (+5 %).
+

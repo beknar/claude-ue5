@@ -1,0 +1,166 @@
+perf|info|3840x2160|NVIDIA GeForce RTX 3060|2026-11-26 22:37|-1|0|brokenspire|res0 view3 aa3 shadow3 gi3 refl3 pp3 tex3 fx3 foliage3 shading3
+place|square|Brokenspire|12|1350|-7950|85|90.0
+perf|square|Brokenspire|12|26.5|42.3|44.3|17.22|7.42|10.40|36.35|398|14|-80|farms|0
+place|square|Brokenspire|0|1350|-7950|85|90.0
+perf|square|Brokenspire|0|32.6|31.9|33.4|15.30|6.43|9.62|29.36|490|14|-80|farms|0
+place|street|Brokenspire|12|1350|-17850|85|90.0
+perf|street|Brokenspire|12|27.0|41.7|42.9|15.12|6.80|9.32|35.85|405|14|-178|farms|0
+place|street|Brokenspire|0|1350|-17850|85|90.0
+perf|street|Brokenspire|0|33.3|31.3|32.2|14.42|6.43|8.99|28.72|499|14|-178|farms|0
+place|square|Ashenreach|12|3501650|-5850|85|-90.0
+perf|square|Ashenreach|12|25.8|43.0|43.6|18.33|7.78|12.21|37.24|388|35016|-58|burned plain|0
+place|square|Ashenreach|0|3501650|-5850|85|0.0
+perf|square|Ashenreach|0|29.5|35.0|35.6|17.26|6.91|11.54|32.63|442|35016|-58|burned plain|0
+place|street|Ashenreach|12|3501650|-15750|85|-90.0
+perf|street|Ashenreach|12|26.8|40.2|40.9|16.52|7.46|10.35|35.95|403|35016|-158|burned plain|0
+place|street|Ashenreach|0|3501650|-15750|85|-90.0
+perf|street|Ashenreach|0|29.0|35.7|36.5|15.02|6.78|9.71|33.24|435|35016|-158|burned plain|0
+place|square|Graymourne|12|9901550|-150|85|90.0
+perf|square|Graymourne|12|25.8|43.4|44.9|13.03|6.78|10.43|37.26|388|99016|-2|coastal regions|0
+place|square|Graymourne|0|9901550|-150|85|180.0
+perf|square|Graymourne|0|29.1|35.6|36.8|11.92|6.05|9.62|32.93|438|99016|-2|coastal regions|0
+place|street|Graymourne|12|9891650|-150|85|180.0
+perf|street|Graymourne|12|27.6|40.7|41.8|11.44|6.30|8.73|34.81|414|98916|-2|coastal regions|0
+place|street|Graymourne|0|9891650|-150|85|180.0
+perf|street|Graymourne|0|31.3|33.2|33.9|10.09|5.48|8.25|30.39|470|98916|-2|coastal regions|0
+place|square|Vel Morrath|12|2749250|3756450|85|180.0
+perf|square|Vel Morrath|12|25.7|43.4|44.5|17.43|7.28|12.41|37.51|386|27492|37564|mountains|0
+place|square|Vel Morrath|0|2749250|3756450|85|180.0
+perf|square|Vel Morrath|0|28.4|36.6|38.5|16.12|6.53|11.63|33.83|426|27492|37564|mountains|0
+place|street|Vel Morrath|12|2749250|3766350|85|-90.0
+perf|street|Vel Morrath|12|26.8|41.7|42.4|16.07|7.24|11.41|35.90|402|27492|37664|mountains|0
+place|street|Vel Morrath|0|2749250|3766350|85|-90.0
+perf|street|Vel Morrath|0|32.8|31.7|32.6|14.48|6.55|10.44|29.19|493|27492|37664|mountains|0
+place|square|Kethrys Spire|12|7630150|-3504650|85|-90.0
+perf|square|Kethrys Spire|12|24.8|44.7|45.7|21.79|8.03|11.47|38.70|373|76302|-35046|glacial|0
+place|square|Kethrys Spire|0|7630150|-3504650|85|-90.0
+perf|square|Kethrys Spire|0|28.8|35.9|36.7|18.99|7.13|10.47|33.33|433|76302|-35046|glacial|0
+place|street|Kethrys Spire|12|7630150|-3514550|85|-90.0
+perf|street|Kethrys Spire|12|26.9|41.1|41.8|19.22|7.60|9.98|35.65|404|76302|-35146|glacial|0
+place|street|Kethrys Spire|0|7630150|-3514550|85|-90.0
+perf|street|Kethrys Spire|0|31.1|33.4|34.1|17.36|6.67|9.08|30.73|467|76302|-35146|glacial|0
+place|square|Heaven|12|5714777|-5550562|85|180.0
+perf|square|Heaven|12|26.3|43.3|46.0|18.69|7.51|12.99|36.50|395|57148|-55506|volcanoes|0
+place|square|Heaven|0|5714777|-5550562|85|180.0
+perf|square|Heaven|0|34.2|32.5|35.7|18.03|7.96|11.35|27.73|513|57148|-55506|volcanoes|0
+place|street|Heaven|12|5714777|-5560462|85|-90.0
+perf|street|Heaven|12|35.7|31.5|33.2|17.51|7.80|9.41|25.95|536|57148|-55605|volcanoes|0
+place|street|Heaven|0|5714777|-5560462|85|-90.0
+perf|street|Heaven|0|36.8|31.4|33.7|16.72|7.30|9.09|25.21|552|57148|-55605|volcanoes|0
+place|biome|grasslands|12|447325|-38616|9847|157.5
+perf|biome|grasslands|12|27.7|38.9|39.7|10.04|5.72|7.55|35.13|415|4473|-386|grasslands|0
+place|run|grasslands|12|447325|-38616|9847|157.5
+perf|run|grasslands|12|27.9|38.1|38.9|10.96|5.84|7.87|34.78|837|4376|-346|grasslands|105
+place|biome|meadows|12|639282|592214|3007|67.5
+perf|biome|meadows|12|27.3|38.8|39.5|9.91|5.60|7.01|35.44|410|6393|5922|meadows|0
+place|run|meadows|12|639282|592214|3007|67.5
+perf|run|meadows|12|30.8|36.5|38.3|10.10|5.70|7.12|31.41|923|6433|6018|meadows|104
+place|biome|farms|12|150000|-120000|-486|45.0
+perf|biome|farms|12|28.8|37.1|38.0|10.76|5.82|8.36|33.63|432|1500|-1200|farms|0
+place|run|farms|12|150000|-120000|-486|45.0
+perf|run|farms|12|28.3|37.5|38.4|10.82|5.95|8.08|34.20|850|1575|-1125|farms|105
+place|biome|savannahs|12|-675321|-1732080|15850|0.0
+perf|biome|savannahs|12|31.3|34.1|35.3|7.99|5.50|7.12|30.65|470|-6753|-17321|savannahs|0
+place|run|savannahs|12|-675321|-1732080|15850|0.0
+perf|run|savannahs|12|30.9|35.1|36.4|8.17|5.64|7.07|31.09|928|-6648|-17321|savannahs|106
+place|biome|hills|12|-969129|529801|13713|-157.5
+perf|biome|hills|12|29.5|35.9|37.2|8.68|5.40|6.98|32.81|443|-9691|5298|hills|0
+place|run|hills|12|-969129|529801|13713|-157.5
+perf|run|hills|12|30.8|35.5|36.5|8.86|5.54|7.01|31.40|925|-9676|5276|hills|27
+place|biome|mountains|12|1047267|38149|137192|90.0
+perf|biome|mountains|12|34.8|30.5|31.3|4.36|5.00|5.51|27.22|522|10473|381|mountains|0
+place|run|mountains|12|1047267|38149|137192|90.0
+perf|run|mountains|12|32.4|33.6|34.8|4.39|5.25|5.50|29.72|972|10473|485|mountains|104
+place|biome|tundras|12|5934032|-1016226|5100|0.0
+perf|biome|tundras|12|26.9|39.5|40.5|18.46|6.63|12.51|35.61|404|59340|-10162|tundras|0
+place|run|tundras|12|5934032|-1016226|5100|0.0
+perf|run|tundras|12|26.3|40.4|48.8|19.79|6.96|13.19|36.23|790|59446|-10162|tundras|106
+place|biome|plains|12|69619|-796204|-1949|0.0
+perf|biome|plains|12|27.0|39.2|40.3|14.67|6.15|9.63|35.85|406|696|-7962|plains|0
+place|run|plains|12|69619|-796204|-1949|0.0
+perf|run|plains|12|27.7|38.4|39.4|14.50|6.23|9.25|34.95|832|802|-7962|plains|106
+place|biome|pine forests|12|3123970|-1691953|7641|-67.5
+perf|biome|pine forests|12|27.7|38.1|38.7|10.51|5.77|7.23|34.91|416|31240|-16920|pine forests|0
+place|run|pine forests|12|3123970|-1691953|7641|-67.5
+perf|run|pine forests|12|27.5|39.6|40.7|10.45|5.97|7.20|35.17|825|31280|-17017|pine forests|106
+place|biome|temperate autumn forests|12|1332723|-3863831|6218|135.0
+perf|biome|temperate autumn forests|12|22.1|54.7|55.8|12.89|6.21|9.85|43.91|332|13327|-38638|temperate autumn forests|0
+place|run|temperate autumn forests|12|1332723|-3863831|6218|135.0
+perf|run|temperate autumn forests|12|22.5|54.7|56.4|14.00|6.25|9.89|43.11|674|13253|-38564|temperate autumn forests|105
+place|biome|marshes|12|2457799|1299690|-36|0.0
+perf|biome|marshes|12|27.1|38.9|40.1|8.51|5.88|7.60|35.70|407|24578|12997|marshes|0
+place|run|marshes|12|2457799|1299690|-36|0.0
+perf|run|marshes|12|27.5|38.8|39.8|8.79|5.85|7.77|35.17|825|24668|12997|marshes|90
+place|biome|wetlands|12|2068826|1840297|-4140|112.5
+perf|biome|wetlands|12|26.0|42.9|43.9|9.53|6.00|7.73|37.20|390|20688|18403|wetlands|0
+place|run|wetlands|12|2068826|1840297|-4140|112.5
+perf|run|wetlands|12|27.6|41.8|44.6|9.76|6.05|7.73|34.94|828|20654|18486|wetlands|90
+place|biome|mountains and peaks|12|-1514378|-1786092|120090|45.0
+perf|biome|mountains and peaks|12|35.2|30.3|31.0|4.09|5.12|5.49|27.05|528|-15144|-17861|mountains and peaks|0
+place|run|mountains and peaks|12|-1514378|-1786092|120090|45.0
+perf|run|mountains and peaks|12|36.1|29.7|30.9|4.39|5.21|5.57|26.32|1083|-15104|-17802|mountains and peaks|71
+place|biome|volcanoes|12|6163992|-5545911|73238|157.5
+perf|biome|volcanoes|12|16.5|66.2|68.6|27.06|11.62|15.73|25.75|300|61640|-55459|volcanoes|0
+place|run|volcanoes|12|6163992|-5545911|73238|157.5
+perf|run|volcanoes|12|16.1|67.9|76.6|28.10|12.01|15.49|26.53|483|61542|-55419|volcanoes|106
+place|biome|coastal regions|12|-3075950|-125620|-8464|67.5
+perf|biome|coastal regions|12|28.6|37.2|38.8|6.69|5.79|6.35|33.67|429|-30760|-1256|coastal regions|0
+place|run|coastal regions|12|-3075950|-125620|-8464|67.5
+perf|run|coastal regions|12|29.2|37.1|38.5|6.45|5.58|5.83|33.02|875|-30719|-1159|coastal regions|105
+place|biome|arctic regions|12|8398588|1900262|2450|112.5
+perf|biome|arctic regions|12|27.1|38.9|39.8|7.81|5.42|7.57|35.74|407|83986|19003|arctic regions|0
+place|run|arctic regions|12|8398588|1900262|2450|112.5
+perf|run|arctic regions|12|26.8|39.2|40.0|7.90|5.54|7.74|36.14|805|83946|19100|arctic regions|105
+place|biome|canyons|12|-801020|-865375|31257|-112.5
+perf|biome|canyons|12|30.9|34.5|35.0|13.52|6.28|9.73|31.14|464|-8010|-8654|canyons|0
+place|run|canyons|12|-801020|-865375|31257|-112.5
+perf|run|canyons|12|31.2|34.4|35.5|13.80|6.44|9.28|30.82|937|-8051|-8751|canyons|106
+place|biome|mesas|12|-1641112|455319|13747|22.5
+perf|biome|mesas|12|31.2|34.1|35.2|12.96|6.65|9.42|30.68|469|-16411|4553|mesas|0
+place|run|mesas|12|-1641112|455319|13747|22.5
+perf|run|mesas|12|30.7|35.2|36.6|14.06|6.49|10.07|31.18|922|-16315|4593|mesas|104
+place|biome|canyon networks|12|-1304865|-290633|27513|0.0
+perf|biome|canyon networks|12|39.3|26.9|27.7|10.62|5.89|7.80|23.99|590|-13049|-2906|canyon networks|0
+place|run|canyon networks|12|-1304865|-290633|27513|0.0
+perf|run|canyon networks|12|skipped|not measured: she was moved 13323 m in a frame
+place|biome|cold steppes|12|3977271|3476658|25174|-22.5
+perf|biome|cold steppes|12|30.4|34.7|35.4|9.14|5.57|8.34|31.63|456|39773|34767|cold steppes|0
+place|run|cold steppes|12|3977271|3476658|25174|-22.5
+perf|run|cold steppes|12|28.7|37.3|38.9|9.45|5.82|8.67|33.52|863|39870|34726|cold steppes|106
+place|biome|highland moorland|12|2658927|1920362|28842|45.0
+perf|biome|highland moorland|12|31.3|34.0|34.5|11.11|6.11|9.70|30.84|470|26589|19204|highland moorland|0
+place|run|highland moorland|12|2658927|1920362|28842|45.0
+perf|run|highland moorland|12|31.0|34.5|35.7|12.17|6.44|10.26|31.07|931|26664|19277|highland moorland|105
+place|biome|boreal pine forest|12|5258451|-2348467|17899|-157.5
+perf|biome|boreal pine forest|12|27.0|38.9|39.7|12.02|6.06|8.20|35.68|405|52585|-23485|boreal pine forest|0
+place|run|boreal pine forest|12|5258451|-2348467|17899|-157.5
+perf|run|boreal pine forest|12|26.1|40.5|41.5|11.86|6.17|8.06|36.97|784|52487|-23525|boreal pine forest|105
+place|biome|temperate aspen|12|3122090|-1028077|7970|22.5
+perf|biome|temperate aspen|12|29.6|36.5|37.4|9.58|6.06|7.33|32.67|444|31221|-10281|temperate aspen|0
+place|run|temperate aspen|12|3122090|-1028077|7970|22.5
+perf|run|temperate aspen|12|29.3|37.3|38.5|9.42|5.93|7.06|32.95|880|31318|-10240|temperate aspen|106
+place|biome|volcanic tundra|12|6149144|-78826|22994|0.0
+perf|biome|volcanic tundra|12|27.5|38.3|39.5|18.26|6.87|13.09|34.78|413|61491|-788|volcanic tundra|0
+place|run|volcanic tundra|12|6149144|-78826|22994|0.0
+perf|run|volcanic tundra|12|27.6|38.5|39.8|18.62|7.03|13.17|34.66|828|61592|-788|volcanic tundra|100
+place|biome|burned plain|12|3750000|0|2025|90.0
+perf|biome|burned plain|12|31.8|33.4|34.2|8.95|5.68|7.73|30.22|478|37500|0|burned plain|0
+place|run|burned plain|12|3750000|0|2025|90.0
+perf|run|burned plain|12|31.6|33.8|35.0|9.16|5.80|7.92|30.27|948|37500|105|burned plain|105
+place|biome|geothermal caldera|12|2784298|-4382545|32336|45.0
+perf|biome|geothermal caldera|12|27.4|38.2|38.9|11.20|6.14|9.65|35.06|411|27843|-43825|geothermal caldera|0
+place|run|geothermal caldera|12|2784298|-4382545|32336|45.0
+perf|run|geothermal caldera|12|26.2|41.6|42.9|11.96|6.47|9.81|36.75|786|27918|-43751|geothermal caldera|105
+place|biome|glacial|12|7630150|-3504800|85|-135.0
+perf|biome|glacial|12|24.9|44.6|45.4|20.97|8.15|11.45|38.71|374|76302|-35048|glacial|0
+place|run|glacial|12|7630150|-3504800|85|-135.0
+perf|run|glacial|12|27.5|42.6|45.4|21.69|8.43|11.50|34.91|826|76263|-35105|glacial|68
+place|biome|taigas|12|6760223|2079641|12201|45.0
+perf|biome|taigas|12|26.2|40.3|41.1|10.81|5.57|8.01|36.96|393|67602|20796|taigas|0
+place|run|taigas|12|6760223|2079641|12201|45.0
+perf|run|taigas|12|26.0|41.1|42.7|11.87|5.81|8.49|37.18|781|67677|20871|taigas|105
+place|biome|rocky coastal|12|-2285121|-1311514|36354|22.5
+perf|biome|rocky coastal|12|39.6|27.0|28.0|7.15|5.04|6.48|24.06|594|-22851|-13115|rocky coastal|0
+place|run|rocky coastal|12|-2285121|-1311514|36354|22.5
+perf|run|rocky coastal|12|38.2|28.2|29.4|7.20|5.24|6.38|24.90|1148|-22754|-13075|rocky coastal|106
+perf|done

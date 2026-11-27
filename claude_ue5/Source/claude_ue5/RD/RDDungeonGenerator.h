@@ -2361,6 +2361,9 @@ public:
 	void RemoveWildRoom17(int32 I);
 	void AddWildPending17(ARDWildChunk* C, const FVector& O, class UStaticMeshComponent* Sm);
 	float Wild17PruneT = 0.f;
+	/** the ninth phase (RDList17g.cpp): -RDTownGo=closed, the packaged game's run of Closed Structures (with -RDStructures=closed) */
+	int32 Go17Stage = -1, Go17Bld = -1, Go17Try = 0; float Go17At = 0.f, Go17LogAt = 0.f, Go17InAt = -1.f;
+	void TickGo17(APawn* Her);
 	void RecordWildPiece17(int32 Ri, UStaticMesh* Mesh, UMaterialInterface* Mat, bool bCol, const FTransform& W);
 	void TakeWildProps17(int32 Ri, ARDWildChunk* C, int32 From);
 	void TakeWildBatch17(int32 Ri, TMap<FString, TWeakObjectPtr<class UInstancedStaticMeshComponent>>& Batch, const TMap<FString, int32>& Snap, const TArray<const UStaticMesh*>& Keep);
