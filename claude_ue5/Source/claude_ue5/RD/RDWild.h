@@ -58,7 +58,16 @@ struct FRDWildFoliage
 	 *  world's grove pattern (FRDWildWorld::Grove: clusters, strips, clearings) decides where it grows (0 everywhere alike, 1 only
 	 *  in the groves) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Grove = 0.f;
+	/** the list of 2026-11-27 (RDList18.cpp): its mesh's box across and up (cm at scale 1), read on the game thread when the world is asked
+	 *  for (the chunks are made on workers, which read no mesh) */
+	float Radius18 = 0.f, Height18 = 0.f;
 };
+/** the list of 2026-11-27 (RDList18.cpp, rd.Scrub18): a bush's extra sink on a slope (its downhill edge at the ground), and the steepest
+ *  ground a plant grows on under that rule */
+bool RDScrub18On();
+float RDScrub18ExtraSink(const FRDWildFoliage& F, float Sc, const FVector& N);
+float RDScrub18SlopeMax(const FRDWildFoliage& F);
+bool RDScrub18Align(const FRDWildFoliage& F);
 
 /** the list of 2026-11-07 ("the farm terrain should have regular lines of crops, like corn, cabbages, potatoes, pumpkins"): a
  *  field's crop, its rows RowM apart; seen from afar its ground is Soil with Leaf over Cover of it, and the ground material

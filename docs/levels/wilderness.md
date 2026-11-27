@@ -1102,3 +1102,12 @@ Rebuild note (the list of 2026-11-26's second phase): C++ only (`RDList17.cpp`, 
 - `888 closed17w` (`test_w17e.json`): Windholt's village house and Odric's Croft's farmhouse, each laid in Immersive and again in Closed on its chunk: the same record (8 pieces with the household's beds, and 7; a lamp each), the chunk drawing 8 and 7 pieces fewer in the room in Closed and the same containers' parts (7 and 8), the farmhouse's 4 windows with panes (none in Immersive); F opened each door, she walked in, the building level came with 8 and 7 pieces laid (124 to 140 ms) in the room she stood in (found by its place), and was unloaded when she walked out. Its picture inside the farmhouse shows the beds, hearth and table laid by the level.
 
 Rebuild note (the list of 2026-11-26's eighth phase): C++ only; check with `888_wilderness_test.ps1 closed17w <tag> 2400 -Light`.
+## The list of 2026-11-27: the floating scrub (its second phase)
+
+"On hills and mountain sides, there is red scrub that appears to be floating in the air." The red scrub is the bearberry (`SM_Bearberry_02`, 56 % of its texture's pixels red), the low mat the mountains and the cold biomes grow; on a slope it stood upright, sunk 3 cm, its downhill side over the ground. With `rd.Scrub18 1` (`RD/RDList18.cpp`, the placing in `RDWildChunk.cpp`):
+
+- a bush lower than it is wide (the bearberry) lies along its slope; an upright bush is sunk by its footprint's radius times the slope (never more than a third of its height) and grows on ground up to 25 degrees (30 before), unless its entry gives a slope of its own;
+- every plant's height on its 2 m quad follows the drawn triangle's split, not a blend of the quad's corners;
+- a far chunk drawn on 4 m or 8 m lifts its vertices by how far the 2 m ground stands over its triangles' chords, so no plant hangs over a far convex slope (a far tree can stand up to 2.6 m into it).
+
+`888 scrub18` measures every plant on ground over 10 degrees in the hills, the mountains and the mountains and peaks against the drawn ground under its footprint (`GetWildFoliageGaps18`), with the old rules and the new at the same place (`test_s18d.json`): within 300 m the bushes' 95th percentile gap went from 7 to 59 cm to under 0, the largest from up to 66 cm to 6.4 (the bearberry's), and on the far chunks from up to 2.1 m to 0. `lod16` still passes (no seam past the skirts, nothing off the ground, the same run's frames).
