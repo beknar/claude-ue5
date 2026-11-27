@@ -62,6 +62,7 @@ void ARDDungeonGenerator::LayVillageHousehold15(ARDWildChunk* C, const FRDWildPl
 			Sm->RegisterComponent();
 			Sm->SetWorldTransform(Bp->Adjust * FTransform(FRotator(0.f, Y2, 0.f), Lf));
 			C->PlaceProps.Add(Sm);
+			AddWildPending17(C, Hs.C, Sm);          // (the list of 2026-11-26's eighth phase: with the house's furniture)
 			Hs.Beds15.Add(FTransform(FRotator(0.f, Y2, 0.f), Lf));
 			++Hs.Furniture;
 		}

@@ -29,20 +29,38 @@ namespace
 }
 
 // ================================================================================================ the record, made as a building is laid
-int32 ARDDungeonGenerator::BeginWildRoom17(ARDWildChunk* C, const FVector& O, float Yaw, const FVector2D& Mn, const FVector2D& Mx, float Floor, const FString& Kind)
+void ARDDungeonGenerator::RemoveWildRoom17(int32 I)
+{
+	// (PR #144's review: the level she is in or waits for goes with its record, and both indices follow the list)
+	if (!WildBlds17.IsValidIndex(I)) return;
+	if (I == InWild17 || I == PendingWild17) UnloadWild17();
+	WildBlds17.RemoveAt(I);
+	if (InWild17 > I) --InWild17;
+	if (PendingWild17 > I) --PendingWild17;
+}
+
+int32 ARDDungeonGenerator::BeginWildRoom17(ARDWildChunk* C, const FVector& O, float Yaw, const FVector2D& Mn, const FVector2D& Mx, float Floor, const FString& Kind, int32 Farm)
 {
 	if (!C) return -1;
 	// (laid again in place (the chunk made again): the old record goes)
 	for (int32 I = WildBlds17.Num() - 1; I >= 0; --I)
-		if (!WildBlds17[I].C.IsValid() || (WildBlds17[I].C.Get() == C && FVector::Dist(WildBlds17[I].O, O) < 5.f))
-		{
-			if (I == InWild17) UnloadWild17();
-			WildBlds17.RemoveAt(I);
-			if (InWild17 > I) --InWild17;
-		}
+		if (!WildBlds17[I].C.IsValid() || (WildBlds17[I].C.Get() == C && FVector::Dist(WildBlds17[I].O, O) < 5.f)) RemoveWildRoom17(I);
 	FWildBld17& B = WildBlds17.AddDefaulted_GetRef();
-	B.C = C; B.O = O; B.Yaw = Yaw; B.Mn = Mn; B.Mx = Mx; B.Floor = Floor; B.Kind = Kind; B.bClosed = Closed17();
+	B.C = C; B.O = O; B.Yaw = Yaw; B.Mn = Mn; B.Mx = Mx; B.Floor = Floor; B.Kind = Kind; B.bClosed = Closed17(); B.Farm = Farm; B.Made = FPlatformTime::Seconds();
 	return WildBlds17.Num() - 1;
+}
+
+void ARDDungeonGenerator::AddWildPending17(ARDWildChunk* C, const FVector& O, UStaticMeshComponent* Sm)
+{
+	// (a household's bed laid after its house: recorded with the house's furniture and taken with it)
+	if (!C || !Sm || !Sm->GetStaticMesh()) return;
+	for (int32 I = 0; I < WildBlds17.Num(); ++I)
+		if (WildBlds17[I].C.Get() == C && FVector::Dist2D(WildBlds17[I].O, O) < 5.f && !WildBlds17[I].bTaken)
+		{
+			RecordWildPiece17(I, Sm->GetStaticMesh(), Sm->GetMaterial(0), Sm->GetCollisionEnabled() != ECollisionEnabled::NoCollision, Sm->GetComponentTransform());
+			WildBlds17[I].Pend.Add(Sm);
+			return;
+		}
 }
 
 void ARDDungeonGenerator::RecordWildPiece17(int32 Ri, UStaticMesh* Mesh, UMaterialInterface* Mat, bool bCol, const FTransform& W)
@@ -57,27 +75,28 @@ void ARDDungeonGenerator::RecordWildPiece17(int32 Ri, UStaticMesh* Mesh, UMateri
 
 void ARDDungeonGenerator::TakeWildProps17(int32 Ri, ARDWildChunk* C, int32 From)
 {
-	// (a village house's furniture: its own components laid since From on the chunk's ground (a container's parts are on their own base))
+	// (a village house's furniture: its own components laid since From on the chunk's ground (a container's parts are on their own base));
+	// the fireplace stays the chunk's (its fire burns in it, seen through the door: PR #144's review); taken once the households are laid
 	if (!WildBlds17.IsValidIndex(Ri) || !C) return;
-	const bool bTake = WildBlds17[Ri].bClosed;
-	for (int32 K = C->PlaceProps.Num() - 1; K >= From; --K)
+	const FRDPiece* Fp = Piece(TEXT("Fireplace"));
+	for (int32 K = From; K < C->PlaceProps.Num(); ++K)
 	{
 		UStaticMeshComponent* P = C->PlaceProps[K];
-		if (!P || P->GetAttachParent() != C->Ground || !P->GetStaticMesh()) continue;
+		if (!P || P->GetAttachParent() != C->Ground || !P->GetStaticMesh() || (Fp && P->GetStaticMesh() == Fp->Mesh)) continue;
 		RecordWildPiece17(Ri, P->GetStaticMesh(), P->GetMaterial(0), P->GetCollisionEnabled() != ECollisionEnabled::NoCollision, P->GetComponentTransform());
-		if (bTake) { P->DestroyComponent(); C->PlaceProps.RemoveAt(K); }
+		WildBlds17[Ri].Pend.Add(P);
 	}
 }
 
-void ARDDungeonGenerator::TakeWildBatch17(int32 Ri, TMap<FString, TWeakObjectPtr<UInstancedStaticMeshComponent>>& Batch, const TMap<FString, int32>& Snap, const UStaticMesh* Keep)
+void ARDDungeonGenerator::TakeWildBatch17(int32 Ri, TMap<FString, TWeakObjectPtr<UInstancedStaticMeshComponent>>& Batch, const TMap<FString, int32>& Snap, const TArray<const UStaticMesh*>& Keep)
 {
-	// (a farm building's furniture: the instances its batch components gained since Snap, the oven's left (a station))
+	// (a farm building's furniture: the instances its batch components gained since Snap, the oven's (a station) and the fireplace's left)
 	if (!WildBlds17.IsValidIndex(Ri)) return;
 	const bool bTake = WildBlds17[Ri].bClosed;
 	for (const TPair<FString, TWeakObjectPtr<UInstancedStaticMeshComponent>>& Kv : Batch)
 	{
 		UInstancedStaticMeshComponent* Is = Kv.Value.Get();
-		if (!Is || !Is->GetStaticMesh() || Is->GetStaticMesh() == Keep || !Is->IsVisible()) continue;
+		if (!Is || !Is->GetStaticMesh() || Keep.Contains(Is->GetStaticMesh()) || !Is->IsVisible()) continue;
 		const int32* S0 = Snap.Find(Kv.Key);
 		const int32 From = S0 ? *S0 : 0, To = Is->GetInstanceCount();
 		if (To <= From) continue;
@@ -152,16 +171,25 @@ void ARDDungeonGenerator::UnloadWild17()
 
 void ARDDungeonGenerator::TickWildBld17(float Dt, const FVector& Her)
 {
-	// (the records of chunks let go, let go)
-	if (WildBlds17.Num() > 0 && FMath::Fmod((float)FPlatformTime::Seconds(), 2.f) < Dt)
-		for (int32 I = WildBlds17.Num() - 1; I >= 0; --I)
-			if (!WildBlds17[I].C.IsValid())
-			{
-				if (I == InWild17 || I == PendingWild17) UnloadWild17();
-				WildBlds17.RemoveAt(I);
-				if (InWild17 > I) --InWild17;
-				if (PendingWild17 > I) --PendingWild17;
-			}
+	// (the records of chunks let go, let go, every 2 s)
+	Wild17PruneT -= Dt;
+	if (Wild17PruneT <= 0.f)
+	{
+		Wild17PruneT = 2.f;
+		for (int32 I = WildBlds17.Num() - 1; I >= 0; --I) if (!WildBlds17[I].C.IsValid()) RemoveWildRoom17(I);
+	}
+	// (a village house's furniture and beds taken out of a closed chunk once every household queued is laid, half a second on)
+	if (VillageHouseQueue15.Num() == 0)
+		for (FWildBld17& B : WildBlds17)
+		{
+			if (B.bTaken || B.Pend.Num() == 0 || FPlatformTime::Seconds() - B.Made < 0.5) continue;
+			B.bTaken = true;
+			if (B.bClosed)
+				if (ARDWildChunk* C = B.C.Get())
+					for (const TWeakObjectPtr<UStaticMeshComponent>& W : B.Pend)
+						if (UStaticMeshComponent* P = W.Get()) { C->PlaceProps.Remove(P); P->DestroyComponent(); }
+			B.Pend.Reset();
+		}
 	// ---- the level asked for, loaded: the furniture and lamp laid
 	if (PendingWild17 >= 0)
 	{

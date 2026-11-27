@@ -8951,6 +8951,8 @@ def step_closed17w():
                 bs = [b for b in wild_blds17() if b["kind"] == kind and math.hypot(b["x"] / 100.0 - x, b["y"] / 100.0 - y) < 80.0]
                 if not bs: per[mode] = None; continue
                 b = min(bs, key=lambda b: math.hypot(b["x"] / 100.0 - x, b["y"] / 100.0 - y))
+                yield from rwait(1.5)          # (a closed village house's furniture is taken once its household is laid)
+                b = next((x for x in wild_blds17() if abs(x["x"] - b["x"]) < 5 and abs(x["y"] - b["y"]) < 5), b)
                 st, mv = room_census17(b)
                 per[mode] = {"closed": b["closed"], "n": b["n"], "lamps": b["lamps"], "panes": b["panes"], "still": st, "moving": mv, "i": b["i"], "b": b}
             v["immersive"] = {k: w for k, w in (per.get(0) or {}).items() if k != "b"}; v["closed"] = {k: w for k, w in (per.get(1) or {}).items() if k != "b"}
@@ -8973,10 +8975,15 @@ def step_closed17w():
                     while time.time() - t0 < 15 and wild17_state()["in"] < 0: yield
                     yield from rwait(0.6)
                     v["inside"] = in_house(h, G["pawn"].get_actor_location()); v["in_state"] = wild17_state()
+                    # (the room she is in by its place, not its index: chunks come and go as she walks)
+                    rin = next((x for x in wild_blds17() if x["i"] == v["in_state"]["in"]), None)
+                    v["in_room_off_cm"] = round(math.hypot(rin["x"] - b["x"], rin["y"] - b["y"]), 1) if rin else None
+                    v["in_room_n"] = rin["n"] if rin else None
                     G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-20, yaw=math.degrees(math.atan2(-out.y, -out.x)))); yield from rwait(1.2)
                     sn = f"closed17w_{len(res['visits'])}"; shot(sn, "1280x720"); v["shot"] = sn; yield from rwait(1.5)
                     yield from walk_to(V(d["x"] + out.x * 400, d["y"] + out.y * 400, 0), 10.0)
                     yield from rwait(1.0)
+                    yield from rwait(2.0)
                     v["out_state"] = wild17_state()
             res["visits"].append(v)
     except Exception as e_:
@@ -8993,7 +9000,8 @@ def step_closed17w():
         return (im.get("closed") == 0 and cl.get("closed") == 1 and cl.get("n", 0) >= 4 and cl.get("n") == im.get("n") and cl.get("lamps") == im.get("lamps") >= 1
                 and im.get("still", 0) - cl.get("still", 0) >= cl.get("n", 99) * 0.9 and cl.get("moving") == im.get("moving") and im.get("panes") == 0
                 and (cl.get("panes", 0) > 0 if v["kind"] == "house" else True)
-                and v.get("inside") and ins.get("in") == cl.get("i") and ins.get("laid") == cl.get("n") and ins.get("loaded") == 1 and outs.get("in") == -1)
+                and v.get("inside") and v.get("in_room_off_cm") is not None and v["in_room_off_cm"] < 50 and ins.get("laid") == v.get("in_room_n") == cl.get("n") and ins.get("loaded") == 1
+                and outs.get("in") == -1 and outs.get("loaded") == 0)
     ok = "error" not in res and len(res["visits"]) == 2 and all(good(v) for v in res["visits"])
     step_result("closed17w", ok, **res)
 

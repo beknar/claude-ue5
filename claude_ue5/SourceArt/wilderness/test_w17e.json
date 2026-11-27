@@ -1,5 +1,5 @@
 {
- "tag": "w17c",
+ "tag": "w17e",
  "plan": [
   "closed17w"
  ],
@@ -14,7 +14,7 @@
      "name": "Windholt",
      "immersive": {
       "closed": 0,
-      "n": 5,
+      "n": 8,
       "lamps": 1,
       "panes": 0,
       "still": 16,
@@ -23,10 +23,10 @@
      },
      "closed": {
       "closed": 1,
-      "n": 5,
+      "n": 8,
       "lamps": 1,
       "panes": 0,
-      "still": 11,
+      "still": 8,
       "moving": 7,
       "i": 3
      },
@@ -35,27 +35,29 @@
       "in": -1,
       "pending": -1,
       "loaded": 0,
-      "laid": 5,
+      "laid": 8,
       "entered": 1,
-      "ms": 776.0
+      "ms": 795.0
      },
      "inside": true,
      "in_state": {
       "in": 3,
       "pending": -1,
       "loaded": 1,
-      "laid": 5,
+      "laid": 8,
       "entered": 2,
-      "ms": 124.0
+      "ms": 140.0
      },
+     "in_room_off_cm": 0.0,
+     "in_room_n": 8,
      "shot": "closed17w_0",
      "out_state": {
       "in": -1,
       "pending": -1,
       "loaded": 0,
-      "laid": 5,
+      "laid": 8,
       "entered": 2,
-      "ms": 124.0
+      "ms": 140.0
      }
     },
     {
@@ -63,7 +65,7 @@
      "name": "farmstead Odric's Croft",
      "immersive": {
       "closed": 0,
-      "n": 8,
+      "n": 7,
       "lamps": 1,
       "panes": 0,
       "still": 15,
@@ -72,10 +74,10 @@
      },
      "closed": {
       "closed": 1,
-      "n": 8,
+      "n": 7,
       "lamps": 1,
       "panes": 4,
-      "still": 7,
+      "still": 8,
       "moving": 8,
       "i": 4
      },
@@ -84,27 +86,29 @@
       "in": -1,
       "pending": -1,
       "loaded": 0,
-      "laid": 5,
+      "laid": 8,
       "entered": 2,
-      "ms": 124.0
+      "ms": 140.0
      },
      "inside": true,
      "in_state": {
       "in": 4,
       "pending": -1,
       "loaded": 1,
-      "laid": 8,
+      "laid": 7,
       "entered": 3,
-      "ms": 128.0
+      "ms": 124.0
      },
+     "in_room_off_cm": 0.0,
+     "in_room_n": 7,
      "shot": "closed17w_1",
      "out_state": {
       "in": -1,
       "pending": -1,
       "loaded": 0,
-      "laid": 8,
+      "laid": 7,
       "entered": 3,
-      "ms": 128.0
+      "ms": 124.0
      }
     }
    ]
@@ -112,8 +116,8 @@
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
  "shots": [
-  "wd_w17c_closed17w_0.png",
-  "wd_w17c_closed17w_1.png"
+  "wd_w17e_closed17w_0.png",
+  "wd_w17e_closed17w_1.png"
  ],
  "error": null,
  "saves_put_back": 1,

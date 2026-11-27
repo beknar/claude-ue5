@@ -253,7 +253,7 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 		Lt->RegisterComponent();
 		Lt->SetWorldLocation(RDW10At(O, Yaw, RoomC.X, RoomC.Y, 290.f));
 		Rec.bLit = true;
-		TakeWildLamp17(Ri17, Lt);
+		if (TakeWildLamp17(Ri17, Lt)) Rec.bLit = false;          // (its light in the building level only)
 	}
 	TakeWildProps17(Ri17, C, Props17);
 	// ---- its ground kept clear: the plants in it taken out, the near grass to come left out; the place's own props in it (a lone

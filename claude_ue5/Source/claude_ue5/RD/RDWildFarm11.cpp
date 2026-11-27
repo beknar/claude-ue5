@@ -417,7 +417,7 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 	// ---- its inside, by its kind (the room inside the walls; the door's wall +X, the back wall -X; a piece's front is its +X)
 	const FVector2D Mn(-Hx + 30.f, -Hy + 30.f), Mx(Hx - 30.f, Hy - 30.f);
 	// (the list of 2026-11-26's eighth phase: what its inside adds to the farm's batches is recorded, taken out in Closed Structures)
-	const int32 Ri17 = BeginWildRoom17(C, O, Yaw, Mn, Mx, Base + 2.f, Kind.ToString());
+	const int32 Ri17 = BeginWildRoom17(C, O, Yaw, Mn, Mx, Base + 2.f, Kind.ToString(), Rec.Id);
 	TMap<FString, int32> Snap17;
 	for (const TPair<FString, TWeakObjectPtr<UInstancedStaticMeshComponent>>& Kv : Rec.Batch) if (const UInstancedStaticMeshComponent* Is = Kv.Value.Get()) Snap17.Add(Kv.Key, Is->GetInstanceCount());
 	const float Wd = Mx.X - Mn.X;
@@ -583,7 +583,11 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 	}
 	{
 		const FRDPiece* Op17 = Piece(TEXT("BreadOven"));
-		TakeWildBatch17(Ri17, Rec.Batch, Snap17, Op17 ? Op17->Mesh.Get() : nullptr);
+		const FRDPiece* Fp17 = Piece(TEXT("Fireplace"));
+		TArray<const UStaticMesh*> Keep17;
+		if (Op17 && Op17->Mesh) Keep17.Add(Op17->Mesh);
+		if (Fp17 && Fp17->Mesh) Keep17.Add(Fp17->Mesh);
+		TakeWildBatch17(Ri17, Rec.Batch, Snap17, Keep17);
 		AddWildPanes17(Ri17, Win17, &Rec.Comps);
 	}
 	// ---- animals inside (a barn's stalls, a coop's hens): a fence across the far half, its gate by the front; the floor's height
@@ -1022,6 +1026,8 @@ bool ARDDungeonGenerator::RemoveWildFarm(int32 Id)
 	const int32 I = WildFarms.IndexOfByPredicate([&](const FRDWildFarmRec& F) { return F.Id == Id; });
 	if (I < 0) return false;
 	FRDWildFarmRec& F = WildFarms[I];
+	// (the list of 2026-11-26's eighth phase: its buildings' records go with it (PR #144's review: a removed design left a room to walk into))
+	for (int32 K = WildBlds17.Num() - 1; K >= 0; --K) if (WildBlds17[K].Farm == Id) RemoveWildRoom17(K);
 	if (ARDWildChunk* C = F.Chunk.Get(); IsValid(C))
 	{
 		// (its ranges in the chunk's lists, last first: they were added together, nothing of another farm between them)
