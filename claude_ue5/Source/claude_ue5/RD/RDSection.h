@@ -849,6 +849,8 @@ public:
 	bool BldClosed17 = false;
 	/** a closed building entered so: one whose furnishing this town recorded */
 	bool HasRecord17(int32 BI) const { return BldClosed17 && BldRec17.Contains(BI); }
+	/** the seventh phase: a building's window piece as its kit and theme give it (its name too) */
+	const FRDPiece* WindowPiece17(int32 BI, FName& Name) const;
 	bool RecordsBuilding17(int32 BI) const;
 	void RecordPiece17(int32 BI, UStaticMesh* Mesh, UMaterialInterface* Mat, bool bCol, bool bSmall, float Cull, const FTransform& W);
 	void RecordActor17(int32 BI, UClass* Class, const FTransform& W);

@@ -36,7 +36,9 @@ UMaterialInterface* ARDDungeonGenerator::RoomPaneFor17(const ARDSection* S, int3
 	FString Base = K.ToString(); int32 Us = -1;
 	if (Base.FindChar(TEXT('_'), Us)) Base = Base.Left(Us);
 	const bool bModern = K.ToString().EndsWith(TEXT("_modern"));
-	for (const FName& Try : { K, FName(*Base), FName(bModern ? TEXT("home_modern") : TEXT("home")), FName(TEXT("home")) })
+	// (PR #143's review: a modern kind with no picture of its own takes Heaven's home before a medieval room)
+	const FName Order[] = { K, bModern ? FName(TEXT("home_modern")) : FName(*Base), FName(*Base), FName(TEXT("home")) };
+	for (const FName& Try : Order)
 		if (const TObjectPtr<UMaterialInterface>* M = RoomPanes17.Find(Try); M && *M) { if (Used) *Used = Try; return *M; }
 	return nullptr;
 }
@@ -72,7 +74,7 @@ void ARDDungeonGenerator::TickPanes17(float Dt)
 			{
 				H = NewObject<UInstancedStaticMeshComponent>(S);
 				H->SetStaticMesh(BuildingPaneMesh17); H->SetMaterial(0, M);
-				H->NumCustomDataFloats = 1;
+				H->SetNumCustomDataFloats(1);
 				H->SetMobility(EComponentMobility::Static); H->SetCollisionProfileName(TEXT("NoCollision")); H->SetCastShadow(false);
 				H->SetCullDistances(6000, 8000);
 				H->SetupAttachment(S->GetRootComponent());
@@ -80,9 +82,28 @@ void ARDDungeonGenerator::TickPanes17(float Dt)
 				H->RegisterComponent(); S->AddInstanceComponent(H);
 				Panes17.Add(H);
 			}
-			// (facing the street, its width along the wall, a few centimetres out in the frame)
+			// (facing the street, its width along the wall, just out of the window piece's own outer face (PR #143's review: a fixed 12 cm was
+			// inside Heaven's walls, whose outer face is at 23 cm): the piece's box through its Adjust, measured once a kit)
 			const FVector Out = Wn.Out.GetSafeNormal2D();
-			const FTransform T(FRotationMatrix::MakeFromZX(Out, FVector(Out.Y, -Out.X, 0.f)).Rotator(), Wn.At + Out * BuildingPaneOut17, FVector(BuildingPaneSize17.X / 100.f, BuildingPaneSize17.Y / 100.f, 1.f));
+			float OutCm = BuildingPaneOut17;
+			FVector2D Size = BuildingPaneSize17;
+			if (S->TownBlds.IsValidIndex(Wn.Bld))
+			{
+				FName Wp;
+				const FRDPiece* Pc = S->WindowPiece17(Wn.Bld, Wp);
+				const bool bModern = S->TownBlds[Wn.Bld].Style >= 7;
+				if (const float* Got = PaneOut17.Find(Wp)) { OutCm = *Got; if (const FVector2D* Sz = PaneSize17.Find(Wp)) Size = *Sz; }
+				else if (Pc && Pc->Mesh)
+				{
+					const FBox Bx = Pc->Mesh->GetBoundingBox().TransformBy(Pc->Adjust);
+					OutCm = FMath::Clamp((float)Bx.Max.X + 2.f, 2.f, 60.f);
+					PaneOut17.Add(Wp, OutCm);
+					// (a modern window is a wall of glass: the pane its width (PR #143's review's picture: 110 cm squares in 3 m panes))
+					if (bModern) { Size = FVector2D(FMath::Clamp((float)Bx.GetSize().Y * 0.92f, 100.f, 400.f), 250.f); PaneSize17.Add(Wp, Size); }
+					UE_LOG(LogRDList17e, Log, TEXT("RDPANES17 %s: its outer face at %.0f cm, %.0f wide, %.0f high; pane %.0f x %.0f"), *Wp.ToString(), OutCm - 2.f, Bx.GetSize().Y, Bx.GetSize().Z, Size.X, Size.Y);
+				}
+			}
+			const FTransform T(FRotationMatrix::MakeFromZX(Out, FVector(Out.Y, -Out.X, 0.f)).Rotator(), Wn.At + Out * OutCm, FVector(Size.X / 100.f, Size.Y / 100.f, 1.f));
 			const int32 I = H->AddInstance(T, true);
 			PaneBld17.Add({ H, I, Wn.Bld });
 			PaneKeys17.Add(Used);
@@ -120,10 +141,18 @@ bool ARDDungeonGenerator::CaptureRoom17(FVector At, FRotator Rot, FVector LightA
 	UPointLightComponent* L = NewObject<UPointLightComponent>(this);
 	L->SetMobility(EComponentMobility::Movable); L->SetIntensityUnits(ELightUnits::Candelas);
 	L->SetIntensity(Intensity); L->SetAttenuationRadius(1800.f); L->SetLightColor(FLinearColor(1.f, 0.78f, 0.55f)); L->SetCastShadows(false);
-	L->RegisterComponent(); L->SetWorldLocation(LightAt);
+	L->SetWorldLocation(LightAt); L->RegisterComponent();
 	const bool bOk = CaptureView24(At, Rot, 75.f, 512, 512, Dir, File);
 	L->DestroyComponent();
 	return bOk;
+}
+
+const FRDPiece* ARDSection::WindowPiece17(int32 BI, FName& Name) const
+{
+	Name = NAME_None;
+	if (!TownBlds.IsValidIndex(BI)) return nullptr;
+	Name = TownPiece(TownBlds[BI], TEXT("WallWindow"));
+	return Pc(Name);
 }
 
 TArray<FString> ARDDungeonGenerator::GetPanes17() const

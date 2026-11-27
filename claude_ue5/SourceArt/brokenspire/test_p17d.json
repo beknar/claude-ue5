@@ -1,418 +1,73 @@
 {
  "tag": "p17d",
  "plan": [
-  "town"
+  "panes17"
  ],
  "level": "brokenspire",
  "steps": [
   {
-   "step": "town",
+   "step": "panes17",
    "ok": true,
-   "seed0": {
-    "kinds": {
-     "temple": 1,
-     "tavern": 1,
-     "smithy": 1,
-     "store": 3,
-     "healer": 1,
-     "storehouse": 1,
-     "barracks": 1,
-     "chapel": 1,
-     "witch's hut": 1,
-     "home": 122,
-     "castle": 1
+   "fps": {
+    "0_12": {
+     "fps": 15.0,
+     "p95_ms": 89.0
     },
-    "homes": {
-     "lived": 65,
-     "burned": 24,
-     "boarded": 33
+    "0_0": {
+     "fps": 22.4,
+     "p95_ms": 52.0
     },
-    "spots": {
-     "circle": 1,
-     "mill": 1,
-     "tower": 21,
-     "gate": 1,
-     "well": 1,
-     "board": 1,
-     "stall": 12,
-     "lamp": 4,
-     "grave": 16,
-     "graveyard": 1,
-     "stable": 1,
-     "tent": 3,
-     "still": 1,
-     "altar": 1,
-     "bar": 1,
-     "smith": 1,
-     "counter": 3,
-     "basin": 1,
-     "stash": 1
+    "1_12": {
+     "fps": 11.7,
+     "p95_ms": 101.9
     },
-    "square": [
-     1050,
-     8100
-    ],
-    "unreached": [],
-    "castle_rooms": 4,
-    "mistgate": true,
-    "trades_at": {
-     "temple": [
-      56,
-      100
-     ],
-     "tavern": [
-      -27,
-      123
-     ],
-     "smithy": [
-      45,
-      63
-     ],
-     "store": [
-      26,
-      132
-     ],
-     "healer": [
-      27,
-      44
-     ],
-     "storehouse": [
-      -10,
-      50
-     ],
-     "barracks": [
-      122,
-      130
-     ],
-     "chapel": [
-      -57,
-      -74
-     ],
-     "witch's hut": [
-      -66,
-      -222
-     ],
-     "castle": [
-      10,
-      -206
-     ]
-    },
-    "gate_at": [
-     10,
-     201
-    ]
+    "1_0": {
+     "fps": 9.3,
+     "p95_ms": 124.1
+    }
    },
-   "roles": {
-    "Elder": 1,
-    "Preacher": 1,
-    "Idiot": 1,
-    "Mourner": 1,
-    "Guard": 4,
-    "Captain": 1,
-    "Militia": 4,
-    "Refugee": 4,
-    "Priest": 1,
-    "Innkeeper": 1,
-    "Drunk": 1,
-    "Scholar": 1,
-    "Smith": 1,
-    "Trader": 15,
-    "Healer": 1,
-    "Keeper": 1,
-    "Soldier": 3,
-    "Witch": 1,
-    "Townsfolk": 66,
-    "Child": 10
-   },
-   "roles_missing": [],
-   "seed1111": {
-    "kinds": {
-     "temple": 1,
-     "tavern": 1,
-     "smithy": 1,
-     "store": 3,
-     "healer": 1,
-     "storehouse": 1,
-     "barracks": 1,
-     "chapel": 1,
-     "witch's hut": 1,
-     "home": 119,
-     "castle": 1
-    },
-    "homes": {
-     "lived": 66,
-     "burned": 26,
-     "boarded": 27
-    },
-    "spots": {
-     "circle": 1,
-     "mill": 1,
-     "tower": 21,
-     "gate": 1,
-     "well": 1,
-     "board": 1,
-     "stall": 12,
-     "lamp": 4,
-     "grave": 16,
-     "graveyard": 1,
-     "stable": 1,
-     "tent": 3,
-     "still": 1,
-     "altar": 1,
-     "bar": 1,
-     "smith": 1,
-     "counter": 3,
-     "basin": 1,
-     "stash": 1
-    },
-    "square": [
-     -6000,
-     1650
-    ],
-    "unreached": [],
-    "castle_rooms": 4,
-    "mistgate": true,
-    "trades_at": {
-     "temple": [
-      -39,
-      69
-     ],
-     "tavern": [
-      -80,
-      72
-     ],
-     "smithy": [
-      -117,
-      -9
-     ],
-     "store": [
-      9,
-      52
-     ],
-     "healer": [
-      -92,
-      33
-     ],
-     "storehouse": [
-      -105,
-      -48
-     ],
-     "barracks": [
-      -166,
-      -21
-     ],
-     "chapel": [
-      86,
-      -136
-     ],
-     "witch's hut": [
-      225,
-      87
-     ],
-     "castle": [
-      206,
-      16
-     ]
-    },
-    "gate_at": [
-     -207,
-     16
-    ]
-   },
-   "seed2222": {
-    "kinds": {
-     "temple": 1,
-     "tavern": 1,
-     "smithy": 1,
-     "store": 3,
-     "healer": 1,
-     "storehouse": 1,
-     "barracks": 1,
-     "chapel": 1,
-     "witch's hut": 1,
-     "home": 121,
-     "castle": 1
-    },
-    "homes": {
-     "lived": 70,
-     "burned": 24,
-     "boarded": 27
-    },
-    "spots": {
-     "circle": 1,
-     "mill": 1,
-     "tower": 24,
-     "gate": 1,
-     "well": 1,
-     "board": 1,
-     "stall": 12,
-     "lamp": 4,
-     "grave": 16,
-     "graveyard": 1,
-     "stable": 1,
-     "tent": 3,
-     "still": 1,
-     "altar": 1,
-     "bar": 1,
-     "smith": 1,
-     "counter": 3,
-     "basin": 1,
-     "stash": 1
-    },
-    "square": [
-     -1650,
-     -7200
-    ],
-    "unreached": [],
-    "castle_rooms": 4,
-    "mistgate": true,
-    "trades_at": {
-     "temple": [
-      -42,
-      -34
-     ],
-     "tavern": [
-      10,
-      -36
-     ],
-     "smithy": [
-      32,
-      -102
-     ],
-     "store": [
-      -34,
-      -12
-     ],
-     "healer": [
-      36,
-      -26
-     ],
-     "storehouse": [
-      -57,
-      -124
-     ],
-     "barracks": [
-      -118,
-      -45
-     ],
-     "chapel": [
-      -198,
-      18
-     ],
-     "witch's hut": [
-      -120,
-      222
-     ],
-     "castle": [
-      -16,
-      206
-     ]
-    },
-    "gate_at": [
-     -16,
-     -204
-    ]
-   },
-   "seed3333": {
-    "kinds": {
-     "temple": 1,
-     "tavern": 1,
-     "smithy": 1,
-     "store": 3,
-     "healer": 1,
-     "storehouse": 1,
-     "barracks": 1,
-     "chapel": 1,
-     "witch's hut": 1,
-     "home": 105,
-     "castle": 1
-    },
-    "homes": {
-     "lived": 67,
-     "burned": 15,
-     "boarded": 23
-    },
-    "spots": {
-     "circle": 1,
-     "mill": 1,
-     "tower": 21,
-     "gate": 1,
-     "well": 1,
-     "board": 1,
-     "stall": 12,
-     "lamp": 4,
-     "grave": 16,
-     "graveyard": 1,
-     "stable": 1,
-     "tent": 3,
-     "still": 1,
-     "altar": 1,
-     "bar": 1,
-     "smith": 1,
-     "counter": 3,
-     "basin": 1,
-     "stash": 1
-    },
-    "square": [
-     -750,
-     -6900
-    ],
-    "unreached": [],
-    "castle_rooms": 4,
-    "mistgate": true,
-    "trades_at": {
-     "temple": [
-      -39,
-      -34
-     ],
-     "tavern": [
-      27,
-      -86
-     ],
-     "smithy": [
-      8,
-      -27
-     ],
-     "store": [
-      48,
-      -84
-     ],
-     "healer": [
-      -24,
-      -123
-     ],
-     "storehouse": [
-      21,
-      -106
-     ],
-     "barracks": [
-      56,
-      -130
-     ],
-     "chapel": [
-      -123,
-      159
-     ],
-     "witch's hut": [
-      84,
-      222
-     ],
-     "castle": [
-      -8,
-      206
-     ]
-    },
-    "gate_at": [
-     -8,
-     -204
-    ]
-   },
-   "layouts_differ": true,
-   "back_to_seed": true
+   "windows_closed": 1311,
+   "panes": 1311,
+   "panes_off_closed": 0,
+   "wrong_picture": [],
+   "keys_used": [
+    "barracks",
+    "chapel",
+    "healer",
+    "home",
+    "smithy",
+    "store",
+    "storehouse",
+    "tavern",
+    "temple",
+    "witchshut"
+   ],
+   "glowing": 29,
+   "dark": 1282,
+   "glow_mismatch": 0,
+   "glow_mismatch_blds": [],
+   "lit_lines": [
+    "0|temple|0|19|0|1|0",
+    "1|tavern|0|24|0|12|0",
+    "2|smithy|0|4|0|1|0"
+   ],
+   "pane_luma_night": 144.1,
+   "pane_luma_off": 0.2,
+   "pane_lit_building": 21,
+   "heaven_panes": 2165,
+   "heaven_pane_out_cm": 22.0,
+   "heaven_noon_on": 141.4,
+   "heaven_noon_off": 14.0
   }
  ],
- "windows_hidden": "claude_ue5 - Unreal Editor, (untitled), Message Log",
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "bs_p17d_panes17_night.png",
+  "bs_p17d_panes17_off.png",
+  "bs_p17d_panes17_heaven_on.png",
+  "bs_p17d_panes17_heaven_off.png"
+ ],
  "error": null,
- "saves_put_back": 0,
+ "saves_put_back": 1,
  "windows_shown_again": 2
 }

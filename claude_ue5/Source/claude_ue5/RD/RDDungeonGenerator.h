@@ -2335,6 +2335,10 @@ public:
 	int32 Panes17Made = 0, Panes17Glowing = 0;
 	float Panes17T = 0.f, Panes17Lit = -1.f;
 	bool bPanes17Shown = true;
+	/** each window piece's outer face (cm out of the wall's line, measured on its mesh through its Adjust), once a kit */
+	TMap<FName, float> PaneOut17;
+	/** a modern window's pane: its width the window piece's (92 %), 250 cm high (Heaven's glass); the medieval ones BuildingPaneSize17 */
+	TMap<FName, FVector2D> PaneSize17;
 	bool IsEnterable17(const ARDSection* S, int32 BI) const;
 	int32 BuildingDoorNear17(const FVector& From, bool bOut) const;
 	bool BuildingDoorFirst17(const FVector& From, int32 I, float NearerThan, const ARDSection* BestS, bool bBestDoor, int32 BestI) const;
