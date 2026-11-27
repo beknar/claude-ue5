@@ -16,8 +16,7 @@ Built and compiled, but no test has run it yet:
 
 ## The list of 2026-11-27 ([docs/improvements18.txt](docs/improvements18.txt), its plan [docs/improvements18_plan.md](docs/improvements18_plan.md))
 
-- [ ] **The far trees sunk**: the far chunks' coarse ground is lifted to the 2 m ground's chords (`rd.Scrub18`), so no plant hangs over it; a tree on a chunk drawn at 4 m or 8 m (past 250 m) can stand up to 2.6 m into it (`888 lod16`'s feet: 1.6 m sunk and 1.45 m over it before). Seen from 250 m and more; not looked at in a picture.
-- [ ] **The bushes on 25 to 30 degrees**: the slope rule keeps a bush whose entry gives no slope of its own off ground steeper than 25 degrees (30 before): some hillsides have fewer bushes.
+- [ ] **Plants on the far chunks**: a chunk drawn on 4 m or 8 m (past 250 m) draws the coarse chord of a convex slope under the plants laid on the 2 m ground: bushes stand up to 1.9 m over it (`888 scrub18`'s far columns), trees and everything else laid on the ground the same. Lifting the coarse vertices to the chords (tried in PR #147) opened seams between chunks of the same step and sank everything else on them up to 2.6 m; re-seating a chunk's plants when its step changes is the other way, not done. The red scrub (the bearberry) grows near her only.
 
 ## The list of 2026-11-26 ([docs/improvements17.txt](docs/improvements17.txt), its plan [docs/improvements17_plan.md](docs/improvements17_plan.md))
 

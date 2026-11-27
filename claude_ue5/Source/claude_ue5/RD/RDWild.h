@@ -66,7 +66,6 @@ struct FRDWildFoliage
  *  ground a plant grows on under that rule */
 bool RDScrub18On();
 float RDScrub18ExtraSink(const FRDWildFoliage& F, float Sc, const FVector& N);
-float RDScrub18SlopeMax(const FRDWildFoliage& F);
 bool RDScrub18Align(const FRDWildFoliage& F);
 
 /** the list of 2026-11-07 ("the farm terrain should have regular lines of crops, like corn, cabbages, potatoes, pumpkins"): a

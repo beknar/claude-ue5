@@ -1,5 +1,5 @@
 {
- "tag": "s18d",
+ "tag": "s18e",
  "plan": [
   "scrub18",
   "lod16"
@@ -27,40 +27,40 @@
        "whole5": 0,
        "step1_cm": 30.9,
        "step2_cm": 19.2,
-       "step4_cm": 0.0
+       "step4_cm": -1000000000.0
       },
       "SM_EuropeanBeech_L_01": {
        "kind": "tree",
-       "n": 47,
+       "n": 46,
        "max_cm": 22.0,
        "p95_cm": 9.5,
        "over10": 1,
        "whole5": 0,
        "step1_cm": 22.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Pine_Medium_1_": {
        "kind": "tree",
-       "n": 38,
+       "n": 37,
        "max_cm": -2.1,
        "p95_cm": -4.7,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -2.1,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Large_Rock_C": {
        "kind": "rock",
-       "n": 26,
+       "n": 25,
        "max_cm": -54.5,
        "p95_cm": -55.2,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -54.5,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Bush01": {
        "kind": "bush",
@@ -70,8 +70,8 @@
        "over10": 0,
        "whole5": 0,
        "step1_cm": 9.5,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -0.5,
+       "step4_cm": -1000000000.0
       },
       "SM_Bush02": {
        "kind": "bush",
@@ -81,8 +81,8 @@
        "over10": 2,
        "whole5": 0,
        "step1_cm": 13.1,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_bush": {
        "kind": "bush",
@@ -92,8 +92,8 @@
        "over10": 10,
        "whole5": 0,
        "step1_cm": 44.9,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Bush_02": {
        "kind": "bush",
@@ -103,19 +103,19 @@
        "over10": 27,
        "whole5": 0,
        "step1_cm": 32.3,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Grass_2": {
        "kind": "grass",
-       "n": 5389,
+       "n": 5364,
        "max_cm": 53.1,
-       "p95_cm": -0.5,
+       "p95_cm": -0.6,
        "over10": 18,
        "whole5": 1,
        "step1_cm": 53.1,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_GorseBushSmall_01": {
        "kind": "bush",
@@ -125,8 +125,8 @@
        "over10": 0,
        "whole5": 0,
        "step1_cm": 2.1,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Tree03": {
        "kind": "tree",
@@ -136,19 +136,19 @@
        "over10": 1,
        "whole5": 0,
        "step1_cm": 39.3,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Grass_3": {
        "kind": "grass",
-       "n": 62,
+       "n": 60,
        "max_cm": 21.7,
-       "p95_cm": 16.1,
+       "p95_cm": 19.4,
        "over10": 6,
        "whole5": 0,
        "step1_cm": 21.7,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_flower_01": {
        "kind": "flower",
@@ -157,17 +157,17 @@
        "p95_cm": -1.7,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -1.7,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       }
      },
      "far_0": {
       "SM_GorseBushLarge_01": {
        "kind": "bush",
-       "n": 962,
+       "n": 957,
        "max_cm": 67.0,
-       "p95_cm": 28.1,
+       "p95_cm": 28.2,
        "over10": 384,
        "whole5": 0,
        "step1_cm": 33.4,
@@ -176,9 +176,9 @@
       },
       "SM_EuropeanBeech_L_01": {
        "kind": "tree",
-       "n": 883,
+       "n": 850,
        "max_cm": 111.4,
-       "p95_cm": 9.5,
+       "p95_cm": 10.0,
        "over10": 42,
        "whole5": 0,
        "step1_cm": 22.0,
@@ -187,29 +187,29 @@
       },
       "SM_Pine_Medium_1_": {
        "kind": "tree",
-       "n": 678,
+       "n": 670,
        "max_cm": 24.5,
        "p95_cm": -2.7,
        "over10": 8,
        "whole5": 0,
-       "step1_cm": 0.0,
+       "step1_cm": -2.1,
        "step2_cm": 18.1,
        "step4_cm": 24.5
       },
       "SM_Large_Rock_C": {
        "kind": "rock",
-       "n": 369,
+       "n": 359,
        "max_cm": -1.1,
        "p95_cm": -50.4,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -54.5,
+       "step2_cm": -45.6,
+       "step4_cm": -1.1
       },
       "SM_Bush01": {
        "kind": "bush",
-       "n": 872,
+       "n": 867,
        "max_cm": 50.1,
        "p95_cm": 17.7,
        "over10": 134,
@@ -220,10 +220,10 @@
       },
       "SM_Bush02": {
        "kind": "bush",
-       "n": 567,
+       "n": 564,
        "max_cm": 59.8,
        "p95_cm": 20.1,
-       "over10": 93,
+       "over10": 92,
        "whole5": 11,
        "step1_cm": 13.1,
        "step2_cm": 18.9,
@@ -231,7 +231,7 @@
       },
       "SM_bush": {
        "kind": "bush",
-       "n": 1004,
+       "n": 1002,
        "max_cm": 51.2,
        "p95_cm": 23.6,
        "over10": 262,
@@ -242,10 +242,10 @@
       },
       "SM_Bush_02": {
        "kind": "bush",
-       "n": 580,
+       "n": 576,
        "max_cm": 58.1,
        "p95_cm": 33.2,
-       "over10": 399,
+       "over10": 398,
        "whole5": 3,
        "step1_cm": 32.3,
        "step2_cm": 44.2,
@@ -253,14 +253,14 @@
       },
       "SM_Grass_2": {
        "kind": "grass",
-       "n": 6052,
+       "n": 6015,
        "max_cm": 53.1,
        "p95_cm": -0.5,
        "over10": 18,
        "whole5": 1,
        "step1_cm": 53.1,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_GorseBushSmall_01": {
        "kind": "bush",
@@ -275,10 +275,10 @@
       },
       "SM_Tree03": {
        "kind": "tree",
-       "n": 20,
+       "n": 19,
        "max_cm": 78.9,
        "p95_cm": 78.9,
-       "over10": 20,
+       "over10": 19,
        "whole5": 0,
        "step1_cm": 39.3,
        "step2_cm": 46.5,
@@ -291,20 +291,20 @@
        "p95_cm": -28.4,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -1000000000.0,
+       "step2_cm": -50.1,
+       "step4_cm": -28.4
       },
       "SM_Grass_3": {
        "kind": "grass",
-       "n": 63,
+       "n": 60,
        "max_cm": 21.7,
-       "p95_cm": 16.1,
+       "p95_cm": 19.4,
        "over10": 6,
        "whole5": 0,
        "step1_cm": 21.7,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_flower_01": {
        "kind": "flower",
@@ -313,57 +313,57 @@
        "p95_cm": -1.7,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -1.7,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       }
      },
-     "pic_up_0": "wd_s18d_scrub18_hills_up_0.png",
-     "pic_across_0": "wd_s18d_scrub18_hills_across_0.png",
+     "pic_up_0": "wd_s18e_scrub18_hills_up_0.png",
+     "pic_across_0": "wd_s18e_scrub18_hills_across_0.png",
      "near_1": {
       "SM_GorseBushLarge_01": {
        "kind": "bush",
        "n": 54,
-       "max_cm": -12.7,
-       "p95_cm": -13.5,
+       "max_cm": -11.2,
+       "p95_cm": -12.8,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -12.7,
+       "step2_cm": -11.2,
+       "step4_cm": -1000000000.0
       },
       "SM_EuropeanBeech_L_01": {
        "kind": "tree",
-       "n": 47,
+       "n": 46,
        "max_cm": 22.2,
        "p95_cm": 9.5,
        "over10": 1,
        "whole5": 0,
        "step1_cm": 22.2,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Pine_Medium_1_": {
        "kind": "tree",
-       "n": 38,
+       "n": 37,
        "max_cm": -1.1,
        "p95_cm": -4.7,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -1.1,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Large_Rock_C": {
        "kind": "rock",
-       "n": 26,
+       "n": 25,
        "max_cm": -54.8,
        "p95_cm": -55.5,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -54.8,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Bush01": {
        "kind": "bush",
@@ -372,9 +372,9 @@
        "p95_cm": -8.9,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -6.4,
+       "step2_cm": -21.1,
+       "step4_cm": -1000000000.0
       },
       "SM_Bush02": {
        "kind": "bush",
@@ -383,20 +383,20 @@
        "p95_cm": -4.4,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -4.2,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_bush": {
        "kind": "bush",
-       "n": 60,
-       "max_cm": 7.0,
+       "n": 61,
+       "max_cm": 10.4,
        "p95_cm": -2.3,
-       "over10": 0,
+       "over10": 1,
        "whole5": 0,
-       "step1_cm": 7.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": 10.4,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Bush_02": {
        "kind": "bush",
@@ -405,20 +405,20 @@
        "p95_cm": -2.9,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -2.7,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Grass_2": {
        "kind": "grass",
-       "n": 5389,
+       "n": 5364,
        "max_cm": 51.5,
        "p95_cm": -0.5,
        "over10": 23,
        "whole5": 0,
        "step1_cm": 51.5,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_GorseBushSmall_01": {
        "kind": "bush",
@@ -427,9 +427,9 @@
        "p95_cm": -12.6,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -12.6,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Tree03": {
        "kind": "tree",
@@ -439,19 +439,19 @@
        "over10": 1,
        "whole5": 0,
        "step1_cm": 39.3,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Grass_3": {
        "kind": "grass",
-       "n": 62,
+       "n": 60,
        "max_cm": 24.6,
-       "p95_cm": 15.9,
+       "p95_cm": 21.2,
        "over10": 6,
        "whole5": 0,
        "step1_cm": 24.6,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_flower_01": {
        "kind": "flower",
@@ -460,154 +460,154 @@
        "p95_cm": -1.6,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -1.6,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       }
      },
      "far_1": {
       "SM_GorseBushLarge_01": {
        "kind": "bush",
-       "n": 1016,
-       "max_cm": -9.1,
-       "p95_cm": -17.7,
-       "over10": 0,
+       "n": 957,
+       "max_cm": 14.0,
+       "p95_cm": -6.3,
+       "over10": 5,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -9.6,
+       "step2_cm": -0.0,
+       "step4_cm": 14.0
       },
       "SM_EuropeanBeech_L_01": {
        "kind": "tree",
-       "n": 956,
-       "max_cm": 59.6,
-       "p95_cm": -3.7,
-       "over10": 19,
+       "n": 850,
+       "max_cm": 111.8,
+       "p95_cm": 9.9,
+       "over10": 42,
        "whole5": 0,
        "step1_cm": 22.2,
-       "step2_cm": 47.7,
-       "step4_cm": 59.6
+       "step2_cm": 53.9,
+       "step4_cm": 111.8
       },
       "SM_Pine_Medium_1_": {
        "kind": "tree",
-       "n": 724,
-       "max_cm": 14.1,
-       "p95_cm": -14.9,
-       "over10": 1,
+       "n": 670,
+       "max_cm": 22.3,
+       "p95_cm": -2.8,
+       "over10": 8,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 14.1,
-       "step4_cm": 4.9
+       "step1_cm": -1.1,
+       "step2_cm": 18.1,
+       "step4_cm": 22.3
       },
       "SM_Large_Rock_C": {
        "kind": "rock",
-       "n": 394,
-       "max_cm": -50.0,
-       "p95_cm": -64.4,
+       "n": 359,
+       "max_cm": -1.1,
+       "p95_cm": -50.4,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -54.8,
+       "step2_cm": -46.1,
+       "step4_cm": -1.1
       },
       "SM_Bush01": {
        "kind": "bush",
-       "n": 928,
-       "max_cm": -6.4,
-       "p95_cm": -11.0,
-       "over10": 0,
-       "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "n": 867,
+       "max_cm": 35.7,
+       "p95_cm": 2.6,
+       "over10": 17,
+       "whole5": 1,
+       "step1_cm": -6.4,
+       "step2_cm": -0.1,
+       "step4_cm": 35.7
       },
       "SM_Bush02": {
        "kind": "bush",
-       "n": 597,
-       "max_cm": -3.6,
-       "p95_cm": -6.9,
-       "over10": 0,
-       "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "n": 564,
+       "max_cm": 46.4,
+       "p95_cm": 7.6,
+       "over10": 23,
+       "whole5": 2,
+       "step1_cm": -3.6,
+       "step2_cm": 3.0,
+       "step4_cm": 46.4
       },
       "SM_bush": {
        "kind": "bush",
-       "n": 1080,
-       "max_cm": 7.0,
-       "p95_cm": -5.0,
-       "over10": 0,
-       "whole5": 0,
-       "step1_cm": 7.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "n": 1002,
+       "max_cm": 38.0,
+       "p95_cm": 10.4,
+       "over10": 53,
+       "whole5": 8,
+       "step1_cm": 10.4,
+       "step2_cm": 6.6,
+       "step4_cm": 38.0
       },
       "SM_Bush_02": {
        "kind": "bush",
-       "n": 627,
-       "max_cm": -2.7,
-       "p95_cm": -6.8,
-       "over10": 0,
+       "n": 576,
+       "max_cm": 30.3,
+       "p95_cm": 5.8,
+       "over10": 14,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -2.7,
+       "step2_cm": 6.7,
+       "step4_cm": 30.3
       },
       "SM_Grass_2": {
        "kind": "grass",
-       "n": 6052,
+       "n": 6015,
        "max_cm": 51.5,
        "p95_cm": -0.5,
        "over10": 23,
        "whole5": 0,
        "step1_cm": 51.5,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_GorseBushSmall_01": {
        "kind": "bush",
        "n": 44,
-       "max_cm": -7.6,
-       "p95_cm": -8.0,
+       "max_cm": 8.0,
+       "p95_cm": 0.8,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -7.6,
+       "step2_cm": -5.0,
+       "step4_cm": 8.0
       },
       "SM_Tree03": {
        "kind": "tree",
-       "n": 23,
-       "max_cm": 55.7,
-       "p95_cm": 46.5,
-       "over10": 17,
+       "n": 19,
+       "max_cm": 81.8,
+       "p95_cm": 81.8,
+       "over10": 19,
        "whole5": 0,
        "step1_cm": 39.3,
-       "step2_cm": 43.1,
-       "step4_cm": 55.7
+       "step2_cm": 46.5,
+       "step4_cm": 81.8
       },
       "SM_Small_Rock_A": {
        "kind": "rock",
-       "n": 9,
-       "max_cm": -44.1,
-       "p95_cm": -44.1,
+       "n": 8,
+       "max_cm": -28.7,
+       "p95_cm": -28.7,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -1000000000.0,
+       "step2_cm": -50.2,
+       "step4_cm": -28.7
       },
       "SM_Grass_3": {
        "kind": "grass",
-       "n": 63,
+       "n": 60,
        "max_cm": 24.6,
-       "p95_cm": 15.9,
+       "p95_cm": 21.2,
        "over10": 6,
        "whole5": 0,
        "step1_cm": 24.6,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_flower_01": {
        "kind": "flower",
@@ -616,13 +616,14 @@
        "p95_cm": -1.6,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -1.6,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       }
      },
-     "pic_up_1": "wd_s18d_scrub18_hills_up_1.png",
-     "pic_across_1": "wd_s18d_scrub18_hills_across_1.png"
+     "pic_up_1": "wd_s18e_scrub18_hills_up_1.png",
+     "pic_across_1": "wd_s18e_scrub18_hills_across_1.png",
+     "bushes_measured": 227
     },
     "mountains": {
      "at": [
@@ -634,14 +635,14 @@
      "near_0": {
       "SM_Pine_Medium_2_": {
        "kind": "tree",
-       "n": 155,
+       "n": 154,
        "max_cm": 32.3,
-       "p95_cm": 22.7,
-       "over10": 22,
+       "p95_cm": 19.6,
+       "over10": 21,
        "whole5": 0,
        "step1_cm": 32.3,
        "step2_cm": 25.1,
-       "step4_cm": 0.0
+       "step4_cm": -1000000000.0
       },
       "SM_Pine_Small_1_Snow": {
        "kind": "tree",
@@ -652,29 +653,29 @@
        "whole5": 0,
        "step1_cm": 66.0,
        "step2_cm": 28.9,
-       "step4_cm": 0.0
+       "step4_cm": -1000000000.0
       },
       "SM_RockCliff_01": {
        "kind": "rock",
-       "n": 52,
+       "n": 48,
        "max_cm": 344.1,
        "p95_cm": -19.2,
        "over10": 2,
        "whole5": 0,
        "step1_cm": 344.1,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -30.5,
+       "step4_cm": -1000000000.0
       },
       "SM_Boulder_01": {
        "kind": "rock",
-       "n": 77,
+       "n": 76,
        "max_cm": -156.8,
        "p95_cm": -166.7,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -156.8,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Bush_Pine": {
        "kind": "bush",
@@ -685,7 +686,7 @@
        "whole5": 0,
        "step1_cm": 25.4,
        "step2_cm": 21.5,
-       "step4_cm": 0.0
+       "step4_cm": -1000000000.0
       },
       "SM_GorseBushSmall_01": {
        "kind": "bush",
@@ -695,8 +696,8 @@
        "over10": 9,
        "whole5": 0,
        "step1_cm": 20.6,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Tree03": {
        "kind": "tree",
@@ -706,8 +707,8 @@
        "over10": 5,
        "whole5": 0,
        "step1_cm": 114.9,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Small_Rock_A": {
        "kind": "rock",
@@ -716,9 +717,9 @@
        "p95_cm": -31.6,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -31.6,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Bush01": {
        "kind": "bush",
@@ -729,7 +730,7 @@
        "whole5": 0,
        "step1_cm": 29.4,
        "step2_cm": 4.5,
-       "step4_cm": 0.0
+       "step4_cm": -1000000000.0
       },
       "SM_Bush02": {
        "kind": "bush",
@@ -739,8 +740,8 @@
        "over10": 3,
        "whole5": 0,
        "step1_cm": 22.6,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_bush": {
        "kind": "bush",
@@ -751,7 +752,7 @@
        "whole5": 0,
        "step1_cm": 34.8,
        "step2_cm": 34.2,
-       "step4_cm": 0.0
+       "step4_cm": -1000000000.0
       },
       "SM_Bush_02": {
        "kind": "bush",
@@ -762,40 +763,40 @@
        "whole5": 0,
        "step1_cm": 58.6,
        "step2_cm": 43.2,
-       "step4_cm": 0.0
+       "step4_cm": -1000000000.0
       },
       "SM_Grass_3": {
        "kind": "grass",
-       "n": 7386,
-       "max_cm": 128.8,
-       "p95_cm": 11.6,
-       "over10": 405,
+       "n": 7249,
+       "max_cm": 108.0,
+       "p95_cm": 10.0,
+       "over10": 362,
        "whole5": 23,
-       "step1_cm": 128.8,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": 108.0,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Bearberry_02": {
        "kind": "bush",
-       "n": 560,
+       "n": 551,
        "max_cm": 44.6,
-       "p95_cm": 25.9,
-       "over10": 384,
+       "p95_cm": 25.8,
+       "over10": 376,
        "whole5": 0,
        "step1_cm": 44.6,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Grass_2": {
        "kind": "grass",
-       "n": 5206,
+       "n": 5189,
        "max_cm": 27.5,
        "p95_cm": 0.6,
        "over10": 19,
        "whole5": 0,
        "step1_cm": 27.5,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_flower_01": {
        "kind": "flower",
@@ -805,17 +806,17 @@
        "over10": 0,
        "whole5": 0,
        "step1_cm": 6.4,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       }
      },
      "far_0": {
       "SM_Pine_Medium_2_": {
        "kind": "tree",
-       "n": 1983,
+       "n": 1962,
        "max_cm": 100.8,
        "p95_cm": 25.2,
-       "over10": 292,
+       "over10": 291,
        "whole5": 0,
        "step1_cm": 35.9,
        "step2_cm": 67.9,
@@ -823,10 +824,10 @@
       },
       "SM_Pine_Small_1_Snow": {
        "kind": "tree",
-       "n": 765,
+       "n": 759,
        "max_cm": 114.8,
        "p95_cm": 60.8,
-       "over10": 406,
+       "over10": 401,
        "whole5": 1,
        "step1_cm": 79.4,
        "step2_cm": 100.0,
@@ -834,10 +835,10 @@
       },
       "SM_RockCliff_01": {
        "kind": "rock",
-       "n": 634,
+       "n": 587,
        "max_cm": 621.0,
-       "p95_cm": -27.8,
-       "over10": 22,
+       "p95_cm": -33.6,
+       "over10": 18,
        "whole5": 0,
        "step1_cm": 621.0,
        "step2_cm": 131.5,
@@ -845,18 +846,18 @@
       },
       "SM_Boulder_01": {
        "kind": "rock",
-       "n": 944,
+       "n": 931,
        "max_cm": -69.0,
        "p95_cm": -158.7,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -144.7,
+       "step2_cm": -153.2,
+       "step4_cm": -69.0
       },
       "SM_Bush_Pine": {
        "kind": "bush",
-       "n": 1391,
+       "n": 1390,
        "max_cm": 185.8,
        "p95_cm": 32.0,
        "over10": 453,
@@ -867,7 +868,7 @@
       },
       "SM_GorseBushSmall_01": {
        "kind": "bush",
-       "n": 173,
+       "n": 172,
        "max_cm": 77.8,
        "p95_cm": 42.5,
        "over10": 102,
@@ -878,10 +879,10 @@
       },
       "SM_Tree03": {
        "kind": "tree",
-       "n": 94,
+       "n": 92,
        "max_cm": 234.1,
        "p95_cm": 174.9,
-       "over10": 93,
+       "over10": 91,
        "whole5": 0,
        "step1_cm": 114.9,
        "step2_cm": 234.1,
@@ -894,13 +895,13 @@
        "p95_cm": -28.3,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -31.6,
+       "step2_cm": -32.9,
+       "step4_cm": -19.5
       },
       "SM_Bush01": {
        "kind": "bush",
-       "n": 303,
+       "n": 302,
        "max_cm": 163.2,
        "p95_cm": 35.1,
        "over10": 159,
@@ -911,7 +912,7 @@
       },
       "SM_Bush02": {
        "kind": "bush",
-       "n": 182,
+       "n": 181,
        "max_cm": 52.0,
        "p95_cm": 28.9,
        "over10": 87,
@@ -922,7 +923,7 @@
       },
       "SM_bush": {
        "kind": "bush",
-       "n": 316,
+       "n": 315,
        "max_cm": 89.5,
        "p95_cm": 39.9,
        "over10": 175,
@@ -933,10 +934,10 @@
       },
       "SM_Bush_02": {
        "kind": "bush",
-       "n": 191,
+       "n": 188,
        "max_cm": 88.1,
        "p95_cm": 62.0,
-       "over10": 171,
+       "over10": 169,
        "whole5": 6,
        "step1_cm": 58.6,
        "step2_cm": 62.0,
@@ -944,36 +945,36 @@
       },
       "SM_Grass_3": {
        "kind": "grass",
-       "n": 7564,
-       "max_cm": 128.8,
-       "p95_cm": 11.6,
-       "over10": 414,
+       "n": 7415,
+       "max_cm": 108.0,
+       "p95_cm": 10.0,
+       "over10": 371,
        "whole5": 23,
-       "step1_cm": 128.8,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": 108.0,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Bearberry_02": {
        "kind": "bush",
-       "n": 568,
+       "n": 559,
        "max_cm": 44.6,
        "p95_cm": 25.8,
-       "over10": 391,
+       "over10": 383,
        "whole5": 0,
        "step1_cm": 44.6,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Grass_2": {
        "kind": "grass",
-       "n": 5244,
+       "n": 5225,
        "max_cm": 27.5,
        "p95_cm": 0.6,
        "over10": 19,
        "whole5": 0,
        "step1_cm": 27.5,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_flower_01": {
        "kind": "flower",
@@ -983,23 +984,23 @@
        "over10": 0,
        "whole5": 0,
        "step1_cm": 6.4,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       }
      },
-     "pic_up_0": "wd_s18d_scrub18_mountains_up_0.png",
-     "pic_across_0": "wd_s18d_scrub18_mountains_across_0.png",
+     "pic_up_0": "wd_s18e_scrub18_mountains_up_0.png",
+     "pic_across_0": "wd_s18e_scrub18_mountains_across_0.png",
      "near_1": {
       "SM_Pine_Medium_2_": {
        "kind": "tree",
-       "n": 155,
+       "n": 154,
        "max_cm": 32.2,
-       "p95_cm": 21.8,
-       "over10": 20,
+       "p95_cm": 19.5,
+       "over10": 21,
        "whole5": 0,
        "step1_cm": 32.2,
-       "step2_cm": 23.1,
-       "step4_cm": 0.0
+       "step2_cm": 24.1,
+       "step4_cm": -1000000000.0
       },
       "SM_Pine_Small_1_Snow": {
        "kind": "tree",
@@ -1009,63 +1010,63 @@
        "over10": 39,
        "whole5": 0,
        "step1_cm": 65.8,
-       "step2_cm": 13.5,
-       "step4_cm": 0.0
+       "step2_cm": 28.8,
+       "step4_cm": -1000000000.0
       },
       "SM_RockCliff_01": {
        "kind": "rock",
-       "n": 52,
+       "n": 48,
        "max_cm": 344.6,
        "p95_cm": -19.3,
        "over10": 2,
        "whole5": 0,
        "step1_cm": 344.6,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -30.5,
+       "step4_cm": -1000000000.0
       },
       "SM_Boulder_01": {
        "kind": "rock",
-       "n": 77,
+       "n": 76,
        "max_cm": -156.8,
        "p95_cm": -166.7,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -156.8,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Bush_Pine": {
        "kind": "bush",
-       "n": 78,
-       "max_cm": -1.7,
-       "p95_cm": -2.4,
+       "n": 116,
+       "max_cm": 4.9,
+       "p95_cm": -1.9,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -1.7,
+       "step2_cm": 4.9,
+       "step4_cm": -1000000000.0
       },
       "SM_GorseBushSmall_01": {
        "kind": "bush",
-       "n": 11,
-       "max_cm": -2.4,
-       "p95_cm": -2.4,
+       "n": 17,
+       "max_cm": -2.0,
+       "p95_cm": -2.0,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -2.0,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Tree03": {
        "kind": "tree",
-       "n": 6,
+       "n": 5,
        "max_cm": 114.9,
        "p95_cm": 114.9,
        "over10": 5,
        "whole5": 0,
        "step1_cm": 114.9,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Small_Rock_A": {
        "kind": "rock",
@@ -1074,86 +1075,86 @@
        "p95_cm": -31.7,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -31.7,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Bush01": {
        "kind": "bush",
-       "n": 10,
-       "max_cm": -7.5,
-       "p95_cm": -7.5,
+       "n": 20,
+       "max_cm": -7.3,
+       "p95_cm": -7.3,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -7.3,
+       "step2_cm": -17.6,
+       "step4_cm": -1000000000.0
       },
       "SM_Bush02": {
        "kind": "bush",
-       "n": 11,
+       "n": 12,
        "max_cm": -6.0,
        "p95_cm": -6.0,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -6.0,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_bush": {
        "kind": "bush",
-       "n": 15,
-       "max_cm": -2.2,
-       "p95_cm": -2.2,
+       "n": 19,
+       "max_cm": 2.6,
+       "p95_cm": 2.6,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -2.2,
+       "step2_cm": 2.6,
+       "step4_cm": -1000000000.0
       },
       "SM_Bush_02": {
        "kind": "bush",
-       "n": 7,
-       "max_cm": -4.9,
-       "p95_cm": -4.9,
+       "n": 10,
+       "max_cm": 2.1,
+       "p95_cm": 2.1,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": 1.8,
+       "step2_cm": 2.1,
+       "step4_cm": -1000000000.0
       },
       "SM_Grass_3": {
        "kind": "grass",
-       "n": 7386,
-       "max_cm": 128.9,
-       "p95_cm": 11.5,
-       "over10": 412,
+       "n": 7249,
+       "max_cm": 122.1,
+       "p95_cm": 10.2,
+       "over10": 370,
        "whole5": 22,
-       "step1_cm": 128.9,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": 122.1,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Bearberry_02": {
        "kind": "bush",
-       "n": 445,
-       "max_cm": 6.4,
-       "p95_cm": -3.5,
+       "n": 552,
+       "max_cm": 7.2,
+       "p95_cm": -3.3,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 6.4,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": 7.2,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Grass_2": {
        "kind": "grass",
-       "n": 5206,
+       "n": 5189,
        "max_cm": 15.8,
-       "p95_cm": 0.7,
+       "p95_cm": 0.6,
        "over10": 15,
        "whole5": 0,
        "step1_cm": 15.8,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_flower_01": {
        "kind": "flower",
@@ -1163,175 +1164,175 @@
        "over10": 0,
        "whole5": 0,
        "step1_cm": 2.1,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       }
      },
      "far_1": {
       "SM_Pine_Medium_2_": {
        "kind": "tree",
-       "n": 1983,
-       "max_cm": 38.9,
-       "p95_cm": 9.7,
-       "over10": 98,
+       "n": 1962,
+       "max_cm": 100.9,
+       "p95_cm": 25.2,
+       "over10": 293,
        "whole5": 0,
        "step1_cm": 35.9,
-       "step2_cm": 38.9,
-       "step4_cm": 37.3
+       "step2_cm": 67.9,
+       "step4_cm": 100.9
       },
       "SM_Pine_Small_1_Snow": {
        "kind": "tree",
-       "n": 761,
-       "max_cm": 97.8,
-       "p95_cm": 47.6,
-       "over10": 244,
-       "whole5": 0,
+       "n": 759,
+       "max_cm": 114.9,
+       "p95_cm": 62.1,
+       "over10": 402,
+       "whole5": 2,
        "step1_cm": 79.4,
-       "step2_cm": 97.1,
-       "step4_cm": 97.8
+       "step2_cm": 99.9,
+       "step4_cm": 114.9
       },
       "SM_RockCliff_01": {
        "kind": "rock",
-       "n": 635,
+       "n": 587,
        "max_cm": 620.4,
-       "p95_cm": -61.9,
-       "over10": 13,
+       "p95_cm": -32.4,
+       "over10": 18,
        "whole5": 0,
        "step1_cm": 620.4,
-       "step2_cm": 99.5,
-       "step4_cm": 236.3
+       "step2_cm": 131.7,
+       "step4_cm": 290.9
       },
       "SM_Boulder_01": {
        "kind": "rock",
-       "n": 948,
-       "max_cm": -146.5,
-       "p95_cm": -173.9,
+       "n": 931,
+       "max_cm": -69.7,
+       "p95_cm": -158.6,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -146.5,
+       "step2_cm": -153.2,
+       "step4_cm": -69.7
       },
       "SM_Bush_Pine": {
        "kind": "bush",
-       "n": 976,
-       "max_cm": -1.2,
-       "p95_cm": -4.3,
-       "over10": 0,
-       "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "n": 1390,
+       "max_cm": 167.0,
+       "p95_cm": 15.5,
+       "over10": 92,
+       "whole5": 47,
+       "step1_cm": -1.2,
+       "step2_cm": 29.0,
+       "step4_cm": 167.0
       },
       "SM_GorseBushSmall_01": {
        "kind": "bush",
-       "n": 115,
-       "max_cm": -2.4,
-       "p95_cm": -6.2,
-       "over10": 0,
+       "n": 172,
+       "max_cm": 45.1,
+       "p95_cm": 13.5,
+       "over10": 12,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -2.0,
+       "step2_cm": 12.9,
+       "step4_cm": 45.1
       },
       "SM_Tree03": {
        "kind": "tree",
-       "n": 93,
-       "max_cm": 233.5,
-       "p95_cm": 164.0,
-       "over10": 85,
+       "n": 92,
+       "max_cm": 234.4,
+       "p95_cm": 174.8,
+       "over10": 91,
        "whole5": 0,
        "step1_cm": 114.9,
-       "step2_cm": 233.5,
-       "step4_cm": 166.9
+       "step2_cm": 234.4,
+       "step4_cm": 174.8
       },
       "SM_Small_Rock_A": {
        "kind": "rock",
        "n": 80,
-       "max_cm": -31.7,
-       "p95_cm": -37.1,
+       "max_cm": -20.4,
+       "p95_cm": -26.7,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -31.7,
+       "step2_cm": -32.6,
+       "step4_cm": -20.4
       },
       "SM_Bush01": {
        "kind": "bush",
-       "n": 210,
-       "max_cm": -5.4,
-       "p95_cm": -11.1,
-       "over10": 0,
-       "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "n": 302,
+       "max_cm": 132.4,
+       "p95_cm": 7.9,
+       "over10": 12,
+       "whole5": 2,
+       "step1_cm": -7.1,
+       "step2_cm": 13.5,
+       "step4_cm": 132.4
       },
       "SM_Bush02": {
        "kind": "bush",
-       "n": 128,
-       "max_cm": -5.9,
-       "p95_cm": -7.0,
-       "over10": 0,
+       "n": 181,
+       "max_cm": 22.7,
+       "p95_cm": 8.2,
+       "over10": 7,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -6.0,
+       "step2_cm": -4.4,
+       "step4_cm": 22.7
       },
       "SM_bush": {
        "kind": "bush",
-       "n": 223,
-       "max_cm": -2.2,
-       "p95_cm": -6.1,
-       "over10": 0,
-       "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "n": 315,
+       "max_cm": 66.4,
+       "p95_cm": 13.4,
+       "over10": 17,
+       "whole5": 6,
+       "step1_cm": -2.2,
+       "step2_cm": 16.5,
+       "step4_cm": 66.4
       },
       "SM_Bush_02": {
        "kind": "bush",
-       "n": 122,
-       "max_cm": -4.9,
-       "p95_cm": -8.6,
-       "over10": 0,
-       "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "n": 188,
+       "max_cm": 61.4,
+       "p95_cm": 13.1,
+       "over10": 15,
+       "whole5": 3,
+       "step1_cm": 5.9,
+       "step2_cm": 13.1,
+       "step4_cm": 61.4
       },
       "SM_Grass_3": {
        "kind": "grass",
-       "n": 7564,
-       "max_cm": 128.9,
-       "p95_cm": 11.4,
-       "over10": 419,
+       "n": 7415,
+       "max_cm": 122.1,
+       "p95_cm": 10.2,
+       "over10": 377,
        "whole5": 22,
-       "step1_cm": 128.9,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": 122.1,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Bearberry_02": {
        "kind": "bush",
-       "n": 452,
-       "max_cm": 6.4,
-       "p95_cm": -3.5,
+       "n": 560,
+       "max_cm": 7.2,
+       "p95_cm": -3.3,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 6.4,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": 7.2,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Grass_2": {
        "kind": "grass",
-       "n": 5244,
+       "n": 5225,
        "max_cm": 15.8,
-       "p95_cm": 0.7,
+       "p95_cm": 0.6,
        "over10": 15,
        "whole5": 0,
        "step1_cm": 15.8,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_flower_01": {
        "kind": "flower",
@@ -1341,12 +1342,13 @@
        "over10": 0,
        "whole5": 0,
        "step1_cm": 2.1,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       }
      },
-     "pic_up_1": "wd_s18d_scrub18_mountains_up_1.png",
-     "pic_across_1": "wd_s18d_scrub18_mountains_across_1.png"
+     "pic_up_1": "wd_s18e_scrub18_mountains_up_1.png",
+     "pic_across_1": "wd_s18e_scrub18_mountains_across_1.png",
+     "bushes_measured": 746
     },
     "mountains and peaks": {
      "at": [
@@ -1358,25 +1360,25 @@
      "near_0": {
       "SM_Boulder_03": {
        "kind": "rock",
-       "n": 121,
+       "n": 117,
        "max_cm": -155.3,
-       "p95_cm": -194.8,
+       "p95_cm": -194.5,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -155.3,
+       "step2_cm": -221.6,
+       "step4_cm": -1000000000.0
       },
       "SM_RockCluster_01": {
        "kind": "rock",
-       "n": 39,
+       "n": 36,
        "max_cm": -66.5,
        "p95_cm": -103.1,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -66.5,
+       "step2_cm": -466.2,
+       "step4_cm": -1000000000.0
       },
       "SM_Pine_Medium_1_Snow": {
        "kind": "tree",
@@ -1386,8 +1388,8 @@
        "over10": 15,
        "whole5": 0,
        "step1_cm": 88.2,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -30.4,
+       "step4_cm": -1000000000.0
       },
       "SM_Bush_Pine": {
        "kind": "bush",
@@ -1398,7 +1400,7 @@
        "whole5": 0,
        "step1_cm": 22.2,
        "step2_cm": 5.8,
-       "step4_cm": 0.0
+       "step4_cm": -1000000000.0
       },
       "SM_Large_Rock_C": {
        "kind": "rock",
@@ -1407,9 +1409,9 @@
        "p95_cm": -66.8,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -56.1,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_TreeDead05": {
        "kind": "tree",
@@ -1419,8 +1421,8 @@
        "over10": 3,
        "whole5": 0,
        "step1_cm": 119.2,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_GorseBushSmall_01": {
        "kind": "bush",
@@ -1431,60 +1433,60 @@
        "whole5": 0,
        "step1_cm": 26.5,
        "step2_cm": 20.7,
-       "step4_cm": 0.0
+       "step4_cm": -1000000000.0
       },
       "SM_Bearberry_02": {
        "kind": "bush",
-       "n": 146,
+       "n": 144,
        "max_cm": 37.5,
        "p95_cm": 32.6,
-       "over10": 126,
+       "over10": 124,
        "whole5": 0,
        "step1_cm": 37.5,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_DryGrassSmall_v1": {
        "kind": "grass",
-       "n": 2327,
-       "max_cm": 13.7,
+       "n": 2318,
+       "max_cm": 8.1,
        "p95_cm": -6.0,
-       "over10": 1,
+       "over10": 0,
        "whole5": 0,
-       "step1_cm": 13.7,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": 8.1,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_DryGrassLarge_v1": {
        "kind": "grass",
-       "n": 773,
+       "n": 771,
        "max_cm": 71.6,
        "p95_cm": 47.2,
-       "over10": 697,
+       "over10": 695,
        "whole5": 0,
        "step1_cm": 71.6,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       }
      },
      "far_0": {
       "SM_Boulder_03": {
        "kind": "rock",
-       "n": 1432,
+       "n": 1400,
        "max_cm": 373.1,
-       "p95_cm": -116.5,
+       "p95_cm": -121.0,
        "over10": 13,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
+       "step1_cm": -36.7,
+       "step2_cm": -69.6,
        "step4_cm": 373.1
       },
       "SM_RockCluster_01": {
        "kind": "rock",
-       "n": 465,
+       "n": 433,
        "max_cm": 1094.2,
-       "p95_cm": 64.7,
-       "over10": 30,
+       "p95_cm": 78.7,
+       "over10": 29,
        "whole5": 0,
        "step1_cm": 115.2,
        "step2_cm": 96.8,
@@ -1492,10 +1494,10 @@
       },
       "SM_Pine_Medium_1_Snow": {
        "kind": "tree",
-       "n": 395,
+       "n": 389,
        "max_cm": 259.9,
        "p95_cm": 78.7,
-       "over10": 132,
+       "over10": 131,
        "whole5": 1,
        "step1_cm": 88.2,
        "step2_cm": 132.7,
@@ -1503,9 +1505,9 @@
       },
       "SM_Bush_Pine": {
        "kind": "bush",
-       "n": 602,
+       "n": 599,
        "max_cm": 211.5,
-       "p95_cm": 40.9,
+       "p95_cm": 41.8,
        "over10": 195,
        "whole5": 52,
        "step1_cm": 22.2,
@@ -1514,7 +1516,7 @@
       },
       "SM_Large_Rock_C": {
        "kind": "rock",
-       "n": 417,
+       "n": 414,
        "max_cm": 330.4,
        "p95_cm": 30.3,
        "over10": 24,
@@ -1536,10 +1538,10 @@
       },
       "SM_GorseBushSmall_01": {
        "kind": "bush",
-       "n": 421,
+       "n": 419,
        "max_cm": 225.7,
-       "p95_cm": 41.5,
-       "over10": 175,
+       "p95_cm": 41.9,
+       "over10": 174,
        "whole5": 19,
        "step1_cm": 26.5,
        "step2_cm": 38.6,
@@ -1547,58 +1549,58 @@
       },
       "SM_Bearberry_02": {
        "kind": "bush",
-       "n": 151,
+       "n": 149,
        "max_cm": 37.5,
        "p95_cm": 32.6,
-       "over10": 130,
+       "over10": 128,
        "whole5": 0,
        "step1_cm": 37.5,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_DryGrassSmall_v1": {
        "kind": "grass",
-       "n": 2478,
-       "max_cm": 13.7,
+       "n": 2466,
+       "max_cm": 8.1,
        "p95_cm": -6.0,
-       "over10": 1,
+       "over10": 0,
        "whole5": 0,
-       "step1_cm": 13.7,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": 8.1,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_DryGrassLarge_v1": {
        "kind": "grass",
-       "n": 818,
+       "n": 813,
        "max_cm": 71.6,
        "p95_cm": 47.3,
-       "over10": 742,
+       "over10": 737,
        "whole5": 0,
        "step1_cm": 71.6,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Small_Rock_B": {
        "kind": "rock",
-       "n": 14,
+       "n": 13,
        "max_cm": 81.8,
        "p95_cm": 81.8,
        "over10": 2,
        "whole5": 2,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
+       "step1_cm": -1000000000.0,
+       "step2_cm": -1000000000.0,
        "step4_cm": 81.8
       },
       "SM_Wild_Acacia_A": {
        "kind": "tree",
-       "n": 4,
-       "max_cm": 234.5,
-       "p95_cm": 234.5,
-       "over10": 4,
+       "n": 3,
+       "max_cm": 186.7,
+       "p95_cm": 186.7,
+       "over10": 3,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 234.5
+       "step1_cm": -1000000000.0,
+       "step2_cm": -1000000000.0,
+       "step4_cm": 186.7
       },
       "SM_Wild_Acacia_B": {
        "kind": "tree",
@@ -1607,35 +1609,35 @@
        "p95_cm": 184.1,
        "over10": 3,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
+       "step1_cm": -1000000000.0,
+       "step2_cm": -1000000000.0,
        "step4_cm": 184.1
       }
      },
-     "pic_up_0": "wd_s18d_scrub18_mountains_and_peaks_up_0.png",
-     "pic_across_0": "wd_s18d_scrub18_mountains_and_peaks_across_0.png",
+     "pic_up_0": "wd_s18e_scrub18_mountains_and_peaks_up_0.png",
+     "pic_across_0": "wd_s18e_scrub18_mountains_and_peaks_across_0.png",
      "near_1": {
       "SM_Boulder_03": {
        "kind": "rock",
-       "n": 121,
+       "n": 117,
        "max_cm": -155.4,
-       "p95_cm": -194.9,
+       "p95_cm": -194.1,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -155.4,
+       "step2_cm": -221.7,
+       "step4_cm": -1000000000.0
       },
       "SM_RockCluster_01": {
        "kind": "rock",
-       "n": 39,
+       "n": 36,
        "max_cm": -66.7,
        "p95_cm": -103.0,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -66.7,
+       "step2_cm": -466.1,
+       "step4_cm": -1000000000.0
       },
       "SM_Pine_Medium_1_Snow": {
        "kind": "tree",
@@ -1645,19 +1647,19 @@
        "over10": 15,
        "whole5": 0,
        "step1_cm": 88.2,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -30.3,
+       "step4_cm": -1000000000.0
       },
       "SM_Bush_Pine": {
        "kind": "bush",
-       "n": 19,
-       "max_cm": -1.1,
-       "p95_cm": -1.1,
+       "n": 37,
+       "max_cm": -0.5,
+       "p95_cm": -0.7,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -0.5,
+       "step2_cm": -10.7,
+       "step4_cm": -1000000000.0
       },
       "SM_Large_Rock_C": {
        "kind": "rock",
@@ -1666,9 +1668,9 @@
        "p95_cm": -66.8,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -56.4,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_TreeDead05": {
        "kind": "tree",
@@ -1678,283 +1680,316 @@
        "over10": 3,
        "whole5": 0,
        "step1_cm": 119.2,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_GorseBushSmall_01": {
        "kind": "bush",
-       "n": 13,
+       "n": 26,
        "max_cm": -1.4,
        "p95_cm": -1.4,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -1.4,
+       "step2_cm": -4.1,
+       "step4_cm": -1000000000.0
       },
       "SM_Bearberry_02": {
        "kind": "bush",
-       "n": 59,
+       "n": 144,
        "max_cm": -0.1,
-       "p95_cm": -2.6,
+       "p95_cm": -3.8,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -0.1,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_DryGrassSmall_v1": {
        "kind": "grass",
-       "n": 2327,
-       "max_cm": 13.7,
+       "n": 2318,
+       "max_cm": 6.2,
        "p95_cm": -6.0,
-       "over10": 1,
+       "over10": 0,
        "whole5": 0,
-       "step1_cm": 13.7,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": 6.2,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_DryGrassLarge_v1": {
        "kind": "grass",
-       "n": 773,
+       "n": 771,
        "max_cm": 71.2,
        "p95_cm": 47.3,
-       "over10": 697,
+       "over10": 695,
        "whole5": 0,
        "step1_cm": 71.2,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       }
      },
      "far_1": {
       "SM_Boulder_03": {
        "kind": "rock",
-       "n": 1431,
-       "max_cm": 124.3,
-       "p95_cm": -191.2,
-       "over10": 1,
+       "n": 1400,
+       "max_cm": 371.1,
+       "p95_cm": -121.0,
+       "over10": 14,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 124.3
+       "step1_cm": -37.1,
+       "step2_cm": -69.8,
+       "step4_cm": 371.1
       },
       "SM_RockCluster_01": {
        "kind": "rock",
-       "n": 467,
-       "max_cm": 747.9,
-       "p95_cm": -95.5,
-       "over10": 13,
+       "n": 433,
+       "max_cm": 1082.7,
+       "p95_cm": 78.6,
+       "over10": 29,
        "whole5": 0,
        "step1_cm": 115.1,
-       "step2_cm": 27.2,
-       "step4_cm": 747.9
+       "step2_cm": 96.5,
+       "step4_cm": 1082.7
       },
       "SM_Pine_Medium_1_Snow": {
        "kind": "tree",
-       "n": 396,
-       "max_cm": 125.9,
-       "p95_cm": 51.4,
-       "over10": 71,
-       "whole5": 0,
+       "n": 389,
+       "max_cm": 259.9,
+       "p95_cm": 77.4,
+       "over10": 131,
+       "whole5": 1,
        "step1_cm": 88.2,
-       "step2_cm": 125.9,
-       "step4_cm": 109.4
+       "step2_cm": 132.7,
+       "step4_cm": 259.9
       },
       "SM_Bush_Pine": {
        "kind": "bush",
-       "n": 416,
-       "max_cm": 3.2,
-       "p95_cm": -5.2,
-       "over10": 0,
-       "whole5": 0,
+       "n": 599,
+       "max_cm": 195.3,
+       "p95_cm": 25.6,
+       "over10": 59,
+       "whole5": 28,
        "step1_cm": 3.2,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": 22.0,
+       "step4_cm": 195.3
       },
       "SM_Large_Rock_C": {
        "kind": "rock",
-       "n": 418,
-       "max_cm": 204.4,
-       "p95_cm": -65.7,
-       "over10": 5,
-       "whole5": 0,
+       "n": 414,
+       "max_cm": 328.3,
+       "p95_cm": 31.7,
+       "over10": 24,
+       "whole5": 4,
        "step1_cm": 204.4,
-       "step2_cm": 65.8,
-       "step4_cm": 80.3
+       "step2_cm": 115.6,
+       "step4_cm": 328.3
       },
       "SM_TreeDead05": {
        "kind": "tree",
        "n": 18,
-       "max_cm": 136.8,
-       "p95_cm": 136.8,
-       "over10": 16,
-       "whole5": 0,
+       "max_cm": 168.3,
+       "p95_cm": 168.3,
+       "over10": 18,
+       "whole5": 1,
        "step1_cm": 119.2,
-       "step2_cm": 82.2,
-       "step4_cm": 136.8
+       "step2_cm": 96.5,
+       "step4_cm": 168.3
       },
       "SM_GorseBushSmall_01": {
        "kind": "bush",
-       "n": 295,
-       "max_cm": -1.4,
-       "p95_cm": -7.2,
-       "over10": 0,
-       "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "n": 419,
+       "max_cm": 185.1,
+       "p95_cm": 13.6,
+       "over10": 27,
+       "whole5": 13,
+       "step1_cm": -1.4,
+       "step2_cm": 10.2,
+       "step4_cm": 185.1
       },
       "SM_Bearberry_02": {
        "kind": "bush",
-       "n": 59,
+       "n": 149,
        "max_cm": -0.1,
-       "p95_cm": -2.6,
+       "p95_cm": -3.8,
        "over10": 0,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": -0.1,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_DryGrassSmall_v1": {
        "kind": "grass",
-       "n": 2478,
-       "max_cm": 13.7,
+       "n": 2466,
+       "max_cm": 6.2,
        "p95_cm": -6.0,
-       "over10": 1,
+       "over10": 0,
        "whole5": 0,
-       "step1_cm": 13.7,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step1_cm": 6.2,
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_DryGrassLarge_v1": {
        "kind": "grass",
-       "n": 818,
+       "n": 813,
        "max_cm": 71.2,
        "p95_cm": 47.5,
-       "over10": 742,
+       "over10": 737,
        "whole5": 0,
        "step1_cm": 71.2,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "step2_cm": -1000000000.0,
+       "step4_cm": -1000000000.0
       },
       "SM_Small_Rock_B": {
        "kind": "rock",
-       "n": 14,
-       "max_cm": -22.7,
-       "p95_cm": -22.7,
-       "over10": 0,
-       "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 0.0
+       "n": 13,
+       "max_cm": 75.2,
+       "p95_cm": 75.2,
+       "over10": 2,
+       "whole5": 2,
+       "step1_cm": -1000000000.0,
+       "step2_cm": -1000000000.0,
+       "step4_cm": 75.2
       },
       "SM_Wild_Acacia_A": {
        "kind": "tree",
-       "n": 4,
-       "max_cm": 228.9,
-       "p95_cm": 228.9,
-       "over10": 4,
+       "n": 3,
+       "max_cm": 186.7,
+       "p95_cm": 186.7,
+       "over10": 3,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 228.9
+       "step1_cm": -1000000000.0,
+       "step2_cm": -1000000000.0,
+       "step4_cm": 186.7
       },
       "SM_Wild_Acacia_B": {
        "kind": "tree",
        "n": 3,
-       "max_cm": 180.5,
-       "p95_cm": 180.5,
+       "max_cm": 183.3,
+       "p95_cm": 183.3,
        "over10": 3,
        "whole5": 0,
-       "step1_cm": 0.0,
-       "step2_cm": 0.0,
-       "step4_cm": 180.5
+       "step1_cm": -1000000000.0,
+       "step2_cm": -1000000000.0,
+       "step4_cm": 183.3
       }
      },
-     "pic_up_1": "wd_s18d_scrub18_mountains_and_peaks_up_1.png",
-     "pic_across_1": "wd_s18d_scrub18_mountains_and_peaks_across_1.png"
+     "pic_up_1": "wd_s18e_scrub18_mountains_and_peaks_up_1.png",
+     "pic_across_1": "wd_s18e_scrub18_mountains_and_peaks_across_1.png",
+     "bushes_measured": 207
     }
    },
-   "bushes_new_p95_max_old_p95": {
+   "bushes_new_p95_max_old_p95_n_new_old": {
     "hills:SM_GorseBushLarge_01": [
-     -13.5,
-     -12.7,
-     21.9
+     -12.8,
+     -11.2,
+     21.9,
+     54,
+     54
     ],
     "hills:SM_Bush01": [
      -8.9,
      -6.4,
-     7.2
+     7.2,
+     47,
+     47
     ],
     "hills:SM_Bush02": [
      -4.4,
      -4.2,
-     12.2
+     12.2,
+     30,
+     30
     ],
     "hills:SM_bush": [
      -2.3,
-     7.0,
-     15.0
+     10.4,
+     15.0,
+     61,
+     61
     ],
     "hills:SM_Bush_02": [
      -2.9,
      -2.7,
-     29.9
+     29.9,
+     33,
+     33
     ],
     "hills:SM_GorseBushSmall_01": [
      -12.6,
      -12.6,
-     2.1
+     2.1,
+     2,
+     2
     ],
     "mountains:SM_Bush_Pine": [
-     -2.4,
-     -1.7,
-     17.1
+     -1.9,
+     4.9,
+     17.1,
+     116,
+     116
     ],
     "mountains:SM_GorseBushSmall_01": [
-     -2.4,
-     -2.4,
-     20.6
+     -2.0,
+     -2.0,
+     20.6,
+     17,
+     17
     ],
     "mountains:SM_Bush01": [
-     -7.5,
-     -7.5,
-     29.4
+     -7.3,
+     -7.3,
+     29.4,
+     20,
+     20
     ],
     "mountains:SM_Bush02": [
      -6.0,
      -6.0,
-     22.6
+     22.6,
+     12,
+     12
     ],
     "mountains:SM_bush": [
-     -2.2,
-     -2.2,
-     34.8
+     2.6,
+     2.6,
+     34.8,
+     19,
+     19
     ],
     "mountains:SM_Bush_02": [
-     -4.9,
-     -4.9,
-     58.6
+     2.1,
+     2.1,
+     58.6,
+     10,
+     10
     ],
     "mountains:SM_Bearberry_02": [
-     -3.5,
-     6.4,
-     25.9
+     -3.3,
+     7.2,
+     25.8,
+     552,
+     551
     ],
     "mountains and peaks:SM_Bush_Pine": [
-     -1.1,
-     -1.1,
-     21.3
+     -0.7,
+     -0.5,
+     21.3,
+     37,
+     37
     ],
     "mountains and peaks:SM_GorseBushSmall_01": [
      -1.4,
      -1.4,
-     24.3
+     24.3,
+     26,
+     26
     ],
     "mountains and peaks:SM_Bearberry_02": [
-     -2.6,
+     -3.8,
      -0.1,
-     32.6
+     32.6,
+     144,
+     144
     ]
    }
   },
@@ -1965,7 +2000,7 @@
    "on": {
     "regrids": 6,
     "in_flight": 0,
-    "swap_ms_max": 2.6,
+    "swap_ms_max": 1.5,
     "on": true,
     "at_2m": 9,
     "at_4m": 11,
@@ -1976,34 +2011,34 @@
    "seams": {
     "pairs": 27,
     "points": 13527,
-    "gap_cm": 83.1,
+    "gap_cm": 56.4,
     "past_skirt": 0,
-    "departure_cm": 83.1
+    "departure_cm": 56.4
    },
    "feet": {
-    "n": 0,
-    "above_max_cm": 0.0,
-    "above_p95_cm": 0.0,
-    "below_max_cm": 256.4
+    "n": 972,
+    "above_max_cm": 141.3,
+    "above_p95_cm": 23.1,
+    "below_max_cm": 174.1
    },
    "movers": {
     "checked": 197,
     "off": 0,
     "names": ""
    },
-   "pic_on": "E:\\code\\claude-ue5\\claude_ue5\\Saved\\Screenshots\\WindowsEditor\\wd_s18d_lod16_far_on.png",
+   "pic_on": "E:\\code\\claude-ue5\\claude_ue5\\Saved\\Screenshots\\WindowsEditor\\wd_s18e_lod16_far_on.png",
    "run_on": {
     "m": 316,
-    "frames": 2731,
-    "p50": 32.6,
-    "p95": 39.1,
-    "p99": 45.1,
-    "max": 88.2
+    "frames": 2521,
+    "p50": 35.2,
+    "p95": 43.1,
+    "p99": 52.6,
+    "max": 97.2
    },
    "on_after_run": {
     "regrids": 19,
     "in_flight": 0,
-    "swap_ms_max": 2.6,
+    "swap_ms_max": 1.7,
     "on": true,
     "at_2m": 10,
     "at_4m": 14,
@@ -2020,7 +2055,7 @@
    "off": {
     "regrids": 19,
     "in_flight": 0,
-    "swap_ms_max": 2.6,
+    "swap_ms_max": 1.7,
     "on": false,
     "at_2m": 64,
     "at_4m": 0,
@@ -2028,34 +2063,34 @@
     "with_collision": 64,
     "triangles": 2064000
    },
-   "pic_off": "E:\\code\\claude-ue5\\claude_ue5\\Saved\\Screenshots\\WindowsEditor\\wd_s18d_lod16_far_off.png",
+   "pic_off": "E:\\code\\claude-ue5\\claude_ue5\\Saved\\Screenshots\\WindowsEditor\\wd_s18e_lod16_far_off.png",
    "run_off": {
     "m": 316,
-    "frames": 2749,
-    "p50": 32.5,
-    "p95": 38.7,
-    "p99": 44.1,
-    "max": 95.7
+    "frames": 2662,
+    "p50": 33.6,
+    "p95": 40.1,
+    "p99": 46.1,
+    "max": 85.2
    },
-   "pictures_luma_diff": 8.81
+   "pictures_luma_diff": 8.72
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
  "shots": [
-  "wd_s18d_scrub18_hills_up_0.png",
-  "wd_s18d_scrub18_hills_across_0.png",
-  "wd_s18d_scrub18_hills_up_1.png",
-  "wd_s18d_scrub18_hills_across_1.png",
-  "wd_s18d_scrub18_mountains_up_0.png",
-  "wd_s18d_scrub18_mountains_across_0.png",
-  "wd_s18d_scrub18_mountains_up_1.png",
-  "wd_s18d_scrub18_mountains_across_1.png",
-  "wd_s18d_scrub18_mountains_and_peaks_up_0.png",
-  "wd_s18d_scrub18_mountains_and_peaks_across_0.png",
-  "wd_s18d_scrub18_mountains_and_peaks_up_1.png",
-  "wd_s18d_scrub18_mountains_and_peaks_across_1.png",
-  "wd_s18d_lod16_far_on.png",
-  "wd_s18d_lod16_far_off.png"
+  "wd_s18e_scrub18_hills_up_0.png",
+  "wd_s18e_scrub18_hills_across_0.png",
+  "wd_s18e_scrub18_hills_up_1.png",
+  "wd_s18e_scrub18_hills_across_1.png",
+  "wd_s18e_scrub18_mountains_up_0.png",
+  "wd_s18e_scrub18_mountains_across_0.png",
+  "wd_s18e_scrub18_mountains_up_1.png",
+  "wd_s18e_scrub18_mountains_across_1.png",
+  "wd_s18e_scrub18_mountains_and_peaks_up_0.png",
+  "wd_s18e_scrub18_mountains_and_peaks_across_0.png",
+  "wd_s18e_scrub18_mountains_and_peaks_up_1.png",
+  "wd_s18e_scrub18_mountains_and_peaks_across_1.png",
+  "wd_s18e_lod16_far_on.png",
+  "wd_s18e_lod16_far_off.png"
  ],
  "error": null,
  "saves_put_back": 1,

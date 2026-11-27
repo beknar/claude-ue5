@@ -1,9 +1,11 @@
 // The user's list of 2026-11-27 (docs/improvements18.txt; the plan docs/improvements18_plan.md), its second phase: "on hills and mountain
-// sides, there is red scrub that appears to be floating in the air". A bush stood upright on any slope up to 30 degrees, sunk 3 cm by its
-// scale, its height a bilinear blend of its 2 m quad's corners: on a slope its downhill side hung over the ground. With rd.Scrub18 1 (the
-// default) a bush is sunk by its footprint's radius times the slope (its downhill edge at the ground), kept to 25 degrees unless its entry
-// asks for a slope of its own, and every plant's height on its quad follows the drawn triangle's split (RDWildChunk.cpp). rd.Scrub18 0 lays
-// them as before (the test's comparison). GetWildFoliageGaps18 measures every plant's footprint against the drawn ground under it.
+// sides, there is red scrub that appears to be floating in the air". The red scrub is the bearberry, a mat 35 cm high: it and every bush stood
+// upright on slopes up to 30 degrees, sunk 3 cm, its height a bilinear blend of its 2 m quad's corners, so its downhill side hung over the
+// ground. With rd.Scrub18 1 (the default) a bush lower than half its width lies along its slope, an upright bush is sunk by its footprint's
+// radius times the slope (its downhill edge at the ground), and every plant's height on its quad follows the drawn triangle's split
+// (RDWildChunk.cpp). rd.Scrub18 0 lays them as before (the test's comparison). GetWildFoliageGaps18 measures the plants' footprints against
+// the drawn ground under them. (Plants on far chunks drawn on 4 m or 8 m still stand on the 2 m ground, over the coarse chord of a convex
+// slope: the bearberry grows near her only; the other bushes' far gap is in TODO.md.)
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDWild.h"
 #include "RD/RDWildChunkData.h"
@@ -31,10 +33,12 @@ namespace
 		if (S->ProcVertexBuffer.Num() < M * M) return false;
 		auto Cell = [&](double L, int32& A, double& F)
 		{
-			const double G = FMath::Clamp(L / StCm, 0.0, (double)(Nv - 1));
+			const double G = L / StCm;
 			A = 0; while (A + 2 < M && Ix[A + 1] <= G) ++A;
 			F = FMath::Clamp((G - Ix[A]) / FMath::Max(1, Ix[A + 1] - Ix[A]), 0.0, 1.0);
 		};
+		// (a point past the chunk's edge is not measured against its edge (PR #147's review))
+		if (Lx < 0.0 || Ly < 0.0 || Lx > (Nv - 1) * StCm || Ly > (Nv - 1) * StCm) return false;
 		int32 A, B; double Fa, Fb; Cell(Lx, A, Fa); Cell(Ly, B, Fb);
 		auto Pz = [&](int32 a, int32 b) { return S->ProcVertexBuffer[a * M + b].Position.Z; };
 		const float Z00 = Pz(A, B), Z10 = Pz(A + 1, B), Z01 = Pz(A, B + 1), Z11 = Pz(A + 1, B + 1);
@@ -58,15 +62,9 @@ float RDScrub18ExtraSink(const FRDWildFoliage& F, float Sc, const FVector& N)
 
 bool RDScrub18Align(const FRDWildFoliage& F)
 {
-	// (a mat lower than it is wide (the bearberry: 35 cm over a metre and more) lies along the slope as the ground cover it is)
+	// (a mat lower than half its width (Radius18 is half the box's width: the bearberry, 35 cm over a metre and more) lies along the slope as
+	// the ground cover it is)
 	return RDScrub18On() && !F.bAlign && F.Kind == TEXT("bush") && F.Height18 > 0.f && F.Height18 < F.Radius18;
-}
-
-float RDScrub18SlopeMax(const FRDWildFoliage& F)
-{
-	// (a bush kept to 25 degrees unless its entry gives a slope of its own: 30 is the table's default)
-	if (RDScrub18On() && F.Kind == TEXT("bush") && FMath::IsNearlyEqual(F.SlopeMax, 30.f)) return 25.f;
-	return F.SlopeMax;
 }
 
 FString ARDDungeonGenerator::GetWildFoliageGaps18(float MaxM, float MinSlopeDeg) const
@@ -82,7 +80,7 @@ FString ARDDungeonGenerator::GetWildFoliageGaps18(float MaxM, float MinSlopeDeg)
 	const int32 Nv = FMath::RoundToInt(WildChunkM / WildStepM) + 1;
 	const double StCm = WildStepM * 100.0;
 	const float CosMin = FMath::Cos(FMath::DegreesToRadians(MinSlopeDeg));
-	struct FAcc { FString Kind; TArray<float> Gaps; int32 Over10 = 0, Whole5 = 0; float ByStep[3] = { 0.f, 0.f, 0.f }; };
+	struct FAcc { FString Kind; TArray<float> Gaps; int32 Over10 = 0, Whole5 = 0; float ByStep[3] = { -1e9f, -1e9f, -1e9f }; };
 	TMap<FString, FAcc> By;
 	TMap<const UStaticMesh*, FString> KindOf;
 	for (const FRDWildBiome& B : WildBiomes) for (const FRDWildFoliage& F : B.Foliage) if (F.Mesh) KindOf.Add(F.Mesh, F.Kind);

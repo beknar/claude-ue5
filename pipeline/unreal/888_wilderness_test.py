@@ -9087,10 +9087,13 @@ def step_scrub18():
     """the list of 2026-11-27's second phase (RD/RDList18.cpp, rd.Scrub18): "on hills and mountain sides, there is red scrub that appears
     to be floating in the air". In the hills, the mountains and the mountains and peaks, at noon: the chunks made with the old rule
     (rd.Scrub18 0), then made again with the new (1), at the same place. Each time every plant within 300 m and within 1.2 km on
-    ground over 10 degrees is measured against the drawn ground under its footprint (its mesh's box's bottom corners: the highest
-    corner's height over the ground is its gap), by mesh, and the slope is pictured along it and across it, her body hidden. Ok: with
-    the new rule no bush's 95th percentile gap within 300 m over 5 cm and none over 25 cm in all, the rule's gaps under the old's"""
+    ground over 10 degrees is measured against the drawn ground under its footprint (its mesh's box's bottom corners drawn in to 0.7:
+    the highest corner's height over the ground is its gap; for a tree that box is its crown, so only the bushes are judged), by mesh,
+    and the slope is pictured along it and across it, her body hidden. Ok: bushes measured in every place; with the new rule no bush's
+    95th percentile gap within 300 m over 5 cm and none over 25 cm, each under the old rule's where that was over 5 cm. The far chunks'
+    gaps (drawn on 4 m and 8 m: the plants stand on the 2 m ground) are recorded, not judged"""
     g = G["gen"]; res = {"places": {}}; quiet(True); w = UES.get_game_world(); hour0 = g.get_town_hour()
+    mode0 = unreal.SystemLibrary.get_console_variable_int_value("rd.Scrub18")
     yield from wait_ready(90)
     try:
         g.set_town_hour(12.0)
@@ -9115,18 +9118,24 @@ def step_scrub18():
         res["error"] = str(e_)
     finally:
         try:
-            unreal.SystemLibrary.execute_console_command(w, "rd.Scrub18 1"); G["pawn"].set_actor_hidden_in_game(False); G["gen"].set_town_hour(hour0)
+            unreal.SystemLibrary.execute_console_command(w, "rd.Scrub18 %d" % mode0); G["pawn"].set_actor_hidden_in_game(False); G["gen"].set_town_hour(hour0)
         except Exception: pass
         quiet(False)
     ok = "error" not in res and len(res["places"]) == 3
     worst = {}
     for bn, r in res["places"].items():
         if "error" in r or "near_1" not in r: ok = False; continue
+        nb = 0
         for m, v in r["near_1"].items():
             if v["kind"] != "bush": continue
-            worst[bn + ":" + m] = (v["p95_cm"], v["max_cm"], r["near_0"].get(m, {}).get("p95_cm"))
+            nb += v["n"]
+            old = r["near_0"].get(m, {}).get("p95_cm")
+            worst[bn + ":" + m] = (v["p95_cm"], v["max_cm"], old, v["n"], r["near_0"].get(m, {}).get("n"))
             if v["p95_cm"] > 5.0 or v["max_cm"] > 25.0: ok = False
-    res["bushes_new_p95_max_old_p95"] = worst
+            if old is not None and old > 5.0 and v["p95_cm"] >= old: ok = False
+        if nb == 0: ok = False
+        r["bushes_measured"] = nb
+    res["bushes_new_p95_max_old_p95_n_new_old"] = worst
     step_result("scrub18", ok, **res)
 
 

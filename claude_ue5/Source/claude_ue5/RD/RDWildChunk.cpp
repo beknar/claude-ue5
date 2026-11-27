@@ -76,34 +76,7 @@ void RDWildDrawGround16(FRDWChunkData& D, int32 Nv)
 	{
 		V.Add(At); N.Add(D.N[K]); U0.Add(D.UV0[K]); U1.Add(D.UV1[K]); U2.Add(D.UV2[K]); U3.Add(D.UV3[K]); C.Add(D.C[K]); Tg.Add(D.Tan[K]);
 	};
-	// (the list of 2026-11-27, rd.Scrub18: each coarse vertex is lifted by the most the 2 m ground stands over the coarse triangles it
-	// belongs to, so the coarse ground lies on or over the 2 m ground the plants stand on (a plant never hangs over a far slope's chord);
-	// on a plane slope nothing moves. She walks on the 2 m collision either way)
-	TArray<float> Lift; Lift.SetNumZeroed(M * M);
-	if (Ev > 1 && RDScrub18On())
-		for (int32 A = 0; A + 1 < M; ++A)
-			for (int32 B = 0; B + 1 < M; ++B)
-			{
-				const float Z00 = D.V[Ix[A] * Nv + Ix[B]].Z, Z10 = D.V[Ix[A + 1] * Nv + Ix[B]].Z, Z01 = D.V[Ix[A] * Nv + Ix[B + 1]].Z, Z11 = D.V[Ix[A + 1] * Nv + Ix[B + 1]].Z;
-				const float Da = (float)(Ix[A + 1] - Ix[A]), Db = (float)(Ix[B + 1] - Ix[B]);
-				for (int32 Ia = Ix[A]; Ia <= Ix[A + 1]; ++Ia)
-					for (int32 Ib = Ix[B]; Ib <= Ix[B + 1]; ++Ib)
-					{
-						const float Fa = (Ia - Ix[A]) / Da, Fb = (Ib - Ix[B]) / Db;
-						const bool bLow = Fa + Fb <= 1.f;
-						const float Zi = bLow ? Z00 + (Z10 - Z00) * Fa + (Z01 - Z00) * Fb : Z11 + (Z01 - Z11) * (1.f - Fa) + (Z10 - Z11) * (1.f - Fb);
-						const float Dz = D.V[Ia * Nv + Ib].Z - Zi;
-						if (Dz <= 0.f) continue;
-						// (the triangle's three corners: (a, b), (a+1, b), (a, b+1) below the split, (a+1, b+1), (a, b+1), (a+1, b) above it)
-						const int32 C0 = bLow ? A * M + B : (A + 1) * M + B + 1, C1 = (A + 1) * M + B, C2 = A * M + B + 1;
-						Lift[C0] = FMath::Max(Lift[C0], Dz); Lift[C1] = FMath::Max(Lift[C1], Dz); Lift[C2] = FMath::Max(Lift[C2], Dz);
-					}
-			}
-	for (int32 A = 0; A < M; ++A) for (int32 B = 0; B < M; ++B)
-	{
-		const int32 K = Ix[A] * Nv + Ix[B];
-		Copy(K, D.V[K] + FVector(0, 0, Lift[A * M + B]));
-	}
+	for (int32 A = 0; A < M; ++A) for (int32 B = 0; B < M; ++B) { const int32 K = Ix[A] * Nv + Ix[B]; Copy(K, D.V[K]); }
 	T.Reserve((M - 1) * (M - 1) * 6 + Sk * 6);
 	for (int32 A = 0; A + 1 < M; ++A)
 		for (int32 B = 0; B + 1 < M; ++B)
@@ -354,7 +327,7 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 					if (F.NearWater < 0.f) { if (!Q.WaterKind || Q.WaterKind == 1) continue; }
 					else if (Q.WaterKind) continue;
 					else if (F.NearWater > 0.f && !Wet[I * Nv + J]) continue;
-					if (FineSlope[I * Nv + J] > RDScrub18SlopeMax(F)) continue;
+					if (FineSlope[I * Nv + J] > F.SlopeMax) continue;
 					if (D.bTownHole && FMath::Abs(X0 + Lx - D.TownAt.X) < D.TownHalfM + 6.0 && FMath::Abs(Y0 + Ly - D.TownAt.Y) < D.TownHalfM + 6.0) continue;
 					if (FRDWildWorld::Rand01(Wx, Wy, Hs + 4u) > Wb) continue;
 					// (its height: the ground's, from the quad's corners)
