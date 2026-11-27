@@ -300,11 +300,11 @@ Measured 2026-11-25 21:38 on NVIDIA GeForce RTX 3060, overall quality level -1 (
 
 ## Closed Structures
 
-Written 2026-11-26 23:32 from the Shipping package's `-RDPerf` run (`pipeline/perf_mistward.ps1 -Structures closed|immersive -WildsOnly`, `RD/RDList16.cpp`), the editor closed, full screen, once in each of the Options page's two modes for buildings ([game-modes.md](game-modes.md)): **Immersive Interiors** (every building built whole in the town) and **Closed Structures** (each building a shell, its furniture laid in a level of its own only while she is inside, its windows pictures). Each city's square and a street about 100 m off it at noon and at midnight, each biome at its nearest site to Brokenspire at noon, standing, then running 30 s from there; the same places in both modes and at both resolutions (replayed from one places file). Each standing place settled 20 s after the world round her was built, then measured until 15 s and 300 frames had passed (at most 45 s), clear weather, her HUD hidden. FPS is the mean over the frames; p95 is the 95th percentile frame time in ms; GPU ms the engine's own GPU time.
+Written 2026-11-26 23:45 from the Shipping package's `-RDPerf` run (`pipeline/perf_mistward.ps1 -Structures closed|immersive -WildsOnly`, `RD/RDList16.cpp`), the editor closed, full screen, once in each of the Options page's two modes for buildings ([game-modes.md](game-modes.md)): **Immersive Interiors** (every building built whole in the town) and **Closed Structures** (each building a shell, its furniture laid in a level of its own only while she is inside, its windows pictures). Each city's square and a street about 100 m off it at noon and at midnight, each biome at its nearest site to Brokenspire at noon, standing, then running 30 s from there; the same places in both modes and at both resolutions (replayed from one places file). Each standing place settled 20 s after the world round her was built, then measured until 15 s and 300 frames had passed (at most 45 s), clear weather, her HUD hidden. FPS is the mean over the frames; p95 is the 95th percentile frame time in ms; GPU ms the engine's own GPU time.
 
 ### 3840x2160
 
-Measured 2026-11-26 20:53 on NVIDIA GeForce RTX 3060, overall quality level -1 (0 low to 3 epic) (by group: res0 view3 aa3 shadow3 gi3 refl3 pp3 tex3 fx3 foliage3 shading3), screen percentage 0, vertical sync off and no frame cap.
+Measured (Closed Structures 2026-11-26 20:53 and Immersive Interiors 2026-11-26 22:37) on NVIDIA GeForce RTX 3060, overall quality level -1 (0 low to 3 epic) (by group: res0 view3 aa3 shadow3 gi3 refl3 pp3 tex3 fx3 foliage3 shading3), screen percentage 0, vertical sync off and no frame cap.
 
 | Place | Immersive FPS | Closed FPS | Change | Immersive p95 ms | Closed p95 ms | Immersive GPU ms | Closed GPU ms | Where (km) | Biome there |
 |---|---|---|---|---|---|---|---|---|---|
@@ -395,7 +395,7 @@ Over the 81 places measured in both modes: Immersive Interiors 29.0 FPS on avera
 
 ### 1920x1080
 
-Measured 2026-11-26 20:01 on NVIDIA GeForce RTX 3060, overall quality level -1 (0 low to 3 epic) (by group: res0 view3 aa3 shadow3 gi3 refl3 pp3 tex3 fx3 foliage3 shading3), screen percentage 0, vertical sync off and no frame cap.
+Measured (Closed Structures 2026-11-26 20:01 and Immersive Interiors 2026-11-26 21:45) on NVIDIA GeForce RTX 3060, overall quality level -1 (0 low to 3 epic) (by group: res0 view3 aa3 shadow3 gi3 refl3 pp3 tex3 fx3 foliage3 shading3), screen percentage 0, vertical sync off and no frame cap.
 
 | Place | Immersive FPS | Closed FPS | Change | Immersive p95 ms | Closed p95 ms | Immersive GPU ms | Closed GPU ms | Where (km) | Biome there |
 |---|---|---|---|---|---|---|---|---|---|

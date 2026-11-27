@@ -31,7 +31,7 @@ The user's list ([improvements17.txt](improvements17.txt)) and its plan ([improv
 
 ### The package
 
-`builds\list17`: Shipping, full cook (11,908 packages), 28.0 GB in 96 files. `package_mistward.ps1 -Test` ran 22 runs, and 21 passed at once: the menu, the town, the castle, the catacombs, Vel Morrath, the four cities' dungeons, the caves, the horse, a village, a tower's cave, Ashenreach, Graymourne, Kethrys Spire, Heaven, a skyscraper, the console, and the new `closed` run. In the `closed` run Brokenspire was built in Closed Structures and F at the store's door took her in. Its level was laid round her with 12 pieces and 21 window panes. No run left a crash report. The peak memory was 7,158 MB, in the `closed` run.
+`builds\list17`: Shipping, full cook (11,908 packages), 28.0 GB in 96 files. `package_mistward.ps1 -Test` ran 22 runs, and 21 passed at once: the menu, the town, the castle, the catacombs, Vel Morrath, the four cities' dungeons, the caves, the horse, a village, a tower's cave, Ashenreach, Graymourne, Kethrys Spire, Heaven, a skyscraper, the display settings, the console, and the new `closed` run. In the `closed` run Brokenspire was built in Closed Structures and F at the store's door took her in. Its level was laid round her with 12 pieces and 21 window panes. No run left a crash report. The peak memory was 7,158 MB, in the `closed` run.
 
 `fortress_open` failed on its first try. It reached the open tier with every one of its 10,733 parts placed, but its mark read `sky=0.99`. The game writes that mark once the sky reaches 0.99, while the script's pattern asked for 1.00. The pattern now follows the game's threshold, and the run was repeated: it passed with `sky=1.00` and 11,358 parts placed.
 
@@ -46,9 +46,16 @@ The Shipping package was run full screen at 1920x1080 and at 3840x2160, once in 
 | 3840x2160, all 81 places | 29.0 FPS | 28.6 FPS | -1 % |
 | 3840x2160, the cities' squares and streets | 29.3 FPS | 28.4 FPS | -3 % |
 
-Closed Structures measured neither clearly faster nor clearly slower. Most places differ by 3 % or less between the modes. The two resolutions read almost alike, as they do in the page's earlier sections: the game's resolution quality group is 0, so 4K is not drawn at four times the pixels.
+These runs do not show Closed Structures to be clearly faster or slower. The averages differ by 1 to 5 %, and in opposite directions at the two resolutions. Within 3 % of each other were 70 of the 81 places at 4K and 54 at 1080p. The two resolutions read almost alike, as they do in the page's earlier sections: the game's resolution quality group is 0, so 4K is not drawn at four times the pixels.
 
-Heaven is the exception, and its two resolutions disagree. At 1080p Closed Structures was faster there, by 4 to 13 % at each of its four places. At 4K it was slower at three of them, by 15 to 35 % (the street at midnight: 36.8 against 24.0). One run a mode cannot tell a cost of the mode in Heaven from run-to-run variation. A Heaven-only run with and without the mode, repeated, is in [TODO.md](../TODO.md).
+The order of the runs may account for much of the difference. Both Closed runs came first (20:01 and 20:53) and both Immersive runs after (21:45 and 22:37). At 1080p Closed was faster at 53 places and slower at 14; at 4K it was slower at 47 and faster at 20. Changes that lean one way like that look like the machine changing over the evening (its heat, its background load) more than the mode. One run per mode cannot tell those apart.
+
+Single places differ by more:
+- **Heaven** disagrees between the resolutions. At 1080p Closed was 4 to 13 % faster at its four places. At 4K it was 15 to 35 % slower at three of them. At the street at midnight, Immersive's 36.8 is above every earlier section's figure there (29.4 to 30.7), so the outlier may be the Immersive run.
+- **Vel Morrath's street at noon** was 24 % faster in Closed at 4K and 10 % at 1080p.
+- **The tundras' run** was 12 % slower in Closed at 1080p and 6 % at 4K.
+
+[TODO.md](../TODO.md) holds a repeat with the modes in alternating order.
 
 ### What was not checked
 

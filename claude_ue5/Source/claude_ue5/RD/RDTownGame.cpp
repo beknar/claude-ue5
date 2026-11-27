@@ -1002,7 +1002,7 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 			// (the list of 2026-11-20's eighteenth phase: the wilds' runs, played once the wilds are ready (RDList15q.cpp))
 			else if ((Go == TEXT("horse") || Go == TEXT("village") || Go == TEXT("cavetower")) && bWild) { GI->Go15 = Go; GI->Go15Stage = 0; GI->Go15Try = 0; GI->Go15At = 0.f; }
 			// (the list of 2026-11-26's ninth phase: in by the general store's door in Closed Structures (RDList17g.cpp))
-			else if (Go == TEXT("closed")) Go17Stage = 0;
+			else if (Go == TEXT("closed")) { Go17Stage = 0; Go17Try = 0; }
 			else UE_LOG(LogRDTownGame, Warning, TEXT("RDTOWN -RDTownGo=%s: not a way this level has"), *Go);
 		}
 	if (bTown && bTownPlaced)

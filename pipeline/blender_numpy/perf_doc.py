@@ -121,12 +121,13 @@ def closed_section(heading, files):
         missing = [m for m, v in (("Immersive Interiors", im), ("Closed Structures", cl)) if not v]
         note += f" ({' and '.join(missing)} not measured at this resolution)" if missing else ""
         grp = f" (by group: {info['groups']})" if info.get("groups") else ""
-        lines += [f"### {res}", "", f"Measured {info.get('when', '?')} on {info.get('gpu', '?')}, overall quality level {info.get('quality', '?')} (0 low to 3 epic){grp}, screen percentage {info.get('sp', '?')}, vertical sync off and no frame cap{note}.", ""]
+        when = " and ".join(f"{m} {v[0].get('when', '?')}" for m, v in (("Closed Structures", cl), ("Immersive Interiors", im)) if v)
+        lines += [f"### {res}", "", f"Measured ({when}) on {info.get('gpu', '?')}, overall quality level {info.get('quality', '?')} (0 low to 3 epic){grp}, screen percentage {info.get('sp', '?')}, vertical sync off and no frame cap{note}.", ""]
         head = "| Place | Immersive FPS | Closed FPS | Change | Immersive p95 ms | Closed p95 ms | Immersive GPU ms | Closed GPU ms | Where (km) | Biome there |"
         lines += [head, "|" + "---|" * (head.count("|") - 1)]
         rows_i = {place(r): r for r in (im[1] if im else [])}
         rows_c = {place(r): r for r in (cl[1] if cl else [])}
-        order = [place(r) for r in ref[1]] + [k for k in rows_i if k not in rows_c]
+        order = list(dict.fromkeys([place(r) for r in ref[1]] + ([k for k in rows_i if k not in rows_c] if cl else [])))
         means = {"immersive": [], "closed": []}
         for k in order:
             a, b = rows_i.get(k), rows_c.get(k)

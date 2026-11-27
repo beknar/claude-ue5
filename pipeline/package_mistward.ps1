@@ -155,7 +155,7 @@ public static class RDWin {
               @{ name = "tower"; args = @("-RDStartHero=Warrior", "-RDTownGo=tower", "-RDMarkFile=$mark"); secs = 210; castle = $true; want = "tower|*|Warrior*" },
 # (the list of 2026-11-26's ninth phase: Brokenspire built in Closed Structures, in by the general store's door (F), its level laid round her:
 #  "closed|<the building>|<pieces laid>|<panes>|<hero>")
-@{ name = "closed"; args = @("-RDStartHero=Warrior", "-RDStructures=closed", "-RDTownGo=closed", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "closed|*|*|*|Warrior*" },
+@{ name = "closed"; args = @("-RDStartHero=Warrior", "-RDStructures=closed", "-RDTownGo=closed", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "closed|?*|[1-9]*|*|Warrior*" },
               @{ name = "display"; args = @("-RDStartHero=Warrior", "-RDMarkFile=$mark", "-RDApplyDisplay=1600x900x2"); secs = 30; window = $true; castle = $true },
               # (2026-11-08: the game's own console (RD/RDConsole.cpp), in a window of its own (the keys go to its focused line):
               #  its self-test types into it through Slate and writes what it measured, and its picture beside it; -RDConsole: it is

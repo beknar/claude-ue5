@@ -4,7 +4,9 @@
 # then writes the results into docs/performance.md under the heading given (pipeline/blender_numpy/perf_doc.py).
 # The list of 2026-11-26 (docs/improvements17.txt): -Structures closed|immersive runs the game in that mode for buildings
 #   (-RDStructures), -WildsOnly measures the cities and biomes only (not the castle's and fortress's halls), -PlacesFrom <file> replays
-#   that file's places (the same places in both modes and at both resolutions).
+#   that file's places (the same places in both modes and at both resolutions). Give each mode's run its own -Label ("CLOSED17 closed",
+#   "CLOSED17 immersive", never a BEFORE one: that would replace the reference every later run replays) and -NoDoc, then write the
+#   tables with perf_doc.py <performance.md> "Closed Structures" <the kept files, named ..._closed_<res>.txt / ..._immersive_<res>.txt>.
 # Args: -Out <package directory> (default builds\mistward_castle) -Label "BEFORE LIST16 changes" [-Res 3840x2160,1920x1080] (default:
 #   the desktop's alone: at the engine's default screen percentage a 4K screen renders about 1920 x 1080 before its upscale, and the
 #   two read the same in BEFORE's first run) [-Py <python>] [-NoDoc] (measure only)
@@ -12,6 +14,11 @@ param([string]$Out = "", [string]$Label = "BEFORE LIST16 changes", [string[]]$Re
       [string]$Structures = "", [switch]$WildsOnly, [string]$PlacesFrom = "")
 $repo = Split-Path -Parent $PSScriptRoot
 if (-not $Out) { $Out = "$repo\builds\mistward_castle" } elseif (-not [IO.Path]::IsPathRooted($Out)) { $Out = Join-Path (Get-Location).Path $Out }
+if (($Structures -or $PlacesFrom -or $WildsOnly) -and $Label -like "BEFORE*") { "-Structures, -PlacesFrom and -WildsOnly need a -Label of their own (a BEFORE label replaces the reference the later runs replay)"; exit 1 }
+if ($PlacesFrom) {
+    if (-not [IO.Path]::IsPathRooted($PlacesFrom)) { $PlacesFrom = Join-Path (Get-Location).Path $PlacesFrom }
+    if (-not (Test-Path $PlacesFrom)) { "no places file at $PlacesFrom"; exit 1 }
+}
 $exe = "$Out\Windows\claude_ue5.exe"
 if (-not (Test-Path $exe)) { "no package at $exe"; exit 1 }
 Add-Type -TypeDefinition @'
@@ -61,7 +68,7 @@ try {
         $tag = $Label -replace '[^A-Za-z0-9]+', '_'
         $placesFrom = Join-Path $repo "claude_ue5\SourceArt\perf16\perf_BEFORE_LIST16_changes_$r.txt"
         if ($PlacesFrom) { $placesFrom = $PlacesFrom }
-        $replay = if ($tag -notlike "BEFORE*" -and (Test-Path $placesFrom)) { @("-RDPerfPlaces=$placesFrom") } else { @() }
+        $replay = if ($tag -notlike "BEFORE*" -and (Test-Path $placesFrom)) { @("-RDPerfPlaces=`"$placesFrom`"") } else { @() }
         $mode = if ($Structures) { @("-RDStructures=$Structures") } else { @() }
         # (the wilds' level (the cities and biomes), then the castle's and Heaven's fortress's first hall: the same file, one after the other)
         # (a list of argument lists: an if-expression unrolled @(, @()) into nothing, and the runs ran no leg)
