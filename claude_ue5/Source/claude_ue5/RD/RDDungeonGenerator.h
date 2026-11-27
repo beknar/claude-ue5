@@ -2351,6 +2351,10 @@ public:
 		 *  taken at once, the household's beds were laid by an overlap test in an empty room) */
 		TArray<TWeakObjectPtr<class UStaticMeshComponent>> Pend;
 		TMap<FString, FWildPiece17> Pieces; TArray<FVector4> Lamps; TWeakObjectPtr<class UInstancedStaticMeshComponent> PaneC;
+		/** the list of 2026-11-27: its windows boarded, its boards outside and in */
+		int32 Boarded18 = 0, Boards18 = 0, Boards18In = 0;
+		/** its inside boards, laid in its level apart from its furniture */
+		TArray<FTransform> Boards18InT;
 	};
 	TArray<FWildBld17> WildBlds17;
 	TWeakObjectPtr<class ULevelStreamingDynamic> WildStream17;
@@ -2414,6 +2418,31 @@ public:
 	float Building17LoadMs = 0.f, Building17CaptureMs = 0.f;
 	FVector Building17ViewAt = FVector::ZeroVector;
 	bool bBuilding17Walked = false;
+	/** the list of 2026-11-27's third phase (RDList18b.cpp, 951 windows): Closed Structures' windows glass or boarded, outside and in */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List18") TArray<FRDWindowHole18> WindowHoles18;
+	/** a plank of the packs, turned by BoardAdjust18 to the board's frame (thickness X, length Y, width Z: BoardSize18) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List18") TObjectPtr<UStaticMesh> BoardMesh18;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List18") FTransform BoardAdjust18;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List18") FVector BoardSize18 = FVector(4.f, 200.f, 20.f);
+	bool Windows18On() const;
+	bool IsGlassWindow18(const ARDSection* S, int32 Bld, FName PieceName) const;
+	void HolesOf18(FName Key, TArray<FBox>& Out, TArray<int32>* Sides = nullptr) const;
+	void BoardsFor18(const FTransform& Frame, const FBox& Hole, bool bOutside, uint32 Seed, TArray<FTransform>& Out, float MarginL = 8.f, float MarginR = 8.f) const;
+	void BoardsOfHoles18(const FTransform& Frame, const TArray<FBox>& Hs, bool bOutside, uint32 Seed, TArray<FTransform>& Out) const;
+	int32 FilterBoards18(TArray<FTransform>& Boards, const TArray<TPair<UStaticMesh*, FTransform>>& Laid) const;
+	void SyncWindowModes18();
+	int32 Wild17Boards18 = 0;
+	void TickBoards18(ARDSection* S);
+	int32 LayInnerBoards18(ARDSection* S, int32 BI, AActor* A);
+	void AddWildBoards18(int32 Ri, const TArray<TPair<FName, FTransform>>& Wins, class UStaticMeshComponent* House, TArray<TWeakObjectPtr<UActorComponent>>* Keep);
+	TWeakObjectPtr<ARDSection> Boards18For;
+	TWeakObjectPtr<class UInstancedStaticMeshComponent> Boards18Out;
+	int32 Boards18Windows = 0, Boards18Glass = 0, Boards18Unmeasured = 0, Boards18Placed = 0, Boards18InnerLeft = 0, Building17Boards18 = 0;
+	/** tests: "<building>|<style>|<glass>|<piece>|<holes>|<x>|<y>|<z>|<out x>|<out y>" a closed building's window; its openings traced on a grid
+	 *  ("<rays>|<boards>|<other>|<none>"); "<windows boarded>|<glass>|<unmeasured>|<outside boards>|<inside boards>|<inside left out>|<on>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List18") TArray<FString> GetWindows18() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List18") FString TraceWindow18(int32 Index, bool bFromOutside, int32 Grid) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List18") FString GetBoards18State() const;
 	bool InHeaven21() const;
 	/** the building whose counter or keeper opened the store (a shop's stock by its kind) */
 	int32 StoreBld21 = -1;

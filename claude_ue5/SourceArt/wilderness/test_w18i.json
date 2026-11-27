@@ -1,0 +1,133 @@
+{
+ "tag": "w18i",
+ "plan": [
+  "closed17w"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "closed17w",
+   "ok": true,
+   "visits": [
+    {
+     "kind": "village house",
+     "name": "Windholt",
+     "immersive": {
+      "closed": 0,
+      "n": 8,
+      "lamps": 1,
+      "panes": 0,
+      "boarded": 0,
+      "boards_in": 0,
+      "still": 16,
+      "moving": 7,
+      "i": 3
+     },
+     "closed": {
+      "closed": 1,
+      "n": 8,
+      "lamps": 1,
+      "panes": 0,
+      "boarded": 0,
+      "boards_in": 0,
+      "still": 8,
+      "moving": 7,
+      "i": 3
+     },
+     "f": "door",
+     "before_in": {
+      "in": -1,
+      "pending": -1,
+      "loaded": 0,
+      "laid": 8,
+      "entered": 1,
+      "ms": 4675.0
+     },
+     "inside": true,
+     "in_state": {
+      "in": 3,
+      "pending": -1,
+      "loaded": 1,
+      "laid": 8,
+      "entered": 2,
+      "ms": 115.0
+     },
+     "in_room_off_cm": 0.0,
+     "in_room_n": 8,
+     "shot": "closed17w_0",
+     "out_state": {
+      "in": -1,
+      "pending": -1,
+      "loaded": 0,
+      "laid": 8,
+      "entered": 2,
+      "ms": 115.0
+     }
+    },
+    {
+     "kind": "house",
+     "name": "farmstead Odric's Croft",
+     "immersive": {
+      "closed": 0,
+      "n": 7,
+      "lamps": 1,
+      "panes": 0,
+      "boarded": 0,
+      "boards_in": 0,
+      "still": 15,
+      "moving": 8,
+      "i": 4
+     },
+     "closed": {
+      "closed": 1,
+      "n": 7,
+      "lamps": 1,
+      "panes": 0,
+      "boarded": 4,
+      "boards_in": 52,
+      "still": 8,
+      "moving": 8,
+      "i": 4
+     },
+     "f": "door",
+     "before_in": {
+      "in": -1,
+      "pending": -1,
+      "loaded": 0,
+      "laid": 8,
+      "entered": 2,
+      "ms": 115.0
+     },
+     "inside": true,
+     "in_state": {
+      "in": 4,
+      "pending": -1,
+      "loaded": 1,
+      "laid": 57,
+      "entered": 3,
+      "ms": 143.0
+     },
+     "in_room_off_cm": 0.0,
+     "in_room_n": 7,
+     "shot": "closed17w_1",
+     "out_state": {
+      "in": -1,
+      "pending": -1,
+      "loaded": 0,
+      "laid": 57,
+      "entered": 3,
+      "ms": 143.0
+     }
+    }
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "wd_w18i_closed17w_0.png",
+  "wd_w18i_closed17w_1.png"
+ ],
+ "error": null,
+ "saves_put_back": 1,
+ "windows_shown_again": 2
+}

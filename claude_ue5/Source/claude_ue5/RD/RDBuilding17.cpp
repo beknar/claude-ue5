@@ -209,9 +209,11 @@ void ARDDungeonGenerator::TickBuilding17(float Dt)
 			for (const TPair<TObjectPtr<UClass>, FTransform>& Ac : R->Actors)
 				if (Ac.Key) if (AActor* Pa = GetWorld()->SpawnActor<AActor>(Ac.Key, Ac.Value, Sp)) { Pa->AttachToActor(A, FAttachmentTransformRules::KeepWorldTransform); ++Building17Pieces; }
 		}
-		CaptureBuildingView17(BI);
+		// (the list of 2026-11-27: glass left as it is, every other window boarded on its inside; no street captured)
+		Building17Boards18 = Windows18On() ? LayInnerBoards18(S, BI, A) : 0;
+		if (!Windows18On()) CaptureBuildingView17(BI);
 		// (a pane in each window, on its inside, showing the street its own cube saw)
-		if (BuildingPaneMesh17 && BuildingViewMaterial17)
+		if (!Windows18On() && BuildingPaneMesh17 && BuildingViewMaterial17)
 		{
 			int32 Wk = 0;
 			for (const ARDSection::FTownWin16& Wn : S->TownWindows16)
@@ -289,6 +291,7 @@ void ARDDungeonGenerator::UnloadBuilding17()
 	if (ULevelStreamingDynamic* L = BuildingStream17.Get()) { L->SetShouldBeLoaded(false); L->SetShouldBeVisible(false); L->SetIsRequestingUnloadAndRemoval(true); }
 	BuildingStream17 = nullptr;
 	InBuilding17 = -1; PendingBuilding17 = -1; bBuilding17Walked = false;
+	Building17Boards18 = 0; Boards18InnerLeft = 0;          // (the list of 2026-11-27: the test's counters of the building she left)
 	// (the visit's cubes let go after it (heaven.md: session state carried for one visit))
 	BuildingViews17.Reset(); BuildingView17 = nullptr;
 }

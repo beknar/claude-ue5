@@ -194,6 +194,8 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 	// ---- its furniture: the dungeon's pieces by name, against its back wall (across from the first door) and round a table
 	// (the list of 2026-11-26's eighth phase: recorded as laid, taken out of the chunk in Closed Structures)
 	const int32 Ri17 = BeginWildRoom17(C, O, Yaw, Mn, Mx, Base + 1.f, TEXT("village house"));
+	// (the list of 2026-11-27: its windows, measured on its mesh, boarded outside and in)
+	AddWildBoards18(Ri17, {}, Sm, nullptr);
 	const int32 Props17 = C->PlaceProps.Num();
 	const float Ds = H->Doors.Num() > 0 && H->Doors[0].Pivot.X < 0.f ? -1.f : 1.f;          // (the door's wall: +X or -X)
 	const float Xb = Ds > 0.f ? Mn.X : Mx.X;                                                // (the back wall)

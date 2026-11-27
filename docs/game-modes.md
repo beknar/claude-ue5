@@ -18,7 +18,7 @@ in the new mode. Everything else stays as it was: the town's seed, its buildings
 
 ## Closed Structures
 
-> Each building a closed shell; its door opens a level of its own. Windows show pictures.
+> Each building a closed shell; its door opens a level of its own. Its windows are glass, or boarded up.
 
 - The town draws each building as a closed shell: its walls, roof, door and windows. Its furniture is recorded when the town is built,
   but not drawn in the town (`RD/RDBuilding17.cpp`). The buildings, their containers and the places of work, beds and stalls are the same
@@ -27,13 +27,13 @@ in the new mode. Everything else stays as it was: the town's seed, its buildings
   lays its recorded furniture, lights and containers in it, and puts her inside the door. The town's people who live or work there are
   inside with her: the innkeeper behind the bar, the trader at the counter, sleepers in their beds. Containers looted inside stay looted
   in either mode.
-- **From inside, its windows show the outside.** Each window holds a picture of the street taken from that window as she comes in.
-- **From outside, its windows show a room.** Each window holds a picture of a room of its building's kind and city: a home, a tavern, a
-  smithy, a store, a chapel... in Brokenspire's, Vel Morrath's, Ashenreach's, Kethrys Spire's and Heaven's looks. There are 55 pictures,
-  taken from inside the game's own furnished rooms (`884 rooms17`, imported by `949 rooms`: `RD/RDList17e.cpp`). At night a window
-  glows while someone awake is inside, as the buildings' lights do in Immersive Interiors. By day it is dim.
-- **In the wilds.** A village or lone house and a farmstead's farmhouse, barn, shed, coop or granary are closed the same way: their furniture and lamp are laid in the building level as she walks in through the door F opens, and let go as she walks out (`RD/RDList17f.cpp`). A farm building's windows show a room of its kind; the village houses, the packs' own meshes, have none.
+- **Its windows are glass or boarded up** (the list of 2026-11-27: `RD/RDList18b.cpp`, `951 windows`). A building with glass, Heaven's,
+  keeps its glass: dark, metallic and opaque, reflecting the street, from outside and from inside. Every other window is boarded over its
+  whole opening, outside and inside: rows of planks and a board across, sized to the opening measured on the window piece's own faces.
+  The boards stop sight, not her (the window's own collider holds her). `rd.Windows18 0` brings back list 17's windows: a picture of a
+  room of its kind from outside, glowing at night, and a picture of the street from inside.
+- **In the wilds.** A village or lone house and a farmstead's farmhouse, barn, shed, coop or granary are closed the same way: their furniture and lamp are laid in the building level as she walks in through the door F opens, and let go as she walks out (`RD/RDList17f.cpp`). A farmhouse's windows are boarded outside and in; the village houses' windows are painted on the packs' own meshes (no opening to see through), and only the dormers of the two houses that have open ones are boarded.
 - **Leaving.** She walks out through the door, or F at the door, and the building's level is let go. A save made inside a building is
   a save at its door's outside, facing out of it.
-- **Why choose it.** There is less to draw in a town: no furniture, lights or people of hidden rooms, and one picture per window. The
+- **Why choose it.** There is less to draw in a town: no furniture, lights or people of hidden rooms. The
   frame rates in every city and biome, at 1080p and 4K, are in `docs/performance.md`'s "Closed Structures" section.

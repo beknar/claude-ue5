@@ -211,6 +211,15 @@ The starting town: a Save As copy of mistward_castle whose generator has `bTown`
 - **Python cannot read a UPROPERTY without a Blueprint specifier** (`TownPeople` is `Transient` only): a test reads the state through a getter of lines (`GetTownLodLines16`).
 
 
+## Closed Structures' windows (the list of 2026-11-27's third phase: `951 windows`, `RD/RDList18b.cpp`, `884 windows18`)
+
+- **An opening is measured on the piece's own faces**: each window piece's triangles laid flat on the wall's plane (2 cm cells), the enclosed empty regions its openings, the faces round them its reveal (inner and outer face). Two-light pieces (`WallWindow2`) have two openings.
+- **A pack's window can be painted**: the wild village houses' ground-storey windows have no hole through any section; a slice at the wall's face found only the plaster panels between the beams (a storey high). Picture a mesh lit before believing a count of its windows.
+- **A wall's band from its mesh's extreme can be its eaves**: the houses' roofs overhang their walls by half a metre and more.
+- **A test ray through a window meets its collider first**: every window piece has a hidden box over its bounds (`AddMeshBoundsCollider`); the trace leaves the town's collider pieces out to reach the boards.
+- **Rows of boards tilted by a few degrees open slivers between them**: at a 12 % overlap and up to 3 degrees, 1 % of the rays through the openings passed (w18a); a third of overlap and 1.5 degrees, none.
+- **A record counted by a test is not the place to add new things**: the wild houses' inside boards went into the furniture record, and `closed17w`'s "the same number in both modes" broke; they are recorded apart (`Boards18In`).
+
 ## PR #125's sleepers (2026-11-24)
 
 - **A test that passes only on one kind of town proves nothing on the others**: `sleep10`'s "a keeper wakes to serve" had only ever met a trader with no bed. A keeper in bed served from it: F turned it to her and its next tick (after the panel, which pauses the game) took it out of bed. Put out of bed where it is woken (`FaceToward`), and awake while it faces her: its day's reset is past the facing's return. Pick the case the check is about (a keeper in bed) and record it.

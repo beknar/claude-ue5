@@ -503,7 +503,8 @@ public:
 	TMap<FString, UInstancedStaticMeshComponent*> HismsBld16;
 	TMap<FString, TArray<FTransform>> PendingBld16;
 	TMap<int32, TArray<TWeakObjectPtr<UInstancedStaticMeshComponent>>> TownBldIsm16;
-	struct FTownWin16 { int32 Bld = -1; FVector At = FVector::ZeroVector, Out = FVector::ForwardVector; };
+	/** (the list of 2026-11-27: the window's piece and its transform, for its boards (RDList18b.cpp)) */
+	struct FTownWin16 { int32 Bld = -1; FVector At = FVector::ZeroVector, Out = FVector::ForwardVector; FName Piece; FTransform Xf; };
 	TArray<FTownWin16> TownWindows16;
 
 protected:

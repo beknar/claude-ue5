@@ -16,6 +16,10 @@ Built and compiled, but no test has run it yet:
 
 ## The list of 2026-11-27 ([docs/improvements18.txt](docs/improvements18.txt), its plan [docs/improvements18_plan.md](docs/improvements18_plan.md))
 
+- [ ] **The village houses' painted windows**: the wild village houses' ground-storey windows are painted on the packs' meshes (no hole through any section, measured by `951 windows` in three ways), so Closed Structures boards only the openings that go through (two houses' dormers). Boarding a painted window would need its place from the texture.
+- [ ] **List 17's windows (`rd.Windows18 0`) in this game's Brokenspire**: `884 building17` and `panes17`, run with list 17's windows (w18d, w18e: the same town both times), failed on two of their own checks: the store's window view against its street cube 0.34 (0.35) where 0.4 is wanted (the home, tavern and smithy 0.65 to 0.98), and at 23:00 the panes of four lit buildings dark (72 panes of 1436; 39 glowing). Their code is list 17's unchanged under `rd.Windows18 0` (the default now boards the windows instead); not looked into.
+- [ ] **Closed Structures' boards from a distance**: the boards are drawn to 90 m (`RDBoard18` cull 70 to 90 m); past it a window shows its piece's empty frame. Not looked at from afar.
+
 - [ ] **Plants on the far chunks**: a chunk drawn on 4 m or 8 m (past 250 m) draws the coarse chord of a convex slope under the plants laid on the 2 m ground: bushes stand up to 1.9 m over it (`888 scrub18`'s far columns), trees and everything else laid on the ground the same. Lifting the coarse vertices to the chords (tried in PR #147) opened seams between chunks of the same step and sank everything else on them up to 2.6 m; re-seating a chunk's plants when its step changes is the other way, not done. The red scrub (the bearberry) grows near her only.
 
 ## The list of 2026-11-26 ([docs/improvements17.txt](docs/improvements17.txt), its plan [docs/improvements17_plan.md](docs/improvements17_plan.md))
