@@ -8372,7 +8372,8 @@ def enterable17():
     out = []
     for l in G["gen"].get_enterable17():
         p = str(l).split("|")
-        out.append({"i": int(p[0]), "kind": int(p[1]), "label": p[2], "rec": int(p[3]), "door": V(float(p[4]), float(p[5]), 0), "out": V(float(p[6]), float(p[7]), 0), "windows": int(p[8]), "door_i": int(p[9]) if len(p) > 9 else -1})
+        out.append({"i": int(p[0]), "kind": int(p[1]), "label": p[2], "rec": int(p[3]), "door": V(float(p[4]), float(p[5]), 0), "out": V(float(p[6]), float(p[7]), 0), "windows": int(p[8]), "door_i": int(p[9]) if len(p) > 9 else -1,
+                    "style": int(p[10]) if len(p) > 10 else 0, "key": p[11] if len(p) > 11 else ""})
     return out
 def pieces17(bi, level=False):
     return sorted(str(l) for l in G["gen"].get_building_pieces17(bi, level))
@@ -8675,6 +8676,199 @@ def step_closed17():
 
 
 STEPS.update({"closed17": step_closed17})
+
+
+# ================================================================================================ the list of 2026-11-26's seventh phase
+ROOMS17 = os.path.normpath(os.path.join(OUT, "..", "list17", "rooms"))
+def step_rooms17():
+    """the rooms' pictures for Closed Structures' windows (the user's "the windows show a solid or glowing texture depicting the inside of
+    that room"): in each of the six cities built Immersive, for each kind of enterable building and its look (RoomKey17: "tavern",
+    "home_holy", "shop_modern"...) one picture of a building's room from just inside one of its windows, looking in (512 x 512, at the
+    hour 20 with the room's lights burning when someone is in), into SourceArt/list17/rooms/<key>.png for 949 rooms"""
+    g = G["gen"]; res = {"keys": {}}; quiet(True)
+    os.makedirs(ROOMS17, exist_ok=True)
+    cv0 = unreal.SystemLibrary.get_console_variable_int_value("rd.Structures17")
+    dn_0 = g.get_editor_property("day_night"); hr_0 = g.get_town_hour()
+    try:
+        for city in ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne", "Kethrys Spire", "Heaven"):
+            if city != "Brokenspire": yield from to_town(city)
+            refresh(); g = G["gen"]
+            set_structures17(0); seed = G["gi"].get_editor_property("town_seed")
+            if city == "Brokenspire": g.rebuild_town(seed); yield from rwait(2.5); refresh(); g = G["gen"]
+            g.set_town_hour(20.0)
+            # (every room's lights burning, whoever is in: the first pictures of rooms nobody was awake in were black)
+            dn0 = g.get_editor_property("day_night"); g.set_editor_property("day_night", False); yield from wait(2.0)
+            seen = {}
+            for e in enterable17():
+                if e["key"] in res["keys"] or e["key"] in seen or e["windows"] == 0: continue
+                seen[e["key"]] = e
+            for key, e in seen.items():
+                ws = [str(l).split("|") for l in g.get_building_windows17(e["i"])]
+                b = next((x for x in blds() if x["i"] == e["i"]), None)
+                if not ws or not b: continue
+                # (the window whose look in reaches farthest: the one farthest from the building's middle's far wall is the one nearest the
+                # middle's opposite: the first of the long walls)
+                # (PR #143's review: a ground-storey window, the deepest look in among them (an upper one looked in over the lit floor))
+                z0 = min(float(w[2]) for w in ws)
+                best = None
+                for w in ws:
+                    wa = V(float(w[0]), float(w[1]), float(w[2])); wo = V(float(w[3]), float(w[4]), 0)
+                    if wa.z > z0 + 50: continue
+                    d = (b["c"].x - wa.x) * -wo.x + (b["c"].y - wa.y) * -wo.y
+                    if best is None or d > best[0]: best = (d, wa, wo)
+                _, wa, wo = best
+                put(V(b["c"].x, b["c"].y, 0)); G["pawn"].get_movement_component().stop_movement_immediately(); yield from wait(1.5)
+                at = V(wa.x - wo.x * 25.0, wa.y - wo.y * 25.0, wa.z - 20.0)
+                yaw = math.degrees(math.atan2(-wo.y, -wo.x))
+                # (a warm fill light over the room's middle, for the picture only: rooms without a lamp of their own came out black)
+                ok_ = g.capture_room17(at, unreal.Rotator(roll=0, pitch=-8, yaw=yaw), V(b["c"].x, b["c"].y, wa.z + 110.0), 400.0, ROOMS17, key + ".png")
+                yield from rwait(0.8)
+                fp = os.path.join(ROOMS17, key + ".png")
+                st = kit().stats(fp) if os.path.exists(fp) else (None, None)
+                # (a big hall the fill light does not reach: taken again with three times the light)
+                for cd in (1200.0, 3600.0):
+                    if st[0] is None or st[0] >= 25: break
+                    ok_ = g.capture_room17(at, unreal.Rotator(roll=0, pitch=-8, yaw=yaw), V(b["c"].x, b["c"].y, wa.z + 110.0), cd, ROOMS17, key + ".png")
+                    yield from rwait(0.8)
+                    st = kit().stats(fp) if os.path.exists(fp) else (None, None)
+                res["keys"][key] = {"city": city, "bld": e["i"], "ok": bool(ok_), "file": os.path.exists(fp), "luma": round(st[0], 1) if st[0] is not None else None,
+                                    "spread": round(st[1], 1) if st[1] is not None else None}
+            g.set_editor_property("day_night", dn0)
+    except Exception as e_:
+        import traceback
+        res["error"] = str(e_) + traceback.format_exc()[-600:]
+    finally:
+        set_structures17(cv0)
+        try:
+            G["gen"].set_editor_property("day_night", dn_0); G["gen"].set_town_hour(hr_0)
+        except Exception: pass
+        try: yield from to_town("Brokenspire")
+        except Exception: pass
+        quiet(False)
+    ok = "error" not in res and len(res["keys"]) >= 15 and all(v["file"] and (v["luma"] or 0) > 18 and (v["spread"] or 0) > 10 for v in res["keys"].values())
+    step_result("rooms17", ok, **res)
+
+
+def step_panes17():
+    """the windows from outside (the user's "the windows show a solid or glowing texture depicting the inside of that room"; RD/RDList17e.cpp):
+    Brokenspire on its seed Closed: every window of a closed building has a pane, its picture its building's kind's (the key the building
+    asks for, or its kind's medieval one); none at a building not closed; at midnight the panes of the buildings whose lights burn glow and
+    the others not, measured in the picture where a lit pane is on the screen against the same pane by day; the square's frame rate at noon
+    and at midnight, Closed against Immersive, in one session"""
+    g = G["gen"]; res = {}; quiet(True)
+    cv0 = unreal.SystemLibrary.get_console_variable_int_value("rd.Structures17")
+    seed0 = G["gi"].get_editor_property("town_seed")
+    try:
+        fps = {}
+        for mode in (0, 1):
+            set_structures17(mode); g.rebuild_town(seed0); yield from rwait(3.0); refresh(); g = G["gen"]
+            sq = place("square"); put(sq, yaw=0.0); yield from wait(2.0)
+            for hr in (12.0, 0.0):
+                g.set_town_hour(hr); yield from rwait(4.0)
+                fps[f"{mode}_{int(hr)}"] = (yield from kit().frames(10.0))
+        res["fps"] = fps
+        # ---- Closed now: the panes
+        en = enterable17(); keys = {e["i"]: e["key"] for e in en}
+        keys_avail = set(str(k) for k in g.get_editor_property("room_panes17").keys())
+        nwin = sum(e["windows"] for e in en)
+        pn = [str(l).split("|") for l in g.get_panes17()]
+        res["windows_closed"] = nwin; res["panes"] = len(pn)
+        res["panes_off_closed"] = sum(1 for p in pn if int(p[0]) not in keys)
+        wrong = []
+        for p in pn:
+            k = keys.get(int(p[0]), ""); used = p[5]
+            want = k if k in keys_avail else (("home_modern" if "home_modern" in keys_avail else k.split("_")[0]) if k.endswith("_modern") else k.split("_")[0])
+            if want not in keys_avail: want = "home"
+            if used != want: wrong.append([p[0], k, used, want])
+        res["wrong_picture"] = wrong[:6]; res["keys_used"] = sorted({p[5] for p in pn})
+        # ---- at midnight: glowing as their buildings' lights burn
+        g.set_town_hour(23.0); yield from rwait(3.0)
+        pn = [str(l).split("|") for l in g.get_panes17()]
+        lit = {int(l.split("|")[0]): l.split("|")[2] for l in (str(x) for x in g.get_town_light_lines())}
+        res["glowing"] = sum(1 for p in pn if float(p[4]) > 0.5); res["dark"] = sum(1 for p in pn if float(p[4]) <= 0.5)
+        # (PR #143's review: each pane against its own building's lights, not only some of each)
+        mism = [p[0] for p in pn if (float(p[4]) > 0.5) != (lit.get(int(p[0])) in ("1", "lit", "True"))]
+        res["glow_mismatch"] = len(mism); res["glow_mismatch_blds"] = sorted(set(mism))[:8]
+        res["lit_lines"] = [str(x) for x in g.get_town_light_lines()][:3]
+        # (a glowing pane in a picture, against the same pane at noon)
+        gp = next((p for p in pn if float(p[4]) > 0.5), None)
+        if gp:
+            pa = V(float(gp[1]), float(gp[2]), float(gp[3]))
+            e = next(x for x in en if x["i"] == int(gp[0]))
+            ws = [str(l).split("|") for l in g.get_building_windows17(e["i"])]
+            w = min(ws, key=lambda w: math.hypot(float(w[0]) - pa.x, float(w[1]) - pa.y))
+            wo = V(float(w[3]), float(w[4]), 0)
+            stand = V(pa.x + wo.x * 500.0, pa.y + wo.y * 500.0, 0)
+            def pic(tag):
+                put(stand, yaw=math.degrees(math.atan2(-wo.y, -wo.x))); G["pawn"].get_movement_component().stop_movement_immediately()
+                G["pawn"].set_actor_hidden_in_game(True)
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-2, yaw=math.degrees(math.atan2(-wo.y, -wo.x)))); yield from wait(1.5)
+                pr_ = unreal.GameplayStatics.project_world_to_screen(G["pc"], pa, False)
+                ok_, sp = (pr_[0], pr_[1]) if isinstance(pr_, tuple) else (pr_ is not None, pr_)
+                vs = unreal.WidgetLayoutLibrary.get_viewport_size(G["w"])
+                f = yield from shot_file16("panes17_" + tag)
+                G["pawn"].set_actor_hidden_in_game(False)
+                if not (ok_ and f and vs.x > 0): return None
+                x, y = sp.x * 1280.0 / vs.x, sp.y * 720.0 / vs.y
+                return round(kit().stats(f, (max(0, x - 25) / 1280.0, max(0, y - 25) / 720.0, min(1280, x + 25) / 1280.0, min(720, y + 25) / 720.0), 1)[0], 1)
+            res["pane_luma_night"] = yield from pic("night")
+            # (the same view with the panes hidden: the glow is the pane's)
+            unreal.SystemLibrary.execute_console_command(G["w"], "rd.Panes17 0"); yield from rwait(1.0)
+            res["pane_luma_off"] = yield from pic("off")
+            unreal.SystemLibrary.execute_console_command(G["w"], "rd.Panes17 1"); yield from rwait(1.0)
+            res["pane_lit_building"] = int(gp[0])
+        g.set_town_hour(12.0); yield from rwait(2.0)
+        # ---- Heaven, Closed: a pane at noon on its wall's outer face, with and without the panes (PR #143's review: 12 cm was inside its walls)
+        yield from to_town("Heaven"); refresh(); g = G["gen"]
+        set_structures17(1); g.rebuild_town(G["gi"].get_editor_property("town_seed")); yield from rwait(3.0); refresh(); g = G["gen"]
+        g.set_town_hour(12.0); yield from rwait(2.0)
+        hp = [str(l).split("|") for l in g.get_panes17()]
+        res["heaven_panes"] = len(hp)
+        sq = place("square")
+        hp.sort(key=lambda p: math.hypot(float(p[1]) - sq.x, float(p[2]) - sq.y))
+        if hp:
+            gp = hp[0]; pa = V(float(gp[1]), float(gp[2]), float(gp[3]))
+            ws = [str(l).split("|") for l in g.get_building_windows17(int(gp[0]))]
+            w = min(ws, key=lambda w: math.hypot(float(w[0]) - pa.x, float(w[1]) - pa.y)); wo = V(float(w[3]), float(w[4]), 0)
+            res["heaven_pane_out_cm"] = round((pa.x - float(w[0])) * wo.x + (pa.y - float(w[1])) * wo.y, 1)
+            stand = V(pa.x + wo.x * 450.0, pa.y + wo.y * 450.0, 0)
+            def hpic(tag):
+                put(stand, yaw=math.degrees(math.atan2(-wo.y, -wo.x))); G["pawn"].get_movement_component().stop_movement_immediately()
+                G["pawn"].set_actor_hidden_in_game(True)
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-2, yaw=math.degrees(math.atan2(-wo.y, -wo.x)))); yield from wait(1.5)
+                pr_ = unreal.GameplayStatics.project_world_to_screen(G["pc"], pa, False)
+                ok_, sp = (pr_[0], pr_[1]) if isinstance(pr_, tuple) else (pr_ is not None, pr_)
+                vs = unreal.WidgetLayoutLibrary.get_viewport_size(G["w"])
+                f = yield from shot_file16("panes17_" + tag)
+                G["pawn"].set_actor_hidden_in_game(False)
+                if not (ok_ and f and vs.x > 0): return None
+                x, y = sp.x * 1280.0 / vs.x, sp.y * 720.0 / vs.y
+                return round(kit().stats(f, (max(0, x - 25) / 1280.0, max(0, y - 25) / 720.0, min(1280, x + 25) / 1280.0, min(720, y + 25) / 720.0), 1)[0], 1)
+            res["heaven_noon_on"] = yield from hpic("heaven_on")
+            unreal.SystemLibrary.execute_console_command(G["w"], "rd.Panes17 0"); yield from rwait(1.0)
+            res["heaven_noon_off"] = yield from hpic("heaven_off")
+            unreal.SystemLibrary.execute_console_command(G["w"], "rd.Panes17 1"); yield from rwait(1.0)
+        yield from to_town("Brokenspire"); refresh()
+    except Exception as e_:
+        import traceback
+        res["error"] = str(e_) + traceback.format_exc()[-600:]
+    finally:
+        try: unreal.SystemLibrary.execute_console_command(G["w"], "rd.Panes17 1")
+        except Exception: pass
+        try: G["pawn"].set_actor_hidden_in_game(False)
+        except Exception: pass
+        set_structures17(cv0)
+        try: G["gen"].rebuild_town(seed0)
+        except Exception: pass
+        yield from rwait(2.5); refresh()
+        quiet(False)
+    ok = ("error" not in res and res.get("panes", 0) > 0 and res.get("panes") == res.get("windows_closed") and res.get("panes_off_closed") == 0 and not res.get("wrong_picture")
+          and res.get("glowing", 0) > 0 and res.get("dark", 0) > 0 and res.get("glow_mismatch") == 0 and (res.get("pane_luma_night") or 0) > 1.5 * (res.get("pane_luma_off") or 999)
+          and res.get("heaven_panes", 0) > 0 and res.get("heaven_pane_out_cm", 0) > 20 and abs((res.get("heaven_noon_on") or 0) - (res.get("heaven_noon_off") or 0)) > 5)
+    step_result("panes17", ok, **res)
+
+
+STEPS.update({"rooms17": step_rooms17, "panes17": step_panes17})
 
 def run():
     G["saves"] = saves_snapshot()

@@ -2317,6 +2317,28 @@ public:
 	FVector SavePoint17(const FVector& Her) const;
 	float SaveYaw17(float Yaw) const;
 	void EnsureStructures17() const;
+	/** the seventh phase (RDList17e.cpp): the closed buildings' windows from outside, a picture of a room of the building's kind (949 rooms'
+	 *  RoomPanes17 by key), glowing at night while its lights burn; tests: "<building>|<x>|<y>|<z>|<glow>|<key>" a pane */
+	static FName RoomKey17(const ARDSection* S, int32 BI);
+	UMaterialInterface* RoomPaneFor17(const ARDSection* S, int32 BI, FName* Used = nullptr) const;
+	void TickPanes17(float Dt);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List17") TArray<FString> GetPanes17() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List17") int32 GetPanesGlowing17() const { return Panes17Glowing; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List17") bool CaptureRoom17(FVector At, FRotator Rot, FVector LightAt, float Intensity, const FString& Dir, const FString& File);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List17") TMap<FName, TObjectPtr<UMaterialInterface>> RoomPanes17;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List17") float BuildingPaneOut17 = 12.f;
+	struct FPane17 { TWeakObjectPtr<class UInstancedStaticMeshComponent> C; int32 I = 0; int32 Bld = -1; };
+	TArray<FPane17> PaneBld17;
+	TArray<FName> PaneKeys17;
+	TArray<TWeakObjectPtr<class UInstancedStaticMeshComponent>> Panes17;
+	TWeakObjectPtr<ARDSection> Panes17For;
+	int32 Panes17Made = 0, Panes17Glowing = 0;
+	float Panes17T = 0.f, Panes17Lit = -1.f;
+	bool bPanes17Shown = true;
+	/** each window piece's outer face (cm out of the wall's line, measured on its mesh through its Adjust), once a kit */
+	TMap<FName, float> PaneOut17;
+	/** a modern window's pane: its width the window piece's (92 %), 250 cm high (Heaven's glass); the medieval ones BuildingPaneSize17 */
+	TMap<FName, FVector2D> PaneSize17;
 	bool IsEnterable17(const ARDSection* S, int32 BI) const;
 	int32 BuildingDoorNear17(const FVector& From, bool bOut) const;
 	bool BuildingDoorFirst17(const FVector& From, int32 I, float NearerThan, const ARDSection* BestS, bool bBestDoor, int32 BestI) const;

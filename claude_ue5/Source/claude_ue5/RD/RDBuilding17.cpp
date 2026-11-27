@@ -397,7 +397,7 @@ TArray<FString> ARDDungeonGenerator::GetBuildingPieces17(int32 BI, bool bLevel) 
 
 TArray<FString> ARDDungeonGenerator::GetEnterable17() const
 {
-	// (tests: every enterable building, "<index>|<kind>|<label>|<recorded pieces>|<door x>|<door y>|<out x>|<out y>|<windows>|<door index>")
+	// (tests: every enterable building, "<index>|<kind>|<label>|<recorded pieces>|<door x>|<door y>|<out x>|<out y>|<windows>|<door index>|<style>|<room picture key>")
 	TArray<FString> Out;
 	const ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	if (!S) return Out;
@@ -409,7 +409,7 @@ TArray<FString> ARDDungeonGenerator::GetEnterable17() const
 		const FVector Door = S->LocalToWorld(B.DoorTile) + Out_ * (TileSize * 0.5f);
 		const ARDSection::FBldRec17* R = S->BldRec17.Find(I);
 		int32 Nw = 0; for (const ARDSection::FTownWin16& Wn : S->TownWindows16) if (Wn.Bld == I) ++Nw;
-		Out.Add(FString::Printf(TEXT("%d|%d|%s|%d|%.0f|%.0f|%.0f|%.0f|%d|%d"), I, (int32)B.Kind, *B.Label, R ? R->N : 0, Door.X, Door.Y, Out_.X, Out_.Y, Nw, B.Door));
+		Out.Add(FString::Printf(TEXT("%d|%d|%s|%d|%.0f|%.0f|%.0f|%.0f|%d|%d|%d|%s"), I, (int32)B.Kind, *B.Label, R ? R->N : 0, Door.X, Door.Y, Out_.X, Out_.Y, Nw, B.Door, (int32)B.Style, *RoomKey17(S, I).ToString()));
 	}
 	return Out;
 }
