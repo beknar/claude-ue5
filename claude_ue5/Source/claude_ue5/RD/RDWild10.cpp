@@ -192,6 +192,9 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 			}
 	}
 	// ---- its furniture: the dungeon's pieces by name, against its back wall (across from the first door) and round a table
+	// (the list of 2026-11-26's eighth phase: recorded as laid, taken out of the chunk in Closed Structures)
+	const int32 Ri17 = BeginWildRoom17(C, O, Yaw, Mn, Mx, Base + 1.f, TEXT("village house"));
+	const int32 Props17 = C->PlaceProps.Num();
 	const float Ds = H->Doors.Num() > 0 && H->Doors[0].Pivot.X < 0.f ? -1.f : 1.f;          // (the door's wall: +X or -X)
 	const float Xb = Ds > 0.f ? Mn.X : Mx.X;                                                // (the back wall)
 	const float Face = Ds > 0.f ? 0.f : 180.f;                                              // (a piece's front (+X) into the room)
@@ -250,7 +253,9 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 		Lt->RegisterComponent();
 		Lt->SetWorldLocation(RDW10At(O, Yaw, RoomC.X, RoomC.Y, 290.f));
 		Rec.bLit = true;
+		TakeWildLamp17(Ri17, Lt);
 	}
+	TakeWildProps17(Ri17, C, Props17);
 	// ---- its ground kept clear: the plants in it taken out, the near grass to come left out; the place's own props in it (a lone
 	// house's fences and hay, a village's carts laid before it) taken away
 	const FTransform Gt = C->Ground->GetComponentTransform();
@@ -561,6 +566,7 @@ void ARDTownsfolk::SetLantern(bool bOn)
 void ARDDungeonGenerator::TickWild10(float Dt, const FVector& Her)
 {
 	TickWildDoors(Dt);
+	TickWildBld17(Dt, Her);          // (the list of 2026-11-26's eighth phase)
 	TickWildPick14();          // (the list of 2026-11-16's ninth phase: a lock being picked)
 	TravellerClock += Dt; LanternClock += Dt;
 	if (bWild && bWildTravellers && TravellerClock >= 1.f) { TravellerClock = 0.f; TickWildTravellers(Her); }

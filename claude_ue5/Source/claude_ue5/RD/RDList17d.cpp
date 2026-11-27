@@ -74,8 +74,13 @@ bool ARDDungeonGenerator::SetStructures17(int32 Mode, bool bApply)
 	// (applied at once in a town whose build differs: the game saved and loaded where she stands, the town built again in the new mode)
 	const ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	// (against the town as it was built (PR #141's review: the live setting can differ from it))
-	if (!bApply || !bTown || !S || S->BldClosed17 == Closed17() || (PlayerCombat && PlayerCombat->IsDead())) return true;
+	// (the list of 2026-11-26's eighth phase: in the wilds, the houses laid round her in the other mode are laid again too)
+	const bool bNow = Closed17();
+	const bool bTownDiff = bTown && S && S->BldClosed17 != bNow;
+	const bool bWildDiff = bWild && WildBlds17.ContainsByPredicate([&](const FWildBld17& B) { return B.C.IsValid() && B.bClosed != bNow; });
+	if (!bApply || (!bTownDiff && !bWildDiff) || (PlayerCombat && PlayerCombat->IsDead())) return true;
 	if (InBuilding17 >= 0) LeaveBuilding17();
+	if (InWild17 >= 0 || PendingWild17 >= 0) UnloadWild17();
 	SetMenuOpen(false);
 	// (a slot of its own (PR #142's review: the player's autosave was taken over and shown as "structures"); the load lets it go)
 	if (!SaveGameNow(TEXT("structures17"), TEXT("structures"), FString())) return false;

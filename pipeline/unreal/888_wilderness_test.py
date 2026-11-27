@@ -8895,6 +8895,111 @@ def saves_restore(snap):
         fp = os.path.join(SAVES, f)
         if not os.path.exists(fp) or open(fp, "rb").read() != b: open(fp, "wb").write(b); n += 1
     return n
+
+# ================================================================================================ the list of 2026-11-26's eighth phase
+def wild_blds17():
+    out = []
+    for l in G["gen"].get_wild_blds17():
+        p = str(l).split("|")
+        out.append({"i": int(p[0]), "kind": p[1], "closed": int(p[2]), "n": int(p[3]), "lamps": int(p[4]), "panes": int(p[5]), "floor": float(p[8]),
+                    "yaw": float(p[9]), "x": float(p[10]), "y": float(p[11]), "glow": float(p[12]), "hx": float(p[13]), "hy": float(p[14])})
+    return out
+def wild17_state():
+    p = str(G["gen"].get_wild17_state()).split("|")
+    return {"in": int(p[0]), "pending": int(p[1]), "loaded": int(p[2]), "laid": int(p[3]), "entered": int(p[4]), "ms": float(p[5])}
+def room_census17(b):
+    """what the chunks draw in a room, by their middles: pieces on the chunk's ground (components and instances) and the containers' parts
+    (on a base of their own)"""
+    h = {"x": b["x"], "y": b["y"], "hx": b["hx"], "hy": b["hy"], "yaw": b["yaw"], "z": b["floor"]}
+    still, moving = 0, 0
+    r = max(b["hx"], b["hy"]) * 1.5
+    box = unreal.Box(min=V(b["x"] - r, b["y"] - r, b["floor"] - 200), max=V(b["x"] + r, b["y"] + r, b["floor"] + 400))
+    for c in GS.get_all_actors_of_class(G["w"], unreal.RDWildChunk):
+        for sm in c.get_components_by_class(unreal.StaticMeshComponent):
+            if isinstance(sm, unreal.InstancedStaticMeshComponent):
+                if isinstance(sm, unreal.HierarchicalInstancedStaticMeshComponent) or not sm.is_visible(): continue
+                for i in sm.get_instances_overlapping_box(box, True) or []:
+                    t = sm.get_instance_transform(i, True); t = t[1] if isinstance(t, tuple) else t
+                    if t and in_house(h, t.translation, -25.0) and b["floor"] - 20 < t.translation.z < b["floor"] + 250: still += 1
+                continue
+            q = sm.get_world_location()
+            if not in_house(h, q, -25.0) or not (b["floor"] - 20 < q.z < b["floor"] + 250) or sm.get_editor_property("hidden_in_game"): continue
+            pa = sm.get_attach_parent()
+            if pa is not None and isinstance(pa, unreal.ProceduralMeshComponent): still += 1
+            elif pa is not None and type(pa) is unreal.SceneComponent: moving += 1
+    return still, moving
+def step_closed17w():
+    """Closed Structures in the wilds (the user's "makes all buildings their own level, where opening a door opens a new level just for
+    that building"; RD/RDList17f.cpp): a village house and a farmstead's farmhouse, each laid on its chunk in Immersive Interiors and again
+    in Closed Structures (rd.Structures17): its record's furniture and lamp the same in both; in Closed the chunk draws that many pieces
+    fewer in its room and the same containers, the farmhouse's windows have panes (none in Immersive); she opens its door by F, walks in
+    by her own movement and the building level comes with its furniture laid (as many as recorded), then walks out and it goes"""
+    g = G["gen"]; res = {"visits": []}; quiet(True)
+    yield from wait_ready(90)
+    near = sorted([p for p in places_near(0, 0, 25000) if p["kind"] in ("house", "village")], key=lambda p: math.hypot(p["x"], p["y"]))
+    fs = [str(x).split("|") for x in g.find_wild_farmsteads(0.0, 0.0, 3500.0)]
+    goals = [("village house", near[0]["name"], near[0]["x"], near[0]["y"])] if near else []
+    goals += [("house", "farmstead " + f[1], float(f[2]), float(f[3])) for f in fs[:1]]
+    def con(c): unreal.SystemLibrary.execute_console_command(G["w"], c)
+    try:
+        for kind, name, x, y in goals:
+            v = {"kind": kind, "name": name}
+            per = {}
+            for mode in (0, 1):
+                con(f"rd.Structures17 {mode}")
+                g.wild_drop_all(); g.wild_put_her(x - 40.0, y); yield from wait_chunks(30, 50); yield from rwait(2.0)
+                bs = [b for b in wild_blds17() if b["kind"] == kind and math.hypot(b["x"] / 100.0 - x, b["y"] / 100.0 - y) < 80.0]
+                if not bs: per[mode] = None; continue
+                b = min(bs, key=lambda b: math.hypot(b["x"] / 100.0 - x, b["y"] / 100.0 - y))
+                st, mv = room_census17(b)
+                per[mode] = {"closed": b["closed"], "n": b["n"], "lamps": b["lamps"], "panes": b["panes"], "still": st, "moving": mv, "i": b["i"], "b": b}
+            v["immersive"] = {k: w for k, w in (per.get(0) or {}).items() if k != "b"}; v["closed"] = {k: w for k, w in (per.get(1) or {}).items() if k != "b"}
+            if per.get(1):
+                b = per[1]["b"]
+                hs, ds = wild_houses()
+                h = {"x": b["x"], "y": b["y"], "hx": b["hx"], "hy": b["hy"], "yaw": b["yaw"]}
+                dd = [d for d in ds if math.hypot(d["x"] - b["x"], d["y"] - b["y"]) < max(b["hx"], b["hy"]) * 1.8]
+                if dd:
+                    d = min(dd, key=lambda d: math.hypot(d["x"] - b["x"], d["y"] - b["y"]))
+                    out = V(d["x"] - b["x"], d["y"] - b["y"], 0); n_ = math.hypot(out.x, out.y) or 1.0; out = V(out.x / n_, out.y / n_, 0)
+                    stp = V(d["x"] + out.x * 350, d["y"] + out.y * 350, 0)
+                    put(stp, yaw=math.degrees(math.atan2(-out.y, -out.x)), z=g.wild_ground_z(stp)); yield from rwait(0.8)
+                    yield from walk_to(V(d["x"] + out.x * 110, d["y"] + out.y * 110, 0), 6.0, 40.0); yield from rwait(0.3)
+                    v["f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(1.6)
+                    v["before_in"] = wild17_state()
+                    yield from walk_to(V(d["x"] - out.x * 150, d["y"] - out.y * 150, 0), 6.0)
+                    yield from walk_to(V(b["x"], b["y"], 0), 6.0, 90.0)
+                    t0 = time.time()
+                    while time.time() - t0 < 15 and wild17_state()["in"] < 0: yield
+                    yield from rwait(0.6)
+                    v["inside"] = in_house(h, G["pawn"].get_actor_location()); v["in_state"] = wild17_state()
+                    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-20, yaw=math.degrees(math.atan2(-out.y, -out.x)))); yield from rwait(1.2)
+                    sn = f"closed17w_{len(res['visits'])}"; shot(sn, "1280x720"); v["shot"] = sn; yield from rwait(1.5)
+                    yield from walk_to(V(d["x"] + out.x * 400, d["y"] + out.y * 400, 0), 10.0)
+                    yield from rwait(1.0)
+                    v["out_state"] = wild17_state()
+            res["visits"].append(v)
+    except Exception as e_:
+        import traceback
+        res["error"] = str(e_) + traceback.format_exc()[-600:]
+    finally:
+        con("rd.Structures17 -1")
+        g.wild_drop_all(); g.wild_put_her(0.0, 0.0)
+        quiet(False)
+    yield from wait_chunks(30, 40)
+    def good(v):
+        im, cl = v.get("immersive") or {}, v.get("closed") or {}
+        ins, outs = v.get("in_state") or {}, v.get("out_state") or {}
+        return (im.get("closed") == 0 and cl.get("closed") == 1 and cl.get("n", 0) >= 4 and cl.get("n") == im.get("n") and cl.get("lamps") == im.get("lamps") >= 1
+                and im.get("still", 0) - cl.get("still", 0) >= cl.get("n", 99) * 0.9 and cl.get("moving") == im.get("moving") and im.get("panes") == 0
+                and (cl.get("panes", 0) > 0 if v["kind"] == "house" else True)
+                and v.get("inside") and ins.get("in") == cl.get("i") and ins.get("laid") == cl.get("n") and ins.get("loaded") == 1 and outs.get("in") == -1)
+    ok = "error" not in res and len(res["visits"]) == 2 and all(good(v) for v in res["visits"])
+    step_result("closed17w", ok, **res)
+
+
+STEPS["closed17w"] = step_closed17w
+
 def run():
     G["saves"] = saves_snapshot()
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
