@@ -334,12 +334,16 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 					const int32 I0 = FMath::Clamp(FMath::FloorToInt(Lx / St), 0, Nv - 2), J0 = FMath::Clamp(FMath::FloorToInt(Ly / St), 0, Nv - 2);
 					const float Fx = (float)(Lx / St - I0), Fy = (float)(Ly / St - J0);
 					float Zc = FMath::Lerp(FMath::Lerp(Zat(I0, J0), Zat(I0 + 1, J0), Fx), FMath::Lerp(Zat(I0, J0 + 1), Zat(I0 + 1, J0 + 1), Fx), Fy);
+					// (the list of 2026-11-27: on the drawn triangle, split from (i+1, j) to (i, j+1) as the ground mesh is wound)
+					if (RDScrub18On())
+						Zc = Fx + Fy <= 1.f ? Zat(I0, J0) + (Zat(I0 + 1, J0) - Zat(I0, J0)) * Fx + (Zat(I0, J0 + 1) - Zat(I0, J0)) * Fy
+							: Zat(I0 + 1, J0 + 1) + (Zat(I0, J0 + 1) - Zat(I0 + 1, J0 + 1)) * (1.f - Fx) + (Zat(I0 + 1, J0) - Zat(I0 + 1, J0 + 1)) * (1.f - Fy);
 					if (F.NearWater < 0.f) Zc = W.ToZ(Q.Water) + 3.f;
 					const float Sc = FMath::Lerp(F.ScaleMin, F.ScaleMax, FRDWildWorld::Rand01(Wx, Wy, Hs + 5u));
 					const float Yaw = FRDWildWorld::Rand01(Wx, Wy, Hs + 6u) * 360.f;
 					FQuat Rq = FQuat(FVector::UpVector, FMath::DegreesToRadians(Yaw));
-					if (F.bAlign) Rq = FQuat::FindBetweenNormals(FVector::UpVector, FineN[I * Nv + J]) * Rq;
-					Ins.X.Add(FTransform(Rq, FVector(Lx * 100.0, Ly * 100.0, Zc - F.Sink * Sc), FVector(Sc)));
+					if (F.bAlign || RDScrub18Align(F)) Rq = FQuat::FindBetweenNormals(FVector::UpVector, FineN[I * Nv + J]) * Rq;
+					Ins.X.Add(FTransform(Rq, FVector(Lx * 100.0, Ly * 100.0, Zc - F.Sink * Sc - RDScrub18ExtraSink(F, Sc, FineN[I * Nv + J])), FVector(Sc)));
 				}
 			if (Ins.X.Num() > 0) D.Inst.Add(MoveTemp(Ins));
 		}

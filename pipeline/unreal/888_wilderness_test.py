@@ -9059,3 +9059,84 @@ def tick(dt):
 G["gen_"] = run()
 G["h"] = unreal.register_slate_post_tick_callback(tick)
 print("wilderness test armed:", PLAN, TAG)
+
+
+# ================================================================================================ the list of 2026-11-27's second phase
+def scrub18_gaps(max_m, min_deg=10.0):
+    out = {}
+    for ln in str(G["gen"].get_wild_foliage_gaps18(max_m, min_deg)).split(";"):
+        p = ln.split("|")
+        if len(p) < 10: continue
+        out[p[0]] = {"kind": p[1], "n": int(p[2]), "max_cm": float(p[3]), "p95_cm": float(p[4]), "over10": int(p[5]), "whole5": int(p[6]),
+                     "step1_cm": float(p[7]), "step2_cm": float(p[8]), "step4_cm": float(p[9])}
+    return out
+
+
+def scrub18_spot(x, y):
+    """beside the biome's point, the way its ground rises most over 60 m (the slope to look at) and a gentle spot to stand on before it"""
+    best = (0.0, 0.0)
+    z0 = sample(x, y)["z"]
+    for k in range(16):
+        a = k * 22.5
+        dz = sample(x + 60.0 * math.cos(math.radians(a)), y + 60.0 * math.sin(math.radians(a)))["z"] - z0
+        if dz > best[0]: best = (dz, a)
+    return best[1], best[0]
+
+
+def step_scrub18():
+    """the list of 2026-11-27's second phase (RD/RDList18.cpp, rd.Scrub18): "on hills and mountain sides, there is red scrub that appears
+    to be floating in the air". In the hills, the mountains and the mountains and peaks, at noon: the chunks made with the old rule
+    (rd.Scrub18 0), then made again with the new (1), at the same place. Each time every plant within 300 m and within 1.2 km on
+    ground over 10 degrees is measured against the drawn ground under its footprint (its mesh's box's bottom corners drawn in to 0.7:
+    the highest corner's height over the ground is its gap; for a tree that box is its crown, so only the bushes are judged), by mesh,
+    and the slope is pictured along it and across it, her body hidden. Ok: bushes measured in every place; with the new rule no bush's
+    95th percentile gap within 300 m over 5 cm and none over 25 cm, each under the old rule's where that was over 5 cm. The far chunks'
+    gaps (drawn on 4 m and 8 m: the plants stand on the 2 m ground) are recorded, not judged"""
+    g = G["gen"]; res = {"places": {}}; quiet(True); w = UES.get_game_world(); hour0 = g.get_town_hour()
+    mode0 = unreal.SystemLibrary.get_console_variable_int_value("rd.Scrub18")
+    yield from wait_ready(90)
+    try:
+        g.set_town_hour(12.0)
+        for bn in ("hills", "mountains", "mountains and peaks"):
+            pt = find_biome_point(bn)
+            if not pt: res["places"][bn] = {"error": "not found"}; continue
+            yaw, rise = scrub18_spot(*pt)
+            r = {"at": [round(pt[0]), round(pt[1])], "rise_60m": round(rise, 1), "yaw": yaw}
+            for mode in (0, 1):
+                unreal.SystemLibrary.execute_console_command(w, "rd.Scrub18 %d" % mode)
+                g = G["gen"]; g.wild_drop_all(); g.wild_put_her(pt[0], pt[1]); yield from wait_chunks(40, 60); ground_put(*pt); yield from rwait(5.0)
+                r["near_%d" % mode] = scrub18_gaps(300.0)
+                r["far_%d" % mode] = scrub18_gaps(1200.0)
+                G["pawn"].set_actor_hidden_in_game(True)
+                for tag, dy, pitch in (("up", 0.0, 4.0), ("across", 90.0, -6.0)):
+                    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=pitch, yaw=yaw + dy)); yield from rwait(2.5)
+                    p = yield from shot_wait13("scrub18_%s_%s_%d" % (bn.replace(" ", "_"), tag, mode), "1280x720")
+                    r["pic_%s_%d" % (tag, mode)] = os.path.basename(p) if p else None
+                G["pawn"].set_actor_hidden_in_game(False)
+            res["places"][bn] = r
+    except Exception as e_:
+        res["error"] = str(e_)
+    finally:
+        try:
+            unreal.SystemLibrary.execute_console_command(w, "rd.Scrub18 %d" % mode0); G["pawn"].set_actor_hidden_in_game(False); G["gen"].set_town_hour(hour0)
+        except Exception: pass
+        quiet(False)
+    ok = "error" not in res and len(res["places"]) == 3
+    worst = {}
+    for bn, r in res["places"].items():
+        if "error" in r or "near_1" not in r: ok = False; continue
+        nb = 0
+        for m, v in r["near_1"].items():
+            if v["kind"] != "bush": continue
+            nb += v["n"]
+            old = r["near_0"].get(m, {}).get("p95_cm")
+            worst[bn + ":" + m] = (v["p95_cm"], v["max_cm"], old, v["n"], r["near_0"].get(m, {}).get("n"))
+            if v["p95_cm"] > 5.0 or v["max_cm"] > 25.0: ok = False
+            if old is not None and old > 5.0 and v["p95_cm"] >= old: ok = False
+        if nb == 0: ok = False
+        r["bushes_measured"] = nb
+    res["bushes_new_p95_max_old_p95_n_new_old"] = worst
+    step_result("scrub18", ok, **res)
+
+
+STEPS["scrub18"] = step_scrub18

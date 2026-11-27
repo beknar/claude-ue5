@@ -79,7 +79,10 @@ void ARDDungeonGenerator::StartWild()
 	// moved, given back to him to take again; she is told once she stands in the square)
 	if (URDGameInstance* GIw = URDGameInstance::Of(this); GIw && GIw->bOldWorld) GiveBackWildQuests14();
 	TSharedPtr<FRDWildWorld, ESPMode::ThreadSafe> W = Wild;
-	const TArray<FRDWildBiome> Biomes = WildBiomes;
+	TArray<FRDWildBiome> Biomes = WildBiomes;
+	// (the list of 2026-11-27: each plant's footprint for the chunks' slope rule, RDList18.cpp)
+	for (FRDWildBiome& Bm : Biomes) for (FRDWildFoliage& Fo : Bm.Foliage)
+		if (Fo.Mesh) { const FBoxSphereBounds Bd = Fo.Mesh->GetBounds(); Fo.Radius18 = FMath::Max(Bd.BoxExtent.X, Bd.BoxExtent.Y); Fo.Height18 = 2.f * Bd.BoxExtent.Z; }
 	const TArray<FRDWildPoiKind> Pois = WildPoiKinds; const float Fill = WildPoiFill;
 	const bool bPortSea = bPortWaterOpen;
 	const bool bTerr15 = bVillageTerraces15;          // (the list of 2026-11-20: the villages' terraces)          // (the list of 2026-11-11: Graymourne's harbour open to the sea)

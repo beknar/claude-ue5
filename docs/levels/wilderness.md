@@ -1102,3 +1102,12 @@ Rebuild note (the list of 2026-11-26's second phase): C++ only (`RDList17.cpp`, 
 - `888 closed17w` (`test_w17e.json`): Windholt's village house and Odric's Croft's farmhouse, each laid in Immersive and again in Closed on its chunk: the same record (8 pieces with the household's beds, and 7; a lamp each), the chunk drawing 8 and 7 pieces fewer in the room in Closed and the same containers' parts (7 and 8), the farmhouse's 4 windows with panes (none in Immersive); F opened each door, she walked in, the building level came with 8 and 7 pieces laid (124 to 140 ms) in the room she stood in (found by its place), and was unloaded when she walked out. Its picture inside the farmhouse shows the beds, hearth and table laid by the level.
 
 Rebuild note (the list of 2026-11-26's eighth phase): C++ only; check with `888_wilderness_test.ps1 closed17w <tag> 2400 -Light`.
+## The list of 2026-11-27: the floating scrub (its second phase)
+
+"On hills and mountain sides, there is red scrub that appears to be floating in the air." The red scrub is the bearberry (`SM_Bearberry_02`, 56 % of its texture's pixels red), the low mat the mountains and the cold biomes grow near her; on a slope it stood upright, sunk 3 cm, its downhill side over the ground. With `rd.Scrub18 1` (`RD/RDList18.cpp`, the placing in `RDWildChunk.cpp`):
+
+- a bush lower than half its width (the bearberry) lies along its slope;
+- an upright bush is sunk by its footprint's radius times the slope (never more than a third of its height);
+- every plant's height on its 2 m quad follows the drawn triangle's split, not a blend of the quad's corners.
+
+`888 scrub18` measures every bush on ground over 10 degrees in the hills, the mountains and the mountains and peaks against the drawn ground under its footprint (`GetWildFoliageGaps18`: the mesh box's bottom corners drawn in to 0.7; a tree's box is its crown, so trees are not judged), with the old rules and the new at the same place (`test_s18e.json`). Within 300 m the bushes' 95th percentile gaps went from 2 to 59 cm to under 3 cm, the largest from 59 cm to 10 cm (the hills' `SM_bush`; the bearberry's 7 cm), and as many bushes grow as before (the bearberry 552 against 551). Plants on far chunks drawn on 4 m or 8 m (past 250 m) still stand on the 2 m ground, over the coarse chord of a convex slope (bushes up to 1.9 m there, 2.3 m before): the bearberry grows near her only (TODO.md).

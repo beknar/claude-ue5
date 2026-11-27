@@ -4848,6 +4848,9 @@ public:
 	 *  the wilds on a chunk with collision (RDList16c.cpp) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") FString GetWildSeams16() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") FString GetWildFootGaps16() const;
+	/** the list of 2026-11-27 (RDList18.cpp): every plant within MaxM of her on ground steeper than MinSlopeDeg against the drawn ground under
+	 *  its footprint, by mesh */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List18") FString GetWildFoliageGaps18(float MaxM, float MinSlopeDeg) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List16") FString GetWildMoversOffGround16() const;
 	double WildLod1M16 = 250.0, WildLod2M16 = 500.0;
 	int32 WildRegridMax16 = 4, WildRegridInFlight16 = 0, WildRegrids16 = 0;
