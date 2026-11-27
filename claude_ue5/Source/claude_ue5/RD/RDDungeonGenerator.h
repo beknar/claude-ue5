@@ -2339,6 +2339,38 @@ public:
 	TMap<FName, float> PaneOut17;
 	/** a modern window's pane: its width the window piece's (92 %), 250 cm high (Heaven's glass); the medieval ones BuildingPaneSize17 */
 	TMap<FName, FVector2D> PaneSize17;
+	/** the eighth phase (RDList17f.cpp): the wilds' houses and farm buildings, their furniture and lamp recorded as laid (both modes), taken
+	 *  out of the chunk in Closed Structures and laid in the building level while she is inside */
+	struct FWildPiece17 { TObjectPtr<UStaticMesh> Mesh = nullptr; TObjectPtr<UMaterialInterface> Mat = nullptr; bool bCol = false; TArray<FTransform> T; };
+	struct FWildBld17
+	{
+		TWeakObjectPtr<ARDWildChunk> C; FVector O = FVector::ZeroVector; float Yaw = 0.f; FVector2D Mn = FVector2D::ZeroVector, Mx = FVector2D::ZeroVector;
+		float Floor = 0.f; FString Kind; bool bClosed = false; int32 N = 0, Panes = 0; float LampR = 400.f, Glow = -1.f;
+		int32 Farm = -1; double Made = 0.0; bool bTaken = false;
+		/** a village house's furniture and its household's beds, taken out of the chunk once the households are laid (PR #144's review:
+		 *  taken at once, the household's beds were laid by an overlap test in an empty room) */
+		TArray<TWeakObjectPtr<class UStaticMeshComponent>> Pend;
+		TMap<FString, FWildPiece17> Pieces; TArray<FVector4> Lamps; TWeakObjectPtr<class UInstancedStaticMeshComponent> PaneC;
+	};
+	TArray<FWildBld17> WildBlds17;
+	TWeakObjectPtr<class ULevelStreamingDynamic> WildStream17;
+	TWeakObjectPtr<AActor> WildActor17;
+	int32 InWild17 = -1, PendingWild17 = -1, Wild17Pieces = 0, Wild17Entered = 0, Wild17Count = 0;
+	double Wild17Asked = 0.0; float Wild17LoadMs = 0.f, Wild17PaneT = 0.f;
+	int32 BeginWildRoom17(ARDWildChunk* C, const FVector& O, float Yaw, const FVector2D& Mn, const FVector2D& Mx, float Floor, const FString& Kind, int32 Farm = -1);
+	void RemoveWildRoom17(int32 I);
+	void AddWildPending17(ARDWildChunk* C, const FVector& O, class UStaticMeshComponent* Sm);
+	float Wild17PruneT = 0.f;
+	void RecordWildPiece17(int32 Ri, UStaticMesh* Mesh, UMaterialInterface* Mat, bool bCol, const FTransform& W);
+	void TakeWildProps17(int32 Ri, ARDWildChunk* C, int32 From);
+	void TakeWildBatch17(int32 Ri, TMap<FString, TWeakObjectPtr<class UInstancedStaticMeshComponent>>& Batch, const TMap<FString, int32>& Snap, const TArray<const UStaticMesh*>& Keep);
+	bool TakeWildLamp17(int32 Ri, class UPointLightComponent* Lt);
+	void AddWildPanes17(int32 Ri, const TArray<FTransform>& Windows, TArray<TWeakObjectPtr<UActorComponent>>* Keep);
+	bool WildRoomAt17(int32 Ri, const FVector& P, float Pad) const;
+	void UnloadWild17();
+	void TickWildBld17(float Dt, const FVector& Her);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List17") TArray<FString> GetWildBlds17() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List17") FString GetWild17State() const;
 	bool IsEnterable17(const ARDSection* S, int32 BI) const;
 	int32 BuildingDoorNear17(const FVector& From, bool bOut) const;
 	bool BuildingDoorFirst17(const FVector& From, int32 I, float NearerThan, const ARDSection* BestS, bool bBestDoor, int32 BestI) const;

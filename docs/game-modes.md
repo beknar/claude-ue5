@@ -32,6 +32,7 @@ in the new mode. Everything else stays as it was: the town's seed, its buildings
   smithy, a store, a chapel... in Brokenspire's, Vel Morrath's, Ashenreach's, Kethrys Spire's and Heaven's looks. There are 55 pictures,
   taken from inside the game's own furnished rooms (`884 rooms17`, imported by `949 rooms`: `RD/RDList17e.cpp`). At night a window
   glows while someone awake is inside, as the buildings' lights do in Immersive Interiors. By day it is dim.
+- **In the wilds.** A village or lone house and a farmstead's farmhouse, barn, shed, coop or granary are closed the same way: their furniture and lamp are laid in the building level as she walks in through the door F opens, and let go as she walks out (`RD/RDList17f.cpp`). A farm building's windows show a room of its kind; the village houses, the packs' own meshes, have none.
 - **Leaving.** She walks out through the door, or F at the door, and the building's level is let go. A save made inside a building is
   a save at its door's outside, facing out of it.
 - **Why choose it.** There is less to draw in a town: no furniture, lights or people of hidden rooms, and one picture per window. The

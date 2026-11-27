@@ -299,6 +299,7 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 	};
 	const int32 Box0 = Rec.Boxes;
 	int32 Furniture = 0;
+	TArray<FTransform> Win17;          // (the list of 2026-11-26's eighth phase: its windows, for Closed Structures' panes)
 	// ---- the plinth: stone under the whole floor, from the floor down to the ground's lowest (the floor's collision)
 	{
 		const float Z0 = Gmin - 30.f;
@@ -324,7 +325,7 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 			if (!bDoor && bWindows && R.FRand() < (Si == 0 ? 0.5f : 0.35f)) Nm = Pn(TEXT("WallWindow"));
 			const FTransform T = WallT(Pl, Sd.Out, 2.f);
 			Put(Nm, T);
-			if (!bDoor && Nm != Pn(TEXT("Wall"))) BoundsCollider(Nm, T);
+			if (!bDoor && Nm != Pn(TEXT("Wall"))) { BoundsCollider(Nm, T); Win17.Add(WallT(Pl, Sd.Out, 152.f)); }
 		}
 	for (int32 Cx = -1; Cx <= 1; Cx += 2)
 		for (int32 Cy = -1; Cy <= 1; Cy += 2)
@@ -415,6 +416,10 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 	}
 	// ---- its inside, by its kind (the room inside the walls; the door's wall +X, the back wall -X; a piece's front is its +X)
 	const FVector2D Mn(-Hx + 30.f, -Hy + 30.f), Mx(Hx - 30.f, Hy - 30.f);
+	// (the list of 2026-11-26's eighth phase: what its inside adds to the farm's batches is recorded, taken out in Closed Structures)
+	const int32 Ri17 = BeginWildRoom17(C, O, Yaw, Mn, Mx, Base + 2.f, Kind.ToString(), Rec.Id);
+	TMap<FString, int32> Snap17;
+	for (const TPair<FString, TWeakObjectPtr<UInstancedStaticMeshComponent>>& Kv : Rec.Batch) if (const UInstancedStaticMeshComponent* Is = Kv.Value.Get()) Snap17.Add(Kv.Key, Is->GetInstanceCount());
 	const float Wd = Mx.X - Mn.X;
 	auto PutAt = [&](FName Name, float X, float Y, float YawL) -> bool
 	{
@@ -456,7 +461,7 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 		Lt->SetCastShadows(false);
 		Lt->RegisterComponent();
 		Lt->SetWorldLocation(At(0.f, 0.f, 260.f));
-		Keep(Lt);
+		if (!TakeWildLamp17(Ri17, Lt)) Keep(Lt);
 	};
 	if (Kind == TEXT("house"))
 	{
@@ -575,6 +580,15 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 		// (a trough by a barn's side wall; the yard's cart, scaled for the yard, filled a barn and held its hay up)
 		else if (bBarn) WildPiece(TEXT("trough"), (Mn.X + Mx.X) * 0.5f, Mn.Y + 70.f, 0.f, 5.f);
 		Lamp(Kind == TEXT("barn") ? 22.f : 14.f);
+	}
+	{
+		const FRDPiece* Op17 = Piece(TEXT("BreadOven"));
+		const FRDPiece* Fp17 = Piece(TEXT("Fireplace"));
+		TArray<const UStaticMesh*> Keep17;
+		if (Op17 && Op17->Mesh) Keep17.Add(Op17->Mesh);
+		if (Fp17 && Fp17->Mesh) Keep17.Add(Fp17->Mesh);
+		TakeWildBatch17(Ri17, Rec.Batch, Snap17, Keep17);
+		AddWildPanes17(Ri17, Win17, &Rec.Comps);
 	}
 	// ---- animals inside (a barn's stalls, a coop's hens): a fence across the far half, its gate by the front; the floor's height
 	// for their ground
@@ -1012,6 +1026,8 @@ bool ARDDungeonGenerator::RemoveWildFarm(int32 Id)
 	const int32 I = WildFarms.IndexOfByPredicate([&](const FRDWildFarmRec& F) { return F.Id == Id; });
 	if (I < 0) return false;
 	FRDWildFarmRec& F = WildFarms[I];
+	// (the list of 2026-11-26's eighth phase: its buildings' records go with it (PR #144's review: a removed design left a room to walk into))
+	for (int32 K = WildBlds17.Num() - 1; K >= 0; --K) if (WildBlds17[K].Farm == Id) RemoveWildRoom17(K);
 	if (ARDWildChunk* C = F.Chunk.Get(); IsValid(C))
 	{
 		// (its ranges in the chunk's lists, last first: they were added together, nothing of another farm between them)
