@@ -2,10 +2,14 @@
 # changes). Runs a package built by package_mistward.ps1 with -RDPerf (RD/RDList16.cpp: each city's square and a street by the map's
 # travel, then each biome at its nearest site to Brokenspire, settled 20 s and measured 15 s), full screen, at each resolution asked,
 # then writes the results into docs/performance.md under the heading given (pipeline/blender_numpy/perf_doc.py).
+# The list of 2026-11-26 (docs/improvements17.txt): -Structures closed|immersive runs the game in that mode for buildings
+#   (-RDStructures), -WildsOnly measures the cities and biomes only (not the castle's and fortress's halls), -PlacesFrom <file> replays
+#   that file's places (the same places in both modes and at both resolutions).
 # Args: -Out <package directory> (default builds\mistward_castle) -Label "BEFORE LIST16 changes" [-Res 3840x2160,1920x1080] (default:
 #   the desktop's alone: at the engine's default screen percentage a 4K screen renders about 1920 x 1080 before its upscale, and the
 #   two read the same in BEFORE's first run) [-Py <python>] [-NoDoc] (measure only)
-param([string]$Out = "", [string]$Label = "BEFORE LIST16 changes", [string[]]$Res = @(), [string]$Py = "python", [switch]$NoDoc)
+param([string]$Out = "", [string]$Label = "BEFORE LIST16 changes", [string[]]$Res = @(), [string]$Py = "python", [switch]$NoDoc,
+      [string]$Structures = "", [switch]$WildsOnly, [string]$PlacesFrom = "")
 $repo = Split-Path -Parent $PSScriptRoot
 if (-not $Out) { $Out = "$repo\builds\mistward_castle" } elseif (-not [IO.Path]::IsPathRooted($Out)) { $Out = Join-Path (Get-Location).Path $Out }
 $exe = "$Out\Windows\claude_ue5.exe"
@@ -56,12 +60,17 @@ try {
         # (BEFORE's places at this resolution, replayed by the later runs)
         $tag = $Label -replace '[^A-Za-z0-9]+', '_'
         $placesFrom = Join-Path $repo "claude_ue5\SourceArt\perf16\perf_BEFORE_LIST16_changes_$r.txt"
+        if ($PlacesFrom) { $placesFrom = $PlacesFrom }
         $replay = if ($tag -notlike "BEFORE*" -and (Test-Path $placesFrom)) { @("-RDPerfPlaces=$placesFrom") } else { @() }
+        $mode = if ($Structures) { @("-RDStructures=$Structures") } else { @() }
         # (the wilds' level (the cities and biomes), then the castle's and Heaven's fortress's first hall: the same file, one after the other)
-        foreach ($leg in @(@(), @("-RDTownGo=castle"), @("-RDTownGo=dungeon:heaven", "-RDAllKeys"))) {
+        # (a list of argument lists: an if-expression unrolled @(, @()) into nothing, and the runs ran no leg)
+        $legs = New-Object System.Collections.ArrayList; [void]$legs.Add([string[]]@())
+        if (-not $WildsOnly) { [void]$legs.Add([string[]]@("-RDTownGo=castle")); [void]$legs.Add([string[]]@("-RDTownGo=dungeon:heaven", "-RDAllKeys")) }
+        foreach ($leg in $legs) {
             $t0 = Get-Date
             $before = if (Test-Path $file) { @(Get-Content $file).Count } else { 0 }
-            $l = Start-Process -FilePath $exe -ArgumentList (@("-RDStartHero=Warrior", "-RDPerf=$file", "-ResX=$w", "-ResY=$h", "-fullscreen", "-nosound") + $replay + $leg) -PassThru
+            $l = Start-Process -FilePath $exe -ArgumentList (@("-RDStartHero=Warrior", "-RDPerf=$file", "-ResX=$w", "-ResY=$h", "-fullscreen", "-nosound") + $replay + $mode + $leg) -PassThru
             $p = $null
             for ($s = 0; $s -lt 30 -and -not $p; $s++) { Start-Sleep 1; $p = Get-Process "claude_ue5*" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.ToLower().StartsWith($bin) -and $_.StartTime -ge $t0.AddSeconds(-1) } | Select-Object -First 1 }
             # (at most 4 hours for the wilds' leg: 82 places of about 1.5 minutes each and the slow first loads; 15 minutes a hall)
@@ -73,9 +82,9 @@ try {
         }
         $lines = if (Test-Path $file) { @(Get-Content $file -Encoding UTF8) } else { @() }
         $dones = @($lines | Where-Object { $_ -eq "perf|done" }).Count
-        "PERF $r : {0} lines, {1} of 3 legs done" -f $lines.Count, $dones
+        "PERF $r : {0} lines, {1} of {2} legs done" -f $lines.Count, $dones, $legs.Count
         $lines | Where-Object { $_ -like "perf|*" } | ForEach-Object { "    $_" }
-        if ($dones -lt 3) { $bad++ }
+        if ($dones -lt $legs.Count) { $bad++ }
         if ($lines.Count) {
             $keep = Join-Path $repo "claude_ue5\SourceArt\perf16\perf_$($tag)_$r.txt"; New-Item -ItemType Directory -Force (Split-Path $keep) | Out-Null; Copy-Item $file $keep -Force; $files += $keep
             # (the pictures stay out of the repository: kept beside the package)

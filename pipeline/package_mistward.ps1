@@ -137,7 +137,7 @@ public static class RDWin {
     @{ name = "heaven_fortress"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:heaven", "-RDAllKeys", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "heaven_fortress" },
 # (2026-11-25, the list of 2026-11-22's phase 27: the fortress's open tiers: down into it, tier 3 opened and a set of it generated round
 # her (-RDOpen27, RD/RDAlien27.cpp); its mark once the sky is up: "open27|open=1|ground=...|clusters=...|... sky=1.00|<hero>")
-@{ name = "fortress_open"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:heaven", "-RDAllKeys", "-RDOpen27", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "open27|open=1*sky=1.00|Warrior*" },
+@{ name = "fortress_open"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:heaven", "-RDAllKeys", "-RDOpen27", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "open27|open=1*sky=*|Warrior*" },          # (the mark is written once the sky is 0.99 or more (RDAlien27.cpp): 0.99 read as a failure in the list of 2026-11-26's package)
     # (2026-11-21: the caves under the landmark towers (935): down into the cave level at tier 12 from where she stands)
     @{ name = "caves"; args = @("-RDStartHero=Warrior", "-RDTownGo=cave:12", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "caves" },
 # (2026-11-22, the list of 2026-11-20's eighteenth phase: the wilds' runs (RD/RDList15q.cpp): her horse called, mounted and ridden 15 s
@@ -153,6 +153,9 @@ public static class RDWin {
               @{ name = "heaven"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:heaven", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Heaven|Warrior*" },
               # (the list of 2026-11-22's phase 24: out to Heaven and in by its first tower's door, the tower built round her)
               @{ name = "tower"; args = @("-RDStartHero=Warrior", "-RDTownGo=tower", "-RDMarkFile=$mark"); secs = 210; castle = $true; want = "tower|*|Warrior*" },
+# (the list of 2026-11-26's ninth phase: Brokenspire built in Closed Structures, in by the general store's door (F), its level laid round her:
+#  "closed|<the building>|<pieces laid>|<panes>|<hero>")
+@{ name = "closed"; args = @("-RDStartHero=Warrior", "-RDStructures=closed", "-RDTownGo=closed", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "closed|*|*|*|Warrior*" },
               @{ name = "display"; args = @("-RDStartHero=Warrior", "-RDMarkFile=$mark", "-RDApplyDisplay=1600x900x2"); secs = 30; window = $true; castle = $true },
               # (2026-11-08: the game's own console (RD/RDConsole.cpp), in a window of its own (the keys go to its focused line):
               #  its self-test types into it through Slate and writes what it measured, and its picture beside it; -RDConsole: it is
