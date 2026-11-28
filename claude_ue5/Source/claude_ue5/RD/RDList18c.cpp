@@ -12,6 +12,8 @@
 #include "HAL/IConsoleManager.h"
 DEFINE_LOG_CATEGORY_STATIC(LogRDList18c, Log, All);
 
+bool RDStalls17On();
+
 namespace
 {
 	TAutoConsoleVariable<int32> CVarRDStalls18(TEXT("rd.Stalls18"), 1, TEXT("The squares' stands of twenty designs each style (1), or the three stands of before (0); a town planned after the change"));
@@ -67,11 +69,14 @@ int32 ARDSection::StallDesign18At(const FVector& At) const
 
 bool ARDSection::LayStall18(const FTownSpot& Sp)
 {
-	if (!Generator || CVarRDStalls18.GetValueOnGameThread() == 0 || Generator->StallDesigns18.Num() == 0) return false;
+	// (with rd.Stalls17 0 the square keeps the four stands of before, as they were (PR #149's review))
+	if (!Generator || CVarRDStalls18.GetValueOnGameThread() == 0 || !RDStalls17On() || Generator->StallDesigns18.Num() == 0) return false;
 	if (!bStalls18Picked) PickStalls18();
 	const int32* D = Stalls18.Find(RDL18cKey(Sp.At));
 	if (!D || !Generator->StallDesigns18.IsValidIndex(*D)) return false;
-	for (const FName& P : Generator->StallDesigns18[*D].Parts) AddPieceAt(P, Sp.At, Sp.Yaw);
+	const FRDStallDesign18& Ds = Generator->StallDesigns18[*D];
+	const FTransform St(FRotator(0, Sp.Yaw, 0), Sp.At);
+	for (int32 K = 0; K < Ds.Parts.Num(); ++K) AddPiece(Ds.Parts[K], (Ds.PartXf.IsValidIndex(K) ? Ds.PartXf[K] : FTransform::Identity) * St);
 	return true;
 }
 

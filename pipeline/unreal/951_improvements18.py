@@ -214,38 +214,48 @@ CUBE = "/Engine/BasicShapes/Cube"
 HV = "/Game/RandomDungeon/Heaven"
 
 
+HV_MATS = {}
+
+
 def hv_material(name):
-    """a material instance of Heaven's kit by its name (heaven_kit.py's)"""
-    for p in EAL.list_assets(HV, recursive=True, include_folder=False):
-        if p.split("/")[-1].split(".")[0] == name: return unreal.load_asset(p)
-    return None
+    """a material instance of Heaven's kit by its name (heaven_kit.py's); the folder read once (PR #149's review)"""
+    if not HV_MATS:
+        for p in EAL.list_assets(HV, recursive=True, include_folder=False):
+            n = p.split("/")[-1].split(".")[0]
+            if n.startswith("MI_") and n not in HV_MATS: HV_MATS[n] = p
+    return unreal.load_asset(HV_MATS[name]) if name in HV_MATS else None
 
 
 BP_PIECES = {}          # (a Blueprint's path: the town's own piece of it, Town.Stall1-3: its Adjust as the town has always laid it)
+IDENT = unreal.Transform()
 
 
-def part_piece(p):
-    """a design's part as a piece: a pack's mesh, a Blueprint (its generated class), or the engine's cube in a Heaven material, placed in the
-    stand's frame by its Adjust"""
-    pc = unreal.RDPiece()
+def part_piece(p, pieces):
+    """a design's part: (its piece's name, the piece, its own place in the stand's frame). A pack's mesh or a Blueprint is a piece of its own
+    placed by its Adjust (the place identity); a box is the engine's cube in a Heaven material, one shared piece a material
+    (Stall18.Box.<material>), placed by its own transform (PR #149's review: a piece a box made a component a box)"""
     if "box" in p:
         cx, cy, cz, ex, ey, ez = p["box"]
-        m = unreal.load_asset(CUBE); assert m, "951: the engine's cube"
-        mat = hv_material(p["material"]); assert mat, "951: Heaven's material " + p["material"]
+        nm = "Stall18.Box." + p["material"]
+        if nm not in pieces:
+            pc = unreal.RDPiece()
+            m = unreal.load_asset(CUBE); assert m, "951: the engine's cube"
+            mat = hv_material(p["material"]); assert mat, "951: Heaven's material " + p["material"]
+            pc.set_editor_property("mesh", m); pc.set_editor_property("material", mat)
+            pc.set_editor_property("size", unreal.Vector(100, 100, 100))
+            pieces[nm] = pc
         # (the engine's cube is 100 cm about its middle)
-        pc.set_editor_property("mesh", m); pc.set_editor_property("material", mat)
-        pc.set_editor_property("adjust", unreal.Transform(location=unreal.Vector(cx, cy, cz), rotation=unreal.Rotator(0, 0, 0), scale=unreal.Vector(ex / 50.0, ey / 50.0, ez / 50.0)))
-        pc.set_editor_property("size", unreal.Vector(2 * ex, 2 * ey, 2 * ez))
-        return pc
-    sc = p.get("scale", 1.0)
-    sv = unreal.Vector(*sc) if isinstance(sc, list) else unreal.Vector(sc, sc, sc)
-    xf = unreal.Transform(location=unreal.Vector(p["x"], p["y"], p["z"]), rotation=unreal.Rotator(roll=0, pitch=0, yaw=p.get("yaw", 0.0)), scale=sv)
+        return nm, pieces[nm], unreal.Transform(location=unreal.Vector(cx, cy, cz), rotation=unreal.Rotator(0, 0, 0), scale=unreal.Vector(ex / 50.0, ey / 50.0, ez / 50.0))
+    pc = unreal.RDPiece()
     if p.get("actor") and p["mesh"].split(".")[0] in BP_PIECES:
         # (the Docks' market stands: the town's own pieces of them (882), not the draft's guess at their place (they measured 4 m across))
         src = BP_PIECES[p["mesh"].split(".")[0]]
         pc.set_editor_property("actor_class", src.get_editor_property("actor_class")); pc.set_editor_property("adjust", src.get_editor_property("adjust"))
         pc.set_editor_property("size", src.get_editor_property("size"))
-        return pc
+        return None, pc, IDENT
+    sc = p.get("scale", 1.0)
+    sv = unreal.Vector(*sc) if isinstance(sc, list) else unreal.Vector(sc, sc, sc)
+    xf = unreal.Transform(location=unreal.Vector(p["x"], p["y"], p["z"]), rotation=unreal.Rotator(roll=0, pitch=0, yaw=p.get("yaw", 0.0)), scale=sv)
     if p.get("actor"):
         bp = unreal.load_asset(p["mesh"]); assert bp, "951: the Blueprint " + p["mesh"]
         pc.set_editor_property("actor_class", bp.generated_class())
@@ -253,16 +263,19 @@ def part_piece(p):
         m = unreal.load_asset(p["mesh"]); assert m, "951: the mesh " + p["mesh"]
         pc.set_editor_property("mesh", m)
         bb = m.get_bounding_box(); pc.set_editor_property("size", bb.max - bb.min)
+        # (small goods (an apple, a jar) fade out past 50 m, as the town's other small things do)
+        sz = bb.max - bb.min
+        if max(sz.x * sv.x, sz.y * sv.y, sz.z * sv.z) < 60.0: pc.set_editor_property("cull_distance", 5000.0)
     pc.set_editor_property("adjust", xf)
-    return pc
+    return None, pc, IDENT
 
 
-def measure_design(pieces, at):
-    """the design laid in the editor's world at `at` (its parts as actors, as the town lays them): the union of their bounds in the stand's
-    frame, and the actors (to picture, then take away)"""
+def measure_design(parts, at):
+    """the design laid in the editor's world at `at` (its parts as actors, as the town lays them: the piece's Adjust, then the part's own
+    place): the union of their bounds in the stand's frame, and the actors (to take away)"""
     acts = []
-    for pc in pieces:
-        xf = pc.get_editor_property("adjust")
+    for pc, px in parts:
+        xf = pc.get_editor_property("adjust") * px
         loc = xf.translation + at
         ac = pc.get_editor_property("actor_class")
         if ac:
@@ -283,6 +296,18 @@ def measure_design(pieces, at):
     return lo, hi, acts
 
 
+def matchable(sd):
+    """the twelve trades can each take a different design (a matching by augmenting paths, Hall's condition, not only a count a trade)"""
+    owner = {}
+    def try_(t, seen):
+        for i, d in enumerate(sd):
+            if i in seen or (d["trades"] and t not in d["trades"]): continue
+            seen.add(i)
+            if i not in owner or try_(owner[i], seen): owner[i] = t; return True
+        return False
+    return all(try_(t, set()) for t in range(12))
+
+
 def stalls():
     les.load_level(MAP)
     unreal.SystemLibrary.execute_console_command(None, "obj gc")
@@ -293,44 +318,53 @@ def stalls():
     for k in ("Town.Stall1", "Town.Stall2", "Town.Stall3"):
         ac = pieces[k].get_editor_property("actor_class") if k in pieces else None
         if ac: BP_PIECES[ac.get_path_name().split(".")[0].removesuffix("_C")] = pieces[k]
-    designs, report = [], []
+    designs, report, plain = [], [], []
     at = unreal.Vector(0, 0, 300000)
     for d in data["designs"]:
-        pcs = [part_piece(p) for p in d["parts"]]
-        lo, hi, acts = measure_design(pcs, at)
+        names, parts, xfs = [], [], []
+        for n, p in enumerate(d["parts"]):
+            nm, pc, px = part_piece(p, pieces)
+            if nm is None:
+                nm = f"Stall18.{d['id']}.{n}"; pieces[nm] = pc
+            names.append(nm); parts.append((pc, px)); xfs.append(px)
+        lo, hi, acts = measure_design(parts, at)
         for a in acts: eas.destroy_actor(a)
-        # (a design wider than the stands' 2.6 m square is drawn in about its middle, parts and places alike)
+        # (a design wider than the stands' 2.6 m square is drawn in about its middle, parts and places alike; the town's own stands
+        # (Town.Stall1-3) keep their size: the squares have always made room for them)
         reach = max(abs(lo[0]), abs(hi[0]), abs(lo[1]), abs(hi[1]))
         k = min(1.0, 130.0 / reach) if reach > 132.0 else 1.0
-        # (a design of the town's own stands (Town.Stall1-3) keeps their size: the squares have always made room for them)
         if all(p.get("actor") and p["mesh"].split(".")[0] in BP_PIECES for p in d["parts"]): k = 1.0
-        names = []
-        for n, pc in enumerate(pcs):
-            if k < 1.0:
-                xf = pc.get_editor_property("adjust")
-                pc.set_editor_property("adjust", unreal.Transform(location=xf.translation * k, rotation=xf.rotation.rotator(), scale=xf.scale3d * k))
-            nm = f"Stall18.{d['id']}.{n}"
-            pieces[nm] = pc; names.append(unreal.Name(nm))
+        if k < 1.0:
+            for i, (pc, px) in enumerate(parts):
+                if px is IDENT:
+                    xf = pc.get_editor_property("adjust")
+                    pc.set_editor_property("adjust", unreal.Transform(location=xf.translation * k, rotation=xf.rotation.rotator(), scale=xf.scale3d * k))
+                else:
+                    xfs[i] = unreal.Transform(location=px.translation * k, rotation=px.rotation.rotator(), scale=px.scale3d * k)
         ds = unreal.RDStallDesign18()
         ds.set_editor_property("id", d["id"]); ds.set_editor_property("modern", d["style"] == "modern")
-        ds.set_editor_property("parts", names)
-        ds.set_editor_property("trades", [] if "any" in d["trades"] else [TRADES.index(t) for t in d["trades"]])
-        designs.append(ds)
+        ds.set_editor_property("parts", [unreal.Name(n) for n in names]); ds.set_editor_property("part_xf", xfs)
+        trades = [] if "any" in d["trades"] else [TRADES.index(t) for t in d["trades"]]
+        ds.set_editor_property("trades", trades)
+        designs.append(ds); plain.append({"modern": d["style"] == "modern", "trades": trades})
         report.append({"id": d["id"], "measured": [round(v) for v in lo + hi], "scaled": round(k, 3)})
-        REPORT.append(f"stalls: {d['id']} {d['name']}: {len(pcs)} parts, x {lo[0]:.0f}..{hi[0]:.0f} y {lo[1]:.0f}..{hi[1]:.0f} z {lo[2]:.0f}..{hi[2]:.0f}" + (f", drawn in to {k:.3f}" if k < 1.0 else ""))
+        REPORT.append(f"stalls: {d['id']} {d['name']}: {len(d['parts'])} parts, x {lo[0]:.0f}..{hi[0]:.0f} y {lo[1]:.0f}..{hi[1]:.0f} z {lo[2]:.0f}..{hi[2]:.0f}" + (f", drawn in to {k:.3f}" if k < 1.0 else ""))
     # (every trade has a design of each style that suits it, and the twelve stands of a square can take twelve different ones)
     for style in (False, True):
-        sd = [d for d in designs if d.get_editor_property("modern") == style]
+        sd = [d for d in plain if d["modern"] == style]
         for t in range(12):
-            n = sum(1 for d in sd if not d.get_editor_property("trades") or t in d.get_editor_property("trades"))
+            n = sum(1 for d in sd if not d["trades"] or t in d["trades"])
             assert n >= 3, f"951: the {'modern' if style else 'medieval'} trade {TRADES[t]} has {n} designs"
+        assert matchable(sd), f"951: the {'modern' if style else 'medieval'} designs cannot give twelve trades twelve different designs"
     g.set_editor_property("pieces", pieces)
     g.set_editor_property("stall_designs18", designs)
+    # (the saved town built again: play on a fixed seed takes the saved section, whose pieces are not laid again (PR #149's review))
+    g.build_start_section()
     g.modify(); les.save_current_level()
     with open(os.path.join(os.path.dirname(STALLS), "stalls18_measured.json"), "w", encoding="utf-8") as f: json.dump(report, f, indent=1)
-    REPORT.append(f"stalls: {len(designs)} designs, {sum(len(d.get_editor_property('parts')) for d in designs)} parts on brokenspire's generator")
+    REPORT.append(f"stalls: {len(designs)} designs, {sum(len(d.get_editor_property('parts')) for d in designs)} parts on brokenspire's generator, "
+                  f"{sum(1 for n in pieces if n.startswith('Stall18.'))} pieces; the saved town built again (run 869 before a package)")
     del g
-
 
 PARTS = {"windows": windows, "stalls": stalls}
 for part in (sys.argv[1] if len(sys.argv) > 1 else "").split(","):

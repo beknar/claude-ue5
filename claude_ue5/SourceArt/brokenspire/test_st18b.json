@@ -1,5 +1,5 @@
 {
- "tag": "st18a",
+ "tag": "st18b",
  "plan": [
   "stalls18"
  ],
@@ -12,101 +12,23 @@
     "Brokenspire": {
      "stands": 12,
      "designs": [
-      "m12",
-      "m09",
-      "m18",
-      "m05",
-      "m08",
-      "m13",
       "m14",
       "m15",
-      "m04",
-      "m17",
+      "m18",
+      "m10",
+      "m07",
+      "m05",
+      "m19",
+      "m13",
       "m11",
+      "m02",
+      "m12",
       "m20"
      ],
      "distinct": 12,
      "wrong_style": 0,
      "unsuited": [],
      "footprints": [
-      {
-       "n": 11,
-       "x": [
-        -107,
-        129
-       ],
-       "y": [
-        -126,
-        96
-       ],
-       "keeper_blocked": false,
-       "id": "m12"
-      },
-      {
-       "n": 5,
-       "x": [
-        -97,
-        127
-       ],
-       "y": [
-        -125,
-        129
-       ],
-       "keeper_blocked": false,
-       "id": "m09"
-      },
-      {
-       "n": 10,
-       "x": [
-        -107,
-        73
-       ],
-       "y": [
-        -127,
-        127
-       ],
-       "keeper_blocked": false,
-       "id": "m18"
-      },
-      {
-       "n": 12,
-       "x": [
-        -91,
-        91
-       ],
-       "y": [
-        -128,
-        128
-       ],
-       "keeper_blocked": false,
-       "id": "m05"
-      },
-      {
-       "n": 10,
-       "x": [
-        -108,
-        114
-       ],
-       "y": [
-        -126,
-        126
-       ],
-       "keeper_blocked": false,
-       "id": "m08"
-      },
-      {
-       "n": 12,
-       "x": [
-        -110,
-        127
-       ],
-       "y": [
-        -126,
-        126
-       ],
-       "keeper_blocked": false,
-       "id": "m13"
-      },
       {
        "n": 10,
        "x": [
@@ -118,7 +40,8 @@
         115
        ],
        "keeper_blocked": false,
-       "id": "m14"
+       "id": "m14",
+       "want": 10
       },
       {
        "n": 5,
@@ -131,33 +54,92 @@
         127
        ],
        "keeper_blocked": false,
-       "id": "m15"
-      },
-      {
-       "n": 7,
-       "x": [
-        -93,
-        126
-       ],
-       "y": [
-        -128,
-        128
-       ],
-       "keeper_blocked": false,
-       "id": "m04"
+       "id": "m15",
+       "want": 5
       },
       {
        "n": 10,
        "x": [
-        -105,
-        123
+        -107,
+        73
+       ],
+       "y": [
+        -127,
+        127
+       ],
+       "keeper_blocked": false,
+       "id": "m18",
+       "want": 10
+      },
+      {
+       "n": 8,
+       "x": [
+        -102,
+        90
        ],
        "y": [
         -128,
         128
        ],
        "keeper_blocked": false,
-       "id": "m17"
+       "id": "m10",
+       "want": 8
+      },
+      {
+       "n": 10,
+       "x": [
+        -107,
+        128
+       ],
+       "y": [
+        -121,
+        121
+       ],
+       "keeper_blocked": false,
+       "id": "m07",
+       "want": 10
+      },
+      {
+       "n": 12,
+       "x": [
+        -91,
+        91
+       ],
+       "y": [
+        -128,
+        128
+       ],
+       "keeper_blocked": false,
+       "id": "m05",
+       "want": 12
+      },
+      {
+       "n": 14,
+       "x": [
+        -109,
+        114
+       ],
+       "y": [
+        -130,
+        130
+       ],
+       "keeper_blocked": false,
+       "id": "m19",
+       "want": 14
+      },
+      {
+       "n": 12,
+       "x": [
+        -110,
+        127
+       ],
+       "y": [
+        -126,
+        126
+       ],
+       "keeper_blocked": false,
+       "id": "m13",
+       "want": 12
       },
       {
        "n": 13,
@@ -170,7 +152,36 @@
         130
        ],
        "keeper_blocked": false,
-       "id": "m11"
+       "id": "m11",
+       "want": 13
+      },
+      {
+       "n": 0,
+       "x": [
+        1000000000,
+        -1000000000
+       ],
+       "y": [
+        1000000000,
+        -1000000000
+       ],
+       "keeper_blocked": false,
+       "id": "m02",
+       "want": 0
+      },
+      {
+       "n": 11,
+       "x": [
+        -107,
+        129
+       ],
+       "y": [
+        -126,
+        96
+       ],
+       "keeper_blocked": false,
+       "id": "m12",
+       "want": 11
       },
       {
        "n": 10,
@@ -183,11 +194,12 @@
         130
        ],
        "keeper_blocked": false,
-       "id": "m20"
+       "id": "m20",
+       "want": 10
       }
      ],
+     "parts_missing": [],
      "outside": [],
-     "keeper_blocked": [],
      "opened": 12,
      "stalls17": 12
     },
@@ -222,7 +234,8 @@
         130
        ],
        "keeper_blocked": false,
-       "id": "m11"
+       "id": "m11",
+       "want": 13
       },
       {
        "n": 5,
@@ -235,7 +248,8 @@
         127
        ],
        "keeper_blocked": false,
-       "id": "m15"
+       "id": "m15",
+       "want": 5
       },
       {
        "n": 5,
@@ -248,7 +262,8 @@
         129
        ],
        "keeper_blocked": false,
-       "id": "m09"
+       "id": "m09",
+       "want": 5
       },
       {
        "n": 10,
@@ -261,7 +276,8 @@
         129
        ],
        "keeper_blocked": false,
-       "id": "m06"
+       "id": "m06",
+       "want": 10
       },
       {
        "n": 0,
@@ -274,7 +290,8 @@
         -1000000000
        ],
        "keeper_blocked": false,
-       "id": "m01"
+       "id": "m01",
+       "want": 0
       },
       {
        "n": 12,
@@ -287,7 +304,8 @@
         128
        ],
        "keeper_blocked": false,
-       "id": "m05"
+       "id": "m05",
+       "want": 12
       },
       {
        "n": 12,
@@ -300,7 +318,8 @@
         126
        ],
        "keeper_blocked": false,
-       "id": "m13"
+       "id": "m13",
+       "want": 12
       },
       {
        "n": 14,
@@ -313,7 +332,8 @@
         130
        ],
        "keeper_blocked": false,
-       "id": "m19"
+       "id": "m19",
+       "want": 14
       },
       {
        "n": 10,
@@ -326,7 +346,8 @@
         121
        ],
        "keeper_blocked": false,
-       "id": "m07"
+       "id": "m07",
+       "want": 10
       },
       {
        "n": 8,
@@ -339,7 +360,8 @@
         128
        ],
        "keeper_blocked": false,
-       "id": "m10"
+       "id": "m10",
+       "want": 8
       },
       {
        "n": 10,
@@ -352,7 +374,8 @@
         126
        ],
        "keeper_blocked": false,
-       "id": "m08"
+       "id": "m08",
+       "want": 10
       },
       {
        "n": 10,
@@ -365,11 +388,12 @@
         127
        ],
        "keeper_blocked": false,
-       "id": "m18"
+       "id": "m18",
+       "want": 10
       }
      ],
+     "parts_missing": [],
      "outside": [],
-     "keeper_blocked": [],
      "opened": 12,
      "stalls17": 12
     },
@@ -404,7 +428,8 @@
         130
        ],
        "keeper_blocked": false,
-       "id": "m11"
+       "id": "m11",
+       "want": 13
       },
       {
        "n": 10,
@@ -417,7 +442,8 @@
         115
        ],
        "keeper_blocked": false,
-       "id": "m14"
+       "id": "m14",
+       "want": 10
       },
       {
        "n": 12,
@@ -430,7 +456,8 @@
         128
        ],
        "keeper_blocked": false,
-       "id": "m05"
+       "id": "m05",
+       "want": 12
       },
       {
        "n": 5,
@@ -443,7 +470,8 @@
         129
        ],
        "keeper_blocked": false,
-       "id": "m09"
+       "id": "m09",
+       "want": 5
       },
       {
        "n": 7,
@@ -456,7 +484,8 @@
         128
        ],
        "keeper_blocked": false,
-       "id": "m16"
+       "id": "m16",
+       "want": 7
       },
       {
        "n": 10,
@@ -469,7 +498,8 @@
         128
        ],
        "keeper_blocked": false,
-       "id": "m17"
+       "id": "m17",
+       "want": 10
       },
       {
        "n": 10,
@@ -482,7 +512,8 @@
         126
        ],
        "keeper_blocked": false,
-       "id": "m08"
+       "id": "m08",
+       "want": 10
       },
       {
        "n": 0,
@@ -495,7 +526,8 @@
         -1000000000
        ],
        "keeper_blocked": false,
-       "id": "m01"
+       "id": "m01",
+       "want": 0
       },
       {
        "n": 14,
@@ -508,7 +540,8 @@
         130
        ],
        "keeper_blocked": false,
-       "id": "m19"
+       "id": "m19",
+       "want": 14
       },
       {
        "n": 0,
@@ -521,7 +554,8 @@
         -1000000000
        ],
        "keeper_blocked": false,
-       "id": "m03"
+       "id": "m03",
+       "want": 0
       },
       {
        "n": 0,
@@ -534,7 +568,8 @@
         -1000000000
        ],
        "keeper_blocked": false,
-       "id": "m02"
+       "id": "m02",
+       "want": 0
       },
       {
        "n": 5,
@@ -547,11 +582,12 @@
         127
        ],
        "keeper_blocked": false,
-       "id": "m15"
+       "id": "m15",
+       "want": 5
       }
      ],
+     "parts_missing": [],
      "outside": [],
-     "keeper_blocked": [],
      "opened": 12,
      "stalls17": 12
     },
@@ -586,7 +622,8 @@
         121
        ],
        "keeper_blocked": false,
-       "id": "m07"
+       "id": "m07",
+       "want": 10
       },
       {
        "n": 12,
@@ -599,7 +636,8 @@
         126
        ],
        "keeper_blocked": false,
-       "id": "m13"
+       "id": "m13",
+       "want": 12
       },
       {
        "n": 10,
@@ -612,7 +650,8 @@
         115
        ],
        "keeper_blocked": false,
-       "id": "m14"
+       "id": "m14",
+       "want": 10
       },
       {
        "n": 5,
@@ -625,7 +664,8 @@
         129
        ],
        "keeper_blocked": false,
-       "id": "m09"
+       "id": "m09",
+       "want": 5
       },
       {
        "n": 7,
@@ -638,7 +678,8 @@
         128
        ],
        "keeper_blocked": false,
-       "id": "m16"
+       "id": "m16",
+       "want": 7
       },
       {
        "n": 10,
@@ -651,7 +692,8 @@
         129
        ],
        "keeper_blocked": false,
-       "id": "m06"
+       "id": "m06",
+       "want": 10
       },
       {
        "n": 0,
@@ -664,7 +706,8 @@
         -1000000000
        ],
        "keeper_blocked": false,
-       "id": "m02"
+       "id": "m02",
+       "want": 0
       },
       {
        "n": 10,
@@ -677,7 +720,8 @@
         126
        ],
        "keeper_blocked": false,
-       "id": "m08"
+       "id": "m08",
+       "want": 10
       },
       {
        "n": 11,
@@ -690,7 +734,8 @@
         96
        ],
        "keeper_blocked": false,
-       "id": "m12"
+       "id": "m12",
+       "want": 11
       },
       {
        "n": 10,
@@ -703,7 +748,8 @@
         127
        ],
        "keeper_blocked": false,
-       "id": "m18"
+       "id": "m18",
+       "want": 10
       },
       {
        "n": 10,
@@ -716,7 +762,8 @@
         130
        ],
        "keeper_blocked": false,
-       "id": "m20"
+       "id": "m20",
+       "want": 10
       },
       {
        "n": 5,
@@ -729,11 +776,12 @@
         127
        ],
        "keeper_blocked": false,
-       "id": "m15"
+       "id": "m15",
+       "want": 5
       }
      ],
+     "parts_missing": [],
      "outside": [],
-     "keeper_blocked": [],
      "opened": 12,
      "stalls17": 12
     },
@@ -768,7 +816,8 @@
         128
        ],
        "keeper_blocked": false,
-       "id": "m10"
+       "id": "m10",
+       "want": 8
       },
       {
        "n": 5,
@@ -781,7 +830,8 @@
         127
        ],
        "keeper_blocked": false,
-       "id": "m15"
+       "id": "m15",
+       "want": 5
       },
       {
        "n": 0,
@@ -794,7 +844,8 @@
         -1000000000
        ],
        "keeper_blocked": false,
-       "id": "m03"
+       "id": "m03",
+       "want": 0
       },
       {
        "n": 0,
@@ -807,7 +858,8 @@
         -1000000000
        ],
        "keeper_blocked": false,
-       "id": "m01"
+       "id": "m01",
+       "want": 0
       },
       {
        "n": 10,
@@ -820,7 +872,8 @@
         115
        ],
        "keeper_blocked": false,
-       "id": "m14"
+       "id": "m14",
+       "want": 10
       },
       {
        "n": 10,
@@ -833,7 +886,8 @@
         127
        ],
        "keeper_blocked": false,
-       "id": "m18"
+       "id": "m18",
+       "want": 10
       },
       {
        "n": 12,
@@ -846,7 +900,8 @@
         128
        ],
        "keeper_blocked": false,
-       "id": "m05"
+       "id": "m05",
+       "want": 12
       },
       {
        "n": 10,
@@ -859,7 +914,8 @@
         128
        ],
        "keeper_blocked": false,
-       "id": "m17"
+       "id": "m17",
+       "want": 10
       },
       {
        "n": 0,
@@ -872,7 +928,8 @@
         -1000000000
        ],
        "keeper_blocked": false,
-       "id": "m02"
+       "id": "m02",
+       "want": 0
       },
       {
        "n": 7,
@@ -885,7 +942,8 @@
         128
        ],
        "keeper_blocked": false,
-       "id": "m04"
+       "id": "m04",
+       "want": 7
       },
       {
        "n": 12,
@@ -898,7 +956,8 @@
         126
        ],
        "keeper_blocked": false,
-       "id": "m13"
+       "id": "m13",
+       "want": 12
       },
       {
        "n": 14,
@@ -911,11 +970,12 @@
         130
        ],
        "keeper_blocked": false,
-       "id": "m19"
+       "id": "m19",
+       "want": 14
       }
      ],
+     "parts_missing": [],
      "outside": [],
-     "keeper_blocked": [],
      "opened": 12,
      "stalls17": 12
     },
@@ -950,7 +1010,8 @@
         117
        ],
        "keeper_blocked": false,
-       "id": "h09"
+       "id": "h09",
+       "want": 9
       },
       {
        "n": 12,
@@ -963,7 +1024,8 @@
         125
        ],
        "keeper_blocked": false,
-       "id": "h14"
+       "id": "h14",
+       "want": 12
       },
       {
        "n": 4,
@@ -976,7 +1038,8 @@
         125
        ],
        "keeper_blocked": false,
-       "id": "h11"
+       "id": "h11",
+       "want": 4
       },
       {
        "n": 13,
@@ -989,7 +1052,8 @@
         125
        ],
        "keeper_blocked": false,
-       "id": "h18"
+       "id": "h18",
+       "want": 13
       },
       {
        "n": 1,
@@ -1002,7 +1066,8 @@
         130
        ],
        "keeper_blocked": false,
-       "id": "h01"
+       "id": "h01",
+       "want": 1
       },
       {
        "n": 14,
@@ -1015,7 +1080,8 @@
         125
        ],
        "keeper_blocked": false,
-       "id": "h07"
+       "id": "h07",
+       "want": 14
       },
       {
        "n": 8,
@@ -1028,7 +1094,8 @@
         120
        ],
        "keeper_blocked": false,
-       "id": "h08"
+       "id": "h08",
+       "want": 8
       },
       {
        "n": 26,
@@ -1041,7 +1108,8 @@
         125
        ],
        "keeper_blocked": false,
-       "id": "h13"
+       "id": "h13",
+       "want": 26
       },
       {
        "n": 1,
@@ -1054,7 +1122,8 @@
         120
        ],
        "keeper_blocked": false,
-       "id": "h03"
+       "id": "h03",
+       "want": 1
       },
       {
        "n": 4,
@@ -1067,7 +1136,8 @@
         125
        ],
        "keeper_blocked": false,
-       "id": "h16"
+       "id": "h16",
+       "want": 4
       },
       {
        "n": 4,
@@ -1080,7 +1150,8 @@
         92
        ],
        "keeper_blocked": false,
-       "id": "h20"
+       "id": "h20",
+       "want": 4
       },
       {
        "n": 22,
@@ -1093,11 +1164,12 @@
         125
        ],
        "keeper_blocked": false,
-       "id": "h06"
+       "id": "h06",
+       "want": 22
       }
      ],
+     "parts_missing": [],
      "outside": [],
-     "keeper_blocked": [],
      "opened": 12,
      "stalls17": 12
     }
@@ -1109,16 +1181,16 @@
    },
    "fps": {
     "on": {
-     "fps": 21.0,
-     "p95_ms": 218.4
+     "fps": 8.8,
+     "p95_ms": 223.6
     },
     "off": {
-     "fps": 9.8,
-     "p95_ms": 129.3
+     "fps": 12.8,
+     "p95_ms": 93.8
     },
     "on2": {
-     "fps": 10.5,
-     "p95_ms": 113.4
+     "fps": 14.2,
+     "p95_ms": 86.2
     }
    },
    "seen_medieval": [
@@ -1161,12 +1233,12 @@
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
  "shots": [
-  "bs_st18a_stalls17_18_Brokenspire.png",
-  "bs_st18a_stalls17_18_VelMorrath.png",
-  "bs_st18a_stalls17_18_Ashenreach.png",
-  "bs_st18a_stalls17_18_Graymourne.png",
-  "bs_st18a_stalls17_18_KethrysSpire.png",
-  "bs_st18a_stalls17_18_Heaven.png"
+  "bs_st18b_stalls17_18_Brokenspire.png",
+  "bs_st18b_stalls17_18_VelMorrath.png",
+  "bs_st18b_stalls17_18_Ashenreach.png",
+  "bs_st18b_stalls17_18_Graymourne.png",
+  "bs_st18b_stalls17_18_KethrysSpire.png",
+  "bs_st18b_stalls17_18_Heaven.png"
  ],
  "error": null,
  "saves_put_back": 1,

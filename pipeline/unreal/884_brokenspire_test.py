@@ -9097,7 +9097,7 @@ def step_stalls18():
     """the squares' stands of twenty designs (the user's "the vendor stands in the town square all have the same design. Have at least 20
     different designs"; RD/RDList18c.cpp, 951 stalls): in each of the six cities the square's twelve stands each a design of the town's style
     (medieval, Heaven's modern), twelve different, each suiting its stand's trade; the parts laid at each stand measured (their meshes'
-    boxes in the stand's frame within its 2.6 m square, give or take 15 cm, none over the keeper's place 2 m behind); F at each stand from
+    boxes in the stand's frame within its 2.6 m square, give or take 15 cm, as many as its design has); F at each stand from
     before its counter still opens its store; a picture of each square. Brokenspire on its seed with rd.Stalls18 0 and 1: its buildings,
     containers and other spots the same; its square's frame rate with, without and with again; three more seeds for the designs seen.
     Ok: every square twelve different designs of its style, all suiting, all within their square, every stand opened by F, the streams
@@ -9106,13 +9106,13 @@ def step_stalls18():
     cv0 = unreal.SystemLibrary.get_console_variable_int_value("rd.Stalls18")
     pcs = {str(k): v for k, v in g.get_editor_property("pieces").items() if str(k).startswith("Stall18.")}
     designs = g.get_editor_property("stall_designs18")
-    dmesh = []
+    dmesh, dcount = [], []
     for d in designs:
-        ms = set()
+        ms, nn = set(), 0
         for pn in d.get_editor_property("parts"):
             p = pcs.get(str(pn))
-            if p and p.get_editor_property("mesh") and not p.get_editor_property("actor_class"): ms.add(p.get_editor_property("mesh").get_path_name())
-        dmesh.append(ms)
+            if p and p.get_editor_property("mesh") and not p.get_editor_property("actor_class"): ms.add(p.get_editor_property("mesh").get_path_name()); nn += 1
+        dmesh.append(ms); dcount.append(nn)
     seen_med, seen_mod = set(), set()
     try:
         seed0 = G["gi"].get_editor_property("town_seed")
@@ -9138,10 +9138,11 @@ def step_stalls18():
             fp = []
             for s in st:
                 f = stall18_footprint(s, dmesh[s["d"]]) if s["d"] >= 0 else {"n": 0}
-                f["id"] = s["id"]; fp.append(f)
+                f["id"] = s["id"]; f["want"] = dcount[s["d"]] if s["d"] >= 0 else -1; fp.append(f)
             r["footprints"] = fp
+            # (every instanced part laid, no more, no fewer (PR #149's review: a stand that laid nothing passed); the Docks' Blueprints have none)
+            r["parts_missing"] = [[f["id"], f["n"], f["want"]] for f in fp if f["n"] != f["want"]]
             r["outside"] = [f["id"] for f in fp if f["n"] and (f["x"][0] < -145 or f["x"][1] > 145 or f["y"][0] < -145 or f["y"][1] > 145)]
-            r["keeper_blocked"] = [f["id"] for f in fp if f.get("keeper_blocked")]
             # (F from 1.7 m before each counter opens its store)
             opened = 0
             st17 = stalls17()
@@ -9172,7 +9173,7 @@ def step_stalls18():
         quiet(False)
     cs = res["cities"]
     ok = ("error" not in res and len(cs) == 6 and all(res.get("streams_kept", {}).values()) and len(res.get("seen_medieval", [])) >= 20
-          and all(r["stands"] == 12 and r["distinct"] == 12 and r["wrong_style"] == 0 and not r["unsuited"] and not r["outside"] and not r["keeper_blocked"]
+          and all(r["stands"] == 12 and r["distinct"] == 12 and r["wrong_style"] == 0 and not r["unsuited"] and not r["outside"] and not r["parts_missing"]
                   and r["opened"] == r["stalls17"] == 12 for r in cs.values()))
     step_result("stalls18", ok, **res)
 
