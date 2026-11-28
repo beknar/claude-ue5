@@ -2095,7 +2095,14 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 				break;
 			}
 			// (the list of 2026-11-26: a new stand's mesh by a hash of its place, the old four's from the step's stream as before)
-			case TS_Stall: AddPieceAt(FName(*FString::Printf(TEXT("Town.Stall%d"), 1 + (Sp.Bld >= 16 ? (int32)(HashCombine(GetTypeHash(FMath::RoundToInt(Sp.At.X)), GetTypeHash(FMath::RoundToInt(Sp.At.Y))) % 3u) : R.RandRange(0, 2)))), Sp.At, Sp.Yaw); break;
+			case TS_Stall:
+			{
+				// (the list of 2026-11-27: one of the twenty designs (RDList18c.cpp); the old four's draw from the step's stream still drawn, so
+				// nothing after it moves)
+				const int32 Old = 1 + (Sp.Bld >= 16 ? (int32)(HashCombine(GetTypeHash(FMath::RoundToInt(Sp.At.X)), GetTypeHash(FMath::RoundToInt(Sp.At.Y))) % 3u) : R.RandRange(0, 2));
+				if (!LayStall18(Sp)) AddPieceAt(FName(*FString::Printf(TEXT("Town.Stall%d"), Old)), Sp.At, Sp.Yaw);
+				break;
+			}
 			case TS_Lamp:
 				AddPieceAt(TEXT("Town.Lamp"), Sp.At, R.FRandRange(0, 360));
 				AddEffect(TEXT("BrazierFire"), Sp.At + FVector(0, 0, 105.f), 1.2f);
